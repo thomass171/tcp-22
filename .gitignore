@@ -9,7 +9,6 @@ local.properties
 #Gradle
 .gradletasknamecache
 .gradle/
-build/
 
 # Logs
 *.log
