@@ -1,0 +1,16 @@
+.idea/
+out/
+local.properties
+*.iml
+*.iws
+*.ipr
+
+#Gradle
+.gradletasknamecache
+.gradle/
+build/
+
+# Logs
+*.log
+log/
+logs/
