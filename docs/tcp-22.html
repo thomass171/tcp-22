@@ -1,0 +1,197 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Tcp-22</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!--Viewport from w3.css-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+</head>
+
+<body class="w3-light-grey">
+
+<!-- Navigation (Stays on Top) -->
+<!--<div class="w3-top w3-bar w3-black">
+    <a href="#home" class="w3-bar-item w3-button">Home</a>
+    <a href="#about" class="w3-bar-item w3-button">About</a>
+    <a href="#members" class="w3-bar-item w3-button">Members</a>
+    <a href="#contact" class="w3-bar-item w3-button">Contact</a>
+</div>-->
+
+<!-- Start Content -->
+<div id="home" class="w3-content">
+
+    <header class="w3-container w3-center w3-padding-32 w3-grey">
+        <h1 class="">Tcp-22</h1>
+        <p class="">A cross platform 3D graphics meta engine for Java</p>
+        <p class="">(still WiP!)</p>
+    </header>
+
+    <div class="w3-container" style="padding:32px">
+
+        <div class="w3-panel w3-padding-large w3-section  w3-white">
+            <h2>Examples</h2>
+
+            <div class="">
+                <div class="">Reference Scene</div>
+            </div>
+            <div id="row8" class="w3-panel">
+                <div>
+                    <div class="">
+                        <button class=" w3-button  w3-round w3-khaki "
+                                onclick="launchReferenceScene(false,$('#chk_nearView').prop('checked'),$('#chk_hud').prop('checked'))">
+                            Launch
+                        </button>
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchReferenceScene(true,false,false)">
+                            Launch VR
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="">
+                <div class="">VR Scene</div>
+            </div>
+            <div id="row16" class="w3-panel">
+                <div>
+                    <div class="">
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchVrScene()">Launch</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="w3-panel w3-padding-large w3-section  w3-white">
+            <h1 class="">Use Cases</h1>
+            <p class="w3-xlarge"></p>
+
+
+            <div class="w3-row-padding w3-padding-16 w3-center">
+                <div class="w3-half w3-card-2">
+                    <h3>Sokoban</h3>
+                    <p>The famous game in a first person 3D view. Move the boxes to the indicated locations. This might
+                        be hard without top view,
+                        so differing to the original its also possible to pull boxes.</p>
+
+                    <select class="w3-select  " id="sel_sceneBox">
+                        <option value="skbn/SokobanWikipedia.txt">Sokoban Wikipedia</option>
+                        <option value="skbn/DavidJoffe.txt:1">DavidJoffe 1</option>
+                        <option value="skbn/DavidJoffe.txt:2">DavidJoffe 2</option>
+                        <option value="skbn/DavidJoffe.txt:3">DavidJoffe 3</option>
+                        <option value="skbn/Sokoban10x10.txt">Sokoban10x10</option>
+                        <option value="skbn/SokobanTrivial.txt">SokobanTrivial</option>
+                    </select>
+                    <div class="w3-container">
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchMazeScene(false)">Launch
+                        </button>
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchMazeScene(true)">Launch VR
+                        </button>
+                    </div>
+
+                </div>
+                <div class="w3-half w3-card-2">
+                    <!--<img src="/w3images/steak.jpg" alt="Steak" style="width:100%">-->
+                    <h3>Mazes</h3>
+                    <p>Just a maze.</p>
+                    <div class="">
+                        <select class="w3-select  " id="sel_sceneBox1">
+                            <option value="maze/Maze15x10.txt">Maze 15x10</option>
+                        </select>
+
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchMazeScene(false)">Launch</button>
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchMazeScene(true)">Launch VR
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="w3-panel w3-padding-large w3-section  w3-white">
+            <h1 class="">User Controls</h1>
+            <p class="">Controlling depends on the platform</p>
+            <div class="w3-third w3-card-2">
+                <h3>Keyboard</h3>
+                <p>Use arrow key for moving.</p>
+            </div>
+            <div class="w3-third w3-card-2">
+                <h3>Touchscreen</h3>
+                <p>Move by touching segments on the screen.</p>
+            </div>
+            <div class="w3-third w3-card-2">
+                <h3>VR</h3>
+                <p>Use left trigger for teleporting to marked element. Use right trigger to do an action like moving a
+                    box. Note: Only the trigger button of a controller is used. The left controller has a wristwatch
+                    controller with buttons for</p>
+                <ul>
+                    <li>Move VR position up/down</li>
+                    <li>Pulling a box</li>
+                </ul>
+
+            </div>
+        </div>
+
+        <div class="w3-panel w3-padding-large w3-section  w3-white">
+            <h1 class="">Launch Settings</h1>
+            <p class="">Common settings for the scenes launched via the above buttons</p>
+            <div id="row21" class="w3-panel">
+                <div>
+                    <table>
+                        <tr>
+                            <td>Dev Mode</td>
+                            <td><input type="checkbox" class=" w3-check" id="chk_devMode"></td>
+                        </tr>
+                        <tr>
+                            <td>HUD</td>
+                            <td><input type="checkbox" class=" w3-check" id="chk_hud"></td>
+                        </tr>
+                        <tr>
+                            <td>NearView</td>
+                            <td><input type="checkbox" class=" w3-check" id="chk_nearView"></td>
+                        </tr>
+                        <tr>
+                            <td>VR Control Panel</td>
+                            <td><input class=" " id="inp_ctrlPanel"></td>
+                        </tr>
+                        <tr>
+                            <td>yoffsetVR</td>
+                            <td><input class=" " id="inp_yoffsetVR"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="w3-panel w3-padding-large w3-section w3-white">
+            <h1 class="">Credits</h1>
+            <ul class="w3-ul">
+                <li>Thanks to the team of <a href="https://threejs.org" target="_blank">ThreeJs</a> for their fantastic
+                    WebGl graphics
+                    engine.
+                </li>
+                <li>Sokoban was invented by Hiroyuki Imabayashi and is copyrighted (C) 1982 by Thinking Rabbit Inc.
+                    Japan
+                    and later Falcon Co., Ltd., Japan.
+                </li>
+                <li>Thanks to <a href="https://github.com/davidjoffe/sokoban" target="_blank">David Joffe</a> for
+                    releasing 90 of his Sokoban levels to the public domain
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- End Content -->
+</div>
+
+<script src="util.js"></script>
+<script src="tcp-22.js"></script>
+
+<script>$(document).ready(function(){init();});</script>
+
+</body>
+</html>
