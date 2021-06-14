@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # Deploy build artifacts from $BUILDDIR to $HOSTDIR on $HOST
+# Only native build artifacts for now.
 #
 
 OWNDIR=`dirname $0`
@@ -11,19 +12,23 @@ OWNDIR=`dirname $0`
 BUILDDIR=target
 HOST=
 HOSTDIR=tcp-22
+COPYCMD="rsync -rt --chmod=ugo+rx"
 
 usage() {
     echo "Usage: $0 [-b <builddir>] [-h <host>]" 1>&2
     exit 1;
 }
 
-while getopts ":b:h:" o; do
+while getopts ":b:h:s" o; do
     case "${o}" in
         b)
             BUILDDIR=${OPTARG}
             ;;
         h)
             HOST=${OPTARG}
+            ;;
+        s)
+            COPYCMD="scp -pr"
             ;;
         *)
             usage
@@ -43,12 +48,7 @@ fi
 echo Ready to deploy to $HOST$HOSTDIR. Hit CR
 read
 
-rsync -rt --chmod=ugo+rx $BUILDDIR/js $HOST$HOSTDIR
-rsync -rt --chmod=ugo+rx $BUILDDIR/webgl $HOST$HOSTDIR
-rsync -rt --chmod=ugo+rx $BUILDDIR/threejs $HOST$HOSTDIR
-rsync -rt --chmod=ugo+rx $BUILDDIR/webgl.html $HOST$HOSTDIR
-
-for bundle in core data maze engine railing
-do
-        rsync -rt --chmod=ugo+rx $BUILDDIR/../../../bundles/$bundle $HOST$HOSTDIR/bundles
-done
+$COPYCMD $BUILDDIR/js $HOST$HOSTDIR
+$COPYCMD $BUILDDIR/webgl $HOST$HOSTDIR
+$COPYCMD $BUILDDIR/threejs $HOST$HOSTDIR
+$COPYCMD $BUILDDIR/webgl.html $HOST$HOSTDIR
