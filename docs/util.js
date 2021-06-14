@@ -109,7 +109,7 @@ function launchScene(scenename,args) {
 
     const params = new URLSearchParams()
 
-    var url = host + "/webgl.html?scene="+scenename;
+    var url = host + "/tcp-22/webgl.html?scene="+scenename;
 
     args.forEach(function (value, key) {
         //console.log(`${key}: ${value}`);
