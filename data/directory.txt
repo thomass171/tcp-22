@@ -2,3 +2,13 @@ images/river.jpg
 models/loc.bin
 models/loc.gltf
 textures/earth/2_no_clouds_4k.jpg
+textures/gimp/Ground.png
+textures/gimp/SampleNormalMap.png
+textures/gimp/SampleWallHeightMap.png
+textures/gimp/SampleWallNormalMapByPetry.png
+textures/gimp/WallNormalMap.png
+textures/gimp/wood/BucheDunkel.png
+textures/gimp/wood/BucheHell.png
+textures/gimp/wood/BucheMedium.png
+textures/gimp/wood/Orange.png
+textures/gimp/wood/Orange_normal.png
