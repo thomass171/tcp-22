@@ -34,11 +34,11 @@ function launchReferenceScene(vr,nearview,hud) {
     launchScene("ReferenceScene",args);
 }
 
-function launchMazeScene(vr) {
+function launchMazeScene(vr,boxname) {
 
     var args = new Map();
     addCommonArgs(args);
-    args.set("initialMaze",$("#sel_sceneBox").val());
+    args.set("initialMaze",$("#" + boxname).val());
     args.set("enableVR",vr);
     launchScene("MazeScene",args);
 }
