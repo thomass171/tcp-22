@@ -1,6 +1,7 @@
 images/river.jpg
 models/loc.bin
 models/loc.gltf
+textures/SokobanTarget.png
 textures/earth/2_no_clouds_4k.jpg
 textures/gimp/Ground.png
 textures/gimp/SampleNormalMap.png
