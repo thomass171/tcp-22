@@ -3,7 +3,7 @@
  */
 
 var mazeScenes = ["skbn/SokobanWikipedia.txt","skbn/Sokoban10x10.txt","skbn/SokobanTrivial.txt","maze/Maze15x10.txt"];
-var host = "https://ts171.de";
+var host = "https://ts171.de/tcp-22";
 
 var chk_devMode;
 var inp_ctrlPanel;
@@ -62,6 +62,7 @@ function init() {
     var hostparam = url.searchParams.get("host");
     if (hostparam != null) {
         host = hostparam;
+        $("#debuginfo").html("(host="+hostparam+")");
     }
 
     $("#inp_ctrlPanel").val("0,0,0,200,90,0");
