@@ -1,0 +1,19 @@
+MaterialDef Solid Color {
+    //This is the complete list of user defined uniforms to be used in the
+    //shaders
+    MaterialParameters {
+        Vector4 Color
+        Texture2D ColorMap
+    }
+    Technique {
+        //This is where the vertex and fragment shader files are
+        //specified
+        VertexShader GLSL120:   shader/SimpleTexture.vert
+        FragmentShader GLSL120: shader/SimpleTexture.frag
+        //This is where you specify which global uniform you need for your
+        //shaders
+        WorldParameters {
+            WorldViewProjectionMatrix
+        }
+    }
+}

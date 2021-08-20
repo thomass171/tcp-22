@@ -1,0 +1,19 @@
+MaterialDef Photo Album {
+    //This is the complete list of user defined uniforms to be used in the shaders
+    MaterialParameters {
+        Texture2D texture0
+        Texture2D texture1
+
+
+        }
+    Technique {
+        //This is where the vertex and fragment shader files are specified
+            VertexShader GLSL120:   shader/PhotoAlbum.vert
+            FragmentShader GLSL120: shader/PhotoAlbum.frag
+            //This is where you specify which global uniform you need for your
+            //shaders
+            WorldParameters {
+                WorldViewProjectionMatrix
+            }
+    }
+}

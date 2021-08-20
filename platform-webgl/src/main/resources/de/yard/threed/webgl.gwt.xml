@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO8859-15"?>
+<module rename-to='webgl'>
+    <!-- Inherit the core Web Toolkit stuff.                        -->
+    <inherits name='com.google.gwt.user.User'/>
+
+    <!-- Inherit the default GWT style sheet.  You can change       -->
+    <!-- the theme of your GWT application by uncommenting          -->
+    <!-- any one of the following lines.                            -->
+    <inherits name='com.google.gwt.user.theme.standard.Standard'/>
+    <inherits name="com.google.gwt.xml.XML"/>
+    <inherits name="com.google.gwt.http.HTTP" />
+    <inherits name="com.google.gwt.json.JSON" />
+    <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+    <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+
+    <!-- 07.05.15: Das GWT Logging wird nicht mehr verwendet. Das JS logging ist praktischer -->
+
+    <!-- Other module inherits                                      -->
+
+    <!-- 6.6.15 Damit Stack traces zeilen und Sourcefiles haben. Geht scheinbar aber nicht (mehr in 2.7?).
+         ist esh nur für Entwicklung und nicht Produktion -->
+    <!--<set-property name="compiler.stackMode" value="emulated" />
+    <set-configuration-property name="compiler.emulatedStack.recordFileNames"   value="true" />
+    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers"  value="true" />-->
+
+    <!-- Specify the app entry point class.                         -->
+    <entry-point class='de.yard.threed.platform.webgl.Main'/>
+
+    <!-- Specify the paths for translatable code beyond its package location. Here this file isType located in package "de.yard.threed",
+                      so path are beyond that name.-->
+
+    <source path='core'/>
+
+    <source path='engine'/>
+
+    <source path='common'/>
+
+    <source path='maze'/>
+
+    <source path='geodesy'/>
+    <source path='test'/>
+
+    <source path='platform'>
+        <exclude name="**/jme/**"/>
+        <exclude name="**/opengl/**"/>
+        <exclude name="**/commonjmeandroid/**"/>
+        <exclude name="HomeBrewRenderer.java"/>
+
+    </source>
+    <source path='platform/webgl'/>
+    <source path='fgrc'/>
+
+</module>

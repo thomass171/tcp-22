@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<PropertyList>
+
+    <path>bike.gltf</path>
+
+    <!-- 0,0,0 ist auf Nabenhöhe. TODO z-m-->
+    <offsets>
+        <pitch-deg>0</pitch-deg>
+        <z-m>0.3</z-m>
+    </offsets>
+
+
+</PropertyList>

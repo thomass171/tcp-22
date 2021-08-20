@@ -1,0 +1,2 @@
+Hier ist ein Avatar für alle Zwecke: Maze, Rail, Tube, OSM: Optional oder idealerweise, je nach dem, mit einem
+Fahrzeug, das auch für alles geeignet ist: Maze, Rail, OSM, Tube. Wobei eine Locomotive doch anders als ein Truck ist.

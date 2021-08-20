@@ -1,0 +1,11 @@
+Comment=Also for testing all possible 3D wall model types
+###############
+#     %       #
+#  #        # #
+#  ## D # D## #
+#  #   ###  # #
+#     @ #     #
+#    #D ####  #
+#   ###   #D  #
+#             #
+###############

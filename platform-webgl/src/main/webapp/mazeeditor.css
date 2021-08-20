@@ -1,0 +1,72 @@
+.board {
+    font-size: 0px;
+    white-space: nowrap;
+}
+
+.cell {
+    font-size: 18px;
+    display: inline-block;
+    text-align: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #999;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+
+    position: relative;
+}
+
+.cell.known {
+    background: #ccc;
+    border-top-color: #ccc;
+    border-left-color: #ccc;
+    font-weight: bold;
+}
+
+.cell.empty {
+    background: #e0e0e0;
+    border-top-color: #fff;
+    border-left-color: #fff;
+    border-right-color: #999;
+    border-bottom-color: #999;
+}
+
+/* color picker https://www.w3schools.com/colors/colors_picker.asp */
+.cell.wall {
+    background: black;
+}
+
+.cell.destination {
+    background: yellow;
+}
+
+.cell.start {
+    background: #ff9900;
+}
+
+.cell.box {
+    background: #993300;
+}
+
+.cell.clickable {
+    cursor: pointer;
+}
+
+.cell.clickable:hover {
+    background: #eee;
+}
+
+.buttons {
+    margin-top: 1em;
+}
+
+h2 {
+    margin-top: 1em;
+}
+
+#hint.hidden {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 1s;
+}

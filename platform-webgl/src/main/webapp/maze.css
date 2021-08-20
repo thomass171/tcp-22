@@ -1,0 +1,62 @@
+.board {
+    font-size: 0px;
+    white-space: nowrap;
+}
+
+.cell {
+    /*font-size: 18px;
+    one of these causes heicht 24 instead of 8
+    display: inline-block;
+    text-align: center;*/
+    border: 1px solid #999;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+
+    /*position: relative;*/
+}
+
+.cellsize8x8 {
+    width: 8px;
+    height: 8px;
+}
+
+.cellknown {
+    background: #ccc;
+    border-top-color: #ccc;
+    border-left-color: #ccc;
+    font-weight: bold;
+}
+
+.cellempty {
+    background: #e0e0e0;
+    border-top-color: #fff;
+    border-left-color: #fff;
+    border-right-color: #999;
+    border-bottom-color: #999;
+}
+
+/* color picker https://www.w3schools.com/colors/colors_picker.asp */
+.cellwall {
+    background: black;
+}
+
+.celldestination {
+    background: yellow;
+}
+
+.cellstart {
+    background: #ff9900;
+}
+
+.cellbox {
+    background: #993300;
+}
+
+.mazetable {
+    border-collapse: collapse;
+}
+
+.mazetabletd {
+    padding: 0;
+}

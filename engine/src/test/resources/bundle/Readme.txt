@@ -1,0 +1,2 @@
+30.9.19: Für Tests kann man Bundles doch auch onTheFly bauen. Naja, aber dann brauch ich hier einen Loader (doofe Abhaengigkeit). Und manuell erstellt werden muessen sie
+ja eh. Dann kann sie auch direkt als corrupted in bundles anlegen.

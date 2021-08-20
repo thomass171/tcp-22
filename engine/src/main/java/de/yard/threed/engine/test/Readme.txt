@@ -1,0 +1,1 @@
+30.6.2021: Tests for testing a platform at runtime (from ReferenceScene)

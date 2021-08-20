@@ -1,0 +1,4 @@
+plane-darkgreen de.yard.threed.engine.geometry.PrimitiveCreator plane darkgreen
+sphere-orange de.yard.threed.engine.geometry.PrimitiveCreator sphere orange
+cube-red de.yard.threed.engine.geometry.PrimitiveCreator cube red
+cube-blue de.yard.threed.engine.geometry.PrimitiveCreator cube blue

@@ -1,0 +1,15 @@
+package de.yard.threed.core.platform;
+
+import de.yard.threed.core.platform.NativeNode;
+import de.yard.threed.core.platform.NativeNodeList;
+
+/**
+ * Created by thomass on 11.09.15.
+ */
+public interface NativeElement extends NativeNode {
+    String getAttribute(String name);
+
+    NativeNodeList getElementsByTagName(String name);
+    //27.3.17: Waarum hier und ncht in Node?
+    //NativeAttributeList getAttributes();
+}

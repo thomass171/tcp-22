@@ -1,0 +1,59 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the    -->
+<!-- browser's rendering engine into               -->
+<!-- "Standards Mode". Replacing this declaration  -->
+<!-- with a "Quirks Mode" doctype may lead to some -->
+<!-- differences in layout.                        -->
+<!-- 30.4.21: Renamed gwt.html(war mal index.html?) -> webgl.html (name is import for maven gwt plugin)      -->
+
+<html>
+<head>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        #container {
+        background: #000;
+        /* no default size. default is full panel/tab/view
+        width: 805px;
+        height: 605px;*/
+        }
+        #statusfield {
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        text-align: right;
+        z-index: 100;
+        display:block;
+        }
+
+    </style>
+
+    <!-- Alle anderen lege ich auch davor, um sie aus GWT verwenden zu koennen. -->
+    <!--threejs ist eine Kopie der needed parts of ThreeJs -->
+    <script src="threejs/build/three.js"></script>
+    <script src="threejs/examples/js/libs/stats.min.js"></script>
+    <script src="threejs/examples/jsm/webxr/VRButton.js"></script>
+
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <script type="text/javascript" language="javascript" src="webgl/webgl.nocache.js"></script>
+
+    <script src="js/Tools.js"></script>
+
+</head>
+
+<body>
+<div id="statusfield">Status</div>
+
+<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+<noscript>
+    <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+    </div>
+</noscript>
+
+</body>
+</html>

@@ -1,0 +1,691 @@
+package de.yard.threed.maze;
+
+import de.yard.threed.core.*;
+import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.*;
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.engine.avatar.Avatar;
+import de.yard.threed.engine.avatar.AvatarSystem;
+import de.yard.threed.engine.ecs.*;
+import de.yard.threed.engine.geometry.ShapeGeometry;
+import de.yard.threed.engine.gui.Hud;
+import de.yard.threed.engine.platform.common.*;
+
+import java.util.List;
+
+
+/**
+ * Steuert die Bewegung und damit auch den "GridState".
+ * <p>
+ * Connection between an {@link MazeLevel} and state handling via ECS.
+ * <p>
+ * Created by thomass on 14.02.17.
+ */
+public class MazeMovingAndStateSystem extends DefaultEcsSystem {
+    Log logger = Platform.getInstance().getLog(MazeMovingAndStateSystem.class);
+    //MA32 GridState currentstate;
+    //nextstate != null isType indicator for ongoing movement.
+    //private GridState nextstate;
+    //MazeLayout layout;
+    //10.11.20 private MazeView view;
+    // Alle Events queuen, weil sie evtl. unpassend (z.B. während Movement) kommen. Einfach ignorieren
+    // ist riskant, weil sie auch fuer Replay, etc kommen können, wo jedes Event wichtig ist.
+    // 30.10.20: Gibt es das nicht uebergreifend? Genau, dass ist doch ein Asbachkonzept.
+    // 7.4.21: Wenn alle Events Requests sind, kann das wohl weg.
+    //7.4.21 SimpleQueue eventqueue = new SimpleQueue();
+
+    // gesetzt, wenn Autosolver aktiv ist.
+    // 14.4.21: Ersetzt ducrh ReplaySystem
+    List<GridMovement> solution = null;
+
+    protected MazeSettings st;
+
+    private Hud helphud = null;
+    String initialMaze = null;
+    //Das Grid ist erstmal nur zur Initilisierung/Visualisierung.
+    //Grid grid;
+
+    public MazeMovingAndStateSystem() {
+        super(new String[]{"MazeMovingComponent"}, new RequestType[]{RequestRegistry.TRIGGER_REQUEST_BACK,
+                        RequestRegistry.TRIGGER_REQUEST_TURNLEFT, RequestRegistry.TRIGGER_REQUEST_FORWARD,
+                        RequestRegistry.TRIGGER_REQUEST_TURNRIGHT, RequestRegistry.MAZE_REQUEST_LOADLEVEL,
+                        RequestRegistry.TRIGGER_REQUEST_AUTOSOLVE, UserSystem.USER_REQUEST_JOIN, RequestRegistry.TRIGGER_REQUEST_UNDO,
+                        RequestRegistry.TRIGGER_REQUEST_VALIDATE, RequestRegistry.TRIGGER_REQUEST_HELP,
+                        RequestRegistry.TRIGGER_REQUEST_RESET,
+                        RequestRegistry.TRIGGER_REQUEST_FORWARDMOVE,
+                        RequestRegistry.TRIGGER_REQUEST_LEFT,
+                        RequestRegistry.TRIGGER_REQUEST_RIGHT,
+                        RequestRegistry.TRIGGER_REQUEST_PULL,
+                        RequestRegistry.TRIGGER_REQUEST_RELOCATE,
+                        RequestRegistry.TRIGGER_REQUEST_KICK,
+                },
+                new EventType[]{
+                        UserSystem.USER_EVENT_LOGGEDIN, UserSystem.USER_EVENT_JOINED});
+
+        //10.4.21: TODO in init(), vorher die Settings aber decouplen
+        //abstractMaze = new SimpleMaze();
+        st = MazeSettings.init(MazeSettings.MODE_SOKOBAN);
+    }
+
+    public MazeMovingAndStateSystem(String initialMaze) {
+        this();
+        this.initialMaze = initialMaze;
+    }
+
+    public static MazeMovingAndStateSystem buildFromArguments() {
+        String argv_initialMaze = ((Platform) Platform.getInstance()).getSystemProperty("argv.initialMaze");
+        return new MazeMovingAndStateSystem(argv_initialMaze);
+    }
+
+    @Override
+    public void init() {
+
+        // only for system init
+        if (initialMaze == null) {
+            initialMaze = "skbn/SokobanWikipedia.txt";
+        }
+        String name = StringUtils.substringBeforeLast(initialMaze, ".");
+        name = StringUtils.substringAfterLast(name, "/");
+        String filename = StringUtils.substringBeforeLast(initialMaze, ":");
+        String fileContent = MazeUtils.readMazefile(filename/*, name*/);
+
+        String title = StringUtils.substringAfterLast(initialMaze, ":");
+        loadLevel(fileContent,title);
+        //10.11.20 ob der hier gut ist, muss sich noch zeigen.
+        MoveRecorder.init(/*movingsystem.* /currentstate*/);
+
+        // 10.4.21: richtige Stelle?
+        SystemState.state = SystemState.STATE_READY_TO_JOIN;
+    }
+
+    @Override
+    public void update(EcsEntity entity, EcsGroup group, double tpf) {
+
+        MoverComponent mover = (MoverComponent) group.cl.get(0);
+
+        /*7.4.21 if (!MazeVisualizationSystem.view.isMoving()) {
+            Event evt = (Event) eventqueue.poll();
+            if (evt != null) {
+                processEvent(evt);
+            }
+        }*/
+        //float tpf = scene.getDeltaTime();
+         /*if ((movement = mover.attempMove(true, walls, currentstate)) != null) {
+                nextstate = currentstate.execute(movement);
+                MoveRecorder.getInstance().addMove(movement, nextstate);
+            }*/
+      
+        /*14.2.17 if (Input.GetKeyDown(KeyCode.Space)) {
+            // gequeute Bewegungen gehen noch nicht
+            ray.attemptFire();
+        }*/
+        boolean debugcontrols = true;
+        if (debugcontrols && mover.isPlayer()) {
+            if (Input.GetKeyDown(KeyCode.PageUp)) {
+                entity.getSceneNode().getTransform().rotateX(new Degree(-5));
+                //logger.debug("Rotation now"+maze.get)
+            }
+            if (Input.GetKeyDown(KeyCode.PageDown)) {
+                entity.getSceneNode().getTransform().rotateX(new Degree(5));
+            }
+            if (Input.GetKeyDown(KeyCode.Plus)) {
+                entity.getSceneNode().getTransform().translateY(0.5f);
+            }
+            if (Input.GetKeyDown(KeyCode.Minus)) {
+                entity.getSceneNode().getTransform().translateY(-0.5f);
+            }
+        }
+        // Es ist nicht sauber, auf completed zu gehen, wenn nur ein Mover fertig ist. Es aknn sich ja der Player
+        //und eine Box bewegen. 24.10.18: Darum ueber global moving gehen.
+        boolean completed = mover.update(tpf);
+        if (/*completed*/MazeVisualizationSystem.view != null && !MazeVisualizationSystem.view.isMoving()) {
+            movementCompleted();
+        }
+
+        if (!SystemState.isOver() && GridState.isSolved(MazeUtils.buildBoxesFromEcs(), Grid.getInstance().getMazeLayout())) {
+            logger.info("solved");
+            Hud hud = Hud.buildForCamera(Scene.getCurrent().getDefaultCamera(), 1);
+            hud.setText(2, "Solved");
+            Scene.getCurrent().getDefaultCamera().getCarrier().attach(hud);
+
+            SystemState.state = SystemState.STATE_OVER;
+        }
+
+    }
+
+    @Override
+    public boolean processRequest(Request request) {
+
+        logger.debug("got request " + request.getType());
+
+        if (SystemState.isOver()) {
+            return true;
+        }
+
+        GridState currentstate = MazeUtils.buildGridStateFromEcs();
+
+        if (request.getType().equals(RequestRegistry.MAZE_REQUEST_LOADLEVEL)) {
+            //16.4.21: For simplication not used. Just restart with other arguments
+            //Integer level = (Integer) request.getPayloadByIndex(0);
+            //removeLevel();
+            //doLoadLevel(level);
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_AUTOSOLVE)) {
+            autosolve(currentstate);
+            return true;
+        }
+
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_VALIDATE)) {
+            validate();
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_HELP)) {
+            help();
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RESET)) {
+            reset();
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RELOCATE)) {
+            relocate(request.getPayload());
+            return true;
+        }
+        return processSolutionOrUserRequest(currentstate, request);
+    }
+
+
+    public MazeSettings getSettings() {
+        return st;
+    }
+
+    /**
+     * 14.4.21: Ein Request wird auch dann auf processed gesetzt, wenn es wegen einer laufenden Bewegung ignoriert wird.
+     * Es wird also nicht gequeued.
+     *
+     * @param currentstate
+     * @param request
+     * @return
+     */
+    private boolean processSolutionOrUserRequest(GridState currentstate, Request request) {
+
+        if (solution != null) {
+            // dann keine Steuerung durch Benutzer mehr
+            if (solution.size() == 0) {
+                // muesste solved sein.
+                solution = null;
+
+            } else {
+                GridMovement nextstep = solution.get(0);
+                solution.remove(0);
+                //TODO abbrechen bei scheitern des attempt?
+                //24.10.18: Auch per Event
+                //raycontroller.attempt(nextstep);
+                Object o = nextstep.getEvent();
+                if (o instanceof EventType) {
+                    SystemManager.sendEvent(new Event((EventType) o, null));
+                } else {
+                    SystemManager.putRequest(new Request((RequestType) o, null));
+                }
+            }
+            //10.11.20 true oder false liefern?
+            return true;
+        } else {
+            //1.4.21: Be sure join completed. Evtl. faellt hier ein movement unter den Tisch, weil gerade ein Moving läuft.
+            // Dafuer gab es mal eine Queue um alle Events queuen, weil sie evtl. unpassend (z.B. während Movement) kommen. Einfach ignorieren
+            // ist riskant, weil sie auch fuer Replay, etc kommen können, wo jedes Event wichtig ist.
+
+            if (AvatarSystem.getAvatar() != null) {
+                EcsEntity ray = AvatarSystem.getAvatar().avatarE;
+
+                MoverComponent mover = (MoverComponent) ray.getComponent(MoverComponent.TAG);
+                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
+                    attemptRotate(currentstate, mover, false);
+                    return true;
+                }
+                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNLEFT)) {
+                    attemptRotate(currentstate, mover, true);
+                    return true;
+                }
+
+                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_BACK)) {
+                    attemptMove(currentstate, mover, GridMovement.Back);
+                    return true;
+                }
+                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARD)) {
+                    attemptMove(currentstate, mover, GridMovement.Forward);
+                    return true;
+                }
+                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_UNDO)) {
+                    undo(currentstate, mover, Grid.getInstance().getLayout());
+                    return true;
+                }
+                // 10.4.21: Wer triggered denn einen TRIGGER_REQUEST_FORWARDMOVE? Nur der Replay?
+                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARDMOVE)) {
+                    attemptMove(currentstate, mover, GridMovement.ForwardMove);
+                    return true;
+                }
+                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_LEFT)) {
+                    attemptMove(currentstate, mover, GridMovement.Left);
+                    return true;
+                }
+                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RIGHT)) {
+                    attemptMove(currentstate, mover, GridMovement.Right);
+                    return true;
+                }
+
+                // pull kommt evtl auch bei undo? 27.5.21: jetzt auch eigenstaendig. UNDO hat aber sein eigenes Event.
+                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_PULL)) {
+                    attemptMove(currentstate, mover, GridMovement.Pull);
+                    return true;
+                }
+                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_KICK)) {
+                    attemptMove(currentstate, mover, GridMovement.Kick);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param evt
+     */
+    @Override
+    public void process(Event evt) {
+
+        //if (mazedebuglog) {
+        //logger.debug("got event " + evt.getType());
+        //}
+        /*if (AvatarSystem.getAvatar() != null) {
+            EcsEntity ray = AvatarSystem.getAvatar().avatarE;
+
+            MoverComponent mover = (MoverComponent) ray.getComponent(MoverComponent.TAG);
+
+        }*/
+
+        if (evt.getType().equals(UserSystem.USER_EVENT_JOINED)) {
+            if (Grid.getInstance() == null) {
+                throw new RuntimeException("unexpected flow. state no readtojoin?");
+            }
+            //create player entity and publish "new player". But not before maze was loaded.
+            //das geht am einfachsten per Avatar, obwohl das fuer MP fragwürdig ist.
+            // 1.4.21: Avatar was build by AvatarSystem (and attached to world)
+            //Entity wurde schon als Avatar angelegt und kommt hier als Payload.
+
+            EcsEntity playerEntity = (EcsEntity) evt.getPayloadByIndex(0);
+            playerEntity.setName("Player");
+            logger.debug(playerEntity.getName() + " joined");
+            //avatar = buildPlayer(Scene.getCurrent().getMainCamera());
+            //Avatar avatar = AvatarSystem.getAvatar();
+            MazeLayout layout = Grid.getInstance().getLayout();
+            //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
+            //ist.
+            MoverComponent mover;
+            if (MazeScene.vrInstance != null) {
+                mover = new MoverComponent(Observer.getInstance(), true, layout.initialPosition, layout.initialOrientation);
+            } else {
+                SceneNode avatar = playerEntity.scenenode;
+
+                mover = new MoverComponent(/*avatar.getSceneNode()*//*this*/avatar.getTransform(), true, layout.initialPosition, layout.initialOrientation);
+
+                // Also, Observer wird an Avatar attached. Der hat aber y0 als Bezugspunkt(?), so dass Observer angehoben wird.
+                Observer.getInstance().getTransform().setParent(avatar.getTransform());
+
+                // 16.5.21: rayy wurde freher irgendwie anders gesetzt. So gehts aber auch erstmal.
+                // 31.5.21: Besser ueber finetune, damit er bei xyz nicht springt. Das beisst sich aber mit viewpoint. Muesste nicht Avatar angehoben werden? Hmm
+                // setPosition ueber den Observer transform untergraebt aber finetune. doof. So ist jetzt aber gut.
+                //Observer.getInstance().getTransform().setPosition(getSettings().getViewpoint().position.add(new Vector3(0,MazeScene.rayy,0)));
+                Observer.getInstance().initFineTune(getSettings().getViewpoint().position.add(new Vector3(0,MazeScene.rayy,0)));
+                //Observer.getInstance().getTransform().translateY(MazeScene.rayy);
+                //Observer.getInstance().initFineTune(MazeScene.rayy);
+                //avatar.getTransform().translateY(MazeScene.rayy);
+                // Rotation ist blick nach schraeg unten
+                Observer.getInstance().getTransform().setRotation(getSettings().getViewpoint().rotation);
+
+            }
+            playerEntity/*avatar.avatarE.*/.addComponent(mover);
+
+            //MazeView.ray = avatar.avatarE;
+            //1.4.21 Scene.getCurrent().addToWorld(MazeView.ray.scenenode);
+
+            Point startpos = Grid.getInstance().getStartPos();
+            if (MazeVisualizationSystem.view != null) {
+            /*15.5.21 das ist doch auch Asbach Kruecke
+                MazeVisualizationSystem.view.setRayPosition(startpos);
+                MazeVisualizationSystem.view.setRayRotation(new Degree(0));            */
+            }
+            mover.setLocation(startpos);
+
+            // 11.11.20: Raising the camera must be done again since splitting to system. Reason isType unclear, well the Avatar drops the position, so its obvious, but
+            // why didn't that occur before?
+            //15.5.21: Scene.getCurrent().getMainCamera().getCarrier().getTransform().setPosition(new Vector3(0, st.simplerayheight / 2 + 0.3f, 0.2f/*0/*+0.4f*/));
+
+            InputToRequestSystem.setPayload0(/*avatar.avatarE*/playerEntity.getName());
+
+            //avatar.avatarE.addComponent(new InventoryComponent());
+            if (MazeUtils.getPlayer().size() > 1) {
+                createBullets(3, /*avatar.avatarE*/playerEntity.getId());
+            }
+        }
+    }
+
+    /**
+     * Einen Walk versuchen. Wenn der nicht geht, einen push (aber nur bei Forward).
+     * Erlaubt nur die 4 Grundschritte, nicht ForwardMove, obwohl das auch gehen könnte.
+     *
+     *
+     * <p>
+     */
+    private void attemptMove(GridState currentstate, MoverComponent mover, GridMovement movement) {
+        MazeLayout layout = Grid.getInstance().getLayout();
+
+        if (mover.isMoving()) {
+            // nur sicherheitshalber, duerfte gar nicht aufgerufen werden.
+            logger.warn("cannot move. still moving");
+        } else {
+            // erstmal gehen versuchen
+            //MA32 nextstate = currentstate.walk(movement, layout);
+            GridMovement mo = mover.walk(movement, currentstate, layout);
+            if (mo == null) {
+                // push versuchen, aber nur, wenn ich forward wollte. Sonst kann ich mit Back Boxen pushen.
+                if (movement.isForward()) {
+                    movement = GridMovement.ForwardMove;
+                    //Point boxloc = currentstate.getPushBoxLocation(layout);
+                    //GridMover/*Point*/ boxloc = currentstate.canMove(layout);
+                    //nextstate = currentstate.push(layout);
+                    //if (nextstate != null) {
+                    //if (boxloc != null) {
+                    //GridMover movableBox = currentstate.canMove(layout);
+                    //MoverComponent movableBoxComponent = movableBox.getParent();
+                    //    MazeUtils.combinedMove(currentstate, mover,  layout);
+                    mo = mover.walk(movement, currentstate, layout);
+                    //}
+                }
+            } else {
+                //mover.setWalkStatus(movement, currentstate.playerorientation);
+                //mover.walk(movement, currentstate, layout);
+            }
+            if (mo != null) {
+                MoveRecorder.getInstance().addMove(movement/*, nextstate*/);
+            }
+        }
+    }
+
+    /**
+     * Muesste nicht "attempt" heissen, ist dann aber analog zu attemptmove.
+     */
+    public void attemptRotate(GridState currentstate, MoverComponent mover, boolean left) {
+        GridMovement movement;
+        //24.10.18 Mover mover = ((Mover) ray.components.get(0));
+        if (left) {
+            // gequeute Bewegungen gehen noch nicht
+            if ((movement = mover.rotate(true)) != null) {
+                //nextstate = currentstate.execute(movement, layout);
+                MoveRecorder.getInstance().addMove(movement/*, nextstate*/);
+            }
+        } else {
+            // gequeute Bewegungen gehen noch nicht
+            if ((movement = mover.rotate(false)) != null) {
+                //nextstate = currentstate.execute(movement, layout);
+                MoveRecorder.getInstance().addMove(movement/*, nextstate*/);
+            }
+        }
+    }
+
+
+    /**
+     * Nach Ende der Bewegung den aktuellen state fixieren und visualisieren, um (schleichende) Abweichungen zu vermeiden.
+     * Wird auch fuer undo verwendet.
+     * MA32: TODO Die erneute Visualisierung dient ja auch als eine Art refresh. Das sollte beibehalten werden.
+     */
+    public void movementCompleted() {
+        /*MA32 if (nextstate != null) {
+            //logger.debug("Switching to next state");
+            currentstate = nextstate;
+            nextstate = null;
+            MazeVisualizationSystem.view.visualizeState(currentstate);
+        }*/
+    }
+
+
+    /**
+     * Keine Pruefungen. Es wird erwartet, dass das geht.
+     * TODO: Aktuelle Bewegunegen beachten. undo wird sehr schnell gemacht. Er scheint da schon mal  durcheinander zu kommen.
+     *
+     * @param movement
+     */
+    private void undo(GridState currentstate, MoverComponent mover, GridMovement movement, MazeLayout layout) {
+        //24.10.18: Mover mover = ((Mover) ray.components.get(0));
+
+        switch (movement.movement) {
+            case GridMovement.FORWARD:
+                if ((movement = mover.walk(GridMovement.Back, currentstate, layout)) != null) {
+                    /*MA32 nextstate =*/
+                    currentstate.execute(movement, layout);
+                }
+                break;
+            case GridMovement.BACK:
+                if ((movement = mover.walk(GridMovement.Forward, currentstate, layout)) != null) {
+                    /*MA32 nextstate =*/
+                    currentstate.execute(movement, layout);
+                }
+                break;
+            case GridMovement.FORWARDMOVE:
+                Point boxloc = currentstate.getPullBoxLocation(layout);
+                GridState nextstate = currentstate.pull(layout);
+                if (nextstate != null) {
+                    Util.nomore();
+                    //triggerPushPull(currentstate, mover, boxloc, GridMovement.Pull);
+                }
+                break;
+            case GridMovement.TURNLEFT:
+                if ((movement = mover.rotate(false)) != null) {
+                    /*MA32 nextstate =*/
+                    currentstate.execute(movement, layout);
+                }
+                break;
+            case GridMovement.TURNRIGHT:
+                if ((movement = mover.rotate(true)) != null) {
+                    /*MA32 nextstate =*/
+                    currentstate.execute(movement, layout);
+                }
+                break;
+        }
+    }
+
+    /**
+     * 15.8.19. Wegen VR mit "Avatar".
+     * Es könnte sein, dass der Body jetzt zu hoch ist. Und bei VR würde er wohl auch stören.
+     * Darum erstmal keinen body.
+     * TODO 1.4.21: Delegate in AvatarSystem for body
+     *
+     * @return
+     */
+    public static Avatar/*EcsEntity*/ buildPlayer(Camera camera) {
+
+        Avatar avatar = Avatar.buildDefault(camera/*getMainCamera()*/);
+        SceneNode body = MazeModelBuilder.buildSimpleBody(MazeSettings.getSettings().simplerayheight, MazeSettings.getSettings().simpleraydiameter, Color.ORANGE);
+        //avatar.avatar.attach(body);
+
+
+        return avatar/*.avatarE*/;
+    }
+
+
+    private void undo(GridState currentstate, MoverComponent mover, MazeLayout layout) {
+        GridMovement lastmovement = MoveRecorder.getInstance().removeLastMove();
+        if (lastmovement != null) {
+            undo(currentstate, mover, lastmovement, layout);
+        }
+    }
+
+    /**
+     * TODO 4.10.18: Das scheint nicht (mehr) zu gehen. Der irrt einfach rum.
+     */
+    private void autosolve(GridState currentstate) {
+        logger.debug("autosolve");
+        SokobanAutosolver solver = new SokobanAutosolver(/*movingsystem.*/Grid.getInstance()/*MA32, /*movingsystem.* /currentstate*/);
+        solver.solve();
+        solution = solver.getSolution();
+    }
+
+    /**
+     * There is no level reload, so no need to get rid of old one.
+     * TODO Fehlerbehandlung
+     */
+    private void loadLevel(String fileContent, String name) {
+        logger.debug("loadLevel ");
+
+        Grid grid;
+        try {
+            List<Grid> grids = Grid.loadByReader(new StringReader(fileContent));
+            if (grids.size() > 1 && name != null) {
+                grid = Grid.findByTitle(grids, name);
+            } else {
+                grid = grids.get(0);
+            }
+
+        } catch (InvalidMazeException e) {
+            logger.error("load error: InvalidMazeException:" + e.getMessage());
+            return;
+        }
+        Grid.setInstance(grid);
+
+        for (Point b : grid.getBoxes()) {
+            //EcsEntity box = MazeMovingAndStateSystem.buildSokobanBox(b.getX(), b.getY());
+            //static EcsEntity buildSokobanBox(int x, int y) {
+            SceneNode p = MazeModelBuilder.buildSokobanBox(/*b.getX(), b.getY()*/);
+            EcsEntity box = new EcsEntity(p);
+            MoverComponent mover = new MoverComponent(p.getTransform()/*this*/, false, b, new GridOrientation());
+            mover.setLocation(b);
+            box.addComponent(mover);
+            //return box;
+
+            Scene.getCurrent().addToWorld(box.scenenode);
+        }
+        for (Point b : grid.getDiamonds()) {
+            SceneNode p = MazeModelBuilder.buildDiamond();
+            EcsEntity diamond = new EcsEntity(p);
+            p.getTransform().setPosition(MazeUtils.point2Vector3(b));
+            diamond.addComponent(new ItemComponent());
+            Scene.getCurrent().addToWorld(diamond.scenenode);
+        }
+        // only create bullets if we have bots (2 per bot). Bullets for player are created at join time
+        for (Point b : grid.getBots()) {
+            //SceneNode p = MazeModelBuilder.buildSokobanBox();
+            SceneNode body = MazeModelBuilder.buildSimpleBody(MazeSettings.getSettings().simplerayheight, MazeSettings.getSettings().simpleraydiameter, Color.ORANGE);
+            EcsEntity bot = new EcsEntity(body);
+
+            bot.setName("Bot");
+            MoverComponent mover = new MoverComponent(body.getTransform(), true, b, new GridOrientation());
+            mover.setLocation(b);
+            bot.addComponent(mover);
+            //bot.addComponent(new InventoryComponent());
+            Scene.getCurrent().addToWorld(bot.scenenode);
+            createBullets(2, bot.getId());
+        }
+
+
+        SystemState.state = SystemState.STATE_READY_TO_JOIN;
+        SystemManager.sendEvent(new Event(EventRegistry.EVENT_MAZE_LOADED, new Payload(grid)));
+
+        //11.4.16 addTestObjekte();
+        logger.debug("load completed");
+    }
+
+    private void createBullets(int cnt, int owner) {
+        for (int i = 0; i < cnt; i++) {
+            SceneNode ball = MazeModelBuilder.buildSimpleBall(0.3, Color.YELLOW/*, mv.getLocation()*/);
+            EcsEntity e = new EcsEntity(ball);
+            BulletComponent bulletComponent = new BulletComponent(/*mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), playername*/);
+            e.addComponent(bulletComponent);
+            e.addComponent(new ItemComponent(owner));
+        }
+    }
+
+    private void validate() {
+        logger.debug("validate");
+        /*1.4.21if (MazeView.ray == null) {
+            logger.error("no ray in MazeView");
+        }*/
+        logger.debug("validate complete");
+
+    }
+
+    private void reset() {
+        logger.debug("reset");
+        Util.nomore();
+        /*MA32
+        GridState initialstate = MoveRecorder.getInstance().statelist.get(0);
+        MoveRecorder.getInstance().reset();
+        /*movingsystem.* /
+        currentstate = initialstate;
+        MazeVisualizationSystem.view.visualizeState(initialstate);*/
+    }
+
+    /**
+     * 6.4.21 Im MP Sinne ist das hier in dieser Form aber unguenstig.
+     */
+    private void help() {
+        logger.debug("help");
+        if (helphud == null) {
+            helphud = Hud.buildForCamera(Scene.getCurrent().getDefaultCamera(), 1);
+            helphud.setText(0, "r - ");
+            helphud.setText(6, "u - undo");
+            helphud.setText(7, "r - reset");
+            helphud.setText(9, "press h to close");
+            //20.2.17? add(hud);
+        } else {
+            SceneNode.removeSceneNode(helphud);
+            helphud = null;
+        }
+    }
+
+
+    private void addTestObjekte() {
+        Geometry cuboid = Geometry.buildCube(0.5f, MazeModelFactory.PILLARHEIGHT * 2, 0.5f);
+        ShapeGeometry cubegeometry = ShapeGeometry.buildBox(0.5f, MazeModelFactory.PILLARHEIGHT * 2, 0.5f, null);
+
+        Mesh m = new Mesh(cubegeometry, Material.buildBasicMaterial(Color.RED));
+        //add(m);
+    }
+
+    private void relocate(Payload payload) {
+
+        String playername = (String) payload.o[0];
+        EcsEntity player = MazeUtils.findPlayerByName(playername);
+        if (player == null) {
+            logger.warn("unknown player for relocate:" + playername);
+            return;
+        }
+
+        logger.debug("relocate " + player.getName());
+
+        String location = (String) payload.o[1];
+        Point p = Util.parsePoint(location);
+        if (p == null) {
+            logger.warn("invalid location:" + location);
+            return;
+        }
+
+        GridOrientation gridOrientation = null;
+        String orientation = (String) payload.o[2];
+        if (StringUtils.length(orientation) > 0) {
+            gridOrientation = GridOrientation.fromDirection(StringUtils.charAt(orientation, 0));
+            if (gridOrientation == null) {
+                logger.warn("invalid orientation:" + orientation);
+                return;
+            }
+        }
+
+        MoverComponent mc = MoverComponent.getMoverComponent(player);
+
+        mc.setLocation(p);
+        if (gridOrientation != null) {
+            //otherwise keep orientation
+            mc.setOrientation(gridOrientation);
+        }
+    }
+}
