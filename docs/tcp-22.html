@@ -12,7 +12,11 @@
 </head>
 
 <body class="w3-light-grey">
-
+<!--
+w3-card-2:  Container for any HTML content (2px bordered shadow)
+w3-half: Half (1/2) screen column container
+w3-row-padding: Row where all columns have a default padding
+-->
 <!-- Navigation (Stays on Top) -->
 <!--<div class="w3-top w3-bar w3-black">
     <a href="#home" class="w3-bar-item w3-button">Home</a>
@@ -34,7 +38,7 @@
     <div class="w3-container" style="padding:32px">
 
         <div class="w3-panel w3-padding-large w3-section  w3-white">
-            <h2>Examples</h2>
+            <h1>Examples</h1>
 
             <div class="">
                 <div class="">Reference Scene</div>
@@ -63,85 +67,106 @@
                     </div>
                 </div>
             </div>
-
         </div>
-
 
         <div class="w3-panel w3-padding-large w3-section  w3-white">
             <h1 class="">Use Cases</h1>
             <p class="w3-xlarge"></p>
-
-
             <div class="w3-row-padding w3-padding-16">
-                <div class="w3-half w3-card-2">
-                    <div class="w3-container">
-                        <h3>Sokoban</h3>
-                        <p>The famous game in a first person 3D view. Move the boxes to the indicated locations. This
-                            might
-                            be hard without top view,
-                            so differing to the original its also possible to pull boxes.</p>
+                <div class="w3-half">
+                    <div class="w3-card-2">
+                        <div class="w3-container">
+                            <h3>Sokoban</h3>
+                            <p>The famous game in a first person 3D view. Move the boxes to the indicated locations.
+                                This
+                                might
+                                be hard without top view,
+                                so differing to the original its also possible to pull boxes.</p>
 
-                        <select class="w3-select  " id="sel_sceneBox">
-                            <option value="skbn/SokobanWikipedia.txt">Sokoban Wikipedia</option>
-                            <option value="skbn/DavidJoffe.txt:1">DavidJoffe 1</option>
-                            <option value="skbn/DavidJoffe.txt:2">DavidJoffe 2</option>
-                            <option value="skbn/DavidJoffe.txt:3">DavidJoffe 3</option>
-                            <option value="skbn/Sokoban10x10.txt">Sokoban10x10</option>
-                            <option value="skbn/SokobanTrivial.txt">SokobanTrivial</option>
-                        </select>
-                        <p></p>
+                            <select class="w3-select  " id="sel_sceneBox">
+                                <option value="skbn/SokobanWikipedia.txt">Sokoban Wikipedia</option>
+                                <option value="skbn/DavidJoffe.txt:1">DavidJoffe 1</option>
+                                <option value="skbn/DavidJoffe.txt:2">DavidJoffe 2</option>
+                                <option value="skbn/DavidJoffe.txt:3">DavidJoffe 3</option>
+                                <option value="skbn/Sokoban10x10.txt">Sokoban10x10</option>
+                                <option value="skbn/SokobanTrivial.txt">SokobanTrivial</option>
+                            </select>
+                            <p></p>
 
-                        <button class=" w3-button  w3-round w3-khaki " onclick="launchMazeScene(false,'sel_sceneBox')">Launch
-                        </button>
-                        <button class=" w3-button  w3-round w3-khaki " onclick="launchMazeScene(true,'sel_sceneBox')">Launch VR
-                        </button>
+                            <button class=" w3-button  w3-round w3-khaki "
+                                    onclick="launchMazeScene(false,'sel_sceneBox')">Launch
+                            </button>
+                            <button class=" w3-button  w3-round w3-khaki "
+                                    onclick="launchMazeScene(true,'sel_sceneBox')">Launch VR
+                            </button>
 
-                        <p></p>
+                            <p></p>
+                        </div>
                     </div>
                 </div>
-                <div class="w3-half w3-card-2">
-                    <div class="w3-container">
-                        <!--<img src="/w3images/steak.jpg" alt="Steak" style="width:100%">-->
-                        <h3>Mazes</h3>
-                        <p>Just a maze.</p>
+                <div class="w3-half">
+                    <div class="w3-card-2">
+                        <div class="w3-container">
+                            <!--<img src="/w3images/steak.jpg" alt="Steak" style="width:100%">-->
+                            <h3>Mazes</h3>
+                            <p>Just a maze.</p>
 
-                        <select class="w3-select  " id="sel_sceneBox1">
-                            <option value="maze/Maze15x10.txt">Maze 15x10</option>
-                        </select>
-                        <p></p>
-                        <button class=" w3-button  w3-round w3-khaki " onclick="launchMazeScene(false,'sel_sceneBox1')">Launch
-                        </button>
-                        <button class=" w3-button  w3-round w3-khaki " onclick="launchMazeScene(true,'sel_sceneBox1')">Launch VR
-                        </button>
-                        <p></p>
+                            <select class="w3-select  " id="sel_sceneBox1">
+                                <option value="maze/Maze15x10.txt">Maze 15x10</option>
+                            </select>
+                            <p></p>
+                            <button class=" w3-button  w3-round w3-khaki "
+                                    onclick="launchMazeScene(false,'sel_sceneBox1')">Launch
+                            </button>
+                            <button class=" w3-button  w3-round w3-khaki "
+                                    onclick="launchMazeScene(true,'sel_sceneBox1')">Launch VR
+                            </button>
+                            <p></p>
+                        </div>
                     </div>
                 </div>
-
             </div>
         </div>
 
-
         <div class="w3-panel w3-padding-large w3-section  w3-white">
             <h1 class="">User Controls</h1>
-            <p class="">Controlling depends on the platform. In general, keys x/y/z can be used to fine tune the cameras position.</p>
-            <div class="w3-third w3-card-2">
-                <h3>Keyboard</h3>
-                <p>Use arrow key for moving.</p>
-            </div>
-            <div class="w3-third w3-card-2">
-                <h3>Touchscreen</h3>
-                <p>Move by touching segments on the screen.</p>
-            </div>
-            <div class="w3-third w3-card-2">
-                <h3>VR</h3>
-                <p>Use left trigger for teleporting to marked element. Use right trigger to do an action like moving a
-                    box. Note: Only the trigger button of a controller is used. The left controller has a wristwatch
-                    controller with buttons for</p>
-                <ul>
-                    <li>Move VR position up/down</li>
-                    <li>Pulling a box</li>
-                </ul>
-
+            <p class="">Controlling depends on the platform. In general, keys x/y/z can be used to fine tune the cameras
+                position.</p>
+            <div class="w3-row-padding w3-padding-16">
+                <div class="w3-third">
+                    <div class="w3-card-2">
+                        <div class="w3-container">
+                            <h3>Keyboard</h3>
+                            <p>Use arrow key for moving.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="w3-third">
+                    <div class=" w3-card-2">
+                        <div class="w3-container">
+                            <h3>Touchscreen</h3>
+                            <p>Move by touching segments on the screen.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="w3-third">
+                    <div class=" w3-card-2">
+                        <div class="w3-container">
+                            <h3>VR</h3>
+                            <p>Use left trigger for teleporting to marked element. Use right trigger to do an action
+                                like
+                                moving
+                                a
+                                box. Note: Only the trigger button of a controller is used. The left controller has a
+                                wristwatch
+                                controller with buttons for</p>
+                            <ul>
+                                <li>Move VR position up/down</li>
+                                <li>Pulling a box</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -193,7 +218,8 @@
                 <li>Thanks to the team of <a href="https://jmonkeyengine.org" target="_blank">JMonkeyEngine</a> for
                     their native Java 3D engine.
                 </li>
-                <li>The CSG implementation is copyrighted by Evan Wallace (<a href="http://madebyevan.com/" target="_blank"></a>).
+                <li>The CSG implementation is copyrighted by Evan Wallace (<a href="http://madebyevan.com/"
+                                                                              target="_blank"></a>).
                 </li>
             </ul>
         </div>
