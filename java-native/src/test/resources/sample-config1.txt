@@ -1,0 +1,3 @@
+prop1=value20
+
+prop20=900
