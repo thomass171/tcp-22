@@ -25,11 +25,6 @@
             <artifactId>module-engine</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>org.osm2world</groupId>
-            <artifactId>module-core</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
-        </dependency>
         <!-- 23.12.17: core tests. -->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
