@@ -39,7 +39,11 @@ public class TestFactory {
 
         //TODO allgemeingültiges cachedir
         properties.put("CACHEDIR", "/Users/thomas/Projekte/Granada/ncache");
-        properties.put("BUNDLEDIR", "/Users/thomas/Projekte/Granada/bundles");
+        String hostdir = System.getenv("HOSTDIR");
+        if (hostdir == null) {
+            throw new RuntimeException("HOSTDIR not set");
+        }
+        properties.put("BUNDLEDIR", hostdir + "/bundles");
 
         //7.7.21 Reset aus EngineHelper (geht nicht beim ersten mal wegen fehlender Platform)
         resetInit();
@@ -156,7 +160,7 @@ public class TestFactory {
                     Assert.fail("Bundle failed:" + bundlename);
                 }
             },*/ new DefaultResourceReader());
-            if (e!=null){
+            if (e != null) {
                 // das mal als Fehler werten
                 Assert.fail("Bundle failed:" + bundlename);
             }
