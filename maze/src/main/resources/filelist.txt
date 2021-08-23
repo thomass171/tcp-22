@@ -1,0 +1,8 @@
+maze/Area15x10.txt
+maze/Maze15x10.txt
+maze/grid1.txt
+skbn/DavidJoffe.txt
+skbn/Sokoban10x10.txt
+skbn/SokobanSimple.txt
+skbn/SokobanTrivial.txt
+skbn/SokobanWikipedia.txt

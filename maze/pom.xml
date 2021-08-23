@@ -7,7 +7,7 @@
     <name>maze</name>
 
     <parent>
-        <groupId>de.yard.tcp22</groupId>
+        <groupId>de.yard.tcp-22</groupId>
         <artifactId>main</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
@@ -16,12 +16,12 @@
         <!-- junit comes from parent -->
         <!-- jetzt die eigenen Projektabhaengigkeiten-->
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-engine</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
@@ -32,14 +32,14 @@
         </dependency>
         <!-- 23.12.17: core tests. -->
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-engine</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <type>test-jar</type>
@@ -47,7 +47,7 @@
         </dependency>
         <!-- 5.7.21 die Tests brauchen eine implementierte Platform-->
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-java-common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <scope>test</scope>

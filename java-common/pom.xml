@@ -7,7 +7,7 @@
     <name>java-common</name>
 
     <parent>
-        <groupId>de.yard.tcp22</groupId>
+        <groupId>de.yard.tcp-22</groupId>
         <artifactId>main</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
@@ -32,24 +32,24 @@
 
         <!-- now the own project dependencies -->
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-java-native</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <!-- 10.8.21 unwanted? -->
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-outofbrowser-common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <type>test-jar</type>

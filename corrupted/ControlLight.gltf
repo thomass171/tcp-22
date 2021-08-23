@@ -1,0 +1,192 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 52
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 52
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "type": "VEC2",
+      "count": 52
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5125,
+      "type": "SCALAR",
+      "count": 108
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 63
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 63
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5126,
+      "type": "VEC2",
+      "count": 63
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5125,
+      "type": "SCALAR",
+      "count": 108
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 208,
+      "byteOffset": 0
+    },
+    {
+      "buffer": 0,
+      "byteLength": 208,
+      "byteOffset": 624
+    },
+    {
+      "buffer": 0,
+      "byteLength": 208,
+      "byteOffset": 1248
+    },
+    {
+      "buffer": 0,
+      "byteLength": 432,
+      "byteOffset": 1664
+    },
+    {
+      "buffer": 0,
+      "byteLength": 252,
+      "byteOffset": 2096
+    },
+    {
+      "buffer": 0,
+      "byteLength": 252,
+      "byteOffset": 2852
+    },
+    {
+      "buffer": 0,
+      "byteLength": 252,
+      "byteOffset": 3608
+    },
+    {
+      "buffer": 0,
+      "byteLength": 432,
+      "byteOffset": 4112
+    }
+  ],
+  "meshes": [
+    {
+      "name": "cylinder",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 2
+        }
+      ]
+    },
+    {
+      "name": "GS-light",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 4,
+            "NORMAL": 5,
+            "TEXCOORD_0": 6
+          },
+          "indices": 7,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "cylinder",
+      "mesh": 0
+    },
+    {
+      "name": "GS-light",
+      "mesh": 1
+    }
+  ],
+  "materials": [
+    {
+      "name": "shadedac3dmat6",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.0,
+          0.349,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "name": "unshadedac3dmat6",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.0,
+          0.349,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "name": "shadedac3dmat13",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.533333,
+          0.533333,
+          0.533333,
+          0.0
+        ]
+      }
+    },
+    {
+      "name": "unshadedac3dmat13",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.533333,
+          0.533333,
+          0.533333,
+          0.0
+        ]
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0,
+        1
+      ]
+    }
+  ],
+  "textures": [],
+  "images": [],
+  "samplers": []
+}

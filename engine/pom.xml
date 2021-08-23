@@ -7,7 +7,7 @@
     <name>engine</name>
 
     <parent>
-        <groupId>de.yard.tcp22</groupId>
+        <groupId>de.yard.tcp-22</groupId>
         <artifactId>main</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
@@ -16,26 +16,26 @@
         <!-- junit comes from parent -->
         <!-- jetzt die eigenen Projektabhaengigkeiten-->
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <!-- 5.7.21 test dependencies. die Tests brauchen eine implementierte Platform-->
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-java-common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-outofbrowser-common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <scope>test</scope>

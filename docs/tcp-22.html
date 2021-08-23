@@ -36,8 +36,28 @@ w3-row-padding: Row where all columns have a default padding
     </header>
 
     <div class="w3-container" style="padding:32px">
+        <div class="w3-panel w3-padding-large w3-section w3-white">
+            <h1>The idea</h1>
+            Like Java provides the option for platform independent application development, the main idea of this
+            project is to
+            create 3D (game) applications with Java that run on several platforms like native Java, web browsers or
+            Unity.
+            Currently supported 3D engines are
+            <dl>
+                <dt><a href="https://jmonkeyengine.org" target="_blank">JMonkeyEngine</a></dt>
+                <dd>The most straightforward approach, because JMonkeyEngine is also written in Java</dd>
+                <dt><a href="https://threejs.org" target="_blank">ThreeJs</a></dt>
+                <dd>Java code is converted to JS code by <a href="http://www.gwtproject.org" target="_blank">GWT</a></dd>
+                <dt><a href="https://unity.com/" target="_blank">Unity</a></dt>
+                <dd>Java code is converted to CS code by a simple language converter</dd>
+            </dl>
+            <h2>Limitations</h2>
+            Like all platform independent solutions these hide some of the platform specific opportunities,
+            so you cannot benefit from it. The major limitation currently is a lack for a good solution for platform
+            independent shader programming.
+        </div>
 
-        <div class="w3-panel w3-padding-large w3-section  w3-white">
+        <div class="w3-panel w3-padding-large w3-section w3-white">
             <h1>Examples</h1>
 
             <div class="">
@@ -218,9 +238,12 @@ w3-row-padding: Row where all columns have a default padding
                 <li>Thanks to the team of <a href="https://jmonkeyengine.org" target="_blank">JMonkeyEngine</a> for
                     their native Java 3D engine.
                 </li>
-                <li>The CSG implementation is copyrighted by Evan Wallace (<a href="http://madebyevan.com/"
-                                                                              target="_blank"></a>).
+                <li>The CSG implementation is copyrighted by <a href="http://madebyevan.com/"
+                                                                        target="_blank">Evan Wallace</a> .
                 </li>
+                <li>Unity is copyrighted by <a href="https://unity.com/" target="_blank">Unity Technologies</a>.
+                </li>
+
             </ul>
         </div>
     </div>

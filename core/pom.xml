@@ -7,7 +7,7 @@
     <name>core</name>
 
     <parent>
-        <groupId>de.yard.tcp22</groupId>
+        <groupId>de.yard.tcp-22</groupId>
         <artifactId>main</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>

@@ -7,7 +7,7 @@
     <url>http://maven.apache.org</url>
 
     <parent>
-        <groupId>de.yard.tcp22</groupId>
+        <groupId>de.yard.tcp-22</groupId>
         <artifactId>main</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
@@ -39,17 +39,17 @@
         </dependency>
         <!-- jetzt die eigenen Projektabhaengigkeiten-->
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-engine</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-maze</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
@@ -57,21 +57,21 @@
         <!-- and below also the sources -->
 
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <classifier>sources</classifier>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-engine</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <classifier>sources</classifier>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>de.yard.tcp22</groupId>
+            <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-maze</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <classifier>sources</classifier>
@@ -90,10 +90,6 @@
                 <artifactId>gwt-maven-plugin</artifactId>
                 <!-- das ist die GWT Version, nicht die des Plugin-->
                 <version>2.8.0</version>
-                <!--16.3.16 nicht erforderlich-->
-                <!--<compileSourcesArtifacts>
-                    <compileSourcesArtifact>de.yard.tcp22:module.core</compileSourcesArtifact>
-                </compileSourcesArtifacts>-->
                 <executions>
                     <execution>
                         <goals>
@@ -138,6 +134,7 @@
             </plugin>
             <!-- copy webapp -->
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.7</version>
                 <executions>
