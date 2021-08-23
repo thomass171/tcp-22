@@ -7,17 +7,7 @@ See https://thomass171.github.io/tcp-22/tcp-22.html
 # Modules
 
 
-# Building
-
-maven is needed for building. Run
-
-```
-mvn clean install
-```
-
-for building
-
-# Installing
+# Building And Deploying
 
 This shows the installation to a web browser running locally serving from
 directory $HOME/Sites. Set shell variable HOSTDIR, eg.:
@@ -25,19 +15,31 @@ directory $HOME/Sites. Set shell variable HOSTDIR, eg.:
 ```
 export HOSTDIR=$HOME/Sites/tcp-22
 ```
-and create that base directory. Deploy the software:
+and create that base directory.
+Deploy some bundles needed for building:
+
+```
+sh bin/deployBundle.sh data
+sh bin/deployBundle.sh corrupted
+sh bin/deployBundle.sh -m maze
+```
+maven is needed for building. Run
+
+```
+mvn clean install
+```
+
+for building.
+Deploy the software:
 
 ```
 sh bin/deploy.sh
 ```
 
-Deploy the bundles:
+Deploy the remaining bundles:
 
 ```
-sh bin/deployBundle.sh data
-sh bin/deployBundle.sh corrupted
 sh bin/deployBundle.sh -m engine
-sh bin/deployBundle.sh -m maze
 ```
 
 # Running

@@ -74,14 +74,16 @@ fi
 BUNDLE=$1
 shift
 
+BUNDLEDIR=$HOSTDIR/bundles
+mkdir -p $BUNDLEDIR
+checkrc mkdir
+
 if [ "$BUNDLE" == "corrupted" ]
 then
 	echo "special handling for manual built bundle"
-	$COPYCMD corrupted $HOSTDIR/bundles
+	$COPYCMD corrupted $BUNDLEDIR
 	exit 0
 fi
-
-BUNDLEDIR=$HOSTDIR/bundles
 
 if [ $BUNDLEISMODULE = "1" ]
 then
