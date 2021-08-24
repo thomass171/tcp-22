@@ -49,13 +49,17 @@ processPcm() {
 }
 
 export BUNDLEISMODULE=0
-while getopts ":s:m" o; do
+export STATIC=0
+while getopts ":S:s:m" o; do
     case "${o}" in
         s)
             COPYCMD="scp -pr"
             ;;
         m)
             BUNDLEISMODULE=1
+            ;;
+        S)
+            STATIC=1
             ;;
         *)
             usage
@@ -147,8 +151,12 @@ do
     #replace pcm file by creating models
     if [ "$SUFFIX" = "pcm" ]
     then
-      processPcm $FNAME $DESTDIR $DIRECTORY $filename
-      checkrc processPcm
+      if [ "$STATIC" = "1" ]; then
+        echo "Skipping pcm"
+      else
+        processPcm $FNAME $DESTDIR $DIRECTORY $filename
+        checkrc processPcm
+      fi
     else
       cp -p $FNAME $DESTDIR/$filename
       checkrc cp

@@ -16,12 +16,13 @@ directory $HOME/Sites. Set shell variable HOSTDIR, eg.:
 export HOSTDIR=$HOME/Sites/tcp-22
 ```
 and create that base directory.
-Deploy some bundles needed for building:
+Deploy static content bundles needed for building:
 
 ```
 sh bin/deployBundle.sh data
 sh bin/deployBundle.sh corrupted
 sh bin/deployBundle.sh -m maze
+sh bin/deployBundle.sh -S -m engine
 ```
 maven is needed for building. Run
 
