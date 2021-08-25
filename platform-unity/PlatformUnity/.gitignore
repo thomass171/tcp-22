@@ -17,6 +17,11 @@
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 ![Aa]ssets/**/*.meta
 
+# But try to ignore script meta files
+[Aa]ssets/scripts-platform/*.meta
+# and everything generated
+[Aa]ssets/scripts-generated/*
+
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*
 
@@ -69,3 +74,7 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 [Aa]ssets/[Ss]treamingAssets/aa.meta
 [Aa]ssets/[Ss]treamingAssets/aa/*
+
+.vsconfig
+[Aa]ssets/scripts-platform.meta
+[Aa]ssets/scripts-generated.meta
