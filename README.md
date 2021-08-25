@@ -4,7 +4,7 @@ A cross platform 3D graphics meta engine for Java, but still WiP!
 
 See https://thomass171.github.io/tcp-22/tcp-22.html
 
-# Modules
+
 
 
 # Building And Deploying
@@ -54,3 +54,10 @@ Check the developer console for possible errors.
 You should see the [ReferenceScene](engine/src/main/java/de/yard/threed/engine/apps/reference/ReferenceScene.java)
 
 ![](docs/ReferenceScene-webgl.png)
+
+# Technical Details
+
+## Architecture
+
+## Modules
+

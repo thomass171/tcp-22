@@ -1,7 +1,5 @@
 <!--
-
-19.3.21: wichtig nicht zum bauen (dafuer gibts mittlerweile Skripte), sondern um neue Module in Idea zu bekommen
-
+19.3.21: important not only for building but also for informing Idea about modules
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -32,6 +30,7 @@
         <module>maze</module>
         <module>platform-webgl</module>
         <module>tools</module>
+        <module>java2cs</module>
     </modules>
 
     <build>

@@ -1,0 +1,1 @@
+Test files reside in "java" instead of "resources" to make sure by the IDE these are valid Java files.
