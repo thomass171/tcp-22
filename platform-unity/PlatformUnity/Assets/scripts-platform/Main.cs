@@ -12,7 +12,7 @@ using de.yard.threed.engine;
 using java.util;
 
 /**
- * Main class. Is attached to game object "ScriptContainer" for being activated. Triggeres everything else.
+ * Main class. Is attached to game object "MyScriptContainer" for being activated. Triggeres everything else.
  */
 public class Main : MonoBehaviour
 {
@@ -21,18 +21,19 @@ public class Main : MonoBehaviour
     public static bool gcpermesh = false;
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
-        Debug.Log ("Starting Main");
-        init ();
+        Debug.Log("Starting Main");
+        init();
     }
 
     /**
      *
      */
-    public void init ()
+    public void init()
     {
-        try {
+        try
+        {
             // 4.5.16: HAt wie bei JME keinen sichtbaren Effekt beim IPAD Buch
             QualitySettings.anisotropicFiltering = AnisotropicFiltering.Enable;
             // Ein AA Effekt ist auch nicht erkennbar. 21.3.17: immer noch nicht. AA wirkt aber wohl nur auf Kanten, nicht in Texturen.
@@ -41,43 +42,59 @@ public class Main : MonoBehaviour
             Application.targetFrameRate = 1;
 
             // 16.11.16: Auch hier den init mit Properties.
-            HashMap<String,String> properties = new HashMap<String,String> ();
+            HashMap<String, String> properties = new HashMap<String, String>();
             //FlightGearInit.initProperties (properties);
 
-            if (isHandheld ()) {
-                properties.put ("CACHEDIR", Application.persistentDataPath/*"/storage/external_SD/ncache"*/);
-                properties.put ("BUNDLEDIR", "/Users/thomas/Projekte/Granada/bundles");
-
-            } else {
-                //TODO allgemeingültiges cachedir
-                properties.put ("CACHEDIR", "/Users/thomas/Projekte/Granada/ncache");
-                //30.1.18:  Das BUNDLEDIR gilt so für MACOS und Win10. Ach, besser nicht
-                if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows) {
-                    properties.put ("BUNDLEDIR", "/Users/thomas/Documents/Projekte/Granada/bundles");
-                } else {
-                    properties.put ("BUNDLEDIR", "/Users/thomas/Projekte/Granada/bundles");
-
-                }
+            //TODO adjust this to your local environment, possibly OS dependent
+            //if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
+            //{
+            //  
+            //}
+            Environment.SetEnvironmentVariable("HOSTDIR", "/Users/thomas/Sites/tcp-22");
+            string hostdir = Environment.GetEnvironmentVariable("HOSTDIR");
+            if (hostdir == null)
+            {
+                Debug.Break();
+                throw new Exception("HOSTDIR not set");
             }
+            Debug.Log("using HOSTDIR=" + hostdir);
 
+            if (isHandheld())
+            {
+                properties.put("CACHEDIR", Application.persistentDataPath/*"/storage/external_SD/ncache"*/);
+                properties.put("BUNDLEDIR", hostdir + "/bundles");
+
+            }
+            else
+            {
+                //TODO allgemeingültiges cachedir
+                properties.put("CACHEDIR", "/Users/thomas/Projekte/Granada/ncache");
+                //30.1.18:  Das BUNDLEDIR gilt so für MACOS und Win10. Ach, besser nicht
+                properties.put("BUNDLEDIR", hostdir + "/bundles");
+
+            }
+            //25.8.21 TODO check that bundle dir exists
 
             // Der UnityScenerunner baut auch die Platform
-            sr = (UnitySceneRunner)UnitySceneRunner.init (properties);
-            logger = PlatformUnity.getInstance().getLog (typeof(Main));
+            sr = (UnitySceneRunner)UnitySceneRunner.init(properties);
+            logger = PlatformUnity.getInstance().getLog(typeof(Main));
 
             //30.1.18 BundleRegistry.registerBundle ("Terrasync", new BtgBundle ("Terrasync"));
             //30.1.18 BtgBundle textures = BtgBundle.buildTextureBundle ();
             //30.1.18 BundleRegistry.registerBundle (textures.name, textures);
 
-            logger.info ("Starting Main");
-            if (isHandheld ()) {
-                checkFileWrite ();
-                Debug.Log ("Application.persistentDataPath is " + Application.persistentDataPath);
-                (Platform.getInstance ()).setSystemProperty ("FG_HOME", "/storage/external_SD/fghome");
-                (Platform.getInstance ()).setSystemProperty ("FG_ROOT", "/storage/external_SD/fgroot");
-                (Platform.getInstance ()).setSystemProperty ("FG_SCENERY", "??/FlightGear/TerraSync");
-                (Platform.getInstance ()).setSystemProperty ("MY777HOME", "/storage/external_SD/MyAircraft/My-777");
-            } else {
+            logger.info("Starting Main");
+            if (isHandheld())
+            {
+                checkFileWrite();
+                Debug.Log("Application.persistentDataPath is " + Application.persistentDataPath);
+                (Platform.getInstance()).setSystemProperty("FG_HOME", "/storage/external_SD/fghome");
+                (Platform.getInstance()).setSystemProperty("FG_ROOT", "/storage/external_SD/fgroot");
+                (Platform.getInstance()).setSystemProperty("FG_SCENERY", "??/FlightGear/TerraSync");
+                (Platform.getInstance()).setSystemProperty("MY777HOME", "/storage/external_SD/MyAircraft/My-777");
+            }
+            else
+            {
                 /* jetzt ueber flightgerinitPlatform.getInstance ().setSystemProperty ("FG_HOME", "/Users/thomas/Library/Application Support/FlightGear");
                 Platform.getInstance ().setSystemProperty ("FG_ROOT", "/Applications/FlightGear-2016.4.3.app/Contents/Resources/data");
                 Platform.getInstance ().setSystemProperty ("FG_SCENERY", "/Users/thomas/Library/Application Support/FlightGear/TerraSync");
@@ -85,16 +102,16 @@ public class Main : MonoBehaviour
             }
             //((EnginePlatform)Platform.getInstance ()).setSystemProperty ("argv.basename", "B55-B477");
             //((EnginePlatform)Platform.getInstance ()).setSystemProperty ("argv.basename", "B55-B477-small");
-            (Platform.getInstance ()).setSystemProperty ("argv.visualizeTrack", "true");
-            (Platform.getInstance ()).setSystemProperty ("argv.enableUsermode", "false");
-            (Platform.getInstance ()).setSystemProperty ("argv.enableNearView", "true");
+            (Platform.getInstance()).setSystemProperty("argv.visualizeTrack", "true");
+            (Platform.getInstance()).setSystemProperty("argv.enableUsermode", "false");
+            (Platform.getInstance()).setSystemProperty("argv.enableNearView", "true");
             //haengt haeufig UnityLog.setupNetworkstream ("192.168.98.20");
             //UnityLog.setupNetworkstream ("192.168.98.38");
-            startUdpListener ();
+            startUdpListener();
 
             // Jetzt ist die Initialisierung durch und die Applikation wird gestartet.
 
-            Scene updater = new de.yard.threed.engine.apps.reference.ReferenceScene ();//TODO ScenePool.buildSceneUpdater(scene);
+            Scene updater = new de.yard.threed.engine.apps.reference.ReferenceScene();//TODO ScenePool.buildSceneUpdater(scene);
             //Scene updater = new de.yard.threed.maze.SokobanScene();//TODO ScenePool.buildSceneUpdater(scene);
             //Scene updater = new de.yard.threed.apps.ShowroomScene ();//TODO ScenePool.buildSceneUpdater(scene);
             //Scene updater = new de.yard.threed.client.ModelViewScene ();//TODO ScenePool.buildSceneUpdater(scene);
