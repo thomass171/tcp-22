@@ -32,7 +32,8 @@ convertModule() {
 	TARGETDIR=platform-unity/PlatformUnity/Assets/scripts-generated
 	if [ ! -r $TARGETDIR ]
 	then
-		error $TARGETDIR not found
+		mkdir $TARGETDIR
+		checkrc mkdir
 	fi
 
 	#FILELIST=`echo $MODULE_FILES[$MODULE]` 
