@@ -61,7 +61,11 @@ In detail these are:
 Furthermore Unity needs to know your HOSTDIR for finding bundle data.
 Go to file Main.js and adjust the SetEnvironmentVariable() call accordingly.
 
+And it might be necessary to reassign the script file
+Main.cs to game object "MyScriptContainer" to trigger it.
+
 Now the scene "SampleScene" is ready to be started.
+![](docs/UnityPreview.png)
 
 # Running
 ## Browser
