@@ -19,7 +19,7 @@ namespace de.yard.threed.platform.unity
     {
         Log logger = Platform.getInstance ().getLog (typeof(UnityResourceManager));
         //TODO
-        public const string RESOURCEPREFIX = "/Users/thomas/Projekte/Granada/data/src/main/resources/";
+        //28.8.21 public const string RESOURCEPREFIX = "/Users/thomas/Projekte/Granada/data/src/main/resources/";
         protected static UnityResourceManager instance;
 
         public UnityResourceManager ()

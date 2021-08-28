@@ -67,8 +67,6 @@ public class Main : MonoBehaviour
             }
             else
             {
-                //TODO allgemeingültiges cachedir
-                properties.put("CACHEDIR", "/Users/thomas/Projekte/Granada/ncache");
                 //30.1.18:  Das BUNDLEDIR gilt so für MACOS und Win10. Ach, besser nicht
                 properties.put("BUNDLEDIR", hostdir + "/bundles");
 

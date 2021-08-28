@@ -1,6 +1,6 @@
 package de.yard.threed.platform.jme;
 
-import de.yard.threed.core.Util;
+import de.yard.threed.javacommon.Util;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
@@ -28,10 +28,6 @@ public class Main {
         boolean useinspector = false;
         HashMap<String, String> properties = Setup.setUp(args);
 
-        //TODO allgemeingültiges cachedir
-        properties.put("CACHEDIR", "/Users/thomas/Projekte/Granada/ncache");
-        properties.put("BUNDLEDIR", "/Users/thomas/Projekte/Granada/bundles");
-
         //10.7.21 NativeSceneRunner nsr = JmeSceneRunner.init(properties);
         JmeSceneRunner nsr = JmeSceneRunner.init(properties);
 
@@ -56,7 +52,7 @@ public class Main {
                 Scene updater = (Scene) Class.forName(scene).newInstance();
                 if (useinspector) {
                     //27.7.21 dafuer brauchen wir mal eine andere Loesung
-                    Util.nomore();
+                    de.yard.threed.core.Util.nomore();
                     //EngineInspector ei = new EngineInspector();
                     //ei.setVisible(true);
                 }

@@ -1,5 +1,6 @@
 package de.yard.threed.engine.testutil;
 
+import de.yard.threed.javacommon.Util;
 import de.yard.threed.javacommon.DefaultResourceReader;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.platform.*;
@@ -37,13 +38,7 @@ public class TestFactory {
 
         HashMap<String, String> properties = new HashMap<String, String>();
 
-        //TODO allgemeingültiges cachedir
-        properties.put("CACHEDIR", "/Users/thomas/Projekte/Granada/ncache");
-        String hostdir = System.getenv("HOSTDIR");
-        if (hostdir == null) {
-            throw new RuntimeException("HOSTDIR not set");
-        }
-        properties.put("BUNDLEDIR", hostdir + "/bundles");
+        //properties.put("BUNDLEDIR", Util.getHostdir() + "/bundles");
 
         //7.7.21 Reset aus EngineHelper (geht nicht beim ersten mal wegen fehlender Platform)
         resetInit();

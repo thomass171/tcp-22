@@ -24,7 +24,7 @@ import java.io.IOException;
  */
 public class ImageBuilder {
     // intended not the final destination directory. Should be validated before moving.
-    public static final String outdir = "/Users/thomas/Projekte/Granada/tools";
+    public static final String outdir = "/tmp";
 
 
     private ImageBuilder() {

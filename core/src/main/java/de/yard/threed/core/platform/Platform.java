@@ -32,6 +32,8 @@ public abstract class Platform {
 
     public NativeBundleLoader bundleLoader;
 
+    public String bundledir;
+
     protected static Platform instance;
     
     public static Platform getInstance() {

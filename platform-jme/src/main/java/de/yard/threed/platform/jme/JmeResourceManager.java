@@ -12,8 +12,7 @@ import de.yard.threed.javacommon.DefaultResourceReader;
  */
 public class JmeResourceManager extends DefaultResourceReader/*5.8.21 JAResourceManager*/ {
     // Der Prefix ist erforderlich, damit JME die Resource nicht findet und einen Custom Loader aufruft.
-    // 2.5.19: Statt "xxx" (wofuer das auch war), ein vernuenftiges "customJME".
-    public static final String RESOURCEPREFIX = "customJME";//"xxx";//19.3.16 "src/main/resources";
+    public static final String RESOURCEPREFIX = "customJME";//19.3.16 "src/main/resources";
     Log logger = Platform.getInstance().getLog(JmeResourceManager.class);
 
     // 11.12.15: Der am kann jetzt auch null sein, um z.B. normale Dateien oder auch autotests

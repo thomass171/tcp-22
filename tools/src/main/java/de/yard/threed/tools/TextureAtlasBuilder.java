@@ -3,6 +3,7 @@ package de.yard.threed.tools;
 
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.Util;
 import de.yard.threed.javacommon.FileUtil;
 import de.yard.threed.javacommon.ImageUtils;
 import org.apache.commons.cli.*;
@@ -28,7 +29,7 @@ import java.io.IOException;
  */
 public class TextureAtlasBuilder {
     // intended not the final destination directory. Should be validated before moving.
-    public static final String outdir = "/Users/thomas/Projekte/Granada/tmp";
+    public static final String outdir = "/tmp";
     public static Platform platform = ToolsPlatform.init();
     static Log logger = Platform.getInstance().getLog(TextureAtlasBuilder.class);
 
@@ -59,7 +60,8 @@ public class TextureAtlasBuilder {
         if (name.equals("Runway")) {
             image = buildRunwayAtlas();
         } else if (name.equals("Road")) {
-            image = buildRoadAtlas();
+            Util.nomore();
+            //image = buildRoadAtlas();
         } else {
             usage();
         }
@@ -155,56 +157,6 @@ public class TextureAtlasBuilder {
         return rotate(textureAtlas.image);
     }
 
-    /**
-     * Eine Gridcell sind 2x2m. Ein Arrow belegt zwei Cells.
-     * Eine Parkpos 4x4m, sind 4 cells.
-     * Da braucht man schon 2048 (16x128) für eine virtuelle size von 32m (64 pixel per meter)
-     * Sonst wird die Deko zu grob. Vielleicht muss man Deco wirklich in eigene legen.
-     * 29.5.19: Ja, denn für normale Roads sind es zu viele Pixel;Mipmapping setzt zu früh ein. Oder Road mal nur in eine Cell.
-     * <p>
-     * AWT zaehlt y von oben
-     * Der Background ist nicht transparent.
-     * <p>
-     * <p>
-     * Ganze Roads sollten über t laufen, weils intuitiver zu TriangleStrip passt. Und komplett von links nach rechts, um repeatable zu sein.
-     * Kleine Ecke hier als POC für Apron Decos.
-     * <p>
-     * Die
-     *
-     * @return
-     */
-    private static BufferedImage buildRoadAtlas() {
-        String prefix = "pa_";
-        String base = "/Users/thomas/Projekte/Granada/osmscenery/textures/MarekAsphalt0001.jpg";
-        base = "/Users/thomas/Projekte/Granada/osmscenery/textures/asphalt.png";
-        TextureAtlas textureAtlas = new TextureAtlas(2048, 128);
-        textureAtlas.fill(base);
-        //row zaehlt von oben
-        int row = 0;
-        double ppm = 2048.0 / 32.0;
-        double shapescale = ppm;
-        Decoration arrow = DecorationFactory.buildRoadArrow(3, 0.3, 0.5, shapescale);
-        textureAtlas.draw(arrow, 0, row, 1, 2);
-        Decoration parkpos = DecorationFactory.buildParkPos(shapescale);
-        textureAtlas.draw(parkpos, 14, row, 2, 2);
-
-        row++;
-        row++;
-        // bei rowheight 2 setzt MipMapping zu frueh ein
-        int rowheight=1;
-        double roadlen = 32;
-        //TODO den yoffset und dashlen richtig berechnen
-        Decoration centerline = DecorationFactory.buildRoadMarker(roadlen, 0.1, 0, roadlen / 12.0, shapescale);
-        textureAtlas.draw(centerline, 0, row, 16, rowheight);
-
-        Decoration topline = DecorationFactory.buildRoadMarker(roadlen, 0.1, -1.8/2.0, shapescale);
-        textureAtlas.draw(topline, 0, row, 16, rowheight);
-        Decoration bottomline = DecorationFactory.buildRoadMarker(roadlen, 0.1, 1.8/2.0, shapescale);
-        textureAtlas.draw(bottomline, 0, row, 16, rowheight);
-        row+=rowheight;
-
-        return textureAtlas.image;
-    }
 
     /**
      * "verlustfrei" Rotation nach rechts (ohne AffineTransformation). Naja, ob das per Graphics2D verlustfrei?

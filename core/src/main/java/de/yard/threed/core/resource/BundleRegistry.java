@@ -156,7 +156,7 @@ public class BundleRegistry {
                 }
             }
             if (customTerraSync){
-                return Platform.getInstance().getSystemProperty("BUNDLEDIR") + "/TerraSync";
+                return Platform.getInstance().bundledir + "/TerraSync";
             }else {
                 // 25.7.21: Dieser Zweig soll wohl seit 2018 gar nicht mehr genutzt werden.
                 String fghome = Platform.getInstance().getSystemProperty("FG_HOME");
@@ -194,7 +194,7 @@ public class BundleRegistry {
         if (perhttp) {
             return "bundles/" + bundlename;
         }
-        return Platform.getInstance().getSystemProperty("BUNDLEDIR") + "/" + bundlename;
+        return Platform.getInstance().bundledir + "/" + bundlename;
 
     }
 

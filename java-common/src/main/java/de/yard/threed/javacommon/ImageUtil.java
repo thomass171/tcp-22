@@ -26,7 +26,6 @@ import java.nio.ByteBuffer;
  */
 public class ImageUtil {
     static Log logger = Platform.getInstance().getLog(ImageUtil.class);
-    public static Cache pngcache = new Cache("png");
 
     /**
      * 24.5.16: Fuer innerhalb der Platformen, die pngs lesen koennen.
@@ -111,67 +110,30 @@ public class ImageUtil {
     }
 
     /**
-     * Read file from cache or add it to cache.
+     * Read file.
      *
      * Return null in the case of error (already logged)
      *
      * @param file
-     * @param usecache
      * @return
      */
-    public static LoadedImage loadPNG(NativeResource file, boolean usecache) {
-        // usecache = false;
+    public static LoadedImage loadPNG(NativeResource file) {
+
         BufferedImage bi = null;
         ByteBuffer bb = null;
         //  try {
         LoadedImage loadedimage = null;
-        if (usecache && pngcache.isEnabled()) {
-            byte[] buf /*InputStream ins1*/ = FileReader.readFully(pngcache.getCachedObject(file));
-            if (buf != null) {
-
-                // byte[] buf = ins1.readFully();
-                ByteArrayInputStream b = new ByteArrayInputStream(new SimpleByteBuffer(buf));
-                int width = b.readInt();
-                int height = b.readInt();
-                //ByteBuffer buffer = ByteBuffer.allocate(buf.length - 8);
-                ByteBuffer buffer = BufferHelper.createByteBuffer(width * height * 4/*BYTES_PER_PIXEL*/); //4 for RGBA, 3 for RGB
-                buffer.put(b.getBuffer(), 8, buf.length - 8);
-                buffer.rewind();
-                loadedimage = new LoadedImage(width, height, buffer);
-                //das serialisierte Objekt ist schon preprocessed
-                return loadedimage;
-            }
-        }
 
         bi = ImageUtil.loadImageFromFile(file);
         if (bi == null) {
             return null;
         }
-        logger.debug("adding file to cache");
+
         //logger.debug(String.format("loadFromFile took %d ms", System.currentTimeMillis() - starttime));
         int[] pxl = bi.getRGB(0, 0, bi.getWidth(), bi.getHeight(), null, 0, bi.getWidth());
-        bb = BufferHelper/*OpenGlTexture*/.buildTextureBuffer(bi.getWidth(), bi.getHeight(), pxl,4);
+        bb = BufferHelper.buildTextureBuffer(bi.getWidth(), bi.getHeight(), pxl,4);
+        logger.debug("ByteBuffer created");
 
-        if (usecache && pngcache.isEnabled()) {
-            NativeOutputStream outs = null;
-            try {
-                outs = pngcache.saveCachedObject(file);
-            } catch (ResourceSaveException e) {
-                logger.error("saveCachedObject failed:" + e.getMessage(), e);
-                return null;
-            }
-            outs.writeInt(bi.getWidth());
-            outs.writeInt(bi.getHeight());
-            for (int i = 0; i < bi.getWidth() * bi.getHeight() * 4; i++) {
-                outs.writeByte(bb.get());
-            }
-            outs.close();
-            bb.flip();
-        }
-      /*  } catch (Exception e) {
-            //21.12.16: error statt warn. Sonst folgt eh NPE
-            logger.error("Caching loaded image failed: " + e.getMessage(),e);
-        }*/
         return new LoadedImage(bi.getWidth(), bi.getHeight(), bb);
     }
 }

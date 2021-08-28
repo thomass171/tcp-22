@@ -33,8 +33,15 @@ public class ToolsPlatform extends DefaultPlatform {
         //this.resourcemanager = resourceManager;
         this.logfactory = logfactory;
         //matlib braucht bundles
-        properties.put("BUNDLEDIR", "/Users/thomas/Projekte/Granada/bundles");
 
+        String hostdir = System.getProperty("HOSTDIR");
+        if (hostdir == null) {
+            hostdir = System.getenv("HOSTDIR");
+            if (hostdir == null) {
+                throw new RuntimeException("HOSTDIR not set");
+            }
+        }
+        bundledir =  hostdir + "/bundles";
     }
 
     public static Platform init(/*, HashMap<String, String> properties*/) {

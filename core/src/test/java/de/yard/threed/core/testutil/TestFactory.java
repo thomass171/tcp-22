@@ -1,6 +1,7 @@
 package de.yard.threed.core.testutil;
 
 import de.yard.threed.core.InitMethod;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
@@ -13,9 +14,9 @@ public class TestFactory {
 
         HashMap<String, String> properties = new HashMap<String, String>();
 
-        //TODO allgemeingültiges cachedir
-        properties.put("CACHEDIR", "/Users/thomas/Projekte/Granada/ncache");
-        properties.put("BUNDLEDIR", "/Users/thomas/Projekte/Granada/bundles");
+
+
+
 
         PlatformInternals pl = platformFactory.createPlatform(properties);
 

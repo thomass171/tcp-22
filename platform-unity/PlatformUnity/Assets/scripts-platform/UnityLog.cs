@@ -34,7 +34,7 @@ namespace de.yard.threed.platform
             name = clazz.Name;
             // Muesste eigentlich threadsafe gemacht werden...(und nur einmal. pruefen TODO)
             if (logfile == null) {
-                logfile = new System.IO.StreamWriter ("Granada.log");
+                logfile = new System.IO.StreamWriter ("platform-unity.log");
                 logfile.AutoFlush = true;
             }
          

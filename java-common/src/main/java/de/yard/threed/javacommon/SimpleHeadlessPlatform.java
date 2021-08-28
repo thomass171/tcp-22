@@ -56,6 +56,14 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         logfactory = new JALogFactory();
         nativeScene = new DummyScene();
 
+        String hostdir = System.getProperty("HOSTDIR");
+        if (hostdir == null) {
+            hostdir = System.getenv("HOSTDIR");
+            if (hostdir == null) {
+                throw new RuntimeException("HOSTDIR not set");
+            }
+        }
+        bundledir =  hostdir + "/bundles";
     }
 
     public static /*Engine* /Platform*/PlatformInternals init(/*ResourceManager resourceManager, * /NativeLogFactory logfactory/*, */HashMap<String, String> properties) {

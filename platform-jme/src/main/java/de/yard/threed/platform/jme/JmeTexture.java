@@ -89,7 +89,7 @@ public class JmeTexture implements NativeTexture {
         // 16.10.18: Mit jpg ist es zwar auch langsam, aber speiochern in eigenem Format bläht den Cache enorm auf. Darum lass ich
         // anderes ausser png
         if (textureresource.getName().toUpperCase().endsWith(".PNG")) {
-            LoadedImage li = ImageUtil.loadPNG(textureresource, true);
+            LoadedImage li = ImageUtil.loadPNG(textureresource);
             if (li == null) {
                 return null;
             }

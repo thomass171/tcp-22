@@ -50,18 +50,6 @@
             <artifactId>jme3-lwjgl</artifactId>
             <version>${jme.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${jme.groupid}</groupId>
-            <artifactId>jme3-android</artifactId>
-            <version>${jme.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <!--terrain is optional- ->
-        <dependency>
-            <groupId>${jme.groupid}</groupId>
-            <artifactId>jme3-terrain</artifactId>
-            <version>${jme.version}</version>
-        </dependency>-->
         <!--effects for SSAO (ambient occlusion)-->
         <dependency>
             <groupId>${jme.groupid}</groupId>

@@ -52,8 +52,8 @@ public class GltfProcessor {
                 if (opt.equals("-acpp")) {
                     //22.12.18: Das ist Asbach
                     Util.nomore();
-//preprocess("/Users/thomass/Projekte/Granada/bundles/fgdatabasicmodel/Models/Airport/Pushback/Douglas.ac");
-                    //preprocess("/Users/thomass/Projekte/Granada/bundles/fgdatabasicmodel/AI/Aircraft/738/Models/737-800.ac");
+
+
                     //preprocessAcpp(argv[3]);
                 } else if (opt.equals("-gltf")) {
                     preprocessGltf(argv[3], outdir);
