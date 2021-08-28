@@ -52,7 +52,7 @@ public class Setup {
 
             System.setProperty("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
             //System.setProperty("scene","de.yard.threed.trafficext.apps.SceneryViewerScene");
-            System.setProperty("scene","de.yard.threed.sandbox.apps.CockpitScene");
+            //System.setProperty("scene","de.yard.threed.sandbox.apps.CockpitScene");
             //System.setProperty("scene", "de.yard.threed.apps.ShowroomScene");
             //System.setProperty("scene", "de.yard.threed.maze.MazeScene");
             //der geht nicht System.setProperty("scene", "de.yard.threed.apps.maze.MazeScene");

@@ -1,0 +1,169 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>module-platform-jme</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>platform-jme</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <!--<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
+        <!--<jme.version>3.0.10</jme.version>-->
+        <!--27.10.19 <jme.version>3.1.0-stable</jme.version>-->
+       <!-- <jme.version>3.2.2-stable</jme.version>-->
+        <jme.version>3.2.4-dbl</jme.version>
+        <!--<jme.groupid>com.jme3</jme.groupid>-->
+        <jme.groupid>org.jmonkeyengine</jme.groupid>
+    </properties>
+
+    <parent>
+        <groupId>de.yard.tcp-22</groupId>
+        <artifactId>main</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+        <!-- junit comes from parent -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+        <dependency>
+            <groupId>${jme.groupid}</groupId>
+            <artifactId>jme3-core</artifactId>
+            <version>${jme.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${jme.groupid}</groupId>
+            <artifactId>jme3-desktop</artifactId>
+            <version>${jme.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${jme.groupid}</groupId>
+            <artifactId>jme3-lwjgl</artifactId>
+            <version>${jme.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${jme.groupid}</groupId>
+            <artifactId>jme3-android</artifactId>
+            <version>${jme.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--terrain is optional- ->
+        <dependency>
+            <groupId>${jme.groupid}</groupId>
+            <artifactId>jme3-terrain</artifactId>
+            <version>${jme.version}</version>
+        </dependency>-->
+        <!--effects for SSAO (ambient occlusion)-->
+        <dependency>
+            <groupId>${jme.groupid}</groupId>
+            <artifactId>jme3-effects</artifactId>
+            <version>${jme.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>1.8.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+
+        <!-- jetzt die eigenen Projektabhaengigkeiten-->
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-core</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-engine</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-java-common</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-java-native</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-maze</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <!-- 23.12.17: auch die core tests. Idea bekommt das auch direkt mit -->
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-engine</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- "surefire", "source" and "jar"(for tests.jar) come from parent-->
+        <!--<resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.java</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <!- - <includes>
+                     <include>**/*.gwt.xml</include>
+                 </includes>- ->
+            </resource>
+        </resources>-->
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+

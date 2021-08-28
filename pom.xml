@@ -31,6 +31,7 @@
         <module>platform-webgl</module>
         <module>tools</module>
         <module>java2cs</module>
+        <module>platform-jme</module>
     </modules>
 
     <build>

@@ -1,0 +1,106 @@
+package de.yard.threed.platform.jme;
+
+import de.yard.threed.core.Util;
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.Scene;
+import de.yard.threed.javacommon.Setup;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.util.HashMap;
+
+
+/**
+ * Hauptprogramm fuer Platform JME (20.9.19: und OpenGL? Nee, besser nicht. Das führt nur zu unsauberen Classpath beim Laden von z.B. Shadern)
+ * <p/>
+ * Warum gibt es die Scene eigentlich nicht mehr als Property? 28.10.15: Vielleicht wegen der Klasse ScenePool?
+ * 22.1.16: Vielleicht weil GWT eine solche Klasse nicht per Reflection instatieeren kann?
+ * <p/>
+ * Created by thomass on 30.05.15.
+ */
+public class Main {
+    static Log logger;
+
+    public static void main(String[] args) {
+        boolean useinspector = false;
+        HashMap<String, String> properties = Setup.setUp(args);
+
+        //TODO allgemeingültiges cachedir
+        properties.put("CACHEDIR", "/Users/thomas/Projekte/Granada/ncache");
+        properties.put("BUNDLEDIR", "/Users/thomas/Projekte/Granada/bundles");
+
+        //10.7.21 NativeSceneRunner nsr = JmeSceneRunner.init(properties);
+        JmeSceneRunner nsr = JmeSceneRunner.init(properties);
+
+        // Benchmark.main(null);                
+
+        logger = Platform.getInstance().getLog(Main.class);
+        logger.info("Loading JME Client");
+        String scene = System.getProperty("scene");
+        logger.debug("Parameter:");
+        logger.debug("scene=" + scene);
+
+
+        try {
+            if (scene == null) {
+                //Scene updater = new LightedRotatingCube();
+                //updater = new MazeScene();
+                // updater = new ShowroomScene();
+                //6.6. TODO new SceneViewer(updater);
+                logger.warn("Not yet available in JME");
+            } else {
+                //24.10.18 Scene updater = ScenePool.buildSceneUpdater(scene);
+                Scene updater = (Scene) Class.forName(scene).newInstance();
+                if (useinspector) {
+                    //27.7.21 dafuer brauchen wir mal eine andere Loesung
+                    Util.nomore();
+                    //EngineInspector ei = new EngineInspector();
+                    //ei.setVisible(true);
+                }
+                nsr.runScene(updater);
+                //   new SceneRunner(new ReferenceScene());
+                //new SceneRunner(new MazeScene());
+            }
+        } catch (Exception t) {
+            logger.error("Exception occured:" + t.getMessage() + t.getStackTrace()[0]);
+            // Hier kann man gut einen Breakpint setzen, um einen Stacktrace zu bekommen
+            t.printStackTrace();
+
+        }
+
+    }
+
+
+    private static void encodeBase64(String path, String filename) {
+        try {
+            byte[] buf = FileUtils.readFileToByteArray(new File(path + "/" + filename));
+            buf = Base64.encodeBase64(buf);
+            File outfile = new File(path + "/" + filename + ".b64");
+            FileUtils.writeByteArrayToFile(outfile, buf);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+}
+
+/**
+ * Nurmal ein Versuch. Muss im Prinzip in die Platform.
+ */
+class GaCo extends Thread {
+    @Override
+    public void run() {
+        while (true) {
+            System.gc();
+            try {
+                sleep(200);
+            } catch (InterruptedException e) {
+
+            }
+        }
+    }
+}
