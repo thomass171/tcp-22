@@ -50,7 +50,7 @@ processPcm() {
 
 export BUNDLEISMODULE=0
 export STATIC=0
-while getopts ":S:s:m" o; do
+while getopts "Ssm" o; do
     case "${o}" in
         s)
             COPYCMD="scp -pr"

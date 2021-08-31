@@ -18,7 +18,7 @@ usage() {
     exit 1;
 }
 
-while getopts ":b:h:s" o; do
+while getopts "b:s" o; do
     case "${o}" in
         b)
             BUILDDIR=${OPTARG}
