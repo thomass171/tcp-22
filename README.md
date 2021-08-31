@@ -6,14 +6,13 @@ See https://thomass171.github.io/tcp-22/tcp-22.html
 
 # Building And Deploying
 
-This shows the installation to a web browser running locally serving from
+This shows the build and installation to a web browser running locally serving from
 directory $HOME/Sites. Set shell variable HOSTDIR, eg.:
 
 ```
 export HOSTDIR=$HOME/Sites/tcp-22
 ```
-and create that base directory.
-Deploy static content bundles needed for building:
+and create that base directory. Deploy static content bundles needed for building to $HOSTDIR:
 
 ```
 sh bin/deployBundle.sh data
@@ -21,7 +20,20 @@ sh bin/deployBundle.sh corrupted
 sh bin/deployBundle.sh -m maze
 sh bin/deployBundle.sh -S -m engine
 ```
-maven is needed for building. Run
+ 
+The module platform-jme requires customized JMonkeyEngine build artifact files, which were built
+from JMonkeyEngine 3.2.4-stable with all datatypes float replaced by double. These use the legacy version
+2.9.3 of lwjgl (http://legacy.lwjgl.org).
+
+These files reside in subfolder lib and should be installed in the local maven repository.
+```
+for l in jme3-core jme3-desktop jme3-effects jme3-lwjgl
+do
+  mvn install:install-file -Dfile=./platform-jme/lib/jme3-core-3.2.4-dbl.jar -DgroupId=org.jmonkeyengine -DartifactId=jme3-core -Dversion=3.2.4-dbl -Dpackaging=jar
+done  
+```
+
+Maven is needed for building. Run
 
 ```
 mvn clean install
@@ -65,7 +77,10 @@ And it might be necessary to reassign the script file
 Main.cs to game object "MyScriptContainer" to trigger it.
 
 Now the scene "SampleScene" is ready to be started.
-![](docs/UnityPreview.png)
+
+# JMonkeyEngine
+
+Nothing special to do any more. All is prepared to launch a scene in JMonkeyEngine.
 
 # Running
 ## Browser
@@ -81,6 +96,17 @@ You should see the [ReferenceScene](engine/src/main/java/de/yard/threed/engine/a
 
 ## Unity
 Just start the scene.
+![](docs/UnityPreview.png)
+
+## JMonkeyEngine
+
+Start a scene by the wrapper script launchScene.sh, eg.:
+
+```
+sh bin/launchScene.sh de.yard.threed.engine.apps.reference.ReferenceScene
+```
+![](docs/JMonkeyEnginePreview.png)
+
 # Build your own scene
 The best starting point is to use class [ReferenceScene](engine/src/main/java/de/yard/threed/engine/apps/reference/ReferenceScene.java) and modify it for your needs.
 

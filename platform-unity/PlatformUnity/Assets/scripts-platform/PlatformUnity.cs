@@ -29,6 +29,18 @@ namespace de.yard.threed.platform.unity
         private PlatformUnity ()
         {
             logfactory = new UnityLogFactory ();
+
+            string hostdir = Environment.GetEnvironmentVariable("HOSTDIR");
+            if (hostdir == null)
+            {
+                Debug.Break();
+                throw new System.Exception("HOSTDIR not set");
+            }
+            Debug.Log("using HOSTDIR=" + hostdir);
+          
+            //30.1.18:  Das BUNDLEDIR gilt so für MACOS und Win10. Ach, besser nicht
+            bundledir = hostdir + "/bundles";
+            //25.8.21 TODO check that bundle dir exists
         }
 
         public static PlatformInternals init (HashMap<String, String> props)

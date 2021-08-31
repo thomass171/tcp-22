@@ -51,27 +51,7 @@ public class Main : MonoBehaviour
             //  
             //}
             Environment.SetEnvironmentVariable("HOSTDIR", "/Users/thomas/Sites/tcp-22");
-            string hostdir = Environment.GetEnvironmentVariable("HOSTDIR");
-            if (hostdir == null)
-            {
-                Debug.Break();
-                throw new Exception("HOSTDIR not set");
-            }
-            Debug.Log("using HOSTDIR=" + hostdir);
-
-            if (isHandheld())
-            {
-                properties.put("CACHEDIR", Application.persistentDataPath/*"/storage/external_SD/ncache"*/);
-                properties.put("BUNDLEDIR", hostdir + "/bundles");
-
-            }
-            else
-            {
-                //30.1.18:  Das BUNDLEDIR gilt so für MACOS und Win10. Ach, besser nicht
-                properties.put("BUNDLEDIR", hostdir + "/bundles");
-
-            }
-            //25.8.21 TODO check that bundle dir exists
+            
 
             // Der UnityScenerunner baut auch die Platform
             sr = (UnitySceneRunner)UnitySceneRunner.init(properties);

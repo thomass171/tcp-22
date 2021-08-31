@@ -10,12 +10,15 @@ source $OWNDIR/common.sh || exit 1
 
 validateHOSTDIR
 
+cd $OWNDIR/../platform-jme
+checkrc cd
+
 usage() {
-	echo "$0: [properties] <scenename>"
+	echo "$0: <sceneclass>"
 	exit 1
 }
 
-java $SCENECLASS
+mvn exec:java -Dscene=$1
 
 exit 0
 

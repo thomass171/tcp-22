@@ -8,12 +8,8 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <!--<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
-        <!--<jme.version>3.0.10</jme.version>-->
-        <!--27.10.19 <jme.version>3.1.0-stable</jme.version>-->
-       <!-- <jme.version>3.2.2-stable</jme.version>-->
+        <!-- custom build of JME with double instead of float-->
         <jme.version>3.2.4-dbl</jme.version>
-        <!--<jme.groupid>com.jme3</jme.groupid>-->
         <jme.groupid>org.jmonkeyengine</jme.groupid>
     </properties>
 
@@ -55,6 +51,11 @@
             <groupId>${jme.groupid}</groupId>
             <artifactId>jme3-effects</artifactId>
             <version>${jme.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl.lwjgl</groupId>
+            <artifactId>lwjgl</artifactId>
+            <version>2.9.3</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -148,6 +149,14 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <mainClass>de.yard.threed.platform.jme.Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>
