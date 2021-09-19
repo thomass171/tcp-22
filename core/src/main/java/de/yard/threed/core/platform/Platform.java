@@ -3,6 +3,7 @@ package de.yard.threed.core.platform;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.resource.BundleLoadDelegate;
+import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourcePath;
 
@@ -12,7 +13,7 @@ import java.util.List;
 
 /**
  * Extrahiert for Modul core, wo Logging und StringHelper gebraucht wird.
- *
+ * <p>
  * Rename "Platform"->"PlatformCore". No good idea because its abstract.
  * <p>
  * Created by thomass on 12.12.18.
@@ -32,10 +33,10 @@ public abstract class Platform {
 
     public NativeBundleLoader bundleLoader;
 
-    public String bundledir;
+    public List<BundleResolver> bundleResolver = new ArrayList<BundleResolver>();
 
     protected static Platform instance;
-    
+
     public static Platform getInstance() {
         return instance;
     }
@@ -130,7 +131,6 @@ public abstract class Platform {
      * @return
      */
     public abstract void updateMesh(NativeMesh mesh, NativeGeometry nativeGeometry, NativeMaterial material);
-
 
 
     /**
@@ -261,8 +261,6 @@ public abstract class Platform {
      * @return
      */
     /*10.7.21 public abstract NativeSceneRunner getSceneRunner();*/
-
-
     public abstract NativeCanvas buildNativeCanvas(int width, int height);
 
 
@@ -348,6 +346,7 @@ public abstract class Platform {
      * 6.10.17: Bei Unity kann er hier auch destryte SceneNodes finden. Die liefern dann aber keine Childs.
      * 24.3.18: Das ist die Nachbildung einer Subtree Suche laut MA22 für alle Platformen, auch die, die das selber könnten.
      * 18.7.21:Moved here from EnginePlatform. TODO needs a better location
+     *
      * @param name
      * @return
      */
@@ -452,13 +451,13 @@ public abstract class Platform {
 
     /**
      * Establish a (web)socket connection to a MP Server. This isType no "EventBus", because its peer2peer.
-     *
+     * <p>
      * Noch nicht abstract, weils sonst so oft implementiert werden muss. Erstmal Prototyp aus JME.
-     *
+     * <p>
      * Gabs da schon mal einen anderen Ansatz? Find ich aber nicht mehr.
      * 15.2.21
      */
-    public NativeSocket connectToServer(){
+    public NativeSocket connectToServer() {
         return (NativeSocket) Util.notyet();
     }
 
@@ -471,5 +470,9 @@ public abstract class Platform {
 
     public boolean hasOwnAsync() {
         return false;
+    }
+
+    public void addBundleResolver(BundleResolver bundleResolver) {
+        this.bundleResolver.add(bundleResolver);
     }
 }

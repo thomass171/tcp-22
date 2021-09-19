@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Those elements of a platform that are for internal use (by SceneRunner) but not for the application.
- *
+ * 14.9.21:But this doesn't really help hiding it? Why not put it into either Platform or SceneRunner?
  * 02.08.21
  */
 public class PlatformInternals {

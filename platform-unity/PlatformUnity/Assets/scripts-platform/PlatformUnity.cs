@@ -25,22 +25,19 @@ namespace de.yard.threed.platform.unity
         // kann nicht ueber die Factory gebaut werden, weil die gerade noch initialisiert wird
         Log logger = new UnityLog (typeof (PlatformUnity));
         public NativeLogFactory logfactory;
+        string hostdir;
 
         private PlatformUnity ()
         {
             logfactory = new UnityLogFactory ();
 
-            string hostdir = Environment.GetEnvironmentVariable("HOSTDIR");
+            hostdir = Environment.GetEnvironmentVariable("HOSTDIR");
             if (hostdir == null)
             {
                 Debug.Break();
                 throw new System.Exception("HOSTDIR not set");
             }
             Debug.Log("using HOSTDIR=" + hostdir);
-          
-            //30.1.18:  Das BUNDLEDIR gilt so für MACOS und Win10. Ach, besser nicht
-            bundledir = hostdir + "/bundles";
-            //25.8.21 TODO check that bundle dir exists
         }
 
         public static PlatformInternals init (HashMap<String, String> props)
@@ -54,9 +51,10 @@ namespace de.yard.threed.platform.unity
             foreach (String key in keyset) {
                 ((PlatformUnity)instance).properties.put (key, props.get (key));
             }
-            instance.bundleLoader = new AsyncBundleLoader (new UnityResourceManager ());
-
-
+            UnityResourceManager resourceReader = new UnityResourceManager();
+            instance.bundleResolver.add(new SimpleBundleResolver(((PlatformUnity)instance).hostdir + "/bundles", resourceReader));
+            instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(Environment.GetEnvironmentVariable("ADDITIONALBUNDLE"), resourceReader));
+            instance.bundleLoader = new AsyncBundleLoader (resourceReader);
 
             PlatformInternals platformInternals = new PlatformInternals ();
             return platformInternals;
@@ -185,7 +183,8 @@ namespace de.yard.threed.platform.unity
             }
             String bundlebasedir;//= Platform.getInstance().getSystemProperty("BUNDLEDIR") + "/" + filename.bundle.name;
             FileSystemResource resource;//= FileSystemResource.buildFromFullString(bundlebasedir + "/" + filename.getFullName());
-            bundlebasedir = BundleRegistry.getBundleBasedir (filename.bundle.name, false);
+            //bundlebasedir = BundleRegistry.getBundleBasedir (filename.bundle.name, false);
+            bundlebasedir = BundleResolver.resolveBundle(filename.bundle.name, Platform.getInstance().bundleResolver).getPath();
             resource = FileSystemResource.buildFromFullString (bundlebasedir + "/" + filename.getFullName ());
             return buildNativeTextureUnity (resource, parameters);
         }

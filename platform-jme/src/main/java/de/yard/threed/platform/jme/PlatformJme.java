@@ -9,6 +9,7 @@ import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
+import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
@@ -32,6 +33,8 @@ import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.javacommon.*;
 import de.yard.threed.javacommon.JavaXmlDocument;
 import de.yard.threed.javacommon.Util;
+import de.yard.threed.outofbrowser.SimpleBundleResolver;
+import de.yard.threed.outofbrowser.SyncBundleLoader;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.w3c.dom.Document;
@@ -80,6 +83,9 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
 
 
         PlatformInternals platformInternals = new PlatformInternals();
+        DefaultResourceReader resourceReader = new DefaultResourceReader();
+        instance.bundleResolver.add(new SimpleBundleResolver(((PlatformJme) instance).hostdir + "/bundles", resourceReader));
+        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(SimpleHeadlessPlatform.getProperty("ADDITIONALBUNDLE"), resourceReader));
         return platformInternals/*instance*/;
     }
 
@@ -290,7 +296,8 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
             }
         } else {*/
         //bundlebasedir = Platform.getInstance().getSystemProperty("BUNDLEDIR") + "/" + filename.bundle.name;
-        bundlebasedir = BundleRegistry.getBundleBasedir(filename.bundle.name, false);
+        //bundlebasedir = BundleRegistry.getBundleBasedir(filename.bundle.name, false);
+        bundlebasedir = BundleResolver.resolveBundle(filename.bundle.name, Platform.getInstance().bundleResolver).getPath();
         resource = FileSystemResource.buildFromFullString(bundlebasedir + "/" + filename.getFullName());
         //}
         return buildNativeTextureJme(resource, parameters);
@@ -341,7 +348,7 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
     }
 
     @Override
-    public NativeGeometry buildNativeGeometry(Vector3Array vertices,int[] indices, Vector2Array uvs, Vector3Array normals) {
+    public NativeGeometry buildNativeGeometry(Vector3Array vertices, int[] indices, Vector2Array uvs, Vector3Array normals) {
         if (ShapeGeometry.debug) {
             logger.debug("buildGeometry with " + vertices.size() + " vertices and  " + indices.length + " indices");
         }

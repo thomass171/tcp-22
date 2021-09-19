@@ -25,7 +25,7 @@ public class ResourcePath {
 
     public ResourcePath(String path) {
         if (path == null) {
-            throw new RuntimeException("path isType null");
+            throw new RuntimeException("path is null");
         }
         this.path = path;
     }
@@ -43,5 +43,9 @@ public class ResourcePath {
         }
 
         return result;
+    }
+
+    public String getPath() {
+        return path;
     }
 }

@@ -8,6 +8,9 @@ import de.yard.threed.core.resource.BundleLoadDelegate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A bundle currently being loaded.
+ */
 public class LoadingBundle {
     Log logger = Platform.getInstance().getLog(LoadingBundle.class);
     // set after directory load

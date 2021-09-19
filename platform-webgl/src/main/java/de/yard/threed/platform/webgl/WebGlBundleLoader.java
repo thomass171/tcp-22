@@ -21,6 +21,7 @@ import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.engine.platform.ResourceLoadingListener;
@@ -54,7 +55,8 @@ public class WebGlBundleLoader implements NativeBundleLoader {
         Bundle bundle = file.bundle;
         //ResourceManager rm = Platform.getInstance().getRessourceManager();
 
-        String bundlebasedir = BundleRegistry.getBundleBasedir(bundle.name, true);
+        //String bundlebasedir = BundleRegistry.getBundleBasedir(bundle.name, true);
+        String bundlebasedir = BundleResolver.resolveBundle(bundle.name, Platform.getInstance().bundleResolver).getPath();
         //String resource = bundlebasedir + "/" + BundleRegistry.getDirectoryName(bundle.name, false);
         String filename = file.getFullName();
         //resource = bundlebasedir + "/" + filename;
@@ -194,7 +196,8 @@ public class WebGlBundleLoader implements NativeBundleLoader {
      * @param loadlistener
      */
     public void loadBundlePlatformInternal(final String bundlename, BundleLoadDelegate loadlistener, boolean delayed) {
-        String bundlebasedir = BundleRegistry.getBundleBasedir(bundlename, true);
+        //String bundlebasedir = BundleRegistry.getBundleBasedir(bundlename, true);
+        String bundlebasedir = BundleResolver.resolveBundle(bundlename, Platform.getInstance().bundleResolver).getPath();
         String directoryresource = bundlebasedir + "/" + BundleRegistry.getDirectoryName(bundlename, true);
 
         // TODO race conditioin? Koennte das selbe Bundle mehrfach laden?
@@ -292,12 +295,12 @@ public class WebGlBundleLoader implements NativeBundleLoader {
 
                             //if (binary) {
 
-                                //logger.debug(url);
-                                if (zipped) {
-                                    //Blob dataBlob = new Blob([data], { "type": "application/zlib" });
-                                    //GZIPInputStream p;
-                                }
-                                loadlistener.onLoad(new BundleData(new WebGlByteBuffer(buffer), false));
+                            //logger.debug(url);
+                            if (zipped) {
+                                //Blob dataBlob = new Blob([data], { "type": "application/zlib" });
+                                //GZIPInputStream p;
+                            }
+                            loadlistener.onLoad(new BundleData(new WebGlByteBuffer(buffer), false));
                             /*6.8.21 } else {
                                 boolean trybuytearray = false;
                                 if (trybuytearray) {

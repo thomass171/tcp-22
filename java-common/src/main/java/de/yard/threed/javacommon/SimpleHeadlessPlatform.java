@@ -6,11 +6,13 @@ import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
-import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.javanative.JsonUtil;
+import de.yard.threed.core.resource.BundleResolver;
+import de.yard.threed.outofbrowser.SimpleBundleResolver;
+import de.yard.threed.outofbrowser.SyncBundleLoader;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -42,28 +44,22 @@ import java.util.List;
  * Created on 05.12.18.
  */
 public class SimpleHeadlessPlatform extends DefaultPlatform {
-    //public NativeLogFactory logfactory;
-    //public ResourceManager resourcemanager;
+    public String hostdir;
     static Log logger = new JALog(/*LogFactory.getLog(*/SimpleHeadlessPlatform.class);
 
     /**
      * Needs access from extending classes.
      */
-    public SimpleHeadlessPlatform(/*ResourceManager resourceManager,* / NativeLogFactory logfactory*/) {
-        //this.resourcemanager = resourceManager;
+    public SimpleHeadlessPlatform() {
         this.logfactory = logfactory;
         eventBus = new JAEventBus();
         logfactory = new JALogFactory();
         nativeScene = new DummyScene();
 
-        String hostdir = System.getProperty("HOSTDIR");
+        hostdir = getProperty("HOSTDIR");
         if (hostdir == null) {
-            hostdir = System.getenv("HOSTDIR");
-            if (hostdir == null) {
-                throw new RuntimeException("HOSTDIR not set");
-            }
+            throw new RuntimeException("HOSTDIR not set");
         }
-        bundledir =  hostdir + "/bundles";
     }
 
     public static /*Engine* /Platform*/PlatformInternals init(/*ResourceManager resourceManager, * /NativeLogFactory logfactory/*, */HashMap<String, String> properties) {
@@ -74,13 +70,26 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
             System.setProperty(key, properties.get(key));
         }
         instance = new SimpleHeadlessPlatform(/*resourceManager, * /logfactory*/);
+        SimpleHeadlessPlatform shpInstance = (SimpleHeadlessPlatform) instance;
         //MA36 ((SimpleHeadlessPlatform)instance).resetInit();
 
         //((PlatformHomeBrew) instance).resourcemanager = JAResourceManager.getInstance();
-        instance.bundleLoader = new AsyncBundleLoader(new DefaultResourceReader());
         PlatformInternals platformInternals = new PlatformInternals();
+        DefaultResourceReader resourceReader = new DefaultResourceReader();
+        instance.bundleResolver.add(new SimpleBundleResolver(shpInstance.hostdir + "/bundles", resourceReader));
+        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(SimpleHeadlessPlatform.getProperty("ADDITIONALBUNDLE"), resourceReader));
+        instance.bundleLoader = new AsyncBundleLoader(resourceReader);
+
         logger.info("SimpleHeadlessPlatform created");
         return /*MA36 (EnginePlatform)* /instance*/platformInternals;
+    }
+
+    public static String getProperty(String name) {
+        String prop = System.getProperty(name);
+        if (prop == null) {
+            prop = System.getenv(name);
+        }
+        return prop;
     }
 
     @Override

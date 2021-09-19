@@ -22,6 +22,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.HashMap;
 
 /**
+ * 10.9.21:TODO check: Why not SimpleHeadless?
+ *
  * Created on 10.12.18.
  */
 public class ToolsPlatform extends DefaultPlatform {
@@ -41,7 +43,6 @@ public class ToolsPlatform extends DefaultPlatform {
                 throw new RuntimeException("HOSTDIR not set");
             }
         }
-        bundledir =  hostdir + "/bundles";
     }
 
     public static Platform init(/*, HashMap<String, String> properties*/) {

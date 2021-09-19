@@ -1,8 +1,7 @@
 package de.yard.threed.engine.testutil;
 
-import de.yard.threed.javacommon.Util;
+import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.javacommon.DefaultResourceReader;
-import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.engine.Scene;
@@ -10,9 +9,10 @@ import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneAnimationController;
 import de.yard.threed.engine.World;
 import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.engine.platform.common.AsyncJobCallback;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.InitMethod;
+import de.yard.threed.core.resource.BundleResolver;
+import de.yard.threed.outofbrowser.SimpleBundleResolver;
 import de.yard.threed.outofbrowser.SyncBundleLoader;
 import org.junit.Assert;
 
@@ -143,6 +143,7 @@ public class TestFactory {
         // Doppelt laden vermeiden, es sei denn es soll unter anderem Namen registiriert werrden
         if (BundleRegistry.getBundle(bundlename) == null || registername != null) {
             /*BundleLoaderExceptGwt*/
+            ResourcePath bundlebasedir = BundleResolver.resolveBundle(bundlename, Platform.getInstance().bundleResolver);
             String e = SyncBundleLoader.loadBundleSyncInternal(bundlename, registername, delayed,/* new AsyncJobCallback() {
                 @Override
                 public void onSuccess() {
@@ -154,7 +155,7 @@ public class TestFactory {
                     // das mal als Fehler werten
                     Assert.fail("Bundle failed:" + bundlename);
                 }
-            },*/ new DefaultResourceReader());
+            },*/ new DefaultResourceReader(), bundlebasedir);
             if (e != null) {
                 // das mal als Fehler werten
                 Assert.fail("Bundle failed:" + bundlename);

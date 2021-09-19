@@ -88,7 +88,7 @@ namespace de.yard.threed.platform.unity
 
             //0.8.21 UnityScene sc = (UnityScene)scene.scene;
 
-            SyncBundleLoader.preLoad (scene.getPreInitBundle (), new UnityResourceManager());
+            SyncBundleLoader.preLoad (scene.getPreInitBundle (), new UnityResourceManager(), Platform.getInstance().bundleResolver);
             /*foreach (string bname in scene.getPreInitBundle()){
                 string bundlename = bname;
                 bool delayed = false;

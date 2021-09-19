@@ -40,6 +40,7 @@ public abstract class NativeResourceReader {
     /**
      * 4.8.17: Eine Kruecke um Unity und Java an dieser Stelle zusammenzufuehren fuer Bundleimplementierung
      * ".gz" ist hier auch transparent.Das ist fuer Bundlenamen, nicht Inhalte in Bundles.
+     * 10.9.21:Mittlerweile aber doch ganz brauchbar fuer bundle probe.
      */
      public abstract boolean exists(String resource);
 

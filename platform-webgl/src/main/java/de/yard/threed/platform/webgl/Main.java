@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Window;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.Scene;
@@ -30,7 +31,7 @@ public class Main implements EntryPoint {
     /**
      * This isType the entry point method.
      * Die Entscheidung, was gestartet wird, soll aus der URL kommen.
-     * 
+     * <p>
      * Eine Entscheidung über "Production" treffen, um Logging entsprechend zu akivieren. Die Erkennung ist so etwas "Naja". Aber am Port 8888
      * ist es z.Z. nicht erkennbar. 10.10.18: Das heisst jetzt devmode und muss explizit in der URL gesetzt werden.
      */
@@ -40,8 +41,8 @@ public class Main implements EntryPoint {
         PlatformWebGl.isDevmode = false;
         for (String arg : args.keySet()) {
             properties.put("argv." + arg, Window.Location.getParameter(arg));
-            if (arg.equals("devmode")){
-                PlatformWebGl.isDevmode = true;    
+            if (arg.equals("devmode")) {
+                PlatformWebGl.isDevmode = true;
             }
         }
         String href = com.google.gwt.user.client.Window.Location.getHref();
@@ -53,7 +54,7 @@ public class Main implements EntryPoint {
         PlatformInternals platformInternals = PlatformWebGl.init(properties);
         Log logger = Platform.getInstance().getLog(Main.class);
 
-        logger.info("Loading GWT Client from " + href+", devmode="+ Platform.getInstance().isDevmode());
+        logger.info("Loading GWT Client from " + href + ", devmode=" + Platform.getInstance().isDevmode());
         logger.debug("Parameter:");
         for (String prop : properties.keySet()) {
             logger.debug(prop + "=" + properties.get(prop));
@@ -78,20 +79,20 @@ public class Main implements EntryPoint {
             WebGlSceneRenderer.getInstance().windowResized(resizeEvent);
         });
         //17.7.21 das verschleiert doch nur try {
-            if (scene == null) {
-                // Dann eine Defaultapplikation (den SceneViewer) starten. 5.1.17: Der SceneViewer ist doch Asbach. Jetzt die RemoteConsole starten
-                //die ist jetzt aber alternativ auch eine Scene. 23.1.18: 
-                //5.10.18: Quark. Einfach eine FM bzw. usage() anzeigen.
-                //Scene updater = new LightedRotatingCubeScene();
-            } else {
-                //testAufruf();
-                GwtUtil.showStatus("Initing...");
-                Window.setTitle(scene);
-                Scene updater = ScenePool.buildSceneUpdater(scene);
-                //MA36 Platform.getInstance().getSceneRunner().runScene(updater);
-                new WebGlSceneRunner(platformInternals).runScene(updater);
-                //18.7.21Ähh, wie muss das denn jetzt?AbstractSceneRunner.instance.runScene(updater);
-            }
+        if (scene == null) {
+            // Dann eine Defaultapplikation (den SceneViewer) starten. 5.1.17: Der SceneViewer ist doch Asbach. Jetzt die RemoteConsole starten
+            //die ist jetzt aber alternativ auch eine Scene. 23.1.18:
+            //5.10.18: Quark. Einfach eine FM bzw. usage() anzeigen.
+            //Scene updater = new LightedRotatingCubeScene();
+        } else {
+            //testAufruf();
+            GwtUtil.showStatus("Initing...");
+            Window.setTitle(scene);
+            Scene updater = ScenePool.buildSceneUpdater(scene);
+            //MA36 Platform.getInstance().getSceneRunner().runScene(updater);
+            new WebGlSceneRunner(platformInternals).runScene(updater);
+            //18.7.21Ähh, wie muss das denn jetzt?AbstractSceneRunner.instance.runScene(updater);
+        }
         /*17.7.21 das verschleiert doch nur } catch (Throwable t) {
             logger.error("Throwable occured:" + t.getMessage() + t.getStackTrace()[0]);
             // Hier kann man gut einen Breakpint setzen, um einen Stacktrace zu bekommen
@@ -123,7 +124,7 @@ public class Main implements EntryPoint {
 
             }
         };
-        ((WebGlBundleLoader)Platform.getInstance().bundleLoader).loadRessource(resource, listener, true, false);
+        ((WebGlBundleLoader) Platform.getInstance().bundleLoader).loadRessource(resource, listener, true, false);
     }
 
     public static void testAufruf2() {
@@ -133,7 +134,8 @@ public class Main implements EntryPoint {
         //logger.debug("testAufruf2");
         //MiscWrapper.alert("testAufruf2");
         BundleResource resource = new BundleResource(BundleRegistry.getBundle("data"), "flusi/windturbine-gltf/windturbine.gltf");
-        String bundlebasedir = BundleRegistry.getBundleBasedir("data", true);
+        //String bundlebasedir = BundleRegistry.getBundleBasedir("data", true);
+        String bundlebasedir = BundleResolver.resolveBundle("data", Platform.getInstance().bundleResolver).getPath();
         BundleResource res = new BundleResource(bundlebasedir + "/" + resource.getFullName());
         res.bundle = BundleRegistry.getBundle("data");
         WebGlLoader.loadGLTFbyThreeJS(res, 0, "");

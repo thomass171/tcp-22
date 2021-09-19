@@ -20,7 +20,7 @@ public interface NativeBundleLoader {
     List<Pair<BundleLoadDelegate, Bundle>> processAsync();
 
     /**
-     * Immediately load single file of a bundle.
+     * Immediately load single file of a bundle. (10.9.21:Nachladen bei delayed?)
      * Daehmlicher name, oder?
      */
     void completeBundle(BundleResource file/*, ResourceManager rm*/);

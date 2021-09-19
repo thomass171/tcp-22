@@ -137,67 +137,8 @@ public class BundleRegistry {
         return BundleRegistry.getBundle(FlightGear.getBucketBundleName(bucket));
     }*/
 
-    /**
-     * Liefert das "Verzeichnis", in dem das Directory erwartet wird.
-     *
-     * @param bundlename
-     * @param perhttp
-     * @return
-     */
-    public static String getBundleBasedir(String bundlename, boolean perhttp) {
-        if (StringUtils.startsWith(bundlename, BundleRegistry.TERRAYSYNCPREFIX)) {
-            // bucket or model bundle
-            String effname = StringUtils.substringAfter(bundlename, "-");
-            if (perhttp) {
-                if (customTerraSync) {
-                    return "bundles/TerraSync";
-                }else{
-                    return "TerraSync";
-                }
-            }
-            if (customTerraSync){
-                return Platform.getInstance().bundledir + "/TerraSync";
-            }else {
-                // 25.7.21: Dieser Zweig soll wohl seit 2018 gar nicht mehr genutzt werden.
-                String fghome = Platform.getInstance().getSystemProperty("FG_HOME");
-                if (fghome == null) {
-                    //26.7.21:Besser aussteigen als nachher ewig die URsache zu suchen
-                    throw new RuntimeException("fghome is null");
-                }
-                return fghome + "/TerraSync";
-            }
 
-        }
-        /*30.1.18: normales Bundle  if (bundlename.equals(SGMaterialLib.BUNDLENAME) || StringUtils.startsWith(bundlename, BundleRegistry.FGROOTCOREBUNDLE)) {
-            if (perhttp) {
-                return "fg_root";
-            }
-            String fgroot = Platform.getInstance().getSystemProperty("FG_ROOT");
-            if (fgroot == null){
-                //loggen geht hier nicht.
-                //System.out.println("FG_ROOT not set as system property");
-            }
-            return fgroot;
-        }
-       if (StringUtils.startsWith(bundlename, BundleRegistry.FGHOMECOREBUNDLE)) {
-            if (perhttp) {
-                return "fg_home";
-            }
-            String fghome = Platform.getInstance().getSystemProperty("FG_HOME");
-            if (fghome == null){
-                //loggen geht hier nicht.
-                //System.out.println("FG_HOME not set as system property");
-            }
-            return fghome;
-        }*/
-        // Dann ist es ein Standardbundle.
-        if (perhttp) {
-            return "bundles/" + bundlename;
-        }
-        return Platform.getInstance().bundledir + "/" + bundlename;
-
-    }
-
+//TODO move to resolver?
     public static String getDirectoryName(String bundlename, boolean b) {
         if (StringUtils.startsWith(bundlename, BundleRegistry.TERRAYSYNCPREFIX)) {
             // bucket or model bundle

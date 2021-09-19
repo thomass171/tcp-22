@@ -13,6 +13,7 @@ import com.google.gwt.xml.client.XMLParser;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.platform.*;
@@ -68,6 +69,7 @@ public class PlatformWebGl extends Platform {
             instance.bundleLoader = new WebGlBundleLoader();
         }
         PlatformInternals platformInternals = new PlatformInternals();
+        instance.bundleResolver.add(new WebGlBundleResolver());
         return platformInternals;//(Platform) Platform.instance;
     }
     
@@ -115,7 +117,8 @@ public class PlatformWebGl extends Platform {
             logger.debug("probing " + gltfile);
             if (gltfile.bundle.exists(gltfile)) {
                 logger.debug("using ThreeJS async gltf instead of ac");
-                String bundlebasedir = BundleRegistry.getBundleBasedir(file.bundle.name, true);
+                //String bundlebasedir = BundleRegistry.getBundleBasedir(file.bundle.name, true);
+                String bundlebasedir = BundleResolver.resolveBundle(file.bundle.name, Platform.getInstance().bundleResolver).getPath();
                 BundleResource resource = new BundleResource(bundlebasedir + "/" + gltfile.getFullName());
                 WebGlLoader.loadGLTFbyThreeJS(resource, delegateid, basename);
                 return;
@@ -225,7 +228,8 @@ public class PlatformWebGl extends Platform {
             logger.error("buildNativeTexture:bundle not set for file " + filename.getFullName());
             return null;//defaulttexture;
         }
-        String bundlebasedir = BundleRegistry.getBundleBasedir(filename.bundle.name, true);
+        //String bundlebasedir = BundleRegistry.getBundleBasedir(filename.bundle.name, true);
+        String bundlebasedir = BundleResolver.resolveBundle(filename.bundle.name, Platform.getInstance().bundleResolver).getPath();
         BundleResource resource = new BundleResource(bundlebasedir + "/" + filename.getFullName());
         return buildNativeTextureWebGl(resource, parameters);
     }
@@ -486,9 +490,8 @@ public class PlatformWebGl extends Platform {
     /**
      * Mal etwas zeitgemaesser? Z.B. fuer REST.
      * Das ist aber nicht mehr fuer binary.
-     *
+     * <p>
      * 17.5.2020
-     *
      */
     public static void sendHttpRequest(String suburl, String method, String[] header, AsyncJobDelegate<AsyncHttpResponse> /*HttpRequestDelegate*/ loadlistener) {
         //logger.debug("loadRessource:" + ressource.getFullName());
@@ -515,12 +518,12 @@ public class PlatformWebGl extends Platform {
                         }
                         Uint8Array array = TypedArrays.createUint8Array(buffer);
 
-                        loadlistener.completed(new AsyncHttpResponse(0,xhr.getResponseText()));
+                        loadlistener.completed(new AsyncHttpResponse(0, xhr.getResponseText()));
 
 
                     } else {
                         //logger.error("XHR Status code " + xhr.getStatus() + " for resource with url " + url);
-                        loadlistener.completed(new AsyncHttpResponse(xhr.getStatus(),""));
+                        loadlistener.completed(new AsyncHttpResponse(xhr.getStatus(), ""));
                     }
                 }
             }

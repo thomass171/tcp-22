@@ -1,11 +1,6 @@
 package de.yard.threed.outofbrowser;
 
-import de.yard.threed.core.BuildResult;
 import de.yard.threed.core.Pair;
-import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.buffer.NativeByteBuffer;
-import de.yard.threed.core.buffer.SimpleByteBuffer;
-import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.NativeBundleLoader;
 import de.yard.threed.core.platform.Platform;
@@ -80,7 +75,8 @@ public class AsyncBundleLoader implements NativeBundleLoader {
             } else {
                 /*rm.  3.8.21 ging mal ueber BundleLoaderExceptGwt*/
                 //5.8.21 loadBundle(bundlename, d.delayed, rm);
-                SyncBundleLoader.loadBundleSyncInternal(bundlename, null, d.delayed, resourceReader/*AbstractSceneRunner.getInstance().getResourceManager()*/);
+                ResourcePath bundlebasedir = BundleResolver.resolveBundle(bundlename, Platform.getInstance().bundleResolver);
+                SyncBundleLoader.loadBundleSyncInternal(bundlename, null, d.delayed, resourceReader, bundlebasedir);
                 // TODO MT sicher machen und Fehlerbehandlung
                 // Es gibt keine PArameter. Das Bundle ist einfach da, oder nicht.
                 // 2.3.18: Wenns in der Signatur steht, erwartet man das aber, darum doch.
@@ -140,11 +136,15 @@ public class AsyncBundleLoader implements NativeBundleLoader {
         Bundle bundle = file.bundle;
         //ResourceManager rm = AbstractSceneRunner.getInstance().getResourceManager();
 
-        String bundlebasedir = BundleRegistry.getBundleBasedir(bundle.name, false);
+        //10.9.21 String bundlebasedir = BundleRegistry.getBundleBasedir(bundle.name, false);
+        ResourcePath bundlebasedir = BundleResolver.resolveBundle(bundle.name, Platform.getInstance().bundleResolver);
+        if (bundlebasedir == null) {
+            throw new RuntimeException("bundle base dir not set for bundle " + bundle.name);
+        }
         String resource = bundlebasedir + "/" + BundleRegistry.getDirectoryName(bundle.name, false);
         String filename = file.getFullName();
-        resource = bundlebasedir + "/" + filename;
-        LoadJob.loadBundleData(bundle, resource, filename, false, resourceReader/*AbstractSceneRunner.getInstance().getResourceManager()*/);
+        resource = bundlebasedir.getPath() + "/" + filename;
+        SyncBundleLoader.loadBundleData(bundle, resource, filename, false, resourceReader/*AbstractSceneRunner.getInstance().getResourceManager()*/);
 
     }
 

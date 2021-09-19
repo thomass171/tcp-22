@@ -115,7 +115,7 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
                 Platform.getInstance().nativeScene = JmeScene.getInstance();
                 initAbstract(null/*JmeScene.getInstance(), rm*/, scene);
 
-                World world=new World();
+                World world = new World();
                 //((EngineHelper) PlatformJme.getInstance()).setWorld(new World());
 
                 //10.7.21: Camera geht erst, wenn world in der Scene ist
@@ -128,7 +128,7 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
                 scene.setSceneAndCamera(JmeScene.getInstance(), world/* ((EngineHelper) Platform.getInstance()).getWorld()*/);
 
                 /*BundleLoaderExceptGwt*/
-                SyncBundleLoader.preLoad(scene.getPreInitBundle(),rm);
+                SyncBundleLoader.preLoad(scene.getPreInitBundle(), rm, Platform.getInstance().bundleResolver);
 
                 scene.init();
 
