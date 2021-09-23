@@ -118,7 +118,8 @@
                     </systemProperties>-->
 
                     <!--30.4.21 Ohne standalone Jetty versuchen. Das geht aber nicht, weil er dann die Bundle nicht vom Apache holen kann.-->
-                    <noServer>true</noServer>
+                    <!--20.9.21 Try again with bundle path .-->
+                    <noServer>false</noServer>
                     <style>DETAILED</style>
                 </configuration>
 

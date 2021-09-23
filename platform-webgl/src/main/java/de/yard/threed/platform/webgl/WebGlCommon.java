@@ -48,8 +48,16 @@ public class WebGlCommon {
      * @param b64
      * @return
      */
-    private static native String atob(String b64)  /*-{
+    public static native String atob(String b64)  /*-{
         return atob(b64);
+    }-*/;
+
+    public static native String decodeURI(String s)  /*-{
+        return decodeURI(s);
+    }-*/;
+
+    public static native String decodeURIComponent(String s)  /*-{
+        return decodeURIComponent(s);
     }-*/;
 
     /**

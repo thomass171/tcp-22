@@ -88,7 +88,7 @@ public class Main implements EntryPoint {
             //testAufruf();
             GwtUtil.showStatus("Initing...");
             Window.setTitle(scene);
-            Scene updater = ScenePool.buildSceneUpdater(scene);
+            Scene updater = buildSceneUpdater(scene);
             //MA36 Platform.getInstance().getSceneRunner().runScene(updater);
             new WebGlSceneRunner(platformInternals).runScene(updater);
             //18.7.21Ähh, wie muss das denn jetzt?AbstractSceneRunner.instance.runScene(updater);
@@ -125,6 +125,17 @@ public class Main implements EntryPoint {
             }
         };
         ((WebGlBundleLoader) Platform.getInstance().bundleLoader).loadRessource(resource, listener, true, false);
+    }
+
+    /**
+     * Might be overridden by other Main with different ScenePool.
+     *
+     * @param sceneName
+     * @return
+     */
+    public Scene buildSceneUpdater(String sceneName) {
+        Scene updater = ScenePool.buildSceneUpdater(sceneName);
+        return updater;
     }
 
     public static void testAufruf2() {

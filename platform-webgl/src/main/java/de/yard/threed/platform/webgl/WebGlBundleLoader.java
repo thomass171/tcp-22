@@ -255,8 +255,8 @@ public class WebGlBundleLoader implements NativeBundleLoader {
             logger.debug("loadRessource:" + ressource.getFullName());
         }
         final String name = ressource.getFullName();
-        //30.9.18: Mit base url prefix
-        final String url = GWT.getHostPageBaseURL() + name;
+        //30.9.18: Mit base url prefix if no host specified
+        final String url = StringUtils.startsWith(name, "http") ? name : GWT.getHostPageBaseURL() + name;
         String cachedisablequerystring = "?timestamp=" + Platform.getInstance().currentTimeMillis();
         String key;
         if (ressource.getName().contains("/")) {
@@ -349,7 +349,7 @@ public class WebGlBundleLoader implements NativeBundleLoader {
             // setzen im Request duerfte aber witzlos sein.??
             // "The GWT RequestBuilder uses XMLHttpRequest internally"
             requestBuilder.setHeader("Content-Type", "text/plain");
-            requestBuilder.setHeader("Mime-Type", "text/plain");
+            //not valid in CORS. Useless anyway? requestBuilder.setHeader("Mime-Type", "text/plain");
             requestBuilder.setHeader("Accept", "text/plain");
             try {
                 requestBuilder.sendRequest(null, new RequestCallback() {

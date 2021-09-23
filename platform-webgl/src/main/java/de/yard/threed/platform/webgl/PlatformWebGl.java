@@ -69,6 +69,8 @@ public class PlatformWebGl extends Platform {
             instance.bundleLoader = new WebGlBundleLoader();
         }
         PlatformInternals platformInternals = new PlatformInternals();
+        // resolver order is important. most specific first.
+        instance.bundleResolver.addAll(WebGlBundleResolver.buildFromPath(((PlatformWebGl) instance).properties.get("argv.ADDITIONALBUNDLE")));
         instance.bundleResolver.add(new WebGlBundleResolver());
         return platformInternals;//(Platform) Platform.instance;
     }
