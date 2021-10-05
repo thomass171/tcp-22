@@ -87,8 +87,8 @@ public class J2CSTest {
         //23.6.20: asyncContentLoad ist doch gar nicht generic??
         knowngenericmethods.add("asyncContentLoad", new String[]{"PlatformAsyncCallback"});
         knowngenericmethods.add("completed", new String[]{"AsyncJobDelegate"});
-        knowngenericmethods.add("parseJsonToModel", new String[]{"??"});
-        knowngenericmethods.add("modelToJson", new String[]{"??"});
+        //knowngenericmethods.add("parseJsonToModel", new String[]{"??"});
+        //knowngenericmethods.add("modelToJson", new String[]{"??"});
         return knowngenericmethods;
     }
 }

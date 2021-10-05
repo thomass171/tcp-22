@@ -132,7 +132,7 @@ public class ImageUtil {
         //logger.debug(String.format("loadFromFile took %d ms", System.currentTimeMillis() - starttime));
         int[] pxl = bi.getRGB(0, 0, bi.getWidth(), bi.getHeight(), null, 0, bi.getWidth());
         bb = BufferHelper.buildTextureBuffer(bi.getWidth(), bi.getHeight(), pxl,4);
-        logger.debug("ByteBuffer created");
+        //logger.debug("ByteBuffer created");
 
         return new LoadedImage(bi.getWidth(), bi.getHeight(), bb);
     }

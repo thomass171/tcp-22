@@ -636,6 +636,7 @@ public class ReferenceScene extends Scene implements SceneUpdater {
             ReferenceTests.testFind(this, towerrechts.get(2));
             ReferenceTests.testGetParent(this, towerrechts.get(2));
             ReferenceTests.testFindNodeByName(this);
+            ReferenceTests.testJson();
             logger.info("tests completed");
             //Der AsyncTest provoziert Fehler zum Test, so dass geloggte error Meldungen dabei korrekt sind.
             new AsyncTest().runtest(this);
@@ -1275,6 +1276,25 @@ class ReferenceTests {
         TestUtil.assertEquals("name", "rechts 1", rechts1.getName());
         TestUtil.assertEquals("children", 1, rechts1.getTransform().getChildren().size());
 
+    }
+
+    /**
+     * GWT JsonParser doesn't like line breaks. TODO add test?
+     */
+    public static void testJson() {
+        String jsonString = "{" +
+                JsonHelper.buildProperty("a", "b") + "," +
+                JsonHelper.buildProperty("c", "\"d")  +
+                "}";
+
+        logger.debug("parsing "+jsonString);
+        NativeJsonValue parsed = Platform.getInstance().parseJson(jsonString);
+        NativeJsonObject o = parsed.isObject();
+        TestUtil.assertNotNull("json.isObject", o);
+        logger.debug("parsed a:"+parsed.isObject().get("a").isString().stringValue());
+        logger.debug("parsed c:"+parsed.isObject().get("c").isString().stringValue());
+        TestUtil.assertEquals("property a", "b", parsed.isObject().get("a").isString().stringValue());
+        TestUtil.assertEquals("property c", "\"d", parsed.isObject().get("c").isString().stringValue());
     }
 }
 

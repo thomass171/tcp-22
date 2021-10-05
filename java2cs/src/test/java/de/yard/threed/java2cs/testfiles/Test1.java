@@ -136,13 +136,6 @@ public class Test1 extends Object {
         return false;
     }
 
-    public <T> T parseJsonToModel(String jsonstring, Class<T> clazz) {
-        T model = null;
-        return model;
-    }
-
-    public <T> String modelToJson(T model) {return "";}
-
     class InnerClass {
 
     }
@@ -158,7 +151,6 @@ class Foo implements MyInterface, Gee {
     @Override
     public void run() {
         Test1 t1 = new Test1();
-        String s = t1.<Foo>modelToJson(new Foo());
     }
 
     /**

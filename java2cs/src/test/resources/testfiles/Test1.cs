@@ -139,13 +139,6 @@ public class Test1  :  Object {
         return false;
     }
 
-    virtual public  T parseJsonToModel<T>(string jsonstring, System.Type<T> clazz) {
-        T model = null;
-        return model;
-    }
-
-    virtual public  string modelToJson<T>(T model) {return "";}
-
      public class InnerClass {
 
     }
@@ -161,7 +154,6 @@ class Foo  :  MyInterface, Gee {
     virtual 
     public void run() {
         Test1 t1 = new Test1();
-        string s = t1.modelToJson<Foo>(new Foo());
     }
 
     /**

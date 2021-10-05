@@ -418,6 +418,9 @@ public class PlatformWebGl extends Platform {
 
     }
 
+    /**
+     * GWT JsonParser doesn't like line breaks!
+     */
     @Override
     public NativeJsonValue parseJson(String jsonstring) {
         JSONValue parsed = JSONParser.parseStrict(jsonstring);
@@ -427,18 +430,6 @@ public class PlatformWebGl extends Platform {
         }
         NativeJsonValue value = WebGlJsonValue.buildJsonValue(parsed);
         return value;
-    }
-
-    @Override
-    public <T> Object parseJsonToModel(String jsonstring, Class clazz) {
-        Util.notyet();
-        return null;
-    }
-
-    @Override
-    public <T> String modelToJson(Object model) {
-        Util.notyet();
-        return null;
     }
 
     /**

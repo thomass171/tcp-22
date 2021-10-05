@@ -192,16 +192,6 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public <T> Object parseJsonToModel(String jsonstring, Class clazz) {
-        throw new RuntimeException("not implemented");
-    }
-
-    @Override
-    public <T> String modelToJson(Object model) {
-        throw new RuntimeException("not implemented");
-    }
-
-    @Override
     public boolean isDevmode() {
         return false;
     }

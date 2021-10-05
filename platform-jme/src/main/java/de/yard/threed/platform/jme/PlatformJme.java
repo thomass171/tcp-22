@@ -518,19 +518,6 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
         de.yard.threed.core.Util.notyet();
     }
 
-
-    @Override
-    public <T> Object parseJsonToModel(String jsonstring, Class clazz) {
-        GsonBuilder builder = new GsonBuilder();
-        Object model = builder.create().fromJson(jsonstring, clazz);
-        return model;
-    }
-
-    @Override
-    public String modelToJson(Object model) {
-        return JsonUtil.toJson(model);
-    }
-
     @Override
     public boolean isDevmode() {
         return true;

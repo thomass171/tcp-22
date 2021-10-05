@@ -252,7 +252,7 @@ namespace de.yard.threed.platform.unity
             return new UnityJsonObject ((JSONObject)node);
         }
 
-        override public System.Object parseJsonToModel<T> (String jsonstring, System.Type clazz)
+        /*override public System.Object parseJsonToModel<T> (String jsonstring, System.Type clazz)
         {
             System.Object model = JsonUtility.FromJson<T> (jsonstring);
             logger.debug ("parseJsonToModel " + jsonstring);
@@ -271,7 +271,7 @@ namespace de.yard.threed.platform.unity
             logger.debug ("modelToJson " + json);
 
             return json;
-        }
+        }*/
 
         override public NativeCanvas buildNativeCanvas (int width, int height)
         {

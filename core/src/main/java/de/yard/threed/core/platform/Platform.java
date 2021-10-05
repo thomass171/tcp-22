@@ -373,7 +373,8 @@ public abstract class Platform {
 
     /**
      * Muesste eigentlich generisch sein, wird z.Z. aber nur fuer GLTF verwendet.
-     *
+     * 22.9.21: Now like XML handling for replacing model mapper.
+     * Assuming NativeJsonValue is fitting for all Json starting with '{' or '['
      * @param jsonstring
      * @return
      */
@@ -388,9 +389,12 @@ public abstract class Platform {
      *
      * @return
      */
+    /*22.9.21: Better not. Requires kind of reflection and is tricky (if possible at all) in GWT.
+    Better XML like.
     public abstract <T> Object parseJsonToModel(String jsonstring, Class clazz);
 
     public abstract <T> String modelToJson(Object model);
+    */
 
     /**
      * Production oder Entwicklung. Production sollte bedeuten:

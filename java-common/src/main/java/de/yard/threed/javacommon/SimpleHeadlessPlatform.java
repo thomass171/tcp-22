@@ -152,18 +152,6 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
-    public <T> Object parseJsonToModel(String jsonstring, Class clazz) {
-        GsonBuilder builder = new GsonBuilder();
-        Object model = builder.create().fromJson(jsonstring, clazz);
-        return model;
-    }
-
-    @Override
-    public <T> String modelToJson(Object model) {
-        return JsonUtil.toJson(model);
-    }
-
-    @Override
     public void setSystemProperty(String key, String value) {
         System.setProperty(key, value);
     }
