@@ -72,4 +72,12 @@ public class RequestQueue {
         requests.clear();
         requesthandler.clear();
     }
+
+    /**
+     * Only for tests
+     * @return
+     */
+    public Request getRequest(int i) {
+        return requests.get(i);
+    }
 }

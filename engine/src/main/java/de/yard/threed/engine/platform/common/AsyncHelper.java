@@ -148,7 +148,7 @@ public class AsyncHelper {
             logger.debug("processing async model build for " + file);
         }
         if (file.bundle == null) {
-            logger.error("bundle not set");
+            logger.error("bundle not set for file " + file.getName());
             return new BuildResult("failure");
         }
         // wenn die Daten im Bundle (noch) nicht vorliegen, diesen Request skippen

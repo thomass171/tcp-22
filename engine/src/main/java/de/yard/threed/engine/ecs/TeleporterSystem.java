@@ -3,7 +3,6 @@ package de.yard.threed.engine.ecs;
 import de.yard.threed.core.*;
 
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.EventRegistry;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
 
@@ -29,6 +28,8 @@ public class TeleporterSystem extends DefaultEcsSystem {
     boolean cycleActive = false;
     //ein Request muss im update() gemacht werden, weils nur das die TCs gibt.
     IntHolder pendingRequest = null;
+
+    public static EventType EVENT_POSITIONCHANGED = new EventType("EVENT_POSITIONCHANGED");
 
     public TeleporterSystem() {
         super(new String[]{"TeleportComponent"},
@@ -188,7 +189,7 @@ public class TeleporterSystem extends DefaultEcsSystem {
         }
         //logger.debug("distance to (0,0,0) isType " + Vector3.getDistance(posrot.position, new Vector3()));
         // Neue Position publishen (fuer Scenery)
-        SystemManager.sendEvent(new Event(EventRegistry.EVENT_POSITIONCHANGED, new Payload(posrot)));
+        SystemManager.sendEvent(new Event(EVENT_POSITIONCHANGED, new Payload(posrot)));
 
         return posrot;
     }

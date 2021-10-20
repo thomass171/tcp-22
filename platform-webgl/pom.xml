@@ -121,8 +121,9 @@
                     <!--20.9.21 Try again with bundle path .-->
                     <noServer>false</noServer>
                     <style>DETAILED</style>
+                    <!--11.10.21 even with jvm set, GWT compile fails with JAVA_HOME pointing to Java17-->
+                    <jvm>/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home/bin/java</jvm>
                 </configuration>
-
             </plugin>
             <!-- 10.10.18: Java compile (class files) wird doch gar nicht gebraucht. Der legt aber den Sparchlevel fest. Doch nicht verzichtbar?-->
             <plugin>

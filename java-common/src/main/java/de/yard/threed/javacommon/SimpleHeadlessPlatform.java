@@ -50,9 +50,13 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     /**
      * Needs access from extending classes.
      */
-    public SimpleHeadlessPlatform() {
+    public SimpleHeadlessPlatform(NativeEventBus optionalEventbus) {
         this.logfactory = logfactory;
-        eventBus = new JAEventBus();
+        if (optionalEventbus == null) {
+            eventBus = new JAEventBus();
+        } else {
+            eventBus = optionalEventbus;
+        }
         logfactory = new JALogFactory();
         nativeScene = new DummyScene();
 
@@ -62,14 +66,18 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         }
     }
 
-    public static /*Engine* /Platform*/PlatformInternals init(/*ResourceManager resourceManager, * /NativeLogFactory logfactory/*, */HashMap<String, String> properties) {
+    public SimpleHeadlessPlatform() {
+        this(null);
+    }
+
+    public static /*Engine* /Platform*/PlatformInternals init(/*ResourceManager resourceManager, * /NativeLogFactory logfactory/*, */HashMap<String, String> properties, NativeEventBus eventbus) {
         //System.out.println("PlatformOpenGL.init");
         //if (instance == null || !(instance instanceof PlatformOpenGL)) {
         for (String key : properties.keySet()) {
             //System.out.println("transfer of propery "+key+" to system");
             System.setProperty(key, properties.get(key));
         }
-        instance = new SimpleHeadlessPlatform(/*resourceManager, * /logfactory*/);
+        instance = new SimpleHeadlessPlatform(/*resourceManager, * /logfactory*/eventbus);
         SimpleHeadlessPlatform shpInstance = (SimpleHeadlessPlatform) instance;
         //MA36 ((SimpleHeadlessPlatform)instance).resetInit();
 
@@ -82,6 +90,10 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
 
         logger.info("SimpleHeadlessPlatform created");
         return /*MA36 (EnginePlatform)* /instance*/platformInternals;
+    }
+
+    public static PlatformInternals init(HashMap<String, String> properties) {
+        return init(properties, null);
     }
 
     public static String getProperty(String name) {

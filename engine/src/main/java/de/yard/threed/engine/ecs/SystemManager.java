@@ -30,7 +30,7 @@ public class SystemManager {
     private static boolean paused = false;
     public static String DATAPROVIDERELEVATION = "Elevation";
     private static Map<String, DataProvider> dataprovider = new HashMap<String, DataProvider>();
-    //11.10.19: Die Requests sollten auch ueber den EventBus gehen. TODO ja, 20.3.20
+    //11.10.19: Die Requests sollten auch ueber den EventBus gehen. TODO ja, 20.3.20. 12.10.21: Aber Requests haben Handler.Hmm.
     private static RequestQueue requestQueue = new RequestQueue();
 
     /* private SystemManager(){ }
@@ -222,6 +222,7 @@ public class SystemManager {
         eventhandler.clear();
         systems.clear();
         entities.clear();
+        dataprovider.clear();
         isinited = false;
     }
 
@@ -341,6 +342,15 @@ public class SystemManager {
 
     public static int getRequestCount() {
         return requestQueue.getRequestCount();
+    }
+
+    /**
+     * Only for tests
+     * TODO use injection for tests like for eventbus
+     * @return
+     */
+    public static Request getRequest(int i) {
+        return requestQueue.getRequest(i);
     }
 
     public static void publishPacket(Packet packet) {
