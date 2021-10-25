@@ -100,7 +100,7 @@ public class Main : MonoBehaviour
             //Scene updater = new de.yard.threed.apps.osm.FlatTravelScene ();
             //Scene updater = new de.yard.threed.apps.railing.RailingScene ();
             //Scene updater = new de.yard.threed.apps.flusi.ModelPreviewScene ();
-            //Scene updater = new de.yard.threed.apps.flusi.OsmSceneryViewScene ();
+            //Scene updater = new de.yard.threed.trafficext.apps.BasicTravelScene ();
             //braucht basename in env
             //Scene updater = new de.yard.threed.apps.osm.OsmSceneryScene ();
             //Scene updater = new de.yard.threed.apps.reference.VrScene ();

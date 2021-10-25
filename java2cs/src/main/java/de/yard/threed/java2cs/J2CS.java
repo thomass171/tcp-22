@@ -303,7 +303,7 @@ public class J2CS {
         knownInterfaces.add("AnimatedModel", new String[]{"getAnimations", "processAnimationStep"});
         knownInterfaces.add("AnimationListener", new String[]{"animationCompleted"});
         knownInterfaces.add("SGSubsystem", new String[]{"init", "postinit", "reinit", "shutdown", "bind", "unbind", "update", "suspend", "resume", "is_suspended", "reportTiming", "stamp"});
-        knownInterfaces.add("GraphVisualizer", new String[]{"visualizePath", "visualizeEdge", "visualizeGraph", "getPositionOffset", ""});
+        knownInterfaces.add("GraphVisualizer", new String[]{"visualizePath", "visualizeEdge", "visualizeGraph", "getPositionOffset", "visualize"});
         knownInterfaces.add("Transform", new String[]{"setParent", "getParent", "getPosition", "getScale", "setScale"});
         knownInterfaces.add("EventNotify", new String[]{"eventPublished"});
         knownInterfaces.add("ModelBuilder", new String[]{"build"});
@@ -324,6 +324,7 @@ public class J2CS {
                 "XXgetRunway", "XXgetGroundNet", "XXgetConfiguration"});
         knownInterfaces.add("RequestHandler", new String[]{"processRequest"});
         knownInterfaces.add("MenuBuilder", new String[]{"buildMenu", "getAttachNode", "getCamera"});
+        knownInterfaces.add("DataProvider", new String[]{"getData"});
         //nutzt nicht knownInterfaces.add("AvatarMenuProvider", new String[]{"buildMenu"});
 
         //FunctionalInterfaces

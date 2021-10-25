@@ -266,10 +266,6 @@ public abstract class Platform {
 
     public abstract long currentTimeMillis();
 
-    public static int currentTimeSeconds() {
-        return (int) (Platform.getInstance().currentTimeMillis() / 1000);
-    }
-
     /**
      * Kann nur in einem einzigen Frame (update()) abgefragt werden.
      *

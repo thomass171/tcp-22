@@ -485,7 +485,9 @@ public class Util {
         return null;
     }
 
-
+    public static int currentTimeSeconds() {
+        return (int) (Platform.getInstance().currentTimeMillis() / 1000);
+    }
 }
 
 class FormatClassifier {
