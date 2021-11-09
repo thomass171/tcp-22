@@ -104,6 +104,12 @@ public class Main : MonoBehaviour
             //braucht basename in env
             //Scene updater = new de.yard.threed.apps.osm.OsmSceneryScene ();
             //Scene updater = new de.yard.threed.apps.reference.VrScene ();
+            bool wayland = false;
+            if (wayland)
+            {
+                //updater = new de.yard.threed.trafficext.apps.BasicTravelScene();
+                //(Platform.getInstance()).setSystemProperty("argv.basename", "Wayland");
+            }
             sr.runScene (updater);
         } catch (System.Exception e) {
             string st = e.StackTrace;

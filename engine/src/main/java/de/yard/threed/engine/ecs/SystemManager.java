@@ -333,11 +333,15 @@ public class SystemManager {
     }
 
     public static DataProvider getDataProvider(String name) {
-        return dataprovider.get(name);
+        DataProvider dp = dataprovider.get(name);
+        if (dp == null) {
+            logger.warn("no data provider for '" + name + "'");
+        }
+        return dp;
     }
 
     public static int getEventCount() {
-        return ( Platform.getInstance()).getEventBus().getEventCount();
+        return (Platform.getInstance()).getEventBus().getEventCount();
     }
 
     public static int getRequestCount() {
@@ -347,6 +351,7 @@ public class SystemManager {
     /**
      * Only for tests
      * TODO use injection for tests like for eventbus
+     *
      * @return
      */
     public static Request getRequest(int i) {

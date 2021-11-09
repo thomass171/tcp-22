@@ -110,7 +110,7 @@ public class ReferenceScene extends Scene implements SceneUpdater {
         logger.debug("init ReferenceScene");
         databundle = BundleRegistry.getBundle("data");
 
-        if (EngineHelper.getBooleanSystemProperty("argv.enableVR")) {
+        if (EngineHelper.isEnabled("argv.enableVR")) {
             vrEnabled = true;
             usedeferred = false;
         }

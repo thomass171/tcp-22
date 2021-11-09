@@ -128,10 +128,10 @@ public class DisplayClient extends Scene implements SceneUpdater/*, BackendAdapt
     }
 
     protected void processArguments() {
-        if (EngineHelper.getBooleanSystemProperty("argv.enableNearView")) {
+        if (EngineHelper.isEnabled("argv.enableNearView")) {
 
         }
-        if (EngineHelper.getBooleanSystemProperty("argv.enableLoweredAvatar")) {
+        if (EngineHelper.isEnabled("argv.enableLoweredAvatar")) {
             enableLoweredAvatar = true;
         }
         yoffsetVR = EngineHelper.getDoubleSystemProperty("argv.yoffsetVR");

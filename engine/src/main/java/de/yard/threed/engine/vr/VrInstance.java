@@ -52,10 +52,10 @@ public class VrInstance {
     public static VrInstance buildFromArguments() {
         boolean enableLoweredAvatar = false;
 
-        if (!EngineHelper.getBooleanSystemProperty("argv.enableVR")) {
+        if (!EngineHelper.isEnabled("argv.enableVR")) {
             return null;
         }
-        /*deprecated if (EngineHelper.getBooleanSystemProperty("argv.enableLoweredAvatar")) {
+        /*deprecated if (EngineHelper.isEnabled("argv.enableLoweredAvatar")) {
             enableLoweredAvatar = true;
         }*/
         Double yoffsetVR = EngineHelper.getDoubleSystemProperty("argv.yoffsetVR");

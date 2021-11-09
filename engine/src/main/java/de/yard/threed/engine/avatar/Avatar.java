@@ -70,6 +70,7 @@ public class Avatar {
             //7.5.21 this.ac.camera = camera;
         }*/
         if (camera != null) {
+            // 24.10.21: Das ist doch fuer Backwardcompat, also deprecated?
             observer = Observer.buildForCamera(camera);
             camera.attachToModel(mainNode.getTransform());
         }

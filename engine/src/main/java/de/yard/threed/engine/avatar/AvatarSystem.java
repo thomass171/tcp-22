@@ -2,11 +2,16 @@ package de.yard.threed.engine.avatar;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.Observer;
+import de.yard.threed.engine.ObserverComponent;
 import de.yard.threed.engine.Scene;
+import de.yard.threed.engine.ViewPoint;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.*;
+
+import java.util.List;
 
 /**
  * Avatar administration.
@@ -29,34 +34,42 @@ public class AvatarSystem extends DefaultEcsSystem {
     @Deprecated
     static Avatar avatar = null;
     public static LocalTransform initialTransform = null;
+    boolean enableObserverComponent = false;
 
     /**
      * @param yoffsetVR
      * @param enableLoweredAvatar
      */
-    public AvatarSystem(Double yoffsetVR, boolean enableLoweredAvatar) {
+    public AvatarSystem(Double yoffsetVR, boolean enableLoweredAvatar, boolean enableObserverComponent) {
         super(new String[]{"AvatarComponent"}, new RequestType[]{UserSystem.USER_REQUEST_JOIN}, new EventType[]{UserSystem.USER_EVENT_JOINED});
 
         //15.5.21 this.yoffsetVR = yoffsetVR;
         //15.5.21 this.enableLoweredAvatar = enableLoweredAvatar;
+        this.enableObserverComponent = enableObserverComponent;
+
     }
 
     public AvatarSystem() {
-        this(0.0, false);
+        this(0.0, false, false);
+    }
+
+    public AvatarSystem(boolean enableObserverComponent) {
+        this(0.0, false, enableObserverComponent);
     }
 
     public static AvatarSystem buildFromArguments() {
         boolean enableNearView = false, enableLoweredAvatar = false;
         Double yoffsetVR;
 
-        if (EngineHelper.getBooleanSystemProperty("argv.enableNearView")) {
-            enableNearView = true;
+        Boolean b;
+        if ((b = EngineHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
+            enableNearView = (boolean)b;
         }
-        if (EngineHelper.getBooleanSystemProperty("argv.enableLoweredAvatar")) {
-            enableLoweredAvatar = true;
+        if ((b = EngineHelper.getBooleanSystemProperty("argv.enableLoweredAvatar")) != null) {
+            enableLoweredAvatar = (boolean)b;
         }
         yoffsetVR = EngineHelper.getDoubleSystemProperty("argv.yoffsetVR");
-        return new AvatarSystem(yoffsetVR, enableLoweredAvatar);
+        return new AvatarSystem(yoffsetVR, enableLoweredAvatar, false);
     }
 
     /**
@@ -79,7 +92,33 @@ public class AvatarSystem extends DefaultEcsSystem {
         if (request.getType().equals(UserSystem.USER_REQUEST_JOIN)) {
 
             avatar = buildAvatar();
-            EcsEntity a=avatar.avatarE;
+            EcsEntity a = avatar.avatarE;
+            TeleportComponent tc = TeleportComponent.getTeleportComponent(a);
+            if (tc != null) {
+                DataProvider viewpointsDataProvider = SystemManager.getDataProvider("viewpoints");
+                if (viewpointsDataProvider == null) {
+                    logger.debug("no viewpointsDataProvider");
+                } else {
+                    //TODO dataprovider need kind of typing/enum?
+                    List<ViewPoint> viewPoints = (List<ViewPoint>) viewpointsDataProvider.getData(new String[]{});
+                    if (viewPoints == null) {
+                        logger.debug("no teleport viewpoints to add to avatar");
+                    } else {
+                        for (ViewPoint vc : viewPoints) {
+                            tc.addPosition(vc.name, vc.transform);
+                        }
+                    }
+                }
+            }
+            if (enableObserverComponent) {
+                //25.10.21 From FlatTravel. Not used in maze.
+                ObserverComponent oc = new ObserverComponent(Scene.getCurrent().getDefaultCamera().getCarrierTransform());
+                oc.setRotationSpeed(40);
+                avatar.avatarE.addComponent(oc);
+
+                // Attach the oberver in oc to the avatar. Is the connection to observer good located here?
+                Observer.getInstance().getTransform().setParent(AvatarSystem.getAvatar().getSceneNode().getTransform());
+            }
             SystemManager.sendEvent(new Event(UserSystem.USER_EVENT_JOINED, new Payload(a)));
 
             return true;
@@ -104,7 +143,7 @@ public class AvatarSystem extends DefaultEcsSystem {
     private static Avatar buildAvatar() {
         logger.debug("Building avatar");
         //avatar = Avatar.buildDefault(Scene.getCurrent().getDefaultCamera());
-        Avatar  av = new Avatar(/*MA35 Scene.getCurrent().getDefaultCamera()*/null, new Quaternion(), true);
+        Avatar av = new Avatar(/*MA35 Scene.getCurrent().getDefaultCamera()*/null, new Quaternion(), true);
         av.enableBody();
         Scene.getCurrent().addToWorld(av.getSceneNode());
 

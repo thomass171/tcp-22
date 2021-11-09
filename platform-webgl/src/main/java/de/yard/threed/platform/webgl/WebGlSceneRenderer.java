@@ -67,8 +67,8 @@ public class WebGlSceneRenderer implements AnimationController {
     private WebGlSceneRenderer(Scene scene, CanvasPanel canvasPanel, Settings scsettings) {
         boolean vrready = scsettings.vrready != null && scsettings.vrready;
         boolean antialiasing = scsettings.aasamples != null && scsettings.aasamples != 0;
-        boolean vrEnabled = EngineHelper.getBooleanSystemProperty("argv.enableVR");
-        boolean statEnabled = EngineHelper.getBooleanSystemProperty("argv.enableStat");
+        boolean vrEnabled = EngineHelper.isEnabled("argv.enableVR");
+        boolean statEnabled = EngineHelper.isEnabled("argv.enableStat");
 
         logger.debug("Building WebGlSceneRenderer: vrEnabled=" + vrEnabled + ",statEnabled=" + statEnabled);
         renderer = WebGlRenderer.buildRenderer(AbstractSceneRunner.getInstance().dimension, vrready, antialiasing, vrEnabled, statEnabled);

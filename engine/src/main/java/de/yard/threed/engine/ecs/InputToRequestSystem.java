@@ -69,7 +69,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         segmentRequests = new HashMap<Integer, RequestType>();
         segmentRequests.put(1, USER_REQUEST_CONTROLMENU);
 
-        if (EngineHelper.getBooleanSystemProperty("argv.emulateVR")) {
+        if (EngineHelper.isEnabled("argv.emulateVR")) {
             emulateLeftVrControllerByMouse();
         }
     }
@@ -165,7 +165,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         // now check mouse clicks. Be aware of multiple possible targets, eg. segment and control menu.
         Point mouseClicklocation = Input.getMouseClick();
         if (mouseClicklocation != null) {
-            logger.debug("mouseClicklocation="+mouseClicklocation);
+            logger.debug("mouseClicklocation=" + mouseClicklocation);
 
             if (menu != null) {
                 // open menu. Only check menu item click.
@@ -292,7 +292,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
     private void emulateLeftVrControllerByMouse() {
         this.mouseClickMode = MOUSE_CLICK_MODE_VR_LEFT;
-        this.mouseMoveMode=MOUSE_MOVE_MODE_VR_LEFT;
+        this.mouseMoveMode = MOUSE_MOVE_MODE_VR_LEFT;
     }
 
     @Override
@@ -309,7 +309,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
     private void processTrigger(Ray ray, boolean left) {
 
-        logger.debug("processTrigger, left="+left);
+        logger.debug("processTrigger, left=" + left);
         for (ControlPanel cp : controlPanelList) {
             //left/right independent?
             if (cp.checkForClickedArea(ray)) {

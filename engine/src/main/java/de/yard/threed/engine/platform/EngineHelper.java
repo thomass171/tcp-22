@@ -35,7 +35,6 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
     static Statistics statistics = new Statistics();
 
 
-
     // TextureMagFilter from gl3.h
     public static final int GL_NEAREST = 0x2600;
     public static final int GL_LINEAR = 0x2601;
@@ -46,8 +45,6 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
     //GL_LINEAR_MIPMAP_LINEAR = TriLinear?
     public static final int GL_LINEAR_MIPMAP_LINEAR = 0x2703;
     public static final int TRILINEAR = GL_LINEAR_MIPMAP_LINEAR;
-
-
 
 
     /**
@@ -69,9 +66,6 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
     public static void buildNativeModel(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate) {
         buildNativeModel(filename, opttexturepath, modeldelegate, 0);
     }
-
-
-
 
 
     /**
@@ -129,9 +123,20 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
      * @param property
      * @return
      */
-    public static boolean getBooleanSystemProperty(String property) {
+    public static Boolean getBooleanSystemProperty(String property) {
         String arg = Platform.getInstance().getSystemProperty(property);
+        if (arg == null) {
+            return null;
+        }
         if (Util.isTrue(arg)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isEnabled(String property) {
+        Boolean b;
+        if ((b = EngineHelper.getBooleanSystemProperty(property)) != null && (boolean) b) {
             return true;
         }
         return false;
@@ -139,6 +144,9 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
 
     public static Double getDoubleSystemProperty(String property) {
         String arg = Platform.getInstance().getSystemProperty(property);
+        if (arg == null) {
+            return null;
+        }
         if (StringUtils.empty(arg)) {
             return null;
         }
@@ -195,7 +203,6 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
     public abstract Object deserialize(byte[] obj);*/
 
 
-
     /**
      * One time init opportunity.
      * 25.4.20
@@ -220,7 +227,6 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
     }*/
 
 
-
     /**
      * deprecated?
      * @param baseUrl
@@ -229,7 +235,6 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
     /*MA36 public NativeWebClient getWebClient(String baseUrl) {
         return null;
     }*/
-
 
 
 }

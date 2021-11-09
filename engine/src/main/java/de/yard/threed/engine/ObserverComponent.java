@@ -3,10 +3,15 @@ package de.yard.threed.engine;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.Util;
 import de.yard.threed.engine.ecs.EcsComponent;
+import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.TeleportComponent;
 
 
 /**
  * Eine Component für einen Observer (Node mit attached camera oder nur camera).
+ *
+ * Allows changing view direction by cursor keys. But how?
+ *
  * 5.4.17: deprecated zugunsten ViewpointComponent oder zusammenlegen?. Teleport ist was anderes, da muss man schon genauer unterscheiden.
  * 20.10.17: Brauchts nicht einen UpVector? Siehe auch {@link FirstPersonController}.
  * <p>
@@ -23,6 +28,8 @@ public class ObserverComponent extends EcsComponent {
     /**
      * Der observer kann eine Camera sein, aber auch ein Kopfobjekt mit attachter Camera, das sich dann dreht.
      * Oder eine ProxyNode.
+     *
+     * 25.10.21: What is the exact purpose of this component relating to Observer? Connecting Observer to ECS? Can it move?
      */
     public ObserverComponent(Transform observer) {
 
@@ -56,4 +63,8 @@ public class ObserverComponent extends EcsComponent {
         return TAG;
     }
 
+    public static ObserverComponent getObserverComponent(EcsEntity e) {
+        ObserverComponent oc = (ObserverComponent) e.getComponent(ObserverComponent.TAG);
+        return oc;
+    }
 }
