@@ -18,7 +18,6 @@ import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.PointLight;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.core.SceneUpdater;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
@@ -26,7 +25,7 @@ import de.yard.threed.core.Color;
 import de.yard.threed.core.Dimension;
 import de.yard.threed.engine.platform.common.Settings;
 
-public class TerrainScene extends Scene implements SceneUpdater {
+public class TerrainScene extends Scene  {
     public Log logger = Platform.getInstance().getLog(TerrainScene.class);
     Light light;
     public double scale = 1;
@@ -36,11 +35,10 @@ public class TerrainScene extends Scene implements SceneUpdater {
 
 
     @Override
-    public void init() {
+    public void init(boolean forServer) {
 
         addLight();
 
-        addSceneUpdater(this);
         // ungefaehr auf EDDK
         getDefaultCamera().getCarrier().getTransform().setPosition(new Vector3(500, 100, -1000));
         getDefaultCamera().lookAt(new Vector3(0, 0, 0));

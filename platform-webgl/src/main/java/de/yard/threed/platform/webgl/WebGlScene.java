@@ -7,7 +7,6 @@ import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.core.platform.NativeScene;
 import de.yard.threed.core.Dimension;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
-import de.yard.threed.core.SceneUpdater;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.List;
  * Created by thomass on 25.04.15.
  */
 public class WebGlScene implements NativeScene {
-    public List<SceneUpdater> sceneupdater = new ArrayList<SceneUpdater>();
+
     // kann nicht ueber die Factory gebaut werden, weil die gerade noch initialisiert wird
     Log logger = new WebGlLog(WebGlScene.class.getName());
     public static WebGlScene webglscene;
@@ -92,8 +91,6 @@ public class WebGlScene implements NativeScene {
                 remove(((WebGlObject3D) parent).object3d,  objtoremove.object3d);
             //}
         }*/
-        //29.4.19: Wofuer ist das denn?
-        sceneupdater.remove(objtoremove);
     }
 
     public void add(JavaScriptObject objtoadd) {
@@ -106,27 +103,6 @@ public class WebGlScene implements NativeScene {
 
     public WebGlObject3D getRootNode() {
         return new WebGlObject3D(getRootNode(scene), null, true);
-    }
-
-    /**
-     * Soll eigentlich nicht public sein, weil es implizit beim add aufgerufen wird.
-     * Ist jetzt noch wegen Renderer.
-     *
-     * @param sceneupdater
-     */
-    @Override
-    public void addSceneUpdater(SceneUpdater sceneupdater) {
-        this.sceneupdater.add(sceneupdater);
-    }
-
-    @Override
-    public void removeSceneUpdater(SceneUpdater sceneupdater) {
-        this.sceneupdater.remove(sceneupdater);
-    }
-
-    @Override
-    public List<SceneUpdater> getSceneUpdater() {
-        return sceneupdater;
     }
     
     /*29.9.18@Override

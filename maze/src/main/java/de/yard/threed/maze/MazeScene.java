@@ -26,7 +26,7 @@ import java.util.Map;
  * <p>
  * Created on 22.10.18.
  */
-public class MazeScene extends Scene implements SceneUpdater {
+public class MazeScene extends Scene {
     static Log logger = Platform.getInstance().getLog(MazeScene.class);
     Light light;
     public static final int WIDTH = 800;
@@ -47,7 +47,7 @@ public class MazeScene extends Scene implements SceneUpdater {
     }
 
     @Override
-    public void init() {
+    public void init(boolean forServer) {
         logger.info("init MazeScene");
 
         // comamnd line arguments are handled in system builder
@@ -191,7 +191,6 @@ public class MazeScene extends Scene implements SceneUpdater {
     private void commonInit() {
 
         addLight();
-        addSceneUpdater(this);
 
         // last init statement. Queue login request
         SystemManager.putRequest(new Request(UserSystem.USER_REQUEST_LOGIN, new Payload("")));

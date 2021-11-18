@@ -1,7 +1,6 @@
 package de.yard.threed.engine.test;
 
 import de.yard.threed.engine.Scene;
-import de.yard.threed.core.SceneUpdater;
 
 /**
  * Nur eine Huelle, um die Platform Tests in der Engine aufzurufen.
@@ -9,9 +8,9 @@ import de.yard.threed.core.SceneUpdater;
  *
  * Created by thomass on 22.12.16.
  */
-public class MainTestScene extends Scene implements SceneUpdater {
+public class MainTestScene extends Scene {
     @Override
-    public void init() {
+    public void init(boolean forServer) {
         MainTest.runTest(null);
     }
 

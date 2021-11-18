@@ -37,7 +37,7 @@ import java.util.Map;
  * Mit initialY=0 reicht nachher -0,9
  * 14.5.21: Eigentlich brauche ich hier keinen Avatar. Ist aber ganz gut zur Orientierung.
  */
-public class VrScene extends Scene implements SceneUpdater {
+public class VrScene extends Scene {
     static Log logger = Platform.getInstance().getLog(VrScene.class);
     Bundle databundle;
     SceneNode balken, box1, ground;
@@ -54,7 +54,7 @@ public class VrScene extends Scene implements SceneUpdater {
     GridTeleporter gridTeleporter;
 
     @Override
-    public void init() {
+    public void init(boolean forServer) {
         processArguments();
 
         vrInstance = VrInstance.buildFromArguments();
@@ -80,8 +80,6 @@ public class VrScene extends Scene implements SceneUpdater {
         }
         };
         databundle = BundleRegistry.getBundle("data");
-
-        addSceneUpdater(this);
 
         observer = Observer.buildForDefaultCamera();
         if (vrInstance != null) {

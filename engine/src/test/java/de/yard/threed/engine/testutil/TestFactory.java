@@ -51,10 +51,15 @@ public class TestFactory {
 
         scene = new Scene() {
             @Override
-            public void init() {
+            public void init(boolean forServer) {
                 if (sceneIinitMethod != null) {
                     sceneIinitMethod.init();
                 }
+            }
+
+            @Override
+            public void update() {
+
             }
         };
 
@@ -114,7 +119,7 @@ public class TestFactory {
             }*/
 
             //27.3.20 dann doch vorher auch den Sceneinit fuer ein paar Systems
-            scene.init();
+            scene.init(false);
             // 9.1.17: Der Vollstaendigkeithalber auch der postinit
             AbstractSceneRunner.getInstance().postInit();
         }

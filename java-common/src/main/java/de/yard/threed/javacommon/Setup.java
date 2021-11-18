@@ -19,7 +19,7 @@ public class Setup {
         if (args.length == 0) {
             properties.put("argv.enableUsermode", "false");
             properties.put("argv.visualizeTrack", "true");
-            properties.put("argv.enableHud", "true");
+            //properties.put("argv.enableHud", "true");
 
             // emulateVR For testing VR panel outside VR
             //properties.put("argv.emulateVR", "true");
@@ -55,7 +55,7 @@ public class Setup {
             //System.setProperty("scene","de.yard.threed.trafficext.apps.SceneryViewerScene");
             //System.setProperty("scene","de.yard.threed.sandbox.apps.CockpitScene");
             //System.setProperty("scene", "de.yard.threed.apps.ShowroomScene");
-            System.setProperty("scene", "de.yard.threed.maze.MazeScene");
+            //System.setProperty("scene", "de.yard.threed.maze.MazeScene");
             //der geht nicht System.setProperty("scene", "de.yard.threed.apps.maze.MazeScene");
             //System.setProperty("scene", "de.yard.threed.apps.ModelPreviewScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");

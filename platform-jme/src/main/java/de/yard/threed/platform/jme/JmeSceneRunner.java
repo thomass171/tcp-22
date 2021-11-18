@@ -130,7 +130,7 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
                 /*BundleLoaderExceptGwt*/
                 SyncBundleLoader.preLoad(scene.getPreInitBundle(), rm, Platform.getInstance().bundleResolver);
 
-                scene.init();
+                scene.init(false);
 
                 postInit();
                 // Wenn die Scene sich keine Camera eingerichtet hat, wird jetzt Default FPS einregichtet

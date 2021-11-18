@@ -11,7 +11,6 @@ import de.yard.threed.core.platform.NativeScene;
 
 import de.yard.threed.core.Dimension;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
-import de.yard.threed.core.SceneUpdater;
 import de.yard.threed.javacommon.JALog;
 
 import java.util.ArrayList;
@@ -30,7 +29,6 @@ public class JmeScene implements NativeScene {
     Log logger = new JALog(JmeScene.class);
     SimpleApplication app;
     FlyByCamera flyCam;
-    public List<SceneUpdater> sceneupdater = new ArrayList<SceneUpdater>();
     private boolean enableModelCameracalled;
     private static JmeScene instance;
     private String uniqueName;
@@ -98,21 +96,6 @@ public class JmeScene implements NativeScene {
         }
         //TODO 29.4.19: remove DirectionalLightShadowRenderer?
         logger.debug("light removed." + cntbefore + "->" + cntafter);
-    }
-
-    @Override
-    public void addSceneUpdater(SceneUpdater sceneupdater) {
-        this.sceneupdater.add(sceneupdater);
-    }
-
-    @Override
-    public void removeSceneUpdater(SceneUpdater sceneupdater) {
-        this.sceneupdater.remove(sceneupdater);
-    }
-
-    @Override
-    public List<SceneUpdater> getSceneUpdater() {
-        return sceneupdater;
     }
 
     /*@Override

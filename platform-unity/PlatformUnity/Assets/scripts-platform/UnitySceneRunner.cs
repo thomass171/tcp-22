@@ -99,7 +99,7 @@ namespace de.yard.threed.platform.unity
                 }
                 BundleLoaderExceptGwt.loadBundleSyncInternal(bundlename,null,delayed,null,AbstractSceneRunner.getInstance().getResourceManager());
             }*/
-            scene.init ();
+            scene.init (false);
             /*runnerhelper.*/postInit();
 
         }

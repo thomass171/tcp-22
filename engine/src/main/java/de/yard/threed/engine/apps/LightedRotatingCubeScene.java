@@ -7,7 +7,6 @@ import de.yard.threed.engine.*;
 import de.yard.threed.engine.Input;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Color;
-import de.yard.threed.core.SceneUpdater;
 
 /**
  * Date: 14.02.14
@@ -25,7 +24,7 @@ import de.yard.threed.core.SceneUpdater;
  * 23.3.16: Das ist die einfachste aller Scenes.
  */
 
-public class LightedRotatingCubeScene extends Scene implements SceneUpdater {
+public class LightedRotatingCubeScene extends Scene {
     Camera camera;
     Log logger = Platform.getInstance().getLog(LightedRotatingCubeScene.class);
     double angle = 1;
@@ -34,7 +33,7 @@ public class LightedRotatingCubeScene extends Scene implements SceneUpdater {
     int loop = 0;
 
     @Override
-    public void init() {
+    public void init(boolean forServer) {
         logger.info("init LightedRotatingCube");
 
         camera = getDefaultCamera();
@@ -43,7 +42,6 @@ public class LightedRotatingCubeScene extends Scene implements SceneUpdater {
         cube = buildColoredCube();
         addToWorld(cube);
         addLight();
-        scene.addSceneUpdater(this);       
     }
 
     public static SceneNode buildColoredCube() {

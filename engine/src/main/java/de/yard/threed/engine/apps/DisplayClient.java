@@ -14,7 +14,6 @@ import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.Dimension;
-import de.yard.threed.core.SceneUpdater;
 import de.yard.threed.engine.platform.common.Settings;
 
 
@@ -44,7 +43,7 @@ import de.yard.threed.engine.platform.common.Settings;
  * <p>
  * Created by thomass on 11.11.20.
  */
-public class DisplayClient extends Scene implements SceneUpdater/*, BackendAdapter/*??*/ {
+public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
     public Log logger = Platform.getInstance().getLog(DisplayClient.class);
     Avatar avatar = null;
     //EcsEntity avatarE = null;
@@ -75,7 +74,7 @@ public class DisplayClient extends Scene implements SceneUpdater/*, BackendAdapt
     }*/
 
     @Override
-    public void init() {
+    public void init(boolean forServer) {
         logger.debug("init GenericScene");
         processArguments();
 
@@ -97,8 +96,6 @@ public class DisplayClient extends Scene implements SceneUpdater/*, BackendAdapt
         ObserverSystem viewingsystem = new ObserverSystem();
         SystemManager.addSystem(viewingsystem, 0);
 
-
-        addSceneUpdater(this);
 
 
         //23.10.19: Jetzt die Plane mal wirklich unter die Gleise

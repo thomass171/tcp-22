@@ -6,7 +6,6 @@ import de.yard.threed.core.Dimension;
 import de.yard.threed.core.platform.NativeScene;
 import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.SceneUpdater;
 import de.yard.threed.engine.platform.common.Settings;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.List;
 
 /**
  * In Anlehung an JME und deswegen hat eine Scene jetzt schon als Default eine PerspectiveCamera.
- *
+ * <p>
  * 19.10.18: Diese Scene als Superklasse und dann NativeScene noch scheint irgendwie doppelt, obwohl es das eigentlich nicht
  * ist. Das ist doch analog zu anderen Native Objekten.
  * <p/>
@@ -59,8 +58,9 @@ public abstract class Scene {
      * Ist nicht reset aehnlich, oder?
      * 20.11.15: Darf man denn schon vorher Platformfunktionen aufrufen, z.B. in der Variableninitialisierung der Scene?
      * Doch wohl eher nicht. Dann muss das unterbunden werden.
+     * 18.11.21: Flag forServer
      */
-    public abstract void init();
+    public abstract void init(boolean forServer);
 
     /**
      * Wird vor dem init() aufgerufen. Muss von der Scene überschrieben werden.
@@ -125,16 +125,6 @@ public abstract class Scene {
     }
 
     /**
-     * Soll eigentlich nicht public sein, weil es implizit beim add aufgerufen wird.
-     * Ist jetzt noch wegen Renderer.
-     *
-     * @param sceneupdater
-     */
-    public void addSceneUpdater(SceneUpdater sceneupdater) {
-        scene.addSceneUpdater(sceneupdater);
-    }
-
-    /**
      * Ob das so gut ist? Aber eine Scene braucht eine Camera.
      * 28.2.21: Nicht unbedingt. Z.B. MP. Also, kann auch null liefern.
      *
@@ -159,6 +149,7 @@ public abstract class Scene {
     /**
      * Nur fuer die Platform gedacht.
      * MA36: Fuer world? Ach, soll die doch die Platform bereitstellen
+     *
      * @param scene
      */
     public void setSceneAndCamera(NativeScene scene, /*NativeCamera camera,*/ World pworld) {
@@ -237,7 +228,7 @@ public abstract class Scene {
      * @return
      */
     public static World getWorld() {
-        if (world==null){
+        if (world == null) {
             throw new RuntimeException("world not set");
         }
         return world;//((Platform)Platform.getInstance()).getWorld();
@@ -252,4 +243,8 @@ public abstract class Scene {
 
     }
 
+    /**
+     * Instead of SceneUpdater interface
+     */
+    public abstract void update() ;
 }

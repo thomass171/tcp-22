@@ -6,7 +6,6 @@ import de.yard.threed.core.GeneralHandler;
 import de.yard.threed.core.ModelBuildDelegate;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
-import de.yard.threed.core.SceneUpdater;
 import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.Log;
@@ -197,9 +196,8 @@ public class AbstractSceneRunner {
         SystemManager.update(tpf);
 
         // Die Liste der updater duplizieren, damit im update() welche geadded werden koennen.
-        for (SceneUpdater scu : new ArrayList<SceneUpdater>(Platform.getInstance().getScene().getSceneUpdater())) {
-            scu.update();
-        }
+        ascene.update();
+
         pressedkeys.clear();
         mousemove = null;
         mouseclick = null;

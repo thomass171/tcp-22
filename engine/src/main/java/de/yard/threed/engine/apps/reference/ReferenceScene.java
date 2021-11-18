@@ -60,7 +60,7 @@ import de.yard.threed.core.testutil.TestUtil;
  */
 
 
-public class ReferenceScene extends Scene implements SceneUpdater {
+public class ReferenceScene extends Scene {
     static Log logger = Platform.getInstance().getLog(ReferenceScene.class);
     public ArrayList<SceneNode> towerrechts = new ArrayList<SceneNode>();
     public ArrayList<SceneNode> tower2 = new ArrayList<SceneNode>();
@@ -106,7 +106,7 @@ public class ReferenceScene extends Scene implements SceneUpdater {
     boolean vrEnabled = false;
 
     @Override
-    public void init() {
+    public void init(boolean forServer) {
         logger.debug("init ReferenceScene");
         databundle = BundleRegistry.getBundle("data");
 
@@ -155,8 +155,6 @@ public class ReferenceScene extends Scene implements SceneUpdater {
         controller.addStep(new Vector3(50000, 30000, 20000), new Vector3(0, 0, 0));
         // als letztes wieder zum Anfang
         controller.addStep(new Vector3(0, 5, 11), new Vector3(0, 0, 0));
-
-        addSceneUpdater(this);
 
         if (!vrEnabled) {
             //controlMenu = GuiGrid.buildControlMenu(getDefaultCamera(), 1);

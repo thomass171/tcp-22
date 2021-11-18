@@ -1,10 +1,6 @@
 package de.yard.threed.core.platform;
 
 import de.yard.threed.core.Dimension;
-import de.yard.threed.core.SceneUpdater;
-
-
-import java.util.List;
 
 /**
  * Created by thomass on 05.06.15.
@@ -26,10 +22,7 @@ public interface NativeScene {
     //15.6.16 void remove(NativeMesh object3d);
 
     void add(NativeLight light);
-    void addSceneUpdater(SceneUpdater sceneupdater);
-    void removeSceneUpdater(SceneUpdater sceneupdater);
-    List<SceneUpdater> getSceneUpdater();
-    
+
     //void addActionListener(int[] keycode, NativeActionListener actionListener);
     //2.3.16 void addAnalogListener(int keycode, NativeAnalogListener actionListener);
 

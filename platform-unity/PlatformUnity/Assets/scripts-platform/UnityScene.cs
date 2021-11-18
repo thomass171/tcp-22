@@ -14,7 +14,6 @@ namespace de.yard.threed.platform.unity
  */
     public class UnityScene  :  NativeScene
     {
-        public List<SceneUpdater> sceneupdater = new ArrayList<SceneUpdater> ();
         private List<UnityLight> lights = new ArrayList<UnityLight> ();
         bool enableModelCameracalled;
         private string uniqueName;
@@ -62,21 +61,6 @@ namespace de.yard.threed.platform.unity
         virtual public void add (NativeLight light)
         {
             //lights.add((UnityLight) light);
-        }
-
-        virtual     public void addSceneUpdater (SceneUpdater sceneupdater)
-        {
-            this.sceneupdater.add (sceneupdater);
-        }
-
-        virtual     public void removeSceneUpdater (SceneUpdater sceneupdater)
-        {
-            this.sceneupdater.remove (sceneupdater);
-        }
-
-        virtual     public List<SceneUpdater> getSceneUpdater ()
-        {
-            return sceneupdater;
         }
 
         /**     */

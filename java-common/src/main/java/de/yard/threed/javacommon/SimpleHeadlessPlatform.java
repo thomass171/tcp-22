@@ -535,8 +535,6 @@ class DummyCamera implements NativeCamera {
 
 class DummyScene implements NativeScene {
 
-    List<SceneUpdater> sceneUpdaters = new ArrayList<SceneUpdater>();
-
     public DummyScene() {
         int h = 9;
     }
@@ -549,21 +547,6 @@ class DummyScene implements NativeScene {
     @Override
     public void add(NativeLight light) {
 
-    }
-
-    @Override
-    public void addSceneUpdater(SceneUpdater sceneupdater) {
-        sceneUpdaters.add(sceneupdater);
-    }
-
-    @Override
-    public void removeSceneUpdater(SceneUpdater sceneupdater) {
-
-    }
-
-    @Override
-    public List<SceneUpdater> getSceneUpdater() {
-        return sceneUpdaters;
     }
 
     @Override
