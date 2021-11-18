@@ -1,5 +1,8 @@
 package de.yard.threed.engine.ecs;
 
+/**
+ * 18.11.21: Should be a system?
+ */
 public class SystemState {
     public static int STATE_READY_TO_JOIN = 10;
     public static int STATE_OVER = 30;

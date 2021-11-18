@@ -69,6 +69,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         segmentRequests = new HashMap<Integer, RequestType>();
         segmentRequests.put(1, USER_REQUEST_CONTROLMENU);
 
+        // For testing VR panel outside VR
         if (EngineHelper.isEnabled("argv.emulateVR")) {
             emulateLeftVrControllerByMouse();
         }

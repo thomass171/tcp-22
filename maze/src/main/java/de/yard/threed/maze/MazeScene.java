@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Superklasse für alle Maze Games.
+ * Scene for all maze games.
  * <p>
  * Created on 22.10.18.
  */
@@ -42,7 +42,6 @@ public class MazeScene extends Scene implements SceneUpdater {
     public static double rayy = 0.6f;
     Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
     static VrInstance vrInstance;
-
 
     public MazeScene() {
     }
@@ -201,7 +200,7 @@ public class MazeScene extends Scene implements SceneUpdater {
 
     @Override
     public void initSettings(Settings settings) {
-        //30 passt bei Unity ganz gut.
+        //30 fits for Unity quite well.
         settings.targetframerate = 30;
         settings.aasamples = 4;
         settings.fov = 60f;

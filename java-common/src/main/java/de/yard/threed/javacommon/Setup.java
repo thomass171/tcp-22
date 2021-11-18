@@ -4,9 +4,7 @@ import java.util.HashMap;
 
 public class Setup {
     /**
-     * 20.9.19: Auch für andere Java Platformen wie OpenGL. Braeuchte einen besseren Platz, aber wo?? desktop geht nicht wegen no publish, tools??
-     * Darum bleibts erstmal hier.
-     * @param args
+     * Also for other Java platforms like OpenGL.
      *
      */
     public static HashMap<String, String> setUp(String[] args){
@@ -22,7 +20,10 @@ public class Setup {
             properties.put("argv.enableUsermode", "false");
             properties.put("argv.visualizeTrack", "true");
             properties.put("argv.enableHud", "true");
-            properties.put("argv.emulateVR", "true");
+
+            // emulateVR For testing VR panel outside VR
+            //properties.put("argv.emulateVR", "true");
+
             //properties.put("argv.initialVehicle", "c172p");
             //Evtl. Bluebird statt c172p wegen sonst verdecktem menu.
             //properties.put("argv.initialVehicle", "bluebird");
@@ -37,7 +38,7 @@ public class Setup {
             //18.11.19: NearView geht in VR eh nicht, darum damit üblicherweise auch sonst nicht arbeiten.
             //properties.put("argv.enableNearView", "true");
             properties.put("argv.initialMaze","skbn/SokobanWikipedia.txt");
-            properties.put("argv.initialMaze","maze/Area15x10.txt");
+            //properties.put("argv.initialMaze","maze/Area15x10.txt");
             //properties.put("argv.initialMaze","skbn/DavidJoffe.txt:1");
         }
         //properties.put("argv.vehiclelist","GenericRoad");
@@ -54,7 +55,7 @@ public class Setup {
             //System.setProperty("scene","de.yard.threed.trafficext.apps.SceneryViewerScene");
             //System.setProperty("scene","de.yard.threed.sandbox.apps.CockpitScene");
             //System.setProperty("scene", "de.yard.threed.apps.ShowroomScene");
-            //System.setProperty("scene", "de.yard.threed.maze.MazeScene");
+            System.setProperty("scene", "de.yard.threed.maze.MazeScene");
             //der geht nicht System.setProperty("scene", "de.yard.threed.apps.maze.MazeScene");
             //System.setProperty("scene", "de.yard.threed.apps.ModelPreviewScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");

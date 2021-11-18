@@ -1,6 +1,5 @@
 package de.yard.threed.platform.jme;
 
-import de.yard.threed.javacommon.Util;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
@@ -14,7 +13,7 @@ import java.util.HashMap;
 
 
 /**
- * Hauptprogramm fuer Platform JME (20.9.19: und OpenGL? Nee, besser nicht. Das führt nur zu unsauberen Classpath beim Laden von z.B. Shadern)
+ * Main for platform JME (not OpenGL, that leads to Classpath problems when loading eg. shader)
  * <p/>
  * Warum gibt es die Scene eigentlich nicht mehr als Property? 28.10.15: Vielleicht wegen der Klasse ScenePool?
  * 22.1.16: Vielleicht weil GWT eine solche Klasse nicht per Reflection instatieeren kann?
@@ -28,10 +27,7 @@ public class Main {
         boolean useinspector = false;
         HashMap<String, String> properties = Setup.setUp(args);
 
-        //10.7.21 NativeSceneRunner nsr = JmeSceneRunner.init(properties);
         JmeSceneRunner nsr = JmeSceneRunner.init(properties);
-
-        // Benchmark.main(null);                
 
         logger = Platform.getInstance().getLog(Main.class);
         logger.info("Loading JME Client");
