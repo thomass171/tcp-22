@@ -315,8 +315,6 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //Entity wurde schon als Avatar angelegt und kommt hier als Payload.
 
             EcsEntity playerEntity = (EcsEntity) evt.getPayloadByIndex(0);
-            playerEntity.setName("Player");
-            logger.debug(playerEntity.getName() + " joined");
             //avatar = buildPlayer(Scene.getCurrent().getMainCamera());
             //Avatar avatar = AvatarSystem.getAvatar();
             MazeLayout layout = Grid.getInstance().getLayout();
@@ -326,12 +324,12 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             if (MazeScene.vrInstance != null) {
                 mover = new MoverComponent(Observer.getInstance(), true, layout.initialPosition, layout.initialOrientation);
             } else {
-                SceneNode avatar = playerEntity.scenenode;
 
-                mover = new MoverComponent(/*avatar.getSceneNode()*//*this*/avatar.getTransform(), true, layout.initialPosition, layout.initialOrientation);
+                // avatar will be moved with Observer attached to it.
+                mover = new MoverComponent(playerEntity.scenenode.getTransform(), true, layout.initialPosition, layout.initialOrientation);
 
                 // Also, Observer wird an Avatar attached. Der hat aber y0 als Bezugspunkt(?), so dass Observer angehoben wird.
-                Observer.getInstance().getTransform().setParent(avatar.getTransform());
+                // Done in AvatarSystem. Observer.getInstance().getTransform().setParent(avatar.getTransform());
 
                 // 16.5.21: rayy wurde freher irgendwie anders gesetzt. So gehts aber auch erstmal.
                 // 31.5.21: Besser ueber finetune, damit er bei xyz nicht springt. Das beisst sich aber mit viewpoint. Muesste nicht Avatar angehoben werden? Hmm

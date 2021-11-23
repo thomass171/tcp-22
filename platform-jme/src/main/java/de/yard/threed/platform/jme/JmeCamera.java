@@ -494,7 +494,7 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
     }
 
     public static JmeCamera findCameraByLayer(int layer) {
-        for (NativeCamera c : Platform.getInstance().getCameras()) {
+        for (NativeCamera c : AbstractSceneRunner.instance.getCameras()) {
             JmeCamera jmeCamera = (JmeCamera) c;
             if (layer == jmeCamera.getLayer()) {
                 return jmeCamera;

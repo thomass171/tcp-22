@@ -12,6 +12,11 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <!-- for version.html -->
+        <fullVersion>${project.version}-${maven.build.timestamp}</fullVersion>
+    </properties>
+
     <dependencies>
         <!-- junit comes from parent -->
         <dependency>
@@ -152,6 +157,8 @@
                             <resources>
                                 <resource>
                                     <directory>src/main/webapp</directory>
+                                    <!-- filter for adding build timestamp to version.html-->
+                                    <filtering>true</filtering>
                                 </resource>
                             </resources>
                         </configuration>

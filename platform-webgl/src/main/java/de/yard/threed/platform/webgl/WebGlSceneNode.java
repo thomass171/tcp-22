@@ -2,6 +2,7 @@ package de.yard.threed.platform.webgl;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import de.yard.threed.core.platform.*;
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
 /**
  * Created by thomass on 25.04.15.
@@ -134,7 +135,7 @@ public class WebGlSceneNode /*extends /*WebGlObject3D*/ implements NativeSceneNo
      */
     @Override
     public NativeCamera getCamera() {
-        for (NativeCamera nc : Platform.getInstance().getCameras()) {
+        for (NativeCamera nc : AbstractSceneRunner.getInstance().getCameras()) {
             WebGlCamera c = (WebGlCamera) nc;
             if (c.carrier.isSame(object3d)) {
                 return c;

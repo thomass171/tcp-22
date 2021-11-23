@@ -13,6 +13,7 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.*;
 
 
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.javacommon.JALog;
 
 import java.util.ArrayList;
@@ -400,7 +401,7 @@ public class JmeSpatial implements /*Native*/NativeTransform {
                 logger.warn("no camera found for current layer " + currentlayer);
             }
         }else{
-            NativeCamera c = Platform.getInstance().getCameras().get(0);
+            NativeCamera c = AbstractSceneRunner.getInstance().getCameras().get(0);
                 JmeCamera jmeCamera = (JmeCamera) c;
             jmeCamera.getViewPort().detachScene(spatial);
         }

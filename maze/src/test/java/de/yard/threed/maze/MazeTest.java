@@ -80,7 +80,7 @@ public class MazeTest {
 
         assertTrue(SystemState.readyToJoin());
 
-        SystemManager.putRequest(new Request(UserSystem.USER_REQUEST_LOGIN, new Payload("")));
+        SystemManager.putRequest(UserSystem.buildLOGIN(""));
 
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
@@ -139,7 +139,7 @@ public class MazeTest {
 
         assertTrue(SystemState.readyToJoin());
 
-        SystemManager.putRequest(new Request(UserSystem.USER_REQUEST_LOGIN, new Payload("")));
+        SystemManager.putRequest(UserSystem.buildLOGIN(""));
 
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
@@ -192,7 +192,7 @@ public class MazeTest {
 
         assertTrue(SystemState.readyToJoin());
 
-        SystemManager.putRequest(new Request(UserSystem.USER_REQUEST_LOGIN, new Payload("")));
+        SystemManager.putRequest(UserSystem.buildLOGIN(""));
 
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
@@ -249,7 +249,7 @@ public class MazeTest {
 
         assertTrue(SystemState.readyToJoin());
 
-        SystemManager.putRequest(new Request(UserSystem.USER_REQUEST_LOGIN, new Payload("")));
+        SystemManager.putRequest(UserSystem.buildLOGIN(""));
 
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());

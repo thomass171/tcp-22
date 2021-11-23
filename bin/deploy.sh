@@ -51,3 +51,4 @@ $COPYCMD $BUILDDIR/webgl.html $HOSTDIR
 $COPYCMD docs/tcp-22.html $HOSTDIR
 $COPYCMD docs/tcp-22.js $HOSTDIR
 $COPYCMD docs/util.js $HOSTDIR
+$COPYCMD $BUILDDIR/version.html $HOSTDIR

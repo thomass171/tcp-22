@@ -121,7 +121,7 @@ public class WebGlSceneRenderer implements AnimationController {
         }
 
         // Anlegen geht erst jetzt, weil jetzt erst die Camra da ist
-        loopback = new LoopCallback(renderer, scene, null, Platform.getInstance().getCameras(),((WebGlBundleLoader)Platform.getInstance().bundleLoader));
+        loopback = new LoopCallback(renderer, scene, null, AbstractSceneRunner.getInstance().getCameras(),((WebGlBundleLoader)Platform.getInstance().bundleLoader));
 
         AnimationScheduler animationScheduler = AnimationScheduler.get();
         animationScheduler.requestAnimationFrame(loopback);
@@ -271,7 +271,7 @@ public class WebGlSceneRenderer implements AnimationController {
         //WebGlResourceManager.getInstance().checkBundleCompleted();
         ((WebGlBundleLoader)Platform.getInstance().bundleLoader).checkBundleCompleted();
 
-        List<NativeCamera> cameras = Platform.getInstance().getCameras();
+        List<NativeCamera> cameras = AbstractSceneRunner.getInstance().getCameras();
         // erst Scene oder erst camera?
 
         long time = System.currentTimeMillis();

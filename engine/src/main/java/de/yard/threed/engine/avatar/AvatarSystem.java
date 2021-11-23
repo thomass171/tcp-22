@@ -10,6 +10,7 @@ import de.yard.threed.engine.ecs.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.*;
+import de.yard.threed.engine.vr.VrInstance;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
  * <p>
  * Building the avatar isType the step USER_REQUEST_JOIN->USER_EVENT_JOINED.
  *
+ * 22.11.21: The name AvatarSystem is confusing. In fact its a player system. And the player just might have an avatar model (body).
  * <p>
  * Created by thomass on 20.11.20.
  */
@@ -63,10 +65,10 @@ public class AvatarSystem extends DefaultEcsSystem {
 
         Boolean b;
         if ((b = EngineHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
-            enableNearView = (boolean)b;
+            enableNearView = (boolean) b;
         }
         if ((b = EngineHelper.getBooleanSystemProperty("argv.enableLoweredAvatar")) != null) {
-            enableLoweredAvatar = (boolean)b;
+            enableLoweredAvatar = (boolean) b;
         }
         yoffsetVR = EngineHelper.getDoubleSystemProperty("argv.yoffsetVR");
         return new AvatarSystem(yoffsetVR, enableLoweredAvatar, false);
@@ -91,6 +93,8 @@ public class AvatarSystem extends DefaultEcsSystem {
 
         if (request.getType().equals(UserSystem.USER_REQUEST_JOIN)) {
 
+            String someName = (String) request.getPayloadByIndex(0);
+            Boolean forLogin = (Boolean) request.getPayloadByIndex(1);
             avatar = buildAvatar();
             EcsEntity a = avatar.avatarE;
             TeleportComponent tc = TeleportComponent.getTeleportComponent(a);
@@ -115,10 +119,18 @@ public class AvatarSystem extends DefaultEcsSystem {
                 ObserverComponent oc = new ObserverComponent(Scene.getCurrent().getDefaultCamera().getCarrierTransform());
                 oc.setRotationSpeed(40);
                 avatar.avatarE.addComponent(oc);
-
-                // Attach the oberver in oc to the avatar. Is the connection to observer good located here?
+            }
+            // Attach the oberver to the avatar. Is the connection to observer good located here?
+            // 19.11.21: Should be independant from ObserverComponent? Probably. If there is an oberver, attach it to avatar
+            // But not in VR. VR needs ground distance.
+            // This is also reached for bot and MP joining.
+            if (forLogin && Observer.getInstance() != null && !VrInstance.isEnabled()) {
+                logger.debug("Attaching oberserver to avatar");
                 Observer.getInstance().getTransform().setParent(AvatarSystem.getAvatar().getSceneNode().getTransform());
             }
+            avatar.avatarE.setName("Player");
+            logger.debug(avatar.avatarE.getName() + " joined");
+
             SystemManager.sendEvent(new Event(UserSystem.USER_EVENT_JOINED, new Payload(a)));
 
             return true;

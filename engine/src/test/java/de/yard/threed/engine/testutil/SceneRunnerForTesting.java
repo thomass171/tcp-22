@@ -2,6 +2,7 @@ package de.yard.threed.engine.testutil;
 
 //import de.yard.threed.platform.HomeBrewRenderer;
 import de.yard.threed.core.Util;
+import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
@@ -38,6 +39,10 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         /*Engine*/
         PlatformInternals pl = /*(EngineHelper)*/ platformFactory.createPlatform(properties);
         instance = new SceneRunnerForTesting(pl);
+
+        // 20.11.21 even though testing is quite headless, a (dummy) camera is helpful for testing, eg. Observer.
+        NativeCamera camera = Platform.getInstance().buildPerspectiveCamera(45,800/600, 0.1,1000);
+        AbstractSceneRunner.getInstance().addCamera(camera);
         return (SceneRunnerForTesting) instance;
     }
 

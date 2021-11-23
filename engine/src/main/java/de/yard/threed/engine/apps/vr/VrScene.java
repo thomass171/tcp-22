@@ -19,23 +19,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 17.10.2017: Eine einfache VR Scene als Referenz analog zur ThreeJS Variante VrScene.html.
- * Der Balken ist auf Höhe 1m. Je nach dem, mit welchem Offset (sitzend/stehend) VR konfiguriert ist, ist
- * die Blickposition sitzend initial in Höhe des (Dangast) Balken.
- * Der Avatar (grüner Würfel) ist auf gleicher Höhe wie der Balken, auch in VR (abhängig vom vr y-offset).
- * Erlaubt über Avatar rechts/links Positionsverschiebung/finetune mit (shift) x/y/z.
- * Controller links teleportiert (nur), Controller rechts steuert:
- * - Den roten Würfel verkleinern (oder Mouseclick). (kann man mit dem menu->start vergroessern)
- * - Per CP am linken Controller:
+ * 17.10.2017: A simple VR Scene as reference analog to ThreeJS VrScene.html.
+ * The bar is at height 1m. Depending on the VR configuration (sitting/standing), the sitting view position is
+ * initially at the bars height.
+ * The avatar (green cube) is at same height as the bar, also in VR (independent from vr y-offset).
+ *
+ * Provides finetune with (shift) x/y/z.
+ * Left ccontroller teleports (only), right controller controls:
+ * - scale down red cube (or mouse click). (scale up with menu->start)
+ * - Via CP at left controller:
  * -- menu toggle
  * -- finetune up/down
  * -- info
  * -- indicator on/off
  * <p>
- * Klassisches HUD ist doof in VR. Darum kein menutoggle mehr. Stattdessen ControlPanel am linken Controller.
- * 18.11.19: Wegen VR gibt es auch nur eine Camera, keine deferred. Und damit auch kein HUD.
- * Mit initialY=0 reicht nachher -0,9
- * 14.5.21: Eigentlich brauche ich hier keinen Avatar. Ist aber ganz gut zur Orientierung.
+ * No traditional HUD in VR. Instead control panel at left controller. No deferred camera, only the VR camera.
+ *
+ * 14.5.21: Avatar not really needed here, but its good for orientation.
+ * 23.11.21: initialY set to 0 instead of BALKENYPOSITION. With that the "standing position" (Oculus 190cm)
+ * is quite correct (with offset -0.9).
  */
 public class VrScene extends Scene {
     static Log logger = Platform.getInstance().getLog(VrScene.class);
@@ -50,7 +52,7 @@ public class VrScene extends Scene {
     Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
     VrInstance vrInstance = null;
     Observer observer = null;
-    double initialY = BALKENYPOSITION;
+    double initialY = 0;
     GridTeleporter gridTeleporter;
 
     @Override

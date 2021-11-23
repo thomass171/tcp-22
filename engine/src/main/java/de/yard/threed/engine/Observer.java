@@ -61,7 +61,12 @@ public class Observer implements SimpleTransform {
     }
 
     public static Observer buildForDefaultCamera() {
-        return buildForCamera(Scene.getCurrent().getDefaultCamera());
+        Camera camera = Scene.getCurrent().getDefaultCamera();
+        if (camera == null) {
+            logger.warn("No camera (running in server?). Not building an observer");
+            return null;
+        }
+        return buildForCamera(camera);
     }
 
     public static Observer getInstance() {
@@ -204,9 +209,18 @@ public class Observer implements SimpleTransform {
     /**
      * Be careful using this to avoid bypassing finetune.
      * Better use 'this', it implements transform.
+     *
      * @return
      */
     public Transform getTransform() {
         return observer;
     }
+
+    /**
+     * For tests.
+     */
+    public static void reset() {
+        instance = null;
+    }
+
 }

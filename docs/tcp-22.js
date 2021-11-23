@@ -67,4 +67,17 @@ function init() {
 
     $("#inp_ctrlPanel").val("0,0,0,200,90,0");
     $("#inp_yoffsetVR").val("-0.9");
+
+    $.get(host + "/version.html", function(responseText) {
+        var s = responseText;
+        var index = s.indexOf("</div>");
+        if (index != -1) {
+            s = s.substring(0,index);
+        }
+        index = s.indexOf("<div>");
+        if (index != -1) {
+            s = s.substring(index+5);
+        }
+        $("#versionInfo").html("Latest Build: " + s);
+    });
 }

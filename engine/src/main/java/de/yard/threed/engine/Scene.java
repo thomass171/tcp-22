@@ -6,6 +6,7 @@ import de.yard.threed.core.Dimension;
 import de.yard.threed.core.platform.NativeScene;
 import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
 
 import java.util.ArrayList;
@@ -138,12 +139,12 @@ public abstract class Scene {
     }
 
     public int getCameraCount() {
-        return Platform.getInstance().getCameras().size();
+        return AbstractSceneRunner.getInstance().getCameras().size();
     }
 
     public Camera getCamera(int index) {
         //unsauber: Camera might be other than Perspective?
-        return new PerspectiveCamera(Platform.getInstance().getCameras().get(index));
+        return new PerspectiveCamera(AbstractSceneRunner.getInstance().getCameras().get(index));
     }
 
     /**

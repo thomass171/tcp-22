@@ -236,11 +236,6 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
     }*/
 
     @Override
-    public List<NativeCamera> getCameras() {
-        return AbstractSceneRunner.instance.getCameras();
-    }
-
-    @Override
     public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap</*TextureType*/String, NativeTexture> texture,
                                         HashMap<NumericType, NumericValue> parameters, /*MA36 TODO Effect*/ Object effect) {
         return JmeMaterial.buildMaterial(new MaterialDefinition(name, color, texture, parameters), (Effect) effect);

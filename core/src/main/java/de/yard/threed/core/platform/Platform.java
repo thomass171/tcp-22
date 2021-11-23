@@ -140,8 +140,6 @@ public abstract class Platform {
      */
     public abstract NativeCamera buildPerspectiveCamera(double fov, double aspect, double near, double far);
 
-    public abstract List<NativeCamera> getCameras();
-
     /**
      * TODO Unerwenschte Dependency auf Effect.
      * Der name hat keine funktionale Bedeutung. Er dient nur der Wiedererkennbarkeit.

@@ -947,7 +947,7 @@ class ReferenceTests {
         TestUtil.assertNotNull("camera.parent",  camera.getCarrier().getParent());
         TestUtil.assertEquals("camera.parent.name", "World", camera.getCarrier().getParent().getName());
         //Wieso 2? Evtl. wegen GUI?. 7.10.19: Die default und die vom HUD (Layer 1 deferred). Und die xplizite deferred (layer 2) dazu.
-        TestUtil.assertEquals("cameras", 2 + ((usedeferred) ? 1 : 0), Platform.getInstance().getCameras().size());
+        TestUtil.assertEquals("cameras", 2 + ((usedeferred) ? 1 : 0), AbstractSceneRunner.instance.getCameras().size());
 
         if (usedeferred) {
             List<Transform> camchildren = camera.getCarrier().getTransform().getChildren();

@@ -3,6 +3,7 @@ package de.yard.threed.platform.jme;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import de.yard.threed.core.platform.*;
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.javacommon.JALog;
 
 /**
@@ -143,7 +144,7 @@ public class JmeSceneNode /*16.9.16 extends JmeSpatial*/ implements NativeSceneN
     public void destroy() {
         if (JmeSpatial.getLayerOfSpatial(object3d.spatial) > 0) {
             //remove spatial from the corresponding camera.
-            for (NativeCamera c : Platform.getInstance().getCameras()) {
+            for (NativeCamera c : AbstractSceneRunner.getInstance().getCameras()) {
                 JmeCamera jmeCamera = (JmeCamera) c;
                 jmeCamera.getViewPort().detachScene(object3d.spatial);
             }
@@ -178,7 +179,7 @@ public class JmeSceneNode /*16.9.16 extends JmeSpatial*/ implements NativeSceneN
 
     @Override
     public NativeCamera getCamera() {
-        for (NativeCamera nc : Platform.getInstance().getCameras()) {
+        for (NativeCamera nc : AbstractSceneRunner.getInstance().getCameras()) {
             JmeCamera c = (JmeCamera) nc;
             if (c.carrier.object3d.spatial == this.object3d.spatial) {
                 return c;

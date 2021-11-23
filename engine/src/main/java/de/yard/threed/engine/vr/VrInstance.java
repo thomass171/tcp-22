@@ -52,14 +52,14 @@ public class VrInstance {
     public static VrInstance buildFromArguments() {
         boolean enableLoweredAvatar = false;
 
-        if (!EngineHelper.isEnabled("argv.enableVR")) {
+        if (!isEnabled()) {
             return null;
         }
         /*deprecated if (EngineHelper.isEnabled("argv.enableLoweredAvatar")) {
             enableLoweredAvatar = true;
         }*/
         Double yoffsetVR = EngineHelper.getDoubleSystemProperty("argv.yoffsetVR");
-        double val = (double)((yoffsetVR==null)?0:yoffsetVR);
+        double val = (double) ((yoffsetVR == null) ? 0 : yoffsetVR);
         instance = new VrInstance(MODE_OBSERVER, val);
 
         String cpposrot = (Platform.getInstance()).getSystemProperty("argv.vr-controlpanel-posrot");
@@ -89,11 +89,22 @@ public class VrInstance {
         }*/
     }
 
-    public LocalTransform getCpTransform(){
+    public LocalTransform getCpTransform() {
         return cpTransform;
     }
 
-    public double getYoffsetVR(){
+    public double getYoffsetVR() {
         return yoffsetVR;
+    }
+
+    /**
+     * For tests.
+     */
+    public static void reset() {
+        instance = null;
+    }
+
+    public static boolean isEnabled() {
+        return EngineHelper.isEnabled("argv.enableVR");
     }
 }

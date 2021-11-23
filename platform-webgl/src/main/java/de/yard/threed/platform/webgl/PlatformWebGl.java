@@ -197,11 +197,6 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
-    public List<NativeCamera> getCameras() {
-        return AbstractSceneRunner.instance.getCameras();
-    }
-
-    @Override
     public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> params, Object/*Effect*/ effect) {
         return WebGlMaterial.buildMaterial(name, color, texture, params, (Effect) effect);
     }

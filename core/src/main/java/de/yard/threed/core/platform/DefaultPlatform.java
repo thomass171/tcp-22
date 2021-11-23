@@ -57,11 +57,6 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public List<NativeCamera> getCameras() {
-        return new ArrayList<NativeCamera>();
-    }
-
-    @Override
     public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameters, Object effect) {
         return null;
     }

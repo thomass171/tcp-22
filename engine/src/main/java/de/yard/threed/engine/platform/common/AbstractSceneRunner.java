@@ -77,10 +77,10 @@ public class AbstractSceneRunner {
     //2.8.21 public TreeMap<Integer, Bundle> bundledelegateresult = new TreeMap<Integer, Bundle>();
     // ResourceManager hier, damit er nicht mehr über die Platform zugreifbar ist (wegen Architektur)
     //5.8.21 private ResourceManager resourceManager = null;
-    //21.10.19 cameras wären schick in der Scene, aber die Plaform muss doch auch wissen welche es gibt. 5.5.21: Ob das wirklich besser waere?
-    // Wofuer wird das überhaupt gebraucht? Zum Rendern?
-    // Aber hier sollten keine internen Cameras (z.B. fuer VR) enthalten sein.
-    //camera[0] ist die main/default.
+    // cameras might also be stored in the scene or the platform (which not really fits).
+    // And why should the platform know cameras? In any case there will be dependency conflicts.
+    // These appear minimal here, because in Scene the list needs to be public.
+    // Not for internal (VR) cameras. camera[0] is the main/default.
     private List<NativeCamera> cameras = new ArrayList<NativeCamera>();
     public NativeHttpClient httpClient = null;
     PlatformInternals platformInternals;
@@ -135,11 +135,9 @@ public class AbstractSceneRunner {
     }
 
     /**
-     * 14.5.19: Warum deprecated?
-     *
-     * @return
+     * 20.11.21 Anyway. Somehow access to cameras is needed and these are here.
+     * So provide access to anybody, even this doesn't comply to the concept of hiding the runner.
      */
-    @Deprecated
     public static AbstractSceneRunner getInstance() {
         return instance;
     }
@@ -453,16 +451,15 @@ public class AbstractSceneRunner {
     }
 
     /**
-     * 23.10.19: Die Cameras liegen zwar in der Platform, sollten aber ueber die Scene gekapselt werden.
-     * add() wird von den Platformimplementierungen beim Anlegen einer Camera aufgerufen.
-     * Siehe Header.
+     * 20.11.21: Finally cameras are here, neither in scene nor platform. See header.
      */
-    @Deprecated
-    //@Override
     public List<NativeCamera> getCameras() {
         return cameras;
     }
 
+    /**
+     * Used by platform implementations for adding a new camera.
+     */
     public void addCamera(NativeCamera nativeCamera) {
         cameras.add(nativeCamera);
     }

@@ -18,7 +18,7 @@ public class UserSystem extends DefaultEcsSystem {
 
     public static RequestType USER_REQUEST_LOGIN = new RequestType("USER_REQUEST_LOGIN");
     // Der Avatar ist erstellt und will jetzt teilnehmen. Oder wird er erst durch den Join erstellt? Ja,
-    // der Join request ist fuer anlegen der entity und des Avatar
+    // der Join request ist fuer anlegen der entity und des Avatar. Parameter 0 "userName"?, Parameter 1 "forlogin"
     public static RequestType USER_REQUEST_JOIN = new RequestType("USER_REQUEST_JOIN");
 
     public static EventType USER_EVENT_LOGGEDIN = new EventType("USER_EVENT_LOGGEDIN");
@@ -46,10 +46,19 @@ public class UserSystem extends DefaultEcsSystem {
         if (request.getType().equals(USER_REQUEST_LOGIN) && SystemState.readyToJoin()) {
             SystemManager.sendEvent(new Event(USER_EVENT_LOGGEDIN, new Payload("")));
             // als Vereinfachung direkt joinen, ohne das der Client es anfragt.
-            SystemManager.putRequest(new Request(USER_REQUEST_JOIN, new Payload("")));
+            SystemManager.putRequest(buildJOIN("",true));
 
             return true;
         }
         return false;
     }
+
+    public static Request buildLOGIN(String s) {
+        return new Request(USER_REQUEST_LOGIN, new Payload(s));
+    }
+
+    public static Request buildJOIN(String s, boolean forLogin) {
+        return new Request(USER_REQUEST_JOIN, new Payload(s, new Boolean(forLogin)));
+    }
+
 }

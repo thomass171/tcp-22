@@ -110,6 +110,7 @@ public class Main : MonoBehaviour
                 //updater = new de.yard.threed.trafficext.apps.BasicTravelScene();
                 //(Platform.getInstance()).setSystemProperty("argv.basename", "Wayland");
             }
+            //updater = new de.yard.threed.traffic.DemoScene();
             sr.runScene (updater);
         } catch (System.Exception e) {
             string st = e.StackTrace;

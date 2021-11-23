@@ -1,6 +1,8 @@
 package de.yard.threed.engine.testutil;
 
 import de.yard.threed.core.resource.ResourcePath;
+import de.yard.threed.engine.Observer;
+import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.javacommon.DefaultResourceReader;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.resource.BundleRegistry;
@@ -184,6 +186,8 @@ public class TestFactory {
             SceneAnimationController.instance = null;
             //4.5.20 das muss jetzt doch auch sein.
             AbstractSceneRunner.instance = null;
+            Observer.reset();
+            VrInstance.reset();
         }
     }
 }
