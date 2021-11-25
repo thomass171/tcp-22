@@ -208,13 +208,6 @@ public class SystemManager {
     }*/
 
     /**
-     * For testing
-     */
-    public static void reinit() {
-        logger.error("not yet");
-    }
-
-    /**
      * eigentlich nur für Tests
      */
     public static void reset() {
@@ -330,6 +323,11 @@ public class SystemManager {
     }
 
     public static void putDataProvider(String name, DataProvider provider) {
+        // Allow removing provider by 'null'
+        if (provider == null) {
+            dataprovider.remove(name);
+            return;
+        }
         if (dataprovider.containsKey(name)) {
             throw new RuntimeException("duplicate provider " + name);
         }

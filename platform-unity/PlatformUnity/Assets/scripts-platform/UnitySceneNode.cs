@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using java.lang;
 using de.yard.threed.core.platform;
+using de.yard.threed.engine.platform.common;
 using de.yard.threed.core;
 
 namespace de.yard.threed.platform.unity
@@ -231,7 +232,7 @@ namespace de.yard.threed.platform.unity
 
         public NativeCamera getCamera ()
         {
-            foreach (NativeCamera nc in (Platform.getInstance()).getCameras()) {
+            foreach (NativeCamera nc in (AbstractSceneRunner.getInstance()).getCameras()) {
                 UnityCamera c = (UnityCamera)nc;
                 if (c.carrier.isSame (this)) {
                     return c;

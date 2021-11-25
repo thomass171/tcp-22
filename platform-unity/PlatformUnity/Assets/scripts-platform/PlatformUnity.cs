@@ -129,12 +129,7 @@ namespace de.yard.threed.platform.unity
         {
             return UnityCamera.buildPerspectiveCamera (fov, aspect, near, far, Settings.backgroundColor);
         }
-
-        override public List<NativeCamera> getCameras ()
-        {
-            return AbstractSceneRunner.instance.getCameras ();
-        }
-
+       
         override public NativeMaterial buildMaterial (string name, HashMap<ColorType, de.yard.threed.core.Color> color, HashMap<string, NativeTexture> texture, HashMap<NumericType, NumericValue> parameter, /*MA36 TODO Effect*/System.Object effect)
         {
             return UnityMaterial.buildMaterial (new MaterialDefinition (name, color, texture, parameter), (Effect)effect);

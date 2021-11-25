@@ -1,11 +1,15 @@
 package de.yard.threed.engine.testutil;
 
 //import de.yard.threed.platform.HomeBrewRenderer;
+
+import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
+import de.yard.threed.engine.Scene;
+import de.yard.threed.engine.World;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
 import java.util.HashMap;
@@ -20,17 +24,64 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
     /**
      * 2.8.21: Jetzt mit den PlatformInternals
      */
-    private SceneRunnerForTesting(PlatformInternals platformInternals) {
+    private SceneRunnerForTesting(PlatformInternals platformInternals, InitMethod sceneIinitMethod, String[] bundlelist) {
         super(platformInternals);
+
+        Scene scene = new Scene() {
+            @Override
+            public void init(boolean forServer) {
+                if (sceneIinitMethod != null) {
+                    sceneIinitMethod.init();
+                }
+            }
+
+            @Override
+            public void update() {
+
+            }
+        };
+
+        initAbstract(null/*JmeScene.getInstance(), rm*/, scene);
+
+        World world = new World();
+        //((EngineHelper) PlatformJme.getInstance()).setWorld(new World());
+
+        //10.7.21: Camera geht erst, wenn world in der Scene ist
+        Scene.world = world;
+
+        // 20.11.21 even though testing is quite headless, a (dummy) camera is helpful for testing, eg. Observer.
+        NativeCamera camera = Platform.getInstance().buildPerspectiveCamera(45, 800 / 600, 0.1, 1000);
+        // SimpleHeadlessPlatform doesn't/cannot add camera, other might/will.
+        if (getCameras().size() == 0) {
+            addCamera(camera);
+        }
+
+        Platform pl = Platform.getInstance();
+        scene.setSceneAndCamera(pl.getScene()/*AbstractSceneRunner.getInstance().scene*/, world);
+
+        // 13.4.17: Die Bundle laden. Ausnahmesweise synchron wegen Test. Doof vor allem bei Einzeltests weil es so lange braucht.
+        if (bundlelist != null) {
+            for (String bundlename : bundlelist) {
+                TestFactory.loadBundleSync(bundlename);
+            }
+        }
+
+        // 10.4.21: MannMannMann: das ist hier jetzt so reingefriemelt.
+        TestHelper.cleanupAsync();
+
+        //27.3.20 dann doch vorher auch den Sceneinit fuer ein paar Systems
+        scene.init(false);
+        // 9.1.17: Der Vollstaendigkeithalber auch der postinit
+        postInit();
     }
 
     /**
      * Ein Init wie in anderen SceneRunnern auch.
      * 7.7.21
-     * @param properties
+     *
      * @return
      */
-    public static SceneRunnerForTesting init(HashMap<String, String> properties, PlatformFactory platformFactory) {
+    public static SceneRunnerForTesting init(HashMap<String, String> properties, PlatformFactory platformFactory, InitMethod sceneIinitMethod, String[] bundlelist) {
         if (instance != null) {
             throw new RuntimeException("already inited");
         }
@@ -38,17 +89,12 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         //MA36 jetzt muesste/soll aber Platform gehen.
         /*Engine*/
         PlatformInternals pl = /*(EngineHelper)*/ platformFactory.createPlatform(properties);
-        instance = new SceneRunnerForTesting(pl);
+        instance = new SceneRunnerForTesting(pl, sceneIinitMethod, bundlelist);
 
-        // 20.11.21 even though testing is quite headless, a (dummy) camera is helpful for testing, eg. Observer.
-        NativeCamera camera = Platform.getInstance().buildPerspectiveCamera(45,800/600, 0.1,1000);
-        AbstractSceneRunner.getInstance().addCamera(camera);
         return (SceneRunnerForTesting) instance;
     }
 
     /**
-     *
-     *
      * @param frameCount
      */
     public void runLimitedFrames(int frameCount) {

@@ -124,7 +124,7 @@ public class AvatarSystem extends DefaultEcsSystem {
             // 19.11.21: Should be independant from ObserverComponent? Probably. If there is an oberver, attach it to avatar
             // But not in VR. VR needs ground distance.
             // This is also reached for bot and MP joining.
-            if (forLogin && Observer.getInstance() != null && !VrInstance.isEnabled()) {
+            if ((boolean)forLogin && Observer.getInstance() != null && !VrInstance.isEnabled()) {
                 logger.debug("Attaching oberserver to avatar");
                 Observer.getInstance().getTransform().setParent(AvatarSystem.getAvatar().getSceneNode().getTransform());
             }

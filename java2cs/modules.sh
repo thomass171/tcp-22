@@ -41,3 +41,7 @@ MODULE_EXCLUDE[engine]=de/yard/threed/platform/HomeBrewRenderer.java,de/yard/thr
 MODULE_FILES[maze]="
 	de/yard/threed/maze"
 MODULE_EXCLUDE[maze]=de/yard/threed/maze/GridPath.java,de/yard/threed/maze/PathFinder.java
+
+MODULE_FILES[graph]="
+	de/yard/threed/graph"
+MODULE_EXCLUDE[graph]=de/yard/threed/core/XXX.java

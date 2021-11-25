@@ -23,7 +23,7 @@ public class SystemManagerTest {
 
     @Test
     public void testProvider() {
-        SystemManager.reinit();
+        SystemManager.reset();
         SystemManager.putDataProvider("n", new SimpleDataProvider());
         try {
             SystemManager.putDataProvider("n", new SimpleDataProvider());

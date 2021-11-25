@@ -36,6 +36,7 @@
     <source path='common'/>
 
     <source path='maze'/>
+    <source path='graph'/>
 
     <source path='geodesy'/>
     <source path='test'/>

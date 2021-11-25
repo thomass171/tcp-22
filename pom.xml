@@ -28,6 +28,7 @@
         <module>engine</module>
         <module>outofbrowser-common</module>
         <module>maze</module>
+        <module>graph</module>
         <module>platform-webgl</module>
         <module>tools</module>
         <module>java2cs</module>
