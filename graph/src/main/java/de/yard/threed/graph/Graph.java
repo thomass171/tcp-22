@@ -23,8 +23,10 @@ public class Graph {
     private GraphSmoothing smoothing = null;
     //y0 Ebene als Default weils damit abwaets komptibel ist.
     //163.18 public Vector3 upVector = new Vector3(0,1,0);
-    //Man koennte denken, das gehört hier nicht hin. Aber das wird beim Anlegen eines Graph ja mit festgelegt. 
+    // Man koennte denken, das gehört hier nicht hin. Aber das wird beim Anlegen eines Graph ja mit festgelegt.
     // Koennte vielleicht hier in eine Art static Registry, damit es nicht Attribut der Klasse ist?
+    // 15.12.21: Tja, ist das wirklich so? Oder ist das nicht eine unzulässige aber praktische Vereinfachung für z0 und y0 Ebenen? Auch in
+    // einer y0 Ebene kann ein Vehicle steil nach oben moven. Stimmt dann noch die Rotation?
     public GraphOrientation orientation;
     //1.4.20 Ohne funktionale Bedeutung, aber ganz praktisch
     private String name;

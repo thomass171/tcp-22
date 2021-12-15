@@ -9,6 +9,8 @@ import java.util.HashMap;
 
 
 /**
+ * In engine instead of core because also used in platform tests.
+ *
  * Date: 27.08.15
  */
 public class XmlTest {
@@ -52,6 +54,8 @@ public class XmlTest {
             NativeText bodyNode = (NativeText) messageDom.getElementsByTagName("body").getItem(0).getFirstChild();
             String body = bodyNode.getData();
             TestUtil.assertEquals("body", "I'll pick you up at the airport at 8:30.  See you then!", body);
+
+            TestUtil.assertNull ("non existing attribute should return null", ((NativeElement) fromNode).getAttribute("xxx"));
         } catch (XmlException e) {
             throw new RuntimeException(e);
         }

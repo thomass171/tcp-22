@@ -89,6 +89,10 @@ public class GraphNode {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public List<GraphNode> getNeighbors() {
         List<GraphNode> neighbors = new ArrayList<GraphNode>();
         for (GraphEdge e : edges) {

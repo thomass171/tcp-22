@@ -3,6 +3,7 @@ package de.yard.threed.graph;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.NativeAttributeList;
+import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.NativeNodeList;
 import de.yard.threed.core.platform.Platform;
@@ -69,9 +70,9 @@ public class GraphFactory {
      * In z0 layer.
      * 30.1.2020
      */
-    public static void addZ0Circle(Graph graph,  Vector3 startE1, String edgeLabel) {
+    public static void addZ0Circle(Graph graph, Vector3 startE1, String edgeLabel) {
         Vector3 center = new Vector3();
-       double angle = MathUtil2.PI_2;
+        double angle = MathUtil2.PI_2;
         boolean z0 = true;
         double radius = startE1.length();
         Vector3 up = new Vector3(0, 0, 1);
@@ -79,7 +80,7 @@ public class GraphFactory {
         GraphNode node = graph.addNode("start", e1);
         GraphNode startNode = node;
         GraphNode lastNode;
-        if (graph.getNodeCount()>1) {
+        if (graph.getNodeCount() > 1) {
             lastNode = graph.getNode(graph.getNodeCount() - 2);
             graph.connectNodes(lastNode, node);
         }
@@ -88,10 +89,10 @@ public class GraphFactory {
             lastNode = node;
             node = graph.addNode("n" + i, e1);
             //Der ex des arc muss zum from zeigen
-            graph.connectNodes(lastNode, node, edgeLabel + "."+i).setArc(new GraphArc(center, radius, lastNode.getLocation().normalize(), up, angle));
+            graph.connectNodes(lastNode, node, edgeLabel + "." + i).setArc(new GraphArc(center, radius, lastNode.getLocation().normalize(), up, angle));
 
         }
-        graph.connectNodes( node,startNode, edgeLabel+".3").setArc(new GraphArc(center, radius, node.getLocation().normalize(), up, angle));
+        graph.connectNodes(node, startNode, edgeLabel + ".3").setArc(new GraphArc(center, radius, node.getLocation().normalize(), up, angle));
 
         /*GraphNode links = addNode(graph, -radius, 0, "links", z0);
         Vector3 up = new Vector3(0, 0, 1);
@@ -110,7 +111,8 @@ public class GraphFactory {
      * 18.5.17: Extension fuer bessere Sichtbarkeit vegrößert.
      */
     public static /*MA31 Traffic*/Graph buildReturnKreis(double radius, boolean extended) {
-        /*Traffic*/Graph graph = new /*Traffic*/Graph(GraphOrientation.buildDefault());
+        /*Traffic*/
+        Graph graph = new /*Traffic*/Graph(GraphOrientation.buildDefault());
         //15.3.18 graph.upVector = new Vector3(0, 1, 0);
         //Railing liegt in y0 und hat Defaultausrichtung
         graph.orientation = GraphOrientation.buildDefault();
@@ -217,11 +219,11 @@ public class GraphFactory {
 
     /**
      * TODO auch fuer Geraden.
-     *
+     * <p>
      * TODO Das ist mir auch zuviel Handarbeit, und uvs sind auch noch nicht drin. Gibts da nichts anderes?
      * 8.2.18: Warum kann man nicht die ShapeGeometry wie bei Railing nehmen? Weil die nicht verschiedene Ups an from/to handelt?
      * Bei Kreisbögen muss es das vielleicht nicht geben, bei Bezier aber schon.
-     *
+     * <p>
      * Naja, so verkehrt ist villeicht doch nicht. Allerdings nur Kreise. Viuelleicht doch ShapeGeometry.
      * Das wird vielleicht doch deprecated, weil fuer Terrain outline Favorit ist.
      * in z=0 Ebene
@@ -231,7 +233,7 @@ public class GraphFactory {
      * @param width
      * @return
      */
-    public static CustomGeometry buildGraphGeometry(GraphEdge edge, double width, int segments ) {
+    public static CustomGeometry buildGraphGeometry(GraphEdge edge, double width, int segments) {
         //Platform platform = ((Platform)Platform.getInstance());
         List</*Native*/Vector3> vertices = new ArrayList<Vector3>();
         List<Vector2> uvs = new ArrayList<Vector2>();
@@ -257,7 +259,7 @@ public class GraphFactory {
 
         for (int i = 0; i <= segments; i++) {
             Quaternion rot = Quaternion.buildRotationZ(Degree.buildFromRadians(i * anglestep));
-            Vector3 er = edge.arcParameter.getRotatedEx((float)i/segments);
+            Vector3 er = edge.arcParameter.getRotatedEx((float) i / segments);
             vertices.add(center.add(er.normalize().multiply(radius - w2)/*vi.rotate(rot))*/));
             vertices.add(center.add(er.normalize().multiply(radius + w2)/*vo.rotate(rot)*/));
             uvs.add(new Vector2(0, 0));
@@ -267,29 +269,29 @@ public class GraphFactory {
         }
 
         for (int i = 0; i < segments; i++) {
-            if (angle.getDegree()>0){
+            if (angle.getDegree() > 0) {
                 int a = i * 2;
                 int b = i * 2 + 1;
                 int c = i * 2 + 2;
                 int d = i * 2 + 3;
                 indexes.add(a, b, d);
                 indexes.add(d, c, a);
-                facelist.add(new Face3(a,b,d));
-                facelist.add(new Face3(d,c,a));
-            }else {
+                facelist.add(new Face3(a, b, d));
+                facelist.add(new Face3(d, c, a));
+            } else {
                 int a = i * 2;
                 int b = i * 2 + 2;
                 int c = i * 2 + 3;
                 int d = i * 2 + 1;
                 indexes.add(a, b, d);
                 indexes.add(b, c, d);
-                facelist.add(new Face3(a,b,d));
-                facelist.add(new Face3(b,c,d));
+                facelist.add(new Face3(a, b, d));
+                facelist.add(new Face3(b, c, d));
             }
         }
         // return new SimpleGeometry(vertices, indexes.getIndices(), uvs, normals);
 
-        return new BasicGeometry(vertices,facelist);
+        return new BasicGeometry(vertices, facelist);
     }
 
     /**
@@ -298,7 +300,7 @@ public class GraphFactory {
      * @param s
      * @return
      */
-    public static Graph buildfromXML(String s,List<Long> tripnodes) {
+    public static Graph buildfromXML(String s, List<Long> tripnodes) {
 
         XmlDocument xmlDocument;
         try {
@@ -306,12 +308,22 @@ public class GraphFactory {
         } catch (XmlException e) {
             throw new RuntimeException(e);
         }
-        //TODO orientation aus XML. Ich brauc evtl. eine mit up nach -y, geht aber nicht weil left handed
-        //23.8.18: Warum ist hier denn noch Default? Jetzt z0
-        Graph graph = new Graph(GraphOrientation.buildForZ0()/*new GraphOrientationYnegative()*/);
-        NativeNodeList nodelist = xmlDocument.nativedocument.getElementsByTagName("n");
-        for (int i = 0; i < nodelist.getLength(); i++) {
-            NativeNode node = nodelist.getItem(i);
+
+        Graph graph;
+        NativeDocument xmlGraph = xmlDocument.nativedocument;
+        String orientation = xmlGraph.getAttribute("orientation");
+        if (orientation == null) {
+            logger.warn("No orientation defined in graph. Using default.");
+            // Ich brauc evtl. eine mit up nach -y, geht aber nicht weil left handed
+            //23.8.18: Warum ist hier denn noch Default? Jetzt z0
+            graph = new Graph(GraphOrientation.buildForZ0()/*new GraphOrientationYnegative()*/);
+        } else {
+            graph = new Graph(GraphOrientation.buildByName(orientation));
+        }
+        List<NativeNode> nodelist = XmlHelper.getChildren(XmlHelper.getChild(xmlGraph, "nodes", 0).nativeNode, "n");
+        //NativeNodeList nodelist = .getElementsByTagName("n");
+        for (int i = 0; i < nodelist.size(); i++) {
+            NativeNode node = nodelist.get(i);
             NativeAttributeList attrs = node.getAttributes();
             // name muss der index sein, denn darueber wird gesucht.
             String name = attrs.getNamedItem("name").getValue();
@@ -322,13 +334,17 @@ public class GraphFactory {
             GraphNode n = graph.addNode(name, location);
 
         }
-        nodelist = xmlDocument.nativedocument.getElementsByTagName("e");
-        for (int i = 0; i < nodelist.getLength(); i++) {
-            NativeNode node = nodelist.getItem(i);
+        NativeNodeList edgelist = xmlDocument.nativedocument.getElementsByTagName("e");
+        for (int i = 0; i < edgelist.getLength(); i++) {
+            NativeNode node = edgelist.getItem(i);
             NativeAttributeList attrs = node.getAttributes();
-            String from = XmlHelper.getAttribute(node, "from");
-            String to = XmlHelper.getAttribute(node, "to");
-            String name = XmlHelper.getAttribute(node, "name");
+            String from = XmlHelper.getStringAttribute(node, "from");
+            String to = XmlHelper.getStringAttribute(node, "to");
+            String name = XmlHelper.getStringAttribute(node, "name");
+            String center = XmlHelper.getStringAttribute(node, "center");
+            String radius = XmlHelper.getStringAttribute(node, "radius");
+            String angle = XmlHelper.getStringAttribute(node, "angle");
+
             GraphNode bn = graph.findNodeByName(from);
             GraphNode en = graph.findNodeByName(to);
             if (bn == null) {
@@ -338,14 +354,17 @@ public class GraphFactory {
                     logger.warn("to node not found: " + to);
                 } else {
                     GraphEdge c = graph.connectNodes(bn, en, name);
+                    if (center != null) {
+                        RailingFactory.setArc(c, Vector3.parseString(center), Util.parseDouble(radius), Util.parseDouble(angle));
+                    }
                 }
             }
         }
-        nodelist = xmlDocument.nativedocument.getElementsByTagName("tripnode");
-        for (int i = 0; i < nodelist.getLength(); i++) {
-            NativeNode node = nodelist.getItem(i);
+        NativeNodeList tlist = xmlDocument.nativedocument.getElementsByTagName("tripnode");
+        for (int i = 0; i < tlist.getLength(); i++) {
+            NativeNode node = tlist.getItem(i);
             NativeAttributeList attrs = node.getAttributes();
-            String osmid = XmlHelper.getAttribute(node, "osmid");
+            String osmid = XmlHelper.getStringAttribute(node, "osmid");
             tripnodes.add(Util.parseLong(osmid));
         }
         return graph;

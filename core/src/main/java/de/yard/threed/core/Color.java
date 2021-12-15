@@ -204,6 +204,9 @@ public class Color {
         if (StringUtils.toLowerCase(data).equals("blue")){
             return Color.BLUE;
         }
+        if (StringUtils.toLowerCase(data).equals("white")){
+            return Color.WHITE;
+        }
         String[] s = StringUtils.split(data, " ");
         if (s.length != 4) {
             logger.error("parseString: invalid color data");

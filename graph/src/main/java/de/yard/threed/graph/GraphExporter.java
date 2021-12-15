@@ -15,7 +15,7 @@ public class GraphExporter {
         //Locale locale = new Locale("us", "US");
         String s = "";
         s += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        s += "<graph>\n";
+        s += "<graph orientation=\"" + graph.orientation.getName() + "\">\n";
 
         s += "  <nodes>\n";
         for (int i = 0; i < graph.getNodeCount(); i++) {
@@ -33,10 +33,22 @@ public class GraphExporter {
         for (int i = 0; i < graph.getEdgeCount(); i++) {
             GraphEdge e = graph.getEdge(i);
             //s += (locale, "    <e name=\"%s\" from=\"%s\" to=\"%s\"/>\n", e.getName(), e.getFrom().getName(), e.getTo().getName());
-            s += buildTag("    ", "e", new String[]{
-                    buildAttribute("name", e.getName()),
-                    buildAttribute("from", e.getFrom().getName()),
-                    buildAttribute("to", e.getTo().getName())});
+            GraphArc arc = e.getArc();
+            if (arc != null) {
+                s += buildTag("    ", "e", new String[]{
+                        buildAttribute("name", e.getName()),
+                        buildAttribute("from", e.getFrom().getName()),
+                        buildAttribute("to", e.getTo().getName()),
+                        buildAttribute("center", arc.getCenter().toString().replace("(", "").replace(")", "")),
+                        buildAttribute("radius", arc.getRadius()),
+                        buildAttribute("angle", arc.getBeta())
+                });
+            } else {
+                s += buildTag("    ", "e", new String[]{
+                        buildAttribute("name", e.getName()),
+                        buildAttribute("from", e.getFrom().getName()),
+                        buildAttribute("to", e.getTo().getName())});
+            }
         }
         s += ("  </edges>\n");
         if (tripnodes != null) {

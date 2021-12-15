@@ -30,7 +30,7 @@ import java.util.HashMap;
 public class TestFactory {
 
     public static Platform initPlatformForTest(String[] bundlelist, PlatformFactory platformFactory) {
-        return initPlatformForTest(bundlelist, platformFactory, null);
+        return initPlatformForTest(bundlelist, platformFactory, (InitMethod)null);
     }
 
     /**
@@ -47,6 +47,20 @@ public class TestFactory {
 
         //7.7.21: Wie "im echten Leben" vor der Platform immer einen SceneRunner anlegen.
         SceneRunnerForTesting.init(properties, platformFactory, sceneIinitMethod, bundlelist);
+        Platform pl = Platform.getInstance();
+
+        return pl;
+    }
+
+    /**
+     *
+     */
+    public static Platform initPlatformForTest(String[] bundlelist, PlatformFactory platformFactory, HashMap<String, String> properties) {
+
+        resetInit();
+
+        //7.7.21: Wie "im echten Leben" vor der Platform immer einen SceneRunner anlegen.
+        SceneRunnerForTesting.init(properties, platformFactory, null, bundlelist);
         Platform pl = Platform.getInstance();
 
         return pl;

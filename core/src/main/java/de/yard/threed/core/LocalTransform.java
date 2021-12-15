@@ -15,7 +15,12 @@ public class LocalTransform {
         this.position = position;
         this.rotation = rotation;
         this.scale = new Vector3(1, 1, 1);
+    }
 
+    public LocalTransform(Vector3 position, Quaternion rotation, Vector3 scale) {
+        this.position = position;
+        this.rotation = rotation;
+        this.scale = scale;
     }
 
     /**
@@ -34,6 +39,6 @@ public class LocalTransform {
 
     @Override
     public String toString() {
-        return position + "," + rotation;
+        return position + "," + rotation + "," + scale;
     }
 }

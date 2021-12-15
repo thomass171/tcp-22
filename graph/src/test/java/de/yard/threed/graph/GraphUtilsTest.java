@@ -635,9 +635,9 @@ public class GraphUtilsTest {
         GraphPathConstraintProvider  graphPathConstraintProvider = new DefaultGraphPathConstraintProvider(0, smoothingradius);
         GraphPath path = GraphUtils.createPathFromGraphPosition(graph, from, drei, null, graphPathConstraintProvider, 2, true, true, null);
         TestUtil.assertEquals("path", "zero:smoothbegin.eins->smootharc(2)->smoothend.eins(0)->(3)", path.toString());
-        TestUtil2.assertGraphPathSegment("seg1",new String[]{"smootharcfrom","smootharcto"},path.getSegment(1));
-        TestUtil2.assertGraphPathSegment("seg2",new String[]{"smootharcto","zwei"},path.getSegment(2));
-        TestUtil2.assertGraphPathSegment("seg3",new String[]{"zwei","drei"},path.getSegment(3));
+        GraphTestUtil.assertGraphPathSegment("seg1",new String[]{"smootharcfrom","smootharcto"},path.getSegment(1));
+        GraphTestUtil.assertGraphPathSegment("seg2",new String[]{"smootharcto","zwei"},path.getSegment(2));
+        GraphTestUtil.assertGraphPathSegment("seg3",new String[]{"zwei","drei"},path.getSegment(3));
     }
 
 }

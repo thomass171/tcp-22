@@ -69,6 +69,13 @@ public class RailingFactory {
 
                 break;
         }
+        // for export/import every node needs a unique name
+        for (int i = 0; i < graph.getNodeCount(); i++) {
+            GraphNode n = graph.getNode(i);
+            if (n.getName().length() == 0) {
+                n.setName("n" + i);
+            }
+        }
         return graph;
     }
 

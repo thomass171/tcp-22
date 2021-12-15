@@ -102,7 +102,6 @@ public class Vector3 implements Dumpable {
     }
 
 
-
     /**
      * Aus http://stackoverflow.com/questions/15777757/drawing-normals-in-lwjgl-messes-with-lighting
      * Feel free to use this for whatever you want, no licenses applied or anything.
@@ -200,7 +199,12 @@ public class Vector3 implements Dumpable {
     }
 
     public static Vector3 parseString(String data) {
-        String[] s = StringUtils.split(data, " ");
+        String[] s;
+        if (StringUtils.contains(data, ",")) {
+            s = StringUtils.split(data, ",");
+        } else {
+            s = StringUtils.split(data, " ");
+        }
         if (s.length != 3) {
             //logger.error("parseString: invalid vector3 data");
         }

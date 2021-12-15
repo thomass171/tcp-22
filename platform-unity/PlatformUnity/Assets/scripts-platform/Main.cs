@@ -110,6 +110,13 @@ public class Main : MonoBehaviour
                 //updater = new de.yard.threed.trafficext.apps.BasicTravelScene();
                 //(Platform.getInstance()).setSystemProperty("argv.basename", "Wayland");
             }
+            bool demo = false;
+            if (demo)
+            {
+                (Platform.getInstance()).setSystemProperty("argv.basename", "traffic:tiles/Demo.xml");
+                (Platform.getInstance()).setSystemProperty("argv.enableAutomove", "true");
+                updater = new de.yard.threed.traffic.BasicTravelScene();
+            }
             //updater = new de.yard.threed.traffic.DemoScene();
             sr.runScene (updater);
         } catch (System.Exception e) {

@@ -7,6 +7,10 @@ import de.yard.threed.core.platform.NativeNodeList;
  * Created by thomass on 11.09.15.
  */
 public interface NativeElement extends NativeNode {
+
+    /**
+     * Different from org.w3c.dom.Node it doesn't return "" for a non existing attribute but null.
+     */
     String getAttribute(String name);
 
     NativeNodeList getElementsByTagName(String name);

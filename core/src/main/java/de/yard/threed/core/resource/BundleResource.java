@@ -11,6 +11,9 @@ import de.yard.threed.core.Util;
  * 10.04.17: Jetzt DER Locator in einem Bundle. Kann optional auch einen Bundlename enthalten (nach resolve, aber auch davor).
  * Auf saubere Tennung des Pfads achten.
  * Ein angegebenes Bundle ist sowas wie ein absoluter Pfad im Unterschied zu einem relativen.
+ * <p>
+ * 29.11.21: Bad design having bundle here instead of just bundle name? Depends on the use case; before loading a resource or
+ * after loading. Loading might include a lookup. Apparently, this class was intended for the second.
  * <p/>
  * Created by thomass on 19.04.16.
  */
@@ -19,7 +22,8 @@ public class BundleResource implements NativeResource {
     public String name;
     // Der Pfad innerhalb des Bundle. kann null sein. nicht mehr.
     public ResourcePath path;
-    //public String bundlename=null;
+    // Optional element to allow using this class *before* loading a resource.
+    public String bundlename = null;
     public Bundle bundle;
 
     public BundleResource(String name) {
@@ -41,11 +45,10 @@ public class BundleResource implements NativeResource {
         }
     }
 
-    public 
-    BundleResource(ResourcePath path, String name) {
+    public BundleResource(ResourcePath path, String name) {
         this(name);
-        if (path==null){
-            path=new ResourcePath("");
+        if (path == null) {
+            path = new ResourcePath("");
         }
         if (this.path != null) {
             this.path = path.append(this.path);
@@ -59,12 +62,11 @@ public class BundleResource implements NativeResource {
         this.bundle = bundle;
     }
 
-    public
-    BundleResource(Bundle bundle, ResourcePath path, String name) {
-        this(path,name);
-        this.bundle=bundle;
+    public BundleResource(Bundle bundle, ResourcePath path, String name) {
+        this(path, name);
+        this.bundle = bundle;
     }
-    
+
     //@Override
     public boolean exists() {
         //TODO
@@ -98,6 +100,7 @@ public class BundleResource implements NativeResource {
 
     /**
      * 12.6.17: Der Bundlename gehoert hier nicht rein.
+     *
      * @return
      */
     @Override
@@ -110,6 +113,7 @@ public class BundleResource implements NativeResource {
 
     /**
      * without "."
+     *
      * @return
      */
     @Override
@@ -128,8 +132,8 @@ public class BundleResource implements NativeResource {
         if (path != null) {
             s = "(" + path.path + ")" + s;
         }
-        if (bundle!=null){
-            s = bundle.name+":"+s;
+        if (bundle != null) {
+            s = bundle.name + ":" + s;
         }
         return s;
     }
@@ -139,7 +143,7 @@ public class BundleResource implements NativeResource {
     }
 
     /**
-     * Never returns null.
+     * Never returns null. 30.11.21:Still in use(!?).
      * @return
      */
     public static BundleResource buildFromFullStringAndBundlename(String bundlename, String filename) {
@@ -148,14 +152,26 @@ public class BundleResource implements NativeResource {
     }
 
     /**
+     * Returns null is case of invalid fullQualifiedString.
+     */
+    public static BundleResource buildFromFullQualifiedString(String fullQualifiedString) {
+        if (!StringUtils.contains(fullQualifiedString,":")){
+            return null;
+        }
+        BundleResource br = new BundleResource(StringUtils.substringAfter(fullQualifiedString,":"));
+        br.bundlename = StringUtils.substringBefore(fullQualifiedString,":");
+        return br;
+    }
+    /**
      * Name without path and extension.
+     *
      * @return
      */
     public String getBasename() {
         String ext = getExtension();
-        if (StringUtils.length(ext)==0){
+        if (StringUtils.length(ext) == 0) {
             return name;
         }
-        return StringUtils.substring(name, 0,StringUtils.indexOf(name,"."+ext));
+        return StringUtils.substring(name, 0, StringUtils.indexOf(name, "." + ext));
     }
 }

@@ -25,25 +25,26 @@ public class GraphArc {
     //optional, eg. the smoothed node in a smootharc
     public GraphNode origin;
 
-    public GraphArc(Vector3 arccenter, double radius, Vector3 ex, Vector3 n,double beta) {
+    public GraphArc(Vector3 arccenter, double radius, Vector3 ex, Vector3 n, double beta) {
         this.arccenter = arccenter;
         this.radius = radius;
         //sicher ist sicher
         this.ex = ex.normalize();
         this.n = n.normalize();
-        this.beta=beta;
+        this.beta = beta;
     }
-    
+
     /**
      * Effective rotated e Vector between ex (t=0) and ey (t=1).
      * e1 und e2 sind normiert. Das Resultat hat richtige Länge (radius).
-     * 
+     * <p>
      * 12.11.18: Das ist doch eigentlich ein rotateOnAxis? 5.4.20:Nee, zumindest keine der Standard xyz-Achsen, sondern eine beliebige im Raum.
+     *
      * @return
      */
     public Vector3 getRotatedEx(double t, /*float radius*/ float ellipsefactor) {
         Vector3 e1 = ex;
-       // Vector3 e2 = ey;
+        // Vector3 e2 = ey;
         //Vector3 n = Vector3.getCrossProduct(e2, e1);
         //System.out.println("n=" + n);
         Quaternion z2n = Quaternion.buildQuaternion(new Vector3(0, 0, 1), n);
@@ -53,19 +54,23 @@ public class GraphArc {
         //15.3.18: angle nicht berechnen, den kenne ich doch als beta. Und er koennte auch negativ sein. Warum eigentlich negieren?
         double angle = -beta;//MathUtil2.getAngleBetween(e1.vector3, e2.vector3);
         Vector3 rotated = e1.rotate(n2z);
-        rotated = rotated.rotate( Quaternion.buildFromAngles(0, 0, -angle * t));
+        rotated = rotated.rotate(Quaternion.buildFromAngles(0, 0, -angle * t));
         rotated = rotated.rotate(z2n);
         rotated = rotated.multiply(radius);
         //logger.debug("getRotatedEx:"+rotated);
         return rotated;
     }
 
-    public Vector3 getRotatedEx(float t){
-        return getRotatedEx(t,0);
+    public Vector3 getRotatedEx(float t) {
+        return getRotatedEx(t, 0);
     }
 
     public double getBeta() {
         return beta;
+    }
+
+    public Vector3 getEx() {
+        return ex;
     }
 
     public double getRadius() {

@@ -32,7 +32,7 @@ checkrc deploy
 sh bin/deployBundle.sh  -m engine
 checkrc deployBundle
 
-for m in core engine maze outofbrowser-common
+for m in core engine maze outofbrowser-common graph
 do
         zsh bin/java2cs.sh $m
         checkrc java2cs $m

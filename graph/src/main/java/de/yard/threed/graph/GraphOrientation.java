@@ -23,7 +23,7 @@ import java.util.List;
  */
 public abstract class GraphOrientation {
     Log logger = Platform.getInstance().getLog(GraphOrientation.class);
-    
+
     public GraphOrientation() {
     }
 
@@ -52,11 +52,11 @@ public abstract class GraphOrientation {
     }
 
     public static GraphOrientation buildForY0() {
-        return new GraphOrientationDefault();
+        return new GraphOrientationY0()/*Default()*/;
     }
 
     public static GraphOrientation buildDefault() {
-        return new GraphOrientationDefault();
+        return new GraphOrientationY0()/*Default()*/;
     }
 
     public static GraphOrientation buildForFG() {
@@ -70,6 +70,7 @@ public abstract class GraphOrientation {
      */
     public abstract Vector3 getUpVector(GraphEdge edge);
 
+    public abstract String getName();
 
     /**
      * 14.12.16: Die Richtung der Kante steht ja fest, aber für die Ermittlung der kompletten Rotation brauchts auch einen up-Vektor.
@@ -99,22 +100,22 @@ public abstract class GraphOrientation {
 
         //10.5.18 boolean useup = true;
         //if (useup) {
-            //Quaternion forwardrotation = new Quaternion(new Degree(0),new Degree(90),new Degree(0));
-            //effectivedirection = effectivedirection.rotate(forwardrotation);
-            Quaternion forwardrotation = this/*baseRotation*/.getForwardRotation();
+        //Quaternion forwardrotation = new Quaternion(new Degree(0),new Degree(90),new Degree(0));
+        //effectivedirection = effectivedirection.rotate(forwardrotation);
+        Quaternion forwardrotation = this/*baseRotation*/.getForwardRotation();
 
-            Vector3 up = this/*baseRotation*/.getUpVector(edge);
-            //Quaternion uprotation = new Quaternion(new Degree(0),new Degree(90),new Degree(0));
-            //up = up.rotate(uprotation);
-            // effectivedirection = effectivedirection.rotate(baserotation);
-            Quaternion rotation = Quaternion.buildLookRotation(effectivedirection.negate(), up);
-            Quaternion localr = new Quaternion();
-            //return baser.multiply(edger).multiply(localr);
-            //16.3.18 Reihenfolge gefaellt mir so besser:19.2.20: Aber ist das auch richtig? mal anders rum versuchen. Damit stimmt SolarSystem dann. Ich blick nicht mehr durch.
-            return localr.multiply(rotation).multiply(forwardrotation);
-            //return forwardrotation.multiply(localr.multiply(rotation));
+        Vector3 up = this/*baseRotation*/.getUpVector(edge);
+        //Quaternion uprotation = new Quaternion(new Degree(0),new Degree(90),new Degree(0));
+        //up = up.rotate(uprotation);
+        // effectivedirection = effectivedirection.rotate(baserotation);
+        Quaternion rotation = Quaternion.buildLookRotation(effectivedirection.negate(), up);
+        Quaternion localr = new Quaternion();
+        //return baser.multiply(edger).multiply(localr);
+        //16.3.18 Reihenfolge gefaellt mir so besser:19.2.20: Aber ist das auch richtig? mal anders rum versuchen. Damit stimmt SolarSystem dann. Ich blick nicht mehr durch.
+        return localr.multiply(rotation).multiply(forwardrotation);
+        //return forwardrotation.multiply(localr.multiply(rotation));
 
-            //return localr.multiply(rotation);
+        //return localr.multiply(rotation);
         /*} else {
             //from zu verwenden ist aber nicht ganz sauber. to waere aber auch nicht besser
             Quaternion baser = new Quaternion();
@@ -161,6 +162,7 @@ public abstract class GraphOrientation {
      * 10.4.18: Andere Signatur: Jetzt kommt hier ein Path bzw. der Kern davon rein. Das macht es vielleicht etwas eingaengiger. Mit layer laesst sich auf ein LAyer beschraenken (-1 fuer alle).
      * 30.8.18: Flexibler, z.B. über interface (GraphPathSegment->LineSegment) geht das nur schwer, weil arcs auch behandelt werden, zumindest rusimentär.
      * 04.04.19: Es gibt jetzt auch eine 2D Variante (OutlineBuilder)
+     *
      * @param offset
      * @return
      */
@@ -235,7 +237,7 @@ public abstract class GraphOrientation {
                     if (!dir.isValid()) {
                         throw new RuntimeException("NaN in dir");
                     }
-                    if (Float.isNaN((float)angle.getDegree())) {
+                    if (Float.isNaN((float) angle.getDegree())) {
                         throw new RuntimeException("NaN in angle.degree");
                     }
                 }
@@ -363,12 +365,27 @@ public abstract class GraphOrientation {
         }
         return line;
     }
+
+    public static GraphOrientation buildByName(String orientation) {
+        if (orientation.equals(GraphOrientationZ0.NAME)) {
+            return buildForZ0();
+        }
+        if (orientation.equals(GraphOrientationY0.NAME)) {
+            return buildForY0();
+        }
+        if (orientation.equals(GraphOrientationFG.NAME)) {
+            return buildForFG();
+        }
+        throw new RuntimeException("unknown orientation " + orientation);
+    }
 }
 
 /**
  * upVector ist dann (0,0,1)
  */
 class GraphOrientationZ0 extends GraphOrientation {
+
+    public static String NAME = "z0";
 
     /*@Override
     public Quaternion getBaseRotation(Vector3 location) {
@@ -401,13 +418,20 @@ class GraphOrientationZ0 extends GraphOrientation {
         //up.rotate(getBaseRotation());
         return up;
     }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
 }
 
 /**
  * In der XZ Ebene.
  * upVector ist dann (0,1,0)
  */
-class GraphOrientationDefault extends GraphOrientation {
+class GraphOrientationY0/*Default*/ extends GraphOrientation {
+
+    public static String NAME = "y0";
 
     /*@Override
     public Quaternion getBaseRotation(Vector3 position) {
@@ -433,12 +457,19 @@ class GraphOrientationDefault extends GraphOrientation {
     public Vector3 getUpVector(GraphEdge edge) {
         return new Vector3(0, 1, 0);
     }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
 }
 
 /**
  * 22.2.2020: Das ist doch eigentlich ein universeller 3D Graph? Nee, der bezieht seinen up-Vektor von einem Mittelpunkt.
  */
 class GraphOrientationFG extends GraphOrientation {
+
+    public static String NAME = "fg";
 
    /* @Override
     public Quaternion getBaseRotation(Vector3 position) {
@@ -447,7 +478,7 @@ class GraphOrientationFG extends GraphOrientation {
 
     @Override
     public Quaternion getForwardRotation() {
-        Quaternion rotation =  Quaternion.buildFromAngles(new Degree(180), new Degree(0), new Degree(-90));
+        Quaternion rotation = Quaternion.buildFromAngles(new Degree(180), new Degree(0), new Degree(-90));
         // Die Werte entstanden durch ausprobieren. :-) Vielleicht laesst sich das mal untermauern. TODO
         rotation = Quaternion.buildFromAngles(new Degree(-90), new Degree(-90), new Degree(0));
         return rotation;
@@ -476,5 +507,10 @@ class GraphOrientationFG extends GraphOrientation {
         Vector3 up = edge.from.getLocation()./*negate().*/normalize();
         Quaternion baserotation = new Quaternion();
         return up.rotate(baserotation);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 }

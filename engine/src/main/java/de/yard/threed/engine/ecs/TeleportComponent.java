@@ -114,7 +114,7 @@ public class TeleportComponent extends EcsComponent {
         TeleportPointList points = teleportlist;
         int newindex = points.step(forward);
         needsupdate = true;
-        logger.debug("newindex="+newindex+"("+points.point.get(newindex).label+") of "+points.point.size());
+        logger.debug("newindex="+newindex+"("+points.point.get(newindex).label+") of "+points.point.size()+":"+points.point.get(newindex).point);
         return newindex;
     }
 

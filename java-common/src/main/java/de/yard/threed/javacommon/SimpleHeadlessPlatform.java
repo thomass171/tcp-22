@@ -118,9 +118,9 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
 
     @Override
     public void buildNativeModelPlain(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
-        // geht nicht, weil es hier keinen SceneRunner/AsyncHelper gibt. Koennte man zwar nachimplementieren, waere aber unsinnig.
-        // 25.7.21: Naja, sinnig waere es schon, damit nicht so viele Tests platform opengl brauchen.
-        throw new RuntimeException("not supported in SimpleHeadless");
+        // No access to SceneRunner/AsyncHelper here. According to the idea of headless: Just create a dummy node
+        // for the model to continue the workflow.
+        delegate.modelBuilt(new BuildResult(new DummySceneNode()));
     }
 
     public NativeMesh buildNativeMesh(NativeGeometry nativeGeometry, NativeMaterial material, boolean castShadow, boolean receiveShadow) {

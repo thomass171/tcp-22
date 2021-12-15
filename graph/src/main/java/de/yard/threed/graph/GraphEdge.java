@@ -152,8 +152,10 @@ public class GraphEdge {
         Vector3 splitlocation = from.getLocation().add(dir.multiply(offset / len));
 
         GraphNode splitnode = graph.addNode("", splitlocation);
+        // no need to connect 'from' to 'splitnode', because 'this' becomes the connection. But it needs to be added.
         GraphEdge n1 = graph.connectNodes(splitnode, to);
         to.removeEdge(this);
+        splitnode.addEdge(this);
         to = splitnode;
         this.dir = to.getLocation().subtract(from.getLocation());
         len = to.getLocation().subtract(from.getLocation()).length();

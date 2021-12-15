@@ -24,22 +24,28 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
     /**
      * 2.8.21: Jetzt mit den PlatformInternals
      */
-    private SceneRunnerForTesting(PlatformInternals platformInternals, InitMethod sceneIinitMethod, String[] bundlelist) {
+    private SceneRunnerForTesting(PlatformInternals platformInternals, InitMethod sceneIinitMethod, String[] bundlelist, Scene scene) {
         super(platformInternals);
 
-        Scene scene = new Scene() {
-            @Override
-            public void init(boolean forServer) {
-                if (sceneIinitMethod != null) {
-                    sceneIinitMethod.init();
+        if (scene == null) {
+            scene = new Scene() {
+                @Override
+                public void init(boolean forServer) {
+                    if (sceneIinitMethod != null) {
+                        sceneIinitMethod.init();
+                    }
                 }
-            }
 
-            @Override
-            public void update() {
+                @Override
+                public void update() {
 
+                }
+            };
+        } else {
+            if (sceneIinitMethod != null) {
+                throw new RuntimeException("sceneIinitMethod cannot be used on real scene");
             }
-        };
+        }
 
         initAbstract(null/*JmeScene.getInstance(), rm*/, scene);
 
@@ -89,7 +95,16 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         //MA36 jetzt muesste/soll aber Platform gehen.
         /*Engine*/
         PlatformInternals pl = /*(EngineHelper)*/ platformFactory.createPlatform(properties);
-        instance = new SceneRunnerForTesting(pl, sceneIinitMethod, bundlelist);
+        Scene scene = null;
+        // better to use "argv.scene"?? Hmm, unclear.
+        if (properties.containsKey("scene")) {
+            try {
+                scene = (Scene) Class.forName(properties.get("scene")).newInstance();
+            } catch (Exception e) {
+                //TODO log
+            }
+        }
+        instance = new SceneRunnerForTesting(pl, sceneIinitMethod, bundlelist, scene);
 
         return (SceneRunnerForTesting) instance;
     }
