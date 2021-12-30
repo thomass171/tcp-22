@@ -46,6 +46,7 @@ import java.util.List;
 public class SimpleHeadlessPlatform extends DefaultPlatform {
     public String hostdir;
     static Log logger = new JALog(/*LogFactory.getLog(*/SimpleHeadlessPlatform.class);
+    public static String PROPERTY_PREFIX = "tcp22.";
 
     /**
      * Needs access from extending classes.
@@ -75,7 +76,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         //if (instance == null || !(instance instanceof PlatformOpenGL)) {
         for (String key : properties.keySet()) {
             //System.out.println("transfer of propery "+key+" to system");
-            System.setProperty(key, properties.get(key));
+            System.setProperty(PROPERTY_PREFIX + key, properties.get(key));
         }
         instance = new SimpleHeadlessPlatform(/*resourceManager, * /logfactory*/eventbus);
         SimpleHeadlessPlatform shpInstance = (SimpleHeadlessPlatform) instance;
@@ -139,6 +140,11 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
+    public NativeSceneNode buildLine(Vector3 from, Vector3 to, Color color) {
+        return new DummySceneNode();
+    }
+
+    @Override
     public NativeCamera buildPerspectiveCamera(double fov, double aspect, double near, double far) {
         return new DummyCamera(fov, aspect, near, far);
     }
@@ -165,18 +171,29 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
 
     @Override
     public void setSystemProperty(String key, String value) {
-        System.setProperty(key, value);
+        System.setProperty(PROPERTY_PREFIX + key, value);
     }
 
     @Override
     public String getSystemProperty(String key) {
-        return System.getProperty(key);
+        return System.getProperty(PROPERTY_PREFIX + key);
     }
 
     @Override
     public Log getLog(Class clazz) {
         return logfactory.getLog(clazz);
 
+    }
+
+    @Override
+    public NativeRay buildRay(Vector3 origin, Vector3 direction) {
+        // inform caller
+        throw new RuntimeException("no ray");
+    }
+
+    @Override
+    public long currentTimeMillis() {
+        return System.currentTimeMillis();
     }
 
     /**
@@ -227,6 +244,11 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed) {
         AsyncHelper.asyncBundleLoad(bundlename, AbstractSceneRunner.getInstance().invokeLater(bundleLoadDelegate), delayed);
     }*/
+
+    @Override
+    public String getName() {
+        return "SimpleHeadless";
+    }
 }
 
 class DummySceneNode implements NativeSceneNode {

@@ -3,6 +3,7 @@ package de.yard.threed.graph;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.CustomGeometry;
@@ -72,7 +73,7 @@ public class RailingFactory {
         // for export/import every node needs a unique name
         for (int i = 0; i < graph.getNodeCount(); i++) {
             GraphNode n = graph.getNode(i);
-            if (n.getName().length() == 0) {
+            if (StringUtils.length(n.getName()) == 0) {
                 n.setName("n" + i);
             }
         }

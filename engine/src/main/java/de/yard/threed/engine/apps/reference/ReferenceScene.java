@@ -580,22 +580,6 @@ public class ReferenceScene extends Scene {
                         //15.6.21 n = ModelSamples.buildGenieLamp();
                         n = ModelSamples.buildEarth();
                         break;
-                        /*MA31
-                        case 1:
-                        Bundle terrasyncmodelbundle = BundleRegistry.getBundle(FlightGear.getBucketBundleName("model"));
-                        if (terrasyncmodelbundle == null) {
-                            //TODO nicht mehrfach
-                            ((EngineHelper) Platform.getInstance()).loadBundle(FlightGear.getBucketBundleName("model"), (r) -> {
-
-                            });
-                        } else {
-                            //TODO 4.10.18: crane tuts irgendwie nicht mehr (FM: "no matlist in Circle")
-                            //das gltf soll async nachgeladen werden. Kein xml wegen zu komplexer simgear Abhaengigkeit
-                            String modelname = "Models/Industrial/generic_crane_01.ac";
-                            int options = EngineHelper.LOADER_USEGLTF;
-                            n = ModelFactory.asyncModelLoad(new BundleResource(terrasyncmodelbundle, modelname), options);
-                        }
-                        break;*/
                 }
                 if (n != null) {
                     n.setName(name);

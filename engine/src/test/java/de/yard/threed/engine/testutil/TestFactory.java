@@ -14,11 +14,13 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.resource.BundleResolver;
+import de.yard.threed.javacommon.SimpleHeadlessPlatform;
 import de.yard.threed.outofbrowser.SimpleBundleResolver;
 import de.yard.threed.outofbrowser.SyncBundleLoader;
 import org.junit.Assert;
 
 import java.util.HashMap;
+import java.util.Properties;
 
 /**
  * Fuer die Initilisierung der Platform zum Test.
@@ -104,6 +106,13 @@ public class TestFactory {
      * Darf nur aus Tests verwendet werden.
      */
     public static void resetInit() {
+        // Try to remove old system properties. Might be difficult to find all, so rely on prefix
+        Properties properties = System.getProperties();
+        for (String p :properties.stringPropertyNames()) {
+            if (p.startsWith(SimpleHeadlessPlatform.PROPERTY_PREFIX)) {
+                System.clearProperty(p);
+            }
+        }
         if (Platform.getInstance() != null) {
             BundleRegistry.clear();
             SystemManager.reset();

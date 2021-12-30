@@ -103,8 +103,7 @@ public class Main implements EntryPoint {
 
     private void testAufruf() {
         MiscWrapper.alert("testAufruf");
-        BundleResource resource = new BundleResource("TerraSync/directory-2954880.txt");
-        resource = new BundleResource("TerraSync/Terrain/e000n50/e007n50/3072816.btg");
+        BundleResource resource = new BundleResource("TerraSync/Terrain/e000n50/e007n50/3072816.btg");
         ResourceLoadingListener listener = new ResourceLoadingListener() {
             @Override
             public void onLoad(BundleData bytebuf) {

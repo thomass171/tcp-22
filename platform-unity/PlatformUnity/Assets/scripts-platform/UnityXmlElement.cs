@@ -21,7 +21,12 @@ namespace de.yard.threed.platform.unity
 
         public String getAttribute (String name)
         {
-            return ((XmlElement)node).GetAttribute (name);
+            XmlAttribute t = ((XmlElement)node).GetAttributeNode (name);
+            if (t == null)
+            {
+                return null;
+            }
+            return t.Value;
         }
 
 

@@ -7,7 +7,8 @@ import java.util.List;
 
 /**
  * 28.10.18: Rename, weil nicht unbedingt railing spezifisch.
- * 
+ * 30.12.21: Well, in fact is doesn't select an edge that isn't a 'smooth' successor, so it *is* railing specific.
+ *
  * Created by thomass on 20.12.16.
  */
 public class RailingBranchSelector implements GraphSelector {

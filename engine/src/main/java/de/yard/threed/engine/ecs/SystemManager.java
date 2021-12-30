@@ -31,6 +31,7 @@ public class SystemManager {
     private static boolean paused = false;
     public static String DATAPROVIDERELEVATION = "Elevation";
     private static Map<String, DataProvider> dataprovider = new HashMap<String, DataProvider>();
+    private static Map<String, EcsService> services = new HashMap<String, EcsService>();
     //11.10.19: Die Requests sollten auch ueber den EventBus gehen. TODO ja, 20.3.20. 12.10.21: Aber Requests haben Handler.Hmm.
     private static RequestQueue requestQueue = new RequestQueue();
 
@@ -217,6 +218,7 @@ public class SystemManager {
         systems.clear();
         entities.clear();
         dataprovider.clear();
+        services.clear();
         isinited = false;
     }
 
@@ -338,6 +340,26 @@ public class SystemManager {
         DataProvider dp = dataprovider.get(name);
         if (dp == null) {
             logger.warn("no data provider for '" + name + "'");
+        }
+        return dp;
+    }
+
+    public static void registerService(String name, EcsService service) {
+        // Allow removing service by 'null'
+        if (service == null) {
+            services.remove(name);
+            return;
+        }
+        if (services.containsKey(name)) {
+            throw new RuntimeException("duplicate service " + name);
+        }
+        services.put(name, service);
+    }
+
+    public static EcsService getService(String name) {
+        EcsService dp = services.get(name);
+        if (dp == null) {
+            logger.warn("no service for '" + name + "'");
         }
         return dp;
     }

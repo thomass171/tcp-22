@@ -21,13 +21,8 @@ public class BundleRegistry {
     //Ueber Provider lassen sich relative Resourcen über Bundle hinweg suchen.
     static private List<BundleResourceProvider> providerlist = new ArrayList<BundleResourceProvider>();
     public static String TERRAYSYNCPREFIX = "Terrasync-";
-    public static String FGROOTCOREBUNDLE = "fgrootcore";
-    //12.10.18: FGHOME Bundle ist leer und wird auch nicht mehr gebraucht, weil FG eh nicht 1:1 portiert wird
-    //Wenn es da mal wichtige Daten gibt, bilden die halt ein neues Bundle
-    //public static String FGHOMECOREBUNDLE = "fghomecore";
     public static boolean bundledebuglog = false;
-    // 26.7.21: Rekonstruiert aus Historie: Muss true sein, damit FG_HOME nicht mehr gesetzt sein muss (ca 2018).
-    public static boolean customTerraSync = true;
+
 
     public static Bundle getBundle(String bundlename) {
         return bundles.get(bundlename);
@@ -128,14 +123,6 @@ public class BundleRegistry {
         }
         return false;
     }
-    /**
-     * 9.6.17: Provisorium hier erstmal zentral untergebracht.
-     *
-     * @return
-     */
-    /*MA31 public static Bundle getTerrasyncBundle(String bucket) {
-        return BundleRegistry.getBundle(FlightGear.getBucketBundleName(bucket));
-    }*/
 
 
 //TODO move to resolver?
