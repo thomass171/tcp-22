@@ -16,6 +16,8 @@ sh bin/deployBundle.sh -m maze
 checkrc deployBundle
 sh bin/deployBundle.sh -S -m engine
 checkrc deployBundle
+sh bin/deployBundle.sh -m traffic
+checkrc deployBundle
 
 for l in jme3-core jme3-desktop jme3-effects jme3-lwjgl
 do
@@ -32,7 +34,7 @@ checkrc deploy
 sh bin/deployBundle.sh  -m engine
 checkrc deployBundle
 
-for m in core engine maze outofbrowser-common graph
+for m in core engine maze outofbrowser-common graph traffic-core traffic
 do
         zsh bin/java2cs.sh $m
         checkrc java2cs $m

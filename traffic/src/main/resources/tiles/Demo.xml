@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Tile Definition for DemoScene (y0 plane)
+ * Travel demo and MP test scene in y=0 plane.
+ *
+ * Einfach ein paar Objekte plazieren, für die ein Model auch vom Client geladen werden kann.
+ * Analog zur ReferenceScene.
+ * <p>
+ * - A lok moving on the ground.
+ * - An earth at ceiling with a shuttle (has no wheels) in orbit.
+ * - A Trrain
+ * - usw.
+ *
+ * <p>
+ * Und Avatar(e) können sich darin bewegen. Aber keinen Graph und keine Travelworld. Naja, ein bischen um Loc laden zu koennen.
+ *
+ * Ach, sowas lass ich mal fuer eine Hangarscene o.ae. Hier einfach nur ein paar Primitives.
+ * 18.11.21: Trotzdem mal nach traffic verschoben, damit man es auch ohne MP mal sehen kann. Das könnte dann mal eine traffic demo Scene
+ * werden. Also nicht unbedingt Hangar, aber irgendsowas wie ReferenceScene.
+ * 26.11.21: Wieso sollte das nicht als Tile gehen? Green plate+RailingSimple.xml+Earth. But the 'simple' RailGraphVisualization.
+ * And two vehicles: Lok and Shuttle.
+ * 14.12.21: (Simple)RailingScene ist hier jetzt aufgegangen
+-->
+
+<c:config xmlns:c="http://www.example.org/tcp-22" name="a">
+
+    <object></object>
+
+    <!-- The plane is no terrain, because it doesn't contain any rails-->
+    <object name="Ground" modelfile="engine:plane-darkgreen.gltf">
+        <transform>
+            <position>80,0,-320</position>
+            <angle>0, 0, 0</angle>
+            <scale>160, 1, 640</scale>
+        </transform>
+    </object>
+    <object modelfile="engine:sphere-orange.gltf"/>
+
+
+    <trafficgraph graphfile="traffic:tiles/RailingSimple.xml"></trafficgraph>
+
+    <light color="white" direction="3,3,3"/>
+    <light color="white"/>
+
+    <viewpoint name="view1">
+        <transform>
+            <position>0, 200, 0</position>
+            <angle>-60,0,0</angle>
+        </transform>
+    </viewpoint>
+    <viewpoint name="view2">
+        <transform>
+            <position>5, 30, 0</position>
+            <angle>-30,0,0</angle>
+        </transform>
+    </viewpoint>
+    <viewpoint name="view3">
+        <transform>
+            <position>40,10,-10</position>
+            <angle>-20,0,0</angle>
+        </transform>
+    </viewpoint>
+
+
+    <vehicle name="loc" delayedload="false" automove="true" location="*:firstEdge"/>
+
+
+</c:config>

@@ -107,15 +107,15 @@ public class Main : MonoBehaviour
             bool wayland = false;
             if (wayland)
             {
-                //updater = new de.yard.threed.trafficext.apps.BasicTravelScene();
-                //(Platform.getInstance()).setSystemProperty("argv.basename", "Wayland");
+                updater = new de.yard.threed.traffic.apps.BasicTravelScene();
+                (Platform.getInstance()).setSystemProperty("argv.basename", "Wayland");
             }
             bool demo = false;
             if (demo)
             {
-                //(Platform.getInstance()).setSystemProperty("argv.basename", "traffic:tiles/Demo.xml");
-                //(Platform.getInstance()).setSystemProperty("argv.enableAutomove", "true");
-                //updater = new de.yard.threed.traffic.BasicTravelScene();
+                (Platform.getInstance()).setSystemProperty("argv.basename", "traffic:tiles/Demo.xml");
+                (Platform.getInstance()).setSystemProperty("argv.enableAutomove", "true");
+                updater = new de.yard.threed.traffic.apps.BasicTravelScene();
             }
             //updater = new de.yard.threed.traffic.DemoScene();
             sr.runScene (updater);

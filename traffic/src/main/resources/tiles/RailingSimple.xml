@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Extracted from ExportImportTest. Name of first edge must be 'firstEdge'. -->
+<graph orientation="y0">
+    <nodes>
+        <n name="i0" x="50.0" y="0.0" z="-20.0"/>
+        <n name="i1" x="20.0" y="0.0" z="-50.0"/>
+        <n name="i2" x="20.0" y="0.0" z="-150.0"/>
+        <n name="i3" x="50.0" y="0.0" z="-180.0"/>
+        <n name="i4" x="80.0" y="0.0" z="-150.0"/>
+        <n name="i5" x="80.0" y="0.0" z="-50.0"/>
+        <n name="o0" x="50.0" y="0.0" z="-16.0"/>
+        <n name="o1" x="16.0" y="0.0" z="-50.0"/>
+        <n name="o2" x="16.0" y="0.0" z="-150.0"/>
+        <n name="o3" x="50.0" y="0.0" z="-184.0"/>
+        <n name="o4" x="84.0" y="0.0" z="-150.0"/>
+        <n name="o5" x="84.0" y="0.0" z="-50.0"/>
+        <n name="n12" x="20.0" y="0.0" z="-63.0"/>
+        <n name="n13" x="22.00000006534806" y="0.0" z="-65.23606791905071"/>
+        <n name="n14" x="16.0" y="0.0" z="-63.0"/>
+        <n name="n15" x="13.999999934651939" y="0.0" z="-65.23606791905071"/>
+        <n name="n16" x="31.333333703639" y="0.0" z="-75.67105154128734"/>
+        <n name="n17" x="4.666666296361001" y="0.0" z="-75.67105154128734"/>
+        <n name="n18" x="80.0" y="0.0" z="-137.0"/>
+        <n name="n19" x="82.00000006534806" y="0.0" z="-134.7639320809493"/>
+        <n name="n20" x="84.0" y="0.0" z="-130.0"/>
+    </nodes>
+    <edges>
+        <e name="firstEdge" from="i0" to="i1" center="50.0,0.0,-50.0" radius="30.0" angle="-1.5707963267948966"/>
+        <e name="" from="i1" to="n12"/>
+        <e name="" from="i2" to="i3" center="50.0,0.0,-150.0" radius="30.0" angle="-1.5707963267948966"/>
+        <e name="" from="i3" to="i4" center="50.0,0.0,-150.0" radius="30.0" angle="-1.5707963267948966"/>
+        <e name="" from="i4" to="n18"/>
+        <e name="" from="i5" to="i0" center="50.0,0.0,-50.0" radius="30.0" angle="-1.5707963267948966"/>
+        <e name="" from="o0" to="o1" center="50.0,0.0,-50.0" radius="34.0" angle="-1.5707963267948966"/>
+        <e name="" from="o1" to="n14"/>
+        <e name="" from="o2" to="o3" center="50.0,0.0,-150.0" radius="34.0" angle="-1.5707963267948966"/>
+        <e name="" from="o3" to="o4" center="50.0,0.0,-150.0" radius="34.0" angle="-1.5707963267948966"/>
+        <e name="" from="o4" to="n20"/>
+        <e name="" from="o5" to="o0" center="50.0,0.0,-50.0" radius="34.0" angle="-1.5707963267948966"/>
+        <e name="" from="n12" to="i2"/>
+        <e name="" from="n12" to="n13"/>
+        <e name="" from="n14" to="o2"/>
+        <e name="" from="n14" to="n15"/>
+        <e name="" from="n13" to="n16"/>
+        <e name="" from="n15" to="n17"/>
+        <e name="" from="n17" to="n16" center="18.0,0.0,-75.0" radius="13.350209654670588" angle="-0.800000011920929"/>
+        <e name="" from="n18" to="i5"/>
+        <e name="" from="n18" to="n19"/>
+        <e name="" from="n20" to="o5"/>
+        <e name="" from="n20" to="n19"/>
+    </edges>
+    <tripnodes>
+    </tripnodes>
+</graph>
+

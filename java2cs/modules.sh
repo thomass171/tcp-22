@@ -45,3 +45,17 @@ MODULE_EXCLUDE[maze]=de/yard/threed/maze/GridPath.java,de/yard/threed/maze/PathF
 MODULE_FILES[graph]="
 	de/yard/threed/graph"
 MODULE_EXCLUDE[graph]=de/yard/threed/core/XXX.java
+
+MODULE_FILES[traffic-core]="
+	de/yard/threed/trafficcore
+	de/yard/threed/trafficcore/model"
+MODULE_EXCLUDE[traffic-core]=de/yard/threed/trafficcore/XXX.java
+
+MODULE_FILES[traffic]="
+	de/yard/threed/traffic
+	de/yard/threed/traffic/apps
+	de/yard/threed/traffic/config
+	de/yard/threed/traffic/geodesy
+	de/yard/threed/traffic/osm
+	de/yard/threed/traffic/flight"
+MODULE_EXCLUDE[traffic]=de/yard/threed/traffic/XXX.java

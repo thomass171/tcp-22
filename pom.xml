@@ -29,6 +29,8 @@
         <module>outofbrowser-common</module>
         <module>maze</module>
         <module>graph</module>
+        <module>traffic</module>
+        <module>traffic-core</module>
         <module>platform-webgl</module>
         <module>tools</module>
         <module>java2cs</module>

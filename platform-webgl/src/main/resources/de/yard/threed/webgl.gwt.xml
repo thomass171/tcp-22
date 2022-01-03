@@ -38,7 +38,8 @@
     <source path='maze'/>
     <source path='graph'/>
 
-    <source path='geodesy'/>
+    <source path='traffic'/>
+    <source path='trafficcore'/>
     <source path='test'/>
 
     <source path='platform'>

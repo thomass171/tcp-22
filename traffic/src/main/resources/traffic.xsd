@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!---->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/tcp-22"
+        xmlns:c="http://www.example.org/tcp-22" elementFormDefault="unqualified">
+
+    <element name="config" type="c:ConfigType"/>
+
+
+    <complexType name="ConfigType">
+        <choice maxOccurs="unbounded">
+            <element name="light" type="c:LightType"/>
+            <element name="object" type="c:ObjectType"/>
+            <element name="terrain" type="c:TerrainType"/>
+            <element name="trafficgraph" type="c:TrafficGraphType"/>
+            <element name="vehicle" type="c:VehicleType"/>
+            <element name="viewpoint" type="c:ViewpointType"/>
+
+        </choice>
+        <attribute name="name" type="string"/>
+
+    </complexType>
+
+    <complexType name="TrafficGraphType">
+        <attribute name="graphfile" type="string"/>
+
+    </complexType>
+
+    <complexType name="ViewpointType">
+        <sequence>
+            <element name="transform" type="c:TransformType" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+        <attribute name="name" type="string"/>
+    </complexType>
+
+    <complexType name="LightType">
+        <attribute name="color" type="string"/>
+        <attribute name="direction" type="string"/>
+    </complexType>
+
+    <complexType name="TransformType">
+        <sequence>
+            <element name="position" type="c:MultiValueType" minOccurs="0" maxOccurs="1"/>
+            <element name="angle" type="c:MultiValueType" minOccurs="0" maxOccurs="1"/>
+            <element name="scale" type="c:MultiValueType" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+
+
+    </complexType>
+
+    <complexType name="TerrainType">
+        <sequence>
+            <element name="object" type="c:ObjectType" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+    </complexType>
+
+    <!-- position,rotation,scale,aso-->
+    <complexType name="MultiValueType">
+
+            <simpleContent>
+                <extension base="string">
+
+                </extension>
+            </simpleContent>
+
+    </complexType>
+
+
+
+    <complexType name="ObjectType">
+        <sequence>
+            <element name="transform" type="c:TransformType" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+        <attribute name="name" type="string"/>
+        <attribute name="modelfile" type="string"/>
+        <attribute name="position" type="string"/>
+        <attribute name="scale" type="string"/>
+
+    </complexType>
+
+    <!-- A vehicle list entry, not a vehicle definition. That should be VehicleDefinitionType-->
+    <complexType name="VehicleType">
+
+        <attribute name="name" type="string"/>
+        <attribute name="delayedload" type="boolean"/>
+        <!-- for GraphMovingComponent.automove-->
+        <attribute name="automove" type="boolean"/>
+        <!-- a SmartLocation-->
+        <attribute name="location" type="string"/>
+
+    </complexType>
+
+
+    <!-- Type for hex integers -->
+    <simpleType name="hex-integer">
+        <restriction base="string">
+            <pattern value="0x[0-9a-fA-F]+"/>
+        </restriction>
+    </simpleType>
+
+    <!-- Type for integers in either decimal or hex -->
+    <simpleType name="dec-or-hex-integer">
+        <union memberTypes="integer c:hex-integer"/>
+    </simpleType>
+
+
+</schema>

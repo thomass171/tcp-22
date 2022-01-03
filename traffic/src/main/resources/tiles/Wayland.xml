@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Tile Definition for Wayland (y0 plane? nee, z0)
+ Was meant to be "by convention" once, but that doesn't make sense, for example for vehicle lists and light.
+-->
+
+<c:config xmlns:c="http://www.example.org/tcp-22" name="a">
+
+    <terrain>
+        <object name="Ground" modelfile="traffic:tiles/Wayland.gltf"/>
+    </terrain>
+
+    <trafficgraph graphfile="traffic:tiles/Wayland-railway.xml"></trafficgraph>
+    <trafficgraph graphfile="traffic:tiles/Wayland-road.xml"></trafficgraph>
+
+    <light color="white" direction="3,3,3"/>
+    <light color="white"/>
+
+    <viewpoint name="oben1">
+        <transform>
+            <position>0, 0, 137</position>
+        </transform>
+    </viewpoint>
+    <viewpoint name="oben2">
+        <transform>
+            <position>0, 0, 500</position>
+        </transform>
+    </viewpoint>
+    <viewpoint name="oben3">
+        <transform>
+            <position>0, 0, 1000</position>
+        </transform>
+    </viewpoint>
+    <viewpoint name="oben4">
+        <transform>
+            <position>0, 0, 2000</position>
+        </transform>
+    </viewpoint>
+    <viewpoint name="oben5">
+        <transform>
+            <position>0, 0, 4000</position>
+        </transform>
+    </viewpoint>
+
+    <vehicle name="loc" delayedload="false" automove="true" location="*:firstEdge"/>
+
+</c:config>
