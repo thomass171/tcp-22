@@ -3,6 +3,7 @@ package de.yard.threed.platform.webgl;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.resource.BundleRegistry;
@@ -40,9 +41,10 @@ public class Main implements EntryPoint {
         HashMap<String, String> properties = new HashMap<String, String>();
         PlatformWebGl.isDevmode = false;
         for (String arg : args.keySet()) {
-            properties.put("argv." + arg, Window.Location.getParameter(arg));
-            if (arg.equals("devmode")) {
-                PlatformWebGl.isDevmode = true;
+            String value = Window.Location.getParameter(arg);
+            properties.put("argv." + arg, value);
+            if (arg.equalsIgnoreCase("devmode")) {
+                PlatformWebGl.isDevmode = Util.isTrue(value);
             }
         }
         String href = com.google.gwt.user.client.Window.Location.getHref();

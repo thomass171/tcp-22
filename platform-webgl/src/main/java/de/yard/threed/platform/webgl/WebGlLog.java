@@ -4,12 +4,9 @@ package de.yard.threed.platform.webgl;
 import de.yard.threed.core.platform.Log;
 
 /**
+ * A very simple logger instead of the problematic GWT logger or similar cumbersome popup loggings.
+ *
  * Created by thomass on 20.04.15.
- * Der Logger ist der GWT Ersatz für javax.logging. Knofiguriert wird der in Gwt.gwt.xml.
- * 07.05.15: Der GWT Logger ist irgendwie problemtisch (auch wegen der Nachbildung von javax.logging (siehe deren Doku)
- * und wegen umstaendlichem Popuplogging.
- * Ich nehme einfach den javascript Logger.
- * 16.1.18: Der braucht aber viel Speicher ("About:" in Prozessliste).
  */
 public class WebGlLog implements Log {
     String name, label;
@@ -31,7 +28,7 @@ public class WebGlLog implements Log {
     public void debug(String msg) {
         if (!enabled)
             return;
-        // kein Debug log in Production
+        // no debug log in Production
         if (PlatformWebGl.isDevmode) {
             debugNative(buildMessage(msg));
         }
@@ -40,29 +37,17 @@ public class WebGlLog implements Log {
     public void info(String msg) {
         if (!enabled)
             return;
-        if (!PlatformWebGl.isDevmode) {
-            logConsole(msg);
-        } else {
-            infoNative(buildMessage(msg));
-        }
+        infoNative(buildMessage(msg));
     }
 
     public void warn(String msg) {
         if (!enabled)
             return;
-        if (!PlatformWebGl.isDevmode) {
-            logConsole(msg);
-        } else {
-            warnNative(buildMessage(msg));
-        }
+        warnNative(buildMessage(msg));
     }
 
     public void error(String msg) {
-        if (!PlatformWebGl.isDevmode) {
-            logConsole(msg);
-        } else {
-            errorNative(buildMessage(msg));
-        }
+        errorNative(buildMessage(msg));
     }
 
     private String buildMessage(String msg) {
@@ -81,27 +66,19 @@ public class WebGlLog implements Log {
         error(msg + e.getMessage());
     }
 
-    private void logConsole(String msg) {
-       logConsoleNative(msg);
-    }
-
     private static native void debugNative(String msg) /*-{
-        //MA34 $wnd.logger.debug(msg);
         console.debug(msg);
     }-*/;
 
     private static native void infoNative(String msg) /*-{
-        //MA34$wnd.logger.info(msg);
         console.info(msg);
     }-*/;
 
     private static native void warnNative(String msg) /*-{
-        //MA34$wnd.logger.warn(msg);
         console.warn(msg);
     }-*/;
 
     private static native void errorNative(String msg) /*-{
-        //MA34$wnd.logger.error(msg);
         console.error(msg);
     }-*/;
 

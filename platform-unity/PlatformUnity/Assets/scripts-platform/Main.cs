@@ -43,7 +43,6 @@ public class Main : MonoBehaviour
 
             // 16.11.16: Auch hier den init mit Properties.
             HashMap<String, String> properties = new HashMap<String, String>();
-            //FlightGearInit.initProperties (properties);
 
             //TODO adjust this to your local environment, possibly OS dependent
             //if (SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)

@@ -118,16 +118,6 @@ public class Avatar {
     }
 
     /**
-     * Avatar rotieren zu Blickrichtung -x und z up, was die Default FG Aircraft Model Orientierung ist.
-     * TODO: ist die Rotation verfifiziert?
-     *
-     * @return
-     */
-    public static Avatar buildForFlightGearModelOrinetation(Camera camera) {
-        return new Avatar(camera, Quaternion.buildFromAngles(new Degree(90), new Degree(0), new Degree(90)), true);
-    }
-
-    /**
      * Für VR muss die Camera (eigentlich der Carrier) niedriger, weil der VR Treiber einen y Wert um 1.3 liefert.
      * 19.10.18: Abhaengig davon, ob der Avatar sichtbar ist, muss man vielleicht auch den Avatar statt
      * der Camera(carrier) versetzen.

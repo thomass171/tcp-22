@@ -50,8 +50,8 @@ public class PlatformWebGl extends Platform {
     public static boolean isDevmode;
 
     /**
-     * 5.10.18: Wie in JME umbenannt von getInstance zu init, um die Bedeutung zu verdeutlichen. Braucht Properties wie z.B. CACHEDIR, die schon in der Platform
-     * z.B. für defaulttexture gebraucht werden.
+     * 5.10.18: Wie in JME umbenannt von getInstance zu init, um die Bedeutung zu verdeutlichen. Braucht Properties, die schon in der Platform
+     * gebraucht werden.
      *
      * @return
      */

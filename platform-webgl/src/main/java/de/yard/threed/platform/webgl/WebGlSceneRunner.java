@@ -44,16 +44,7 @@ public class WebGlSceneRunner extends AbstractSceneRunner implements NativeScene
         //FocusPanel focuspanel = new FocusPanel(p);
         CanvasPanel canvasPanel = new CanvasPanel(WebGlRenderer.canvasid);
         canvasPanel.getElement().getStyle().setBackgroundColor("#2062B8");
-        /*if (Main.withgui) {
-            /*StackLayoutPanel p = new StackLayoutPanel(Style.Unit.EM);
-            p.add(new FlightGearRemoteConsole(), new HTML("UI"), 4);
-            p.add(canvasPanel, new HTML("3D"), 4);
-            RootLayoutPanel.get().add(p);* /
-            new FlightGearRemoteConsole(canvasPanel);
-        }else*/
-        {
-            RootLayoutPanel.get().add(canvasPanel);
-        }
+        RootLayoutPanel.get().add(canvasPanel);
 
         // 5.8.15: Das mit dem FocusPanel gefaellt mir nicht
         /*focuspanel.addKeyDownHandler(new KeyDownHandler() {

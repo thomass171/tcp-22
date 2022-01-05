@@ -61,8 +61,8 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
     JmeResourceManager jmeResourceManager;
 
     /**
-     * 16.11.16: Umbenannt von getInstance zu init, um die Bedeutung zu verdeutlichen. Braucht Properties wie z.B. CACHEDIR, die schon in der Platform
-     * z.B. für defaulttexture gebraucht werden.
+     * 16.11.16: Umbenannt von getInstance zu init, um die Bedeutung zu verdeutlichen. Braucht Properties, die schon in der Platform
+     * gebraucht werden.
      * <p>
      * 23.7.21: JmeScene kann hier noch nicht angelegt werden. Kommt spaeter.
      * 2.8.21: Returns PlatformInternals now instead of just Platform

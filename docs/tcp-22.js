@@ -50,6 +50,15 @@ function launchVrScene() {
     launchScene("VrScene",args);
 }
 
+function launchTrafficScene(vr) {
+
+    var args = new Map();
+    addCommonArgs(args);
+    args.set("basename","traffic:tiles/Demo.xml");
+    args.set("enableVR",vr);
+    launchScene("BasicTravelScene",args);
+}
+
 function addCommonArgs(args) {
     args.set("vr-controlpanel-posrot",$("#inp_ctrlPanel").val());
     args.set("yoffsetVR",$("#inp_yoffsetVR").val());

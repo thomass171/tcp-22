@@ -116,6 +116,21 @@
             <artifactId>module-maze</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-graph</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-traffic-core</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-traffic</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
         <!-- 23.12.17: auch die core tests. Idea bekommt das auch direkt mit -->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>

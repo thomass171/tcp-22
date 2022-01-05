@@ -46,18 +46,9 @@ public class Setup {
         //13.3.19: Scene doch mal wieder aus Property, um nicht so viele Run Configurations zu haben. Nur, wenn sie
         //nicht schon von aussen gesetzt ist.
         if (System.getProperty("scene") == null) {
-            System.setProperty("scene", "de.yard.threed.trafficext.apps.RailingScene");
-            //System.setProperty("scene", "de.yard.threed.trafficext.apps.FlatTravelScene");
-            //System.setProperty("scene","de.yard.threed.trafficext.apps.TravelScene");
-            //System.setProperty("scene","de.yard.threed.trafficext.apps.TravelClientScene");
 
             System.setProperty("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
-            //System.setProperty("scene","de.yard.threed.trafficext.apps.SceneryViewerScene");
-            //System.setProperty("scene","de.yard.threed.sandbox.apps.CockpitScene");
-            //System.setProperty("scene", "de.yard.threed.apps.ShowroomScene");
             //System.setProperty("scene", "de.yard.threed.maze.MazeScene");
-            //der geht nicht System.setProperty("scene", "de.yard.threed.apps.maze.MazeScene");
-            //System.setProperty("scene", "de.yard.threed.apps.ModelPreviewScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
             //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
 
