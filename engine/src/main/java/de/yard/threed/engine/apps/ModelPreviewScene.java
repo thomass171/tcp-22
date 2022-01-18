@@ -20,6 +20,7 @@ import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.ModelFactory;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.avatar.AvatarPmlFactory;
 import de.yard.threed.engine.avatar.VehiclePmlFactory;
 import de.yard.threed.engine.geometry.Primitives;
 import de.yard.threed.engine.gui.Hud;
@@ -43,7 +44,7 @@ public class ModelPreviewScene extends Scene {
     Light light;
     public double scale = 1;
     public SceneNode model = null;
-    public int major = 0;
+    public int major = 5;
     String[] modellist = getModelList();
     Hud hud;
     double rotationspeed = 10;
@@ -53,13 +54,15 @@ public class ModelPreviewScene extends Scene {
     /**
      *
      */
-    public String[] getModelList() {
+    public static String[] getModelList() {
         return new String[]{
                 "pcm:loc",
                 "pcm:bike",
                 "pcm:mobi",
                 "engine:plane-darkgreen.gltf",
                 "engine:sphere-orange.gltf",
+                // 5
+                "pcm:avatarA"
         };
     }
 
@@ -187,6 +190,8 @@ public class ModelPreviewScene extends Scene {
                     pml = VehiclePmlFactory.buildBike();
                 } else if (modelname.equals("mobi")) {
                     pml = VehiclePmlFactory.buildMobi();
+                } else if (modelname.equals("avatarA")) {
+                    pml = AvatarPmlFactory.buildAvatarA();
                 } else {
                     throw new RuntimeException("unknown pcm model " + modelname);
                 }

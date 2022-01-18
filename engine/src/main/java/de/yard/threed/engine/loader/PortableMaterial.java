@@ -170,7 +170,7 @@ public class PortableMaterial {
                 texturename = StringUtils.substring(texturename, index + 1);
             } else {
                 if (texturebasepath == null) {
-                    logger.warn("no texturebasepath");
+                    logger.warn("no texturebasepath. Not building material.");
                     return null;
                 }
             }

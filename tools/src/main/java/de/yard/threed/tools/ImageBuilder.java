@@ -1,6 +1,7 @@
 package de.yard.threed.tools;
 
 
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.javacommon.FileUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -11,6 +12,8 @@ import org.apache.commons.cli.ParseException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import static de.yard.threed.tools.ToolsUtils.toAwtColor;
 
 /**
  * Generieren von Images und Texturen.
@@ -25,7 +28,8 @@ import java.io.IOException;
 public class ImageBuilder {
     // intended not the final destination directory. Should be validated before moving.
     public static final String outdir = "/tmp";
-
+    // platform is needed for some logging
+    public static Platform platform = ToolsPlatform.init();
 
     private ImageBuilder() {
 
@@ -45,6 +49,11 @@ public class ImageBuilder {
             usage();
         }
 
+        if (args.length <= 1) {
+            // just a preview
+            buildForPreview();
+            return;
+        }
         String themename = cmd.getOptionValue("t");
         String name = cmd.getOptionValue("n");
         String labeldatafile = null;//cmd.getOptionValue("l");
@@ -55,17 +64,19 @@ public class ImageBuilder {
             image = buildIconSet(theme);
 
         } else if (name.equals("Labelset")) {
-            if (labeldatafile!=null) {
+            if (labeldatafile != null) {
                 image = buildLabelSet(theme, labeldatafile);
-            }else{
+            } else {
                 image = buildLabelSet(theme);
             }
 
+        } else if (name.equals("Face")) {
+            image = TextureBuilder.buildFace(toAwtColor(de.yard.threed.core.Color.parseString(themename)));
         } else {
 
             usage();
         }
-        String filename = outdir+"/"+name + "-" + theme.name + ".png";
+        String filename = outdir + "/" + name + "-" + ((theme == null) ? themename : theme.name) + ".png";
         try {
             FileUtil.saveToPngFile(image, filename);
         } catch (IOException e) {
@@ -95,6 +106,10 @@ public class ImageBuilder {
         String[] helptext = new String[]{"Keys:", "[shift] x/y/z adjusts view position"};
         image = buildTextPage(Theme.LIGHTBLUE, "Helptext-LightBlue.png", helptext);
         ImagePreviewer.preview(image);
+
+        image = TextureBuilder.buildFace(Color.BLUE);
+        ImagePreviewer.preview(image);
+
     }
 
 
@@ -222,7 +237,7 @@ public class ImageBuilder {
      * 4 (oder besser 8?) Spalten a 256x
      * Erstmal nicht transparent, weil das den (Frame)Overlay bestimmt erschwert.
      * LabelSet aus Stringliste. T.B.C.
-     * 
+     *
      * @return
      */
     private static BufferedImage buildLabelSet(Theme theme, String labeldatafile) {
@@ -240,7 +255,7 @@ public class ImageBuilder {
         int ypos = 0;
         return image;
     }
-    
+
     private static void buildLabel(Dimension basedimension, java.awt.Color color, Font font, String text, boolean framed, BufferedImage image, int xpos, int y, int w, int h, java.awt.Color bgcolor) {
         Dimension dimension = new Dimension(basedimension.width * w, basedimension.height * h);
         if (framed) {
@@ -306,7 +321,7 @@ public class ImageBuilder {
 
     }*/
 
-   
+
 
 }
 

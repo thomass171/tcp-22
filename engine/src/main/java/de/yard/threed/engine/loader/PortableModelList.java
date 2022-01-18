@@ -372,6 +372,7 @@ public class PortableModelList {
             //22.12.17: Darum jetzt bevorzugt den Texturename aus dem Material.
             Material ma = PortableMaterial.buildMaterial(bundle, portableMaterial, /*3.5.19(portableMaterial.texture != null) ? */portableMaterial.texture/*3.5.19 : objtexture*/, texturebasepath, hasnormals);
             if (ma == null) {
+                logger.warn("No material. Using dummy material.");
                 nmat = getDummyMaterial();
             } else {
                 nmat = ma.material;
@@ -464,12 +465,13 @@ public class PortableModelList {
     /**
      * Material, das verwendet wird, wenn das eigentlich definierte nicht bekannt ist.
      * Einfach schlicht blau.
+     * Better white to make more clear its not intended.
      */
     private NativeMaterial getDummyMaterial() {
         dummymaterialused = true;
         if (dummyMaterial == null) {
             HashMap<ColorType, Color> color = new HashMap<ColorType, Color>();
-            color.put(ColorType.MAIN, Color.BLUE);
+            color.put(ColorType.MAIN, Color.WHITE);
             dummyMaterial = ( Platform.getInstance()).buildMaterial(null, color, null, null, null);
         }
         return dummyMaterial;
