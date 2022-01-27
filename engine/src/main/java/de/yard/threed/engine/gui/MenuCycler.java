@@ -90,7 +90,8 @@ public class MenuCycler {
     public void cycle() {
         if (menu == null) {
             menu = menuBuilders[index].buildMenu();
-            menuBuilders[index].getAttachNode().attach(menu.getNode());
+            //27.1.22 menuBuilders[index].getAttachNode().attach(menu.getNode());
+            menu.getNode().getTransform().setParent(menuBuilders[index].getAttachNode());
             //cameraOfMenu= menuBuilders[index].getCamera();
         } else {
             close();

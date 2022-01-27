@@ -145,20 +145,8 @@ public class VehicleLauncher {
 
             // 26.10.18: Erst jetzt zum Schluss die Teleportlocations für z.B. "Captain" eintragen.Scheint einfach sauberer.
             // 24.11.20: Ist jetzt besser in AvatarSystem untergebracht.
-            if (avatarpc != null) {
-                // die alten müssen nicht hier gelöscht werden, sondern erst bei Löschen des Vehicle. Die Locations für dieses Vehicle kommen
-                // beim Avatar einfach mit dran.
-                //pc.addPosition("Captain", new PosRot(new Vector3(-22.60f, -0.5f, 0.8f), new Quaternion(new Degree(90), new Degree(0), new Degree(90))));
-                //21.2.18: Das mit der aircraft roration fuer Captain viewer ist doch fragwürdig. Das muss doch in den Avatar.
-                //23.2.18: das ist aber nicht so trivial, weil z oben ist. Und eigentlich damit ja auch gar nicht passend,
-                //denn Avatra hat hier ja nun mal eine andere Defaultorientierung.
-                //pc.addPosition("Captain", currentaircraft, new PosRot(aircraft.getPilotPosition(), aircraft.orientation));
-                Map<String, LocalTransform> viewpoints = config.getViewpoints();
-                for (String key : viewpoints.keySet()) {
-                    //24.10.19: Der Parameter hier war immer schon die base node, also die ohne offset.
-                    avatarpc.addPosition(key, teleportParentNode, new LocalTransform(viewpoints.get(key).position, viewpoints.get(key).rotation), vehicleEntity.getName(), nearView);
-                }
-            }
+            // 26.01.22: Meanwhile the logic for attaching the vehicles view points to the vatar(s) was
+            // exactly (first copied) moved to {@link TrafficSystem.attachAllAvatarsToNewVehicle()} for event TRAFFIC_EVENT_VEHICLELOADED.
 
             // Vehicle ist schon in den Scene Space (oder graph space?) rotiert. Etwas ueberraschend: x=seitlich,y=hoehe,z vor zurueck. 28.10.17: Wirklich?
             // ist noch in FG space. Dann muss ich aber rotieren. Aber warum so? 22.10.10: Ausserdem muss das in die Config

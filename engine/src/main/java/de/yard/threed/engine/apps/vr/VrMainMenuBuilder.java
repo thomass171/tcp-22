@@ -1,15 +1,15 @@
 package de.yard.threed.engine.apps.vr;
 
-import de.yard.threed.engine.gui.AvatarMenuProvider;
+import de.yard.threed.engine.gui.ObserverMenuProvider;
 import de.yard.threed.engine.gui.Menu;
 import de.yard.threed.engine.vr.VrHelper;
 
 public
-class VrMainMenuBuilder extends AvatarMenuProvider {
+class VrMainMenuBuilder extends ObserverMenuProvider {
     VrScene rs;
 
     VrMainMenuBuilder(VrScene rs) {
-        super(rs.avatar, rs.getDefaultCamera());
+        super(rs.getDefaultCamera());
         this.rs = rs;
     }
 

@@ -1378,8 +1378,8 @@ class MainMenuBuilder implements MenuProvider {
     }
 
     @Override
-    public SceneNode getAttachNode() {
-        return rs.getDefaultCamera().getCarrier();
+    public Transform getAttachNode() {
+        return rs.getDefaultCamera().getCarrier().getTransform();
     }
 
     /*@Override
@@ -1415,11 +1415,11 @@ class SecondMenuBuilder implements MenuProvider {
      * @return
      */
     @Override
-    public SceneNode getAttachNode() {
+    public Transform getAttachNode() {
         //SceneNode hudCube = FovElement.buildSceneNodeForDeferredCamera(rs.getDefaultCamera());
         //hudCube.getTransform().setLayer(hudCube.getTransform().getLayer());
         //return hudCube;
-        return FovElement.getDeferredCamera(rs.getDefaultCamera()).getCarrier();
+        return FovElement.getDeferredCamera(rs.getDefaultCamera()).getCarrier().getTransform();
     }
 
     /*@Override

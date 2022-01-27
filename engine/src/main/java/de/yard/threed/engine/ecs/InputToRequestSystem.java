@@ -262,7 +262,8 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             //menu = MainMenu.open(getDefaultCamera(), this);
             if (menuProvider != null) {
                 menu = menuProvider.buildMenu();//MainMenu.open(getDefaultCamera(), this);
-                menuProvider.getAttachNode().attach(menu.getNode());
+                //27.1.22 menuProvider.getAttachNode().attach(menu.getNode());
+                menu.getNode().getTransform().setParent(menuProvider.getAttachNode());
             }
         }
     }

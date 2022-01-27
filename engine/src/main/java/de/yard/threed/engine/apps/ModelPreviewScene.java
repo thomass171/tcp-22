@@ -45,7 +45,7 @@ public class ModelPreviewScene extends Scene {
     public double scale = 1;
     public SceneNode model = null;
     public int major = 5;
-    String[] modellist = getModelList();
+    String[] modellist;
     Hud hud;
     double rotationspeed = 10;
     SceneNode ground = null;
@@ -54,7 +54,7 @@ public class ModelPreviewScene extends Scene {
     /**
      *
      */
-    public static String[] getModelList() {
+    public String[] getModelList() {
         return new String[]{
                 "pcm:loc",
                 "pcm:bike",
@@ -76,6 +76,8 @@ public class ModelPreviewScene extends Scene {
 
     @Override
     public void init(boolean forServer) {
+        modellist = getModelList();
+
         addLight();
 
         // Wegen FG Modelorientierung von etwas erhöht auf z=0 aus Osten in Richtung Westen blicken

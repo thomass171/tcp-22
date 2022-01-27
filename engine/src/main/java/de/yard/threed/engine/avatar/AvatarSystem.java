@@ -18,7 +18,7 @@ import java.util.List;
  * Avatar administration.
  * <p>
  * Building the avatar isType the step USER_REQUEST_JOIN->USER_EVENT_JOINED.
- *
+ * <p>
  * 22.11.21: The name AvatarSystem is confusing. In fact its a player system. And the player just might have an avatar model (body).
  * <p>
  * Created by thomass on 20.11.20.
@@ -79,10 +79,6 @@ public class AvatarSystem extends DefaultEcsSystem {
      */
     @Override
     public void update(EcsEntity entity, EcsGroup group, double tpf) {
-        //wurde evtl. auch nach InputToRequestSystem passen wegen user input. Und dann hier nur die Requests. Waere konsistenter.
-        if (avatar != null) {
-            avatar.update();
-        }
     }
 
     @Override
@@ -93,11 +89,12 @@ public class AvatarSystem extends DefaultEcsSystem {
 
         if (request.getType().equals(UserSystem.USER_REQUEST_JOIN)) {
 
-            String someName = (String) request.getPayloadByIndex(0);
+            String userEntityName = (String) request.getPayloadByIndex(0);
             Boolean forLogin = (Boolean) request.getPayloadByIndex(1);
-            avatar = buildAvatar();
-            EcsEntity a = avatar.avatarE;
-            TeleportComponent tc = TeleportComponent.getTeleportComponent(a);
+            EcsEntity userEntity = SystemManager.findEntities(new NameFilter(userEntityName)).get(0);
+            avatar = buildAvatar(userEntity);
+
+            TeleportComponent tc = TeleportComponent.getTeleportComponent(userEntity);
             if (tc != null) {
                 DataProvider viewpointsDataProvider = SystemManager.getDataProvider("viewpoints");
                 if (viewpointsDataProvider == null) {
@@ -118,20 +115,20 @@ public class AvatarSystem extends DefaultEcsSystem {
                 //25.10.21 From FlatTravel. Not used in maze.
                 ObserverComponent oc = new ObserverComponent(Scene.getCurrent().getDefaultCamera().getCarrierTransform());
                 oc.setRotationSpeed(40);
-                avatar.avatarE.addComponent(oc);
+                userEntity.addComponent(oc);
             }
             // Attach the oberver to the avatar. Is the connection to observer good located here?
             // 19.11.21: Should be independant from ObserverComponent? Probably. If there is an oberver, attach it to avatar
             // But not in VR. VR needs ground distance.
             // This is also reached for bot and MP joining.
-            if ((boolean)forLogin && Observer.getInstance() != null && !VrInstance.isEnabled()) {
+            if ((boolean) forLogin && Observer.getInstance() != null && !VrInstance.isEnabled()) {
                 logger.debug("Attaching oberserver to avatar");
                 Observer.getInstance().getTransform().setParent(AvatarSystem.getAvatar().getSceneNode().getTransform());
             }
-            avatar.avatarE.setName("Player");
-            logger.debug(avatar.avatarE.getName() + " joined");
+            //avatar.avatarE.setName("Player");
+            logger.debug(userEntity.getName() + " joined");
 
-            SystemManager.sendEvent(new Event(UserSystem.USER_EVENT_JOINED, new Payload(a)));
+            SystemManager.sendEvent(new Event(UserSystem.USER_EVENT_JOINED, new Payload(userEntity)));
 
             return true;
         }
@@ -152,10 +149,10 @@ public class AvatarSystem extends DefaultEcsSystem {
      * Trennung ist aber knifflig. Darum erstmal Avatar nur fuer Bots, aber nicht main player. Geht aber nicht so einfach, also doch auch fuer player?
      * TODO ECS Erstellung muss hier aber wirklich raus. Wird dann später gemacht.
      */
-    private static Avatar buildAvatar() {
-        logger.debug("Building avatar");
-        //avatar = Avatar.buildDefault(Scene.getCurrent().getDefaultCamera());
-        Avatar av = new Avatar(/*MA35 Scene.getCurrent().getDefaultCamera()*/null, new Quaternion(), true);
+    private static Avatar buildAvatar(EcsEntity player) {
+        logger.debug("Building avatar for player " + player);
+
+        Avatar av = new Avatar(player);
         av.enableBody();
         Scene.getCurrent().addToWorld(av.getSceneNode());
 
@@ -166,12 +163,6 @@ public class AvatarSystem extends DefaultEcsSystem {
 
         //1.4.21 Player.init(avatar);
 
-        /*15.5.21 if (yoffsetVR != null) {
-            avatar.setBestPracticeRiftvryoffset((double) yoffsetVR);
-        }*/
-        /*if (enableLoweredAvatar) {
-            avatar.lowerVR();
-        }*/
 
         /*15.5.21 war eh ne Kruecke
         if (initialTransform != null) {

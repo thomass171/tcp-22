@@ -55,8 +55,8 @@ public class MainMenu implements MenuProvider {
     }
 
     @Override
-    public SceneNode getAttachNode() {
-        return camera.getCarrier();
+    public Transform getAttachNode() {
+        return camera.getCarrier().getTransform();
     }
 
     @Override

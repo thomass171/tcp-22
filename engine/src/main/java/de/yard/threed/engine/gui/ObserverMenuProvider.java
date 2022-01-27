@@ -3,31 +3,34 @@ package de.yard.threed.engine.gui;
 
 import de.yard.threed.engine.Camera;
 import de.yard.threed.core.Point;
+import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.Ray;
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.avatar.Avatar;
 import de.yard.threed.engine.vr.VrHelper;
 
 
 /**
- * Kleiner Helper um CodeDubletten zu vermeiden.
- * Muesste das jetzt nicht ObserverMenuSystem sein?
+ * Small helper for avoiding duplicate code.
+ * 27.1.2022 No longer related to avatar but observer.
  *
  * 26.11.2019
  */
-public abstract class AvatarMenuProvider implements MenuProvider {
-    Avatar avatar;
+public abstract class ObserverMenuProvider implements MenuProvider {
+   // Avatar avatar;
     Camera cameraForMouseClick;
 
-    public AvatarMenuProvider(Avatar avatar, Camera cameraForMouseClick) {
-        this.avatar = avatar;
+    public ObserverMenuProvider(/*Avatar avatar,*/ Camera cameraForMouseClick) {
+       // this.avatar = avatar;
         this.cameraForMouseClick=cameraForMouseClick;
     }
 
     @Override
-    public SceneNode getAttachNode() {
+    public /*SceneNode*/Transform getAttachNode() {
         //r11.5.21 eturn avatar.getFaceNode();
-        return avatar.getNode();
+        return Observer.getInstance().getTransform();
+        //return avatar.getNode();
         //return sc.getDefaultCamera().getCarrier();
     }
 

@@ -8,6 +8,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.UserSystem;
 
 /**
  * Die Darstellung eines Maze.
@@ -30,7 +31,6 @@ public class MazeView {
      * Liefert die Box an einer bestimmten Position.
      * 3.3.17: Das ist vielleicht ein schon ganz ordentliches Mapping Model->View.
      *
-     * @param p
      * @return
      */
     /*24.4.21 public  EcsEntity getBox(Point p) {
@@ -60,7 +60,7 @@ public class MazeView {
         }
     }*/
 
-    void setRayPosition(Point position) {
+    /*24.1.22void setRayPosition(Point position) {
         Vector3 effectivestartposition = MazeDimensions.getWorldElementCoordinates(position.getX(), position.getY());
         //Ray Oberkante zum Test genau auf Pillaroberkante mit rayy = Pillar.HEIGHT - 0.15f
         float rayy = 0.6f;
@@ -68,21 +68,22 @@ public class MazeView {
         EcsEntity ray = AvatarSystem.getAvatar().avatarE;
         ray.scenenode.getTransform().setPosition(effectivestartposition);
 
-    }
+    }*/
 
-    void setRayRotation(Degree yaw) {
+   /*24.1.22 void setRayRotation(Degree yaw) {
         EcsEntity ray = AvatarSystem.getAvatar().avatarE;
         Quaternion q =  Quaternion.buildFromAngles(new Degree(0), yaw, new Degree(0));
         ray.scenenode.getTransform().setRotation(q);
         MoverComponent mover = ((MoverComponent) ray.getComponent(MoverComponent.TAG));
         mover.setYaw(yaw);
-    }
+    }*/
 
     public boolean isMoving() {
         if (AvatarSystem.getAvatar()==null){
             return false;
         }
-        EcsEntity ray = AvatarSystem.getAvatar().avatarE;
+        // TODO get user from move request
+        EcsEntity ray = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
 
         MoverComponent mover = ((MoverComponent) ray.getComponent(MoverComponent.TAG));
         if (mover==null){

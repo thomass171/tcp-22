@@ -7,6 +7,8 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
 
+import java.util.List;
+
 /**
  * User administration
  * <p>
@@ -31,6 +33,8 @@ public class UserSystem extends DefaultEcsSystem {
 
     boolean usersystemdebuglog = true;
 
+    int userIndex = 0;
+
     /**
      *
      */
@@ -44,21 +48,31 @@ public class UserSystem extends DefaultEcsSystem {
             logger.debug("got request " + request.getType());
         }
         if (request.getType().equals(USER_REQUEST_LOGIN) && SystemState.readyToJoin()) {
+            EcsEntity user = new EcsEntity(new UserComponent((String) request.getPayloadByIndex(0)));
+            user.setName("User" + userIndex);
+
             SystemManager.sendEvent(new Event(USER_EVENT_LOGGEDIN, new Payload("")));
             // als Vereinfachung direkt joinen, ohne das der Client es anfragt.
-            SystemManager.putRequest(buildJOIN("",true));
-
+            SystemManager.putRequest(buildJOIN(user.getName(), true));
+            userIndex++;
             return true;
         }
         return false;
     }
 
-    public static Request buildLOGIN(String s) {
-        return new Request(USER_REQUEST_LOGIN, new Payload(s));
+    public static Request buildLOGIN(String username) {
+        return new Request(USER_REQUEST_LOGIN, new Payload(username));
     }
 
-    public static Request buildJOIN(String s, boolean forLogin) {
-        return new Request(USER_REQUEST_JOIN, new Payload(s, new Boolean(forLogin)));
+    public static Request buildJOIN(String userEntityName, boolean forLogin) {
+        return new Request(USER_REQUEST_JOIN, new Payload(userEntityName, new Boolean(forLogin)));
     }
 
+    public static EcsEntity getInitialUser() {
+        return SystemManager.findEntities(new NameFilter("User0")).get(0);
+    }
+
+    public static List<EcsEntity> getAllUser() {
+        return SystemManager.findEntities(new ComponentFilter(UserComponent.TAG));
+    }
 }

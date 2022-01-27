@@ -236,6 +236,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             return true;
         }
         if (request.getType().equals(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLES)) {
+            // For initial and 'other' vehicles.
             TrafficGraph trafficGraph = (TrafficGraph) request.getPayloadByIndex(0);
             // groundnet only for backward caompatibility. Should be replaces by graph layer
             //27.12.21 GroundNet groundNet = (GroundNet) request.getPayloadByIndex(1);
@@ -259,7 +260,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 }
                 TrafficHelper.launchVehicles(TrafficSystem.vehiclelist,
                         trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
-                        (AvatarSystem.getAvatar() == null) ? null : TeleportComponent.getTeleportComponent(AvatarSystem.getAvatar().avatarE),
+                        (AvatarSystem.getAvatar() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
                         SphereSystem.getSphereNode()/*getWorld()*/, sphereProjections.backProjection,
                         /*27.12.21airportConfig,*/ baseTransformForVehicleOnGraph, vehicleLoader, genericVehicleBuiltDelegate);
                 return true;

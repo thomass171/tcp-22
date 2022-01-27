@@ -211,7 +211,7 @@ public class MazeTest {
         EcsEntity player = players.get(1);
         mc = MoverComponent.getMoverComponent(player);
         assertNotNull("MoverComponent", mc);
-        assertEquals("player name", "Player", player.getName());
+        assertEquals("player name", "User0", player.getName());
 
         List<EcsEntity> inventory = MazeUtils.getInventory(player);
         assertEquals("inventory size", 3, inventory.size());

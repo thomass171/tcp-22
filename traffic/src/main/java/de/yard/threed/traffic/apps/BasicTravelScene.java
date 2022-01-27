@@ -157,7 +157,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
 
             SystemManager.addSystem(new ObserverSystem(), 0);
         }
-        // UserSystem lass ich erstmal weg
+        SystemManager.addSystem(new UserSystem());
         SystemManager.addSystem(new AvatarSystem(!forServer), 0);
 
         //visualizeTrack soll auch im usermode verfuegbar sein.
@@ -380,9 +380,11 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         //Sphere laden. Von da wird dann das alte "sendInitialEvents" gemacht.
         SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE, new Payload(tilename/*17.10.21 TrafficWorld2D.basename*/, getVehicleList())));
 
-        // Avatar anlegen (ohne login)
-        SystemManager.putRequest(UserSystem.buildJOIN("", true));
+        // Avatar anlegen (via login)
+        SystemManager.putRequest(UserSystem.buildLOGIN("Freds account name"));
 
+        // 24.1.22: State ready to join now needed for 'login'
+        SystemState.state = SystemState.STATE_READY_TO_JOIN;
         //sendInitialEvents(initialPosition);
     }
 
@@ -541,7 +543,8 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             //TrafficSystem.loadVehicles(tw, avataraircraftindex);
 
             VehicleConfig config = TrafficHelper.getVehicleConfigByDataprovider(name);// tw.getVehicleConfig(name);
-            VehicleLauncher.lauchVehicleByName(getGroundNet(), config/*27.12.21DefaultTrafficWorld.getInstance().getConfiguration()*/, name, smartLocation, TeleportComponent.getTeleportComponent(/*24.10.21avatar*/AvatarSystem.getAvatar().avatarE),
+            EcsEntity avatar = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
+            VehicleLauncher.lauchVehicleByName(getGroundNet(), config/*27.12.21DefaultTrafficWorld.getInstance().getConfiguration()*/, name, smartLocation, TeleportComponent.getTeleportComponent(avatar),
                     getDestinationNode(), sphereProjections.backProjection/*getBackProjection()*/, sceneConfig, nearView, TrafficSystem.genericVehicleBuiltDelegate, getVehicleLoader());
             //aus flight: GroundServicesScene.lauchVehicleByIndex(gsw.groundnet, tw, 2, TeleportComponent.getTeleportComponent(avatar.avatarE), world, gsw.groundnet.projection);
 
@@ -583,7 +586,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
      * @return
      */
     protected EcsEntity getAvatarVehicle() {
-        TeleportComponent tc = TeleportComponent.getTeleportComponent(/*24.10.21avatar*/AvatarSystem.getAvatar().avatarE);
+        TeleportComponent tc = TeleportComponent.getTeleportComponent(/*24.10.21avatar*/UserSystem.getInitialUser());
         /*SceneNode avatarparent = tc.getParent();
         String parentname = avatarparent.getName();
         getLog().debug("avatarparent=" + parentname);
@@ -717,8 +720,8 @@ class TravelMainMenuBuilder implements MenuProvider {
     }
 
     @Override
-    public SceneNode getAttachNode() {
-        return /*24.10.21sc.avatar*/AvatarSystem.getAvatar().getNode();//getFaceNode();
+    public Transform getAttachNode() {
+        return /*24.10.21sc.avatar*/AvatarSystem.getAvatar().getNode().getTransform();//getFaceNode();
         //return sc.getDefaultCamera().getCarrier();
     }
 

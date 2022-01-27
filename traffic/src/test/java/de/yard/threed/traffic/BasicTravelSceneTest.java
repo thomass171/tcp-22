@@ -5,6 +5,8 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.EntityFilter;
+import de.yard.threed.engine.ecs.TeleportComponent;
+import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
@@ -68,6 +70,7 @@ public class BasicTravelSceneTest {
         setup("traffic:tiles/Demo.xml");
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
+        assertNotNull("user entity", UserSystem.getInitialUser());
 
         // "Wayland" has two graph files that should have been loaded finally (via EVENT_LOCATIONCHANGED)
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
@@ -79,18 +82,26 @@ public class BasicTravelSceneTest {
         TrafficGraph railwayGraph = TrafficHelper.getTrafficGraphByDataprovider(TrafficGraph.RAILWAY);
         assertNotNull("railwayGraph", railwayGraph);
 
-        assertEquals("number of entities (loc)", 1, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals("number of entities (user)", 1, SystemManager.findEntities((EntityFilter) null).size());
 
         // test GraphTerrainSystem
         List<NativeSceneNode> tracksNode = SceneNode.findByName("tracks");
         assertEquals("tracksNode", 1, tracksNode.size());
 
         assertTrue(((GraphTerrainSystem) SystemManager.findSystem(GraphTerrainSystem.TAG)).enabled);
+
+        EcsEntity player = UserSystem.getInitialUser();
+        TeleportComponent tc = TeleportComponent.getTeleportComponent(player);
+        // vehicle not yet loaded. So only 3 outside viewpoints.
+        assertEquals("teleport destinations", 3, tc.getPointCount());
+
+        sceneRunner.runLimitedFrames(50);
+        // now 'loc' should have been loaded.
+        assertEquals("teleport destinations", 3 + 2, tc.getPointCount());
     }
 
     /**
      * Needs parameter, so no @Before
-     *
      */
     private void setup(String tileName) throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();

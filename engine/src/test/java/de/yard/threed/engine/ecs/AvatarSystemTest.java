@@ -77,7 +77,11 @@ public class AvatarSystemTest {
 
     private void startSimpleTest() {
 
-        SystemManager.putRequest(UserSystem.buildJOIN("", true));
+        String testUserName = "testUserName";
+        EcsEntity user = new EcsEntity(new UserComponent("user account"));
+        user.setName(testUserName);
+
+        SystemManager.putRequest(UserSystem.buildJOIN(testUserName, true));
         assertEquals("requests ", 1, SystemManager.getRequestCount());
         // process join
         EcsTestHelper.processSeconds(2);
@@ -89,7 +93,7 @@ public class AvatarSystemTest {
         assertNotNull("player", playerEntity);
         assertNotNull("Player", playerEntity.getName());
 
-        playerEntity = SystemManager.findEntities(new NameFilter("Player")).get(0);
+        playerEntity = SystemManager.findEntities(new NameFilter(testUserName)).get(0);
         assertNotNull("player", playerEntity);
         assertNotNull("Player", playerEntity.getName());
     }

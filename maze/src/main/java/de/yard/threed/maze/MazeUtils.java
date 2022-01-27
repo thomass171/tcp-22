@@ -10,6 +10,7 @@ import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleData;
+import de.yard.threed.engine.ecs.UserSystem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +27,15 @@ public class MazeUtils {
         return SystemManager.findEntities(new ItemFilter());
     }
 
+    /**
+     * player in terms of maze is an entity having a 'Mover', but not a movable box.
+     *
+     * @return
+     */
     public static List<EcsEntity> getPlayer() {
         return SystemManager.findEntities(new MoverFilter(false));
+        // currently assuem all users joined
+        //return UserSystem.getAllUser();
     }
 
     public static EcsEntity getMainPlayer() {

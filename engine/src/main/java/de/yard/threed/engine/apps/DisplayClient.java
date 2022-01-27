@@ -37,8 +37,8 @@ import de.yard.threed.engine.platform.common.Settings;
  * - es wird verbunden
  * - Scene wird aufgebaut.
  *
- * 15.2.21: Nachfolger der mal angedachten {@link GenericScene}.
- *
+ * 15.2.21: Nachfolger der mal angedachten GenericScene.
+ * 24.1.22: Still a valid concept?
  * <p>
  * <p>
  * Created by thomass on 11.11.20.
@@ -83,16 +83,16 @@ public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
 
         addLight();
 
-        avatar = Avatar.buildDefault(getDefaultCamera());
+        /*24.1.22 avatar = Avatar.buildDefault(getDefaultCamera());
         avatar.enableBody();
         addToWorld(avatar.getSceneNode());
 
         TeleportComponent avatartc = TeleportComponent.getTeleportComponent(avatar.avatarE);
 
 
-        ObserverComponent oc = new ObserverComponent(new ProxyTransform(getDefaultCamera().getCarrier().getTransform().transform, null/*13.11.20 slave*/));
+        ObserverComponent oc = new ObserverComponent(new ProxyTransform(getDefaultCamera().getCarrier().getTransform().transform, null/*13.11.20 slave* /));
         oc.setRotationSpeed(40);
-        avatar.avatarE.addComponent(oc);
+        avatar.avatarE.addComponent(oc);*/
         ObserverSystem viewingsystem = new ObserverSystem();
         SystemManager.addSystem(viewingsystem, 0);
 
@@ -115,9 +115,9 @@ public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
 
         //1.4.21 Player.init(avatar);
 
-        if (yoffsetVR != null) {
+        /*24.1.22 if (yoffsetVR != null) {
             avatar.setBestPracticeRiftvryoffset((double) yoffsetVR);
-        }
+        }*/
         /*if (enableLoweredAvatar) {
             avatar.lowerVR();
         }*/

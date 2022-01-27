@@ -36,14 +36,23 @@ public final class EcsEntity {
     //26.10.19public SceneNode basenode;
     private EcsSystem lockowner;
 
-    public EcsEntity(SceneNode sn) {
+    public EcsEntity() {
         SystemManager.addEntity(this);
-        scenenode = sn;
         id = idcounter++;
+    }
+
+    public EcsEntity(SceneNode sn) {
+        this();
+        scenenode = sn;
     }
 
     public EcsEntity(SceneNode sn, EcsComponent c) {
         this(sn);
+        addComponent(c);
+    }
+
+    public EcsEntity(EcsComponent c) {
+        this();
         addComponent(c);
     }
 

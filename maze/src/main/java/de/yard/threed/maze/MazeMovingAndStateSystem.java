@@ -232,12 +232,14 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //10.11.20 true oder false liefern?
             return true;
         } else {
-            //1.4.21: Be sure join completed. Evtl. faellt hier ein movement unter den Tisch, weil gerade ein Moving läuft.
+            //1.4.21: Be sure join completed (by checking for avatar). Evtl. faellt hier ein movement unter den Tisch, weil gerade ein Moving läuft.
             // Dafuer gab es mal eine Queue um alle Events queuen, weil sie evtl. unpassend (z.B. während Movement) kommen. Einfach ignorieren
             // ist riskant, weil sie auch fuer Replay, etc kommen können, wo jedes Event wichtig ist.
 
             if (AvatarSystem.getAvatar() != null) {
-                EcsEntity ray = AvatarSystem.getAvatar().avatarE;
+                //EcsEntity ray = MazeUtils.getMainPlayer();//AvatarSystem.getAvatar().avatarE;
+                // TODO current request user
+                EcsEntity ray = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
 
                 MoverComponent mover = (MoverComponent) ray.getComponent(MoverComponent.TAG);
                 if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
@@ -501,15 +503,15 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
      *
      * @return
      */
-    public static Avatar/*EcsEntity*/ buildPlayer(Camera camera) {
+    /*24.1.22 public static Avatar/*EcsEntity* / buildPlayer(Camera camera) {
 
-        Avatar avatar = Avatar.buildDefault(camera/*getMainCamera()*/);
+        Avatar avatar = Avatar.buildDefault(camera/*getMainCamera()* /);
         SceneNode body = MazeModelBuilder.buildSimpleBody(MazeSettings.getSettings().simplerayheight, MazeSettings.getSettings().simpleraydiameter, Color.ORANGE);
         //avatar.avatar.attach(body);
 
 
-        return avatar/*.avatarE*/;
-    }
+        return avatar/*.avatarE* /;
+    }*/
 
 
     private void undo(GridState currentstate, MoverComponent mover, MazeLayout layout) {
