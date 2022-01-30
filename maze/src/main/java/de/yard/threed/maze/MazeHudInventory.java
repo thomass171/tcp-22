@@ -24,7 +24,10 @@ public class MazeHudInventory implements MazeInventory {
 
     public MazeHudInventory(Camera deferredcamera, Dimension dimension) {
         controlPanel = ControlPanelHelper.buildInventoryForDeferredCamera(deferredcamera, dimension, basecolor);
-
+        if (controlPanel == null){
+            // headless?
+            return;
+        }
         // occupy mid third of inventory for now
         bulletCountArea = controlPanel.addArea(new Vector2(0, 0), new DimensionF(controlPanel.getSize().getWidth() / 3, controlPanel.getSize().getHeight()), null);
         textTexture = new TextTexture(basecolor);
@@ -34,6 +37,10 @@ public class MazeHudInventory implements MazeInventory {
     public void setBullets(int count) {
         if (bullets == count) {
             // no change
+            return;
+        }
+        if (bulletCountArea == null){
+            // headless?
             return;
         }
         if (count == 0) {

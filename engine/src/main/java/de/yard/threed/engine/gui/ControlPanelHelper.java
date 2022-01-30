@@ -35,7 +35,10 @@ public class ControlPanelHelper {
 
         DimensionF worldBackplaneSize = buildDimensionByPixel(worldPlaneSize, screenDimensionInPixel, inventorySizeInPixel);
         logger.debug("worldBackplaneSize=" + worldBackplaneSize);
-
+        if (worldBackplaneSize == null){
+            // headless?
+            return null;
+        }
         //ControlPanel inventory = new ControlPanel(FovElementPlane.buildFovElementPlane(null, worldBackplaneSize, mat), worldBackplaneSize, basecolor);
         ControlPanel inventory = new ControlPanel( worldBackplaneSize, mat);
         // move it to the lower right screen corner
@@ -51,6 +54,10 @@ public class ControlPanelHelper {
      * @return
      */
     private static DimensionF buildDimensionByPixel(DimensionF planeSize, Dimension dimension, Dimension expectedSizeInPixel) {
+        if (dimension == null){
+            // headless?
+            return null;
+        }
         double wfactor = (double) expectedSizeInPixel.getWidth() / dimension.getWidth();
         double hfactor = (double) expectedSizeInPixel.getHeight() / dimension.getHeight();
         return new DimensionF(planeSize.width * wfactor, planeSize.height * hfactor);

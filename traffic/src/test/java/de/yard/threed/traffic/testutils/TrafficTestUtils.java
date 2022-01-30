@@ -20,19 +20,6 @@ public class TrafficTestUtils {
 
 
 
-    /**
-     * Setup scene like it isType done in main and render "initialFrames" frames.
-     *
-     */
-    public static SceneRunnerForTesting setupForScene(int initialFrames, HashMap<String, String> properties) throws Exception {
-
-        TestFactory.initPlatformForTest( new String[] {"engine","data","traffic"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()),properties);
-
-        SceneRunnerForTesting sceneRunner =  (SceneRunnerForTesting) SceneRunnerForTesting.getInstance();
-        sceneRunner.runLimitedFrames(initialFrames);
-        return sceneRunner;
-    }
-
     public static void runAdditionalFrames(SceneRunnerForTesting sceneRunner, int frames) {
         Util.notyet();
         /*sceneRunner.frameLimit = frames;

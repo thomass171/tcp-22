@@ -162,7 +162,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                     if (transform.direction != null) {
                         orientation = "" + transform.direction;
                     }
-                    return RequestRegistry.buildRELOCATE("Player", p, orientation);
+                    return RequestRegistry.buildRELOCATE("User0", p, orientation);
                 }
             }
         } else {

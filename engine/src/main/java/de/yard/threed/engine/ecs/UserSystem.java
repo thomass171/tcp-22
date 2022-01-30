@@ -69,7 +69,12 @@ public class UserSystem extends DefaultEcsSystem {
     }
 
     public static EcsEntity getInitialUser() {
-        return SystemManager.findEntities(new NameFilter("User0")).get(0);
+        List<EcsEntity> candidates = SystemManager.findEntities(new NameFilter("User0"));
+        if (candidates.size() == 0){
+            SystemManager.findEntities(new NameFilter("User0"));
+            return null;
+        }
+        return candidates.get(0);
     }
 
     public static List<EcsEntity> getAllUser() {

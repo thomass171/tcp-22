@@ -92,9 +92,11 @@ public class AvatarSystemTest {
         EcsEntity playerEntity = (EcsEntity) joinEvent.getPayloadByIndex(0);
         assertNotNull("player", playerEntity);
         assertNotNull("Player", playerEntity.getName());
+        assertEquals(testUserName, playerEntity.getName());
 
         playerEntity = SystemManager.findEntities(new NameFilter(testUserName)).get(0);
         assertNotNull("player", playerEntity);
         assertNotNull("Player", playerEntity.getName());
+        assertEquals(testUserName, playerEntity.getName());
     }
 }

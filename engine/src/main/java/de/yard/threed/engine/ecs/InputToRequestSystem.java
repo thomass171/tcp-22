@@ -60,6 +60,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     public static int MOUSE_MOVE_MODE_SEGMENT = 1;
     public static int MOUSE_MOVE_MODE_VR_LEFT = 2;
     private int mouseMoveMode = MOUSE_MOVE_MODE_SEGMENT;
+    private List<MockedInput> mockedInputs = new ArrayList<MockedInput>();
 
     public InputToRequestSystem() {
         super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU}, new EventType[]{});
@@ -226,6 +227,11 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 processTrigger(rayRight, false);
             }
         }
+
+        if (mockedInputs.size() > 0) {
+            MockedInput mi = mockedInputs.remove(0);
+            processPointer(mi.ray, mi.left);
+        }
     }
 
     @Override
@@ -302,6 +308,13 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         return TAG;
     }
 
+    /**
+     * Intended for testing
+     */
+    public void mockInput(Ray ray, boolean left) {
+        mockedInputs.add(new MockedInput(ray, left));
+    }
+
     private void processPointer(Ray ray, boolean left) {
 
         for (PointerHandler pointerHandler : pointerHandlerList) {
@@ -333,5 +346,18 @@ class KeyEntry {
 
     KeyEntry(int keyCode) {
         this.keyCode = keyCode;
+    }
+}
+
+/**
+ * Not real input intended for testing.
+ */
+class MockedInput {
+    Ray ray;
+    boolean left;
+
+    public MockedInput(Ray ray, boolean left) {
+        this.ray = ray;
+        this.left = left;
     }
 }

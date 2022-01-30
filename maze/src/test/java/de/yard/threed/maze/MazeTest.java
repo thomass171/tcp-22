@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 
 /**
  * Tests using ECS (See GridTest for tests without ECS).
+ * But NO visualization to reveal model-view coupling.
  */
 public class MazeTest {
 

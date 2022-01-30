@@ -84,7 +84,10 @@ public class MazeView {
         }
         // TODO get user from move request
         EcsEntity ray = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
-
+        if (ray == null) {
+            // maybe not yet logged in/joined
+            return false;
+        }
         MoverComponent mover = ((MoverComponent) ray.getComponent(MoverComponent.TAG));
         if (mover==null){
             //1.4.21 wann passiert das denn?

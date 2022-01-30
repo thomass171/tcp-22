@@ -1,6 +1,9 @@
 package de.yard.threed.maze.testutils;
 
 import de.yard.threed.core.Point;
+import de.yard.threed.core.Vector3;
+import de.yard.threed.engine.GridTeleporter;
+import de.yard.threed.engine.Ray;
 import de.yard.threed.maze.*;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
@@ -81,5 +84,26 @@ public class TestUtils {
 
     public static String loadGrid(String name) {
         return TestHelper.getDataBundleString("maze", name);
+    }
+
+    public static Ray getHittingRayForTeleport(Point destinationField, char direction){
+        double offset = GridTeleporter.getCenterOffset(MazeDimensions.GRIDSEGMENTSIZE);
+        Vector3 hitPoint=MazeUtils.point2Vector3(destinationField);
+        switch (direction){
+            case 'N':
+                hitPoint= hitPoint.add(new Vector3(0,0,-offset));
+                break;
+            case 'E':
+                hitPoint= hitPoint.add(new Vector3(0,0,-offset));
+                break;
+            case 'S':
+                hitPoint= hitPoint.add(new Vector3(0,0,-offset));
+                break;
+            case 'W':
+                hitPoint= hitPoint.add(new Vector3(0,0,-offset));
+                break;
+        }
+        Vector3 origin=new Vector3(hitPoint.getX(),100,hitPoint.getZ());
+        return new Ray(origin,hitPoint.subtract(origin));
     }
 }

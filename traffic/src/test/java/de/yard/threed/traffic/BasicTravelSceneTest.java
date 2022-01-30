@@ -107,6 +107,6 @@ public class BasicTravelSceneTest {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         properties.put("argv.basename", tileName);
-        sceneRunner = TrafficTestUtils.setupForScene(INITIAL_FRAMES, properties);
+        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, properties,new String[] {"engine","data","traffic"});
     }
 }

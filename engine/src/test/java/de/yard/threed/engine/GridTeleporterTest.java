@@ -12,7 +12,7 @@ import org.junit.Test;
 
 public class GridTeleporterTest {
 
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
 
     /**
      * Skizze 65
@@ -92,7 +92,12 @@ public class GridTeleporterTest {
 
         Vector2 intersectionInNegativeUpperArea = new Vector2(1.51, -2.1);
         gridTeleporter.moveDestinationMarker(intersectionInNegativeUpperArea, localMarker, directionMarker, 1.5);
-        TestUtil.assertVector3(new Vector3(1.5, GridTeleporter.VISIBLE_GROUNDMARKER_Y, -1.5 - (1.5/2) + 1.5/8), directionMarker.getTransform().getPosition());
+        TestUtil.assertVector3(new Vector3(1.5, GridTeleporter.VISIBLE_GROUNDMARKER_Y, -1.5 - (1.5 / 2) + 1.5 / 8), directionMarker.getTransform().getPosition());
 
+    }
+
+    @Test
+    public void testOffset() {
+        TestUtil.assertFloat("", 3 * 1.5 / 8, GridTeleporter.getCenterOffset(1.5));
     }
 }

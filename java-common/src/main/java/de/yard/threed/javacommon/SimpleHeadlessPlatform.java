@@ -573,6 +573,9 @@ class DummyScene implements NativeScene {
 
     @Override
     public Dimension getDimension() {
+        // Return a 'dummy' dimension instead of just null because some HUD builder for example use the current screen size?
+        // But this ins't headless.
+        //return new Dimension(300,200);
         return null;
     }
 

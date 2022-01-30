@@ -61,7 +61,8 @@ public class GridTeleporter {
         double s2 = gridSize / 2;
         double s4 = gridSize / 4;
         double s8 = gridSize / 8;
-        Vector2 center = new Vector2(Util.roundDouble(rawIntersection.getX()/gridSize)*gridSize, Util.roundDouble(rawIntersection.getY()/gridSize)*gridSize);
+        // center is the center of the grid cell in world coordinates (not logical grid coordinates), eg. (10.5,-4.5) for cell (7,3)
+        Vector2 center = new Vector2(Util.roundDouble(rawIntersection.getX() / gridSize) * gridSize, Util.roundDouble(rawIntersection.getY() / gridSize) * gridSize);
 
         double xoffset = rawIntersection.getX() - center.getX();
         double yoffset = rawIntersection.getY() - center.getY();
@@ -79,15 +80,15 @@ public class GridTeleporter {
                     //logger.debug("upper area");
                     rotation = Quaternion.buildRotationY(new Degree(0));
                     d = new Vector2(center.getX(), center.getY() - s4 - s8);
-                    dir='N';
+                    dir = 'N';
                 } else {
                     //logger.debug("lower area");
                     rotation = Quaternion.buildRotationY(new Degree(180));
                     d = new Vector2(center.getX(), center.getY() + s4 + s8);
-                    dir='S';
+                    dir = 'S';
                 }
                 transformMarker(d, directionMarker, localMarker, rotation);
-                return new GridTeleportDestination(new LocalTransform(new Vector3(d.getX(), 0, d.getY()), rotation),dir);
+                return new GridTeleportDestination(new LocalTransform(new Vector3(d.getX(), 0, d.getY()), rotation), dir);
             }
         }
         if (Math.abs(yoffset) < s4) {
@@ -106,13 +107,23 @@ public class GridTeleporter {
                     dir = 'E';
                 }
                 transformMarker(d, directionMarker, localMarker, rotation);
-                return new GridTeleportDestination(new LocalTransform(new Vector3(d.getX(), 0, d.getY()), rotation),dir);
+                return new GridTeleportDestination(new LocalTransform(new Vector3(d.getX(), 0, d.getY()), rotation), dir);
             }
         }
 
         // assume not in any direction area. No direction indicator. No rotation
         transformMarker(center, localMarker, directionMarker, null);
         return new GridTeleportDestination(new LocalTransform(new Vector3(center.getX(), 0, center.getY()), null));
+    }
+
+    /**
+     * Get the offset of the center of a teleport marker to a field center as absolute value (direction independent)
+     */
+    public static double getCenterOffset(double gridSize) {
+        double s4 = gridSize / 4;
+        double s8 = gridSize / 8;
+
+        return s4 + s8;
     }
 
     private void transformMarker(Vector2 location, SceneNode visibleMarker, SceneNode hiddenMarker, Quaternion rotation) {

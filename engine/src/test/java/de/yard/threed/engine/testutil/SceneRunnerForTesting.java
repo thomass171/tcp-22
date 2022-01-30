@@ -8,9 +8,11 @@ import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
+import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.World;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
+import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
 import java.util.HashMap;
 
@@ -142,4 +144,19 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
     /*MA36public void setRenderer(HomeBrewRenderer renderer) {
         this.renderer = renderer;
     }*/
+
+    /**
+     * Setup scene like it is done in main and render "initialFrames" frames.
+     * Scene name is taken from properties.
+     *
+     */
+    public static SceneRunnerForTesting setupForScene(int initialFrames, HashMap<String, String> properties, String[] bundles)  {
+
+        TestFactory.initPlatformForTest( bundles, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()),properties);
+
+        SceneRunnerForTesting sceneRunner =  (SceneRunnerForTesting) SceneRunnerForTesting.getInstance();
+        sceneRunner.runLimitedFrames(initialFrames);
+        return sceneRunner;
+    }
+
 }

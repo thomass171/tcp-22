@@ -21,7 +21,7 @@ public class Setup {
             properties.put("argv.visualizeTrack", "true");
             //properties.put("argv.enableHud", "true");
 
-            // emulateVR For testing VR panel outside VR
+            // emulateVR for testing VR panel outside VR via mouse move/click (while shift pressed)
             //properties.put("argv.emulateVR", "true");
 
             //properties.put("argv.initialVehicle", "c172p");
@@ -59,7 +59,7 @@ public class Setup {
                 properties.put("argv.enableAutomove", "true");
                 System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
             }
-            boolean demo = true;
+            boolean demo = false;
             if (demo) {
                 properties.put("argv.basename", "traffic:tiles/Demo.xml");
                 // GraphMovingComponent.automove is needed.
