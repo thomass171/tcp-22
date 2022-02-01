@@ -82,7 +82,7 @@ public class VrSceneHelper {
         return box1;
     }
 
-    public static SceneNode buildBalken() {
+    public static SceneNode buildBar() {
         SceneNode balken = new SceneNode(new Mesh(Geometry.buildCube(0.1f, 0.1f, 1), Material.buildLambertMaterial(Texture.buildBundleTexture("data", "images/river.jpg"))));
         balken.setName("balken");
         balken.getTransform().setPosition(new Vector3(0, VrScene.BALKENYPOSITION, -2));
@@ -95,6 +95,28 @@ public class VrSceneHelper {
         ground.getTransform().setPosition(new Vector3(0, 0, 0));
         ground.setName("Ground");
         return ground;
+    }
+
+    /**
+     * A block attached at the right edge of the ground providing a platform that is 2 meters above ground.
+     */
+    public static SceneNode buildPlatform() {
+        Geometry geometry = Geometry.buildCube(5, 4, 25);
+        SceneNode ground = new SceneNode(new Mesh(geometry, Material.buildLambertMaterial(Color.DARKGREEN)));
+        ground.getTransform().setPosition(new Vector3(25/2+5/2, 0, 0));
+        ground.setName("Platform");
+        return ground;
+    }
+
+    /**
+     * A second bar 4 meter above ground and related to the platform (25 m right).
+     * @return
+     */
+    public static SceneNode buildSecondBar() {
+        SceneNode balken = new SceneNode(new Mesh(Geometry.buildCube(0.1f, 0.1f, 1), Material.buildLambertMaterial(Texture.buildBundleTexture("data", "images/river.jpg"))));
+        balken.setName("balken");
+        balken.getTransform().setPosition(new Vector3(25/2+5/2, 4, -2));
+        return balken;
     }
 
     public static SceneNode buildGroundMarker(Icon icon) {

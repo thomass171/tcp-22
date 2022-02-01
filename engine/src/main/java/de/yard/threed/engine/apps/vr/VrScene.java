@@ -42,7 +42,7 @@ import java.util.Map;
 public class VrScene extends Scene {
     static Log logger = Platform.getInstance().getLog(VrScene.class);
     Bundle databundle;
-    SceneNode balken, box1, ground;
+    SceneNode bar, box1, ground, platform, secondBar;
     Avatar avatar;
     MenuCycler menuCycler = null;
     MenuItem[][] menuitems;
@@ -117,7 +117,8 @@ public class VrScene extends Scene {
             //observer.getTransform().setParent(avatar.getSceneNode().getTransform());
             // use FPC to move around? Conflicts with teleport. But only if attached to avatar.
             fps = new FirstPersonController(getMainCamera().getCarrier().getTransform());
-            fps.setMovementSpeed(1.2);
+            fps.setMovementSpeed(3.2);
+            fps.setRotationSpeed(42.2);
         }
 
         addLight();
@@ -125,11 +126,17 @@ public class VrScene extends Scene {
         box1 = VrSceneHelper.buildRedBox();
         addToWorld(box1);
 
-        balken = VrSceneHelper.buildBalken();
-        addToWorld(balken);
+        bar = VrSceneHelper.buildBar();
+        addToWorld(bar);
 
         ground = VrSceneHelper.buildGround();
         addToWorld(ground);
+
+        platform = VrSceneHelper.buildPlatform();
+        addToWorld(platform);
+
+        secondBar = VrSceneHelper.buildSecondBar();
+        addToWorld(secondBar);
 
 
         SceneNode locationMarker = VrSceneHelper.buildGroundMarker(Icon.ICON_CLOSE);

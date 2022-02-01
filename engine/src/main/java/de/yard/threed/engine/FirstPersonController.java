@@ -137,7 +137,7 @@ public class FirstPersonController {
         this.movementSpeed = movementSpeed;
     }
 
-    public void setRotationSpeed(float rotationSpeed) {
+    public void setRotationSpeed(double rotationSpeed) {
         this.rotationSpeed = rotationSpeed;
     }
 
