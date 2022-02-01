@@ -1,9 +1,11 @@
 package de.yard.threed.engine;
 
 /**
- * Ein FPS Controller fuer eine Camera bzw. allgemein für ein Transform.
+ * A 'WASD' FPS controller for a transform in general. It is not grounded which means freely moves in 3D.
+ * Uses 'R' for rolling.
+ *
  * <p>
- * In vager Anlehnung an den THREE.FirstPersonControls, aber ohne dessen lookat.
+ * Similar to THREE.FirstPersonControls, but without lookat.
  * <p>
  * 28.11.16: Funktional was ähnliches für ECS ist MovingComponent. Das hier ist aber speziell zur Nutzung ausserhalb ECS.
  * <p>
@@ -20,53 +22,31 @@ public class FirstPersonController {
     //the rotation around the Y axis of the camera
     // Der Speed muss zur Skalierung der Szene passen. Abhaengig davon kann 10 zu
     // schnell oder zu langsam sein.
-    private float movementSpeed = 10.0f; //move 10 units per getSecond
-    private float rotationSpeed = 20.0f; //move 10 units per getSecond
+    private double movementSpeed = 10.0f; //move 10 units per getSecond
+    private double rotationSpeed = 20.0f; //move 10 units per getSecond
     float mouseSensitivity = 0.05f;
-    private Degree heading = new Degree(0);
-    private Degree pitch = new Degree(0);
     private Transform target;
-    // Durch fortgesetztes Rotieren (Quaterion mults) scheinen sich Rundungsartefakten zu haeufen.
-    // Darum optional die Rotation absolut nachhalten. Das ist aber nicht die einzige Ursache,
-    // und es verhindert das Setzen der Camerarotation von aussen (das springt dann). Das ist auch doof.
-    // 15.3.16: Darum erstmal wieder aus.
-    private boolean useabsrotation = false;
-    //Das mit dem z0 Flag ist doch irgendwie ungar. TODO upVector. Obwohl das für einen generischen FPC auch nicht passt. z0 ist ja auch sowas wie upVector.
-    private boolean z0 = false;
-    private Vector3 upVector = null;
     private Point startdrag;
     private Point possibleMoveByMouse = null;
-    private boolean fixupvector = false;
 
     public FirstPersonController(Transform target) {
         // logger.debug("Building FirstPersonController ");
         this.target = target;
     }
 
-    public FirstPersonController(Transform target, Vector3 up) {
-        // logger.debug("Building FirstPersonController ");
-        this.target = target;
-        this.upVector = up;
-        //22.5.19 Kokolores. this.fixupvector = true;
-    }
-
     public void update(double tpf) {
         //logger.debug("update: tpf="+tpf);
         if (Input.GetKey(KeyCode.UpArrow)) {
             incPitch(target, new Degree(rotationSpeed * tpf));
-            fixUpVector();
         }
         if (Input.GetKey(KeyCode.DownArrow)) {
             incPitch(target, new Degree(-rotationSpeed * tpf));
-            fixUpVector();
         }
         if (Input.GetKey(KeyCode.LeftArrow)) {
-            incHeading(target, new Degree(rotationSpeed * tpf), z0);
-            fixUpVector();
+            incHeading(target, new Degree(rotationSpeed * tpf));
         }
         if (Input.GetKey(KeyCode.RightArrow)) {
-            incHeading(target, new Degree(-rotationSpeed * tpf), z0);
-            fixUpVector();
+            incHeading(target, new Degree(-rotationSpeed * tpf));
         }
         if (Input.GetKey(KeyCode.W)) {
             moveForward(target, +movementSpeed * tpf);
@@ -80,12 +60,13 @@ public class FirstPersonController {
         if (Input.GetKey(KeyCode.D)) {
             moveSidew(movementSpeed * tpf);
         }
+        // Is 'R' a common standard for rolling?
         if (Input.GetKey(KeyCode.R)) {
             //roll
             if (Input.GetKey(KeyCode.Shift)) {
-                incRoll(target, new Degree(rotationSpeed * tpf), z0);
+                incRoll(target, new Degree(rotationSpeed * tpf));
             } else {
-                incRoll(target, new Degree(-rotationSpeed * tpf), z0);
+                incRoll(target, new Degree(-rotationSpeed * tpf));
             }
         }
         Point point = Input.getMousePress();
@@ -100,7 +81,7 @@ public class FirstPersonController {
             //logger.debug("dragging offset " + offset);
             double dragfactor = 0.003;
             double dragtpfheading = (double) offset.getX() * dragfactor;
-            incHeading(target, new Degree(rotationSpeed * dragtpfheading), z0);
+            incHeading(target, new Degree(rotationSpeed * dragtpfheading));
             double dragtpfpitch = -(double) offset.getY() * dragfactor;
             incPitch(target, new Degree(rotationSpeed * dragtpfpitch));
             startdrag = point;
@@ -131,78 +112,28 @@ public class FirstPersonController {
     }
 
     /**
-     * static, um auch von woanders verwendet werden zu koennen.
-     * 17.7.17:Optional fuer z0 Ebene.
+     * static to be used from outside
      *
      * @param inc
      */
-    public static void incHeading(Transform target, Degree inc, boolean z0) {
-        /*if (useabsrotation){
-            heading = new Degree(heading.degree+inc.degree);
-            Quaternion q = new Quaternion(pitch,heading,new Degree(0));
-            target.setRotation(q);
-        }else {*/
-        //target.incHeading( inc);
-        if (z0) {
-            target.rotateOnAxis(new Vector3(0, 0, 1), inc);
-        }
+    public static void incHeading(Transform target, Degree inc) {
         target.rotateOnAxis(new Vector3(0, 1, 0), inc);
-
-        //}
     }
 
     /**
-     * static, um auch von woanders verwendet werden zu koennen.
+     * static to be used from outside
      *
      * @param inc
      */
     public static void incPitch(Transform target, Degree inc) {
-       /* if (useabsrotation){
-            pitch = new Degree(pitch.degree+inc.degree);
-            Quaternion q = new Quaternion(pitch,heading,new Degree(0));
-            target.setRotation(q);
-        }else {*/
-        //target.incPitch( inc);
         target.rotateOnAxis(new Vector3(1, 0, 0), inc);
-
-        //}
     }
 
-    /**
-     * 14.5.19: fix up Vector after a heading/pitch rotation for avoiding the need to roll.
-     * Das scheint zu funktionieren, verhindert ab zu starken pitch (sowohl oben wie unten).  Puuh, aber im Endeffekt ist das ganz ok.
-     * Aber das sollte ein spezielles Feature sein. Und tuts auf Pads nicht??
-     * 22.5.19: Das ist irgendwie Kokelores, weil man nicht mehr nach unten/oben sehen kann.
-     */
-    private void fixUpVector() {
-        if (upVector == null || !fixupvector) {
-            return;
-        }
-        Vector3 left = target.getWorldModelMatrix().getLeft();
-        Vector3 forward = target.getWorldModelMatrix().getForward();
-        //logger.debug("up=" + up);
-        Quaternion rotation = MathUtil2.extractQuaternion(left, upVector, forward);
-        target.setRotation(rotation);
-        Vector3 up = target.getWorldModelMatrix().getUp();
-        //logger.debug("up="+up);
+    public static void incRoll(Transform target, Degree inc) {
+        target.rotateOnAxis(new Vector3(0, 0, 1), inc);
     }
 
-    public static void incRoll(Transform target, Degree inc, boolean z0) {
-       /* if (useabsrotation){
-            pitch = new Degree(pitch.degree+inc.degree);
-            Quaternion q = new Quaternion(pitch,heading,new Degree(0));
-            target.setRotation(q);
-        }else {*/
-        //target.incPitch( inc);
-        if (z0) {
-            target.rotateOnAxis(new Vector3(0, 0, 1), inc);
-        } else {
-            target.rotateOnAxis(new Vector3(0, 0, 1), inc);
-        }
-        //}
-    }
-
-    public void setMovementSpeed(float movementSpeed) {
+    public void setMovementSpeed(double movementSpeed) {
         this.movementSpeed = movementSpeed;
     }
 
@@ -216,7 +147,7 @@ public class FirstPersonController {
      * 15.11.16: Letzlich ist sowohl die Achse wie auch die Richtung rein willkürlich gewählt. Die Wahl entsnad aus der
      * Verwendung des FPS für eine Camera.
      * <p>
-     * static, um auch von woanders verwendet werden zu koennen.
+     * static to be used from outside
      */
     public static void moveForward(Transform target, double amount) {
         target.translateOnAxis(new Vector3(0, 0, -1), amount);
@@ -225,6 +156,4 @@ public class FirstPersonController {
     public void moveSidew(double amount) {
         target.translateOnAxis(new Vector3(1, 0, 0), amount);
     }
-
-
 }

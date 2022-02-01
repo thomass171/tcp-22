@@ -76,8 +76,8 @@ public class Observer implements SimpleTransform {
     /**
      * Nur ausserhalb VR
      */
-    public void incHeading(Degree inc, boolean z0) {
-        FirstPersonController.incHeading(observer, inc, z0);
+    public void incHeading(Degree inc) {
+        FirstPersonController.incHeading(observer, inc);
     }
 
     /**

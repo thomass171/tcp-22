@@ -23,7 +23,6 @@ public class ObserverComponent extends EcsComponent {
     protected Observer observer;
     protected float rotationSpeed = 20.0f;
     static String TAG = "ObserverComponent";
-    public boolean z0 = false;
 
     /**
      * Der observer kann eine Camera sein, aber auch ein Kopfobjekt mit attachter Camera, das sich dann dreht.
@@ -46,7 +45,7 @@ public class ObserverComponent extends EcsComponent {
 
     public void incHeading(double deltatime/*Degree inc*/) {
         //MA35FirstPersonController.incHeading(observer, new Degree(rotationSpeed * deltatime), z0);
-        observer.incHeading(new Degree(rotationSpeed * deltatime), z0);
+        observer.incHeading(new Degree(rotationSpeed * deltatime));
     }
 
     public void incPitch(double deltatime/*Degree inc*/) {

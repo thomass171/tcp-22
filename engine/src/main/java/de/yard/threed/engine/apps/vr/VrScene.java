@@ -54,6 +54,8 @@ public class VrScene extends Scene {
     Observer observer = null;
     double initialY = 0;
     GridTeleporter gridTeleporter;
+    // FirstPersonController not in VR
+    FirstPersonController fps = null;
 
     @Override
     public void init(boolean forServer) {
@@ -84,20 +86,6 @@ public class VrScene extends Scene {
         databundle = BundleRegistry.getBundle("data");
 
         observer = Observer.buildForDefaultCamera();
-        if (vrInstance != null) {
-            observer.initFineTune(vrInstance.getYoffsetVR());
-
-            //if (VrHelper.getController(0) != null) {
-            observer.attach(VrHelper.getController(0));
-            //getDefaultCamera().getCarrier().attach(VrHelper.getController(0));
-            //}
-            //if (VrHelper.getController(1) != null) {
-            observer.attach(VrHelper.getController(1));
-            //getDefaultCamera().getCarrier().attach(VrHelper.getController(1));
-            //}
-        }
-        observer.setPosition(new Vector3(0, initialY, 0));
-
 
         // Ein Mesh am Avatar um zu sehen, ob er sich mitbewegt (sollte er nicht). Die Camera ist dann per default in dem Cube.
         // 5.10.19: Bei VR nicht unbedingt, denn da kommt der VR offset ja noch dazu.
@@ -109,6 +97,28 @@ public class VrScene extends Scene {
         avatar.enableBody();
         //camera.attach(avatar.getTransform());
         addToWorld(avatar.getSceneNode());
+
+        if (vrInstance != null) {
+            observer.initFineTune(vrInstance.getYoffsetVR());
+
+            //if (VrHelper.getController(0) != null) {
+            observer.attach(VrHelper.getController(0));
+            //getDefaultCamera().getCarrier().attach(VrHelper.getController(0));
+            //}
+            //if (VrHelper.getController(1) != null) {
+            observer.attach(VrHelper.getController(1));
+            //getDefaultCamera().getCarrier().attach(VrHelper.getController(1));
+            //}
+
+            observer.setPosition(new Vector3(0, initialY, 0));
+        } else {
+            // No VR. just attach observer to avatar? Hmm, keep it separate for now for separate testing of teleport of avatar and moving view point.
+            observer.setPosition(new Vector3(0, 1, 0));
+            //observer.getTransform().setParent(avatar.getSceneNode().getTransform());
+            // use FPC to move around? Conflicts with teleport. But only if attached to avatar.
+            fps = new FirstPersonController(getMainCamera().getCarrier().getTransform());
+            fps.setMovementSpeed(1.2);
+        }
 
         addLight();
 
@@ -179,7 +189,8 @@ public class VrScene extends Scene {
     @Override
     public void update() {
 
-        /*avatar*/
+        double tpf = getDeltaTime();
+
         observer.update();
         VrHelper.update();
 
@@ -250,6 +261,10 @@ public class VrScene extends Scene {
 
         //menucycler.update() is also for keys!
         menuCycler.update(mouseClickLocation);
+
+        if (fps != null) {
+            fps.update(tpf);
+        }
     }
 
     private void teleport(GridTeleportDestination markerTransform) {
