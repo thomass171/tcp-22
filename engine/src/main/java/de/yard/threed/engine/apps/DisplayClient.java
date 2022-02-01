@@ -48,8 +48,6 @@ public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
     Avatar avatar = null;
     //EcsEntity avatarE = null;
     SceneNode ground;
-    boolean enableLoweredAvatar = false;
-    Double yoffsetVR;
 
 
     @Override
@@ -115,23 +113,12 @@ public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
 
         //1.4.21 Player.init(avatar);
 
-        /*24.1.22 if (yoffsetVR != null) {
-            avatar.setBestPracticeRiftvryoffset((double) yoffsetVR);
-        }*/
-        /*if (enableLoweredAvatar) {
-            avatar.lowerVR();
-        }*/
-
     }
 
     protected void processArguments() {
         if (EngineHelper.isEnabled("argv.enableNearView")) {
 
         }
-        if (EngineHelper.isEnabled("argv.enableLoweredAvatar")) {
-            enableLoweredAvatar = true;
-        }
-        yoffsetVR = EngineHelper.getDoubleSystemProperty("argv.yoffsetVR");
     }
 
     @Override

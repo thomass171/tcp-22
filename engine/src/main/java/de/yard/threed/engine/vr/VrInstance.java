@@ -50,14 +50,10 @@ public class VrInstance {
      * @return
      */
     public static VrInstance buildFromArguments() {
-        boolean enableLoweredAvatar = false;
 
         if (!isEnabled()) {
             return null;
         }
-        /*deprecated if (EngineHelper.isEnabled("argv.enableLoweredAvatar")) {
-            enableLoweredAvatar = true;
-        }*/
         Double yoffsetVR = EngineHelper.getDoubleSystemProperty("argv.yoffsetVR");
         double val = (double) ((yoffsetVR == null) ? 0 : yoffsetVR);
         instance = new VrInstance(MODE_OBSERVER, val);

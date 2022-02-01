@@ -10,6 +10,7 @@ import de.yard.threed.engine.platform.ProcessPolicy;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.engine.vr.VrHelper;
 import de.yard.threed.engine.platform.EngineHelper;
+import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.traffic.AbstractTerrainBuilder;
 import de.yard.threed.traffic.FlatTerrainSystem;
 import de.yard.threed.traffic.GraphBackProjectionProvider;
@@ -24,6 +25,7 @@ import de.yard.threed.traffic.SphereSystem;
 import de.yard.threed.traffic.TrafficGraph;
 import de.yard.threed.traffic.TrafficHelper;
 import de.yard.threed.traffic.TrafficSystem;
+import de.yard.threed.traffic.TrafficVrControlPanel;
 import de.yard.threed.traffic.VehicleComponent;
 import de.yard.threed.traffic.VehicleLauncher;
 import de.yard.threed.traffic.VehicleLoader;
@@ -42,7 +44,9 @@ import de.yard.threed.engine.util.NearView;
 import de.yard.threed.engine.util.RandomIntProvider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * MA37: Entwicklung zu einer BasicTravelScene.
@@ -100,11 +104,10 @@ import java.util.List;
 public class BasicTravelScene extends Scene implements RequestHandler {
     //Die instance loggt über getLog()
     static Log logger = Platform.getInstance().getLog(BasicTravelScene.class);
-    //24.10.21 public Avatar avatar;
-    //26.9.20 protected TrafficWorldConfig tw;
-    protected Hud hud, helphud;
+    // The default TravelScene has no hud.
+    protected Hud hud;
     protected boolean visualizeTrack = false;
-    protected boolean enableFPC = false, enableNearView = false, enableLoweredAvatar = false;
+    protected boolean enableFPC = false, enableNearView = false;
     //6.10.21 protected MenuCycler menuCycler = null;
     //24.10.21 protected ObserverSystem viewingsystem;
     protected SceneConfig sceneConfig;
@@ -121,24 +124,26 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     RandomIntProvider rand = new RandomIntProvider();
     int nextlocationindex = 0;
     protected String vehiclelistname = "GroundServices";
-    RequestType REQUEST_RESET = new RequestType("Reset");
+    /*31.1.22 RequestType REQUEST_RESET = new RequestType("Reset");
     RequestType REQUEST_HELP = new RequestType("Help");
     RequestType REQUEST_MENU = new RequestType("Menu");
     RequestType REQUEST_CYCLE = new RequestType("Cycle");
     RequestType REQUEST_LOAD = new RequestType("Load");
     RequestType REQUEST_PLAY = new RequestType("Play");
     RequestType REQUEST_PLUS = new RequestType("+");
-    RequestType REQUEST_MINUS = new RequestType("-");
+    RequestType REQUEST_MINUS = new RequestType("-");*/
     protected NearView nearView = null;
-    protected Double yoffsetVR;
     // 17.10.21: per argument oder default EDDK
     String tilename = null;
-
+    VrInstance vrInstance;
+    Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
 
     @Override
     public void init(boolean forServer) {
         logger.debug("init BasicTravelScene");
         processArguments();
+
+        vrInstance = VrInstance.buildFromArguments();
 
         SystemManager.addSystem(new TrafficSystem(getVehicleLoader()));
 
@@ -189,6 +194,9 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         return null;
     }
 
+    /**
+     * To be overridden by extending class.
+     */
     public void customInit() {
     }
 
@@ -204,7 +212,6 @@ public class BasicTravelScene extends Scene implements RequestHandler {
 
 
     protected void processArguments() {
-        //5.10.18: Hud braucht viel Speicher (und damit auch (GC) CPU). Darum optional. Aber per default an.
        /*21.3.19  String argv_enableusermode = ((Platform) Platform.getInstance()).getSystemProperty("argv.enableUsermode");
         //argv_enableusermode="1";
         if (!Util.isFalse(argv_enableusermode)) {
@@ -242,34 +249,23 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         if ((b = EngineHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
             enableNearView = (boolean) b;
         }
-        if ((b = EngineHelper.getBooleanSystemProperty("argv.enableLoweredAvatar")) != null) {
-            enableLoweredAvatar = (boolean) b;
-        }
-        yoffsetVR = EngineHelper.getDoubleSystemProperty("argv.yoffsetVR");
 
         // Parameter basename gibt es eigentlich nur in 2D. 7.10.21: Aber das wird hier jetzt einach mal als Request sent,
         // wenns nicht relevant oder ungueltig ist, verfaellt es halt. Und ich fuehre auch wieder den Deault EDDK ein.
 
         tilename = Platform.getInstance().getSystemProperty("argv.basename");
-        /*boolean found = false;
-        for (int i = 0; i < tilelist.length; i++) {
-            if (tilelist[i].file.equals(tilename)) {
-                major = i;
-                found = true;
-            }
-        }
-        if (tilename != null && !found) {
-            logger.error("unknown tilename " + tilename);
-        }*/
+
         if (tilename == null) {
             tilename = getDefaultTilename();
         }
         logger.debug("using tilename " + tilename);
-        //erstmal nur per locationchangeSystemManager.putRequest(new Request(RequestRegistry.USER_REQUEST_TILE_LOAD,new Payload(tilename)));
     }
 
+    /**
+     * To be overridden by extending class.
+     */
     public String getDefaultTilename() {
-        //leads to 3D
+        // null leads to 3D
         return null;
     }
 
@@ -285,6 +281,25 @@ public class BasicTravelScene extends Scene implements RequestHandler {
 
     protected void commoninit() {
 
+        buttonDelegates.put("reset", () -> {
+            logger.info("reset");
+        });
+        buttonDelegates.put("info", () -> {
+            logger.info("cam vr pos=" + getDefaultCamera().getVrPosition());
+            logger.info("cam carrier pos=" + getDefaultCamera().getCarrierPosition());
+            logger.info("cam carrier parent=" + getDefaultCamera().getCarrier().getTransform().getParent());
+            //logger.info("observer pos, finetune=" + observer.getPosition() + "," + observer.getFinetune());
+            logger.info("world pos=" + Scene.getWorld().getTransform().getPosition());
+        });
+        buttonDelegates.put("up", () -> {
+            logger.info("up");
+            Observer.getInstance().fineTune(true);
+        });
+        buttonDelegates.put("down", () -> {
+            logger.info("down");
+            Observer.getInstance().fineTune(false);
+        });
+
         //AbstractSceneRunner.instance.httpClient = new AirportDataProviderMock();
 
         // Kruecke zur Entkopplung des Modelload von AC policy.
@@ -297,6 +312,31 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
         //toggle auto move
         inputToRequestSystem.addKeyMapping(KeyCode.Alpha9, UserSystem.USER_REQUEST_AUTOMOVE);
+
+        if (vrInstance != null) {
+            // Observer was inited before
+            Observer observer = Observer.getInstance();
+            observer.initFineTune(vrInstance.getYoffsetVR());
+            observer.attach(VrHelper.getController(0));
+            observer.attach(VrHelper.getController(1));
+
+            ControlPanel leftControllerPanel = new TrafficVrControlPanel(buttonDelegates);
+            LocalTransform lt = vrInstance.getCpTransform();
+            if (lt != null) {
+                //leftControllerPanel.getTransform().setPosition(new Vector3(-0.5, 1.5, -2.5));
+                //200,90,0 are good rotations
+                leftControllerPanel.getTransform().setPosition(lt.position);
+                leftControllerPanel.getTransform().setRotation(lt.rotation);
+                leftControllerPanel.getTransform().setScale(new Vector3(0.4, 0.4, 0.4));
+            }
+            VrHelper.getController(0).attach(leftControllerPanel);
+            inputToRequestSystem.addControlPanel(leftControllerPanel);
+
+        } else {
+            // nothing special (menu,hud,controlpanel) for non VR?
+        }
+
+
         SystemManager.addSystem(inputToRequestSystem, 0);
         //6.10.21 buildToggleMenu();
         //menuCycler = new MenuCycler(new MenuProvider[]{new TravelMainMenuBuilder(this)});
@@ -352,14 +392,6 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         //8.12.21 addLight();
 
         SystemManager.addSystem(new InputToRequestSystem());
-        //1.4.21 de.yard.threed.engine.ecs.Player.init(avatar);
-
-        /*24.10.21 if (yoffsetVR != null) {
-            avatar.setBestPracticeRiftvryoffset((double) yoffsetVR);
-        }*/
-        /*if (enableLoweredAvatar) {
-            avatar.lowerVR();
-        }*/
 
         //29.10.21: Damit lauchVehicles noch geht. TODO anders.
         TrafficSystem.sceneConfig = sceneConfig;

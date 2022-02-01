@@ -30,7 +30,6 @@ public class AvatarSystem extends DefaultEcsSystem {
     boolean avatarsystemdebuglog = true;
 
     //15.5.21 boolean enableNearView = false;
-    //15.5.21 Double yoffsetVR;
 
     //direkt deprecated weil Kruecke
     @Deprecated
@@ -39,39 +38,26 @@ public class AvatarSystem extends DefaultEcsSystem {
     boolean enableObserverComponent = false;
 
     /**
-     * @param yoffsetVR
-     * @param enableLoweredAvatar
      */
-    public AvatarSystem(Double yoffsetVR, boolean enableLoweredAvatar, boolean enableObserverComponent) {
+    public AvatarSystem(boolean enableObserverComponent) {
         super(new String[]{"AvatarComponent"}, new RequestType[]{UserSystem.USER_REQUEST_JOIN}, new EventType[]{UserSystem.USER_EVENT_JOINED});
 
-        //15.5.21 this.yoffsetVR = yoffsetVR;
-        //15.5.21 this.enableLoweredAvatar = enableLoweredAvatar;
         this.enableObserverComponent = enableObserverComponent;
 
     }
 
     public AvatarSystem() {
-        this(0.0, false, false);
-    }
-
-    public AvatarSystem(boolean enableObserverComponent) {
-        this(0.0, false, enableObserverComponent);
+        this(false);
     }
 
     public static AvatarSystem buildFromArguments() {
-        boolean enableNearView = false, enableLoweredAvatar = false;
-        Double yoffsetVR;
+        boolean enableNearView = false;
 
         Boolean b;
         if ((b = EngineHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
             enableNearView = (boolean) b;
         }
-        if ((b = EngineHelper.getBooleanSystemProperty("argv.enableLoweredAvatar")) != null) {
-            enableLoweredAvatar = (boolean) b;
-        }
-        yoffsetVR = EngineHelper.getDoubleSystemProperty("argv.yoffsetVR");
-        return new AvatarSystem(yoffsetVR, enableLoweredAvatar, false);
+        return new AvatarSystem( false);
     }
 
     /**

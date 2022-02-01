@@ -161,6 +161,10 @@ public class Observer implements SimpleTransform {
         }
     }
 
+    /**
+     *
+     * @param position  Relative position. fineTuneOffset will be added.
+     */
     public void setPosition(Vector3 position) {
         this.position = position;
         adjustVR();
