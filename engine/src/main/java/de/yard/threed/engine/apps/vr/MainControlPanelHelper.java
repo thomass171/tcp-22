@@ -5,11 +5,11 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.gui.ControlPanel;
-import de.yard.threed.engine.gui.ControlPanelHelper;
 import de.yard.threed.engine.gui.Icon;
 import de.yard.threed.engine.gui.Indicator;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.DimensionF;
+import de.yard.threed.engine.gui.SpinnerControlPanel;
 
 /**
  * A panel permanently attached to the scene. Consists of
@@ -37,7 +37,7 @@ public class MainControlPanelHelper {
 
         // top line: property yontrol
         cp.add(new Vector2(0, PropertyControlPanelRowHeight / 2 + PropertyControlPanelRowHeight / 2),
-                ControlPanelHelper.buildPropertyControlPanel(rowsize, PropertyControlPanelMargin, mat));
+                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat,null));
 
         // mid line: a indicator
         Indicator indicator = Indicator.buildGreen(0.03);

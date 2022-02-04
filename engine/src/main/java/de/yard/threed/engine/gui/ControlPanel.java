@@ -49,6 +49,7 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
     DimensionF planeSize;
     private double zoffset = 0.01f;
     List<ControlPanelArea> areas = new ArrayList<ControlPanelArea>();
+    List<ControlPanel> subPanel = new ArrayList<ControlPanel>();
 
 
     /*private ControlPanel(SceneNode backplane, DimensionF worldBackplaneSize, Color basecolor) {
@@ -84,8 +85,12 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
     public void add(Vector2 position, ControlPanel controlPanel) {
         attach(controlPanel);
         controlPanel.getTransform().setPosition(new Vector3(position.getX(), position.getY(), zoffset));
+        subPanel.add(controlPanel);
     }
 
+    /**
+     * Actions are triggered by delegates
+     */
     @Override
     public boolean checkForClickedArea(Ray pickingray) {
         //logger.debug("guigrid picking ray isType " + pickingray);
@@ -98,6 +103,12 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
                 area.buttonDelegate.buttonpressed();
             }
             return true;
+        }
+        // Also check sub control panel
+        for (ControlPanel cp:subPanel){
+            if (cp.checkForClickedArea(pickingray)){
+                return true;
+            }
         }
         return false;
     }

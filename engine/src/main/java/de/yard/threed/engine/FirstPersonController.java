@@ -28,6 +28,7 @@ public class FirstPersonController {
     private Transform target;
     private Point startdrag;
     private Point possibleMoveByMouse = null;
+    public boolean moveByMouseEnabled = true;
 
     public FirstPersonController(Transform target) {
         // logger.debug("Building FirstPersonController ");
@@ -69,44 +70,46 @@ public class FirstPersonController {
                 incRoll(target, new Degree(-rotationSpeed * tpf));
             }
         }
-        Point point = Input.getMousePress();
-        if (point != null) {
-            startdrag = point;
-            possibleMoveByMouse = point;
-            //logger.debug("possible drag from " + startdrag);
-        }
-        point = Input.getMouseMove();
-        if (point != null && startdrag != null) {
-            Point offset = point.subtract(startdrag);
-            //logger.debug("dragging offset " + offset);
-            double dragfactor = 0.003;
-            double dragtpfheading = (double) offset.getX() * dragfactor;
-            incHeading(target, new Degree(rotationSpeed * dragtpfheading));
-            double dragtpfpitch = -(double) offset.getY() * dragfactor;
-            incPitch(target, new Degree(rotationSpeed * dragtpfpitch));
-            startdrag = point;
-            possibleMoveByMouse = null;
-        }
-        point = Input.getMouseClick();
-        if (point != null) {
-            // mouse released
-            if (startdrag != null) {
-                //was drag
-                startdrag = null;
+        if (moveByMouseEnabled) {
+            Point point = Input.getMousePress();
+            if (point != null) {
+                startdrag = point;
+                possibleMoveByMouse = point;
+                //logger.debug("possible drag from " + startdrag);
             }
-            possibleMoveByMouse = null;
-        }
-        if (possibleMoveByMouse != null) {
-            // only in top or bottom segment
-            int segment = Input.getClickSegment(possibleMoveByMouse, Scene.getCurrent().getDimension(), 5);
-            logger.debug("clicked segment:" + segment);
-            switch (segment) {
-                case 2:
-                    moveForward(target, -movementSpeed * tpf);
-                    break;
-                case 22:
-                    moveForward(target, +movementSpeed * tpf);
-                    break;
+            point = Input.getMouseMove();
+            if (point != null && startdrag != null) {
+                Point offset = point.subtract(startdrag);
+                //logger.debug("dragging offset " + offset);
+                double dragfactor = 0.003;
+                double dragtpfheading = (double) offset.getX() * dragfactor;
+                incHeading(target, new Degree(rotationSpeed * dragtpfheading));
+                double dragtpfpitch = -(double) offset.getY() * dragfactor;
+                incPitch(target, new Degree(rotationSpeed * dragtpfpitch));
+                startdrag = point;
+                possibleMoveByMouse = null;
+            }
+            point = Input.getMouseClick();
+            if (point != null) {
+                // mouse released
+                if (startdrag != null) {
+                    //was drag
+                    startdrag = null;
+                }
+                possibleMoveByMouse = null;
+            }
+            if (possibleMoveByMouse != null) {
+                // only in top or bottom segment
+                int segment = Input.getClickSegment(possibleMoveByMouse, Scene.getCurrent().getDimension(), 5);
+                logger.debug("clicked segment:" + segment);
+                switch (segment) {
+                    case 2:
+                        moveForward(target, -movementSpeed * tpf);
+                        break;
+                    case 22:
+                        moveForward(target, +movementSpeed * tpf);
+                        break;
+                }
             }
         }
     }

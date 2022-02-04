@@ -82,7 +82,7 @@ public interface NativeCamera {
      *
      * @return
      */
-    Vector3 getVrPosition();
+    Vector3 getVrPosition(boolean dumpInfo);
 
     /**
      * No bitmask, just an index from 0-15.

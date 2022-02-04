@@ -56,9 +56,10 @@ public class WebGlRenderer {
             // uses autoclear
             WebGlCamera webglcamera = ((WebGlCamera) cameras.get(0));
             //7.5.21 In VR die Camera alleine auch ohne carrier. (MA35). Nee, nur mit carrier.
+            //2.2.22 No longer modify the scene graph here. Should be done by application.
             if (webglcamera.getParent() != null && webglcamera.getParent().getParent() != null) {
-                logger.warn("removing carrier parent from camera.carrier");
-                ((WebGlObject3D)webglcamera.getParent()).clearParent();
+                //logger.warn("removing carrier parent from camera.carrier");
+                //((WebGlObject3D)webglcamera.getParent()).clearParent();
             }
             render(scene, webglcamera);
         } else {

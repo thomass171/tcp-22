@@ -39,6 +39,10 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     private Map<KeyEntry, RequestType> keymapping = new HashMap<KeyEntry, RequestType>();
 
     //2.4.21: menu. Why not in UserSystem?
+    //4.2.22: What is the difference? Apparently the only difference is a control menu is attached to a camera while
+    //a menu is attached to some node. Well, in principle both should be ready for nearView/cameraRelated and scene located.
+    //Even though its quite the same, a control menu is intended to be displayed all the time, while a menu is toggled for
+    // a short time and quickly closed again. And a menu can be shown in addition to a control menu.
     public static RequestType USER_REQUEST_MENU = new RequestType("USER_REQUEST_MENU");
     public static RequestType USER_REQUEST_CONTROLMENU = new RequestType("USER_REQUEST_CONTROLMENU");
 

@@ -224,7 +224,15 @@ public class WebGlCamera implements NativeCamera/*, NativeTransform*/ {
      * "object3d" is "the camera"
      */
     @Override
-    public Vector3 getVrPosition() {
+    public Vector3 getVrPosition(boolean dumpInfo) {
+        if (dumpInfo) {
+            logger.debug("getVrPosition: parents:");
+            NativeTransform parent = object3d.getParent();
+            while (parent != null) {
+                logger.debug("getVrPosition: parent position:" + parent.getPosition());
+                parent = parent.getParent();
+            }
+        }
         return (object3d.getPosition());
     }
 

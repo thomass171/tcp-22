@@ -1,5 +1,6 @@
 package de.yard.threed.engine.apps.vr;
 
+import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
@@ -24,14 +25,20 @@ public class VrSceneHelper {
     private static double PropertyControlPanelMargin = 0.005;
     private static Color controlPanelBackground = new Color(255, 217, 102, 128);
 
+    public static double PLATFORM_X_POSITION = 25 / 2 + 5 / 2;
+    public static double BARYPOSITION = 1;
+    public static double SECONDBARYPOSITION = 4;
+    public static double PLATFORM_HEIGHT = 4;
+    public static double PLATFORM_ABOVE_GROUND = PLATFORM_HEIGHT / 2;
+
     /**
-     * A general purpose control panel permanently attached to the left controller. Consists of
+     * A simple control panel (4 row, 4 columns) permanently attached to the left controller. Consists of
      * <p>
      * - button for opening a main menu
-     * --- menu toggle
-     * - finetune up/down
-     * - info
-     * - indicator on/off
+     * top line: cycle observer - cycle info - cycle observer
+     * medium: indicator - indicator on/off - Reset - finetune up
+     * bottom lime: unused indicator - menu toggle - info   finetune down
+     * -
      * <p>
      * Für Tests als Duplicate auch "im Raum".
      */
@@ -39,37 +46,42 @@ public class VrSceneHelper {
         Color backGround = controlPanelBackground;
         Material mat = Material.buildBasicMaterial(backGround, false);
 
+        int rows = 4;
         DimensionF rowsize = new DimensionF(PropertyControlPanelWidth, PropertyControlPanelRowHeight);
         double midElementWidth4 = PropertyControlPanelWidth / 4;
         double m4_2 = midElementWidth4 / 2;
         double h = PropertyControlPanelRowHeight;
         double h2 = PropertyControlPanelRowHeight / 2;
 
-        ControlPanel cp = new ControlPanel(new DimensionF(PropertyControlPanelWidth, 3 * PropertyControlPanelRowHeight), mat);
+        ControlPanel cp = new ControlPanel(new DimensionF(PropertyControlPanelWidth, rows * PropertyControlPanelRowHeight), mat);
 
-        // top line: property yontrol
-        cp.add(new Vector2(0, PropertyControlPanelRowHeight / 2 + PropertyControlPanelRowHeight / 2),
-                ControlPanelHelper.buildPropertyControlPanel(rowsize, PropertyControlPanelMargin, mat));
+        // top line: property control for yvroffset
+        cp.add(new Vector2(0, h + h2),
+                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat, new VrOffsetHandler()));
 
-        // mid line 4 elements : a indicator, a relocate/rest button
+        // top mid line
+        cp.addArea(new Vector2(-midElementWidth4 - m4_2, h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("cycleLeft")).setIcon(Icon.ICON_LEFTARROW);
+        cp.addArea(new Vector2(-m4_2, h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("cycleRight")).setIcon(Icon.ICON_RIGHTARROW);
+
+        // bottom mid line 4 elements : a indicator, a relocate/rest button
         Indicator indicator = Indicator.buildGreen(0.03);
         // half in ground
-        cp.addArea(new Vector2(-midElementWidth4 - m4_2, 0), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), null).attach(indicator);
-        cp.addArea(new Vector2(-m4_2, 0), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), () -> {
+        cp.addArea(new Vector2(-midElementWidth4 - m4_2, -h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), null).attach(indicator);
+        cp.addArea(new Vector2(-m4_2, -h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), () -> {
             logger.debug("area clicked");
             indicator.toggle();
         }).setIcon(Icon.ICON_LEFTARROW);
-        cp.addArea(new Vector2(m4_2, 0), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("reset")).setIcon(Icon.ICON_POSITION);
-        cp.addArea(new Vector2(midElementWidth4 + m4_2, 0), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("up")).setIcon(Icon.ICON_UPARROW);
+        cp.addArea(new Vector2(m4_2, -h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("reset")).setIcon(Icon.ICON_POSITION);
+        cp.addArea(new Vector2(midElementWidth4 + m4_2, -h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("up")).setIcon(Icon.ICON_UPARROW);
 
 
         // bottom line:  one indicator and 3 buttons
         Indicator indicatorb = Indicator.buildRed(0.03);
         // half in ground
-        cp.addArea(new Vector2(-midElementWidth4 - m4_2, -h), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), null).attach(indicatorb);
-        cp.addArea(new Vector2(-m4_2, -h), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("mainmenu")).setIcon(Icon.ICON_MENU);
-        cp.addArea(new Vector2(m4_2, -h), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("info")).setIcon(Icon.ICON_HELP);
-        cp.addArea(new Vector2(midElementWidth4 + m4_2, -h), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("down")).setIcon(Icon.ICON_DOWNARROW);
+        cp.addArea(new Vector2(-midElementWidth4 - m4_2, -h - h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), null).attach(indicatorb);
+        cp.addArea(new Vector2(-m4_2, -h - h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("mainmenu")).setIcon(Icon.ICON_MENU);
+        cp.addArea(new Vector2(m4_2, -h - h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("info")).setIcon(Icon.ICON_HELP);
+        cp.addArea(new Vector2(midElementWidth4 + m4_2, -h - h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("down")).setIcon(Icon.ICON_DOWNARROW);
 
         return cp;
     }
@@ -85,7 +97,7 @@ public class VrSceneHelper {
     public static SceneNode buildBar() {
         SceneNode balken = new SceneNode(new Mesh(Geometry.buildCube(0.1f, 0.1f, 1), Material.buildLambertMaterial(Texture.buildBundleTexture("data", "images/river.jpg"))));
         balken.setName("balken");
-        balken.getTransform().setPosition(new Vector3(0, VrScene.BALKENYPOSITION, -2));
+        balken.getTransform().setPosition(new Vector3(0, BARYPOSITION, -2));
         return balken;
     }
 
@@ -101,27 +113,28 @@ public class VrSceneHelper {
      * A block attached at the right edge of the ground providing a platform that is 2 meters above ground.
      */
     public static SceneNode buildPlatform() {
-        Geometry geometry = Geometry.buildCube(5, 4, 25);
+        Geometry geometry = Geometry.buildCube(5, PLATFORM_HEIGHT, 25);
         SceneNode ground = new SceneNode(new Mesh(geometry, Material.buildLambertMaterial(Color.DARKGREEN)));
-        ground.getTransform().setPosition(new Vector3(25/2+5/2, 0, 0));
+        ground.getTransform().setPosition(new Vector3(PLATFORM_X_POSITION, 0, 0));
         ground.setName("Platform");
         return ground;
     }
 
     /**
      * A second bar 4 meter above ground and related to the platform (25 m right).
+     *
      * @return
      */
     public static SceneNode buildSecondBar() {
         SceneNode balken = new SceneNode(new Mesh(Geometry.buildCube(0.1f, 0.1f, 1), Material.buildLambertMaterial(Texture.buildBundleTexture("data", "images/river.jpg"))));
         balken.setName("balken");
-        balken.getTransform().setPosition(new Vector3(25/2+5/2, 4, -2));
+        balken.getTransform().setPosition(new Vector3(PLATFORM_X_POSITION, SECONDBARYPOSITION, -2));
         return balken;
     }
 
     public static SceneNode buildGroundMarker(Icon icon) {
-        SimpleGeometry geometry = Primitives.buildSimpleXZPlaneGeometry(0.3, 0.3,icon.getUvMap());
-        SceneNode box1 = new SceneNode(new Mesh(geometry,Material.buildBasicMaterial(icon.getTexture())));
+        SimpleGeometry geometry = Primitives.buildSimpleXZPlaneGeometry(0.3, 0.3, icon.getUvMap());
+        SceneNode box1 = new SceneNode(new Mesh(geometry, Material.buildBasicMaterial(icon.getTexture())));
         box1.setName("destination marker");
         box1.getTransform().setPosition(new Vector3(-1, 1, -24));
         return box1;

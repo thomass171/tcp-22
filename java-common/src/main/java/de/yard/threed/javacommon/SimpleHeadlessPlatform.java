@@ -505,7 +505,7 @@ class DummyCamera implements NativeCamera {
     }
 
     @Override
-    public Vector3 getVrPosition() {
+    public Vector3 getVrPosition(boolean dumpInfo) {
         return null;
     }
 

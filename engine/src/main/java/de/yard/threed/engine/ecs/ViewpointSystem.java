@@ -112,7 +112,8 @@ public class ViewpointSystem extends DefaultEcsSystem {
             parent = vc.parent;
         }
         // SceneNode node = vc.observer;
-        StepController.setNewStep(null, vc.stepposition.get(i), vc.steprotation.get(i), false, camera, parent, null, null);
+        //StepController.setNewStep(null, vc.stepposition.get(i), vc.steprotation.get(i), false, camera, parent, null, null);
+        StepController.setNewStep(camera.getCarrierTransform(), null, vc.stepposition.get(i), vc.steprotation.get(i), false, parent.getTransform());
         return null;
     }
 

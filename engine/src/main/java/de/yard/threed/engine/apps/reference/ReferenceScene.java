@@ -135,33 +135,34 @@ public class ReferenceScene extends Scene {
         }
         setupScene();
 
-        controller = new StepController(camera);
+        ViewpointList tl = new ViewpointList();
+        controller = new StepController(camera.getCarrierTransform(),tl);
 
         //auf Hoehe der move destination
-        controller.addStep(new Vector3(-3, 2, 6), new Vector3(-3, 2, 0));
+        tl.addEntryForLookat(new Vector3(-3, 2, 6), new Vector3(-3, 2, 0));
         // attached hinten an die Movebox mit Blick über die Box in Moverichtung
         // die x/y Werte scheinen sehr gross, aber auf die wirkt ja auch der scale der movinbox  (0.25?)
-        controller.addStep(getMovingbox(), new Vector3(2.5f, 2.1f, 0), Quaternion.buildFromAngles(new Degree(0), new Degree(90), new Degree(0)));
+        tl.addEntry( new Vector3(2.5f, 2.1f, 0), Quaternion.buildFromAngles(new Degree(0), new Degree(90), new Degree(0)),getMovingbox().getTransform());
         //controller.addStep(getMovingbox(), new Vector3(10, 2.1f, 0), new Quaternion(new Degree(0), new Degree(-90), new Degree(90)));
         // von ganz oben
-        controller.addStep(new Vector3(3, 15, 0), new Vector3(2, 0, 0));
+        tl.addEntryForLookat(new Vector3(3, 15, 0), new Vector3(2, 0, 0));
         // von hinten rechts
-        controller.addStep(new Vector3(11, 3, -11), new Vector3(0, 0, 0));
+        tl.addEntryForLookat(new Vector3(11, 3, -11), new Vector3(0, 0, 0));
         // von hinten links (etwas weiter zurück und links um loc zu sehen)
-        controller.addStep(new Vector3(-11, 3, -13/*-11*/), new Vector3(2, 0, 0));
+        tl.addEntryForLookat(new Vector3(-11, 3, -13/*-11*/), new Vector3(2, 0, 0));
         // leicht links vor die Wall, damit man rechts die PYramide sieht.
-        controller.addStep(new Vector3(-0.5f, 0, 2), new Vector3(0, 0, 0));
+        tl.addEntryForLookat(new Vector3(-0.5f, 0, 2), new Vector3(0, 0, 0));
         // weit weg wie in FG mit Blick Richtung (0,0,0) für Test picking ray.
-        controller.addStep(new Vector3(50000, 30000, 20000), new Vector3(0, 0, 0));
+        tl.addEntryForLookat(new Vector3(50000, 30000, 20000), new Vector3(0, 0, 0));
         // als letztes wieder zum Anfang
-        controller.addStep(new Vector3(0, 5, 11), new Vector3(0, 0, 0));
+        tl.addEntryForLookat(new Vector3(0, 5, 11), new Vector3(0, 0, 0));
 
         if (!vrEnabled) {
             //controlMenu = GuiGrid.buildControlMenu(getDefaultCamera(), 1);
             controlMenu = GuiGrid.buildForCamera(getDefaultCamera(), 2, 1, 1, GuiGrid.BLACK_FULLTRANSPARENT);
             controlMenu.setName("ControlIcon");
             controlMenu.addButton(new Request(REQUEST_CYCLE), 0, 0, 1, Icon.ICON_POSITION, () -> {
-                controller.step(true, 0, true);
+                controller.step(true);
             });
             FovElement.getDeferredCamera(getDefaultCamera()).getCarrier().attach(controlMenu);
         }
@@ -325,7 +326,7 @@ public class ReferenceScene extends Scene {
 
         // top line: property yontrol
         cp.add(new Vector2(0, PropertyControlPanelRowHeight / 2 + PropertyControlPanelRowHeight / 2),
-                ControlPanelHelper.buildPropertyControlPanel(rowsize, PropertyControlPanelMargin, mat));
+                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat,null));
 
         // mid line: a indicator
         indicator = Indicator.buildGreen(0.03);
@@ -1134,7 +1135,7 @@ class ReferenceTests {
         TestUtil.assertEquals("camera.parent.name", "rechts 2", rs.getMainCamera().getCarrier().getParent().getName());
 
         // zurueck auf Anfang
-        rs.controller.stepTo(rs.controller.stepposition.size() - 1);
+        rs.controller.stepTo(rs.controller.viewpointList.size() - 1);
 
         //4.11.19 auch mal setMesh hier testen
         Mesh earthmesh = rs.earth.getMesh();
@@ -1167,7 +1168,7 @@ class ReferenceTests {
         Vector3 target = camworldposition.add(pickingray.getDirection().multiply(camworldposition.length()));
         TestUtil.assertVector3("target", new Vector3(-10758, 18599, -58545), target, 2000f);
         // zurueck auf Anfang
-        rs.controller.stepTo(rs.controller.stepposition.size() - 1);
+        rs.controller.stepTo(rs.controller.viewpointList.size() - 1);
     }
 
 

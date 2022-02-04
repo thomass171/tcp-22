@@ -405,7 +405,7 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
     }*/
 
     @Override
-    public Vector3 getVrPosition() {
+    public Vector3 getVrPosition(boolean dumpInfo) {
         return getPosition();
     }
 

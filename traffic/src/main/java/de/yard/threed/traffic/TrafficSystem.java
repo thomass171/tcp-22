@@ -393,7 +393,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         Map<String, LocalTransform> viewpoints = config.getViewpoints();
         for (String key : viewpoints.keySet()) {
             //24.10.19: Der Parameter hier war immer schon die base node, also die ohne offset.
-            avatarpc.addPosition(key, teleportParentNode, new LocalTransform(viewpoints.get(key).position, viewpoints.get(key).rotation), vehicleEntity.getName(), nearView);
+            avatarpc.addPosition(key, teleportParentNode.getTransform(), new LocalTransform(viewpoints.get(key).position, viewpoints.get(key).rotation), vehicleEntity.getName(), nearView);
         }
 
         // start in locomotive. Weil dann der TeleporterSystem.init schon gelaufen ist, muss auch "needsupdate" gesetzt werden, darum stepTo().

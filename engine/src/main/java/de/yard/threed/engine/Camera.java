@@ -141,13 +141,6 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
     }
 
     /**
-     * detach camera from model
-     */
-    public void detachFromModel() {
-        getCarrier().getTransform().setParent(null);
-    }
-
-    /**
      * attach a camera to a model!
      * Convenience.
      * 28.4.21: Und deswegen nicht mehr deprecated.
@@ -211,8 +204,8 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
         return new DimensionF(h * aspect, h);
     }
 
-    public Vector3 getVrPosition() {
-        return (nativecamera.getVrPosition());
+    public Vector3 getVrPosition(boolean dumpInfo) {
+        return (nativecamera.getVrPosition(dumpInfo));
     }
 
     /**

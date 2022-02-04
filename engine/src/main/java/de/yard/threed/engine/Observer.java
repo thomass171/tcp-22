@@ -227,4 +227,7 @@ public class Observer implements SimpleTransform {
         instance = null;
     }
 
+    public void dumpDebugInfo() {
+        logger.info("fineTuneOffset=" + this.fineTuneOffset);
+    }
 }

@@ -285,7 +285,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             logger.info("reset");
         });
         buttonDelegates.put("info", () -> {
-            logger.info("cam vr pos=" + getDefaultCamera().getVrPosition());
+            logger.info("cam vr pos=" + getDefaultCamera().getVrPosition(true));
             logger.info("cam carrier pos=" + getDefaultCamera().getCarrierPosition());
             logger.info("cam carrier parent=" + getDefaultCamera().getCarrier().getTransform().getParent());
             //logger.info("observer pos, finetune=" + observer.getPosition() + "," + observer.getFinetune());
@@ -704,6 +704,11 @@ public class BasicTravelScene extends Scene implements RequestHandler {
 
     public GraphProjection getBackProjection() {
         return null;
+    }
+
+    @Override
+    public void initSettings(Settings settings) {
+        settings.vrready = true;
     }
 }
 

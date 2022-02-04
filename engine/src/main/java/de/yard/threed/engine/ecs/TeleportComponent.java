@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class TeleportComponent extends EcsComponent {
     Log logger = Platform.getInstance().getLog(TeleportComponent.class);
-    TeleportPointList teleportlist = new TeleportPointList();
+    ViewpointList teleportlist = new ViewpointList();
     public static String TAG = "TeleportComponent";
     private SceneNode observer;
     public boolean needsupdate = false;
@@ -50,16 +50,12 @@ public class TeleportComponent extends EcsComponent {
         addPosition(label, null, posrot);
     }
 
-    public void addPosition(String label, SceneNode parent, LocalTransform posrot) {
-        teleportlist.addPosition(label, parent, posrot, null, null);
+    public void addPosition(String label, Transform parent, LocalTransform posrot) {
+        teleportlist.addEntry(label,  posrot, parent);
     }
 
-    public void addPosition(String label, SceneNode parent, LocalTransform posrot, String targetEntity) {
-        teleportlist.addPosition(label, parent, posrot, targetEntity, null);
-    }
-
-    public void addPosition(String label, SceneNode parent, LocalTransform posrot, String targetEntity, NearView nearView) {
-        teleportlist.addPosition(label, parent, posrot, targetEntity, nearView);
+    public void addPosition(String label, Transform parent, LocalTransform posrot, String targetEntity, NearView nearView) {
+        teleportlist.addEntry(label,  posrot, parent, targetEntity, nearView);
     }
 
     public static TeleportComponent getTeleportComponent(EcsEntity e) {
@@ -68,25 +64,15 @@ public class TeleportComponent extends EcsComponent {
     }
 
     public void removePosition(String label) {
-        int index = findPoint(label);
-        if (index != -1) {
-            teleportlist.point.remove(index);
-            //1.1.20 index reset
-            teleportlist.index=0;
-        }
+        teleportlist.removePosition(label);
     }
 
     public int findPoint(String label) {
-        for (int i = 0; i < teleportlist.point.size(); i++) {
-            if (teleportlist.point.get(i).label.equals(label)) {
-                return i;
-            }
-        }
-        return -1;
+       return teleportlist.findPoint(label);
     }
 
     public void setPosition(int i, Vector3 offset) {
-        teleportlist.point.get(i).point.position = (offset);
+        teleportlist.setPosition(i,offset);
         needsupdate = true;
     }
 
@@ -96,25 +82,21 @@ public class TeleportComponent extends EcsComponent {
      * @return
      */
     public LocalTransform getPosRot() {
-        if (teleportlist.index >= teleportlist.point.size()) {
-            return null;
-        }
-        return teleportlist.point.get(teleportlist.index).point;
+        return teleportlist.getTransform();
     }
 
-    public SceneNode getParent() {
-        return teleportlist.point.get(teleportlist.index).parent;
+    public Transform getParent() {
+        return teleportlist.getParent();
     }
 
     public NearView getNearView() {
-        return teleportlist.point.get(teleportlist.index).nearView;
+        return teleportlist.getNearView();
     }
 
     public int step(boolean forward) {
-        TeleportPointList points = teleportlist;
-        int newindex = points.step(forward);
+        int newindex = teleportlist.step(forward);
         needsupdate = true;
-        logger.debug("newindex="+newindex+"("+points.point.get(newindex).label+") of "+points.point.size()+":"+points.point.get(newindex).point);
+        //logger.debug("newindex="+newindex+"("+points.point.get(newindex).label+") of "+points.point.size()+":"+points.point.get(newindex).point);
         return newindex;
     }
 
@@ -124,30 +106,30 @@ public class TeleportComponent extends EcsComponent {
      * @param index
      */
     public void stepTo(int index) {
-        TeleportPointList points = teleportlist;
         //TODO check range
-        points.index = index;
+        teleportlist.setIndex(index);
         needsupdate = true;
     }
 
     public int getPointCount() {
-        return teleportlist.point.size();
+        return teleportlist.size();
     }
 
     public String getPointLabel(int index) {
-        return teleportlist.point.get(index).label;
+        return teleportlist.getLabel(index);
     }
 
     public void setIndex(int index) {
-        teleportlist.index = index;
+        teleportlist.setIndex(index);
     }
 
+/*
     public int getIndex() {
         return teleportlist.index;
-    }
+    }*/
 
     public String getTargetEntity() {
-        return teleportlist.point.get(teleportlist.index).targetEntity;
+        return teleportlist.getTargetEntity();
     }
 
     /**
@@ -155,7 +137,7 @@ public class TeleportComponent extends EcsComponent {
      */
     public LocalTransform setNewStep(/*SceneNode node, Vector3 position, Quaternion rotation,*/ boolean useanimation) {
         SceneNode node = observer;
-        LocalTransform posrot = getPosRot();
+        LocalTransform posrot = teleportlist.getTransform();
         if (posrot == null) {
             //no point to step to yet.
             return null;
@@ -169,13 +151,13 @@ public class TeleportComponent extends EcsComponent {
             node.getTransform().setPosition(posrot.position);
             node.getTransform().setRotation(posrot.rotation);
         }
-        SceneNode parent = null;
-        if (getParent() != null) {
-            parent = getParent();
+        Transform parent = null;
+        if (teleportlist.getParent() != null) {
+            parent = teleportlist.getParent();
         }
 
         if (parent != null) {
-            node.getTransform().setParent(parent.getTransform());
+            node.getTransform().setParent(parent);
         } else {
             //Das mit world ist doof. 21.12.17: Und fuehrt bei FlightScene zum "verschwinden" der Scenery.
             //einfach kein parent? Das waere doch sinnig. Ob das in Unity schadet?
@@ -187,8 +169,8 @@ public class TeleportComponent extends EcsComponent {
         if (lastNearView!=null){
             lastNearView.disable();
         }
-        if (getNearView() != null) {
-            NearView nearView = getNearView();
+        if (teleportlist.getNearView() != null) {
+            NearView nearView = teleportlist.getNearView();
             if (parent != null) {
                 nearView.enable(posrot);
             }
@@ -202,45 +184,3 @@ public class TeleportComponent extends EcsComponent {
     }
 }
 
-class TeleportPointList {
-    public List<TeleportPoint> point = new ArrayList<TeleportPoint>();
-    public int index = 0;
-
-    public void addPosition(String label, SceneNode parent, LocalTransform posrot, String targetEntity, NearView nearView) {
-
-        //this.label.add(label);
-        point.add(new TeleportPoint(posrot, label, parent, targetEntity, nearView));
-        //this.parent.add(parent);
-    }
-
-    public int step(boolean forward) {
-        if (point.size() > 0) {
-            if (forward) {
-                if (++index >= point.size())
-                    index = 0;
-            } else {
-                if (--index < 0)
-                    index = point.size() - 1;
-            }
-            return index;
-        }
-        return -1;
-    }
-}
-
-class TeleportPoint {
-    LocalTransform point;
-    String label;
-    SceneNode parent;
-    //hier eine EcsEntity Referenz aufzunehmen ist eine starke Dependency. Darum nur der Name.
-    /*EcsEntity*/ String targetEntity;
-    NearView nearView;
-
-    TeleportPoint(LocalTransform point, String label, SceneNode parent, String targetEntity, NearView nearView) {
-        this.point = point;
-        this.label = label;
-        this.parent = parent;
-        this.targetEntity = targetEntity;
-        this.nearView = nearView;
-    }
-}

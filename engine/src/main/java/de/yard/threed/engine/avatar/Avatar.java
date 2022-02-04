@@ -102,13 +102,6 @@ public class Avatar {
         }
     }
 
-    public void dumpDebugInfo() {
-        logger.info("mainNode.y=" + mainNode.getTransform().getPosition().getY());
-        //logger.info("vrcarrier.y=" + ac.vrcarrier.getTransform().getPosition().getY());
-        //logger.info("rotator.y=" + ac.rotator.getTransform().getPosition().getY());
-        //logger.info("offsetstep=" + ac.offsetstep);
-    }
-
     public SceneNode getNode() {
         return mainNode;
     }
