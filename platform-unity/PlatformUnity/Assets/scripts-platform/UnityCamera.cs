@@ -222,7 +222,7 @@ namespace de.yard.threed.platform.unity
             UnityTransform.setRotation (getCarrierTransform (), rotation);
         }
 
-        public de.yard.threed.core.Vector3 getVrPosition ()
+        public de.yard.threed.core.Vector3 getVrPosition (bool dumpInfo)
         {
             UnityEngine.Transform ct = camera.transform;
             return UnityTransform.getPosition (ct);

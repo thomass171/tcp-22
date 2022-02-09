@@ -15,6 +15,9 @@ import de.yard.threed.engine.platform.common.RequestType;
  * <p>
  * 26.11.19: Deprecated, weil es friemelig/konfus ist und mit MenuCycler vielleicht eine gute Alternative besteht. Und in VR
  * sollte es eh eine Art Panel (z.B: CDU) geben.
+ *
+ * 7.2.22: But the basic idea is still valid. Maybe move it to something similar to SpinnerControlPanel.
+ *
  * Created on 23.11.18.
  */
 @Deprecated

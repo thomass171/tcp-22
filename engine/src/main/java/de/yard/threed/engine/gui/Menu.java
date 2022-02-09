@@ -3,11 +3,11 @@ package de.yard.threed.engine.gui;
 import de.yard.threed.engine.*;
 
 /**
- * This isType not very specific. Just a scene node where parts can be selected/clicked/pressed.
+ * This is not very specific. Just a scene node (control panel) that can be opened/closed (shown/hidden) and where parts can be selected/clicked/pressed.
  */
 public interface Menu extends GenericControlPanel {
     /**
-     * Returns null if the menu was closed to indicate that. So getNode()!?null isType a "not closed" check.
+     * Returns null if the menu was closed to indicate that. So getNode()==null is a "not closed" check.
      *
      * @return
      */

@@ -5,31 +5,33 @@ import de.yard.threed.engine.Camera;
 import de.yard.threed.core.Point;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.Ray;
-import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.Transform;
-import de.yard.threed.engine.avatar.Avatar;
 import de.yard.threed.engine.vr.VrHelper;
 
 
 /**
  * Small helper for avoiding duplicate code.
- * 27.1.2022 No longer related to avatar but observer.
- *
+ * 27.1.2022 No longer related to avatar but some observer.
+ * 8.2.22: Not only for a Observer but in general for any type of camera.
+ * <p>
  * 26.11.2019
  */
-public abstract class ObserverMenuProvider implements MenuProvider {
-   // Avatar avatar;
-    Camera cameraForMouseClick;
+public class DefaultMenuProvider implements MenuProvider {
 
-    public ObserverMenuProvider(/*Avatar avatar,*/ Camera cameraForMouseClick) {
-       // this.avatar = avatar;
-        this.cameraForMouseClick=cameraForMouseClick;
+    Camera cameraForMouseClick;
+    MenuBuilder menuBuilder;
+
+    public DefaultMenuProvider(Camera cameraForMouseClick, MenuBuilder menuBuilder) {
+
+        this.cameraForMouseClick = cameraForMouseClick;
+        this.menuBuilder = menuBuilder;
     }
 
     @Override
-    public /*SceneNode*/Transform getAttachNode() {
+    public Transform getAttachNode() {
         //r11.5.21 eturn avatar.getFaceNode();
-        return Observer.getInstance().getTransform();
+        //return Observer.getInstance().getTransform();
+        return cameraForMouseClick.getCarrier().getTransform();
         //return avatar.getNode();
         //return sc.getDefaultCamera().getCarrier();
     }
@@ -47,6 +49,6 @@ public abstract class ObserverMenuProvider implements MenuProvider {
 
     @Override
     public Menu buildMenu() {
-        throw new RuntimeException("should be overridden(C#)");
+        return menuBuilder.buildMenu();
     }
 }

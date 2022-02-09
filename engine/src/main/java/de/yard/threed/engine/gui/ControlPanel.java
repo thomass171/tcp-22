@@ -11,9 +11,7 @@ import de.yard.threed.core.DimensionF;
 import de.yard.threed.engine.platform.common.SimpleGeometry;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Mit deferred camera, klassisch an near plane, in VR am Controller oder einfach eine "Schalttafel".
@@ -38,31 +36,16 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
 
     static Log logger = Platform.getInstance().getLog(ControlPanel.class);
 
-    // blauer Hintergrund, der durch Transparenz blasser erscheint. Vielleicht eher im Maze L&F. Naja, mal sehn. die passt gut
-    //Color basecolor = new Color(204, 230, 255, 128);
-    //Color basecolor = new Color(128, 193, 255, 128);
-    //static Color basecolor = new Color(255, 217, 102, 128);
-
-    // Color basecolor;
-    Map<Integer, SceneNode> nodeByIndex = new HashMap<Integer, SceneNode>();
-    //SceneNode backplane;
     DimensionF planeSize;
     private double zoffset = 0.01f;
     List<ControlPanelArea> areas = new ArrayList<ControlPanelArea>();
     List<ControlPanel> subPanel = new ArrayList<ControlPanel>();
 
-
-    /*private ControlPanel(SceneNode backplane, DimensionF worldBackplaneSize, Color basecolor) {
-        this.backplane = backplane;
-        this.worldBackplaneSize = worldBackplaneSize;
-        this.basecolor = basecolor;
-    }*/
-
     /**
      * Just a backplane.
      */
     public ControlPanel(DimensionF planeSize, Material mat) {
-        SimpleGeometry geo = Primitives.buildSimpleXYPlaneGeometry(planeSize.width, planeSize.height,new ProportionalUvMap());
+        SimpleGeometry geo = Primitives.buildSimpleXYPlaneGeometry(planeSize.width, planeSize.height, new ProportionalUvMap());
 
         Mesh mesh = new Mesh(geo, mat);
         setMesh(mesh);
@@ -72,7 +55,7 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
     }
 
     public ControlPanelArea addArea(Vector2 position, DimensionF size, ButtonDelegate buttonDelegate) {
-        ControlPanelArea cpa = new ControlPanelArea(size,buttonDelegate);
+        ControlPanelArea cpa = new ControlPanelArea(size, buttonDelegate);
         attach(cpa);
         cpa.getTransform().setPosition(new Vector3(position.getX(), position.getY(), zoffset));
         areas.add(cpa);
@@ -105,8 +88,8 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
             return true;
         }
         // Also check sub control panel
-        for (ControlPanel cp:subPanel){
-            if (cp.checkForClickedArea(pickingray)){
+        for (ControlPanel cp : subPanel) {
+            if (cp.checkForClickedArea(pickingray)) {
                 return true;
             }
         }

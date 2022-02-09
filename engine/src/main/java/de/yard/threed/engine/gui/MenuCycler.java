@@ -23,7 +23,11 @@ public class MenuCycler {
         this.menuBuilders = menuBuilders;
     }
 
-    public void update(Point mouselocation) {
+    /**
+     * Returns true if the mouseclick was consumed by a click.
+     *
+     */
+    public boolean update(Point mouseClickLocation) {
         if (Input.GetKeyDown(KeyCode.M)) {
             //logger.debug("m key was pressed. currentdelta=" + tpf);
             cycle();
@@ -47,6 +51,7 @@ public class MenuCycler {
             menu.checkForSelectionByKey(2);
         }
 
+        boolean consumed = false;
         if (menu != null) {
 
             Vector3 menuWorldPos = menu.getNode().getTransform().getWorldModelMatrix().extractPosition();
@@ -61,16 +66,17 @@ public class MenuCycler {
                 logger.debug("menu for VR (menuWorldPos=" + menuWorldPos + ") picking ray isType " + ray);
                 checkForClick(ray);
             }
-            if (mouselocation != null) {
+            if (mouseClickLocation != null) {
                 //4.10.19 Generischer ueber Ray
                 //Request command = menu.checkForClickedButton(mouselocation);
                 //if (cameraOfMenu != null) {
                 Ray pickingray;//= cameraOfMenu.buildPickingRay(mouselocation);
-                pickingray = menuBuilders[index].getRayForUserClick(mouselocation);
+                pickingray = menuBuilders[index].getRayForUserClick(mouseClickLocation);
                 logger.debug("menu for mouse click (menuWorldPos=" + menuWorldPos + ") picking ray isType " + pickingray);
-                checkForClick(pickingray);
+                consumed = checkForClick(pickingray);
             }
         }
+        return consumed;
     }
 
     /**
@@ -78,9 +84,9 @@ public class MenuCycler {
      *
      * @param
      */
-    private void checkForClick(Ray pickingray) {
+    private boolean checkForClick(Ray pickingray) {
         /*Request command =*/
-        menu.checkForClickedArea(pickingray);
+        return menu.checkForClickedArea(pickingray);
         // 4.10.19 Pruefung auf close sollte/muss anders gehen
         /*31.12.19if (command != null && command.getType().getLabel() != null && command.getType().getLabel().equals("close")) {
             cycle();

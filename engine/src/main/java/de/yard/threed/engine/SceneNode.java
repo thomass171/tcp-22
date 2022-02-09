@@ -120,9 +120,14 @@ public class SceneNode /*extends Object3D*/ {
         Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODEPARENTCHANGED, new Payload(n)));
     }
 
-    /*public void remove(SceneNode o) {
-        ((NativeSceneNode) object3d).remove((NativeSceneNode) o.object3d);
-    }*/
+    /**
+     * 8.2.22: Reintroduced as (recursive) remove. This object instance (and those of childs) still exists, while the node was removed from
+     * the scene graph and destroyed . The nativescenenode is set to null as an indicator.
+     */
+    public void remove() {
+        (Platform.getInstance()).removeSceneNode(nativescenenode);
+        nativescenenode = null;
+    }
 
     /*public SceneNode find(String name) {
         NativeObject3D n = ((NativeSceneNode) object3d).find(name);

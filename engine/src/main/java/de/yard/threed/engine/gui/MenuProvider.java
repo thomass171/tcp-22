@@ -10,6 +10,10 @@ import de.yard.threed.engine.Transform;
  *
  */
 public interface MenuProvider {
+
+    /**
+     * 7.2.22: To make that clear: Only builds the menu, but doesn't attach it to a parent/camera. For attaching getAttachNode() is provided.
+     */
     Menu buildMenu();
 
     //besser Camera als SceneNode liefern, die brauchts für picking ray bei mouseclick.

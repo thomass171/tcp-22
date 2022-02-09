@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 17.10.2017: A simple VR Scene as reference analog to ThreeJS VrScene.html.
+ * 17.10.2017: A simple VR Scene as reference analog to ThreeJS VrScene.html (not using ECS).
  * The bar is at height 1m. Depending on the VR configuration (sitting/standing), the sitting view position is
  * initially at the bars height.
  * The avatar (green cube) is at same height as the bar, also in VR (independent from vr y-offset).
@@ -45,7 +45,7 @@ public class VrScene extends Scene {
     SceneNode bar, box1, ground, platform, secondBar;
     Avatar avatar;
     MenuCycler menuCycler = null;
-    MenuItem[][] menuitems;
+    MenuItem[] menuitems;
 
     ControlPanel leftControllerPanel = null;
     ControlPanel controlPanel;
@@ -65,24 +65,26 @@ public class VrScene extends Scene {
         vrInstance = VrInstance.buildFromArguments();
 
         //erst jetzt ist menu texture geladen
-        menuitems = new MenuItem[][]{new MenuItem[]{
-                new MenuItem(null, Label.LABEL_RESET, () -> {
+        menuitems = new MenuItem[]{
+                new MenuItem("reset", () -> {
                     logger.debug("reset");
                     reset();
                 }),
-                new MenuItem(null, Label.LABEL_START, () -> {
-                    logger.debug("start");
+                new MenuItem("scale up", () -> {
+                    logger.debug("scale up");
                     Vector3 scale = box1.getTransform().getScale();
                     scale = scale.multiply(1.1f);
                     box1.getTransform().setScale(scale);
                 }),
-                new MenuItem(null, Label.LABEL_LOADINGVEHICLE, () -> {
-                    logger.debug("loadvehicle");
+                new MenuItem("scale down", () -> {
+                    logger.debug("scale down");
                     Vector3 scale = box1.getTransform().getScale();
                     scale = scale.multiply(0.9f);
                     box1.getTransform().setScale(scale);
+                }),
+                new MenuItem("teleport", () -> {
+                    controller.step(true);
                 })
-        }
         };
         databundle = BundleRegistry.getBundle("data");
 
@@ -146,7 +148,7 @@ public class VrScene extends Scene {
         });
         buttonDelegates.put("info", () -> {
             Camera camera = getDefaultCamera();
-            logger.info("YoffsetVR=" + ((VrInstance.getInstance() != null) ? VrInstance.getInstance().getYoffsetVR() : ""));
+            logger.info("YoffsetVR=" + ((VrInstance.getInstance() != null) ? ("" + VrInstance.getInstance().getYoffsetVR()) : ""));
             logger.info("cam vr pos=" + camera.getVrPosition(true));
             logger.info("world pos=" + Scene.getWorld().getTransform().getPosition());
             Transform carrier = camera.getCarrier().getTransform();
@@ -182,13 +184,26 @@ public class VrScene extends Scene {
         });
 
         controlPanel = VrSceneHelper.buildControllerControlPanel(buttonDelegates);
+        //controlPanel = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(3, 2), -3, -2.9, menuitems, Color.LIGHTBLUE);
         controlPanel.getTransform().setPosition(new Vector3(-0.5, 1.5, -2.5));
         addToWorld(controlPanel);
 
-        menuCycler = new MenuCycler(new MenuProvider[]{new VrMainMenuBuilder(this)});
+        //menuCycler = new MenuCycler(new MenuProvider[]{new VrMainMenuBuilder(this)});
+        menuCycler = new MenuCycler(new MenuProvider[]{new DefaultMenuProvider(getDefaultCamera(), () -> {
+            //7.10.19: Mal nicht auf near plane sondern 3 in der Tiefe (wegen VR Verzerrung?)
+            //Dann ist es hinterm Balken. Erstmal versuchen.
+            //VrMainMenu menu = new VrMainMenu(/*rs.getDefaultCamera(), VrScene.logger,*/ rs.menuitems/*, VrHelper.getController(1)*/);
+            //BrowseMenu menu = new BrowseMenu(new DimensionF(3, 2), -3, -2.9, rs.menuitems);
+            //GuiGrid m = GuiGrid.buildSingleColumnFromMenuitems(new DimensionF(3, 2), -3, -2.9, rs.menuitems);
+
+            // not too large to avoid overlapping with regular control panel in non VR for avoiding click conflicts.
+            ControlPanel m = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(1.3, 0.7), -3, -2.9, menuitems, Color.LIGHTBLUE);
+            ControlPanelMenu menu = new ControlPanelMenu(m);
+            return menu;
+        })});
 
         ViewpointList tl = new ViewpointList();
-        controller = new StepController(Observer.getInstance().getTransform(),tl);
+        controller = new StepController(Observer.getInstance().getTransform(), tl);
 
 
         // on top of platform
@@ -199,10 +214,10 @@ public class VrScene extends Scene {
         }
         // attached to top of platform
         if (vrInstance != null) {
-            tl.addEntry( new Vector3(VrSceneHelper.PLATFORM_X_POSITION, 0, 0), new Quaternion(),platform.getTransform());
+            tl.addEntry(new Vector3(VrSceneHelper.PLATFORM_X_POSITION, 0, 0), new Quaternion(), platform.getTransform());
         } else {
             // y position is the same like unattached? Apparently it is.
-            tl.addEntry( new Vector3(0, VrSceneHelper.SECONDBARYPOSITION, 0), new Quaternion(),platform.getTransform());
+            tl.addEntry(new Vector3(0, VrSceneHelper.SECONDBARYPOSITION, 0), new Quaternion(), platform.getTransform());
         }
 
         // back to origin
@@ -237,6 +252,8 @@ public class VrScene extends Scene {
         observer.update();
         VrHelper.update();
 
+        // VR controller might not be available until the user enters VR. So attach the controller the first time
+        // they are found.
         if (VrHelper.getController(0) != null && leftControllerPanel == null) {
 
             leftControllerPanel = VrSceneHelper.buildControllerControlPanel(buttonDelegates);
@@ -282,7 +299,11 @@ public class VrScene extends Scene {
         GridTeleportDestination markerTransform = null;
 
         Point mouseClickLocation = Input.getMouseClick();
-        if (mouseClickLocation != null) {
+        //menucycler.update() is also for keys!
+        boolean clickConsumed = menuCycler.update(mouseClickLocation);
+
+        if (mouseClickLocation != null && !clickConsumed) {
+            // mouse click wasn't consumed by menu
             // menu geht mit delegate. Aber auch mit direktem mouse click red box verkleinern
             Ray ray = /*avatar*/observer.buildPickingRay(getDefaultCamera(), mouseClickLocation);
             toggleRedBox(ray, false);
@@ -292,7 +313,6 @@ public class VrScene extends Scene {
             if (markerTransform != null) {
                 teleport(markerTransform);
             }
-
         }
         //links ist nur noch fuer teleport.
         if (Input.getControllerButtonDown(0)) {
@@ -301,9 +321,6 @@ public class VrScene extends Scene {
                 teleport(markerTransform);
             }
         }
-
-        //menucycler.update() is also for keys!
-        menuCycler.update(mouseClickLocation);
 
         if (fps != null) {
             fps.update(tpf);

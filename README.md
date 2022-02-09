@@ -70,6 +70,7 @@ In detail these are:
 * ImageHelper:handler.handlePixel
 * AbstractSceneRunner:handler.handle
 * An @Override annotation needs to be removed in GraphVisualizer.cs manually
+* DefaultMenuProvider:menuBuilder.buildMenu
 
 Furthermore Unity needs to know your HOSTDIR for finding bundle data.
 Go to file Main.js and adjust the SetEnvironmentVariable() call accordingly.

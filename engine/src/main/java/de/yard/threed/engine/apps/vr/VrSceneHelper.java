@@ -1,6 +1,5 @@
 package de.yard.threed.engine.apps.vr;
 
-import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
@@ -20,9 +19,9 @@ public class VrSceneHelper {
 
     // panel with 3 rows (dimesion 0.6x0.3)
     // rows must be quite narrow to have a proper property panel with text area large enough
-    private static double PropertyControlPanelWidth = 0.6;
-    private static double PropertyControlPanelRowHeight = 0.1;
-    private static double PropertyControlPanelMargin = 0.005;
+    private static double ControlPanelWidth = 0.6;
+    private static double ControlPanelRowHeight = 0.1;
+    private static double ControlPanelMargin = 0.005;
     private static Color controlPanelBackground = new Color(255, 217, 102, 128);
 
     public static double PLATFORM_X_POSITION = 25 / 2 + 5 / 2;
@@ -47,41 +46,40 @@ public class VrSceneHelper {
         Material mat = Material.buildBasicMaterial(backGround, false);
 
         int rows = 4;
-        DimensionF rowsize = new DimensionF(PropertyControlPanelWidth, PropertyControlPanelRowHeight);
-        double midElementWidth4 = PropertyControlPanelWidth / 4;
+        DimensionF rowsize = new DimensionF(ControlPanelWidth, ControlPanelRowHeight);
+        double midElementWidth4 = ControlPanelWidth / 4;
         double m4_2 = midElementWidth4 / 2;
-        double h = PropertyControlPanelRowHeight;
-        double h2 = PropertyControlPanelRowHeight / 2;
+        double h = ControlPanelRowHeight;
+        double h2 = ControlPanelRowHeight / 2;
 
-        ControlPanel cp = new ControlPanel(new DimensionF(PropertyControlPanelWidth, rows * PropertyControlPanelRowHeight), mat);
+        ControlPanel cp = new ControlPanel(new DimensionF(ControlPanelWidth, rows * ControlPanelRowHeight), mat);
 
         // top line: property control for yvroffset
-        cp.add(new Vector2(0, h + h2),
-                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat, new VrOffsetHandler()));
+        cp.add(new Vector2(0, h + h2), new SpinnerControlPanel(rowsize, ControlPanelMargin, mat, new VrOffsetHandler()));
 
         // top mid line
-        cp.addArea(new Vector2(-midElementWidth4 - m4_2, h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("cycleLeft")).setIcon(Icon.ICON_LEFTARROW);
-        cp.addArea(new Vector2(-m4_2, h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("cycleRight")).setIcon(Icon.ICON_RIGHTARROW);
+        cp.addArea(new Vector2(-midElementWidth4 - m4_2, h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), buttonDelegates.get("cycleLeft")).setIcon(Icon.ICON_LEFTARROW);
+        cp.addArea(new Vector2(-m4_2, h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), buttonDelegates.get("cycleRight")).setIcon(Icon.ICON_RIGHTARROW);
 
         // bottom mid line 4 elements : a indicator, a relocate/rest button
         Indicator indicator = Indicator.buildGreen(0.03);
         // half in ground
-        cp.addArea(new Vector2(-midElementWidth4 - m4_2, -h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), null).attach(indicator);
-        cp.addArea(new Vector2(-m4_2, -h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), () -> {
+        cp.addArea(new Vector2(-midElementWidth4 - m4_2, -h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), null).attach(indicator);
+        cp.addArea(new Vector2(-m4_2, -h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), () -> {
             logger.debug("area clicked");
             indicator.toggle();
         }).setIcon(Icon.ICON_LEFTARROW);
-        cp.addArea(new Vector2(m4_2, -h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("reset")).setIcon(Icon.ICON_POSITION);
-        cp.addArea(new Vector2(midElementWidth4 + m4_2, -h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("up")).setIcon(Icon.ICON_UPARROW);
+        cp.addArea(new Vector2(m4_2, -h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), buttonDelegates.get("reset")).setIcon(Icon.ICON_POSITION);
+        cp.addArea(new Vector2(midElementWidth4 + m4_2, -h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), buttonDelegates.get("up")).setIcon(Icon.ICON_UPARROW);
 
 
         // bottom line:  one indicator and 3 buttons
         Indicator indicatorb = Indicator.buildRed(0.03);
         // half in ground
-        cp.addArea(new Vector2(-midElementWidth4 - m4_2, -h - h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), null).attach(indicatorb);
-        cp.addArea(new Vector2(-m4_2, -h - h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("mainmenu")).setIcon(Icon.ICON_MENU);
-        cp.addArea(new Vector2(m4_2, -h - h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("info")).setIcon(Icon.ICON_HELP);
-        cp.addArea(new Vector2(midElementWidth4 + m4_2, -h - h2), new DimensionF(midElementWidth4, PropertyControlPanelRowHeight), buttonDelegates.get("down")).setIcon(Icon.ICON_DOWNARROW);
+        cp.addArea(new Vector2(-midElementWidth4 - m4_2, -h - h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), null).attach(indicatorb);
+        cp.addArea(new Vector2(-m4_2, -h - h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), buttonDelegates.get("mainmenu")).setIcon(Icon.ICON_MENU);
+        cp.addArea(new Vector2(m4_2, -h - h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), buttonDelegates.get("info")).setIcon(Icon.ICON_HELP);
+        cp.addArea(new Vector2(midElementWidth4 + m4_2, -h - h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), buttonDelegates.get("down")).setIcon(Icon.ICON_DOWNARROW);
 
         return cp;
     }

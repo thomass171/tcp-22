@@ -18,7 +18,9 @@ import java.util.List;
  * 26.11.19: Besser Request statt RequestType, damit auch Parameter mitkommen können.
  * <p>
  * 7.10.19: Saudoofe Hierarchie.
+ * 7.2.22: Deprecated by {@link ControlPanel} and {@link GenericControlPanel}? Probably. Mark deprecated
  */
+@Deprecated
 public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
     private double buttonzpos;
     Log logger = Platform.getInstance().getLog(GuiGrid.class);
