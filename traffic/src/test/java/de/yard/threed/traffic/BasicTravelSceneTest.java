@@ -92,12 +92,14 @@ public class BasicTravelSceneTest {
 
         EcsEntity player = UserSystem.getInitialUser();
         TeleportComponent tc = TeleportComponent.getTeleportComponent(player);
-        // vehicle not yet loaded. So only 3 outside viewpoints.
-        assertEquals("teleport destinations", 3, tc.getPointCount());
+        // vehicle not yet loaded. So only 1 outside viewpoints.
+        assertEquals("teleport destinations", 1, tc.getPointCount());
 
         sceneRunner.runLimitedFrames(50);
         // now 'loc' should have been loaded.
-        assertEquals("teleport destinations", 3 + 2, tc.getPointCount());
+        assertEquals("teleport destinations", 1 + 2, tc.getPointCount());
+        // should start at externel overview point. For now its in vehicle.
+        assertEquals("teleport index", 2, tc.getIndex());
     }
 
     /**

@@ -7,7 +7,6 @@ import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.avatar.Avatar;
 import de.yard.threed.engine.gui.*;
-import de.yard.threed.engine.vr.VrHelper;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.core.platform.NativeCollision;
 import de.yard.threed.engine.platform.common.*;
@@ -33,11 +32,13 @@ import java.util.Map;
  * -- info
  * -- indicator on/off
  * <p>
- * No traditional HUD in VR. Instead control panel at left controller. No deferred camera, only the VR camera.
+ * Outside VR Observer can move with FPC.
+ * No traditional HUD in VR. Instead control panel at left controller. Additional menu toggled by 'm' or control panel. No deferred camera, only the VR camera.
  * <p>
  * 14.5.21: Avatar not really needed here, but its good for orientation.
  * 23.11.21: initialY set to 0 instead of BARYPOSITION. With that the "standing position" (Oculus 190cm)
  * is quite correct (with offset -0.9).
+ * With "ReferenceSpaceType" 'local' instead of 'local-floor' -0.1 is better than -0.9
  */
 public class VrScene extends Scene {
     static Log logger = Platform.getInstance().getLog(VrScene.class);
@@ -48,7 +49,6 @@ public class VrScene extends Scene {
     MenuItem[] menuitems;
 
     ControlPanel leftControllerPanel = null;
-    ControlPanel controlPanel;
     Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
     VrInstance vrInstance = null;
     Observer observer = null;
@@ -82,7 +82,8 @@ public class VrScene extends Scene {
                     scale = scale.multiply(0.9f);
                     box1.getTransform().setScale(scale);
                 }),
-                new MenuItem("teleport", () -> {
+                // No 'teleport', because it only moves the observer, not the avatar.
+                new MenuItem("step", () -> {
                     controller.step(true);
                 })
         };
@@ -104,8 +105,8 @@ public class VrScene extends Scene {
         if (vrInstance != null) {
 
             // Without attaching the controller to the obeserver they appear too low. Somehow strange, like many VR aspects.
-            observer.attach(VrHelper.getController(0));
-            observer.attach(VrHelper.getController(1));
+            observer.attach(vrInstance.getController(0));
+            observer.attach(vrInstance.getController(1));
         } else {
             // No VR. just attach observer to avatar? Hmm, keep it separate for now for separate testing of teleport of avatar and moving view point.
             //observer.getTransform().setParent(avatar.getSceneNode().getTransform());
@@ -152,10 +153,17 @@ public class VrScene extends Scene {
             logger.info("cam vr pos=" + camera.getVrPosition(true));
             logger.info("world pos=" + Scene.getWorld().getTransform().getPosition());
             Transform carrier = camera.getCarrier().getTransform();
+            logger.info("observer set pos=" + Observer.getInstance().getPosition());
+            logger.info("observer finetune=" + Observer.getInstance().getFinetune());
+            logger.info("observer real pos=" + Observer.getInstance().getTransform().getPosition());
             logger.info("carrier pos=" + carrier.getPosition());
             while (carrier.getParent() != null) {
                 carrier = carrier.getParent();
-                logger.info("carrier parent pos=" + carrier.getPosition());
+                String name = "<unknwon>";
+                if (carrier.getSceneNode() != null && carrier.getSceneNode().getName() != null) {
+                    name = carrier.getSceneNode().getName();
+                }
+                logger.info("carrier parent pos=" + carrier.getPosition() + ", name=" + name);
             }
             Observer.getInstance().dumpDebugInfo();
         });
@@ -183,11 +191,6 @@ public class VrScene extends Scene {
             controller.step(true);
         });
 
-        controlPanel = VrSceneHelper.buildControllerControlPanel(buttonDelegates);
-        //controlPanel = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(3, 2), -3, -2.9, menuitems, Color.LIGHTBLUE);
-        controlPanel.getTransform().setPosition(new Vector3(-0.5, 1.5, -2.5));
-        addToWorld(controlPanel);
-
         //menuCycler = new MenuCycler(new MenuProvider[]{new VrMainMenuBuilder(this)});
         menuCycler = new MenuCycler(new MenuProvider[]{new DefaultMenuProvider(getDefaultCamera(), () -> {
             //7.10.19: Mal nicht auf near plane sondern 3 in der Tiefe (wegen VR Verzerrung?)
@@ -197,35 +200,24 @@ public class VrScene extends Scene {
             //GuiGrid m = GuiGrid.buildSingleColumnFromMenuitems(new DimensionF(3, 2), -3, -2.9, rs.menuitems);
 
             // not too large to avoid overlapping with regular control panel in non VR for avoiding click conflicts.
-            ControlPanel m = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(1.3, 0.7), -3, -2.9, menuitems, Color.LIGHTBLUE);
+            ControlPanel m = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(1.3, 0.7), -3, 0.01, menuitems, Color.LIGHTBLUE);
             ControlPanelMenu menu = new ControlPanelMenu(m);
             return menu;
         })});
 
         ViewpointList tl = new ViewpointList();
-        controller = new StepController(Observer.getInstance().getTransform(), tl);
+        // its no 'teleport' here, so observer is stepping, not avatar. Teleport is done via GridTeleporter.
+        controller = new StepController(/*avatar.getSceneNode()*/Observer.getInstance().getTransform(), tl);
 
-
-        // on top of platform
-        if (vrInstance != null) {
-            tl.addEntry(new Vector3(VrSceneHelper.PLATFORM_X_POSITION, VrSceneHelper.PLATFORM_ABOVE_GROUND, 0), new Quaternion());
-        } else {
-            tl.addEntry(new Vector3(VrSceneHelper.PLATFORM_X_POSITION, VrSceneHelper.SECONDBARYPOSITION, 0), new Quaternion());
-        }
+        // on top of platform, not attached to platform
+        tl.addEntry(new Vector3(VrSceneHelper.PLATFORM_X_POSITION, VrSceneHelper.SECONDBARYPOSITION, 0), new Quaternion());
         // attached to top of platform
-        if (vrInstance != null) {
-            tl.addEntry(new Vector3(VrSceneHelper.PLATFORM_X_POSITION, 0, 0), new Quaternion(), platform.getTransform());
-        } else {
-            // y position is the same like unattached? Apparently it is.
-            tl.addEntry(new Vector3(0, VrSceneHelper.SECONDBARYPOSITION, 0), new Quaternion(), platform.getTransform());
-        }
+        // y position is the same like unattached? Apparently it is, because platform center is at y=0.
+        tl.addEntry(new Vector3(0, VrSceneHelper.SECONDBARYPOSITION, 0), new Quaternion(), platform.getTransform());
 
-        // back to origin
-        if (vrInstance != null) {
-            tl.addEntry(new Vector3(0, initialY, 0), new Quaternion());
-        } else {
-            tl.addEntry(new Vector3(0, VrSceneHelper.BARYPOSITION, 0), new Quaternion());
-        }
+        // back to origin, attached to avatar
+        tl.addEntry(new Vector3(0, 0, 0), new Quaternion(), avatar.getSceneNode().getTransform());
+
     }
 
     /**
@@ -250,22 +242,14 @@ public class VrScene extends Scene {
         double tpf = getDeltaTime();
 
         observer.update();
-        VrHelper.update();
+        VrInstance.update();
 
         // VR controller might not be available until the user enters VR. So attach the controller the first time
         // they are found.
-        if (VrHelper.getController(0) != null && leftControllerPanel == null) {
+        if (vrInstance != null && vrInstance.getController(0) != null && leftControllerPanel == null) {
 
             leftControllerPanel = VrSceneHelper.buildControllerControlPanel(buttonDelegates);
-            LocalTransform lt = vrInstance.getCpTransform();
-            if (lt != null) {
-                //leftControllerPanel.getTransform().setPosition(new Vector3(-0.5, 1.5, -2.5));
-                //200,90,0 are good rotations
-                leftControllerPanel.getTransform().setPosition(lt.position);
-                leftControllerPanel.getTransform().setRotation(lt.rotation);
-                leftControllerPanel.getTransform().setScale(new Vector3(0.4, 0.4, 0.4));
-            }
-            VrHelper.getController(0).attach(leftControllerPanel);
+            vrInstance.attachControlPanelToController(vrInstance.getController(0), leftControllerPanel);//.attachControlPanel(leftControllerPanel);
         }
 
 
@@ -275,18 +259,21 @@ public class VrScene extends Scene {
         //Aber das ist doch für Verkleinern bei hit der Box
         //4.5.21 jetzt eher generell pruefen auf alle hit area.
         if (Input.getControllerButtonDown(10)) {
-            logger.debug(" found button down 10 ");
-            if (VrHelper.getController(1) != null) {
-                toggleRedBox(VrHelper.getController(1).getRay(), false);
+            logger.debug(" found button down 10 (VR controller trigger)");
+            if (vrInstance.getController(1) != null) {
+                toggleRedBox(vrInstance.getController(1).getRay(), false);
             }
-            Ray ray = VrHelper.getController(1).getRay();
-            controlPanel.checkForClickedArea(ray);
+            Ray ray = vrInstance.getController(1).getRay();
+            //controlPanel.checkForClickedArea(ray);
             leftControllerPanel.checkForClickedArea(ray);
         }
 
         // show destination marker on ground by left controller
-        if (VrHelper.getController(0) != null) {
-            gridTeleporter.updateDestinationMarker(VrHelper.getController(0).getRay(), ground, 1);
+        if (vrInstance != null && vrInstance.getController(0) != null) {
+            Ray ray = vrInstance.getController(0).getRay();
+            if (ray != null) {
+                gridTeleporter.updateDestinationMarker(ray, ground, 1);
+            }
         }
         Point mouseMovelocation = Input.getMouseMove();
         if (mouseMovelocation != null) {
@@ -307,16 +294,22 @@ public class VrScene extends Scene {
             // menu geht mit delegate. Aber auch mit direktem mouse click red box verkleinern
             Ray ray = /*avatar*/observer.buildPickingRay(getDefaultCamera(), mouseClickLocation);
             toggleRedBox(ray, false);
-            controlPanel.checkForClickedArea(ray);
+            //controlPanel.checkForClickedArea(ray);
 
             markerTransform = gridTeleporter.updateDestinationMarker(ray, ground, 1);
             if (markerTransform != null) {
                 teleport(markerTransform);
             }
+
+            if (vrInstance != null && vrInstance.isEmulated()) {
+                // emulate VR trigger
+                ray = getDefaultCamera().buildPickingRay(getDefaultCamera().getCarrierTransform(), mouseClickLocation);
+                leftControllerPanel.checkForClickedArea(ray);
+            }
         }
         //links ist nur noch fuer teleport.
         if (Input.getControllerButtonDown(0)) {
-            markerTransform = gridTeleporter.updateDestinationMarker(VrHelper.getController(0).getRay(), ground, 1);
+            markerTransform = gridTeleporter.updateDestinationMarker(vrInstance.getController(0).getRay(), ground, 1);
             if (markerTransform != null) {
                 teleport(markerTransform);
             }
@@ -328,7 +321,8 @@ public class VrScene extends Scene {
     }
 
     /**
-     * Teleport applies to avatar and observer and keeps these in sync, even though they are not coupled.
+     * Teleport applies to avatar and attached observer.
+     * No longer a need to keep these in sync, because they are not coupled.
      */
     private void teleport(GridTeleportDestination markerTransform) {
 
@@ -336,12 +330,14 @@ public class VrScene extends Scene {
         Vector3 destination = markerTransform.transform.position;
         // Move avatar and observer. TODO y1?
         avatar.setPosition(new Vector3(destination.getX(), 1, destination.getZ()));
-        //TODO rotate avatar.;
+        if (markerTransform.transform.rotation != null) {
+            avatar.setRotation(markerTransform.transform.rotation);
+        }
         //camera.getCarrier().getTransform().setPosition(new Vector3(destination.getX(), 0, destination.getZ()));
-        observer.setPosition(new Vector3(destination.getX(), initialY, destination.getZ()));
+        /*observer.setPosition(new Vector3(destination.getX(), initialY, destination.getZ()));
         if (markerTransform.transform.rotation != null) {
             observer.setRotation(markerTransform.transform.rotation);
-        }
+        }*/
     }
 
     /**
@@ -377,14 +373,11 @@ public class VrScene extends Scene {
             observer.initFineTune(vrInstance.getYoffsetVR());
             observer.setPosition(new Vector3(0, initialY, 0));
         } else {
-            // No VR. just attach observer to avatar? Hmm, keep it separate for now for separate testing of teleport of avatar and moving view point.
-            observer.setPosition(new Vector3(0, VrSceneHelper.BARYPOSITION, 0));
+            // No VR. Keep observer exactly on height of bar/avatar
+            observer.setPosition(new Vector3(0, 0, 0));
 
         }
-    }
-
-    private void cycleObserver(boolean left) {
-
+        Observer.getInstance().getTransform().setParent(avatar.getSceneNode().getTransform());
     }
 
     @Override

@@ -5,9 +5,8 @@ import java.util.HashMap;
 public class Setup {
     /**
      * Also for other Java platforms like OpenGL.
-     *
      */
-    public static HashMap<String, String> setUp(String[] args){
+    public static HashMap<String, String> setUp(String[] args) {
         HashMap<String, String> properties = new HashMap<String, String>();
         for (String arg : args) {
             if (arg.contains("=")) {
@@ -21,8 +20,13 @@ public class Setup {
             properties.put("argv.visualizeTrack", "true");
             //properties.put("argv.enableHud", "true");
 
-            // emulateVR for testing VR panel outside VR via mouse move/click (while shift pressed)
-            //properties.put("argv.emulateVR", "true");
+            // emulateVR for testing VR panel outside VR via mouse move/click (mouseclick is right trigger, shift pressed for left trigger)
+            // Don't set yoffsetVR that low that is needed in real VR (appx -0.9) to have a better view in emulation.
+            boolean emulateVR = false;
+            if (emulateVR) {
+                properties.put("argv.emulateVR", "true");
+                properties.put("argv.yoffsetVR", "0.3");
+            }
 
             //properties.put("argv.initialVehicle", "c172p");
             //Evtl. Bluebird statt c172p wegen sonst verdecktem menu.
@@ -37,7 +41,7 @@ public class Setup {
             //properties.put("argv.enableFPC", "true");
             //18.11.19: NearView geht in VR eh nicht, darum damit üblicherweise auch sonst nicht arbeiten.
             //properties.put("argv.enableNearView", "true");
-            properties.put("argv.initialMaze","skbn/SokobanWikipedia.txt");
+            properties.put("argv.initialMaze", "skbn/SokobanWikipedia.txt");
             //properties.put("argv.initialMaze","maze/Area15x10.txt");
             //properties.put("argv.initialMaze","skbn/DavidJoffe.txt:1");
         }
@@ -49,7 +53,7 @@ public class Setup {
 
             System.setProperty("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
-            //System.setProperty("scene", "de.yard.threed.maze.MazeScene");
+            System.setProperty("scene", "de.yard.threed.maze.MazeScene");
             System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
             //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
 
@@ -59,7 +63,7 @@ public class Setup {
                 properties.put("argv.enableAutomove", "true");
                 System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
             }
-            boolean demo = false;
+            boolean demo = true;
             if (demo) {
                 properties.put("argv.basename", "traffic:tiles/Demo.xml");
                 // GraphMovingComponent.automove is needed.

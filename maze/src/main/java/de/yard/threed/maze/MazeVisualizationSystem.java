@@ -97,6 +97,10 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             //not yet joined?
             return;
         }
+        if (ray == null) {
+            //no ray no pointer
+            return;
+        }
         if (left) {
             GridState state = MazeUtils.buildGridStateFromEcs();
             MoverComponent mc = MoverComponent.getMoverComponent(mainplayer);

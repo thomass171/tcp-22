@@ -1,20 +1,19 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
+import de.yard.threed.core.Vector3;
 import de.yard.threed.core.testutil.TestUtil;
-import de.yard.threed.engine.Ray;
+import de.yard.threed.engine.Camera;
+import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
-import de.yard.threed.engine.ecs.InputToRequestSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
-import de.yard.threed.maze.testutils.TestUtils;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -55,6 +54,10 @@ public class MazeSceneTest {
         assertEquals("initial orientation", new GridOrientation().toString(), MazeUtils.getPlayerorientation().toString());
         assertEquals("initial location", new Point(6, 1).toString(), MazeUtils.getPlayerposition().toString());
 
+        Camera camera = Scene.getCurrent().getDefaultCamera();
+        Vector3 worldPos = camera.getCarrier().getTransform().getWorldModelMatrix().extractPosition();
+        // 1.35 just taken as is. Where does it come from?
+        assertEquals("viewpoint absolut height", 1.35,worldPos.getY(),0.001);
         // teleport to ... for first moving of a box
         /*No ray in test platform for now.
         Ray ray = TestUtils.getHittingRayForTeleport(new Point(7, 3),'W');

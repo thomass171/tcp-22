@@ -52,7 +52,7 @@ public class VrSceneHelper {
         double h = ControlPanelRowHeight;
         double h2 = ControlPanelRowHeight / 2;
 
-        ControlPanel cp = new ControlPanel(new DimensionF(ControlPanelWidth, rows * ControlPanelRowHeight), mat);
+        ControlPanel cp = new ControlPanel(new DimensionF(ControlPanelWidth, rows * ControlPanelRowHeight), mat, 0.01);
 
         // top line: property control for yvroffset
         cp.add(new Vector2(0, h + h2), new SpinnerControlPanel(rowsize, ControlPanelMargin, mat, new VrOffsetHandler()));

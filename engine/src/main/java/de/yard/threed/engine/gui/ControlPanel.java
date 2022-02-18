@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mit deferred camera, klassisch an near plane, in VR am Controller oder einfach eine "Schalttafel".
+ * Just a flat panel with components (like buttons, textareas) added. Can be used for user menus, inventory, control panel aso.
+ * To be attached to either a (deferred) camera, traditional on a near plane, or in VR at a controller.
  * <p>
  * Mal als ausgereiftereren Alternativentwurf zu FovElementPlane (und Hud/GuiGrid, denn das ist doch sehr ähnlich). Und auch zu allen Menus.
  * War mal Inventory, aber ControlPanel trifft es viel besser. Allgemein erstmal nur eine Plane, auf der
@@ -37,14 +38,17 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
     static Log logger = Platform.getInstance().getLog(ControlPanel.class);
 
     DimensionF planeSize;
-    private double zoffset = 0.01f;
+    // offset for components to be raised above the back plane. A positive value. Needs to be related to where the panel is used. A low value (eg. 0.000001) for
+    // near plane usage, but larger (eg 0.01) for world usage.
+    private double zoffset;
     List<ControlPanelArea> areas = new ArrayList<ControlPanelArea>();
     List<ControlPanel> subPanel = new ArrayList<ControlPanel>();
 
     /**
      * Just a backplane.
      */
-    public ControlPanel(DimensionF planeSize, Material mat) {
+    public ControlPanel(DimensionF planeSize, Material mat, double zoffset) {
+        this.zoffset = zoffset;
         SimpleGeometry geo = Primitives.buildSimpleXYPlaneGeometry(planeSize.width, planeSize.height, new ProportionalUvMap());
 
         Mesh mesh = new Mesh(geo, mat);

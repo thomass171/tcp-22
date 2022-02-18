@@ -397,6 +397,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         }
 
         // start in locomotive. Weil dann der TeleporterSystem.init schon gelaufen ist, muss auch "needsupdate" gesetzt werden, darum stepTo().
+        // 16.2.22 Better start at some external overview point? The user can then teleport to a vehicle. So don't change teleport position?
+        // 18.2.22 But if the user requests a vehicle load, its more convenient to teleport it to the cockpit after load. So for now keep auto teleport and add a flag later.
         avatarpc.stepTo(avatarpc.getPointCount() - 1);
 
     }

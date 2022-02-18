@@ -76,8 +76,8 @@ public class SphereSystemTest {
 
         List<ViewPoint> viewpoints = TrafficHelper.getViewpointsByDataprovider();
 
-        assertEquals("viewpoints", 3, viewpoints.size());
-        assertEquals("viewpoint[0].y", 200, viewpoints.get(0).transform.position.getY(),0.0001);
+        assertEquals("viewpoints", 1, viewpoints.size());
+        assertEquals("viewpoint[0].y", 100, viewpoints.get(0).transform.position.getY(),0.0001);
         ViewPoint viewPoint = viewpoints.get(0);
 
         assertEquals("vehiclelist", 1, TrafficSystem.vehiclelist.size());

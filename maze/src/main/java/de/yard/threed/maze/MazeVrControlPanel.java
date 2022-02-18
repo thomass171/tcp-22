@@ -43,7 +43,7 @@ public class MazeVrControlPanel extends ControlPanel {
      */
     public MazeVrControlPanel(Map<String, ButtonDelegate> buttonDelegates) {
 
-        super(new DimensionF(ControlPanelWidth, ControlPanelRows * ControlPanelRowHeight), Material.buildBasicMaterial(controlPanelBackground, false));
+        super(new DimensionF(ControlPanelWidth, ControlPanelRows * ControlPanelRowHeight), Material.buildBasicMaterial(controlPanelBackground, false), 0.01);
 
         PanelGrid panelGrid = new PanelGrid(ControlPanelWidth, ControlPanelRowHeight, ControlPanelRows, ControlPanelColWidth);
 

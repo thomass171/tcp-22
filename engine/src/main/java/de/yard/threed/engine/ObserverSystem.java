@@ -1,15 +1,8 @@
 package de.yard.threed.engine;
 
-
-
-
-
-
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
-
-import java.util.List;
 
 /**
  * Steuerung des Viewpoint bzw. View direction. Aber keine Bewegung.
@@ -18,11 +11,13 @@ import java.util.List;
  */
 
 public class ObserverSystem extends DefaultEcsSystem {
-    
+
+    public static String TAG = "ObserverSystem";
+
     public ObserverSystem() {
         super(new String[]{"ObserverComponent"});
     }
-    
+
     /**
      * Die initiale Position auch darstellen.
      *
@@ -30,7 +25,7 @@ public class ObserverSystem extends DefaultEcsSystem {
      */
     @Override
     public void init(EcsGroup group) {
-        
+
     }
 
     @Override
@@ -52,6 +47,11 @@ public class ObserverSystem extends DefaultEcsSystem {
                 oc.incPitch(-tpf);
             }
         }
+    }
+
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     /*MA31 dependency zu graph und gehört hier dann doch nicht hin public static EcsGroup matches(List<EcsComponent> components) {

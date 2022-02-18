@@ -16,7 +16,7 @@ public class SpinnerControlPanel extends ControlPanel {
     SpinnerHandler handler;
 
     public SpinnerControlPanel(DimensionF size, double margin, Material mat, SpinnerHandler handler) {
-        super(new DimensionF(size.width, size.height), mat);
+        super(new DimensionF(size.width, size.height), mat, 0.01);
         this.handler = handler;
 
         double m2 = 2 * margin;

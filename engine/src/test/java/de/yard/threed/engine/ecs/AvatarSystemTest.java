@@ -72,7 +72,8 @@ public class AvatarSystemTest {
         assertNotNull("observer", Observer.getInstance());
         // Should NOT be assigned to avatar in VR
         Transform observerParent = Observer.getInstance().getTransform().getParent();
-        assertNull("observerParent", observerParent);
+        // 16.2.22: Now also in VR observer is attached to avatar
+        assertNotNull("observerParent", observerParent);
     }
 
     private void startSimpleTest() {

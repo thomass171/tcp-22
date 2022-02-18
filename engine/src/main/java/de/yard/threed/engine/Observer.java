@@ -6,7 +6,9 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.vr.VRController;
 
 /**
- * Singleton. Es kann nur einen geben. Das ist im Prinzip der carrier der main camera.
+ * Just a wrapper for a transform (usually carrier of the main camera) that allows internal fine tuning of the position independent from its
+ * external position. Not a node on its own. Singleton.
+ *
  * Auch ausserhalb ECS nutzbar.
  * Soll in Erweiterung spaeter auch mal in FirstPersonController verwendet werden.
  * <p>
@@ -24,7 +26,7 @@ import de.yard.threed.engine.vr.VRController;
 public class Observer implements SimpleTransform {
     static Log logger = Platform.getInstance().getLog(Observer.class);
 
-    // Ist in der Regel der Carrier, kann aber auch eine ProxyNode sein.
+    // Usually the carrier, but might also be a proxy node.
     private Transform observer;
     private static Observer instance = null;
     // boolean vrEnabled = false;
@@ -93,23 +95,13 @@ public class Observer implements SimpleTransform {
     }
 
     /**
-     * besser den ganzen Avatar statt Camera verschieben, dann gehen die Controller mit.
-     * Z.Z. ist er ja eh unsichtbar.
-     * 15.8.19: jetzt auf vrcarrier statt scenenode.
-     * 5.10.19: Immer absolut beginnen statt relativ. Und ich versuchs noch mal mit vrposition.
-     * 5.5.21: Der Avatar (mainnode) selber bleibt wie gehabt wo er von aussen positioniert wurde.
-     * MA35: jetzt unabhaengig von Avatar.
+     * Apply local position/rotation with local offsets.
+     * Needed/Useful in some VR systems (WebXR?) where too many chained parent nodes might spoil the VR y-position.
      */
     public void adjustVR() {
-        Vector3 vrpos = new Vector3();//vrcarrier.getTransform().getPosition();
-        // if (vrdown) {
-        //      vrpos = vrOffsetPosition;
-        //  }
-        //faceNode.getTransform().setPosition(vrpos.negate());
-        vrpos = position.add(fineTuneOffset);
-        //vrcarrier.getTransform().setPosition(vrpos);
-        //setMesh();
+
         observer.setPosition(getEffectivePosition());
+        //observer.setRotation(getEffectiveRotation());
         //logger.debug("adjustVR: vrdown=" + vrdown + ",vrpos.y=" + vrpos.getY());
     }
 
@@ -168,7 +160,6 @@ public class Observer implements SimpleTransform {
     public void setPosition(Vector3 position) {
         this.position = position;
         adjustVR();
-
     }
 
     public Vector3 getEffectivePosition() {
@@ -189,13 +180,12 @@ public class Observer implements SimpleTransform {
     }
 
     public void initFineTune(double offset) {
-        logger.debug("initFineTune: offset=" + offset);
-        fineTuneOffset = new Vector3(0, offset, 0);
-        adjustVR();
+        initFineTune(new Vector3(0, offset, 0));
     }
 
     public void initFineTune(Vector3 offset) {
-        logger.debug("initFineTune: offset=" + offset);
+
+        logger.debug("initFineTune: offset=" + offset );
         fineTuneOffset = offset;
         adjustVR();
     }

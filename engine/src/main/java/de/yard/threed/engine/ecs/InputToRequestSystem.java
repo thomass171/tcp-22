@@ -9,7 +9,6 @@ import de.yard.threed.engine.*;
 
 import de.yard.threed.engine.gui.*;
 import de.yard.threed.engine.platform.EngineHelper;
-import de.yard.threed.engine.vr.VrHelper;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
@@ -214,14 +213,16 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         // VR controller input
         if (VrInstance.getInstance() != null) {
 
+            VrInstance vrInstance = VrInstance.getInstance();
+
             Ray rayLeft = null, rayRight = null;
-            if (VrHelper.getController(0) != null) {
-                processPointer(VrHelper.getController(0).getRay(), true);
-                rayLeft = VrHelper.getController(0).getRay();
+            if (vrInstance.getController(0) != null) {
+                processPointer(vrInstance.getController(0).getRay(), true);
+                rayLeft = vrInstance.getController(0).getRay();
             }
-            if (VrHelper.getController(1) != null) {
-                processPointer(VrHelper.getController(1).getRay(), false);
-                rayRight = VrHelper.getController(1).getRay();
+            if (vrInstance.getController(1) != null) {
+                processPointer(vrInstance.getController(1).getRay(), false);
+                rayRight = vrInstance.getController(1).getRay();
             }
             if (Input.getControllerButtonDown(0) && rayLeft != null) {
                 processTrigger(rayLeft, true);

@@ -75,7 +75,8 @@ function init() {
     }
 
     $("#inp_ctrlPanel").val("0,0,0,200,90,0");
-    $("#inp_yoffsetVR").val("-0.9");
+    // With "ReferenceSpaceType" 'local' instead of 'local-floor' -0.1 is better than -0.9. 0.6 good for 1.80m player in maze
+    $("#inp_yoffsetVR").val("0.6");
 
     $.get(host + "/version.html", function(responseText) {
         var s = responseText;

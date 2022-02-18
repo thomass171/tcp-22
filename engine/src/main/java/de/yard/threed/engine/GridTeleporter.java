@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Display marker in y0 plane.
- *
+ * <p>
  * Not only/necassarily for VR.
  * <p>
  * 15.5.21
@@ -29,20 +29,23 @@ public class GridTeleporter {
 
     /**
      * Skizze 65
+     *
      * @param ray
      * @param tileCandidate
      * @return
      */
     public GridTeleportDestination updateDestinationMarker(Ray ray, SceneNode tileCandidate, double gridSize) {
-        List<NativeCollision> intersections = ray.getIntersections(tileCandidate);
-        //logger.debug("ground intersections: " + intersections.size());
-        //TODO only use first/nearest?
-        for (int i = 0; i < intersections.size(); i++) {
-            //logger.debug("intersection: " + intersections.get(i).getSceneNode().getName());
-            Vector3 ip = intersections.get(0).getPoint();
-            //destinationMarker.getTransform().setPosition(new Vector3(ip.getX(), 0.01, ip.getZ()));
-            GridTeleportDestination markerTransform = moveDestinationMarker(new Vector2(ip.getX(), ip.getZ()), locationMarker, directionMarker, gridSize);
-            return markerTransform;
+        if (ray != null) {
+            List<NativeCollision> intersections = ray.getIntersections(tileCandidate);
+            //logger.debug("ground intersections: " + intersections.size());
+            //TODO only use first/nearest?
+            for (int i = 0; i < intersections.size(); i++) {
+                //logger.debug("intersection: " + intersections.get(i).getSceneNode().getName());
+                Vector3 ip = intersections.get(0).getPoint();
+                //destinationMarker.getTransform().setPosition(new Vector3(ip.getX(), 0.01, ip.getZ()));
+                GridTeleportDestination markerTransform = moveDestinationMarker(new Vector2(ip.getX(), ip.getZ()), locationMarker, directionMarker, gridSize);
+                return markerTransform;
+            }
         }
         return null;
     }

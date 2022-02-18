@@ -28,7 +28,7 @@ public class TeleportComponent extends EcsComponent {
     public static String TAG = "TeleportComponent";
     private SceneNode observer;
     public boolean needsupdate = false;
-    private NearView lastNearView=null;
+    private NearView lastNearView = null;
 
     /**
      * observer(z.B. avatar) muss/sollte die Camera attached haben.
@@ -51,11 +51,15 @@ public class TeleportComponent extends EcsComponent {
     }
 
     public void addPosition(String label, Transform parent, LocalTransform posrot) {
-        teleportlist.addEntry(label,  posrot, parent);
+        teleportlist.addEntry(label, posrot, parent);
+        // 16.2.22 make the first entry the inital one
+        if (teleportlist.size() == 1) {
+            teleportlist.setIndex(0);
+        }
     }
 
     public void addPosition(String label, Transform parent, LocalTransform posrot, String targetEntity, NearView nearView) {
-        teleportlist.addEntry(label,  posrot, parent, targetEntity, nearView);
+        teleportlist.addEntry(label, posrot, parent, targetEntity, nearView);
     }
 
     public static TeleportComponent getTeleportComponent(EcsEntity e) {
@@ -68,11 +72,11 @@ public class TeleportComponent extends EcsComponent {
     }
 
     public int findPoint(String label) {
-       return teleportlist.findPoint(label);
+        return teleportlist.findPoint(label);
     }
 
     public void setPosition(int i, Vector3 offset) {
-        teleportlist.setPosition(i,offset);
+        teleportlist.setPosition(i, offset);
         needsupdate = true;
     }
 
@@ -103,6 +107,7 @@ public class TeleportComponent extends EcsComponent {
     /**
      * Set position programmatically.
      * 26.10.18
+     *
      * @param index
      */
     public void stepTo(int index) {
@@ -121,6 +126,10 @@ public class TeleportComponent extends EcsComponent {
 
     public void setIndex(int index) {
         teleportlist.setIndex(index);
+    }
+
+    public int getIndex() {
+        return teleportlist.getIndex();
     }
 
 /*
@@ -166,7 +175,7 @@ public class TeleportComponent extends EcsComponent {
             node.getTransform().setParent(Scene.getWorld().getTransform());
             //node.getTransform().setParent(null);
         }
-        if (lastNearView!=null){
+        if (lastNearView != null) {
             lastNearView.disable();
         }
         if (teleportlist.getNearView() != null) {
@@ -174,7 +183,7 @@ public class TeleportComponent extends EcsComponent {
             if (parent != null) {
                 nearView.enable(posrot);
             }
-            lastNearView=nearView;
+            lastNearView = nearView;
         }
         return posrot;
     }

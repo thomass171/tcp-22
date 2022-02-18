@@ -9,6 +9,7 @@ import de.yard.threed.engine.Material;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.Dimension;
 import de.yard.threed.core.DimensionF;
+import de.yard.threed.engine.Texture;
 
 public class ControlPanelHelper {
     static Log logger = Platform.getInstance().getLog(ControlPanelHelper.class);
@@ -39,7 +40,7 @@ public class ControlPanelHelper {
             return null;
         }
         //ControlPanel inventory = new ControlPanel(FovElementPlane.buildFovElementPlane(null, worldBackplaneSize, mat), worldBackplaneSize, basecolor);
-        ControlPanel inventory = new ControlPanel(worldBackplaneSize, mat);
+        ControlPanel inventory = new ControlPanel(worldBackplaneSize, mat, 0.01);
         // move it to the lower right screen corner. TODO check: Why is zpos negated?
         inventory.getTransform().setPosition(new Vector3(worldPlaneSize.width / 2 - worldBackplaneSize.getWidth() / 2,
                 -worldPlaneSize.height / 2 + worldBackplaneSize.getHeight() / 2, -zpos));
@@ -49,12 +50,36 @@ public class ControlPanelHelper {
         return inventory;
     }
 
+    public static ControlPanel buildForNearplaneBanner(Camera camera, Dimension screenDimensionInPixel, Color basecolor) {
+        Material mat = Material.buildBasicMaterial(basecolor, true);
+
+        DimensionF nearPlaneSize = camera.getNearplaneSize();
+        logger.debug("nearPlaneSize=" + nearPlaneSize);
+
+        Dimension bannerSizeInPixel = new Dimension(300, 20);
+        DimensionF worldBackplaneSize = buildDimensionByPixel(nearPlaneSize, screenDimensionInPixel, bannerSizeInPixel);
+        logger.debug("worldBackplaneSize=" + worldBackplaneSize);
+        if (worldBackplaneSize == null) {
+            // headless?
+            return null;
+        }
+        ControlPanel panel = new ControlPanel(worldBackplaneSize, mat, 0.000001);
+        // move it to the top mid
+        // avoid z-fighting on near. TODO: again: why negating? Because near is just a (positive) distance, no coordinate?
+        double near = camera.getNear();
+        panel.getTransform().setPosition(new Vector3(0, nearPlaneSize.height / 2 - worldBackplaneSize.getHeight() / 2, -(near + 0.0001)));
+
+        camera.getCarrier().attach(panel);
+        panel.getTransform().setLayer(camera.getLayer());
+        return panel;
+    }
+
     /**
      * A simple column grid as menu.
      *
      * @param dimension
-     * @param zpos
-     * @param buttonzpos
+     * @param zpos       should be a negative value
+     * @param buttonzpos unclear
      * @param menuitems
      * @param basecolor
      * @return
@@ -68,26 +93,31 @@ public class ControlPanelHelper {
         DimensionF worldBackplaneSize = dimension;
         logger.debug("worldBackplaneSize=" + worldBackplaneSize);
 
-        ControlPanel controlPanel = new ControlPanel(worldBackplaneSize, mat);
+        ControlPanel controlPanel = new ControlPanel(worldBackplaneSize, mat, buttonzpos);
         // locate it to the screen center
         controlPanel.getTransform().setPosition(new Vector3(0, 0, zpos));
 
-        // start at top
-        double h2 = rowHeight / 2;
-        double startY = 0;
-        if (menuitems.length > 2) {
-            startY = ((menuitems.length - 1) / 2) * rowHeight;
-        }
-        if (menuitems.length % 2 == 0) {
-            startY += h2;
-        }
+        PanelGrid panelGrid = new PanelGrid(elementWidth, rowHeight, menuitems.length, new double[]{elementWidth});
 
         TextTexture textTexture = new TextTexture(Color.LIGHTGRAY);
+        // y starts at bottom
         for (int i = 0; i < menuitems.length; i++) {
-            controlPanel.addArea(new Vector2(0, startY - i * rowHeight), new DimensionF(elementWidth, rowHeight),
-                    menuitems[i].buttonDelegate).setTexture(textTexture.getTextureForText(menuitems[i].text));
+            Texture texture;
+            if (menuitems[i].text != null) {
+                texture = textTexture.getTextureForText(menuitems[i].text);
+            } else {
+                texture = menuitems[i].guiTexture.getTexture();
+            }
+            controlPanel.addArea(panelGrid.getPosition(0, menuitems.length - i - 1), new DimensionF(elementWidth, rowHeight),
+                    menuitems[i].buttonDelegate).setTexture(texture);
         }
         return controlPanel;
+    }
+
+    public static void addText(ControlPanel cp, String text, Vector2 pos, DimensionF size) {
+        TextTexture textTexture = new TextTexture(Color.LIGHTGRAY);
+        ControlPanelArea textArea = cp.addArea(pos, size, null);
+        textArea.setTexture(textTexture.getTextureForText(text));
     }
 
     /**

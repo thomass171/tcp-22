@@ -90,7 +90,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         String fileContent = MazeUtils.readMazefile(filename/*, name*/);
 
         String title = StringUtils.substringAfterLast(initialMaze, ":");
-        loadLevel(fileContent,title);
+        loadLevel(fileContent, title);
         //10.11.20 ob der hier gut ist, muss sich noch zeigen.
         MoveRecorder.init(/*movingsystem.* /currentstate*/);
 
@@ -322,13 +322,12 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             MazeLayout layout = Grid.getInstance().getLayout();
             //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
             //ist.
+            // 14.2.22:More consistent approach. Independent from VR mode have a avatar and observer independent from each other.
             MoverComponent mover;
-            if (MazeScene.vrInstance != null) {
-                mover = new MoverComponent(Observer.getInstance(), true, layout.initialPosition, layout.initialOrientation);
-            } else {
+            mover = new MoverComponent(playerEntity.scenenode.getTransform()/*Observer.getInstance(),*/, true, layout.initialPosition, layout.initialOrientation);
 
-                // avatar will be moved with Observer attached to it.
-                mover = new MoverComponent(playerEntity.scenenode.getTransform(), true, layout.initialPosition, layout.initialOrientation);
+            if (MazeScene.vrInstance == null) {
+
 
                 // Also, Observer wird an Avatar attached. Der hat aber y0 als Bezugspunkt(?), so dass Observer angehoben wird.
                 // Done in AvatarSystem. Observer.getInstance().getTransform().setParent(avatar.getTransform());

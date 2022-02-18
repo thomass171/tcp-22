@@ -38,6 +38,7 @@ public class AvatarSystem extends DefaultEcsSystem {
     boolean enableObserverComponent = false;
 
     /**
+     *
      */
     public AvatarSystem(boolean enableObserverComponent) {
         super(new String[]{"AvatarComponent"}, new RequestType[]{UserSystem.USER_REQUEST_JOIN}, new EventType[]{UserSystem.USER_EVENT_JOINED});
@@ -57,7 +58,7 @@ public class AvatarSystem extends DefaultEcsSystem {
         if ((b = EngineHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
             enableNearView = (boolean) b;
         }
-        return new AvatarSystem( false);
+        return new AvatarSystem(false);
     }
 
     /**
@@ -105,9 +106,9 @@ public class AvatarSystem extends DefaultEcsSystem {
             }
             // Attach the oberver to the avatar. Is the connection to observer good located here?
             // 19.11.21: Should be independant from ObserverComponent? Probably. If there is an oberver, attach it to avatar
-            // But not in VR. VR needs ground distance.
             // This is also reached for bot and MP joining.
-            if ((boolean) forLogin && Observer.getInstance() != null && !VrInstance.isEnabled()) {
+            // 14.2.22 Attach observer independent from VR
+            if ((boolean) forLogin && Observer.getInstance() != null && AvatarSystem.getAvatar() != null) {
                 logger.debug("Attaching oberserver to avatar");
                 Observer.getInstance().getTransform().setParent(AvatarSystem.getAvatar().getSceneNode().getTransform());
             }

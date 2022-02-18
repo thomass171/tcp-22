@@ -130,6 +130,10 @@ public class ViewpointList {
     public String getTargetEntity() {
         return points.get(index).targetEntity;
     }
+
+    public int getIndex() {
+        return index;
+    }
 }
 
 class ViewpointListEntry {

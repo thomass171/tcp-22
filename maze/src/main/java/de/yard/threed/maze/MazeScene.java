@@ -13,7 +13,6 @@ import de.yard.threed.engine.gui.ButtonDelegate;
 import de.yard.threed.engine.gui.ControlPanel;
 import de.yard.threed.engine.util.IntProvider;
 import de.yard.threed.engine.util.RandomIntProvider;
-import de.yard.threed.engine.vr.VrHelper;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.*;
@@ -142,8 +141,8 @@ public class MazeScene extends Scene {
 
         if (vrInstance != null) {
             observer.initFineTune(vrInstance.getYoffsetVR());
-            observer.attach(VrHelper.getController(0));
-            observer.attach(VrHelper.getController(1));
+            observer.attach(vrInstance.getController(0));
+            observer.attach(vrInstance.getController(1));
             rayy = 0;
 
             ControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
@@ -155,7 +154,7 @@ public class MazeScene extends Scene {
                 leftControllerPanel.getTransform().setRotation(lt.rotation);
                 leftControllerPanel.getTransform().setScale(new Vector3(0.4, 0.4, 0.4));
             }
-            VrHelper.getController(0).attach(leftControllerPanel);
+            vrInstance.getController(0).attach(leftControllerPanel);
             inputToRequestSystem.addControlPanel(leftControllerPanel);
 
         } else {

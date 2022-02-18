@@ -178,9 +178,7 @@ public class WebGlRenderer {
         // var vravailable = 'getVRDisplays' in $wnd.navigator;
         if (vrready && vrEnabled) {
             renderer.xr.enabled = true;
-            //$wnd.document.body.appendChild( $wnd.WEBVR.createButton( renderer ) );
             //VRButton is not available in $wnd
-            //$wnd.document.body.appendChild( VRButton.createButton( renderer ) );
             $wnd.document.body.appendChild( $wnd.createVrButton( renderer ) );
             //$wnd.addEventListener( 'vrdisplaypresentchange', function ( event ) {
                 //console.log("vrdisplaypresentchange "+event.display.isPresenting);
@@ -188,6 +186,12 @@ public class WebGlRenderer {
 				//@de.yard.threed.platform.webgl.WebGlRenderer::vrChanged(Z)(event.display.isPresenting);
 			//});
             //@de.yard.threed.platform.webgl.WebGlRenderer::vrChanged(Z)(true);
+
+            // "ReferenceSpaceType" (default value is 'local-floor') impacts the resulting height of the camera/player.
+            // In 'local-floor' even with offset -0.9 leads to too high position at appx 2.9m above ground or above avatar.
+            // Best working seems 'local' and offset -0.1, which results in a head height of appx 1.9m (1m avatar + 1m 'vr cube' - 0.1) above ground
+            // 'unbounded' is not supported
+            renderer.xr.setReferenceSpaceType( 'local' );
         }
         return renderer;
     }-*/;

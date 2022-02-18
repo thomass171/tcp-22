@@ -8,7 +8,6 @@ import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.gui.*;
 import de.yard.threed.engine.platform.ProcessPolicy;
 import de.yard.threed.engine.util.XmlHelper;
-import de.yard.threed.engine.vr.VrHelper;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.traffic.AbstractTerrainBuilder;
@@ -108,12 +107,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     protected Hud hud;
     protected boolean visualizeTrack = false;
     protected boolean enableFPC = false, enableNearView = false;
-    //6.10.21 protected MenuCycler menuCycler = null;
-    //24.10.21 protected ObserverSystem viewingsystem;
     protected SceneConfig sceneConfig;
-    //7.10.21 protected TrafficSystem trafficSystem;
-    //7.10.21 protected AutomoveSystem automoveSystem;
-    //27.10.21 protected FlightSystem flightSystem;
     //Manche Requests können wegen zu spezieller Abhängigkeiten nicht von ECS bearbeitet werden, sondern müssen aber auf App Ebene laufen.
     public RequestQueue requestQueue = new RequestQueue();
 
@@ -137,6 +131,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     String tilename = null;
     VrInstance vrInstance;
     Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
+    ControlPanel leftControllerPanel = null;
 
     @Override
     public void init(boolean forServer) {
@@ -299,16 +294,32 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             logger.info("down");
             Observer.getInstance().fineTune(false);
         });
-
-        //AbstractSceneRunner.instance.httpClient = new AirportDataProviderMock();
+        buttonDelegates.put("speedup", () -> {
+        });
+        buttonDelegates.put("speeddown", () -> {
+        });
+        buttonDelegates.put("teleport", () -> {
+            IntHolder option = new IntHolder(0);
+            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(option));
+            SystemManager.putRequest(request);
+        });
 
         // Kruecke zur Entkopplung des Modelload von AC policy.
         ModelLoader.processPolicy = getProcessPolicy();
 
-        //9.11.21 TrafficHelper.vehicleHelperDecoupler = new VehicleLauncher();
-        //10.11.21 TrafficHelper.vehicleLoader = new FgVehicleLoader();
+        InputToRequestSystem inputToRequestSystem = new InputToRequestSystem(new DefaultMenuProvider(getDefaultCamera(), () -> {
+            /**
+             * 18.2.22 Locate menu at near plane like it was when FovElement was used. That should help to avoid menu coverage by cockpits.
+             */
+            double width = 0.07;
+            double zpos = -getDefaultCamera().getNear() - 0.001;
+            double buttonzpos = 0.0001;
 
-        InputToRequestSystem inputToRequestSystem = new InputToRequestSystem(new TravelMainMenuBuilder(this, getMenuItems()));
+            ControlPanel m = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(width, width * 0.7), zpos, buttonzpos, /*sc.*/getMenuItems(), Color.GREEN);
+            ControlPanelMenu menu = new ControlPanelMenu(m);
+            return menu;
+
+        }));
         inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
         //toggle auto move
         inputToRequestSystem.addKeyMapping(KeyCode.Alpha9, UserSystem.USER_REQUEST_AUTOMOVE);
@@ -317,20 +328,8 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             // Observer was inited before
             Observer observer = Observer.getInstance();
             observer.initFineTune(vrInstance.getYoffsetVR());
-            observer.attach(VrHelper.getController(0));
-            observer.attach(VrHelper.getController(1));
-
-            ControlPanel leftControllerPanel = new TrafficVrControlPanel(buttonDelegates);
-            LocalTransform lt = vrInstance.getCpTransform();
-            if (lt != null) {
-                //leftControllerPanel.getTransform().setPosition(new Vector3(-0.5, 1.5, -2.5));
-                //200,90,0 are good rotations
-                leftControllerPanel.getTransform().setPosition(lt.position);
-                leftControllerPanel.getTransform().setRotation(lt.rotation);
-                leftControllerPanel.getTransform().setScale(new Vector3(0.4, 0.4, 0.4));
-            }
-            VrHelper.getController(0).attach(leftControllerPanel);
-            inputToRequestSystem.addControlPanel(leftControllerPanel);
+            observer.attach(vrInstance.getController(0));
+            observer.attach(vrInstance.getController(1));
 
         } else {
             // nothing special (menu,hud,controlpanel) for non VR?
@@ -352,7 +351,13 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     }
 
     public MenuItem[] getMenuItems() {
-        return new MenuItem[]{};
+        return new MenuItem[]{
+                new MenuItem("teleport", () -> {
+                    IntHolder option = new IntHolder(0);
+                    Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(option));
+                    SystemManager.putRequest(request);
+                })
+        };
     }
 
     public VehicleLoader getVehicleLoader() {
@@ -506,6 +511,18 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         //for x/y/z. Only in debug mode (MazeSettings.getSettings().debug)? Better location??
         if (Observer.getInstance() != null) {
             Observer.getInstance().update();
+        }
+
+        // VR controller might not be available until the user enters VR. So attach the controller the first time
+        // they are found.
+        if (vrInstance != null && vrInstance.getController(0) != null && leftControllerPanel == null) {
+
+            leftControllerPanel = new TrafficVrControlPanel(buttonDelegates);
+
+            vrInstance.attachControlPanelToController(vrInstance.getController(0), leftControllerPanel);
+
+            InputToRequestSystem inputToRequestSystem = (InputToRequestSystem) SystemManager.findSystem(InputToRequestSystem.TAG);
+            inputToRequestSystem.addControlPanel(leftControllerPanel);
         }
     }
 
@@ -681,10 +698,6 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         return null;
     }
 
-    /*27.12.21protected GraphWorld getGraphWorld() {
-        return null;
-    }*/
-
     protected void help() {
     }
 
@@ -723,64 +736,4 @@ class VehicleFilter implements EntityFilter {
         //return vc.config.getType().equals(VehicleComponent.VEHICLE_AIRCRAFT);
         return true;
     }
-}
-
-class TravelMainMenuBuilder implements MenuProvider {
-    BasicTravelScene sc;
-    MenuItem[] menuItems;
-
-    TravelMainMenuBuilder(BasicTravelScene sc, MenuItem[] menuItems) {
-        this.sc = sc;
-        this.menuItems = menuItems;
-    }
-
-    /**
-     * 3.1.20: In TravelScene kommt es wohl zu Verzerrungen, so dass die unteren nicht mehr richtig vom Ray getroffen werden.
-     * Mit zpos=-8.4 und width*10 geht es wohl besser, in c172 ist das menu dann aber hinterm propeller.
-     * Evtl. Bluebird statt c172p? Aber in TravelScene brauchts das menu doch eh noch nicht so, weils nicht in VR geht.
-     *
-     * @return
-     */
-    @Override
-    public Menu buildMenu() {
-        double width = 0.3;
-        double zpos = -3;
-        double buttonzpos = -0.4;
-
-        //width=6;
-        //buttonzpos=-9;
-
-        //BrowseMenu m = new BrowseMenu(new DimensionF(width, width * 0.7), -3, -0.4, sc.menuitems);
-        GuiGrid m = GuiGrid.buildSingleColumnFromMenuitems(new DimensionF(width, width * 0.7), zpos, buttonzpos, /*sc.*/menuItems);
-        TravelMainMenu menu = new TravelMainMenu(m);
-        return menu;
-    }
-
-    @Override
-    public Transform getAttachNode() {
-        return /*24.10.21sc.avatar*/AvatarSystem.getAvatar().getNode().getTransform();//getFaceNode();
-        //return sc.getDefaultCamera().getCarrier();
-    }
-
-    @Override
-    public Ray getRayForUserClick(Point mouselocation) {
-        if (mouselocation != null) {
-            //Der Viewpoint kann bei Firefox 1.7m hoher sein als das Camera ausweist! Scheint hier trotzdem zu gehen.
-            return sc.getDefaultCamera().buildPickingRay(sc.getDefaultCamera().getCarrierTransform(), mouselocation);
-        }
-        Ray ray = VrHelper.getController(1).getRay();
-        return ray;
-    }
-}
-
-/**
- * Ein Browsemenu, dass durch einen Button geöffnet/geschlossen wird.
- */
-class TravelMainMenu extends GuiGridMenu {
-
-    TravelMainMenu(GuiGrid menu) {
-        super(menu);
-    }
-
-
 }

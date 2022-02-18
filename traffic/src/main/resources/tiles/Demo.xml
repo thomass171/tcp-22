@@ -42,22 +42,11 @@
     <light color="white" direction="3,3,3"/>
     <light color="white"/>
 
-    <viewpoint name="view1">
+
+    <viewpoint name="Sideview">
         <transform>
-            <position>0, 200, 0</position>
-            <angle>-60,0,0</angle>
-        </transform>
-    </viewpoint>
-    <viewpoint name="view2">
-        <transform>
-            <position>5, 30, 0</position>
-            <angle>-30,0,0</angle>
-        </transform>
-    </viewpoint>
-    <viewpoint name="view3">
-        <transform>
-            <position>40,10,-10</position>
-            <angle>-20,0,0</angle>
+            <position>-80,100,-100</position>
+            <angle>-40,-90,0</angle>
         </transform>
     </viewpoint>
 
