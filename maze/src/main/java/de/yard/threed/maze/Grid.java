@@ -10,15 +10,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Die statischen Daten zu einem Maze Grid. Bewegende Objekte sind in dem Grid nur mit
- * ihrer Startposition abgebildet.
+ * Static data of a maze grid. Moving objects only have a start position here.
  * <p/>
- * Ein Pillar steht immer in der Mitte auf der Grenze zweier Gridfelder.
- * damit ist es durch die Position der beiden Felder immer eindeutig identifizierbar.
- * auf Ecken (da wo sich Wände kreuzen) steht kein Pillar.
- * top ist in Y-Richtung, right in X-Richtung
+ *
+ * - A pillar is always located in the mid on the boundary of two grid fields.
+ * - There is no pillar at corners (where walls intersect) or on 'T's.
+ *
+ * top is in Y-direction, right in X-direction
  * <p>
- * 9.4.21: Ist das nicht ein Mischmasch aus State und Visualization?
  * 26.4.21: Vielleicht mache ich den mal static? Aber nicht schoen wegen unabhaengiger Tests. TODO der static muss in ?? MazeScene? Oder als Provider ins System?
  * <p>
  * <p/>
@@ -26,9 +25,6 @@ import java.util.Map;
  */
 public class Grid {
     Log logger = Platform.getInstance().getLog(Grid.class);
-    // Zeile 0 ist die untere. An leeren Stellen steht ein BLANK Element, aber nie null
-    //public List<List<GridElement>> grid;
-    //12.4.21
     MazeLayout layout;
     List<Point> boxes;
     List<Point> diamonds;
@@ -120,16 +116,12 @@ public class Grid {
     }
 
     public int getMaxWidth() {
-       /* int currmax = 0;
-        for (int i = 0; i < grid.size()/*length* /; i++)
-            if (grid.get(i).size()/*[i].length* / > currmax) {
-                currmax = grid.get(i).size()/*[i].length* /;
-            }*/
-        return layout.maxwidth;//currmax;
+
+        return layout.maxwidth;
     }
 
     public int getHeight() {
-        return layout.height;//grid.size()/*length*/;
+        return layout.height;
     }
 
     public Point getStartPos() {
@@ -137,15 +129,7 @@ public class Grid {
     }
 
     public int isVWALL(Point p) {
-       /* if (el.getType() == GridElementType.VWALL) {
-            return true;
-        }*/
-        // selber Block und drueber oder drunter aber nicht links oder rechts
-        /*if (isWall(p) && (isWall(p.add(new Point(0, 1))) || isWall(p.add(new Point(0, -1))))
-                && !isWall(p.add(new Point(-1, 0))) && !isWall(p.add(new Point(1, 0)))) {
-            return true;
-        }
-        return false;*/
+
         if (!isWall(p)) {
             return STRAIGHTWALLMODE_NONE;
         }
@@ -191,41 +175,20 @@ public class Grid {
         return STRAIGHTWALLMODE_NONE;
     }
 
-
-    /**
-     * Sicher vor ArrayIndexOutOfBoundsException
-     */
-    /*private boolean isType(int x, int y, GridElementType type) {
-        if (isValid(x, y)) {
-            return (grid.get(y).get(x)/*[y][x]* /.getType() == type);
-        }
-        return false;
-    }*/
     public boolean isWall(Point p) {
-        /*if (isValid(x, y)) {
-            return (grid.get(y).get(x).getType() == GridElementType.BLOCKWALL);
-        }
-        return false;*/
         return layout.walls.contains(p);
     }
 
     public boolean isField(Point p) {
-        /*if (isValid(x, y)) {
-            return (grid.get(y).get(x).getType() == GridElementType.BLOCKWALL);
-        }
-        return false;*/
         return layout.fields.contains(p);
     }
 
-   /* private boolean isValid(int x, int y) {
-        if (y < grid.size() && y >= 0) {
-            if (x >= 0 && x < grid.get(y).size()) {
-                return true;
-            }
-        }
-        return false;
-    }*/
-
+    /**
+     * Does the wall continue at top?
+     *
+     * 31.5.21: Also when it is a wall and beyond, but not to the left or right?
+     * 1.6.21: No, then it is a center
+     */
     public boolean hasTopPillar(Point p) {
         boolean isblock = false;
 
@@ -237,13 +200,15 @@ public class Grid {
         if (isblock && isWall(p.addY(1))) {
             return true;
         }
-        // Auch wenn es selber Wall ist und unten auch und links/rechts nicht
-        /*1.6.21 nicht mehr, dann ist es center if (isblock && isWall(p.add(new Point(0, -1))) && !isWall(p.add(new Point(-1, 0))) && !isWall(p.add(new Point(1, 0)))) {
-            return true;
-        }*/
         return false;
     }
 
+    /**
+     * Does the wall continue to the right?
+     *
+     * 31.5.21: Also when it is the end of a wall, ie wall to the left but not above and beyond?
+     * 3.6.21: No, then it is a center
+     */
     public boolean hasRightPillar(Point p) {
 
         boolean isblock = false;
@@ -251,19 +216,10 @@ public class Grid {
         if (isWall(p)) {
             isblock = true;
         }
-        // Wenn rechts vom Feld eine HWALL ist, hat es auch einen rightpillar
-        /*if (isType(x + 1, y, GridElementType.HWALL)) {
-            return true;
-        }*/
         // Wenn es selber BLOCK ist und rechts auch
         if (isblock && isWall(p.addX(1))) {
             return true;
         }
-        // 31.5.21: aber auch, wenn es das Ende einer Wall ist, also links eine, aber nicht oben und unten.
-        /*3.6.21:Nee, dann ist nur center
-        if (isblock && isWall(p.addX(-1)) && !isWall(p.addY(1)) && !isWall(p.addY(-1))) {
-            return true;
-        }*/
         return false;
     }
 
@@ -294,14 +250,8 @@ public class Grid {
         return surroundingwalls == 1;
     }
 
-    /*MA32 public GridState getState() {
-        
-     
-        return new GridState(reader.playerposition,  reader.boxes/*, reader.destinations* /);
-    }*/
-
     public MazeLayout getLayout() {
-        return layout;//new MazeLayout(reader.walls, reader.destinations, reader.playerposition, new GridOrientation());
+        return layout;
     }
 
     public List<Point> getBoxes() {

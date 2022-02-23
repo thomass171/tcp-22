@@ -5,6 +5,7 @@
 declare -A MODULE_FILES
 declare -A MODULE_EXCLUDE
 MODULE_FILES[core]="
+	de/yard/threed/core/configuration
 	de/yard/threed/core/platform
 	de/yard/threed/core/resource
 	de/yard/threed/core/testutil

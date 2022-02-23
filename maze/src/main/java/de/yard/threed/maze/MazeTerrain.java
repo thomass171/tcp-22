@@ -10,7 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Die 3D Abbildung eines Maze. Dazu gibt es noch die logische (GridState oder MazeLayout).
+ * 3D visualization of a maze. This is a traditional grid where
+ * - A pillar is always located in the mid on the boundary of two grid fields.
+ * - There is no pillar at corners (where walls intersect) or on 'T's.
+ * <p>
+ * Dazu gibt es noch die logische (GridState oder MazeLayout).
  * Das ist zunächst mal speziell auf Maze zugeschnitten.
  * Es enthält alles statische, den Ground, alle Wände und Pillars. Ist alles in einem SubModel, sodass ein Löschen einfach mit remove des Terrain geht.
  * <p>
@@ -19,22 +23,23 @@ import java.util.Map;
  * <p/>
  * Created by thomass on 07.05.15.
  */
-public class MazeTerrain extends SceneNode {
+public class MazeTerrain implements AbstractMazeTerrain {
     Log logger = Platform.getInstance().getLog(MazeTerrain.class);
     int width;
     int height;
     float effectivewidth, effectiveheight;
     //public SceneNode terrain;
     boolean simpleground = false;
-    public Map<Point, SceneNode> tiles = new HashMap<Point, SceneNode>();
+    private Map<Point, SceneNode> tiles = new HashMap<Point, SceneNode>();
     // walls are only pure H and V walls. But the nodes are the center of two single planes, not the real wall!
-    public Map<Point, SceneNode> walls = new HashMap<Point, SceneNode>();
+    private Map<Point, SceneNode> walls = new HashMap<Point, SceneNode>();
     public Map<Point, SceneNode> topPillars = new HashMap<Point, SceneNode>();
     public Map<Point, SceneNode> rightPillars = new HashMap<Point, SceneNode>();
     public Map<Point, SceneNode> centerPillars = new HashMap<Point, SceneNode>();
+    private SceneNode node;
 
     public MazeTerrain(int width, int height) {
-        super();
+        node = new SceneNode();
         this.width = width;
         this.height = height;
         effectivewidth = width * MazeDimensions.GRIDSEGMENTSIZE;
@@ -45,7 +50,7 @@ public class MazeTerrain extends SceneNode {
             ShapeGeometry planeGeometry = ShapeGeometry.buildPlane(effectivewidth, effectiveheight, width, height);
             Material material = MazeSettings.getSettings().groundmaterial;
             /*terrain = new SceneNode(*/
-            setMesh(new Mesh(planeGeometry, material/*, false, true*/));
+            node.setMesh(new Mesh(planeGeometry, material/*, false, true*/));
         } else {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
@@ -57,20 +62,12 @@ public class MazeTerrain extends SceneNode {
                 }
             }
         }
-        getTransform().setPosition(new Vector3(effectivewidth / 2 - MazeDimensions.GRIDSEGMENTSIZE / 2, 0, -effectiveheight / 2 + MazeDimensions.GRIDSEGMENTSIZE / 2));
+        node.getTransform().setPosition(new Vector3(effectivewidth / 2 - MazeDimensions.GRIDSEGMENTSIZE / 2, 0, -effectiveheight / 2 + MazeDimensions.GRIDSEGMENTSIZE / 2));
 
 
         if (MazeSettings.getSettings().debug) {
             //TODO material.setWireframe(true);
         }
-        //attach(terrain);
-
-    }
-
-    public void addGrid(Grid grid, /*9.4.21 List<EcsEntity> boxes,*/ Scene scene) {
-        visualize(grid,/*9.4.21 boxes,*/scene);
-        logger.debug("grid visualized");
-
     }
 
     /**
@@ -79,40 +76,30 @@ public class MazeTerrain extends SceneNode {
      * Jedes Element baut seine Pillar nur oben und rechts, damit die nicht doppelt
      * gebaut werdebn.
      * <p>
-     *
-     * @param scene
      */
-    private void visualize(Grid grid, /*MazeTerrain terrain, /*9.4.21 final List<EcsEntity> boxes,*/ final Scene scene) {
+    @Override
+    public void visualizeGrid(Grid grid) {
         MazeModelFactory mf = new MazeModelFactory();
 
         int w = grid.getMaxWidth();
         int h = grid.getHeight();
-        for (int y = 0; y < h/*grid.size()/*length*/; y++) {
-            for (int x = 0; x < w/*grid.get(y).size()/*[y].length*/; x++) {
-                //if (grid.get(y).get(x)/*[y][x]*/ != null) {
-                //GridElement el = grid.get(y).get(x)/*[y][x]*/;
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
                 Point p = new Point(x, y);
 
                 if (x == 6 && y == 2) {
                     int hh = 9;
                 }
                 if (grid.hasTopPillar(p)) {
-                    //Vector3 pos = xypos.add(MazeDimensions.getTopOffset());
-                    addTopPillar(MazeModelFactory.buildPillar(/*pos,*/), p);
+                    addTopPillar(MazeModelFactory.buildPillar(), p);
                 }
                 if (grid.hasRightPillar(p)) {
-                    //Vector3 pos = xypos.add(MazeDimensions.getRightOffset());
                     addRightPillar(MazeModelFactory.buildPillar(), p);
                 }
                 if (grid.hasCenterPillar(p)) {
-                    //Vector3 pos = xypos.add(MazeDimensions.getRightOffset());
                     addCenterPillar(MazeModelFactory.buildPillar(), p);
                 }
-                if (grid.getMazeLayout().destinations.contains(p)/*el.getType() == GridElementType.DESTINATION*/) {
-                    //ShapeGeometry cubegeometry = ShapeGeometry.buildBox(1.1f, 0.01f, 1.1f, null);
-
-                    //MeshLambertMaterial mat = new MeshLambertMaterial(new Color(0xAA, 0xAA, 00));
-                    Vector3 xypos = MazeDimensions.getWorldElementCoordinates(x, y);
+                if (grid.getMazeLayout().destinations.contains(p)) {
 
                     float destinationsize = 1.1f;
                     //etwas groesser um mit Box davor sichtbar zu sein.
@@ -203,6 +190,22 @@ public class MazeTerrain extends SceneNode {
                 }
             }
         }
+        logger.debug("grid visualized");
+    }
+
+    @Override
+    public SceneNode getNode() {
+        return node;
+    }
+
+    @Override
+    public Map<Point, SceneNode> getTiles(){
+        return tiles;
+    }
+
+    @Override
+    public Map<Point, SceneNode> getWalls(){
+        return walls;
     }
 
     private Degree getTAngle(String directions) {
@@ -226,25 +229,25 @@ public class MazeTerrain extends SceneNode {
         Vector3 p = getTerrainElementCoordinates(x, y);
         p = p.add(new Vector3(0, zfightingyoffset, 0));
         element.getTransform().setPosition(p);
-        attach(element);
+        node.attach(element);
     }
 
     private void addTopPillar(SceneNode pillar, Point p) {
         topPillars.put(p, pillar);
         pillar.getTransform().setPosition(getTerrainElementCoordinates(p).add(MazeDimensions.getTopOffset()));
-        attach(pillar);
+        node.attach(pillar);
     }
 
     private void addRightPillar(SceneNode pillar, Point p) {
         rightPillars.put(p, pillar);
         pillar.getTransform().setPosition(getTerrainElementCoordinates(p).add(MazeDimensions.getRightOffset()));
-        attach(pillar);
+        node.attach(pillar);
     }
 
     private void addCenterPillar(SceneNode pillar, Point p) {
         centerPillars.put(p, pillar);
         pillar.getTransform().setPosition(getTerrainElementCoordinates(p));
-        attach(pillar);
+        node.attach(pillar);
     }
 
     /**

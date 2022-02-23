@@ -2,8 +2,13 @@ package de.yard.threed.maze;
 
 
 import de.yard.threed.core.*;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByArgs;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.InputToRequestSystem;
@@ -49,7 +54,9 @@ public class MazeScene extends Scene {
     public void init(boolean forServer) {
         logger.info("init MazeScene");
 
-        // comamnd line arguments are handled in system builder
+        // command line arguments are handled in system builder
+        Configuration configuration = Configuration.getDefaultConfiguration();
+        configuration.addConfiguration(new ConfigurationByProperties(new BundleResource(BundleRegistry.getBundle("maze"), "maze.properties")),true);
 
         boolean isMP = false;
         if (isMP) {

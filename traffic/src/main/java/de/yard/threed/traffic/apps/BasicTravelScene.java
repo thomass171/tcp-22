@@ -2,6 +2,7 @@ package de.yard.threed.traffic.apps;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.platform.PlatformHelper;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
@@ -220,7 +221,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         }
 
         Boolean b;
-        if ((b = EngineHelper.getBooleanSystemProperty("argv.enableFPC")) != null) {
+        if ((b = PlatformHelper.getBooleanSystemProperty("argv.enableFPC")) != null) {
             //FPC heisst: kein Teleporting, kein Observer, kein initialVehicle,kein Avatar.
             enableFPC = (boolean) b;
         }
@@ -241,7 +242,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             vehiclelistname = argv_vehiclelistname;
         }
 
-        if ((b = EngineHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
+        if ((b = PlatformHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
             enableNearView = (boolean) b;
         }
 

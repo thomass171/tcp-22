@@ -109,6 +109,15 @@ public class StringUtils {
         return sh.splitByWhitespace(str);
     }
 
+    public static String[] splitByLineBreak(String str) {
+        String separator = "\n";
+
+        if (contains(str, "\r\n")) {
+            separator = "\r\n";
+        }
+        return split(str,separator);
+    }
+
     public static int indexOf(String s, char c) {
         return sh.indexOf(s, c);
     }

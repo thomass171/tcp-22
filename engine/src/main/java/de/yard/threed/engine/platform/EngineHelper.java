@@ -117,42 +117,13 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
         return Platform.getInstance().buildNativeGeometry(vertices, indices, uvs, normals);
     }
 
-    /**
-     * Only useful for checking set to true. Returns false if property doesn't exist.
-     *
-     * @param property
-     * @return
-     */
-    public static Boolean getBooleanSystemProperty(String property) {
-        String arg = Platform.getInstance().getSystemProperty(property);
-        if (arg == null) {
-            return null;
-        }
-        if (Util.isTrue(arg)) {
-            return true;
-        }
-        return false;
-    }
-
     public static boolean isEnabled(String property) {
         Boolean b;
-        if ((b = EngineHelper.getBooleanSystemProperty(property)) != null && (boolean) b) {
+        if ((b = PlatformHelper.getBooleanSystemProperty(property)) != null && (boolean) b) {
             return true;
         }
         return false;
     }
-
-    public static Double getDoubleSystemProperty(String property) {
-        String arg = Platform.getInstance().getSystemProperty(property);
-        if (arg == null) {
-            return null;
-        }
-        if (StringUtils.empty(arg)) {
-            return null;
-        }
-        return new Double(Util.parseDouble(arg));
-    }
-
 
     /**
      * Ein Laden anstossen und ueber Callback weitermachen.

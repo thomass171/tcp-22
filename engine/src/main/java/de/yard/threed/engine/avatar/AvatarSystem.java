@@ -2,6 +2,7 @@ package de.yard.threed.engine.avatar;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.platform.PlatformHelper;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.ObserverComponent;
 import de.yard.threed.engine.Scene;
@@ -55,7 +56,7 @@ public class AvatarSystem extends DefaultEcsSystem {
         boolean enableNearView = false;
 
         Boolean b;
-        if ((b = EngineHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
+        if ((b = PlatformHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
             enableNearView = (boolean) b;
         }
         return new AvatarSystem(false);

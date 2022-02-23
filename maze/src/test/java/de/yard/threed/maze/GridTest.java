@@ -29,6 +29,7 @@ public class GridTest {
     static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine","maze"}, new PlatformFactoryHeadless());
 
     Grid grid;
+    // not the interface. Really tests the traditional implementation.
     MazeTerrain terrain;
 
     /**
@@ -227,7 +228,7 @@ public class GridTest {
 
         loadGridAndTerrain("skbn/SokobanWikipedia.txt");
 
-        TestUtil.assertEquals("tiles", grid.getMaxWidth() * grid.getHeight(), terrain.tiles.values().size());
+        TestUtil.assertEquals("tiles", grid.getMaxWidth() * grid.getHeight(), terrain.getTiles().values().size());
     }
 
     /**
@@ -289,7 +290,7 @@ public class GridTest {
         MazeModelFactory mf = new MazeModelFactory();
         MazeTerrain terrain = new MazeTerrain(3, 6);
         terrain.addGridElement(mf.buildWall(1, Grid.STRAIGHTWALLMODE_FULL), 0, 0, 0);
-        SceneNode wall = terrain.getTransform().getChild(0).getSceneNode();
+        SceneNode wall = terrain.getNode().getTransform().getChild(0).getSceneNode();
         TestUtil.assertVector3("wallpos", new Vector3(-MazeDimensions.GRIDSEGMENTSIZE, 0, 2.5f * MazeDimensions.GRIDSEGMENTSIZE), wall.getTransform().getPosition());
     }
 
@@ -309,6 +310,6 @@ public class GridTest {
         grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze",mazeName ))).get(0);
 
         terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());
-        terrain.addGrid(grid, Scene.getCurrent());
+        terrain.visualizeGrid(grid);
     }
 }

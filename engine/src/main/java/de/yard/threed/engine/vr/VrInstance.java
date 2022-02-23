@@ -7,6 +7,7 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.platform.PlatformHelper;
 import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.World;
@@ -77,7 +78,7 @@ public class VrInstance {
                 return null;
             }
         }
-        Double yoffsetVR = EngineHelper.getDoubleSystemProperty("argv.yoffsetVR");
+        Double yoffsetVR = PlatformHelper.getDoubleSystemProperty("argv.yoffsetVR");
         double val = (double) ((yoffsetVR == null) ? 0 : yoffsetVR);
         instance = new VrInstance(emulated ? MODE_EMULATED : MODE_OBSERVER, val);
 

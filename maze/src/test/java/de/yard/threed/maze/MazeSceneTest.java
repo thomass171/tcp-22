@@ -2,6 +2,7 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.Scene;
@@ -41,6 +42,8 @@ public class MazeSceneTest {
     public void testSokobanWikipedia() {
         setup("skbn/SokobanWikipedia.txt");
 
+        assertEquals(2, Configuration.getDefaultConfiguration().size());
+
         assertTrue(SystemState.readyToJoin());
 
         EcsEntity user = UserSystem.getInitialUser();
@@ -57,7 +60,7 @@ public class MazeSceneTest {
         Camera camera = Scene.getCurrent().getDefaultCamera();
         Vector3 worldPos = camera.getCarrier().getTransform().getWorldModelMatrix().extractPosition();
         // 1.35 just taken as is. Where does it come from?
-        assertEquals("viewpoint absolut height", 1.35,worldPos.getY(),0.001);
+        assertEquals("viewpoint absolut height", 1.35, worldPos.getY(), 0.001);
         // teleport to ... for first moving of a box
         /*No ray in test platform for now.
         Ray ray = TestUtils.getHittingRayForTeleport(new Point(7, 3),'W');
@@ -78,6 +81,6 @@ public class MazeSceneTest {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.maze.MazeScene");
         properties.put("argv.initialMaze", gridname);
-        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, properties,new String[] {"engine","data","maze"});
+        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, properties, new String[]{"engine", "data", "maze"});
     }
 }

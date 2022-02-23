@@ -19,10 +19,10 @@ import de.yard.threed.engine.ecs.UserSystem;
  */
 public class MazeView {
 
-    public MazeTerrain terrain;
+    public AbstractMazeTerrain terrain;
 
     public void remove() {
-        SceneNode.removeSceneNode(terrain);
+        SceneNode.removeSceneNode(terrain.getNode());
 
         terrain = null;
     }

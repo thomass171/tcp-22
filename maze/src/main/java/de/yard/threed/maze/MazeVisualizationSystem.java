@@ -4,6 +4,7 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.GridTeleportDestination;
 import de.yard.threed.engine.GridTeleporter;
@@ -112,7 +113,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             List<SceneNode> tileCandidates = new ArrayList<SceneNode>();
             for (GridMovement m : moveOptions) {
                 if (m.isRelocate()) {
-                    SceneNode n = view.terrain.tiles.get(m.relocateTarget);
+                    SceneNode n = view.terrain.getTiles().get(m.relocateTarget);
                     if (n == null) {
                         logger.warn("No tile for field " + m.relocateTarget);
                     } else {
@@ -136,14 +137,14 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                 }
             }
             if (MazeUtils.playerHasBullets()) {
-                for (SceneNode wall : view.terrain.walls.values()) {
+                for (SceneNode wall : view.terrain.getWalls().values()) {
 
                     List<NativeCollision> intersections = ray.getIntersections(wall);
                     if (intersections.size() > 0) {
                         updateFireTargetMarker(ray, wall, intersections);
                     }
                 }
-            }else{
+            } else {
                 hideFireTargetMarker();
             }
         }
@@ -158,7 +159,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
     public Request getRequestByTrigger(Ray ray, boolean left) {
         logger.debug("getRequestByTrigger,left=" + left + ",ray=" + ray);
         if (left) {
-            for (SceneNode tile : view.terrain.tiles.values()) {
+            for (SceneNode tile : view.terrain.getTiles().values()) {
                 GridTeleportDestination transform = gridTeleporter.updateDestinationMarker(ray, tile, MazeDimensions.GRIDSEGMENTSIZE);
                 if (transform != null) {
                     Point p = MazeUtils.vector2Point(transform.transform.position);
@@ -192,9 +193,16 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
 
         logger.debug("visualizing maze terrain");
         view = new MazeView();
-        view.terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());
-        view.terrain.addGrid(grid, /*9.4.21 view.boxes,*/ Scene.getCurrent());
-        Scene.getCurrent().addToWorld(view.terrain);
+
+        Configuration configuration = Configuration.getDefaultConfiguration();
+        String terrainbuilder = configuration.getString("maze.visualization", "");
+        if (terrainbuilder.equals("traditional")) {
+            view.terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());
+        } else {
+            throw new RuntimeException("unknown visualization " + terrainbuilder);
+        }
+        view.terrain.visualizeGrid(grid);
+        Scene.getCurrent().addToWorld(view.terrain.getNode());
 
     }
 
