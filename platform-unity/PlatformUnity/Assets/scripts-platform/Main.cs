@@ -109,7 +109,7 @@ public class Main : MonoBehaviour
                 updater = new de.yard.threed.traffic.apps.BasicTravelScene();
                 (Platform.getInstance()).setSystemProperty("argv.basename", "Wayland");
             }
-            bool demo = true;
+            bool demo = false;
             if (demo)
             {
                 (Platform.getInstance()).setSystemProperty("argv.basename", "traffic:tiles/Demo.xml");

@@ -1,4 +1,6 @@
 images/river.jpg
+images/lake.jpg
+images/mountain-lake.jpg
 models/loc.bin
 models/loc.gltf
 textures/SokobanTarget.png

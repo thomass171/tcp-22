@@ -16,6 +16,7 @@ import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import de.yard.threed.engine.test.AsyncTest;
@@ -255,12 +256,7 @@ public class ReferenceScene extends Scene {
         wall.setName("Wall");
         addToWorld(wall);
 
-        //3.5.21 eine wall by simple plane above
-        SceneNode simplewall = new SceneNode(new Mesh(Primitives.buildSimpleXYPlaneGeometry(0.4, 0.2, new ProportionalUvMap()),
-                Material.buildPhongMaterial(Texture.buildBundleTexture("data", "images/river.jpg"))));
-        simplewall.getTransform().setPosition(new Vector3(0, 2, -2));
-        simplewall.setName("Simple XY plane Wall");
-        addToWorld(simplewall);
+        buildPhotoalbumPage();
 
         // loc nur zum Test des async gltf Ladens, aber ohne Animation um keine Abhaengigkeit zu FG zu haben.
         // 5.1.17: das Laden geht hier erstmal mit dem eigenen Loader. Den Platform Loader verwendet nachher das Laden ueber key a.
@@ -552,6 +548,27 @@ public class ReferenceScene extends Scene {
         pyramideblf.attach(flag);
         flag.setName("Pyramide Flag");
         flag.getTransform().setPosition(new Vector3(radiusBottom, -height / 2, 0));
+    }
+
+    /**
+     * Does not display correctly in Unity and ThreeJS yet.
+     */
+    private void buildPhotoalbumPage(){
+
+        Material mat = null;
+        Texture[] textures = null;
+        //ShapeGeometry cubegeometry = ShapeGeometry.buildPlane(3, 3, 1, 1);
+        textures = new Texture[]{Texture.buildBundleTexture("data", "images/lake.jpg"), Texture.buildBundleTexture("data", "images/mountain-lake.jpg")};
+        // Texture Shading
+        HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
+        map.put("texture0", textures[0].texture);
+        map.put("texture1", textures[1].texture);
+        mat = Material.buildCustomShaderMaterial(map, Effect.buildPhotoalbumEffect());
+        //3.5.21 eine wall by simple plane above
+        SceneNode simplewall = new SceneNode(new Mesh(Primitives.buildSimpleXYPlaneGeometry(1.1, 1.8, new ProportionalUvMap()), mat));
+        simplewall.getTransform().setPosition(new Vector3(0, 2, -2));
+        simplewall.setName("Photoalbum XY plane Wall");
+        addToWorld(simplewall);
     }
 
     public SceneNode getMovingbox() {
