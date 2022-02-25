@@ -62,11 +62,15 @@ public class WebGlScene implements NativeScene {
     }*/
 
     public void remove(WebGlSceneNode objtoremove) {
-        removeFromScene(objtoremove.object3d);
+        if (objtoremove != null) {
+            removeFromScene(objtoremove.object3d);
+        }
     }
 
     public void remove(WebGlLight lighttoremove) {
-        remove(lighttoremove.light);
+        if (lighttoremove != null) {
+            remove(lighttoremove.light);
+        }
     }
 
     /**
@@ -126,10 +130,11 @@ public class WebGlScene implements NativeScene {
 
     /**
      * Returns Mesh.
+     *
      * @return
      */
     public JavaScriptObject addTestObjekt() {
-        return addTestObjekt(scene,1);
+        return addTestObjekt(scene, 1);
     }
 
     @Override
@@ -140,15 +145,15 @@ public class WebGlScene implements NativeScene {
     public List<NativeSceneNode> getObjectByName(String name) {
         List<NativeSceneNode> l = new ArrayList<NativeSceneNode>();
 
-        JavaScriptObject obj = getObjectByName(scene,name,true);
-        if (obj == null){
+        JavaScriptObject obj = getObjectByName(scene, name, true);
+        if (obj == null) {
             return l;
         }
         //TODO mehrere?
-        l.add(new WebGlSceneNode(obj,true));
+        l.add(new WebGlSceneNode(obj, true));
         return l;
     }
-    
+
     private static native JavaScriptObject buildNativeScene()  /*-{
         var scene = new $wnd.THREE.Scene();
         //$wnd.alert("scene built:"+scene);
@@ -169,11 +174,13 @@ public class WebGlScene implements NativeScene {
         //  $wnd.alert("nativeadd2");
     }-* /;*/
 
-    private static native void remove(            JavaScriptObject objtoremove)  /*-{
+    private static native void remove(JavaScriptObject objtoremove)  /*-{
         //$wnd.alert("nativeremove");
-        objtoremove.parent.remove(objtoremove);
+        if (objtoremove != null && objtoremove.parent != null) {
+          objtoremove.parent.remove(objtoremove);
+        }
     }-*/;
-    
+
     private static native JavaScriptObject getRootNode(JavaScriptObject scene)  /*-{
         // die scene selber muesste root sein.
         return scene;
@@ -195,5 +202,5 @@ public class WebGlScene implements NativeScene {
     private static native JavaScriptObject getObjectByName(JavaScriptObject scene, String name, boolean recursive)  /*-{
         return scene.getObjectByName(name,recursive);
     }-*/;
-    
+
 }

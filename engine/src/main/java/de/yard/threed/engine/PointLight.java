@@ -4,25 +4,18 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.Color;
 
 /**
- * 23.3.17 Die Verwendung ist noch weitgehend unklar. Besser erstmal Directional.
- * Evtl. nicht in alklen Platformen und performancehungrig?
- * Darum Deprecated.
- * 
+ * A point light.
+ * Has no own transform but will be attached to a node.
+ *
  * Date: 09.07.14
  */
-@Deprecated
 public class PointLight extends Light {
+
     public PointLight(Color color) {
-        //this.color = color;
-        nativelight = Platform.getInstance().buildPointLight(color);
+        nativelight = Platform.getInstance().buildPointLight(color,1000000000.0);
     }
 
-    /*public Vector3 getPosition() {
-        return new Vector3(nativelight.getPosition());
+    public PointLight(Color color, double range) {
+        nativelight = Platform.getInstance().buildPointLight(color, range);
     }
-
-    public void setPosition(Vector3 pos) {
-        nativelight.setPosition(pos.vector3);
-    }*/
-
 }

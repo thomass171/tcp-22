@@ -176,7 +176,7 @@ public abstract class Platform {
 
     public abstract NativeTexture buildNativeTexture(NativeCanvas imagedata);
 
-    public abstract NativeLight buildPointLight(Color argb);
+    public abstract NativeLight buildPointLight(Color argb, double range);
 
     public abstract NativeLight buildAmbientLight(Color argb);
 

@@ -190,7 +190,7 @@ namespace de.yard.threed.platform.unity
             return texture;
         }
 
-        override public NativeLight buildPointLight (de.yard.threed.core.Color argb)
+        override public NativeLight buildPointLight (de.yard.threed.core.Color argb, double range)
         {
             return UnityLight.buildPointLight (argb);
         }

@@ -328,8 +328,8 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
     }
 
     @Override
-    public NativeLight buildPointLight(Color argb) {
-        return JmeLight.buildPointLight(argb);
+    public NativeLight buildPointLight(Color argb, double range) {
+        return JmeLight.buildPointLight(argb, range);
     }
 
     @Override

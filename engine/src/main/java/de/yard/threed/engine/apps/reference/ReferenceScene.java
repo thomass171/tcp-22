@@ -95,7 +95,6 @@ public class ReferenceScene extends Scene {
     //Wohl nicht, FovElement ist immer Layer 1
     //layer 2->9, damit es nicht zufaellig funktioniert
     int HIDDENCUBELAYER = 9;//1 << 8;
-    private boolean ambient = false;
     SceneNode lightNode;
     int shading = NumericValue.SMOOTH;
     RequestType REQUEST_CLOSE = new RequestType("close");
@@ -105,6 +104,8 @@ public class ReferenceScene extends Scene {
     ControlPanel controlPanel;
     Color controlPanelBackground = new Color(128, 193, 255, 128);
     boolean vrEnabled = false;
+    int lightIndex = 0;
+    GeneralHandler[] lightCycle;
 
     @Override
     public void init(boolean forServer) {
@@ -137,13 +138,13 @@ public class ReferenceScene extends Scene {
         setupScene();
 
         ViewpointList tl = new ViewpointList();
-        controller = new StepController(camera.getCarrierTransform(),tl);
+        controller = new StepController(camera.getCarrierTransform(), tl);
 
         //auf Hoehe der move destination
         tl.addEntryForLookat(new Vector3(-3, 2, 6), new Vector3(-3, 2, 0));
         // attached hinten an die Movebox mit Blick über die Box in Moverichtung
         // die x/y Werte scheinen sehr gross, aber auf die wirkt ja auch der scale der movinbox  (0.25?)
-        tl.addEntry( new Vector3(2.5f, 2.1f, 0), Quaternion.buildFromAngles(new Degree(0), new Degree(90), new Degree(0)),getMovingbox().getTransform());
+        tl.addEntry(new Vector3(2.5f, 2.1f, 0), Quaternion.buildFromAngles(new Degree(0), new Degree(90), new Degree(0)), getMovingbox().getTransform());
         //controller.addStep(getMovingbox(), new Vector3(10, 2.1f, 0), new Quaternion(new Degree(0), new Degree(-90), new Degree(90)));
         // von ganz oben
         tl.addEntryForLookat(new Vector3(3, 15, 0), new Vector3(2, 0, 0));
@@ -172,6 +173,7 @@ public class ReferenceScene extends Scene {
     /**
      * "railing" fuer loc.
      * 13.6.21: loc GLTF liegt jetzt in "data". "core" gibt es nicht mehr, stattdessen "engine"
+     *
      * @return
      */
     @Override
@@ -213,6 +215,7 @@ public class ReferenceScene extends Scene {
 
         addOrReplaceEarth();
 
+        initLightCycle();
         setLight();
 
         //20.5.16: Auch ein Hud, einfach um das bei wechselnden Camerapositionen einfach mittesten zu koennen.
@@ -230,7 +233,7 @@ public class ReferenceScene extends Scene {
         if (deferredcamera != null) {
             inventory = ControlPanelHelper.buildInventoryForDeferredCamera(deferredcamera, getDimension(), controlPanelBackground);
             // occupy mid third of inventory
-            TextTexture textTexture=new TextTexture(Color.LIGHTGRAY);
+            TextTexture textTexture = new TextTexture(Color.LIGHTGRAY);
             inventory.addArea(new Vector2(0, 0), new DimensionF(inventory.getSize().getWidth() / 3, inventory.getSize().getHeight()), null).setTexture(textTexture.getTextureForText("1884"));
         }
         controlPanel = buildControlPanel(controlPanelBackground);
@@ -295,7 +298,7 @@ public class ReferenceScene extends Scene {
         GenericGeometry canvasgeo = new GenericGeometry(Primitives.buildPlaneGeometry(0.7f, 1.1f, 2, 1));
         mat = buildWallMaterial(false);
 
-        NativeCanvas canvas =  Platform.getInstance().buildNativeCanvas(300, 200);
+        NativeCanvas canvas = Platform.getInstance().buildNativeCanvas(300, 200);
         SceneNode canvasNode = new SceneNode(new Mesh(canvasgeo, Material.buildBasicMaterial(new Texture(canvas))));
         // vor der linken Box, damit es nach dem ersten step ganz gut sehen kann.
         canvasNode.getTransform().rotateX(new Degree(90));
@@ -322,7 +325,7 @@ public class ReferenceScene extends Scene {
 
         // top line: property yontrol
         cp.add(new Vector2(0, PropertyControlPanelRowHeight / 2 + PropertyControlPanelRowHeight / 2),
-                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat,null));
+                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat, null));
 
         // mid line: a indicator
         indicator = Indicator.buildGreen(0.03);
@@ -355,6 +358,13 @@ public class ReferenceScene extends Scene {
     }
 
     private void setLight() {
+        if (lightNode != null) {
+            SceneNode.removeSceneNode(lightNode);
+        }
+        lightCycle[lightIndex].handle();
+    }
+
+    private void setDefaultLight(boolean ambient) {
         //22.3.17: Mal kein AmbientLight mehr, um erstmal DirectionalLight zu ergründen.
         //Das DirectionalLight jetzt schräg von vorne  scheinen lassen (45 Grad). Dann ist die Pyramide gut beleuchtet
         //und es gibt einige Schatten nach unten. Aber nicht zu sehr in Blickrichtung der Camera, sonst sieht man keine Schatten.
@@ -363,9 +373,7 @@ public class ReferenceScene extends Scene {
 
         //TODO 2.4.19: Bei JME macht der Wechsel des Lichts den Schatten dunkler/schwärzer. Komisch??.
         //29.4.19: Der Remove von Directional geht in JME offenbar nicht. Sieht zumindest so aus, wenn man mit ambient startet. Da kommt man nicht mehr hin.wegen DirectionalLightShadowRenderer?
-        if (lightNode != null) {
-            SceneNode.removeSceneNode(lightNode);
-        }
+
         Light light;
         if (ambient) {
             light = new AmbientLight(new Color(0x40, 0x40, 0x40));
@@ -551,9 +559,9 @@ public class ReferenceScene extends Scene {
     }
 
     /**
-     * Does not display correctly in Unity and ThreeJS yet.
+     * Photo album custom shader not display correctly in Unity and ThreeJS yet. So don't use it for now? Causes nasty ThreeJS error messages.
      */
-    private void buildPhotoalbumPage(){
+    private void buildPhotoalbumPage() {
 
         Material mat = null;
         Texture[] textures = null;
@@ -564,6 +572,7 @@ public class ReferenceScene extends Scene {
         map.put("texture0", textures[0].texture);
         map.put("texture1", textures[1].texture);
         mat = Material.buildCustomShaderMaterial(map, Effect.buildPhotoalbumEffect());
+        //mat = Material.buildPhongMaterial(textures[0]);
         //3.5.21 eine wall by simple plane above
         SceneNode simplewall = new SceneNode(new Mesh(Primitives.buildSimpleXYPlaneGeometry(1.1, 1.8, new ProportionalUvMap()), mat));
         simplewall.getTransform().setPosition(new Vector3(0, 2, -2));
@@ -678,7 +687,10 @@ public class ReferenceScene extends Scene {
         if (Input.GetKeyDown(KeyCode.L)) {
             if (Input.GetKey(KeyCode.Shift)) {
                 //cycle lightNode
-                ambient = !ambient;
+                lightIndex++;
+                if (lightIndex >= lightCycle.length) {
+                    lightIndex = 0;
+                }
                 setLight();
             } else {
                 int layer = hiddencube.getTransform().getLayer();
@@ -864,6 +876,23 @@ public class ReferenceScene extends Scene {
         }
         return null;
     }
+
+    private void initLightCycle() {
+        lightCycle = new GeneralHandler[]{
+                // 0: standard/initial light, no ambient
+                () -> setDefaultLight(false), () -> {
+            // 1: ambient
+            setDefaultLight(true);
+        },
+                // 2: point light
+                () -> {
+                    PointLight pointLight = new PointLight(Color.WHITE);
+                    this.lightNode = addLightToWorld(pointLight);
+                },
+                // 3: no light, just dark
+                () -> {
+                }};
+    }
 }
 
 class ReferenceTests {
@@ -946,7 +975,7 @@ class ReferenceTests {
         TestUtil.assertVector3("extracted camera position scale", new Vector3(0, 5, 11), cameraworldmatrix.extractPosition());
         TestUtil.assertEquals("camera.name", "Main Camera", camera.getName());
         TestUtil.assertEquals("camera.carrier.name", "Main Camera Carrier", camera.getCarrier().getName());
-        TestUtil.assertNotNull("camera.parent",  camera.getCarrier().getParent());
+        TestUtil.assertNotNull("camera.parent", camera.getCarrier().getParent());
         TestUtil.assertEquals("camera.parent.name", "World", camera.getCarrier().getParent().getName());
         //Wieso 2? Evtl. wegen GUI?. 7.10.19: Die default und die vom HUD (Layer 1 deferred). Und die xplizite deferred (layer 2) dazu.
         TestUtil.assertEquals("cameras", 2 + ((usedeferred) ? 1 : 0), AbstractSceneRunner.instance.getCameras().size());
@@ -1284,15 +1313,15 @@ class ReferenceTests {
     public static void testJson() {
         String jsonString = "{" +
                 JsonHelper.buildProperty("a", "b") + "," +
-                JsonHelper.buildProperty("c", "\"d")  +
+                JsonHelper.buildProperty("c", "\"d") +
                 "}";
 
-        logger.debug("parsing "+jsonString);
+        logger.debug("parsing " + jsonString);
         NativeJsonValue parsed = Platform.getInstance().parseJson(jsonString);
         NativeJsonObject o = parsed.isObject();
         TestUtil.assertNotNull("json.isObject", o);
-        logger.debug("parsed a:"+parsed.isObject().get("a").isString().stringValue());
-        logger.debug("parsed c:"+parsed.isObject().get("c").isString().stringValue());
+        logger.debug("parsed a:" + parsed.isObject().get("a").isString().stringValue());
+        logger.debug("parsed c:" + parsed.isObject().get("c").isString().stringValue());
         TestUtil.assertEquals("property a", "b", parsed.isObject().get("a").isString().stringValue());
         TestUtil.assertEquals("property c", "\"d", parsed.isObject().get("c").isString().stringValue());
     }

@@ -15,8 +15,8 @@ public class WebGlLight implements NativeLight {
         this.light = light;
     }
 
-    public static WebGlLight buildPointLight(int col) {
-        return new WebGlLight(buildPointLightNative(col));
+    public static WebGlLight buildPointLight(int col, double range) {
+        return new WebGlLight(buildPointLightNative(col, range));
     }
 
     public static WebGlLight buildAmbientLight(int col) {
@@ -24,7 +24,7 @@ public class WebGlLight implements NativeLight {
     }
 
     public static WebGlLight buildDirectionalLight(int col, JavaScriptObject direction) {
-        return new WebGlLight(buildDirectionalLightNative(col,direction));
+        return new WebGlLight(buildDirectionalLightNative(col, direction));
     }
 
     public void setPosition(Vector3 pos) {
@@ -35,8 +35,8 @@ public class WebGlLight implements NativeLight {
         return new WebGlVector3(WebGlObject3D.getPosition(light));
     }
 
-    private static native JavaScriptObject buildPointLightNative(int col)  /*-{
-        var pointLight = new $wnd.THREE.PointLight({color: col});
+    private static native JavaScriptObject buildPointLightNative(int col, double range)  /*-{
+        var pointLight = new $wnd.THREE.PointLight({color: col, distance: range});
         return pointLight;
     }-*/;
 
@@ -48,6 +48,7 @@ public class WebGlLight implements NativeLight {
     /**
      * Die direction ist die Richtung der Lichtquelle, also quais deren relative Position.
      * Es ist nicht die Richtung der Lichtstrahlen.
+     *
      * @param col
      * @param direction
      * @return

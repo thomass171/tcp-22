@@ -77,7 +77,7 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public NativeLight buildPointLight(Color argb) {
+    public NativeLight buildPointLight(Color argb, double range) {
         return null;
     }
 

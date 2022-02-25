@@ -29,6 +29,8 @@ import de.yard.threed.engine.platform.common.EffectShader;
  * die PropertyNodes wieder freigegeben (wegen memory). Ist auch im Sinne von Material sharing. Aber ob das wirklich die Intention ist?
  *
  * 9.3.21: MA31: Zerlegt in engine und FG(FGEffect).
+ *
+ * 25.2.22: platform independent Shader still not work in ThreeJs and Unity. Maybe its a bad approach.
  * Created by thomass on 30.10.15.
  */
 public class Effect {

@@ -8,15 +8,16 @@ import de.yard.threed.engine.platform.common.AbstractSceneRunner;
  * Created by thomass on 25.04.15.
  * <p/>
  * ThreeJs verwendet Quaternions und hat keine diskreten Rotationswerte fuer einzelne Achsen.
- * 25.2.16: Warum war das denn von Base3D abgeleitet? Geaendert auf Object3D.
- * 15.11.16: Wegen ECS gar nicht mehr.
- * 23.12.16: Der Aufbau ist: SceneNode enthält ein Platform 3D Objekt (als Transform), das wiederum ein Mesh ganz normal als Child enthaelt(wirklich?, ist doch parallel. 7.10.17: Ja, wirklich).
+ * 25.2.16: No longer extends Base3D but Object3D now.
+ * 15.11.16:
+ * No longer an extension of any ThreeJs object. Now its just a simple container object, containing a ThreeJs object.
+ * The ThreeJs object also provides the transform and might contain a mesh as child(!). (Really?, ist doch parallel. 7.10.17: yes, really).
  * 23.3.17: Light analog.
  */
-public class WebGlSceneNode /*extends /*WebGlObject3D*/ implements NativeSceneNode {
+public class WebGlSceneNode implements NativeSceneNode {
    static Log logger = new WebGlLog(WebGlSceneNode.class.getName());
 
-    //MA17 WebGlMesh mesh;
+    // a light attached to this node
     WebGlLight light;
     static int uniqueid = 1;
     int id;
@@ -38,11 +39,6 @@ public class WebGlSceneNode /*extends /*WebGlObject3D*/ implements NativeSceneNo
     WebGlSceneNode(JavaScriptObject nativeobject3d, boolean exists) {
         this.object3d = new WebGlObject3D(nativeobject3d, this, true);
     }
-    
-   /*21.11.6 public WebGlModel() {
-        this(WebGlBase3D.buildObject3D());
-        id = uniqueid++;
-    }*/
 
     public WebGlSceneNode(String name) {
         this(WebGlObject3D.buildObject3D());

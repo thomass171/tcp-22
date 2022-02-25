@@ -243,8 +243,8 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
-    public NativeLight buildPointLight(Color argbcolor) {
-        return WebGlLight.buildPointLight(argbcolor.getARGB());
+    public NativeLight buildPointLight(Color argbcolor, double range) {
+        return WebGlLight.buildPointLight(argbcolor.getARGB(), range);
     }
 
     @Override

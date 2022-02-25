@@ -82,12 +82,10 @@ public abstract class Scene {
     }
 
     /**
-     * Light ist wie ein Mesh Komponente einer SceneNode, obwohl es in JME und anderen eigentlich eigenstaendig ist.
-     * Kann das in JME ueberhaupt so gehen?
-     * 2.4.19: Das light muesste dann doch mit einem remove der SceneNode entfernbar sein, oder?
-     * Tuts auch.
-     * 30.4.19: Bei JME(DirectionalLightShadowRenderer?) noch nicht richtig
      *
+     * See {@link Light}
+     * 30.4.19: Bei JME(DirectionalLightShadowRenderer?) noch nicht richtig
+     * 25.2.22: This is just a convenience method. Maybe there can be a better location (in Light?).
      * @param light
      * @return
      */
