@@ -17,6 +17,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertNull;
+
 
 /**
  * Tests without ECS (See MazeTest for tests with ECS).
@@ -46,10 +48,11 @@ public class GridTest {
 
         Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "maze/grid1.txt"))).get(0);
 
+        Point startPosition = grid.getLayout().getNextLaunchPosition(null);
         TestUtil.assertEquals("width", 11, grid.getMaxWidth());
         TestUtil.assertEquals("height", 7, grid.getHeight());
-        TestUtil.assertEquals("start.x", 5, grid.getStartPos().getX());
-        TestUtil.assertEquals("start.y", 1, grid.getStartPos().getY());
+        TestUtil.assertEquals("start.x", 5, startPosition.getX());
+        TestUtil.assertEquals("start.y", 1, startPosition.getY());
         TestUtil.assertTrue("top pillar", grid.hasTopPillar(new Point(0, 0)));
         TestUtil.assertTrue("top pillar", grid.hasTopPillar(new Point(0, 1)));
         TestUtil.assertFalse("top pillar", grid.hasTopPillar(new Point(1, 0)));
@@ -59,9 +62,9 @@ public class GridTest {
         TestUtil.assertTrue("right pillar", grid.hasRightPillar(new Point(1, 0)));
         TestUtil.assertFalse("right pillar", grid.hasRightPillar(new Point(1, 1)));
 
-        TestUtil.assertEquals("start.y", 2, grid.getStartPos().add(Direction.N.getPoint()).getY());
+        TestUtil.assertEquals("start.y", 2, startPosition.add(Direction.N.getPoint()).getY());
 
-        GridMover player = MazeFactory.buildMover(grid.getLayout().initialPosition);
+        GridMover player = MazeFactory.buildMover(startPosition);
 
         TestUtil.assertPoint("current location", new Point(5, 1), player.getLocation());
         GridState state = new GridState(player, new ArrayList<GridMover>(), new ArrayList<GridItem>());
@@ -115,7 +118,8 @@ public class GridTest {
 
         Grid grid = Grid.loadByReader(new StringReader(TestUtils.loadGrid("skbn/SokobanSimple.txt"))).get(0);
 
-        GridMover player = MazeFactory.buildMover(grid.getLayout().initialPosition);
+        Point startPosition = grid.getLayout().getNextLaunchPosition(null);
+        GridMover player = MazeFactory.buildMover(startPosition);
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
         TestUtil.assertEquals("boxes", 1, boxes.size());
         GridMover box = boxes.get(0);
@@ -164,7 +168,7 @@ public class GridTest {
 
         Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
 
-        GridMover player = MazeFactory.buildMover(grid.getLayout().initialPosition);
+        GridMover player = MazeFactory.buildMover(grid.getLayout().getNextLaunchPosition(null));
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
         GridMover bottombox = boxes.get(0);
         GridMover topbox = boxes.get(1);
@@ -273,7 +277,7 @@ public class GridTest {
         TestUtil.assertNull("right of 6,2", pillar[1]);
         TestUtil.assertNotNull("center of 6,2", pillar[2]);
 
-        GridMover player = MazeFactory.buildMover(grid.getLayout().initialPosition);
+        GridMover player = MazeFactory.buildMover(grid.getLayout().getNextLaunchPosition(null));
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
         TestUtil.assertEquals("boxes", 0, boxes.size());
 
@@ -304,6 +308,33 @@ public class GridTest {
         Grid g = Grid.findByTitle(grids, "2");
 
         TestUtil.assertNotNull("", g);
+    }
+
+    /**
+     * ##########
+     * #   @    #
+     * #   # #  #
+     * #   # #  #
+     * #    @   #
+     * ##########
+     */
+    @Test
+    public void testP_Simple() throws Exception {
+
+        loadGridAndTerrain("maze/Maze-P-Simple.txt");
+
+        List<Point> usedLaunchPositions = new ArrayList<Point>();
+        Point startPosition = grid.getLayout().getNextLaunchPosition(usedLaunchPositions);
+        GridMover firstPlayer = MazeFactory.buildMover(startPosition);
+        usedLaunchPositions.add(startPosition);
+        TestUtil.assertPoint("current location", new Point(5, 1), firstPlayer.getLocation());
+
+        startPosition = grid.getLayout().getNextLaunchPosition(usedLaunchPositions);
+        GridMover secondPlayer = MazeFactory.buildMover(startPosition);
+        usedLaunchPositions.add(startPosition);
+        TestUtil.assertPoint("current location", new Point(4, 4), secondPlayer.getLocation());
+
+        assertNull(grid.getLayout().getNextLaunchPosition(usedLaunchPositions));
     }
 
     private void loadGridAndTerrain(String mazeName) throws InvalidMazeException {

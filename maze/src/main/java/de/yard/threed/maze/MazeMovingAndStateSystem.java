@@ -4,13 +4,13 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.avatar.Avatar;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.engine.gui.Hud;
 import de.yard.threed.engine.platform.common.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -42,8 +42,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
     private Hud helphud = null;
     String initialMaze = null;
-    //Das Grid ist erstmal nur zur Initilisierung/Visualisierung.
-    //Grid grid;
+    List<Point> usedLaunchPositions = new ArrayList<Point>();
 
     public MazeMovingAndStateSystem() {
         super(new String[]{"MazeMovingComponent"}, new RequestType[]{RequestRegistry.TRIGGER_REQUEST_BACK,
@@ -320,53 +319,65 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //avatar = buildPlayer(Scene.getCurrent().getMainCamera());
             //Avatar avatar = AvatarSystem.getAvatar();
             MazeLayout layout = Grid.getInstance().getLayout();
-            //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
-            //ist.
-            // 14.2.22:More consistent approach. Independent from VR mode have a avatar and observer independent from each other.
-            MoverComponent mover;
-            mover = new MoverComponent(playerEntity.scenenode.getTransform()/*Observer.getInstance(),*/, true, layout.initialPosition, layout.initialOrientation);
-
-            if (MazeScene.vrInstance == null) {
-
-
-                // Also, Observer wird an Avatar attached. Der hat aber y0 als Bezugspunkt(?), so dass Observer angehoben wird.
-                // Done in AvatarSystem. Observer.getInstance().getTransform().setParent(avatar.getTransform());
-
-                // 16.5.21: rayy wurde freher irgendwie anders gesetzt. So gehts aber auch erstmal.
-                // 31.5.21: Besser ueber finetune, damit er bei xyz nicht springt. Das beisst sich aber mit viewpoint. Muesste nicht Avatar angehoben werden? Hmm
-                // setPosition ueber den Observer transform untergraebt aber finetune. doof. So ist jetzt aber gut.
-                //Observer.getInstance().getTransform().setPosition(getSettings().getViewpoint().position.add(new Vector3(0,MazeScene.rayy,0)));
-                Observer.getInstance().initFineTune(getSettings().getViewpoint().position.add(new Vector3(0,MazeScene.rayy,0)));
-                //Observer.getInstance().getTransform().translateY(MazeScene.rayy);
-                //Observer.getInstance().initFineTune(MazeScene.rayy);
-                //avatar.getTransform().translateY(MazeScene.rayy);
-                // Rotation ist blick nach schraeg unten
-                Observer.getInstance().getTransform().setRotation(getSettings().getViewpoint().rotation);
-
+            Point launchPosition = layout.getNextLaunchPosition(usedLaunchPositions);
+            if (launchPosition != null) {
+                joinPlayer(playerEntity,launchPosition);
+            } else {
+                logger.warn("Rejecting join request due to too may players. Currently " + usedLaunchPositions.size());
             }
-            playerEntity/*avatar.avatarE.*/.addComponent(mover);
+        }
+    }
 
-            //MazeView.ray = avatar.avatarE;
-            //1.4.21 Scene.getCurrent().addToWorld(MazeView.ray.scenenode);
+    /**
+     * Join a new player
+     *
+     */
+    private void joinPlayer(EcsEntity playerEntity, Point launchPosition) {
+        //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
+        //ist.
+        // 14.2.22:More consistent approach. Independent from VR mode have a avatar and observer independent from each other.
+        MoverComponent mover;
+        mover = new MoverComponent(playerEntity.scenenode.getTransform()/*Observer.getInstance(),*/, true, launchPosition, Grid.getInstance().getLayout().initialOrientation);
+        usedLaunchPositions.add(launchPosition);
+        if (MazeScene.vrInstance == null) {
 
-            Point startpos = Grid.getInstance().getStartPos();
-            if (MazeVisualizationSystem.view != null) {
+
+            // Also, Observer wird an Avatar attached. Der hat aber y0 als Bezugspunkt(?), so dass Observer angehoben wird.
+            // Done in AvatarSystem. Observer.getInstance().getTransform().setParent(avatar.getTransform());
+
+            // 16.5.21: rayy wurde freher irgendwie anders gesetzt. So gehts aber auch erstmal.
+            // 31.5.21: Besser ueber finetune, damit er bei xyz nicht springt. Das beisst sich aber mit viewpoint. Muesste nicht Avatar angehoben werden? Hmm
+            // setPosition ueber den Observer transform untergraebt aber finetune. doof. So ist jetzt aber gut.
+            //Observer.getInstance().getTransform().setPosition(getSettings().getViewpoint().position.add(new Vector3(0,MazeScene.rayy,0)));
+            Observer.getInstance().initFineTune(getSettings().getViewpoint().position.add(new Vector3(0, MazeScene.rayy, 0)));
+            //Observer.getInstance().getTransform().translateY(MazeScene.rayy);
+            //Observer.getInstance().initFineTune(MazeScene.rayy);
+            //avatar.getTransform().translateY(MazeScene.rayy);
+            // Rotation ist blick nach schraeg unten
+            Observer.getInstance().getTransform().setRotation(getSettings().getViewpoint().rotation);
+
+        }
+        playerEntity/*avatar.avatarE.*/.addComponent(mover);
+
+        //MazeView.ray = avatar.avatarE;
+        //1.4.21 Scene.getCurrent().addToWorld(MazeView.ray.scenenode);
+
+        if (MazeVisualizationSystem.view != null) {
             /*15.5.21 das ist doch auch Asbach Kruecke
                 MazeVisualizationSystem.view.setRayPosition(startpos);
                 MazeVisualizationSystem.view.setRayRotation(new Degree(0));            */
-            }
-            mover.setLocation(startpos);
+        }
+        mover.setLocation(launchPosition);
 
-            // 11.11.20: Raising the camera must be done again since splitting to system. Reason isType unclear, well the Avatar drops the position, so its obvious, but
-            // why didn't that occur before?
-            //15.5.21: Scene.getCurrent().getMainCamera().getCarrier().getTransform().setPosition(new Vector3(0, st.simplerayheight / 2 + 0.3f, 0.2f/*0/*+0.4f*/));
+        // 11.11.20: Raising the camera must be done again since splitting to system. Reason isType unclear, well the Avatar drops the position, so its obvious, but
+        // why didn't that occur before?
+        //15.5.21: Scene.getCurrent().getMainCamera().getCarrier().getTransform().setPosition(new Vector3(0, st.simplerayheight / 2 + 0.3f, 0.2f/*0/*+0.4f*/));
 
-            InputToRequestSystem.setPayload0(/*avatar.avatarE*/playerEntity.getName());
+        InputToRequestSystem.setPayload0(/*avatar.avatarE*/playerEntity.getName());
 
-            //avatar.avatarE.addComponent(new InventoryComponent());
-            if (MazeUtils.getPlayer().size() > 1) {
-                createBullets(3, /*avatar.avatarE*/playerEntity.getId());
-            }
+        //avatar.avatarE.addComponent(new InventoryComponent());
+        if (MazeUtils.getPlayer().size() > 1) {
+            createBullets(3, /*avatar.avatarE*/playerEntity.getId());
         }
     }
 
@@ -511,8 +522,6 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
         return avatar/*.avatarE* /;
     }*/
-
-
     private void undo(GridState currentstate, MoverComponent mover, MazeLayout layout) {
         GridMovement lastmovement = MoveRecorder.getInstance().removeLastMove();
         if (lastmovement != null) {
@@ -601,6 +610,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             BulletComponent bulletComponent = new BulletComponent(/*mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), playername*/);
             e.addComponent(bulletComponent);
             e.addComponent(new ItemComponent(owner));
+            e.setName("bullet");
         }
     }
 

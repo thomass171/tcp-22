@@ -4,7 +4,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
 /**
- * Nachbildung der Klasse aus org.junit für (Platform) Tests at runtime, die wegen ThreeJS auch im Browser laufen muessen.
+ * Like class org.junit for (Platform) tests at runtime, that also need to run in a browser.
  * Created by thomass on 29.05.15.
  */
 public class Assert {

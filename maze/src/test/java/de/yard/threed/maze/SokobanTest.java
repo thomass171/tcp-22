@@ -14,7 +14,7 @@ import org.junit.Test;
 
 
 /**
- * Auch fuer AutoSolver.
+ * Also for AutoSolver.
  * Created by thomass on 15.11.15.
  */
 public class SokobanTest {
@@ -39,10 +39,11 @@ public class SokobanTest {
         try {
             Grid grid = Grid.loadByReader(new StringReader(TestUtils.loadGrid("skbn/SokobanWikipedia.txt"))).get(0);
 
+            Point startPosition = grid.getLayout().getNextLaunchPosition(null);
             TestUtil.assertEquals("width", 9, grid.getMaxWidth());
             TestUtil.assertEquals("height", 6, grid.getHeight());
-            TestUtil.assertEquals("start.x", 6, grid.getStartPos().getX());
-            TestUtil.assertEquals("start.y", 1, grid.getStartPos().getY());
+            TestUtil.assertEquals("start.x", 6, startPosition.getX());
+            TestUtil.assertEquals("start.y", 1, startPosition.getY());
             TestUtil.assertTrue("top pillar", grid.hasTopPillar(new Point(0, 0)));
             TestUtil.assertTrue("top pillar", grid.hasTopPillar(new Point(0, 1)));
             TestUtil.assertFalse("top pillar", grid.hasTopPillar(new Point(0, 4)));

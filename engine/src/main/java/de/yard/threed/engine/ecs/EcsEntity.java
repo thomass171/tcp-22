@@ -29,7 +29,7 @@ public final class EcsEntity {
     private int id;
     private static int idcounter = 1;
     boolean wranlogged;
-    //nur zur besseren Analyse/Debug
+    // mainly for analyse/debug. No need to be unique.
     String name;
     //4.10.19 ist basenode optional?
     //22.10.19:Kann das nicht in die VehicleComponent?Nee,weg.

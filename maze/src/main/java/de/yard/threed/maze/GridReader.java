@@ -1,6 +1,7 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.StringReader;
@@ -73,7 +74,8 @@ class GridDraft {
         List<Point> boxes;
         // everything not a wall
         List<Point> fields;
-        Point playerposition = null;
+        // Several sets of start positions
+        List<List<Point>> playerposition = new ArrayList<List<Point>>();
         int height;
         int maxwidth = 0;
 
@@ -147,8 +149,7 @@ class GridDraft {
                             break;
                         case 'x':
                         case '@':
-                            //TODO check duplicate
-                            playerposition = p;
+                            addStartPosition(playerposition, p);
                             fields.add(p);
                             break;
                         case '$':
@@ -169,11 +170,11 @@ class GridDraft {
                 }
             }
         }
-        if (playerposition == null)
+        if (playerposition.size() == 0)
             throw new InvalidMazeException("no start position");
         //default heading is 'N'orth.
-        MazeLayout mazeLayout = new MazeLayout(walls, destinations, playerposition, new GridOrientation(), maxwidth, height,fields);
-        Grid grid = new Grid(mazeLayout, boxes, bots, diamonds,tags);
+        MazeLayout mazeLayout = new MazeLayout(walls, destinations, playerposition, new GridOrientation(), maxwidth, height, fields);
+        Grid grid = new Grid(mazeLayout, boxes, bots, diamonds, tags);
 
         return grid;
 
@@ -194,5 +195,13 @@ class GridDraft {
             return true;
         }
         return false;
+    }
+
+    private void addStartPosition(List<List<Point>> playerposition, Point p) {
+        // TODO check extend existing
+        boolean createNew = true;
+        if (createNew) {
+            playerposition.add(Util.buildList(p));
+        }
     }
 }

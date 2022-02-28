@@ -124,10 +124,6 @@ public class Grid {
         return layout.height;
     }
 
-    public Point getStartPos() {
-        return layout.initialPosition;
-    }
-
     public int isVWALL(Point p) {
 
         if (!isWall(p)) {

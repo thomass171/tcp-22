@@ -16,6 +16,7 @@ import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static de.yard.threed.maze.RequestRegistry.*;
@@ -53,7 +54,7 @@ public class MazeTest {
             }
         };
 
-        TestFactory.initPlatformForTest( new String[]{"engine", "maze", "data"}, new PlatformFactoryHeadless(), initMethod);
+        TestFactory.initPlatformForTest(new String[]{"engine", "maze", "data"}, new PlatformFactoryHeadless(), initMethod);
 
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
         observerDummy = new SceneNode();
@@ -236,9 +237,9 @@ public class MazeTest {
      * #..    @ ##  #
      * #..  # #  $ ##
      * ###### ##$ $ #
-     *   # $  $ $ $ #
-     *   #    #     #
-     *   ############
+     *__ # $  $ $ $ #
+     *__ #    #     #
+     *__ ############
      */
     @Test
     public void testDavidJoffe2() {
@@ -255,7 +256,47 @@ public class MazeTest {
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
 
-        assertEquals("number of entites (avatar+boxes)", 1+10, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals("number of entites (avatar+boxes)", 1 + 10, SystemManager.findEntities((EntityFilter) null).size());
 
     }
+
+    /**
+     * ##########
+     * #   @    #
+     * #   # #  #
+     * #   # #  #
+     * #    @   #
+     * ##########
+     */
+    @Test
+    public void testP_Simple() {
+
+        setup("maze/Maze-P-Simple.txt");
+
+        // no boxes, no player
+        assertEquals("number of entities", 0, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals("number of player", 0, MazeUtils.getPlayer().size());
+        assertNull(MazeUtils.getMainPlayer());
+
+        assertTrue(SystemState.readyToJoin());
+        SystemManager.putRequest(UserSystem.buildLOGIN("u0"));
+        sceneRunner.runLimitedFrames(5);
+
+        assertEquals("number of entites (one player)", 1, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals("number of player", 1, MazeUtils.getPlayer().size());
+        assertNotNull(MazeUtils.getMainPlayer());
+
+        SystemManager.putRequest(UserSystem.buildLOGIN("u1"));
+        sceneRunner.runLimitedFrames(5);
+
+        assertEquals("number of entites (two player+3 bullets)", 2 + 3, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals("number of player", 2, MazeUtils.getPlayer().size());
+        assertNotNull(MazeUtils.getMainPlayer());
+
+        // don't expect 3rd user (however, login should be possible)
+        SystemManager.putRequest(UserSystem.buildLOGIN("u2"));
+        sceneRunner.runLimitedFrames(5);
+        assertEquals("number of player", 2, MazeUtils.getPlayer().size());
+    }
+
 }

@@ -114,6 +114,12 @@ public class Util {
         return list;
     }
 
+    public static <T> List<T> buildList(T o0) {
+        List<T> list = new ArrayList<T>();
+        list.add(o0);
+        return list;
+    }
+
     /*public static <T>T[] buildArrayFromList(List<T> o) {
     //public static Object[] buildArrayFromList(List o) {
        return new T[]{};
