@@ -48,10 +48,12 @@ public class UserSystem extends DefaultEcsSystem {
             logger.debug("got request " + request.getType());
         }
         if (request.getType().equals(USER_REQUEST_LOGIN) && SystemState.readyToJoin()) {
-            EcsEntity user = new EcsEntity(new UserComponent((String) request.getPayloadByIndex(0)));
+            String username = (String) request.getPayloadByIndex(0);
+            String clientid = (String) request.getPayloadByIndex(1);
+            EcsEntity user = new EcsEntity(new UserComponent(username));
             user.setName("User" + userIndex);
 
-            SystemManager.sendEvent(new Event(USER_EVENT_LOGGEDIN, new Payload("")));
+            SystemManager.sendEvent(buildLoggedinEvent(username,clientid,user.getId()));
             // als Vereinfachung direkt joinen, ohne das der Client es anfragt.
             SystemManager.putRequest(buildJOIN(user.getName(), true));
             userIndex++;
@@ -60,8 +62,12 @@ public class UserSystem extends DefaultEcsSystem {
         return false;
     }
 
-    public static Request buildLOGIN(String username) {
-        return new Request(USER_REQUEST_LOGIN, new Payload(username));
+    public static Request buildLoginRequest(String username, String clientid) {
+        return new Request(USER_REQUEST_LOGIN, new Payload(username, clientid));
+    }
+
+    public static Event buildLoggedinEvent(String username, String clientid, int userEntityId) {
+        return new Event(USER_EVENT_LOGGEDIN, new Payload(username, clientid, new Integer(userEntityId)));
     }
 
     public static Request buildJOIN(String userEntityName, boolean forLogin) {

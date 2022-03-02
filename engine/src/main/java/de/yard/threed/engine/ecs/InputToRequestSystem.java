@@ -1,5 +1,6 @@
 package de.yard.threed.engine.ecs;
 
+import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.IntHolder;
 import de.yard.threed.core.Payload;
@@ -17,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static de.yard.threed.engine.ecs.UserSystem.USER_EVENT_LOGGEDIN;
 
 /**
  * 2.4.21: Also for mouse input. In general for all inputs:
@@ -64,9 +67,11 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     public static int MOUSE_MOVE_MODE_VR_LEFT = 2;
     private int mouseMoveMode = MOUSE_MOVE_MODE_SEGMENT;
     private List<MockedInput> mockedInputs = new ArrayList<MockedInput>();
+    // null unless not logged in
+    Integer userEntityId = null;
 
     public InputToRequestSystem() {
-        super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU}, new EventType[]{});
+        super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU}, new EventType[]{USER_EVENT_LOGGEDIN});
         updatepergroup = false;
 
         // segments 0,1,2 are reserved: 1=unused due to VR toggle area, 2=control menu toggle, besser 1? 0 und 2 auch fuer movement.
@@ -143,8 +148,10 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         for (KeyEntry key : keymapping.keySet()) {
             if (Input.GetKeyDown(key.keyCode)) {
 
-                //payload playername important for firing. And more?
-                SystemManager.putRequest(new Request(keymapping.get(key), new Payload(playername)));
+                if (userEntityId != null) {
+                    // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
+                    SystemManager.putRequest(new Request(keymapping.get(key), userEntityId));
+                }
             }
         }
 
@@ -196,7 +203,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                         logger.debug("clicked segment:" + segment);
                         RequestType sr = segmentRequests.get(segment);
                         if (sr != null) {
-                            SystemManager.putRequest(new Request(sr, null));
+                            SystemManager.putRequest(new Request(sr));
                         }
                     }
                     if (mouseClickMode == MOUSE_CLICK_MODE_VR_LEFT) {
@@ -259,6 +266,21 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void process(Event evt) {
+        if (keytorequestsystemdebuglog) {
+            logger.debug("got event " + evt.getType());
+        }
+        if (evt.getType().equals(USER_EVENT_LOGGEDIN)) {
+            String username = (String) evt.getPayloadByIndex(0);
+            String clientid = (String) evt.getPayloadByIndex(1);
+            Integer userEntityId = (Integer) evt.getPayloadByIndex(2);
+
+            //TODO check clientid that login was from here
+            this.userEntityId = userEntityId;
+        }
     }
 
     /**

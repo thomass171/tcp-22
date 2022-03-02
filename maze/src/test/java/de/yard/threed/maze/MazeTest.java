@@ -16,7 +16,6 @@ import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static de.yard.threed.maze.RequestRegistry.*;
@@ -82,7 +81,7 @@ public class MazeTest {
 
         assertTrue(SystemState.readyToJoin());
 
-        SystemManager.putRequest(UserSystem.buildLOGIN(""));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("",""));
 
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
@@ -92,10 +91,10 @@ public class MazeTest {
         assertEquals("initial orientation", new GridOrientation().toString(), MazeUtils.getPlayerorientation().toString());
         assertEquals("initial location", new Point(6, 1).toString(), MazeUtils.getPlayerposition().toString());
 
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNRIGHT, null));
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD, null));
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNLEFT, null));
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD, null));
+        replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNRIGHT));
+        replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD));
+        replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNLEFT));
+        replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD));
 
         // 30 is not sufficient
         sceneRunner.runLimitedFrames(50);
@@ -104,18 +103,18 @@ public class MazeTest {
         MoverComponent mc = MoverComponent.getMoverComponent(player);
         TestUtil.assertPoint("player location", new Point(7, 2), mc.getLocation());
 
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD, null));
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNLEFT, null));
+        replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD));
+        replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNLEFT));
         sceneRunner.runLimitedFrames(50);
         TestUtil.assertPoint("player location", new Point(7, 3), mc.getLocation());
         TestUtil.assertVector3("player location", MazeUtils.point2Vector3(new Point(7, 3)), player.getSceneNode().getTransform().getPosition());
 
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_KICK, null));
+        replaySystem.addRequests(new Request(TRIGGER_REQUEST_KICK));
         sceneRunner.runLimitedFrames(50);
         TestUtil.assertPoint("player location", new Point(7, 3), mc.getLocation());
         TestUtil.assertVector3("player location", MazeUtils.point2Vector3(new Point(7, 3)), player.getSceneNode().getTransform().getPosition());
 
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_PULL, null));
+        replaySystem.addRequests(new Request(TRIGGER_REQUEST_PULL));
         sceneRunner.runLimitedFrames(50);
         TestUtil.assertPoint("player location", new Point(7, 3), mc.getLocation());
         TestUtil.assertVector3("player location", MazeUtils.point2Vector3(new Point(7, 3)), player.getSceneNode().getTransform().getPosition());
@@ -141,7 +140,7 @@ public class MazeTest {
 
         assertTrue(SystemState.readyToJoin());
 
-        SystemManager.putRequest(UserSystem.buildLOGIN(""));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("",""));
 
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
@@ -194,7 +193,7 @@ public class MazeTest {
 
         assertTrue(SystemState.readyToJoin());
 
-        SystemManager.putRequest(UserSystem.buildLOGIN(""));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("",""));
 
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
@@ -251,7 +250,7 @@ public class MazeTest {
 
         assertTrue(SystemState.readyToJoin());
 
-        SystemManager.putRequest(UserSystem.buildLOGIN(""));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("",""));
 
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
@@ -279,14 +278,14 @@ public class MazeTest {
         assertNull(MazeUtils.getMainPlayer());
 
         assertTrue(SystemState.readyToJoin());
-        SystemManager.putRequest(UserSystem.buildLOGIN("u0"));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u0",""));
         sceneRunner.runLimitedFrames(5);
 
         assertEquals("number of entites (one player)", 1, SystemManager.findEntities((EntityFilter) null).size());
         assertEquals("number of player", 1, MazeUtils.getPlayer().size());
         assertNotNull(MazeUtils.getMainPlayer());
 
-        SystemManager.putRequest(UserSystem.buildLOGIN("u1"));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u1",""));
         sceneRunner.runLimitedFrames(5);
 
         assertEquals("number of entites (two player+3 bullets)", 2 + 3, SystemManager.findEntities((EntityFilter) null).size());
@@ -294,7 +293,7 @@ public class MazeTest {
         assertNotNull(MazeUtils.getMainPlayer());
 
         // don't expect 3rd user (however, login should be possible)
-        SystemManager.putRequest(UserSystem.buildLOGIN("u2"));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u2",""));
         sceneRunner.runLimitedFrames(5);
         assertEquals("number of player", 2, MazeUtils.getPlayer().size());
     }

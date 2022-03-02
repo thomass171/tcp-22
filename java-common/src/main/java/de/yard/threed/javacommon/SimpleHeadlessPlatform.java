@@ -47,6 +47,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     public String hostdir;
     static Log logger = new JALog(/*LogFactory.getLog(*/SimpleHeadlessPlatform.class);
     public static String PROPERTY_PREFIX = "tcp22.";
+    public static List<Integer> mockedKeyInput = new ArrayList<Integer>();
 
     /**
      * Needs access from extending classes.
@@ -248,6 +249,13 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     @Override
     public String getName() {
         return "SimpleHeadless";
+    }
+
+    @Override
+    public boolean GetKeyDown(int keycode) {
+        // no real input, but can be used for testing
+        boolean found = mockedKeyInput.remove(new Integer(keycode));
+        return found;
     }
 }
 

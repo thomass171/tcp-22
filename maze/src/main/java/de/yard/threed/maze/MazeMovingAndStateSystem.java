@@ -225,7 +225,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 if (o instanceof EventType) {
                     SystemManager.sendEvent(new Event((EventType) o, null));
                 } else {
-                    SystemManager.putRequest(new Request((RequestType) o, null));
+                    SystemManager.putRequest(new Request((RequestType) o));
                 }
             }
             //10.11.20 true oder false liefern?

@@ -82,14 +82,15 @@ public class Main : MonoBehaviour
             (Platform.getInstance()).setSystemProperty("argv.visualizeTrack", "true");
             (Platform.getInstance()).setSystemProperty("argv.enableUsermode", "false");
             (Platform.getInstance()).setSystemProperty("argv.enableNearView", "true");
+            (Platform.getInstance()).setSystemProperty("argv.initialMaze", "skbn/SokobanWikipedia.txt");
             //haengt haeufig UnityLog.setupNetworkstream ("192.168.98.20");
             //UnityLog.setupNetworkstream ("192.168.98.38");
             startUdpListener();
 
             // Jetzt ist die Initialisierung durch und die Applikation wird gestartet.
 
-            Scene updater = new de.yard.threed.engine.apps.reference.ReferenceScene();//TODO ScenePool.buildSceneUpdater(scene);
-            //Scene updater = new de.yard.threed.maze.SokobanScene();//TODO ScenePool.buildSceneUpdater(scene);
+            //Scene updater = new de.yard.threed.engine.apps.reference.ReferenceScene();//TODO ScenePool.buildSceneUpdater(scene);
+            Scene updater = new de.yard.threed.maze.MazeScene();//TODO ScenePool.buildSceneUpdater(scene);
             //Scene updater = new de.yard.threed.apps.ShowroomScene ();//TODO ScenePool.buildSceneUpdater(scene);
             //Scene updater = new de.yard.threed.client.ModelViewScene ();//TODO ScenePool.buildSceneUpdater(scene);
             //Scene updater = new de.yard.threed.apps.flusi.CockpitScene ();

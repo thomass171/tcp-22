@@ -11,18 +11,29 @@ import de.yard.threed.core.Payload;
  *
  */
 public class Request {
+    // payload might be null, eg. for button click.
     public Payload payload;
     public int declined = 0;
     private  RequestType requesttype;
+    // userEntityId is null for non user requests.
+    Integer userEntityId;
+
+    public Request(RequestType requesttype, Payload payload, Integer userEntityId) {
+        this.requesttype = requesttype;
+        this.payload = payload;
+        this.userEntityId = userEntityId;
+    }
 
     public Request(RequestType requesttype, Payload payload) {
         this.requesttype = requesttype;
         this.payload = payload;
     }
 
-    /**
-     * 4.10.19: Payload darf auch null sein, z.B. bei ButtonClick.
-     */
+    public Request(RequestType requesttype, Integer userEntityId) {
+        this.requesttype = requesttype;
+        this.userEntityId = userEntityId;
+    }
+
     public Request(RequestType requesttype) {
         this.requesttype = requesttype;
     }
@@ -36,7 +47,7 @@ public class Request {
     }
 
     /**
-     * Basiert auf der Annahme, dass PAyload ein Array ist.
+     * payload must be an array!
      * @param index
      * @return
      */

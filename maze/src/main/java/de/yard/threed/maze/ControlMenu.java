@@ -23,39 +23,39 @@ public class ControlMenu implements ControlMenuBuilder {
 
         //unten
         controlmenu.addButton(/*new Request(new RequestType("Left")),*/ 0, 0, 1, Icon.ICON_LEFTARROW, () -> {
-            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_LEFT, null));
+            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_LEFT));
         });
         /*28.5.21:das lassen wir mal controlmenu.addButton( 1, 0, 1, Icon.IconCharacter(0), () -> {
             SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_AUTOSOLVE, null));
         });*/
         controlmenu.addButton(/*new Request(new RequestType("Down")),*/ 2, 0, 1, Icon.ICON_DOWNARROW, () -> {
-            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_BACK, null));
+            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_BACK));
         });
         // 20.4.21: No longer mani menu, but close control menu
         //controlmenu.addButton(/*new Request(new RequestType("Menu")),*/ 3, 0, 1, Icon.ICON_MENU, () -> {
         controlmenu.addButton(/*new Request(new RequestType("Menu")),*/ 3, 0, 1, Icon.ICON_CLOSE, () -> {
             //openCloseMenu();
-            SystemManager.putRequest(new Request(InputToRequestSystem.USER_REQUEST_CONTROLMENU, null));
+            SystemManager.putRequest(new Request(InputToRequestSystem.USER_REQUEST_CONTROLMENU));
         });
         controlmenu.addButton(/*new Request(new RequestType("Right")),*/ 4, 0, 1, Icon.ICON_RIGHTARROW, () -> {
-            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_RIGHT, null));
+            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_RIGHT));
         });
 
         //mitte
         controlmenu.addButton(/*new Request(new RequestType("TurnLeft")),*/ 1, 1, 1, Icon.ICON_TURNLEFT, () -> {
-            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_TURNLEFT, null));
+            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_TURNLEFT));
         });
         // 27.5.21: Pull instead of undo
         controlmenu.addButton(/*new Request(new RequestType("Undo")), */2, 1, 1, Icon.IconCharacter(15), () -> {
-            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_PULL, null));
+            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_PULL));
         });
         controlmenu.addButton(/*new Request(new RequestType("TurnRight")),*/ 3, 1, 1, Icon.ICON_TURNRIGHT, () -> {
-            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT, null));
+            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT));
         });
 
         //oben
         controlmenu.addButton(/*new Request(new RequestType("Up")),*/ 2, 2, 1, Icon.ICON_UPARROW, () -> {
-            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_FORWARD, null));
+            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_FORWARD));
         });
 
         return controlmenu;

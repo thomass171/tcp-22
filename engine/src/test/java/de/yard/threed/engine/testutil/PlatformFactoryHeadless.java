@@ -10,7 +10,9 @@ import java.util.HashMap;
 /**
  * General purpose platform for unit tests. 6.7.21: Uses PlatformFactoryHeadless instead of HomeBrew.
  * 26.7.21: Wird das noch gebraucht? Es gibt doch SimpleHeadlessPlatformFactory.
+ * 1.3.22 set to deprecated
  */
+@Deprecated
 public class PlatformFactoryHeadless implements PlatformFactory {
     @Override
     public /*Engine*/PlatformInternals createPlatform(HashMap<String, String> properties) {

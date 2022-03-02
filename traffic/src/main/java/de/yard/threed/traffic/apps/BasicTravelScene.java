@@ -9,7 +9,6 @@ import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.gui.*;
 import de.yard.threed.engine.platform.ProcessPolicy;
 import de.yard.threed.engine.util.XmlHelper;
-import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.traffic.AbstractTerrainBuilder;
 import de.yard.threed.traffic.FlatTerrainSystem;
@@ -419,7 +418,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE, new Payload(tilename/*17.10.21 TrafficWorld2D.basename*/, getVehicleList())));
 
         // Avatar anlegen (via login)
-        SystemManager.putRequest(UserSystem.buildLOGIN("Freds account name"));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("Freds account name",""));
 
         // 24.1.22: State ready to join now needed for 'login'
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
@@ -483,7 +482,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         if (Input.GetKeyDown(KeyCode.L)) {
             //20.3.19: Ueber AppRequest loadNextConfiguredVehicle(null);
             Request request;
-            request = new Request(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE, null);
+            request = new Request(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE);
             requestQueue.addRequest(request);
         }
 

@@ -3,7 +3,6 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.configuration.ConfigurationByArgs;
 import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
@@ -199,7 +198,7 @@ public class MazeScene extends Scene {
         addLight();
 
         // last init statement. Queue login request
-        SystemManager.putRequest(UserSystem.buildLOGIN(""));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("",""));
 
     }
 
