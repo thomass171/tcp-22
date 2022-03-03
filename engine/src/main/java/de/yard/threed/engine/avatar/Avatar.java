@@ -28,7 +28,7 @@ import de.yard.threed.core.Color;
  * Wenn der Avatar sichtbar sein soll, kann man ja ein Mesh dranhaengen. Optional hier ein kleiner grüner Würfel.
  * <p>
  * 27.11.20 Smmothly move to AvatarSystem/AvatarComponent.
- * 11.5.21: Avatar is nothing more than the visual representation of a player. Everything view related is in {@link Observer}. (MA35)
+ * 11.5.21: Avatar is nothing more than the visual representation of a loggedin/joined player. Everything view related is in {@link Observer}. (MA35)
  * Könnte auch direkt SceneNode sein?
  * VR (vrdown,vrOffsetPosition) is no longer an avatar issue but an {@link Observer} issue.
  */

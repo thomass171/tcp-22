@@ -19,8 +19,8 @@ public class UserSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(UserSystem.class);
 
     public static RequestType USER_REQUEST_LOGIN = new RequestType("USER_REQUEST_LOGIN");
-    // Der Avatar ist erstellt und will jetzt teilnehmen. Oder wird er erst durch den Join erstellt? Ja,
-    // der Join request ist fuer anlegen der entity und des Avatar. Parameter 0 "userName"?, Parameter 1 "forlogin"
+    // The logged in user wants to join.
+    // The join request creates an avatar for the user entity. Parameter 0 "userEntityId", Parameter 1 "forlogin"
     public static RequestType USER_REQUEST_JOIN = new RequestType("USER_REQUEST_JOIN");
 
     public static EventType USER_EVENT_LOGGEDIN = new EventType("USER_EVENT_LOGGEDIN");
@@ -53,9 +53,9 @@ public class UserSystem extends DefaultEcsSystem {
             EcsEntity user = new EcsEntity(new UserComponent(username));
             user.setName("User" + userIndex);
 
-            SystemManager.sendEvent(buildLoggedinEvent(username,clientid,user.getId()));
+            SystemManager.sendEvent(buildLoggedinEvent(username, clientid, user.getId()));
             // als Vereinfachung direkt joinen, ohne das der Client es anfragt.
-            SystemManager.putRequest(buildJOIN(user.getName(), true));
+            SystemManager.putRequest(buildJoinRequest(user.getId(), true));
             userIndex++;
             return true;
         }
@@ -70,14 +70,22 @@ public class UserSystem extends DefaultEcsSystem {
         return new Event(USER_EVENT_LOGGEDIN, new Payload(username, clientid, new Integer(userEntityId)));
     }
 
-    public static Request buildJOIN(String userEntityName, boolean forLogin) {
-        return new Request(USER_REQUEST_JOIN, new Payload(userEntityName, new Boolean(forLogin)));
+    public static Request buildJoinRequest(int userEntityId, boolean forLogin) {
+        return new Request(USER_REQUEST_JOIN, new Payload(new Integer(userEntityId), new Boolean(forLogin)));
     }
 
     public static EcsEntity getInitialUser() {
         List<EcsEntity> candidates = SystemManager.findEntities(new NameFilter("User0"));
-        if (candidates.size() == 0){
+        if (candidates.size() == 0) {
             SystemManager.findEntities(new NameFilter("User0"));
+            return null;
+        }
+        return candidates.get(0);
+    }
+
+    public static EcsEntity getUserByEntityId(int userEntityId) {
+        List<EcsEntity> candidates = SystemManager.findEntities((e) -> e.getId() == userEntityId);
+        if (candidates.size() == 0) {
             return null;
         }
         return candidates.get(0);

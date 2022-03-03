@@ -10,6 +10,7 @@ import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleData;
+import de.yard.threed.engine.ecs.UserComponent;
 import de.yard.threed.engine.ecs.UserSystem;
 
 import java.util.ArrayList;
@@ -169,5 +170,23 @@ public class MazeUtils {
             return getBullets(player).size() > 0;
         }
         return false;
+    }
+
+    public static EcsEntity getPlayerByUsername(String username) {
+        // find user entity by username in UserComponent
+        List<EcsEntity> candidates = SystemManager.findEntities((e) -> {
+            UserComponent userComponent = UserComponent.getUserComponent(e);
+            if (userComponent != null && userComponent.getUsername().equals(username)) {
+                return true;
+            }
+            return false;
+        });
+        if (candidates.size() == 0) {
+            return null;
+        }
+        if (candidates.size() > 0) {
+            logger.warn("inconsistency: Multiple username " + username);
+        }
+        return candidates.get(0);
     }
 }

@@ -82,7 +82,7 @@ public class AvatarSystemTest {
         EcsEntity user = new EcsEntity(new UserComponent("user account"));
         user.setName(testUserName);
 
-        SystemManager.putRequest(UserSystem.buildJOIN(testUserName, true));
+        SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId(), true));
         assertEquals("requests ", 1, SystemManager.getRequestCount());
         // process join
         EcsTestHelper.processSeconds(2);

@@ -12,7 +12,7 @@ public class UserComponent extends EcsComponent {
 
     public static String TAG = "UserComponent";
 
-    String username;
+    private String username;
 
     public UserComponent(String username) {
         this.username = username;
@@ -26,5 +26,9 @@ public class UserComponent extends EcsComponent {
     public static UserComponent getUserComponent(EcsEntity e) {
         UserComponent uc = (UserComponent) e.getComponent(UserComponent.TAG);
         return uc;
+    }
+
+    public String getUsername() {
+        return username;
     }
 }

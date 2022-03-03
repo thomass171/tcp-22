@@ -231,59 +231,18 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //10.11.20 true oder false liefern?
             return true;
         } else {
-            //1.4.21: Be sure join completed (by checking for avatar). Evtl. faellt hier ein movement unter den Tisch, weil gerade ein Moving läuft.
-            // Dafuer gab es mal eine Queue um alle Events queuen, weil sie evtl. unpassend (z.B. während Movement) kommen. Einfach ignorieren
-            // ist riskant, weil sie auch fuer Replay, etc kommen können, wo jedes Event wichtig ist.
+            // 1.4.21: Be sure join completed (by checking for avatar).
+            // A movement request might be lost here due to a current moving.
+            // Once there was a queue to handle this. Ignoring lost movements is a risk, because for use cases like 'replay' its important not to loose a single movement.
 
             if (AvatarSystem.getAvatar() != null) {
-                //EcsEntity ray = MazeUtils.getMainPlayer();//AvatarSystem.getAvatar().avatarE;
-                // TODO current request user
-                EcsEntity ray = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
-
-                MoverComponent mover = (MoverComponent) ray.getComponent(MoverComponent.TAG);
-                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
-                    attemptRotate(currentstate, mover, false);
-                    return true;
-                }
-                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNLEFT)) {
-                    attemptRotate(currentstate, mover, true);
-                    return true;
-                }
-
-                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_BACK)) {
-                    attemptMove(currentstate, mover, GridMovement.Back);
-                    return true;
-                }
-                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARD)) {
-                    attemptMove(currentstate, mover, GridMovement.Forward);
-                    return true;
-                }
-                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_UNDO)) {
-                    undo(currentstate, mover, Grid.getInstance().getLayout());
-                    return true;
-                }
-                // 10.4.21: Wer triggered denn einen TRIGGER_REQUEST_FORWARDMOVE? Nur der Replay?
-                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARDMOVE)) {
-                    attemptMove(currentstate, mover, GridMovement.ForwardMove);
-                    return true;
-                }
-                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_LEFT)) {
-                    attemptMove(currentstate, mover, GridMovement.Left);
-                    return true;
-                }
-                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RIGHT)) {
-                    attemptMove(currentstate, mover, GridMovement.Right);
-                    return true;
-                }
-
-                // pull kommt evtl auch bei undo? 27.5.21: jetzt auch eigenstaendig. UNDO hat aber sein eigenes Event.
-                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_PULL)) {
-                    attemptMove(currentstate, mover, GridMovement.Pull);
-                    return true;
-                }
-                if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_KICK)) {
-                    attemptMove(currentstate, mover, GridMovement.Kick);
-                    return true;
+                if (request.getUserEntityId() == null) {
+                    logger.warn("No userEntityId in request. Ignoring");
+                } else {
+                    EcsEntity ray = UserSystem.getUserByEntityId(request.getUserEntityId());
+                    if (processUserRequest(currentstate, request, ray)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -321,7 +280,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             MazeLayout layout = Grid.getInstance().getLayout();
             Point launchPosition = layout.getNextLaunchPosition(usedLaunchPositions);
             if (launchPosition != null) {
-                joinPlayer(playerEntity,launchPosition);
+                joinPlayer(playerEntity, launchPosition);
             } else {
                 logger.warn("Rejecting join request due to too may players. Currently " + usedLaunchPositions.size());
             }
@@ -330,7 +289,6 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
     /**
      * Join a new player
-     *
      */
     private void joinPlayer(EcsEntity playerEntity, Point launchPosition) {
         //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
@@ -379,6 +337,58 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         if (MazeUtils.getPlayer().size() > 1) {
             createBullets(3, /*avatar.avatarE*/playerEntity.getId());
         }
+    }
+
+    /**
+     * 14.4.21: Ein Request wird auch dann auf processed gesetzt, wenn es wegen einer laufenden Bewegung ignoriert wird.
+     * Es wird also nicht gequeued.
+     */
+    private boolean processUserRequest(GridState currentstate, Request request, EcsEntity user) {
+
+        MoverComponent mover = (MoverComponent) user.getComponent(MoverComponent.TAG);
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
+            attemptRotate(currentstate, mover, false);
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNLEFT)) {
+            attemptRotate(currentstate, mover, true);
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_BACK)) {
+            attemptMove(currentstate, mover, GridMovement.Back);
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARD)) {
+            attemptMove(currentstate, mover, GridMovement.Forward);
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_UNDO)) {
+            undo(currentstate, mover, Grid.getInstance().getLayout());
+            return true;
+        }
+        // 10.4.21: Wer triggered denn einen TRIGGER_REQUEST_FORWARDMOVE? Nur der Replay?
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARDMOVE)) {
+            attemptMove(currentstate, mover, GridMovement.ForwardMove);
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_LEFT)) {
+            attemptMove(currentstate, mover, GridMovement.Left);
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RIGHT)) {
+            attemptMove(currentstate, mover, GridMovement.Right);
+            return true;
+        }
+        // pull kommt evtl auch bei undo? 27.5.21: jetzt auch eigenstaendig. UNDO hat aber sein eigenes Event.
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_PULL)) {
+            attemptMove(currentstate, mover, GridMovement.Pull);
+            return true;
+        }
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_KICK)) {
+            attemptMove(currentstate, mover, GridMovement.Kick);
+            return true;
+        }
+        return false;
     }
 
     /**

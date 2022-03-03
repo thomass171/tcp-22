@@ -19,8 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static de.yard.threed.engine.ecs.UserSystem.USER_EVENT_LOGGEDIN;
-
 /**
  * 2.4.21: Also for mouse input. In general for all inputs:
  * - Keyboard (desktop)
@@ -71,7 +69,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     Integer userEntityId = null;
 
     public InputToRequestSystem() {
-        super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU}, new EventType[]{USER_EVENT_LOGGEDIN});
+        super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU}, new EventType[]{UserSystem.USER_EVENT_LOGGEDIN});
         updatepergroup = false;
 
         // segments 0,1,2 are reserved: 1=unused due to VR toggle area, 2=control menu toggle, besser 1? 0 und 2 auch fuer movement.
@@ -273,7 +271,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         if (keytorequestsystemdebuglog) {
             logger.debug("got event " + evt.getType());
         }
-        if (evt.getType().equals(USER_EVENT_LOGGEDIN)) {
+        if (evt.getType().equals(UserSystem.USER_EVENT_LOGGEDIN)) {
             String username = (String) evt.getPayloadByIndex(0);
             String clientid = (String) evt.getPayloadByIndex(1);
             Integer userEntityId = (Integer) evt.getPayloadByIndex(2);

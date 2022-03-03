@@ -77,10 +77,10 @@ public class AvatarSystem extends DefaultEcsSystem {
 
         if (request.getType().equals(UserSystem.USER_REQUEST_JOIN)) {
 
-            String userEntityName = (String) request.getPayloadByIndex(0);
+            int userEntityId = ((Integer) request.getPayloadByIndex(0)).intValue();
             Boolean forLogin = (Boolean) request.getPayloadByIndex(1);
-            EcsEntity userEntity = SystemManager.findEntities(new NameFilter(userEntityName)).get(0);
-            avatar = buildAvatar(userEntity);
+            EcsEntity userEntity = SystemManager.findEntities((e) -> e.getId() == userEntityId).get(0);
+            avatar = buildAvatarForUserEntity(userEntity);
 
             TeleportComponent tc = TeleportComponent.getTeleportComponent(userEntity);
             if (tc != null) {
@@ -135,12 +135,12 @@ public class AvatarSystem extends DefaultEcsSystem {
     /**
      * 15.5.21: MA35: camera nicht mehr am Avatar, sondern Observer
      * Trennung ist aber knifflig. Darum erstmal Avatar nur fuer Bots, aber nicht main player. Geht aber nicht so einfach, also doch auch fuer player?
-     * TODO ECS Erstellung muss hier aber wirklich raus. Wird dann später gemacht.
+     *
      */
-    private static Avatar buildAvatar(EcsEntity player) {
-        logger.debug("Building avatar for player " + player);
+    private static Avatar buildAvatarForUserEntity(EcsEntity user) {
+        logger.debug("Building avatar for player " + user);
 
-        Avatar av = new Avatar(player);
+        Avatar av = new Avatar(user);
         av.enableBody();
         Scene.getCurrent().addToWorld(av.getSceneNode());
 

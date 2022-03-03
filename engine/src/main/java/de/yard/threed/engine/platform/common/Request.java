@@ -6,17 +6,16 @@ import de.yard.threed.core.Payload;
  * Ein Request innerhalb ECS, aber auch losgelöst von ECS.
  * z.B. auch durch User Aktion angestossen, z.B. durch Button, Menu, Click, etc. als ActionCommand
  * Irgendeiner muss sich dann darum kümmern, z.B. ein ECS System.
- *
+ * <p>
  * 21.3.19: Abgrenzung Request/Event.
- *
  */
 public class Request {
     // payload might be null, eg. for button click.
     public Payload payload;
     public int declined = 0;
-    private  RequestType requesttype;
+    private RequestType requesttype;
     // userEntityId is null for non user requests.
-    Integer userEntityId;
+    private Integer userEntityId;
 
     public Request(RequestType requesttype, Payload payload, Integer userEntityId) {
         this.requesttype = requesttype;
@@ -48,12 +47,13 @@ public class Request {
 
     /**
      * payload must be an array!
+     *
      * @param index
      * @return
      */
     public Object getPayloadByIndex(int index) {
 
-        if (payload==null){
+        if (payload == null) {
             return null;
         }
         return (payload.o)[index];
@@ -61,5 +61,9 @@ public class Request {
 
     public boolean isType(RequestType requestType) {
         return (getType().equals(requestType));
+    }
+
+    public Integer getUserEntityId() {
+        return userEntityId;
     }
 }
