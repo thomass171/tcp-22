@@ -48,7 +48,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         super(new String[]{"MazeMovingComponent"}, new RequestType[]{RequestRegistry.TRIGGER_REQUEST_BACK,
                         RequestRegistry.TRIGGER_REQUEST_TURNLEFT, RequestRegistry.TRIGGER_REQUEST_FORWARD,
                         RequestRegistry.TRIGGER_REQUEST_TURNRIGHT, RequestRegistry.MAZE_REQUEST_LOADLEVEL,
-                        RequestRegistry.TRIGGER_REQUEST_AUTOSOLVE, UserSystem.USER_REQUEST_JOIN, RequestRegistry.TRIGGER_REQUEST_UNDO,
+                        RequestRegistry.TRIGGER_REQUEST_AUTOSOLVE, /*3.3.22 not needed here UserSystem.USER_REQUEST_JOIN,*/ RequestRegistry.TRIGGER_REQUEST_UNDO,
                         RequestRegistry.TRIGGER_REQUEST_VALIDATE, RequestRegistry.TRIGGER_REQUEST_HELP,
                         RequestRegistry.TRIGGER_REQUEST_RESET,
                         RequestRegistry.TRIGGER_REQUEST_FORWARDMOVE,
@@ -235,16 +235,17 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             // A movement request might be lost here due to a current moving.
             // Once there was a queue to handle this. Ignoring lost movements is a risk, because for use cases like 'replay' its important not to loose a single movement.
 
-            if (AvatarSystem.getAvatar() != null) {
+            //if (AvatarSystem.getAvatar() != null) {
                 if (request.getUserEntityId() == null) {
-                    logger.warn("No userEntityId in request. Ignoring");
+                    logger.warn("No userEntityId in request. Ignoring user request");
+                    return true;
                 } else {
                     EcsEntity ray = UserSystem.getUserByEntityId(request.getUserEntityId());
                     if (processUserRequest(currentstate, request, ray)) {
                         return true;
                     }
                 }
-            }
+            //}
         }
         return false;
     }
@@ -295,7 +296,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         //ist.
         // 14.2.22:More consistent approach. Independent from VR mode have a avatar and observer independent from each other.
         MoverComponent mover;
-        mover = new MoverComponent(playerEntity.scenenode.getTransform()/*Observer.getInstance(),*/, true, launchPosition, Grid.getInstance().getLayout().initialOrientation);
+        mover = new MoverComponent(playerEntity.scenenode.getTransform()/*Observer.getInstance(),*/, true, launchPosition, Grid.getInstance().getLayout().getInitialOrientation(launchPosition));
         usedLaunchPositions.add(launchPosition);
         if (MazeScene.vrInstance == null) {
 
@@ -325,7 +326,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 MazeVisualizationSystem.view.setRayPosition(startpos);
                 MazeVisualizationSystem.view.setRayRotation(new Degree(0));            */
         }
-        mover.setLocation(launchPosition);
+        mover.updateMovable();
 
         // 11.11.20: Raising the camera must be done again since splitting to system. Reason isType unclear, well the Avatar drops the position, so its obvious, but
         // why didn't that occur before?

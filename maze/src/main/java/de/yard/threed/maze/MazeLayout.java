@@ -22,16 +22,14 @@ public class MazeLayout {
     public List<Point> destinations;
     // Several sets of start positions. Starting at lower (small y) left (small x).
     public List<List<Point>> initialPosition;
-    public GridOrientation initialOrientation;
     //private static MazeLayout instance;
     int maxwidth, height;
     public List<Point> fields;
 
-    public MazeLayout(List<Point> walls, List<Point> destinations, List<List<Point>> initialPosition, GridOrientation initialOrientation, int maxwidth, int height, List<Point> fields) {
+    public MazeLayout(List<Point> walls, List<Point> destinations, List<List<Point>> initialPosition, int maxwidth, int height, List<Point> fields) {
         this.walls = walls;
         this.destinations = destinations;
         this.initialPosition = initialPosition;
-        this.initialOrientation = initialOrientation;
         this.maxwidth = maxwidth;
         this.height = height;
         this.fields = fields;
@@ -43,9 +41,9 @@ public class MazeLayout {
     }
 
     public Point getNextLaunchPosition(List<Point> usedLaunchPositions) {
-        for (List<Point> pset:initialPosition){
-            for (Point p:pset) {
-                if (usedLaunchPositions == null || !usedLaunchPositions.contains(p)){
+        for (List<Point> pset : initialPosition) {
+            for (Point p : pset) {
+                if (usedLaunchPositions == null || !usedLaunchPositions.contains(p)) {
                     return p;
                 }
             }
@@ -53,5 +51,25 @@ public class MazeLayout {
         // no more unused launch position
         logger.debug("no more unused launch position");
         return null;
+    }
+
+    /**
+     * The default orientation is 'North'. But if this results in facing a wall, turn clockwise until not facing a wall.
+     */
+    public GridOrientation getInitialOrientation(Point launchPosition) {
+        GridOrientation orientation = new GridOrientation();
+        if (!GridState.isWallAtDestination(launchPosition, orientation.getDirection(), 1, this)) {
+            return orientation;
+        }
+        orientation = orientation.rotate(false);
+        if (!GridState.isWallAtDestination(launchPosition, orientation.getDirection(), 1, this)) {
+            return orientation;
+        }
+        orientation = orientation.rotate(false);
+        if (!GridState.isWallAtDestination(launchPosition, orientation.getDirection(), 1, this)) {
+            return orientation;
+        }
+        // then just use 'West'.
+        return orientation.rotate(false);
     }
 }

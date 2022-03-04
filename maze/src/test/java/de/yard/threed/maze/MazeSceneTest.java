@@ -54,8 +54,8 @@ public class MazeSceneTest {
 
         assertEquals("number of entites (2 boxes+avatar)", 2 + 1, SystemManager.findEntities((EntityFilter) null).size());
 
-        assertEquals("initial orientation", new GridOrientation().toString(), MazeUtils.getPlayerorientation().toString());
-        assertEquals("initial location", new Point(6, 1).toString(), MazeUtils.getPlayerposition().toString());
+        assertEquals("initial orientation", new GridOrientation().toString(), MazeUtils.getPlayerorientation(MazeUtils.getMainPlayer()).toString());
+        assertEquals("initial location", new Point(6, 1).toString(), MazeUtils.getPlayerposition(MazeUtils.getMainPlayer()).toString());
 
         Camera camera = Scene.getCurrent().getDefaultCamera();
         Vector3 worldPos = camera.getCarrier().getTransform().getWorldModelMatrix().extractPosition();

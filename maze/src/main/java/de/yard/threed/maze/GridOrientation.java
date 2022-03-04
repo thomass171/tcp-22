@@ -45,14 +45,14 @@ public class GridOrientation {
         }
     }
 
-    public Direction getOrientation() {
+    public Direction getDirection() {
         return dirs[dir];
     }
 
     public Direction getDirectionForMovement(GridMovement movement) {
 
         // Forward als Default nehmen. Gilt auch fur ForwardMove.
-        Direction p = getOrientation();
+        Direction p = getDirection();
 
         switch (movement.movement){
             case GridMovement.BACK:
@@ -73,7 +73,7 @@ public class GridOrientation {
     }
 
     public Direction getRevertedOrientation() {
-        Direction p = getOrientation();
+        Direction p = getDirection();
         return p.getReverted();
     }
 

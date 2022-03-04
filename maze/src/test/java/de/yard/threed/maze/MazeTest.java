@@ -17,6 +17,7 @@ import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
+import de.yard.threed.maze.testutils.TestUtils;
 import org.junit.Test;
 
 import java.util.List;
@@ -94,8 +95,8 @@ public class MazeTest {
 
         assertEquals("number of entites (2 boxes+avatar)", 2 + 1, SystemManager.findEntities((EntityFilter) null).size());
 
-        assertEquals("initial orientation", new GridOrientation().toString(), MazeUtils.getPlayerorientation().toString());
-        assertEquals("initial location", new Point(6, 1).toString(), MazeUtils.getPlayerposition().toString());
+        assertEquals("initial orientation", new GridOrientation().toString(), MazeUtils.getPlayerorientation(MazeUtils.getMainPlayer()).toString());
+        assertEquals("initial location", new Point(6, 1).toString(), MazeUtils.getPlayerposition(MazeUtils.getMainPlayer()).toString());
 
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNRIGHT, userEntityId));
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD, userEntityId));
@@ -242,9 +243,9 @@ public class MazeTest {
      * #..    @ ##  #
      * #..  # #  $ ##
      * ###### ##$ $ #
-     * __ # $  $ $ $ #
-     * __ #    #     #
-     * __ ############
+     * _ # $  $ $ $ #
+     * _ #    #     #
+     * _ ############
      */
     @Test
     public void testDavidJoffe2() {
@@ -292,6 +293,7 @@ public class MazeTest {
         assertNotNull(MazeUtils.getMainPlayer());
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user0);
+        assertEquals("user0 initial orientation", Direction.N.toString(), MazeUtils.getPlayerorientation(user0).getDirection().toString());
 
         SystemManager.putRequest(UserSystem.buildLoginRequest("u1", ""));
         sceneRunner.runLimitedFrames(5);
@@ -301,11 +303,24 @@ public class MazeTest {
         assertNotNull(MazeUtils.getMainPlayer());
         EcsEntity user1 = MazeUtils.getPlayerByUsername("u1");
         assertNotNull(user1);
+        assertEquals("user1 initial orientation", Direction.E.toString(), MazeUtils.getPlayerorientation(user1).getDirection().toString());
 
         // don't expect 3rd user (however, login should be possible)
         SystemManager.putRequest(UserSystem.buildLoginRequest("u2", ""));
         sceneRunner.runLimitedFrames(5);
         assertEquals("number of player", 2, MazeUtils.getPlayer().size());
+
+        assertPosition(user1, new Point(4, 4));
+
+        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FORWARD, user1.getId()));
+        sceneRunner.runLimitedFrames(5);
+        assertPosition(user1, new Point(5, 4));
+    }
+
+    void assertPosition(EcsEntity user, Point point) {
+        MoverComponent mc = MoverComponent.getMoverComponent(user);
+        assertNotNull("user1.MoverComponent", mc);
+        TestUtil.assertPoint(" point", point, mc.getLocation());
     }
 
 }

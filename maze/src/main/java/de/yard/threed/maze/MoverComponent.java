@@ -304,9 +304,7 @@ public class MoverComponent extends EcsComponent implements GridMover {
 
     public void setLocation(Point point) {
         gridMover.setLocation(point);
-        Vector3 v = MazeUtils.point2Vector3(point);
-        // y stays 0. The mover model should have a aligned container to fit its height.
-        movable.setPosition(new Vector3(v.getX(), 0, v.getZ()));
+        updateMovable();
     }
 
     @Override
@@ -331,12 +329,22 @@ public class MoverComponent extends EcsComponent implements GridMover {
 
     public void setOrientation(GridOrientation orientation) {
         gridMover.setOrientation(orientation);
-        yaw = orientation.getYaw();
-        catchRotation();
+        updateMovable();
     }
 
     public GridMover getGridMover() {
         return gridMover;
+    }
+
+    /**
+     * Keep 'movable' in sync with 'gridMover'.
+     */
+    public void updateMovable(){
+        Vector3 v = MazeUtils.point2Vector3(gridMover.getLocation());
+        // y stays 0. The mover model should have a aligned container to fit its height.
+        movable.setPosition(new Vector3(v.getX(), 0, v.getZ()));
+        yaw = gridMover.getOrientation().getYaw();
+        catchRotation();
     }
 }
 

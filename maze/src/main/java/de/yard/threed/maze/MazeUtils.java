@@ -59,8 +59,7 @@ public class MazeUtils {
         return null;
     }
 
-    public static Point getPlayerposition() {
-        EcsEntity player = getMainPlayer();
+    public static Point getPlayerposition(EcsEntity player ) {
         if (player == null) {
             return null;
         }
@@ -68,8 +67,7 @@ public class MazeUtils {
         return mc.getLocation();
     }
 
-    public static GridOrientation getPlayerorientation() {
-        EcsEntity player = getMainPlayer();
+    public static GridOrientation getPlayerorientation(EcsEntity player) {
         if (player == null) {
             return null;
         }
@@ -184,7 +182,7 @@ public class MazeUtils {
         if (candidates.size() == 0) {
             return null;
         }
-        if (candidates.size() > 0) {
+        if (candidates.size() > 1) {
             logger.warn("inconsistency: Multiple username " + username);
         }
         return candidates.get(0);

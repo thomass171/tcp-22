@@ -19,6 +19,7 @@ import java.util.List;
  * 7.3.17: Doch, eigentlich schon. Jetzt sind die statischen in MazeLayout und MazeMovingAndStateSystem hält es zusammen.
  * 10.4.21: MA32: Die State Engine Idee mal deprecaten und mehr auf ECS setzen. Ein next State wird hier aber optional trotzdem ermittelt, aber lediglich fuers
  * Gaming nicht verwendet. Für Autosolver und testing ist das praktisch.
+ * 3.3.22: Should this be static or deprecated. There should be not grid state outside of ECS.
  * <p>
  * <p>
  * Created by thomass on 14.02.17.
@@ -224,7 +225,7 @@ public class GridState {
         //return MazeScene.grid.grid.get(gridposition.y + steps * direction.y).get(gridposition.x + steps * direction.x);
         return new GridState(MazeScene.grid.grid).getElementAtDestination(gridposition,direction,steps);
     }*/
-    public boolean isWallAtDestination(Point gridposition, Direction direction, int steps, MazeLayout mazeLayout /*List<Point> walls*/) {
+    public static boolean isWallAtDestination(Point gridposition, Direction direction, int steps, MazeLayout mazeLayout /*List<Point> walls*/) {
 
         //logger.debug("gridposition=" + gridposition + ",direction=" + direction + ",yaw=" + /*yaw*/0);
         Point destination = gridposition.add(direction.multiply(steps));

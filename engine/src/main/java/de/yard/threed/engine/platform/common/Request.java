@@ -66,4 +66,8 @@ public class Request {
     public Integer getUserEntityId() {
         return userEntityId;
     }
+
+    public void setUserEntityId(Integer userEntityId){
+        this.userEntityId = userEntityId;
+    }
 }

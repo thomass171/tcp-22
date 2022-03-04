@@ -173,7 +173,7 @@ class GridDraft {
         if (playerposition.size() == 0)
             throw new InvalidMazeException("no start position");
         //default heading is 'N'orth.
-        MazeLayout mazeLayout = new MazeLayout(walls, destinations, playerposition, new GridOrientation(), maxwidth, height, fields);
+        MazeLayout mazeLayout = new MazeLayout(walls, destinations, playerposition, maxwidth, height, fields);
         Grid grid = new Grid(mazeLayout, boxes, bots, diamonds, tags);
 
         return grid;

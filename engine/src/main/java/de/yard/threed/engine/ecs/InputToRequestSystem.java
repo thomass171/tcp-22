@@ -340,6 +340,23 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         mockedInputs.add(new MockedInput(ray, left));
     }
 
+    /**
+     * Helper for sending a request with a userEntityId
+     *
+     */
+    public static void sendRequestWithId(Request request){
+        InputToRequestSystem inputToRequestSystem = (InputToRequestSystem) SystemManager.findSystem(InputToRequestSystem.TAG);
+        if (inputToRequestSystem==null){
+            return;
+        }
+        request.setUserEntityId(inputToRequestSystem.getUserEntityId());
+        SystemManager.putRequest(request);
+    }
+
+    private Integer getUserEntityId() {
+        return userEntityId;
+    }
+
     private void processPointer(Ray ray, boolean left) {
 
         for (PointerHandler pointerHandler : pointerHandlerList) {
