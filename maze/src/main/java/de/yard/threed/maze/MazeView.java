@@ -78,30 +78,5 @@ public class MazeView {
         mover.setYaw(yaw);
     }*/
 
-    public boolean isMoving() {
-        if (AvatarSystem.getAvatar()==null){
-            return false;
-        }
-        // TODO get user from move request
-        EcsEntity ray = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
-        if (ray == null) {
-            // maybe not yet logged in/joined
-            return false;
-        }
-        MoverComponent mover = ((MoverComponent) ray.getComponent(MoverComponent.TAG));
-        if (mover==null){
-            //1.4.21 wann passiert das denn?
-            return false;
-        }
-        if (mover.isMoving()) {
-            return true;
-        }
-        for (EcsEntity e : MazeUtils.getBoxes()) {
-            mover = ((MoverComponent) e.components.get(0));
-            if (mover.isMoving()) {
-                return true;
-            }
-        }
-        return false;
-    }
+
 }

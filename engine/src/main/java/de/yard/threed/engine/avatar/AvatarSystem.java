@@ -32,9 +32,6 @@ public class AvatarSystem extends DefaultEcsSystem {
 
     //15.5.21 boolean enableNearView = false;
 
-    //direkt deprecated weil Kruecke
-    @Deprecated
-    static Avatar avatar = null;
     public static LocalTransform initialTransform = null;
     boolean enableObserverComponent = false;
 
@@ -80,7 +77,7 @@ public class AvatarSystem extends DefaultEcsSystem {
             int userEntityId = ((Integer) request.getPayloadByIndex(0)).intValue();
             Boolean forLogin = (Boolean) request.getPayloadByIndex(1);
             EcsEntity userEntity = SystemManager.findEntities((e) -> e.getId() == userEntityId).get(0);
-            avatar = buildAvatarForUserEntity(userEntity);
+            Avatar avatar = buildAvatarForUserEntity(userEntity);
 
             TeleportComponent tc = TeleportComponent.getTeleportComponent(userEntity);
             if (tc != null) {
@@ -109,9 +106,9 @@ public class AvatarSystem extends DefaultEcsSystem {
             // 19.11.21: Should be independant from ObserverComponent? Probably. If there is an oberver, attach it to avatar
             // This is also reached for bot and MP joining.
             // 14.2.22 Attach observer independent from VR
-            if ((boolean) forLogin && Observer.getInstance() != null && AvatarSystem.getAvatar() != null) {
+            if ((boolean) forLogin && Observer.getInstance() != null) {
                 logger.debug("Attaching oberserver to avatar");
-                Observer.getInstance().getTransform().setParent(AvatarSystem.getAvatar().getSceneNode().getTransform());
+                Observer.getInstance().getTransform().setParent(avatar.getSceneNode().getTransform());
             }
             //avatar.avatarE.setName("Player");
             logger.debug(userEntity.getName() + " joined");
@@ -126,10 +123,6 @@ public class AvatarSystem extends DefaultEcsSystem {
     @Override
     public void process(Event evt) {
         logger.debug("got event " + evt.getType());
-    }
-
-    public static Avatar getAvatar() {
-        return avatar;
     }
 
     /**

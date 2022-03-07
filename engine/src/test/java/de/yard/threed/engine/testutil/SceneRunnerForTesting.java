@@ -114,19 +114,23 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
     /**
      * @param frameCount
      */
-    public void runLimitedFrames(int frameCount) {
+    public void runLimitedFrames(int frameCount, double tpf) {
         for (int i = 0; i < frameCount; i++) {
-            // tpf 0 ist unguenstig, dann bewegt sich nichts.
-            singleUpdate(0.1f);
+            singleUpdate(tpf);
         }
     }
 
+    public void runLimitedFrames(int frameCount) {
+        // tpf 0 ist unguenstig, dann bewegt sich nichts.
+        runLimitedFrames(frameCount,0.1);
+    }
+
     /**
-     * Das ist ein einzelner "update".
+     * A single "update".
      *
      * @param tpf
      */
-    public void singleUpdate(float tpf) {
+    public void singleUpdate(double tpf) {
         //TODO scene.deltaTime = tpf;
         prepareFrame(tpf);
         renderScene();

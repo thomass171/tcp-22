@@ -69,19 +69,6 @@ public class TestUtils {
 
     }*/
 
-    private static void waitForNotMoving(MoverComponent mc) {
-        //TODO notaus
-        while (mc.isMoving()) {
-
-            if (mc.update(0.3)) {
-                return;
-            }
-
-            System.out.println("waitForNotMoving");
-        }
-
-    }
-
     public static String loadGrid(String name) {
         return TestHelper.getDataBundleString("maze", name);
     }

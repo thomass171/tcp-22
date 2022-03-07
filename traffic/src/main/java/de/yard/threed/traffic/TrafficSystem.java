@@ -260,7 +260,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 }
                 TrafficHelper.launchVehicles(TrafficSystem.vehiclelist,
                         trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
-                        (AvatarSystem.getAvatar() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
+                        /*4.3.22 (AvatarSystem.getAvatar() == null) ? null :*/ TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
                         SphereSystem.getSphereNode()/*getWorld()*/, sphereProjections.backProjection,
                         /*27.12.21airportConfig,*/ baseTransformForVehicleOnGraph, vehicleLoader, genericVehicleBuiltDelegate);
                 return true;

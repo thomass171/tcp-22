@@ -313,8 +313,13 @@ public class MazeTest {
         assertPosition(user1, new Point(4, 4));
 
         SystemManager.putRequest(new Request(TRIGGER_REQUEST_FORWARD, user1.getId()));
+        sceneRunner.runLimitedFrames(3,0);
+        assertTrue(MazeUtils.isAnyMoving());
+        // 5 seems to be sufficient for completing the move
         sceneRunner.runLimitedFrames(5);
         assertPosition(user1, new Point(5, 4));
+        assertFalse(MazeUtils.isAnyMoving());
+
     }
 
     void assertPosition(EcsEntity user, Point point) {

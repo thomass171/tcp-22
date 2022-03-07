@@ -37,6 +37,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     // gesetzt, wenn Autosolver aktiv ist.
     // 14.4.21: Ersetzt ducrh ReplaySystem
     List<GridMovement> solution = null;
+    boolean mazeMovingAndStateSystemdebuglog = true;
 
     protected MazeSettings st;
 
@@ -134,11 +135,11 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 entity.getSceneNode().getTransform().translateY(-0.5f);
             }
         }
-        // Es ist nicht sauber, auf completed zu gehen, wenn nur ein Mover fertig ist. Es aknn sich ja der Player
-        //und eine Box bewegen. 24.10.18: Darum ueber global moving gehen.
-        boolean completed = mover.update(tpf);
-        if (/*completed*/MazeVisualizationSystem.view != null && !MazeVisualizationSystem.view.isMoving()) {
-            movementCompleted();
+        mover.update(tpf);
+        // reVisualizeState() is a nice to have for avoiding inconsistencies, but with multiple movers it will
+        // be difficult to find a frame where nobody moves.
+        if (!MazeUtils.isAnyMoving()) {
+            reVisualizeState();
         }
 
         if (!SystemState.isOver() && GridState.isSolved(MazeUtils.buildBoxesFromEcs(), Grid.getInstance().getMazeLayout())) {
@@ -236,15 +237,15 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             // Once there was a queue to handle this. Ignoring lost movements is a risk, because for use cases like 'replay' its important not to loose a single movement.
 
             //if (AvatarSystem.getAvatar() != null) {
-                if (request.getUserEntityId() == null) {
-                    logger.warn("No userEntityId in request. Ignoring user request");
+            if (request.getUserEntityId() == null) {
+                logger.warn("No userEntityId in request. Ignoring user request");
+                return true;
+            } else {
+                EcsEntity ray = UserSystem.getUserByEntityId(request.getUserEntityId());
+                if (processUserRequest(currentstate, request, ray)) {
                     return true;
-                } else {
-                    EcsEntity ray = UserSystem.getUserByEntityId(request.getUserEntityId());
-                    if (processUserRequest(currentstate, request, ray)) {
-                        return true;
-                    }
                 }
+            }
             //}
         }
         return false;
@@ -256,15 +257,9 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     @Override
     public void process(Event evt) {
 
-        //if (mazedebuglog) {
-        //logger.debug("got event " + evt.getType());
-        //}
-        /*if (AvatarSystem.getAvatar() != null) {
-            EcsEntity ray = AvatarSystem.getAvatar().avatarE;
-
-            MoverComponent mover = (MoverComponent) ray.getComponent(MoverComponent.TAG);
-
-        }*/
+        if (mazeMovingAndStateSystemdebuglog) {
+            logger.debug("got event " + evt.getType());
+        }
 
         if (evt.getType().equals(UserSystem.USER_EVENT_JOINED)) {
             if (Grid.getInstance() == null) {
@@ -272,12 +267,10 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             }
             //create player entity and publish "new player". But not before maze was loaded.
             //das geht am einfachsten per Avatar, obwohl das fuer MP fragwürdig ist.
-            // 1.4.21: Avatar was build by AvatarSystem (and attached to world)
+            // 1.4.21: Avatar was build by AvatarSystem (and attached to world and user entity)
             //Entity wurde schon als Avatar angelegt und kommt hier als Payload.
 
             EcsEntity playerEntity = (EcsEntity) evt.getPayloadByIndex(0);
-            //avatar = buildPlayer(Scene.getCurrent().getMainCamera());
-            //Avatar avatar = AvatarSystem.getAvatar();
             MazeLayout layout = Grid.getInstance().getLayout();
             Point launchPosition = layout.getNextLaunchPosition(usedLaunchPositions);
             if (launchPosition != null) {
@@ -461,7 +454,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
      * Wird auch fuer undo verwendet.
      * MA32: TODO Die erneute Visualisierung dient ja auch als eine Art refresh. Das sollte beibehalten werden.
      */
-    public void movementCompleted() {
+    public void reVisualizeState() {
         /*MA32 if (nextstate != null) {
             //logger.debug("Switching to next state");
             currentstate = nextstate;

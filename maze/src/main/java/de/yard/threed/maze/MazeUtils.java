@@ -187,4 +187,23 @@ public class MazeUtils {
         }
         return candidates.get(0);
     }
+
+    public static boolean isAnyMoving() {
+
+        MoverComponent mover;
+        for (EcsEntity e : MazeUtils.getPlayer()) {
+            mover = MoverComponent.getMoverComponent(e);
+            if (mover.isMoving()) {
+                return true;
+            }
+        }
+
+        for (EcsEntity e : MazeUtils.getBoxes()) {
+            mover = MoverComponent.getMoverComponent(e);
+            if (mover.isMoving()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

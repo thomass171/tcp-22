@@ -205,18 +205,18 @@ public class MoverComponent extends EcsComponent implements GridMover {
     }
 
     /**
-     * Liefert true, wenn die Bewegung beendet wurde.
+     *
      *
      * @param tpf
      * @return
      */
-    public boolean update(double tpf) {
+    public void update(double tpf) {
         boolean completed = false;
         // wenn tpf 0 ist, bleiben mover im maze einfach haengen
-        if (tpf < 0.001f) {
+        /*7.3.22 Nonsense if (tpf < 0.001f) {
             logger.warn("Adjusting tpf " + tpf);
             tpf = 0.001f;
-        }
+        }*/
         //totaltpf += tpf;
         //logger.debug("tpf="+tpf+", walkstatus="/*+totaltpf*/+walkstatus);
         // es geht nur entweder gehen oder drehen
@@ -270,7 +270,6 @@ public class MoverComponent extends EcsComponent implements GridMover {
                 }
             }
         }
-        return completed;
     }
 
     //@Override
