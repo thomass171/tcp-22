@@ -25,7 +25,7 @@ import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.engine.test.testutil.TestUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

@@ -9,7 +9,7 @@ import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
 
 import de.yard.threed.engine.testutil.TestHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 /**

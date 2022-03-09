@@ -4,7 +4,7 @@ using java.lang;
 namespace de.yard.threed.java2cs.testfiles {
 
 using org.apache.log4j;// import org.apache.log4j.Logger;
-using org.junit;// import org.junit.Test;
+using org.junit.jupiter.api;// import org.junit.jupiter.api.Test;
 
 using java.util;// import java.util.ArrayList;
 // import java.util.HashMap;
@@ -254,8 +254,7 @@ enum NumericType {
         }
     }
 
-    virtual 
-    public void testMethoda(AsyncJobDelegate<string> asyncJobDelegate) {
+    virtual public void testMethoda(AsyncJobDelegate<string> asyncJobDelegate) {
         asyncJobDelegate("rt");
     }
 }

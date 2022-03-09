@@ -1,16 +1,16 @@
 package de.yard.threed.java2cs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Anders als der Name sagt sind das keine Swift Tests, sondern die ganz normalen.
- * 
+ * <p>
  * Created by thomass on 29.02.16.
  */
 
@@ -25,8 +25,8 @@ public class J2CSTest {
 
     @Test
     public void testConvert() {
-        String classpath = System.getProperty("java.class.path" );
-        System.out.println("classpath="+classpath);
+        String classpath = System.getProperty("java.class.path");
+        System.out.println("classpath=" + classpath);
 
         callConverter(TESTFILE1);
         assertFile(TESTFILE1o, "output/" + TESTFILE1o);
@@ -50,13 +50,13 @@ public class J2CSTest {
     @Test
     public void testError() {
         J2CS j2s = callConverter(TESTFILE2);
-        assertEquals("errorcnt", 5, j2s.errorcnt);
+        assertEquals(5, j2s.errorcnt, "errorcnt");
         // assertFile(TESTFILE1o, "output/" + TESTFILE1o);
     }
 
     private J2CS callConverter(String filename) {
         try {
-            return J2CS.main1(new String[]{"-src", "src/test/java/de/yard/threed/java2cs", "-target", "output", "-f", filename},buildKnownInterfaces(),buildKnownGenericMethods());
+            return J2CS.main1(new String[]{"-src", "src/test/java/de/yard/threed/java2cs", "-target", "output", "-f", filename}, buildKnownInterfaces(), buildKnownGenericMethods());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -66,7 +66,7 @@ public class J2CSTest {
         try {
             String expectedcontent = new String(Files.readAllBytes(Paths.get("src/test/resources").resolve(expected)));
             String actualcontent = new String(Files.readAllBytes(Paths.get(actual)));
-            assertEquals("The files differ:" + actual, expectedcontent, actualcontent);
+            assertEquals(expectedcontent, actualcontent, "The files differ:" + actual);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

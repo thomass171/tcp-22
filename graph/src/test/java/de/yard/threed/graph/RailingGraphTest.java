@@ -14,7 +14,7 @@ import de.yard.threed.graph.RailingFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.core.testutil.TestUtil;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;

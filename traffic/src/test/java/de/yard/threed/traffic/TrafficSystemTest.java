@@ -10,11 +10,11 @@ import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 /**
  * <p>
@@ -27,7 +27,7 @@ public class TrafficSystemTest {
     /**
      *
      */
-    @Before
+    @BeforeEach
     public void setup() {
         InitMethod initMethod = new InitMethod() {
             @Override
@@ -48,7 +48,7 @@ public class TrafficSystemTest {
         startSimpleTest("traffic:tiles/Wayland.xml");
 
         TrafficGraph railwayGraph = TrafficHelper.getTrafficGraphByDataprovider(TrafficGraph.RAILWAY);
-        assertNotNull("railwayGraph", railwayGraph);
+        assertNotNull(railwayGraph, "railwayGraph");
 
     }
 
@@ -60,7 +60,7 @@ public class TrafficSystemTest {
         startSimpleTest("traffic:tiles/Demo.xml");
 
         TrafficGraph railwayGraph = TrafficHelper.getTrafficGraphByDataprovider(TrafficGraph.RAILWAY);
-        assertNotNull("railwayGraph", railwayGraph);
+        assertNotNull(railwayGraph, "railwayGraph");
 
 
     }
@@ -68,7 +68,7 @@ public class TrafficSystemTest {
     private void startSimpleTest(String tilename) {
 
         SystemManager.sendEvent(TrafficEventRegistry.buildLOCATIONCHANGED(null, /*27.3.20 projection,*/  null,
-                 BundleResource.buildFromFullQualifiedString(tilename)));
+                BundleResource.buildFromFullQualifiedString(tilename)));
         //too many assertEquals("events ", 1, SystemManager.getEventCount());
         EcsTestHelper.processSeconds(2);
     }

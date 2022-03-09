@@ -7,7 +7,7 @@ import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
 import de.yard.threed.core.testutil.TestFactory;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.testutil.TestUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 /**

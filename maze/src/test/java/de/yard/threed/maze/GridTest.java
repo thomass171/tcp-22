@@ -12,12 +12,12 @@ import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 /**

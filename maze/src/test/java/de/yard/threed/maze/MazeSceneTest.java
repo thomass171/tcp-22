@@ -12,11 +12,11 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -48,19 +48,19 @@ public class MazeSceneTest {
 
         EcsEntity user = UserSystem.getInitialUser();
         assertNotNull(user);
-        assertEquals("user name", "User0", user.getName());
+        assertEquals("User0", user.getName(), "user name");
         MoverComponent mc = MoverComponent.getMoverComponent(user);
         TestUtil.assertPoint("player location", new Point(6, 1), mc.getLocation());
 
-        assertEquals("number of entites (2 boxes+avatar)", 2 + 1, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals(2 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (2 boxes+avatar)");
 
-        assertEquals("initial orientation", new GridOrientation().toString(), MazeUtils.getPlayerorientation(MazeUtils.getMainPlayer()).toString());
-        assertEquals("initial location", new Point(6, 1).toString(), MazeUtils.getPlayerposition(MazeUtils.getMainPlayer()).toString());
+        assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(MazeUtils.getMainPlayer()).toString(), "initial orientation");
+        assertEquals(new Point(6, 1).toString(), MazeUtils.getPlayerposition(MazeUtils.getMainPlayer()).toString(), "initial location");
 
         Camera camera = Scene.getCurrent().getDefaultCamera();
         Vector3 worldPos = camera.getCarrier().getTransform().getWorldModelMatrix().extractPosition();
         // 1.35 just taken as is. Where does it come from?
-        assertEquals("viewpoint absolut height", 1.35, worldPos.getY(), 0.001);
+        assertEquals(1.35, worldPos.getY(), 0.001, "viewpoint absolut height");
         // teleport to ... for first moving of a box
         /*No ray in test platform for now.
         Ray ray = TestUtils.getHittingRayForTeleport(new Point(7, 3),'W');

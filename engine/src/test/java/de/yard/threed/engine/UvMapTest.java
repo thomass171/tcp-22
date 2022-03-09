@@ -8,7 +8,7 @@ import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.core.Dimension;
 
 import de.yard.threed.core.testutil.TestUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by thomass on 03.11.15.

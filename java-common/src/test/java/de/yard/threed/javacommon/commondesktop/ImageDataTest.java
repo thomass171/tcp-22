@@ -8,7 +8,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestFactory;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by thomass on 24.05.16.

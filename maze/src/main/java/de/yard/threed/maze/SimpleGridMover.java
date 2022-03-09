@@ -120,7 +120,7 @@ public class SimpleGridMover implements GridMover {
      */
     public boolean canWalk(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout) {
         Direction direction = gridOrientation.getDirectionForMovement(movement);
-        if (gridState.isWallAtDestination(location, direction, 1, mazeLayout)) {
+        if (GridState.isWallAtDestination(location, direction, 1, mazeLayout)) {
             logger.debug("cannot walk due to wall");
             return false;
         }

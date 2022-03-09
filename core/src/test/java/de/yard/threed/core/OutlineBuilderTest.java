@@ -6,7 +6,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
 import de.yard.threed.core.testutil.TestFactory;
 import de.yard.threed.core.testutil.TestUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;

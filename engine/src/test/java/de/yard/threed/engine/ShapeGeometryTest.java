@@ -19,7 +19,7 @@ import de.yard.threed.engine.test.testutil.ShapedGeometryTestHelper;
 import de.yard.threed.engine.test.testutil.TestUtil;
 import de.yard.threed.engine.test.testutil.TinyPlane;
 import de.yard.threed.engine.testutil.TestHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

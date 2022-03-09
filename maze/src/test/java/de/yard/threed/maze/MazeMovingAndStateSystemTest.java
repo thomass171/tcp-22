@@ -18,14 +18,13 @@ import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static de.yard.threed.core.testutil.TestUtil.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+
 
 /**
  * <p>
@@ -36,7 +35,7 @@ public class MazeMovingAndStateSystemTest {
     /**
      *
      */
-    @Before
+    @BeforeEach
     public void setup() {
         InitMethod initMethod = () -> SystemManager.addSystem(new MazeMovingAndStateSystem());
         SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());

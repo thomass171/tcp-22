@@ -5,7 +5,7 @@ import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 /**

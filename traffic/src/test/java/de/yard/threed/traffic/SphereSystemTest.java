@@ -17,14 +17,15 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
 import de.yard.threed.traffic.config.SceneConfig;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static de.yard.threed.traffic.SphereSystem.USER_REQUEST_SPHERE;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 /**
  * <p>
@@ -43,21 +44,20 @@ public class SphereSystemTest {
         startSimpleTest(/*"Desdorf"*/"traffic:Wayland");
 
         // 0 because of no TRAFFIC_REQUEST_LOADGROUNDNET
-        assertEquals("requests ", 0, SystemManager.getRequestCount());
+        assertEquals(0, SystemManager.getRequestCount(), "requests ");
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
-        assertEquals("completeEvents.size", 1, completeEvents.size());
+        assertEquals(1, completeEvents.size(), "completeEvents.size");
         //assertNull("", DefaultTrafficWorld.getInstance());
         SphereProjections projections = TrafficHelper.getProjectionByDataprovider();
-        assertNotNull("", projections);
-        assertNotNull("", projections.projection);
-        assertNull("", projections.backProjection);
+        assertNotNull(projections);
+        assertNotNull(projections.projection);
+        assertNull(projections.backProjection);
 
         List<ViewPoint> viewpoints = TrafficHelper.getViewpointsByDataprovider();
         // 9 "oben*" viewpoints from osmscenery". Vehicle not loaded because of missing system.
-        assertEquals("viewpoints", 9, viewpoints.size());
+        assertEquals(9, viewpoints.size(), "viewpoints");
         ViewPoint viewPoint = viewpoints.get(0);
     }
-
 
 
     @Test
@@ -68,20 +68,20 @@ public class SphereSystemTest {
         startSimpleTest("traffic:tiles/Demo.xml");
 
         // 0 because of no TRAFFIC_REQUEST_LOADGROUNDNET
-        assertEquals("requests ", 0, SystemManager.getRequestCount());
+        assertEquals(0, SystemManager.getRequestCount(), "requests ");
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
-        assertEquals("completeEvents.size", 1, completeEvents.size());
+        assertEquals(1, completeEvents.size(), "completeEvents.size");
         //assertNull("", DefaultTrafficWorld.getInstance());
-        assertNotNull("", TrafficHelper.getProjectionByDataprovider());
+        assertNotNull(TrafficHelper.getProjectionByDataprovider());
 
         List<ViewPoint> viewpoints = TrafficHelper.getViewpointsByDataprovider();
 
-        assertEquals("viewpoints", 1, viewpoints.size());
-        assertEquals("viewpoint[0].y", 100, viewpoints.get(0).transform.position.getY(),0.0001);
+        assertEquals(1, viewpoints.size(), "viewpoints");
+        assertEquals(100, viewpoints.get(0).transform.position.getY(), 0.0001, "viewpoint[0].y");
         ViewPoint viewPoint = viewpoints.get(0);
 
-        assertEquals("vehiclelist", 1, TrafficSystem.vehiclelist.size());
-        assertEquals("vehiclelist[0].name", "loc", TrafficSystem.vehiclelist.get(0).getName());
+        assertEquals(1, TrafficSystem.vehiclelist.size(), "vehiclelist");
+        assertEquals("loc", TrafficSystem.vehiclelist.get(0).getName(), "vehiclelist[0].name");
 
     }
 
@@ -108,12 +108,12 @@ public class SphereSystemTest {
         //Hmm. es gibt ja so viele Events .assertEquals("completeEvents.size", 4/*??*/, completeEvents.size());
 
         List<Event> locEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
-        assertEquals("completeEvents.size", 1, locEvents.size());
-        assertNull("", TrafficHelper.getProjectionByDataprovider().projection);
+        assertEquals(1, locEvents.size(), "completeEvents.size");
+        assertNull(TrafficHelper.getProjectionByDataprovider().projection);
         // 1 because of TRAFFIC_REQUEST_LOADGROUNDNET
-        assertEquals("requests ", 1, SystemManager.getRequestCount());
+        assertEquals(1, SystemManager.getRequestCount(), "requests ");
         Request request = SystemManager.getRequest(0);
-        assertEquals("", "TRAFFIC_REQUEST_LOADGROUNDNET", request.getType().getLabel());
+        assertEquals("TRAFFIC_REQUEST_LOADGROUNDNET", request.getType().getLabel());
 
     }
 
@@ -128,13 +128,13 @@ public class SphereSystemTest {
             //assertNull("", DefaultTrafficWorld.getInstance());
 
             //TrafficWorldConfig liegt in "ext"
-            setup(GeoCoordinate.fromLatLon(new LatLon(new Degree(50.86538f), new Degree(7.139103f)),0),null);
-        }else{
-            setup(null,null);
+            setup(GeoCoordinate.fromLatLon(new LatLon(new Degree(50.86538f), new Degree(7.139103f)), 0), null);
+        } else {
+            setup(null, null);
         }
-        SystemManager.putRequest(new Request(USER_REQUEST_SPHERE, new Payload(tilename,new ArrayList())));
+        SystemManager.putRequest(new Request(USER_REQUEST_SPHERE, new Payload(tilename, new ArrayList())));
         //ein Request muss anliegen
-        assertEquals("requests ", 1, SystemManager.getRequestCount());
+        assertEquals(1, SystemManager.getRequestCount(), "requests ");
         //EcsTestHelper.processRequests();
         EcsTestHelper.processSeconds(2);
     }
@@ -147,7 +147,7 @@ public class SphereSystemTest {
             @Override
             public void init() {
                 world = new SceneNode();
-                SystemManager.addSystem(new SphereSystem(null,null,center,sceneConfig));
+                SystemManager.addSystem(new SphereSystem(null, null, center, sceneConfig));
 
                 //ohne Elevation wird kein groundnet geladen
                 //??SystemManager.putDataProvider(SystemManager.DATAPROVIDERELEVATION, TerrainElevationProvider.buildForStaticAltitude(17));

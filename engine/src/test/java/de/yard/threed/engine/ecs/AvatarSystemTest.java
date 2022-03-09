@@ -12,13 +12,13 @@ import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static de.yard.threed.core.testutil.TestUtil.assertNotNull;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * <p>
@@ -29,7 +29,7 @@ public class AvatarSystemTest {
     /**
      *
      */
-    @Before
+    @BeforeEach
     public void setup() {
         InitMethod initMethod = new InitMethod() {
             @Override
@@ -83,7 +83,7 @@ public class AvatarSystemTest {
         user.setName(testUserName);
 
         SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId(), true));
-        assertEquals("requests ", 1, SystemManager.getRequestCount());
+        assertEquals(1, SystemManager.getRequestCount(), "requests ");
         // process join
         EcsTestHelper.processSeconds(2);
 

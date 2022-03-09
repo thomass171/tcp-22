@@ -17,19 +17,19 @@ import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.javacommon.SimpleHeadlessPlatform;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static de.yard.threed.core.testutil.TestUtil.assertNotNull;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class InputToRequestSystemTest {
 
     SceneRunnerForTesting sceneRunner;
 
-    @Before
+    @BeforeEach
     public void setup() {
         InitMethod initMethod = new InitMethod() {
             @Override
@@ -69,8 +69,8 @@ public class InputToRequestSystemTest {
         EcsTestHelper.processSeconds(2);
 
         // key input should be ignored silently
-        assertEquals("mockedKeyInput ", 0, SimpleHeadlessPlatform.mockedKeyInput.size());
-        assertEquals("requests ", 0, SystemManager.getRequestCount());
+        assertEquals(0, SimpleHeadlessPlatform.mockedKeyInput.size(), "mockedKeyInput ");
+        assertEquals(0, SystemManager.getRequestCount(), "requests ");
 
         String clientId = "677";
         int userEntitId = 343;
@@ -78,7 +78,7 @@ public class InputToRequestSystemTest {
         SimpleHeadlessPlatform.mockedKeyInput.add(KeyCode.KEY_K);
         // process login
         EcsTestHelper.processSeconds(2);
-        assertEquals("requests ", 1, SystemManager.getRequestCount());
+        assertEquals(1, SystemManager.getRequestCount(), "requests ");
 
         Request request = SystemManager.getRequest(0);
         assertEquals("requestForKeyK", request.getType().getLabel());

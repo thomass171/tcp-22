@@ -11,7 +11,7 @@ import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 
 import de.yard.threed.engine.platform.common.Settings;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static de.yard.threed.core.testutil.Assert.assertEquals;
 

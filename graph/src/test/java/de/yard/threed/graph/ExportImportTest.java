@@ -5,12 +5,12 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * <p>

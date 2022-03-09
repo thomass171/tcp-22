@@ -8,7 +8,7 @@ import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.util.Bezier;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

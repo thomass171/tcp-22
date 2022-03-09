@@ -7,7 +7,7 @@ import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.trafficcore.model.Airport;
 import de.yard.threed.trafficcore.model.Runway;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 /**

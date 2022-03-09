@@ -1,6 +1,7 @@
 package de.yard.threed.engine.testutil;
 
 import de.yard.threed.core.resource.ResourcePath;
+import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.javacommon.DefaultResourceReader;
@@ -17,7 +18,6 @@ import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.javacommon.SimpleHeadlessPlatform;
 import de.yard.threed.outofbrowser.SimpleBundleResolver;
 import de.yard.threed.outofbrowser.SyncBundleLoader;
-import org.junit.Assert;
 
 import java.util.HashMap;
 import java.util.Properties;

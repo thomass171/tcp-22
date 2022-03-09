@@ -241,7 +241,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 logger.warn("No userEntityId in request. Ignoring user request");
                 return true;
             } else {
-                EcsEntity ray = UserSystem.getUserByEntityId(request.getUserEntityId());
+                EcsEntity ray = UserSystem.getUserByEntityId((int)request.getUserEntityId());
                 if (processUserRequest(currentstate, request, ray)) {
                     return true;
                 }

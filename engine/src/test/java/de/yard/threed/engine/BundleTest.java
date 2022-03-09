@@ -9,7 +9,7 @@ import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests fuer die scenery/terrasync bundle sind in SceneryTest.

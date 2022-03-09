@@ -6,7 +6,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
 
-import static org.junit.Assert.assertEquals;
+
 
 
 /**

@@ -10,8 +10,8 @@ import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * <p>
@@ -24,7 +24,7 @@ public class FlatTerrainSystemTest {
     /**
      *
      */
-    @Before
+    @BeforeEach
     public void setup() {
         InitMethod initMethod = new InitMethod() {
             @Override

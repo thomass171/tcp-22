@@ -4,7 +4,7 @@ import de.yard.threed.core.Matrix3;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.core.testutil.TestUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 /**

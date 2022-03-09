@@ -14,14 +14,14 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.VelocityComponent;
 import de.yard.threed.traffic.testutils.TrafficTestUtils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.List;
 
 import de.yard.threed.graph.GraphMovingComponent;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -54,13 +54,13 @@ public class BasicTravelSceneTest {
 
         // "Wayland" has two graph files that should have been loaded finally (via EVENT_LOCATIONCHANGED)
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
-        assertEquals("EVENT_LOCATIONCHANGED.size", 1, completeEvents.size());
+        assertEquals(1, completeEvents.size(), "EVENT_LOCATIONCHANGED.size");
 
         completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED);
-        assertEquals("TRAFFIC_EVENT_GRAPHLOADED.size", 2, completeEvents.size());
+        assertEquals(2, completeEvents.size(), "TRAFFIC_EVENT_GRAPHLOADED.size");
 
         TrafficGraph railwayGraph = TrafficHelper.getTrafficGraphByDataprovider(TrafficGraph.RAILWAY);
-        assertNotNull("railwayGraph", railwayGraph);
+        assertNotNull(railwayGraph, "railwayGraph");
 
         assertFalse(((GraphTerrainSystem) SystemManager.findSystem(GraphTerrainSystem.TAG)).enabled);
     }
@@ -70,36 +70,36 @@ public class BasicTravelSceneTest {
         setup("traffic:tiles/Demo.xml");
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
-        assertNotNull("user entity", UserSystem.getInitialUser());
+        assertNotNull(UserSystem.getInitialUser(), "user entity");
 
         // "Wayland" has two graph files that should have been loaded finally (via EVENT_LOCATIONCHANGED)
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
-        assertEquals("EVENT_LOCATIONCHANGED.size", 1, completeEvents.size());
+        assertEquals(1, completeEvents.size(), "EVENT_LOCATIONCHANGED.size");
 
         completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED);
-        assertEquals("TRAFFIC_EVENT_GRAPHLOADED.size", 1, completeEvents.size());
+        assertEquals(1, completeEvents.size(), "TRAFFIC_EVENT_GRAPHLOADED.size");
 
         TrafficGraph railwayGraph = TrafficHelper.getTrafficGraphByDataprovider(TrafficGraph.RAILWAY);
-        assertNotNull("railwayGraph", railwayGraph);
+        assertNotNull(railwayGraph, "railwayGraph");
 
-        assertEquals("number of entities (user)", 1, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (user)");
 
         // test GraphTerrainSystem
         List<NativeSceneNode> tracksNode = SceneNode.findByName("tracks");
-        assertEquals("tracksNode", 1, tracksNode.size());
+        assertEquals(1, tracksNode.size(), "tracksNode");
 
         assertTrue(((GraphTerrainSystem) SystemManager.findSystem(GraphTerrainSystem.TAG)).enabled);
 
         EcsEntity player = UserSystem.getInitialUser();
         TeleportComponent tc = TeleportComponent.getTeleportComponent(player);
         // vehicle not yet loaded. So only 1 outside viewpoints.
-        assertEquals("teleport destinations", 1, tc.getPointCount());
+        assertEquals(1, tc.getPointCount(), "teleport destinations");
 
         sceneRunner.runLimitedFrames(50);
         // now 'loc' should have been loaded.
-        assertEquals("teleport destinations", 1 + 2, tc.getPointCount());
+        assertEquals(1 + 2, tc.getPointCount(), "teleport destinations");
         // should start at externel overview point. For now its in vehicle.
-        assertEquals("teleport index", 2, tc.getIndex());
+        assertEquals(2, tc.getIndex(), "teleport index");
     }
 
     /**
@@ -109,6 +109,6 @@ public class BasicTravelSceneTest {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         properties.put("argv.basename", tileName);
-        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, properties,new String[] {"engine","data","traffic"});
+        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, properties, new String[]{"engine", "data", "traffic"});
     }
 }

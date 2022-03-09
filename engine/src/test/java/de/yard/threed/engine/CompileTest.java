@@ -4,7 +4,7 @@ package de.yard.threed.engine;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Nur um compilieren anzustossen

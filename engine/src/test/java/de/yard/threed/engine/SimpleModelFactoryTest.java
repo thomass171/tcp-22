@@ -12,7 +12,7 @@ import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.testutil.TestUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Nur fuer Model building, das keine echt platform braucht. Sonst in opengl.

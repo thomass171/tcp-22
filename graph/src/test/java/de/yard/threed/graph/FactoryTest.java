@@ -9,7 +9,7 @@ import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.core.testutil.TestUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Created by thomass on 28.11.16.

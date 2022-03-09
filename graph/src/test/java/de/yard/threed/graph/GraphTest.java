@@ -11,7 +11,7 @@ import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.engine.testutil.DeterministicIntProvider;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;

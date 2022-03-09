@@ -10,7 +10,7 @@ import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 /**

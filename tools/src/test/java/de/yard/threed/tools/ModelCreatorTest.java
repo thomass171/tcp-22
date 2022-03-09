@@ -13,7 +13,7 @@ import de.yard.threed.tools.GltfBuilderResult;
 import de.yard.threed.tools.GltfMemoryBundle;
 import de.yard.threed.tools.ModelCreator;
 import de.yard.threed.tools.ToolsPlatform;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 /**

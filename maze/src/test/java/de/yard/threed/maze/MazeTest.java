@@ -18,12 +18,13 @@ import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.maze.testutils.TestUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static de.yard.threed.maze.RequestRegistry.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 /**
  * Tests using ECS (See GridTest for tests without ECS).
@@ -81,7 +82,7 @@ public class MazeTest {
         setup("skbn/SokobanWikipedia.txt");
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
-        assertEquals("number of entities (2 boxes)", 2, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals(2, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (2 boxes)");
 
         assertTrue(SystemState.readyToJoin());
 
@@ -93,10 +94,10 @@ public class MazeTest {
         assertEquals(1, loginEvents.size());
         int userEntityId = (Integer) loginEvents.get(0).getPayloadByIndex(2);
 
-        assertEquals("number of entites (2 boxes+avatar)", 2 + 1, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals(2 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (2 boxes+avatar)");
 
-        assertEquals("initial orientation", new GridOrientation().toString(), MazeUtils.getPlayerorientation(MazeUtils.getMainPlayer()).toString());
-        assertEquals("initial location", new Point(6, 1).toString(), MazeUtils.getPlayerposition(MazeUtils.getMainPlayer()).toString());
+        assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(MazeUtils.getMainPlayer()).toString(), "initial orientation");
+        assertEquals(new Point(6, 1).toString(), MazeUtils.getPlayerposition(MazeUtils.getMainPlayer()).toString(), "initial location");
 
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNRIGHT, userEntityId));
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD, userEntityId));
@@ -143,7 +144,7 @@ public class MazeTest {
         setup("maze/grid1.txt");
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
-        assertEquals("number of entities (0 boxes)", 0, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (0 boxes)");
 
         assertTrue(SystemState.readyToJoin());
 
@@ -152,14 +153,14 @@ public class MazeTest {
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
 
-        assertEquals("number of entites (avatar)", 1, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (avatar)");
 
         List<EcsEntity> players = MazeUtils.getPlayer();
-        assertEquals("number of player (avatar)", 1, players.size());
+        assertEquals(1, players.size(), "number of player (avatar)");
 
         EcsEntity player = players.get(0);
         MoverComponent mc = MoverComponent.getMoverComponent(player);
-        assertNotNull("player.MoverComponent", mc);
+        assertNotNull(mc, "player.MoverComponent");
         Point start = new Point(5, 1);
         TestUtil.assertPoint("start point", start, mc.getLocation());
         // Die Mover liegen alle auf y0!
@@ -173,7 +174,7 @@ public class MazeTest {
 
         // no balls without bot
         //assertEquals("number of entites (avatar+ball)", 2, SystemManager.findEntities((EntityFilter) null).size());
-        assertEquals("number of entites (avatar)", 1, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (avatar)");
 
     }
 
@@ -195,8 +196,8 @@ public class MazeTest {
         setup("maze/Area15x10.txt");
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
-        assertEquals("number of entities (1 bot, 4 diamonds, 2 balls)", 7, SystemManager.findEntities((EntityFilter) null).size());
-        assertEquals("number of entities (2 balls, 4 diamonds)", 2 + 4, SystemManager.findEntities(new ItemFilter()).size());
+        assertEquals(7, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (1 bot, 4 diamonds, 2 balls)");
+        assertEquals(2 + 4, SystemManager.findEntities(new ItemFilter()).size(), "number of entities (2 balls, 4 diamonds)");
 
         assertTrue(SystemState.readyToJoin());
 
@@ -205,31 +206,31 @@ public class MazeTest {
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
 
-        assertEquals("number of entites (1 bot, 4 diamonds, 2 balls+avatar+3 balls)", 7 + 4, SystemManager.findEntities((EntityFilter) null).size());
-        assertEquals("number of entities (5 balls, 4 diamonds)", 5 + 4, SystemManager.findEntities(new ItemFilter()).size());
+        assertEquals(7 + 4, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (1 bot, 4 diamonds, 2 balls+avatar+3 balls)");
+        assertEquals(5 + 4, SystemManager.findEntities(new ItemFilter()).size(), "number of entities (5 balls, 4 diamonds)");
 
         List<EcsEntity> players = MazeUtils.getPlayer();
-        assertEquals("number of player (bot+avatar)", 2, players.size());
+        assertEquals(2, players.size(), "number of player (bot+avatar)");
 
         EcsEntity bot = players.get(0);
         MoverComponent mc = MoverComponent.getMoverComponent(bot);
-        assertNotNull("MoverComponent", mc);
-        assertEquals("bot name", "Bot", bot.getName());
+        assertNotNull(mc, "MoverComponent");
+        assertEquals("Bot", bot.getName(), "bot name");
 
         EcsEntity player = players.get(1);
         mc = MoverComponent.getMoverComponent(player);
-        assertNotNull("MoverComponent", mc);
-        assertEquals("player name", "User0", player.getName());
+        assertNotNull(mc, "MoverComponent");
+        assertEquals("User0", player.getName(), "player name");
 
         List<EcsEntity> inventory = MazeUtils.getInventory(player);
-        assertEquals("inventory size", 3, inventory.size());
-        assertEquals("bullets", 3, MazeUtils.getBullets(player).size());
+        assertEquals(3, inventory.size(), "inventory size");
+        assertEquals(3, MazeUtils.getBullets(player).size(), "bullets");
 
         SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload("")));
         sceneRunner.runLimitedFrames(1);
-        assertEquals("bullets", 2, MazeUtils.getBullets(player).size());
+        assertEquals(2, MazeUtils.getBullets(player).size(), "bullets");
 
-        assertEquals("number of entites (avatar+bot+4 diamonds+5 balls)", 1 + 1 + 4 + 5, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals(1 + 1 + 4 + 5, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (avatar+bot+4 diamonds+5 balls)");
 
 
     }
@@ -253,7 +254,7 @@ public class MazeTest {
         setup("skbn/DavidJoffe.txt:2");
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
-        assertEquals("number of entities (0 boxes)", 10, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals(10, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (0 boxes)");
 
         assertTrue(SystemState.readyToJoin());
 
@@ -262,7 +263,7 @@ public class MazeTest {
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
 
-        assertEquals("number of entites (avatar+boxes)", 1 + 10, SystemManager.findEntities((EntityFilter) null).size());
+        assertEquals(1 + 10, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (avatar+boxes)");
 
     }
 
@@ -280,40 +281,40 @@ public class MazeTest {
         setup("maze/Maze-P-Simple.txt");
 
         // no boxes, no player
-        assertEquals("number of entities", 0, SystemManager.findEntities((EntityFilter) null).size());
-        assertEquals("number of player", 0, MazeUtils.getPlayer().size());
+        assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
+        assertEquals(0, MazeUtils.getPlayer().size(), "number of player");
         assertNull(MazeUtils.getMainPlayer());
 
         assertTrue(SystemState.readyToJoin());
         SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
         sceneRunner.runLimitedFrames(5);
 
-        assertEquals("number of entites (one player)", 1, SystemManager.findEntities((EntityFilter) null).size());
-        assertEquals("number of player", 1, MazeUtils.getPlayer().size());
+        assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player)");
+        assertEquals(1, MazeUtils.getPlayer().size(), "number of player");
         assertNotNull(MazeUtils.getMainPlayer());
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user0);
-        assertEquals("user0 initial orientation", Direction.N.toString(), MazeUtils.getPlayerorientation(user0).getDirection().toString());
+        assertEquals(Direction.N.toString(), MazeUtils.getPlayerorientation(user0).getDirection().toString(), "user0 initial orientation");
 
         SystemManager.putRequest(UserSystem.buildLoginRequest("u1", ""));
         sceneRunner.runLimitedFrames(5);
 
-        assertEquals("number of entites (two player+3 bullets)", 2 + 3, SystemManager.findEntities((EntityFilter) null).size());
-        assertEquals("number of player", 2, MazeUtils.getPlayer().size());
+        assertEquals(2 + 3, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (two player+3 bullets)");
+        assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
         assertNotNull(MazeUtils.getMainPlayer());
         EcsEntity user1 = MazeUtils.getPlayerByUsername("u1");
         assertNotNull(user1);
-        assertEquals("user1 initial orientation", Direction.E.toString(), MazeUtils.getPlayerorientation(user1).getDirection().toString());
+        assertEquals(Direction.E.toString(), MazeUtils.getPlayerorientation(user1).getDirection().toString(), "user1 initial orientation");
 
         // don't expect 3rd user (however, login should be possible)
         SystemManager.putRequest(UserSystem.buildLoginRequest("u2", ""));
         sceneRunner.runLimitedFrames(5);
-        assertEquals("number of player", 2, MazeUtils.getPlayer().size());
+        assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
 
         assertPosition(user1, new Point(4, 4));
 
         SystemManager.putRequest(new Request(TRIGGER_REQUEST_FORWARD, user1.getId()));
-        sceneRunner.runLimitedFrames(3,0);
+        sceneRunner.runLimitedFrames(3, 0);
         assertTrue(MazeUtils.isAnyMoving());
         // 5 seems to be sufficient for completing the move
         sceneRunner.runLimitedFrames(5);
@@ -324,7 +325,7 @@ public class MazeTest {
 
     void assertPosition(EcsEntity user, Point point) {
         MoverComponent mc = MoverComponent.getMoverComponent(user);
-        assertNotNull("user1.MoverComponent", mc);
+        assertNotNull(mc, "user1.MoverComponent");
         TestUtil.assertPoint(" point", point, mc.getLocation());
     }
 

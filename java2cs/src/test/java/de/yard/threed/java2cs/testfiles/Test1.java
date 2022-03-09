@@ -1,7 +1,7 @@
 package de.yard.threed.java2cs.testfiles;
 
 import org.apache.log4j.Logger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -251,7 +251,6 @@ class Node extends Test1 {
         }
     }
 
-    @Test
     public void testMethoda(AsyncJobDelegate<String> asyncJobDelegate) {
         asyncJobDelegate.completed("rt");
     }

@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static de.yard.threed.javanative.JavaUtil.sleepMs;
-import static org.junit.Assert.fail;
+
 
 public class TrafficTestUtils {
 
