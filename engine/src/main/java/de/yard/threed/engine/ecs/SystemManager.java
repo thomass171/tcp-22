@@ -276,23 +276,6 @@ public class SystemManager {
         paused = !paused;
     }
 
-    public static List<EcsEntity> findEntities(String[] tags) {
-        List<EcsEntity> result = new ArrayList<EcsEntity>();
-        for (EcsEntity e : entities) {
-            boolean match = true;
-            for (String tag : tags) {
-                if (e.getComponent(tag) == null) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) {
-                result.add(e);
-            }
-        }
-        return result;
-    }
-
     /**
      * So eine MEthode gabs doch schon mal? Find ich aber nicht mehr. Generischer list filter jetzt in EcsEntity.
      * Filter might be null, so returning all.

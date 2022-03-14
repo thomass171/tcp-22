@@ -155,7 +155,7 @@ public class MazeTest {
 
         assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (avatar)");
 
-        List<EcsEntity> players = MazeUtils.getPlayer();
+        List<EcsEntity> players = MazeUtils.getPlayerOrBoxes(false);
         assertEquals(1, players.size(), "number of player (avatar)");
 
         EcsEntity player = players.get(0);
@@ -197,7 +197,7 @@ public class MazeTest {
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(7, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (1 bot, 4 diamonds, 2 balls)");
-        assertEquals(2 + 4, SystemManager.findEntities(new ItemFilter()).size(), "number of entities (2 balls, 4 diamonds)");
+        assertEquals(2 + 4, MazeUtils.getItems(-1).size(), "number of entities (2 balls, 4 diamonds)");
 
         assertTrue(SystemState.readyToJoin());
 
@@ -207,9 +207,9 @@ public class MazeTest {
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
 
         assertEquals(7 + 4, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (1 bot, 4 diamonds, 2 balls+avatar+3 balls)");
-        assertEquals(5 + 4, SystemManager.findEntities(new ItemFilter()).size(), "number of entities (5 balls, 4 diamonds)");
+        assertEquals(5 + 4, MazeUtils.getItems(-1).size(), "number of entities (5 balls, 4 diamonds)");
 
-        List<EcsEntity> players = MazeUtils.getPlayer();
+        List<EcsEntity> players = MazeUtils.getPlayerOrBoxes(false);
         assertEquals(2, players.size(), "number of player (bot+avatar)");
 
         EcsEntity bot = players.get(0);

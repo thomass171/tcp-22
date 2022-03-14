@@ -418,7 +418,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE, new Payload(tilename/*17.10.21 TrafficWorld2D.basename*/, getVehicleList())));
 
         // Avatar anlegen (via login)
-        SystemManager.putRequest(UserSystem.buildLoginRequest("Freds account name",""));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("Freds account name", ""));
 
         // 24.1.22: State ready to join now needed for 'login'
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
@@ -614,7 +614,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     }
 
     private void report() {
-        List<EcsEntity> vehicles = SystemManager.findEntities(new String[]{VehicleComponent.TAG});
+        List<EcsEntity> vehicles = SystemManager.findEntities((e) -> VehicleComponent.getVehicleComponent(e) != null);
         for (EcsEntity e : vehicles) {
             VehicleComponent vhc = VehicleComponent.getVehicleComponent(e);
             GraphMovingComponent gmc = GraphMovingComponent.getGraphMovingComponent(e);
@@ -657,7 +657,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     }
 
     public static EcsEntity findVehicleByName(String name) {
-        List<EcsEntity> aircrafts = SystemManager.findEntities(new VehicleFilter()/*AircraftFilter()*/);
+        List<EcsEntity> aircrafts = EcsHelper.findEntitiesByComponent(VehicleComponent.TAG);
         EcsEntity found = null;
         int i;
         for (i = 0; i < aircrafts.size(); i++) {
@@ -722,18 +722,5 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     @Override
     public void initSettings(Settings settings) {
         settings.vrready = true;
-    }
-}
-
-class VehicleFilter implements EntityFilter {
-
-    @Override
-    public boolean matches(EcsEntity e) {
-        VehicleComponent vc = VehicleComponent.getVehicleComponent(e);
-        if (vc == null) {
-            return false;
-        }
-        //return vc.config.getType().equals(VehicleComponent.VEHICLE_AIRCRAFT);
-        return true;
     }
 }

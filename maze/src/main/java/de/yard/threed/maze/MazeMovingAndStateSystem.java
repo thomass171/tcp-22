@@ -328,7 +328,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         InputToRequestSystem.setPayload0(/*avatar.avatarE*/playerEntity.getName());
 
         //avatar.avatarE.addComponent(new InventoryComponent());
-        if (MazeUtils.getPlayer().size() > 1) {
+        if (MazeUtils.getPlayerOrBoxes(false).size() > 1) {
             createBullets(3, /*avatar.avatarE*/playerEntity.getId());
         }
     }

@@ -95,7 +95,7 @@ public class AvatarSystemTest {
         assertNotNull("Player", playerEntity.getName());
         assertEquals(testUserName, playerEntity.getName());
 
-        playerEntity = SystemManager.findEntities(new NameFilter(testUserName)).get(0);
+        playerEntity = SystemManager.findEntities(e->testUserName.equals(e.getName())).get(0);
         assertNotNull("player", playerEntity);
         assertNotNull("Player", playerEntity.getName());
         assertEquals(testUserName, playerEntity.getName());

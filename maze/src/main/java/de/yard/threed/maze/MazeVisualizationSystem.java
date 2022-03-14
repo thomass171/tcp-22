@@ -127,7 +127,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         } else {
             // mark hit objects. TODO don't hit boxes behind wall.
             double scale = 1.2;
-            for (EcsEntity box : MazeUtils.getBoxes()) {
+            for (EcsEntity box : MazeUtils.getPlayerOrBoxes(true)) {
 
                 if (ray.intersects(box.getSceneNode())) {
                     box.getSceneNode().getTransform().setScale(new Vector3(scale, scale, scale));
@@ -171,7 +171,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                 }
             }
         } else {
-            for (EcsEntity box : MazeUtils.getBoxes()) {
+            for (EcsEntity box : MazeUtils.getPlayerOrBoxes(true)) {
 
                 if (ray.intersects(box.getSceneNode())) {
                     return RequestRegistry.buildKICK();

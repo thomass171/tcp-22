@@ -11,7 +11,6 @@ import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsTestHelper;
-import de.yard.threed.engine.ecs.NameFilter;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserComponent;
 import de.yard.threed.engine.ecs.UserSystem;

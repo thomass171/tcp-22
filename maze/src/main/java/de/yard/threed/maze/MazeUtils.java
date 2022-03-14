@@ -5,13 +5,11 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleRegistry;
-import de.yard.threed.engine.ecs.ComponentFilter;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.engine.ecs.UserComponent;
-import de.yard.threed.engine.ecs.UserSystem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,27 +18,44 @@ public class MazeUtils {
 
     static Log logger = Platform.getInstance().getLog(MazeUtils.class);
 
-    public static List<EcsEntity> getBoxes() {
-        return SystemManager.findEntities(new MoverFilter(true));
-    }
-
-    public static List<EcsEntity> getItems() {
-        return SystemManager.findEntities(new ItemFilter());
-    }
-
     /**
      * player in terms of maze is an entity having a 'Mover', but not a movable box.
-     *
-     * @return
+     * Currently, every mover not being a player is a box.*
      */
-    public static List<EcsEntity> getPlayer() {
-        return SystemManager.findEntities(new MoverFilter(false));
-        // currently assuem all users joined
-        //return UserSystem.getAllUser();
+    public static List<EcsEntity> getPlayerOrBoxes(boolean forBoxes) {
+        return SystemManager.findEntities(e-> {
+            MoverComponent moverComponent = MoverComponent.getMoverComponent(e);
+            if (moverComponent == null) {
+                return false;
+            }
+            if (moverComponent.isPlayer() && !forBoxes) {
+                return true;
+            }
+            if (!moverComponent.isPlayer() && forBoxes) {
+                return true;
+            }
+            return false;
+        });
     }
 
+    public static List<EcsEntity> getItems(int owner) {
+        return SystemManager.findEntities(e -> {
+
+            ItemComponent itemComponent = ItemComponent.getItemComponent(e);
+            if (itemComponent == null) {
+                return false;
+            }
+            if (owner != -1 && owner != itemComponent.getOwner()) {
+                return false;
+            }
+            return true;
+        });
+    }
+
+
+
     public static EcsEntity getMainPlayer() {
-        List<EcsEntity> players = getPlayer();
+        List<EcsEntity> players = getPlayerOrBoxes(false);
         for (EcsEntity player : players) {
             if (!"Bot".equals(player.getName())) {
                 return player;
@@ -50,7 +65,7 @@ public class MazeUtils {
     }
 
     public static EcsEntity findPlayerByName(String name) {
-        List<EcsEntity> players = getPlayer();
+        List<EcsEntity> players = getPlayerOrBoxes(false);
         for (EcsEntity player : players) {
             if (name.equals(player.getName())) {
                 return player;
@@ -59,7 +74,7 @@ public class MazeUtils {
         return null;
     }
 
-    public static Point getPlayerposition(EcsEntity player ) {
+    public static Point getPlayerposition(EcsEntity player) {
         if (player == null) {
             return null;
         }
@@ -77,7 +92,7 @@ public class MazeUtils {
 
     public static List<Point> getBoxLocations() {
         List<Point> locations = new ArrayList<Point>();
-        for (EcsEntity box : getBoxes()) {
+        for (EcsEntity box : getPlayerOrBoxes(true)) {
             MoverComponent mc = MoverComponent.getMoverComponent(box);
             locations.add(mc.getLocation());
         }
@@ -114,7 +129,7 @@ public class MazeUtils {
 
     public static GridState buildGridStateFromEcs() {
         List<GridMover> players = new ArrayList<GridMover>();
-        for (EcsEntity player : MazeUtils.getPlayer()) {
+        for (EcsEntity player : MazeUtils.getPlayerOrBoxes(false)) {
             players.add(MoverComponent.getMoverComponent(player).getGridMover());
         }
         List<GridMover> boxes = buildBoxesFromEcs();
@@ -124,7 +139,7 @@ public class MazeUtils {
 
     public static List<GridMover> buildBoxesFromEcs() {
         List<GridMover> boxes = new ArrayList<GridMover>();
-        for (EcsEntity player : MazeUtils.getBoxes()) {
+        for (EcsEntity player : MazeUtils.getPlayerOrBoxes(true)) {
             boxes.add(MoverComponent.getMoverComponent(player).getGridMover());
         }
         return boxes;
@@ -132,7 +147,7 @@ public class MazeUtils {
 
     public static List<GridItem> buildItemsFromEcs() {
         List<GridItem> items = new ArrayList<GridItem>();
-        for (EcsEntity item : MazeUtils.getItems()) {
+        for (EcsEntity item : MazeUtils.getItems(-1)) {
             items.add(ItemComponent.getItemComponent(item).getGridItem());
         }
         return items;
@@ -140,7 +155,7 @@ public class MazeUtils {
 
     //TODO nur Components liefern? Alle Items sind enditities?->DVK
     public static List<EcsEntity> getInventory(int owner) {
-        return SystemManager.findEntities(ItemFilter.byOwner(owner));
+        return MazeUtils.getItems(owner);
     }
 
     public static List<EcsEntity> getInventory(EcsEntity player) {
@@ -149,7 +164,7 @@ public class MazeUtils {
     }
 
     public static List<EcsEntity> getBullets(EcsEntity player) {
-        return EcsEntity.filterList(getInventory(player), new ComponentFilter(BulletComponent.TAG));
+        return EcsEntity.filterList(getInventory(player), e -> e.getComponent(BulletComponent.TAG) != null);
     }
 
     public static String readMazefile(String filename/*, String levelname*/) {
@@ -191,19 +206,23 @@ public class MazeUtils {
     public static boolean isAnyMoving() {
 
         MoverComponent mover;
-        for (EcsEntity e : MazeUtils.getPlayer()) {
+        for (EcsEntity e : MazeUtils.getPlayerOrBoxes(false)) {
             mover = MoverComponent.getMoverComponent(e);
             if (mover.isMoving()) {
                 return true;
             }
         }
 
-        for (EcsEntity e : MazeUtils.getBoxes()) {
+        for (EcsEntity e : MazeUtils.getPlayerOrBoxes(true)) {
             mover = MoverComponent.getMoverComponent(e);
             if (mover.isMoving()) {
                 return true;
             }
         }
         return false;
+    }
+
+    public static List<EcsEntity> getPlayer() {
+        return getPlayerOrBoxes(false);
     }
 }

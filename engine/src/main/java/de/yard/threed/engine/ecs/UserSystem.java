@@ -75,9 +75,9 @@ public class UserSystem extends DefaultEcsSystem {
     }
 
     public static EcsEntity getInitialUser() {
-        List<EcsEntity> candidates = SystemManager.findEntities(new NameFilter("User0"));
+        List<EcsEntity> candidates = EcsHelper.findEntitiesByName("User0");
         if (candidates.size() == 0) {
-            SystemManager.findEntities(new NameFilter("User0"));
+            EcsHelper.findEntitiesByName("User0");
             return null;
         }
         return candidates.get(0);
@@ -92,6 +92,6 @@ public class UserSystem extends DefaultEcsSystem {
     }
 
     public static List<EcsEntity> getAllUser() {
-        return SystemManager.findEntities(new ComponentFilter(UserComponent.TAG));
+        return EcsHelper.findEntitiesByComponent(UserComponent.TAG);
     }
 }

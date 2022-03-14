@@ -364,7 +364,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         logger.debug("attaching all existing avatars to new vehicle");
 
         //9.3.21: Navigator hat auch TeleportComponent!
-        List<EcsEntity> avatars = SystemManager.findEntities(new String[]{TeleportComponent.TAG});
+        List<EcsEntity> avatars = SystemManager.findEntities((e) -> e.getComponent(TeleportComponent.TAG) != null);
         for (EcsEntity avatar : avatars) {
             if (AvatarComponent.getAvatarComponent(avatar) != null) {
                 attachAvatarToVehicle(avatar, vehicleEntity, config, teleportParentNode, nearView);
