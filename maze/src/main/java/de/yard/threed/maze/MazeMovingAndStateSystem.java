@@ -4,7 +4,6 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.engine.gui.Hud;
@@ -241,7 +240,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 logger.warn("No userEntityId in request. Ignoring user request");
                 return true;
             } else {
-                EcsEntity ray = UserSystem.getUserByEntityId((int)request.getUserEntityId());
+                EcsEntity ray = UserSystem.getUserByEntityId((int) request.getUserEntityId());
                 if (processUserRequest(currentstate, request, ray)) {
                     return true;
                 }
@@ -271,7 +270,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //Entity wurde schon als Avatar angelegt und kommt hier als Payload.
 
             EcsEntity playerEntity = (EcsEntity) evt.getPayloadByIndex(0);
-            MazeLayout layout = Grid.getInstance().getLayout();
+            MazeLayout layout = Grid.getInstance().getMazeLayout();
             Point launchPosition = layout.getNextLaunchPosition(usedLaunchPositions);
             if (launchPosition != null) {
                 joinPlayer(playerEntity, launchPosition);
@@ -288,8 +287,9 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
         //ist.
         // 14.2.22:More consistent approach. Independent from VR mode have a avatar and observer independent from each other.
+        MazeLayout layout = Grid.getInstance().getMazeLayout();
         MoverComponent mover;
-        mover = new MoverComponent(playerEntity.scenenode.getTransform()/*Observer.getInstance(),*/, true, launchPosition, Grid.getInstance().getLayout().getInitialOrientation(launchPosition));
+        mover = new MoverComponent(playerEntity.scenenode.getTransform()/*Observer.getInstance(),*/, true, launchPosition, layout.getInitialOrientation(launchPosition));
         usedLaunchPositions.add(launchPosition);
         if (MazeScene.vrInstance == null) {
 
@@ -328,8 +328,9 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         InputToRequestSystem.setPayload0(/*avatar.avatarE*/playerEntity.getName());
 
         //avatar.avatarE.addComponent(new InventoryComponent());
-        if (MazeUtils.getPlayerOrBoxes(false).size() > 1) {
-            createBullets(3, /*avatar.avatarE*/playerEntity.getId());
+        // In multi player every joined user gets three bullets
+        if (layout.getNumberOfTeams() > 1) {
+            createBullets(3, playerEntity.getId());
         }
     }
 
@@ -340,6 +341,10 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     private boolean processUserRequest(GridState currentstate, Request request, EcsEntity user) {
 
         MoverComponent mover = (MoverComponent) user.getComponent(MoverComponent.TAG);
+        if (mover == null) {
+            logger.error("no mover for user");
+            return true;
+        }
         if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
             attemptRotate(currentstate, mover, false);
             return true;
@@ -357,7 +362,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             return true;
         }
         if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_UNDO)) {
-            undo(currentstate, mover, Grid.getInstance().getLayout());
+            undo(currentstate, mover, Grid.getInstance().getMazeLayout());
             return true;
         }
         // 10.4.21: Wer triggered denn einen TRIGGER_REQUEST_FORWARDMOVE? Nur der Replay?
@@ -393,7 +398,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
      * <p>
      */
     private void attemptMove(GridState currentstate, MoverComponent mover, GridMovement movement) {
-        MazeLayout layout = Grid.getInstance().getLayout();
+        MazeLayout layout = Grid.getInstance().getMazeLayout();
 
         if (mover.isMoving()) {
             // nur sicherheitshalber, duerfte gar nicht aufgerufen werden.
@@ -585,7 +590,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             Scene.getCurrent().addToWorld(diamond.scenenode);
         }
         // only create bullets if we have bots (2 per bot). Bullets for player are created at join time
-        for (Point b : grid.getBots()) {
+        /* TODO 14.3.22 Hmm for (Point b : grid.getBots()) {
             //SceneNode p = MazeModelBuilder.buildSokobanBox();
             SceneNode body = MazeModelBuilder.buildSimpleBody(MazeSettings.getSettings().simplerayheight, MazeSettings.getSettings().simpleraydiameter, Color.ORANGE);
             EcsEntity bot = new EcsEntity(body);
@@ -597,7 +602,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //bot.addComponent(new InventoryComponent());
             Scene.getCurrent().addToWorld(bot.scenenode);
             createBullets(2, bot.getId());
-        }
+        }*/
 
 
         SystemState.state = SystemState.STATE_READY_TO_JOIN;

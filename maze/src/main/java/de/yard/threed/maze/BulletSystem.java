@@ -42,7 +42,7 @@ public class BulletSystem extends DefaultEcsSystem {
             case 1:
                 offset = bc.getOffset(tpf);
                 moveForward(ball, offset);
-                checkCollision(ball, bc, grid.getLayout(), MazeUtils.getPlayerOrBoxes(false));
+                checkCollision(ball, bc, grid.getMazeLayout(), MazeUtils.getPlayerOrBoxes(false));
                 break;
 
         }

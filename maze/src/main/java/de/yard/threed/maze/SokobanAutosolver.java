@@ -44,7 +44,7 @@ public class SokobanAutosolver {
     public void solve() {
         Timestamp timestamp=new Timestamp();
 
-        GridMover player = MazeFactory.buildMover(grid.getLayout().getNextLaunchPosition(null));
+        GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null));
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
 
         //no items here for now.
@@ -138,13 +138,13 @@ public class SokobanAutosolver {
         //logger.debug("known states now:" + solutions.size());
         for (GridMovement m : GridMovement.regularpossiblemoves) {
             //GridState nextstate = state.execute(m,grid.getLayout());
-            GridMovement rm = state.player.walk(m,state.player.getOrientation(),state,grid.getLayout());
+            GridMovement rm = state.player.walk(m,state.player.getOrientation(),state,grid.getMazeLayout());
             GridState nextstate =null;
             if (rm != null){
                 nextstate=new GridState(state.player, state.boxes,state.items);
             }
             if (nextstate != null) {
-                if (GridState.isSolved(state.boxes,grid.getLayout())) {
+                if (GridState.isSolved(state.boxes,grid.getMazeLayout())) {
                     logger.debug("Solved");
                     node.addMovement(m, null);
                     // Wenn ich aus meinem State einen Schritt in Richtung Lösung gefunden habe, versuche ich keinen anderen mehr.

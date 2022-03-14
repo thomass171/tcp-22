@@ -28,7 +28,6 @@ public class Grid {
     MazeLayout layout;
     List<Point> boxes;
     List<Point> diamonds;
-    List<Point> bots;
     static Grid instance;
     Map<String, String> tags;
 
@@ -37,10 +36,9 @@ public class Grid {
     static final int STRAIGHTWALLMODE_LOW_PART = 2;
     static final int STRAIGHTWALLMODE_HIGH_PART = 3;
 
-    public Grid(MazeLayout layout, List<Point> boxes, List<Point> bots, List<Point> diamonds, Map<String, String> tags) {
+    public Grid(MazeLayout layout, List<Point> boxes, List<Point> diamonds, Map<String, String> tags) {
         this.layout = layout;
         this.boxes = boxes;
-        this.bots = bots;
         this.diamonds = diamonds;
         this.tags = tags;
 
@@ -246,19 +244,11 @@ public class Grid {
         return surroundingwalls == 1;
     }
 
-    public MazeLayout getLayout() {
-        return layout;
-    }
-
     public List<Point> getBoxes() {
         return boxes;
     }
 
     public List<Point> getDiamonds() {
         return diamonds;
-    }
-
-    public List<Point> getBots() {
-        return bots;
     }
 }

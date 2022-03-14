@@ -107,7 +107,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             MoverComponent mc = MoverComponent.getMoverComponent(mainplayer);
 
             // show possible teleport destinations
-            List<GridMovement> moveOptions = mc.getMoveOptions(state, Grid.getInstance().getLayout());
+            List<GridMovement> moveOptions = mc.getMoveOptions(state, Grid.getInstance().getMazeLayout());
 
             logger.debug("found moves:" + moveOptions.size());
             List<SceneNode> tileCandidates = new ArrayList<SceneNode>();

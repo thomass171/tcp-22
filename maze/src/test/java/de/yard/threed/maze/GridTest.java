@@ -48,7 +48,7 @@ public class GridTest {
 
         Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "maze/grid1.txt"))).get(0);
 
-        Point startPosition = grid.getLayout().getNextLaunchPosition(null);
+        Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null);
         TestUtil.assertEquals("width", 11, grid.getMaxWidth());
         TestUtil.assertEquals("height", 7, grid.getHeight());
         TestUtil.assertEquals("start.x", 5, startPosition.getX());
@@ -68,7 +68,7 @@ public class GridTest {
 
         TestUtil.assertPoint("current location", new Point(5, 1), player.getLocation());
         GridState state = new GridState(player, new ArrayList<GridMover>(), new ArrayList<GridItem>());
-        List<GridMovement> moveOptions = player.getMoveOptions(state, grid.getLayout());
+        List<GridMovement> moveOptions = player.getMoveOptions(state, grid.getMazeLayout());
         // 2 rotate, 3 simple move, 0 push, 8+4+8 relocates
         TestUtil.assertEquals("moveOptions", 2 + 3 + 0 + 8 + 4 + 8, moveOptions.size());
     }
@@ -118,7 +118,7 @@ public class GridTest {
 
         Grid grid = Grid.loadByReader(new StringReader(TestUtils.loadGrid("skbn/SokobanSimple.txt"))).get(0);
 
-        Point startPosition = grid.getLayout().getNextLaunchPosition(null);
+        Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null);
         GridMover player = MazeFactory.buildMover(startPosition);
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
         TestUtil.assertEquals("boxes", 1, boxes.size());
@@ -126,32 +126,32 @@ public class GridTest {
 
         TestUtil.assertPoint("current location", new Point(2, 1), player.getLocation());
         GridState state = new GridState(player, boxes, new ArrayList<GridItem>());
-        List<GridMovement> moveOptions = player.getMoveOptions(state, grid.getLayout());
+        List<GridMovement> moveOptions = player.getMoveOptions(state, grid.getMazeLayout());
         // 2 rotate, 2 simple move, 1 push, 6 relocates (not behind box)
         TestUtil.assertEquals("moveOptions", 2 + 2 + 1 + 6, moveOptions.size());
 
         TestUtils.rotatePlayer(player, true, new Point(2, 1));
 
         state = new GridState(player, boxes, new ArrayList<GridItem>());
-        moveOptions = player.getMoveOptions(state, grid.getLayout());
+        moveOptions = player.getMoveOptions(state, grid.getMazeLayout());
         // 2 rotate, 2 simple move, 0 push, 6 relocates (not behind box)
         TestUtil.assertEquals("moveOptions", 2 + 2 + 6, moveOptions.size());
 
-        TestUtils.walkPlayer(player, GridMovement.Forward, state, grid.getLayout(), new Point(1, 1));
+        TestUtils.walkPlayer(player, GridMovement.Forward, state, grid.getMazeLayout(), new Point(1, 1));
         TestUtils.rotatePlayer(player, false, new Point(1, 1));
-        TestUtils.walkPlayer(player, GridMovement.Forward, state, grid.getLayout(), new Point(1, 2));
+        TestUtils.walkPlayer(player, GridMovement.Forward, state, grid.getMazeLayout(), new Point(1, 2));
         TestUtils.rotatePlayer(player, false, new Point(1, 2));
         // forward should fail because of box
-        TestUtils.walkPlayer(player, GridMovement.Forward, state, grid.getLayout(), new Point(1, 2));
+        TestUtils.walkPlayer(player, GridMovement.Forward, state, grid.getMazeLayout(), new Point(1, 2));
         // but push should be possible
-        TestUtils.walkPlayer(player, GridMovement.ForwardMove, state, grid.getLayout(), new Point(2, 2));
-        TestUtils.walkPlayer(player, GridMovement.Right, state, grid.getLayout(), new Point(2, 1));
-        TestUtils.walkPlayer(player, GridMovement.Forward, state, grid.getLayout(), new Point(3, 1));
+        TestUtils.walkPlayer(player, GridMovement.ForwardMove, state, grid.getMazeLayout(), new Point(2, 2));
+        TestUtils.walkPlayer(player, GridMovement.Right, state, grid.getMazeLayout(), new Point(2, 1));
+        TestUtils.walkPlayer(player, GridMovement.Forward, state, grid.getMazeLayout(), new Point(3, 1));
         TestUtils.rotatePlayer(player, true, new Point(3, 1));
 
-        TestUtil.assertFalse("solved", GridState.isSolved(boxes, grid.getLayout()));
-        TestUtils.walkPlayer(player, GridMovement.ForwardMove, state, grid.getLayout(), new Point(3, 2));
-        TestUtil.assertTrue("solved", GridState.isSolved(boxes, grid.getLayout()));
+        TestUtil.assertFalse("solved", GridState.isSolved(boxes, grid.getMazeLayout()));
+        TestUtils.walkPlayer(player, GridMovement.ForwardMove, state, grid.getMazeLayout(), new Point(3, 2));
+        TestUtil.assertTrue("solved", GridState.isSolved(boxes, grid.getMazeLayout()));
 
     }
 
@@ -168,7 +168,7 @@ public class GridTest {
 
         Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
 
-        GridMover player = MazeFactory.buildMover(grid.getLayout().getNextLaunchPosition(null));
+        GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null));
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
         GridMover bottombox = boxes.get(0);
         GridMover topbox = boxes.get(1);
@@ -181,39 +181,39 @@ public class GridTest {
         TestUtil.assertNotNull("can push box ", gridState.canPushFrom(new Point(5, 3), GridOrientation.fromDirection('E'), grid.getMazeLayout()));
 
         // forward should fail because of unmovable box. Same for kick
-        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getLayout(), new Point(6, 1), null);
-        TestUtils.walkPlayer(player, boxes, GridMovement.Kick, grid.getLayout(), new Point(6, 1), null);
+        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(6, 1), null);
+        TestUtils.walkPlayer(player, boxes, GridMovement.Kick, grid.getMazeLayout(), new Point(6, 1), null);
         TestUtil.assertPoint("bottombox box location", new Point(6, 2), bottombox.getLocation());
 
         // also pull should fail
-        TestUtils.walkPlayer(player, boxes, GridMovement.Pull, grid.getLayout(), new Point(6, 1), null);
+        TestUtils.walkPlayer(player, boxes, GridMovement.Pull, grid.getMazeLayout(), new Point(6, 1), null);
         TestUtil.assertPoint("bottom box location", new Point(6, 2), bottombox.getLocation());
 
-        TestUtils.walkPlayer(player, boxes, GridMovement.Right, grid.getLayout(), new Point(7, 1));
-        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getLayout(), new Point(7, 2));
-        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getLayout(), new Point(7, 3));
+        TestUtils.walkPlayer(player, boxes, GridMovement.Right, grid.getMazeLayout(), new Point(7, 1));
+        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(7, 2));
+        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(7, 3));
 
         // forward should fail because of wall
-        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getLayout(), new Point(7, 3));
+        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(7, 3));
 
         TestUtils.rotatePlayer(player, true, new Point(7, 3));
 
         // push box
-        TestUtils.walkPlayer(player, boxes, GridMovement.ForwardMove, grid.getLayout(), new Point(6, 3), GridMovement.ForwardMove);
+        TestUtils.walkPlayer(player, boxes, GridMovement.ForwardMove, grid.getMazeLayout(), new Point(6, 3), GridMovement.ForwardMove);
         TestUtil.assertPoint("top box location", new Point(5, 3), topbox.getLocation());
         TestUtil.assertPoint("player location", new Point(6, 3), player.getLocation());
 
         // kick (keeps position, only moves box)
-        TestUtils.walkPlayer(player, boxes, GridMovement.Kick, grid.getLayout(), new Point(6, 3), GridMovement.Kick);
+        TestUtils.walkPlayer(player, boxes, GridMovement.Kick, grid.getMazeLayout(), new Point(6, 3), GridMovement.Kick);
         TestUtil.assertPoint("top box location", new Point(4, 3), topbox.getLocation());
         TestUtil.assertPoint("player location", new Point(6, 3), player.getLocation());
 
         // kick again from same position
-        TestUtils.walkPlayer(player, boxes, GridMovement.Kick, grid.getLayout(), new Point(6, 3), GridMovement.Kick);
+        TestUtils.walkPlayer(player, boxes, GridMovement.Kick, grid.getMazeLayout(), new Point(6, 3), GridMovement.Kick);
         TestUtil.assertPoint("top box location", new Point(3, 3), topbox.getLocation());
 
         // pull it back
-        TestUtils.walkPlayer(player, boxes, GridMovement.Pull, grid.getLayout(), new Point(6, 3), GridMovement.Pull);
+        TestUtils.walkPlayer(player, boxes, GridMovement.Pull, grid.getMazeLayout(), new Point(6, 3), GridMovement.Pull);
         TestUtil.assertPoint("top box location", new Point(4, 3), topbox.getLocation());
     }
 
@@ -237,7 +237,7 @@ public class GridTest {
 
     /**
      * ###############
-     * #     %       #
+     * #     @       #
      * #  #        # #
      * #  ## D # D## #
      * #  #   ###  # #
@@ -277,15 +277,15 @@ public class GridTest {
         TestUtil.assertNull("right of 6,2", pillar[1]);
         TestUtil.assertNotNull("center of 6,2", pillar[2]);
 
-        GridMover player = MazeFactory.buildMover(grid.getLayout().getNextLaunchPosition(null));
+        GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null));
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
         TestUtil.assertEquals("boxes", 0, boxes.size());
 
 
         TestUtil.assertPoint("current location", new Point(6, 4), player.getLocation());
 
-        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getLayout(), new Point(6, 5));
-        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getLayout(), new Point(6, 6));
+        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(6, 5));
+        TestUtils.walkPlayer(player, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(6, 6));
 
     }
 
@@ -324,17 +324,17 @@ public class GridTest {
         loadGridAndTerrain("maze/Maze-P-Simple.txt");
 
         List<Point> usedLaunchPositions = new ArrayList<Point>();
-        Point startPosition = grid.getLayout().getNextLaunchPosition(usedLaunchPositions);
+        Point startPosition = grid.getMazeLayout().getNextLaunchPosition(usedLaunchPositions);
         GridMover firstPlayer = MazeFactory.buildMover(startPosition);
         usedLaunchPositions.add(startPosition);
         TestUtil.assertPoint("current location", new Point(5, 1), firstPlayer.getLocation());
 
-        startPosition = grid.getLayout().getNextLaunchPosition(usedLaunchPositions);
+        startPosition = grid.getMazeLayout().getNextLaunchPosition(usedLaunchPositions);
         GridMover secondPlayer = MazeFactory.buildMover(startPosition);
         usedLaunchPositions.add(startPosition);
         TestUtil.assertPoint("current location", new Point(4, 4), secondPlayer.getLocation());
 
-        assertNull(grid.getLayout().getNextLaunchPosition(usedLaunchPositions));
+        assertNull(grid.getMazeLayout().getNextLaunchPosition(usedLaunchPositions));
     }
 
     private void loadGridAndTerrain(String mazeName) throws InvalidMazeException {

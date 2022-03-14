@@ -39,7 +39,7 @@ public class SokobanTest {
         try {
             Grid grid = Grid.loadByReader(new StringReader(TestUtils.loadGrid("skbn/SokobanWikipedia.txt"))).get(0);
 
-            Point startPosition = grid.getLayout().getNextLaunchPosition(null);
+            Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null);
             TestUtil.assertEquals("width", 9, grid.getMaxWidth());
             TestUtil.assertEquals("height", 6, grid.getHeight());
             TestUtil.assertEquals("start.x", 6, startPosition.getX());

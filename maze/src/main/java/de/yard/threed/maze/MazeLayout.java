@@ -21,7 +21,7 @@ public class MazeLayout {
     public List<Point> walls;
     public List<Point> destinations;
     // Several sets of start positions. Starting at lower (small y) left (small x).
-    public List<List<Point>> initialPosition;
+    private List<List<Point>> initialPosition;
     //private static MazeLayout instance;
     int maxwidth, height;
     public List<Point> fields;
@@ -71,5 +71,9 @@ public class MazeLayout {
         }
         // then just use 'West'.
         return orientation.rotate(false);
+    }
+
+    public int getNumberOfTeams() {
+        return initialPosition.size();
     }
 }

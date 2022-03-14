@@ -1,11 +1,14 @@
 package de.yard.threed.maze;
 
+import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
+import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.*;
 
 /**
@@ -16,13 +19,16 @@ import de.yard.threed.engine.platform.common.*;
 public class BotSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(BotSystem.class);
 
-    boolean botsystemdebuglog = false;
+    private boolean botsystemdebuglog = true;
+    private int botsNeeded = 0;
 
     /**
      *
      */
     public BotSystem() {
-        super(new String[]{BotComponent.TAG}, new RequestType[]{}, new EventType[]{});
+        super(new String[]{BotComponent.TAG},
+                new RequestType[]{},
+                new EventType[]{EventRegistry.EVENT_MAZE_LOADED, UserSystem.USER_EVENT_JOINED});
     }
 
     @Override
@@ -43,6 +49,24 @@ public class BotSystem extends DefaultEcsSystem {
         return false;
     }
 
+    @Override
+    public void process(Event evt) {
 
+        if (botsystemdebuglog) {
+            logger.debug("got event " + evt.getType());
+        }
 
+        if (evt.getType().equals(EventRegistry.EVENT_MAZE_LOADED)) {
+            Grid grid = (Grid) evt.getPayloadByIndex(0);
+            botsNeeded = grid.getMazeLayout().getNumberOfTeams() - 1;
+        }
+        if (evt.getType().equals(UserSystem.USER_EVENT_JOINED)) {
+            // Start a bot for remaining players. But only once, the login request fired here will als trigger a JOINED event again.
+            // Be prepared for inconsistent (negative) botNeeded.
+            for (int i = 0; botsNeeded > 0 && i < botsNeeded; i++) {
+                SystemManager.putRequest(UserSystem.buildLoginRequest("bot0", ""));
+            }
+            botsNeeded=0;
+        }
+    }
 }

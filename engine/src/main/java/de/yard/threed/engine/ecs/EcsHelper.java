@@ -4,6 +4,10 @@ import java.util.List;
 
 public class EcsHelper {
 
+    public static List<EcsEntity> findAllEntities() {
+        return SystemManager.findEntities(null);
+    }
+
     public static List<EcsEntity> findEntitiesByName(String name) {
         return SystemManager.findEntities(e -> name.equals(e.getName()));
     }

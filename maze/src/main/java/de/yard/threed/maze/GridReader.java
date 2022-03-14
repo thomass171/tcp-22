@@ -84,7 +84,6 @@ class GridDraft {
         boxes = new ArrayList<Point>();
         destinations = new ArrayList<Point>();
         diamonds = new ArrayList<Point>();
-        bots = new ArrayList<Point>();
         fields = new ArrayList<Point>();
 
         if (rows.size() < 3) {
@@ -156,10 +155,6 @@ class GridDraft {
                             boxes.add(p);
                             fields.add(p);
                             break;
-                        case '%':
-                            bots.add(p);
-                            fields.add(p);
-                            break;
                         case 'D':
                             diamonds.add(p);
                             fields.add(p);
@@ -174,7 +169,7 @@ class GridDraft {
             throw new InvalidMazeException("no start position");
         //default heading is 'N'orth.
         MazeLayout mazeLayout = new MazeLayout(walls, destinations, playerposition, maxwidth, height, fields);
-        Grid grid = new Grid(mazeLayout, boxes, bots, diamonds, tags);
+        Grid grid = new Grid(mazeLayout, boxes, diamonds, tags);
 
         return grid;
 
