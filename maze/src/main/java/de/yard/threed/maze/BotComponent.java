@@ -6,6 +6,8 @@ import de.yard.threed.engine.ecs.EcsComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
 
 /**
+ * 14.3.22: Not needed because a bot is just a regular user?
+ *
  * Created by thomass on 08.04.21.
  */
 public class BotComponent extends EcsComponent {

@@ -10,6 +10,7 @@ import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.avatar.AvatarSystem;
+import de.yard.threed.engine.avatar.AvatarABuilder;
 import de.yard.threed.engine.ecs.InputToRequestSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserSystem;
@@ -55,7 +56,7 @@ public class MazeScene extends Scene {
 
         // command line arguments are handled in system builder
         Configuration configuration = Configuration.getDefaultConfiguration();
-        configuration.addConfiguration(new ConfigurationByProperties(new BundleResource(BundleRegistry.getBundle("maze"), "maze.properties")),true);
+        configuration.addConfiguration(new ConfigurationByProperties(new BundleResource(BundleRegistry.getBundle("maze"), "maze.properties")), true);
 
         boolean isMP = false;
         if (isMP) {
@@ -113,7 +114,9 @@ public class MazeScene extends Scene {
 
         SystemManager.addSystem(new UserSystem());
         AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
-        //16.5.21 avatarSystem.initialTransform = viewpoint;
+        // AvatarA needs to be raised above ground (maze is in xz plane) to have the view point in head height for viewing other avatars eye to eye.
+        avatarSystem.setAvatarBuilder(new AvatarABuilder(new LocalTransform(new Vector3(0,0.7,0),Quaternion.buildRotationY(new Degree(-90)))));
+        avatarSystem.setViewTransform(getViewTransform());
         SystemManager.addSystem(avatarSystem);
         SystemManager.addSystem(new MazeVisualizationSystem());
         //16.4.21: Kein main menu mehr. Level change geht einfach über Neustart. Dafuer das control menu togglen.
@@ -198,7 +201,7 @@ public class MazeScene extends Scene {
         addLight();
 
         // last init statement. Queue login request
-        SystemManager.putRequest(UserSystem.buildLoginRequest("",""));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
 
     }
 
@@ -281,5 +284,15 @@ public class MazeScene extends Scene {
     public void update() {
         //for x/y/z. Only in debug mode (MazeSettings.getSettings().debug)? Better location??
         Observer.getInstance().update();
+    }
+
+    /**
+     * The preferred position/rotation of the oberver.
+     * @return
+     */
+    public static LocalTransform getViewTransform() {
+        LocalTransform viewTransform = MazeSettings.getSettings().getViewpoint();
+        viewTransform.position = viewTransform.position.add(new Vector3(0, MazeScene.rayy, 0));
+        return viewTransform;
     }
 }

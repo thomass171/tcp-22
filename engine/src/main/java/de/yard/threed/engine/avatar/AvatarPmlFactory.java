@@ -23,17 +23,18 @@ import de.yard.threed.engine.platform.common.SimpleGeometry;
 public class AvatarPmlFactory {
 
     /**
-     * Simple A-like avatar
+     * Simple A-like avatar. Body runs along z-axis(?) facing up (+y)(?)
+     * Only specific colors are allowed: "red","blue","green","darkgreen"
      */
-    public static PortableModelList buildAvatarA() {
+    public static PortableModelList buildAvatarA(String color) {
         double headRadius = 0.20;
 
         double bottomRadius = 0.4f;
         double topRadius = 0.1;
         double baseHeight = 0.8;
 
-        PortableMaterial mainMaterial = new PortableMaterial("mainMaterial", Color.RED);
-        PortableMaterial faceMaterial = new PortableMaterial("faceMaterial", "data:textures/Face-red.png");
+        PortableMaterial mainMaterial = new PortableMaterial("mainMaterial", Color.parseString(color));
+        PortableMaterial faceMaterial = new PortableMaterial("faceMaterial", "data:textures/Face-" + color + ".png");
         WoodenToyPmlFactory tbf = new WoodenToyPmlFactory();
 
         PortableModelDefinition body = buildBody(baseHeight, topRadius, bottomRadius, "mainMaterial");

@@ -53,7 +53,7 @@ public class Setup {
         if (System.getProperty("scene") == null) {
 
             System.setProperty("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
-            //System.setProperty("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
+            System.setProperty("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
             System.setProperty("scene", "de.yard.threed.maze.MazeScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
             //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
@@ -64,7 +64,7 @@ public class Setup {
                 properties.put("argv.enableAutomove", "true");
                 System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
             }
-            boolean demo = false;
+            boolean demo = true;
             if (demo) {
                 properties.put("argv.basename", "traffic:tiles/Demo.xml");
                 // GraphMovingComponent.automove is needed.

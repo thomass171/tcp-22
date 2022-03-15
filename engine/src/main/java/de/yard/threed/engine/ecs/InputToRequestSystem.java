@@ -276,8 +276,10 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             String clientid = (String) evt.getPayloadByIndex(1);
             Integer userEntityId = (Integer) evt.getPayloadByIndex(2);
 
-            //TODO check clientid that login was from here
-            this.userEntityId = userEntityId;
+            //TODO check clientid that login was from here. For now only consider first login to be the player
+            if (this.userEntityId == null) {
+                this.userEntityId = userEntityId;
+            }
         }
     }
 
@@ -342,11 +344,10 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
     /**
      * Helper for sending a request with a userEntityId
-     *
      */
-    public static void sendRequestWithId(Request request){
+    public static void sendRequestWithId(Request request) {
         InputToRequestSystem inputToRequestSystem = (InputToRequestSystem) SystemManager.findSystem(InputToRequestSystem.TAG);
-        if (inputToRequestSystem==null){
+        if (inputToRequestSystem == null) {
             return;
         }
         request.setUserEntityId(inputToRequestSystem.getUserEntityId());

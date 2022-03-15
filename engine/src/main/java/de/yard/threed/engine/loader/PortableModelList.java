@@ -250,13 +250,13 @@ public class PortableModelList {
         return buildModel(bundle, null);
     }
 
-    public SceneNode buildModel(Bundle bundle, /*ResourcePath rpath,*/ ResourcePath alttexturepath/*, boolean dummywegensignatureindeutigkeit*/) {
+    public SceneNode buildModel(Bundle bundle, ResourcePath alttexturepath) {
         SceneNode rootnode = new SceneNode();
         if (name != null) {
             rootnode.setName(name);
         }
         for (int i = 0; i < objects.size(); i++) {
-            rootnode.attach(buildModel(bundle, /*rpath,*/ objects.get(i), alttexturepath/*, dummywegensignatureindeutigkeit*/));
+            rootnode.attach(buildModel(bundle, objects.get(i), alttexturepath));
         }
         return rootnode;
     }

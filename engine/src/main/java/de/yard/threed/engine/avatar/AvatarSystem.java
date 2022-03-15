@@ -34,6 +34,9 @@ public class AvatarSystem extends DefaultEcsSystem {
 
     public static LocalTransform initialTransform = null;
     boolean enableObserverComponent = false;
+    private AvatarBuilder avatarBuilder = null;
+    private boolean isFirstJoin = true;
+    private LocalTransform viewTransform;
 
     /**
      *
@@ -57,6 +60,14 @@ public class AvatarSystem extends DefaultEcsSystem {
             enableNearView = (boolean) b;
         }
         return new AvatarSystem(false);
+    }
+
+    public void setAvatarBuilder(AvatarBuilder avatarBuilder) {
+        this.avatarBuilder = avatarBuilder;
+    }
+
+    public void setViewTransform(LocalTransform viewTransform) {
+        this.viewTransform = viewTransform;
     }
 
     /**
@@ -105,10 +116,21 @@ public class AvatarSystem extends DefaultEcsSystem {
             // Attach the oberver to the avatar. Is the connection to observer good located here?
             // 19.11.21: Should be independant from ObserverComponent? Probably. If there is an oberver, attach it to avatar
             // This is also reached for bot and MP joining.
-            // 14.2.22 Attach observer independent from VR
-            if ((boolean) forLogin && Observer.getInstance() != null) {
-                logger.debug("Attaching oberserver to avatar");
+            // 14.2.22 Attach observer independent from VR. But only to the first player (for now)
+            if ((boolean) forLogin && Observer.getInstance() != null && isFirstJoin) {
+                logger.debug("Attaching oberserver " + Observer.getInstance().getTransform() + " to avatar " + avatar.getSceneNode().getTransform());
                 Observer.getInstance().getTransform().setParent(avatar.getSceneNode().getTransform());
+
+                // In non VR the position might need to be raised to head height and view direction slightly down. (eg in maze)
+                if (viewTransform != null && VrInstance.getInstance() == null) {
+
+                    // MazeScene.rayy now is covered by avatarbuilder
+                    //LocalTransform viewTransform = avatarBuilder.getViewTransform();
+                    Observer.getInstance().initFineTune(viewTransform/*getSettings().getViewpoint()*/.position/*.add(new Vector3(0, MazeScene.rayy, 0))*/);
+                    // Rotation for looking slightly down.
+                    Observer.getInstance().getInstance().getTransform().setRotation(viewTransform/*getSettings().getViewpoint()*/.rotation);
+                }
+                isFirstJoin = false;
             }
             //avatar.avatarE.setName("Player");
             logger.debug(userEntity.getName() + " joined");
@@ -126,29 +148,13 @@ public class AvatarSystem extends DefaultEcsSystem {
     }
 
     /**
-     * 15.5.21: MA35: camera nicht mehr am Avatar, sondern Observer
-     * Trennung ist aber knifflig. Darum erstmal Avatar nur fuer Bots, aber nicht main player. Geht aber nicht so einfach, also doch auch fuer player?
+     * Build avatar for user. No observer change here.
      */
-    private static Avatar buildAvatarForUserEntity(EcsEntity user) {
+    private Avatar buildAvatarForUserEntity(EcsEntity user) {
         logger.debug("Building avatar for player " + user);
 
-        Avatar av = new Avatar(user);
-        av.enableBody();
+        Avatar av = new Avatar(user, avatarBuilder);
         Scene.getCurrent().addToWorld(av.getSceneNode());
-
-        //
-       /* if (Observer.getInstance()!=null) {
-            Observer.getInstance().getTransform().setParent(avatar.getNode().getTransform());
-        }*/
-
-        //1.4.21 Player.init(avatar);
-
-
-        /*15.5.21 war eh ne Kruecke
-        if (initialTransform != null) {
-            av.setPosition(initialTransform.position);
-            av.setRotation(initialTransform.rotation);
-        }*/
         return av;
     }
 }

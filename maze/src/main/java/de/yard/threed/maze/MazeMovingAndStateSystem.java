@@ -264,10 +264,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             if (Grid.getInstance() == null) {
                 throw new RuntimeException("unexpected flow. state no readtojoin?");
             }
-            //create player entity and publish "new player". But not before maze was loaded.
-            //das geht am einfachsten per Avatar, obwohl das fuer MP fragwürdig ist.
-            // 1.4.21: Avatar was build by AvatarSystem (and attached to world and user entity)
-            //Entity wurde schon als Avatar angelegt und kommt hier als Payload.
+            // Init player (entity already created) and publish "new player". But not before maze was loaded.
+            // 1.4.21: Avatar was build by AvatarSystem (and attached to world and previously created user entity).
 
             EcsEntity playerEntity = (EcsEntity) evt.getPayloadByIndex(0);
             MazeLayout layout = Grid.getInstance().getMazeLayout();
@@ -281,38 +279,25 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     }
 
     /**
-     * Join a new player
+     * Join a new player.
      */
     private void joinPlayer(EcsEntity playerEntity, Point launchPosition) {
         //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
         //ist.
-        // 14.2.22:More consistent approach. Independent from VR mode have a avatar and observer independent from each other.
+        // 14.2.22: More consistent approach. Independent from VR mode have a avatar and observer independent from each other, but
+        // observer always attached to avatar (in AvatarSystem).
         MazeLayout layout = Grid.getInstance().getMazeLayout();
         MoverComponent mover;
-        mover = new MoverComponent(playerEntity.scenenode.getTransform()/*Observer.getInstance(),*/, true, launchPosition, layout.getInitialOrientation(launchPosition));
+        mover = new MoverComponent(playerEntity.scenenode.getTransform(), true, launchPosition, layout.getInitialOrientation(launchPosition));
         usedLaunchPositions.add(launchPosition);
-        if (MazeScene.vrInstance == null) {
+        /*Now in AvatarSystem if (MazeScene.vrInstance == null) {
 
-
-            // Also, Observer wird an Avatar attached. Der hat aber y0 als Bezugspunkt(?), so dass Observer angehoben wird.
-            // Done in AvatarSystem. Observer.getInstance().getTransform().setParent(avatar.getTransform());
-
-            // 16.5.21: rayy wurde freher irgendwie anders gesetzt. So gehts aber auch erstmal.
-            // 31.5.21: Besser ueber finetune, damit er bei xyz nicht springt. Das beisst sich aber mit viewpoint. Muesste nicht Avatar angehoben werden? Hmm
-            // setPosition ueber den Observer transform untergraebt aber finetune. doof. So ist jetzt aber gut.
-            //Observer.getInstance().getTransform().setPosition(getSettings().getViewpoint().position.add(new Vector3(0,MazeScene.rayy,0)));
             Observer.getInstance().initFineTune(getSettings().getViewpoint().position.add(new Vector3(0, MazeScene.rayy, 0)));
-            //Observer.getInstance().getTransform().translateY(MazeScene.rayy);
-            //Observer.getInstance().initFineTune(MazeScene.rayy);
-            //avatar.getTransform().translateY(MazeScene.rayy);
-            // Rotation ist blick nach schraeg unten
-            Observer.getInstance().getTransform().setRotation(getSettings().getViewpoint().rotation);
+            // Rotation for looking slightly down.
+            Observer.getInstance().getInstance().getTransform().setRotation(getSettings().getViewpoint().rotation);
 
-        }
-        playerEntity/*avatar.avatarE.*/.addComponent(mover);
-
-        //MazeView.ray = avatar.avatarE;
-        //1.4.21 Scene.getCurrent().addToWorld(MazeView.ray.scenenode);
+        }*/
+        playerEntity.addComponent(mover);
 
         if (MazeVisualizationSystem.view != null) {
             /*15.5.21 das ist doch auch Asbach Kruecke
@@ -325,7 +310,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         // why didn't that occur before?
         //15.5.21: Scene.getCurrent().getMainCamera().getCarrier().getTransform().setPosition(new Vector3(0, st.simplerayheight / 2 + 0.3f, 0.2f/*0/*+0.4f*/));
 
-        InputToRequestSystem.setPayload0(/*avatar.avatarE*/playerEntity.getName());
+        InputToRequestSystem.setPayload0(playerEntity.getName());
 
         //avatar.avatarE.addComponent(new InventoryComponent());
         // In multi player every joined user gets three bullets

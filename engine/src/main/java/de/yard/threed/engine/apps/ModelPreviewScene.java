@@ -193,7 +193,7 @@ public class ModelPreviewScene extends Scene {
                 } else if (modelname.equals("mobi")) {
                     pml = VehiclePmlFactory.buildMobi();
                 } else if (modelname.equals("avatarA")) {
-                    pml = AvatarPmlFactory.buildAvatarA();
+                    pml = AvatarPmlFactory.buildAvatarA("red");
                 } else {
                     throw new RuntimeException("unknown pcm model " + modelname);
                 }

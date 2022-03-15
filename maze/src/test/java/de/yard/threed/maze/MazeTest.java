@@ -51,7 +51,9 @@ public class MazeTest {
                 // No visualization to reveal model-view coupling.
                 SystemManager.addSystem(new MazeMovingAndStateSystem(levelname));
                 SystemManager.addSystem(new UserSystem());
-                SystemManager.addSystem(new AvatarSystem());
+                AvatarSystem avatarSystem = new AvatarSystem();
+                avatarSystem.setViewTransform(MazeScene.getViewTransform());
+                SystemManager.addSystem(avatarSystem);
                 SystemManager.addSystem(new BulletSystem());
                 replaySystem = new ReplaySystem();
                 SystemManager.addSystem(replaySystem);
@@ -298,6 +300,9 @@ public class MazeTest {
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user0);
         assertEquals(Direction.N.toString(), MazeUtils.getPlayerorientation(user0).getDirection().toString(), "user0 initial orientation");
+        assertEquals("Avatar", Observer.getInstance().getTransform().getParent().getSceneNode().getName(), "parent of observer");
+        // only native transforms are static
+        assertEquals(user0.scenenode.getTransform().transform, Observer.getInstance().getTransform().getParent().transform, "parent of observer");
 
         SystemManager.putRequest(UserSystem.buildLoginRequest("u1", ""));
         sceneRunner.runLimitedFrames(5);
@@ -308,6 +313,10 @@ public class MazeTest {
         EcsEntity user1 = MazeUtils.getPlayerByUsername("u1");
         assertNotNull(user1);
         assertEquals(Direction.E.toString(), MazeUtils.getPlayerorientation(user1).getDirection().toString(), "user1 initial orientation");
+        // observer should stay attached to first player
+        assertEquals("Avatar", Observer.getInstance().getTransform().getParent().getSceneNode().getName(), "parent of observer");
+        // only native transforms are static
+        assertEquals(user0.scenenode.getTransform().transform, Observer.getInstance().getTransform().getParent().transform, "parent of observer");
 
         // don't expect 3rd user (however, login should be possible)
         SystemManager.putRequest(UserSystem.buildLoginRequest("u2", ""));

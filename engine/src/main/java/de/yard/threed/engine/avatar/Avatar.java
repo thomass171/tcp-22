@@ -1,10 +1,8 @@
 package de.yard.threed.engine.avatar;
 
 
-import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
-import de.yard.threed.core.Degree;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
@@ -38,24 +36,32 @@ public class Avatar {
     private SceneNode mainNode;
     private boolean hasMesh = false;
 
-    public Avatar(EcsEntity entity) {
+    public Avatar(EcsEntity entity, AvatarBuilder avatarBuilder) {
 
-        mainNode = new SceneNode();
+        hasMesh = true;
+        if (avatarBuilder == null) {
+            // simple green cube avatar
+            mainNode = new SceneNode();
+            setMesh();
+        } else {
+            mainNode = avatarBuilder.buildAvatar();
+        }
+
         mainNode.setName("Avatar");
 
-        entity.scenenode=mainNode;
+        entity.scenenode = mainNode;
         entity.addComponent(new TeleportComponent(mainNode));
         entity.addComponent(new AvatarComponent());
     }
 
     /**
-     * MA35: Constructor without camera and in generel more simple.
-     *
-     * @return
+     * Avatar outside ECS with simple green cube body/mesh.
      */
     public Avatar() {
         mainNode = new SceneNode();
         mainNode.setName("Avatar");
+        hasMesh = true;
+        setMesh();
     }
 
     /**
@@ -72,6 +78,7 @@ public class Avatar {
 
     /**
      * 15.5.21: Das ist fragwürdig, denn kippen dürfte/könnte merkwürdige Effekte haben.
+     *
      * @param rotation
      */
     public void setRotation(Quaternion rotation) {
@@ -83,23 +90,10 @@ public class Avatar {
     }
 
     /**
-     * Simpler Body zum Testen. Normal ist er grün, bei vr low ist er gelb.
+     * Simple green cube for testing.
      */
-    public void enableBody() {
-        hasMesh = true;
-        setMesh();
-    }
-
-
-
     private void setMesh() {
-        if (hasMesh) {
-           /* if (vrdown) {
-                mainNode.setMesh(new Mesh(Geometry.buildCube(0.1f, 0.1f, 0.1f), Material.buildBasicMaterial(Color.YELLOW)));
-            } else */{
-                mainNode.setMesh(new Mesh(Geometry.buildCube(0.1f, 0.1f, 0.1f), Material.buildBasicMaterial(Color.GREEN)));
-            }
-        }
+        mainNode.setMesh(new Mesh(Geometry.buildCube(0.1f, 0.1f, 0.1f), Material.buildBasicMaterial(Color.GREEN)));
     }
 
     public SceneNode getNode() {

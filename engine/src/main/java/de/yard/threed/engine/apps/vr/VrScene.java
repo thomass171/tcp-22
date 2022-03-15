@@ -97,8 +97,6 @@ public class VrScene extends Scene {
         //4.10.19: Wieder autoadjust. Darum auf BALKENYPOSITION (ohne VR, Höhe Dangast Balken) beginnen. Mit VR abzgl. Rift Ground Offset, also 1.3
         //5.5.21: Die Avatar position auf Höhe des Balekn ist schon gut so. Bei aktivieren von VR muss dann der Offset greifen.
         avatar.setPosition(new Vector3(0, VrSceneHelper.BARYPOSITION, 0));
-        //7.5.21 avatar.ac.setVrOffsetPosition(new Vector3(0, -BALKENYPOSITION, 0));
-        avatar.enableBody();
         //camera.attach(avatar.getTransform());
         addToWorld(avatar.getSceneNode());
 
