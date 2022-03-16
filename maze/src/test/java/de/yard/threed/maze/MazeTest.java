@@ -174,7 +174,7 @@ public class MazeTest {
         //da fehlt doch was by y??
         TestUtil.assertFloat("camera.world.y", 0.6 + 0.75, observerDummy.getTransform().getWorldModelMatrix().extractPosition().getY());
 
-        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload("")));
+        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload(""), player.getId()));
         sceneRunner.runLimitedFrames(1);
 
         // no balls without bot
@@ -202,17 +202,17 @@ public class MazeTest {
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(4, EcsHelper.findAllEntities().size(), "number of entities (4 diamonds)");
-        assertEquals(4, MazeUtils.getItems(-1).size(), "number of entities (4 diamonds)");
+        assertEquals(4, MazeUtils.getAllItems().size(), "number of entities (4 diamonds)");
 
         assertTrue(SystemState.readyToJoin());
 
-        SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("aaa", ""));
 
         sceneRunner.runLimitedFrames(5);
         assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
 
         assertEquals(1 + 1 + 4 + 2 * 3, EcsHelper.findAllEntities().size(), "number of entites (1 player + 1 bot, 4 diamonds, 2 * 3 balls)");
-        assertEquals(2 * 3 + 4, MazeUtils.getItems(-1).size(), "number of entities (6 balls, 4 diamonds)");
+        assertEquals(2 * 3 + 4, MazeUtils.getAllItems().size(), "number of entities (6 balls, 4 diamonds)");
 
         List<EcsEntity> players = MazeUtils.getPlayerOrBoxes(false);
         assertEquals(2, players.size(), "number of player (player+bot)");
@@ -220,19 +220,19 @@ public class MazeTest {
         EcsEntity player = players.get(0);
         MoverComponent mc = MoverComponent.getMoverComponent(player);
         assertNotNull(mc, "MoverComponent");
-        assertEquals("User0", player.getName(), "player name");
+        assertEquals("aaa", player.getName(), "player name");
 
         EcsEntity bot = players.get(1);
         mc = MoverComponent.getMoverComponent(bot);
         assertNotNull(mc, "MoverComponent");
-        // a bot is just a user
-        assertEquals("User1", bot.getName(), "bot name");
+        // a bot is not just a user
+        assertEquals("Bot0", bot.getName(), "bot name");
 
         List<EcsEntity> inventory = MazeUtils.getInventory(player);
         assertEquals(3, inventory.size(), "inventory size");
         assertEquals(3, MazeUtils.getBullets(player).size(), "bullets");
 
-        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload("")));
+        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload(""), player.getId()));
         sceneRunner.runLimitedFrames(1);
         assertEquals(3 - 1, MazeUtils.getBullets(player).size(), "bullets");
         assertEquals(1 + 1 + 4 + 2 * 3, EcsHelper.findAllEntities().size(), "number of entites (player+bot+4 diamonds+2*3 balls)");
@@ -322,16 +322,28 @@ public class MazeTest {
         SystemManager.putRequest(UserSystem.buildLoginRequest("u2", ""));
         sceneRunner.runLimitedFrames(5);
         assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
+        TestUtils.assertPosition(user1, new Point(4, 4));
 
-        assertPosition(user1, new Point(4, 4));
+        // both user still on their start position
+        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload(""), user0.getId()));
+        sceneRunner.runLimitedFrames(1);
+        assertEquals(3 - 1, MazeUtils.getBullets(user0).size(), "bullets");
+        assertEquals(3, MazeUtils.getBullets(user1).size(), "bullets");
 
-        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FORWARD, user1.getId()));
-        sceneRunner.runLimitedFrames(3, 0);
-        assertTrue(MazeUtils.isAnyMoving());
-        // 5 seems to be sufficient for completing the move
-        sceneRunner.runLimitedFrames(5);
-        assertPosition(user1, new Point(5, 4));
-        assertFalse(MazeUtils.isAnyMoving());
+        List<EcsEntity> flyingBullets = TestUtils.getFlyingBullets();
+        assertEquals(1, flyingBullets.size());
+        EcsEntity flyingBullet = flyingBullets.get(0);
+        BulletComponent bc = BulletComponent.getBulletComponent(flyingBullet);
+        assertNotNull(bc);
+        EcsTestHelper.processUntil(() -> {
+            return !bc.isFlying();
+        }, 0.1, 1000);
+        assertTrue(bc.isOnGround());
+
+        // Now step forward user1 and pick up the ball.
+        TestUtils.ecsWalk(sceneRunner, user1, new Point(5, 4));
+        assertEquals(3 + 1, MazeUtils.getBullets(user1).size(), "bullets");
+
 
     }
 
@@ -359,18 +371,10 @@ public class MazeTest {
 
         assertEquals(1 + 1 + 2 * 3, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player + one bot + 2*3 bullets)");
         assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
-        assertNotNull(MazeUtils.getMainPlayer());
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user0);
-        EcsEntity user1 = MazeUtils.getPlayerByUsername("bot0");
+        EcsEntity user1 = EcsHelper.findEntitiesByName("Bot0").get(0);
         assertNotNull(user1);
-
-    }
-
-    void assertPosition(EcsEntity user, Point point) {
-        MoverComponent mc = MoverComponent.getMoverComponent(user);
-        assertNotNull(mc, "user1.MoverComponent");
-        TestUtil.assertPoint(" point", point, mc.getLocation());
     }
 
 }

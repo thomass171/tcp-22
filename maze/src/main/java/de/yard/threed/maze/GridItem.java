@@ -16,7 +16,7 @@ import de.yard.threed.core.Point;
 public interface GridItem {
 
     /**
-     * null for collected items.
+     * null for collected (or moving/flying) items.
      *
      */
     Point getLocation() ;

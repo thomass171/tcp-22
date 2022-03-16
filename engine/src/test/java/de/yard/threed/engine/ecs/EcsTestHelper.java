@@ -44,18 +44,21 @@ public class EcsTestHelper {
 
     }
 
-    public static void processUntil(BooleanMethod booleanMethod) {
+    public static void processUntil(BooleanMethod booleanMethod){
+        processUntil(booleanMethod, 1.0, 1000);
+    }
+
+    public static void processUntil(BooleanMethod booleanMethod, double tpf, int maxCycles) {
         Platform pl = (Platform) Platform.getInstance();
         SceneRunnerForTesting sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.getInstance();
 
         int cntr = 0;
 
         do {
-            //SystemManager.update(1);
-            sceneRunner.singleUpdate(1);
-        } while (!booleanMethod.isTrue() && cntr++ < 1000);
-        if (cntr >= 1000) {
-            throw new RuntimeException("not aus");
+            sceneRunner.singleUpdate(tpf);
+        } while (!booleanMethod.isTrue() && cntr++ < maxCycles);
+        if (cntr >= maxCycles) {
+            throw new RuntimeException("max cycles reached");
         }
     }
 

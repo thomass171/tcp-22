@@ -97,6 +97,9 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
     }
 
+    /**
+     * update for player and boxes (MoverComponent(s)).
+     */
     @Override
     public void update(EcsEntity entity, EcsGroup group, double tpf) {
 
@@ -209,6 +212,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
      */
     private boolean processSolutionOrUserRequest(GridState currentstate, Request request) {
 
+        // 16.3.22: Isn't a solution played by ReplaySystem?
         if (solution != null) {
             // dann keine Steuerung durch Benutzer mehr
             if (solution.size() == 0) {
@@ -231,11 +235,9 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //10.11.20 true oder false liefern?
             return true;
         } else {
-            // 1.4.21: Be sure join completed (by checking for avatar).
             // A movement request might be lost here due to a current moving.
             // Once there was a queue to handle this. Ignoring lost movements is a risk, because for use cases like 'replay' its important not to loose a single movement.
 
-            //if (AvatarSystem.getAvatar() != null) {
             if (request.getUserEntityId() == null) {
                 logger.warn("No userEntityId in request. Ignoring user request");
                 return true;
@@ -245,7 +247,6 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                     return true;
                 }
             }
-            //}
         }
         return false;
     }
@@ -330,91 +331,71 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             logger.error("no mover for user");
             return true;
         }
+        List<EcsEntity> foundStuff = null;
         if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
             attemptRotate(currentstate, mover, false);
-            return true;
-        }
-        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNLEFT)) {
+        } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNLEFT)) {
             attemptRotate(currentstate, mover, true);
-            return true;
-        }
-        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_BACK)) {
-            attemptMove(currentstate, mover, GridMovement.Back);
-            return true;
-        }
-        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARD)) {
-            attemptMove(currentstate, mover, GridMovement.Forward);
-            return true;
-        }
-        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_UNDO)) {
+        } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_BACK)) {
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Back);
+        } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARD)) {
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Forward);
+        } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_UNDO)) {
             undo(currentstate, mover, Grid.getInstance().getMazeLayout());
-            return true;
+        } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARDMOVE)) {
+            // 10.4.21: Wer triggered denn einen TRIGGER_REQUEST_FORWARDMOVE? Nur der Replay?
+            foundStuff = attemptMove(currentstate, mover, GridMovement.ForwardMove);
+        } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_LEFT)) {
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Left);
+        } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RIGHT)) {
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Right);
+        } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_PULL)) {
+            // pull kommt evtl auch bei undo? 27.5.21: jetzt auch eigenstaendig. UNDO hat aber sein eigenes Event.
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Pull);
+        } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_KICK)) {
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Kick);
+        } else {
+            return false;
         }
-        // 10.4.21: Wer triggered denn einen TRIGGER_REQUEST_FORWARDMOVE? Nur der Replay?
-        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARDMOVE)) {
-            attemptMove(currentstate, mover, GridMovement.ForwardMove);
-            return true;
+        if (foundStuff != null) {
+            for (EcsEntity item : foundStuff) {
+                MazeUtils.setItemCollectedByPlayer(item, user);
+            }
         }
-        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_LEFT)) {
-            attemptMove(currentstate, mover, GridMovement.Left);
-            return true;
-        }
-        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RIGHT)) {
-            attemptMove(currentstate, mover, GridMovement.Right);
-            return true;
-        }
-        // pull kommt evtl auch bei undo? 27.5.21: jetzt auch eigenstaendig. UNDO hat aber sein eigenes Event.
-        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_PULL)) {
-            attemptMove(currentstate, mover, GridMovement.Pull);
-            return true;
-        }
-        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_KICK)) {
-            attemptMove(currentstate, mover, GridMovement.Kick);
-            return true;
-        }
-        return false;
+        return true;
     }
 
     /**
-     * Einen Walk versuchen. Wenn der nicht geht, einen push (aber nur bei Forward).
-     * Erlaubt nur die 4 Grundschritte, nicht ForwardMove, obwohl das auch gehen könnte.
-     *
-     *
+     * Try a movement (eg. walk to an non occupied field).
+     * If walk is not possible, try a push (only in case of forward)
      * <p>
+     * Only allows four basic movements, no ForwardMove, though that could be possible.
+     * Items do not occupy a field. So items that might be located at the destination field do not affect movement.
      */
-    private void attemptMove(GridState currentstate, MoverComponent mover, GridMovement movement) {
+    private List<EcsEntity> attemptMove(GridState currentstate, MoverComponent mover, GridMovement movement) {
         MazeLayout layout = Grid.getInstance().getMazeLayout();
 
+        List<EcsEntity> foundStuff = null;
         if (mover.isMoving()) {
-            // nur sicherheitshalber, duerfte gar nicht aufgerufen werden.
+            // Just to be sure. Shouldn't be called in this case.
             logger.warn("cannot move. still moving");
         } else {
-            // erstmal gehen versuchen
-            //MA32 nextstate = currentstate.walk(movement, layout);
+            // try basic movement
             GridMovement mo = mover.walk(movement, currentstate, layout);
             if (mo == null) {
-                // push versuchen, aber nur, wenn ich forward wollte. Sonst kann ich mit Back Boxen pushen.
+                // no success. Try push, but only when the basic request was 'Forward'. Otherwise boxes could be pushed by 'Back'
                 if (movement.isForward()) {
                     movement = GridMovement.ForwardMove;
-                    //Point boxloc = currentstate.getPushBoxLocation(layout);
-                    //GridMover/*Point*/ boxloc = currentstate.canMove(layout);
-                    //nextstate = currentstate.push(layout);
-                    //if (nextstate != null) {
-                    //if (boxloc != null) {
-                    //GridMover movableBox = currentstate.canMove(layout);
-                    //MoverComponent movableBoxComponent = movableBox.getParent();
-                    //    MazeUtils.combinedMove(currentstate, mover,  layout);
                     mo = mover.walk(movement, currentstate, layout);
-                    //}
                 }
-            } else {
-                //mover.setWalkStatus(movement, currentstate.playerorientation);
-                //mover.walk(movement, currentstate, layout);
             }
             if (mo != null) {
+                // successfully moved. Record it for replay and collect items on new field
                 MoveRecorder.getInstance().addMove(movement/*, nextstate*/);
+                foundStuff = MazeUtils.getStuffOnField(mover.getLocation());
             }
         }
+        return foundStuff;
     }
 
     /**
@@ -655,6 +636,9 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         //add(m);
     }
 
+    /**
+     * Process a relocate request (eg. for hit players).
+     */
     private void relocate(Payload payload) {
 
         String playername = (String) payload.o[0];
@@ -675,7 +659,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
         GridOrientation gridOrientation = null;
         String orientation = (String) payload.o[2];
-        if (StringUtils.length(orientation) > 0) {
+        if (orientation != null && StringUtils.length(orientation) > 0) {
             gridOrientation = GridOrientation.fromDirection(StringUtils.charAt(orientation, 0));
             if (gridOrientation == null) {
                 logger.warn("invalid orientation:" + orientation);

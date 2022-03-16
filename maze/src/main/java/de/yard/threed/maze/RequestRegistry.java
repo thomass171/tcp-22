@@ -41,15 +41,11 @@ public class RequestRegistry {
     public static RequestType TRIGGER_REQUEST_RELOCATE = new RequestType("TRIGGER_REQUEST_RELOCATE");
     public static RequestType TRIGGER_REQUEST_KICK = new RequestType("TRIGGER_REQUEST_KICK");
 
-    public static Request buildRELOCATE(String player, Point p, String orientation) {
+    public static Request buildRelocate(String player, Point p, String orientation) {
         return new Request(TRIGGER_REQUEST_RELOCATE,new Payload(player, "" + p.getX() + "," + p.getY(),orientation));
     }
 
-    public static Request buildFIRE() {
-        return new Request(TRIGGER_REQUEST_FIRE,new Payload(""));
-    }
-
-    public static Request buildKICK() {
+    public static Request buildKick() {
         return new Request(TRIGGER_REQUEST_KICK,new Payload(""));
     }
 }

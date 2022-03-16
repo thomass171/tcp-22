@@ -9,6 +9,7 @@ import de.yard.threed.engine.*;
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
+import de.yard.threed.engine.ecs.EcsHelper;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.platform.common.*;
 
@@ -42,7 +43,7 @@ public class BulletSystem extends DefaultEcsSystem {
             case 1:
                 offset = bc.getOffset(tpf);
                 moveForward(ball, offset);
-                checkCollision(ball, bc, grid.getMazeLayout(), MazeUtils.getPlayerOrBoxes(false));
+                checkCollision(entity, bc, grid.getMazeLayout(), MazeUtils.getPlayerOrBoxes(false));
                 break;
 
         }
@@ -59,19 +60,19 @@ public class BulletSystem extends DefaultEcsSystem {
             logger.debug("got request " + request.getType());
         }
         if (request.isType(RequestRegistry.TRIGGER_REQUEST_FIRE)) {
-            String playername = (String) request.getPayloadByIndex(0);
-            EcsEntity player = MazeUtils.getMainPlayer();
+
+            EcsEntity player = EcsHelper.findEntityById((int) request.getUserEntityId());
             MoverComponent mv = MoverComponent.getMoverComponent(player);
             List<EcsEntity> bullets = MazeUtils.getBullets(player);
 
             //InventoryComponent ic = InventoryComponent.getInventoryComponent(player);
             BulletComponent bc;
-            if ((bc = pickBullet(bullets,mv.getLocation())) != null) {
+            if ((bc = pickBullet(bullets, mv.getLocation())) != null) {
 
                 //SceneNode ball = buildSimpleBall(0.3, Color.YELLOW, mv.getLocation());
                 //EcsEntity e = new EcsEntity(ball);
                 //BulletComponent bulletComponent = new BulletComponent(mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), playername);
-                bc.launchBullet(mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), playername);
+                bc.launchBullet(mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), player.getName());
                 //e.addComponent(bulletComponent);
             }
             //das event kann ich mir sparen. Ic muss ja es ins inventory sehen.
@@ -107,27 +108,43 @@ public class BulletSystem extends DefaultEcsSystem {
         }
     }
 
-    private void checkCollision(SceneNode ball, BulletComponent bc, MazeLayout layout, List<EcsEntity> players) {
+    private void checkCollision(EcsEntity bullet, BulletComponent bc, MazeLayout layout, List<EcsEntity> players) {
+        SceneNode ball = bullet.getSceneNode();
         Vector3 loc = ball.getTransform().getPosition();
         Point ballLocation = MazeUtils.vector2Point(loc);
         //TODO check for skipped fields by large tpf
         if (layout.isWallAt(ballLocation)) {
             bc.state = 2;
+            // lay down the ball on the field in front of the wall
+            locateToGround(bullet, ballLocation.add(bc.getDirection().getReverted().getPoint()));
+
         }
         for (EcsEntity player : players) {
             MoverComponent mc = MoverComponent.getMoverComponent(player);
             // don't hit myself
             if (!player.getName().equals(bc.origin)) {
                 if (mc.getLocation().equals(ballLocation)) {
-                    logger.debug("Hit detected of " + player.getName());
+                    logger.debug("Hit detected of '" + player.getName() + "' with bullet by '" + bc.origin + "'");
                     bc.state = 2;
 
                     Point p = new Point(2, 2);
-                    SystemManager.putRequest(RequestRegistry.buildRELOCATE(player.getName(),p,null));
+                    SystemManager.putRequest(RequestRegistry.buildRelocate(player.getName(), p, null));
+                    locateToGround(bullet, ballLocation);
+
                 }
             }
         }
     }
 
+    /**
+     * Put the ball to the center of a field (half in ground), so it is ready to be picked again.
+     */
+    private void locateToGround(EcsEntity bullet, Point p) {
+        SceneNode ball = bullet.getSceneNode();
+        BulletComponent bc = BulletComponent.getBulletComponent(bullet);
 
+        ball.getTransform().setPosition(MazeUtils.point2Vector3(p));
+
+        bc.locateToGround(p);
+    }
 }

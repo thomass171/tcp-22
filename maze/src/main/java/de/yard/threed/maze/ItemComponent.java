@@ -35,7 +35,7 @@ public class ItemComponent extends EcsComponent implements GridItem {
 
     @Override
     public Point getLocation() {
-        return null;
+        return gridItem.getLocation();
     }
 
     @Override

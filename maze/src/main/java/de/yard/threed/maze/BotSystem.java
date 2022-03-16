@@ -11,6 +11,8 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.*;
 
+import static de.yard.threed.engine.ecs.UserSystem.buildJoinRequest;
+
 /**
  * <p>
  * Created by thomass on 09.04.21.
@@ -64,9 +66,12 @@ public class BotSystem extends DefaultEcsSystem {
             // Start a bot for remaining players. But only once, the login request fired here will als trigger a JOINED event again.
             // Be prepared for inconsistent (negative) botNeeded.
             for (int i = 0; botsNeeded > 0 && i < botsNeeded; i++) {
-                SystemManager.putRequest(UserSystem.buildLoginRequest("bot0", ""));
+                // A bot is no logged in user, thus will only join
+                EcsEntity user = new EcsEntity(new BotComponent());
+                user.setName("Bot" + i);
+                SystemManager.putRequest(buildJoinRequest(user.getId(), false));
             }
-            botsNeeded=0;
+            botsNeeded = 0;
         }
     }
 }

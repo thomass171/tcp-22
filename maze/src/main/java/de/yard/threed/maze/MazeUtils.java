@@ -23,7 +23,7 @@ public class MazeUtils {
      * Currently, every mover not being a player is a box.*
      */
     public static List<EcsEntity> getPlayerOrBoxes(boolean forBoxes) {
-        return SystemManager.findEntities(e-> {
+        return SystemManager.findEntities(e -> {
             MoverComponent moverComponent = MoverComponent.getMoverComponent(e);
             if (moverComponent == null) {
                 return false;
@@ -38,7 +38,15 @@ public class MazeUtils {
         });
     }
 
-    public static List<EcsEntity> getItems(int owner) {
+    public static List<EcsEntity> getAllItems() {
+        return getItems(-1);
+    }
+
+    public static List<EcsEntity> getItems(EcsEntity player) {
+        return getItems(player.getId());
+    }
+
+    private static List<EcsEntity> getItems(int owner) {
         return SystemManager.findEntities(e -> {
 
             ItemComponent itemComponent = ItemComponent.getItemComponent(e);
@@ -52,7 +60,23 @@ public class MazeUtils {
         });
     }
 
+    /**
+     * Find items and bullets.
+     */
+    public static List<EcsEntity> getStuffOnField(Point field) {
+        return SystemManager.findEntities(e -> {
 
+            ItemComponent itemComponent = ItemComponent.getItemComponent(e);
+            if (itemComponent != null && itemComponent.getLocation() != null && field.equals(itemComponent.getLocation())) {
+                return true;
+            }
+            BulletComponent bulletComponent = BulletComponent.getBulletComponent(e);
+            if (bulletComponent != null && bulletComponent.getLocation() != null && field.equals(bulletComponent.getLocation())) {
+                return true;
+            }
+            return false;
+        });
+    }
 
     public static EcsEntity getMainPlayer() {
         List<EcsEntity> players = getPlayerOrBoxes(false);
@@ -185,6 +209,9 @@ public class MazeUtils {
         return false;
     }
 
+    /**
+     * Will only find logged in users (no bot).
+     */
     public static EcsEntity getPlayerByUsername(String username) {
         // find user entity by username in UserComponent
         List<EcsEntity> candidates = SystemManager.findEntities((e) -> {
@@ -224,5 +251,10 @@ public class MazeUtils {
 
     public static List<EcsEntity> getPlayer() {
         return getPlayerOrBoxes(false);
+    }
+
+    public static void setItemCollectedByPlayer(EcsEntity item, EcsEntity user) {
+        ItemComponent ic = ItemComponent.getItemComponent(item);
+        ic.collectedBy(user.getId());
     }
 }

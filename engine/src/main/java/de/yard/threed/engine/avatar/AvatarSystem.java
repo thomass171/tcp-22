@@ -87,7 +87,7 @@ public class AvatarSystem extends DefaultEcsSystem {
 
             int userEntityId = ((int) request.getPayloadByIndex(0));
             Boolean forLogin = (Boolean) request.getPayloadByIndex(1);
-            EcsEntity userEntity = SystemManager.findEntities((e) -> e.getId() == userEntityId).get(0);
+            EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
             Avatar avatar = buildAvatarForUserEntity(userEntity);
 
             TeleportComponent tc = TeleportComponent.getTeleportComponent(userEntity);

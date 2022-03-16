@@ -48,7 +48,8 @@ public class MazeSceneTest {
 
         EcsEntity user = UserSystem.getInitialUser();
         assertNotNull(user);
-        assertEquals("User0", user.getName(), "user name");
+        // The default maze user has an empty user name
+        assertEquals("", user.getName(), "user name");
         MoverComponent mc = MoverComponent.getMoverComponent(user);
         TestUtil.assertPoint("player location", new Point(6, 1), mc.getLocation());
 

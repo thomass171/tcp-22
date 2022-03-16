@@ -7,6 +7,7 @@ import de.yard.threed.engine.ecs.EcsEntity;
 
 /**
  * 14.3.22: Not needed because a bot is just a regular user?
+ * A bot is not a regular user but a bot. For example a bot doesn't log in.
  *
  * Created by thomass on 08.04.21.
  */

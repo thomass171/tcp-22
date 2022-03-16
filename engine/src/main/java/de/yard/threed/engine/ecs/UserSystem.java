@@ -51,7 +51,8 @@ public class UserSystem extends DefaultEcsSystem {
             String username = (String) request.getPayloadByIndex(0);
             String clientid = (String) request.getPayloadByIndex(1);
             EcsEntity user = new EcsEntity(new UserComponent(username));
-            user.setName("User" + userIndex);
+            // Set entity name to user name. There is no benefit in setting it different, but makes things easier.
+            user.setName(username);
 
             SystemManager.sendEvent(buildLoggedinEvent(username, clientid, user.getId()));
             // als Vereinfachung direkt joinen, ohne das der Client es anfragt.
@@ -74,10 +75,14 @@ public class UserSystem extends DefaultEcsSystem {
         return new Request(USER_REQUEST_JOIN, new Payload(new Integer(userEntityId), new Boolean(forLogin)));
     }
 
+    /**
+     * Only real user, no bots.
+     */
     public static EcsEntity getInitialUser() {
-        List<EcsEntity> candidates = EcsHelper.findEntitiesByName("User0");
+        List<EcsEntity> candidates = SystemManager.findEntities((e) -> {
+            return UserComponent.getUserComponent(e) != null;
+        });
         if (candidates.size() == 0) {
-            EcsHelper.findEntitiesByName("User0");
             return null;
         }
         return candidates.get(0);

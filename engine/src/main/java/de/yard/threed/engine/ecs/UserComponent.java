@@ -4,6 +4,8 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
 /**
+ * Only for real users that logged in. Not for bots.
+ *
  * <p>
  * Created by thomass on 24.1.22.
  */

@@ -167,14 +167,14 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                     if (transform.direction != null) {
                         orientation = "" + transform.direction;
                     }
-                    return RequestRegistry.buildRELOCATE("User0", p, orientation);
+                    return RequestRegistry.buildRelocate("User0", p, orientation);
                 }
             }
         } else {
             for (EcsEntity box : MazeUtils.getPlayerOrBoxes(true)) {
 
                 if (ray.intersects(box.getSceneNode())) {
-                    return RequestRegistry.buildKICK();
+                    return RequestRegistry.buildKick();
                 }
             }
         }

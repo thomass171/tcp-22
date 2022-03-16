@@ -4,12 +4,19 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.GridTeleporter;
 import de.yard.threed.engine.Ray;
+import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.engine.platform.common.Request;
+import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.maze.*;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FORWARD;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestUtils {
 
@@ -92,5 +99,31 @@ public class TestUtils {
         }
         Vector3 origin=new Vector3(hitPoint.getX(),100,hitPoint.getZ());
         return new Ray(origin,hitPoint.subtract(origin));
+    }
+
+    public static List<EcsEntity> getFlyingBullets(){
+        return SystemManager.findEntities(e->{
+            BulletComponent bc = BulletComponent.getBulletComponent(e);
+            if (bc==null || bc.state!=1){
+                return false;
+            }
+            return true;
+        });
+    }
+
+    public static void ecsWalk(SceneRunnerForTesting sceneRunner, EcsEntity player, Point expectedNewLocation) {
+        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FORWARD, player.getId()));
+        sceneRunner.runLimitedFrames(3, 0);
+        assertTrue(MazeUtils.isAnyMoving());
+        // 5 seems to be sufficient for completing the move
+        sceneRunner.runLimitedFrames(5);
+        assertPosition(player, expectedNewLocation);
+        assertFalse(MazeUtils.isAnyMoving());
+    }
+
+    public static void assertPosition(EcsEntity user, Point point) {
+        MoverComponent mc = MoverComponent.getMoverComponent(user);
+        assertNotNull(mc, "user1.MoverComponent");
+        TestUtil.assertPoint(" point", point, mc.getLocation());
     }
 }
