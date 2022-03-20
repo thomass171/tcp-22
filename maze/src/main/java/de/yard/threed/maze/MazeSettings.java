@@ -48,7 +48,7 @@ public class MazeSettings {
                 grid = "skbn/SokobanWikipedia.txt";
                 //grid = "skbn/SokobanTrivial.txt";
                 ambilight = false;
-                theme=THEME_WOOD;
+                theme = THEME_WOOD;
                 break;
         }
         switch (theme) {
@@ -77,7 +77,7 @@ public class MazeSettings {
                         Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));
                 //wallnormalmap = buildTexture("textures/gimp/SampleWallNormalMapByPetry.png"));
                 //Ein paar anlegen, damit nicht alle gleich aussehen. Die werden durch randon alle unterschiedlich
-                wallnormalmap=new Texture[5];
+                wallnormalmap = new Texture[5];
                 wallnormalmap[0] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
                 wallnormalmap[1] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
                 wallnormalmap[2] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
@@ -99,7 +99,7 @@ public class MazeSettings {
         }
     }
 
-    public LocalTransform getViewpoint(){
+    public LocalTransform getViewpoint() {
         //12.10.15: Nicht auf den Boden y=0), sondern auf halbe höhe sehen.
         // Die Reihenfolge ist wichtig. Erst Position/Lookup, dann attachen. 25.2.16: NeeNee, erst attach!
         // 19.5.16: Camera etwas höher, damit man targets hinter einer Box sehen kann.(plus 0.1->0.3)
@@ -107,14 +107,18 @@ public class MazeSettings {
         //6.4.21 der Blickwinkel nach unten scheint jetzt (beim Setzen über Avatar statt direkt camera) verloren zu gehen.
         //ist eh noch nicht das wahre, weil es per initialtransform den ganzen Avatar kippen duerfte.
         //16.5.21: Aus MazeScene hierhin.
-        LocalTransform  viewpoint = new LocalTransform(new Vector3(0, /*movingsystem.getSettings().*/simplerayheight / 2 + 0.3f, 0.2f/*0/*+0.4f*/),
+        // 19.3.22: Warum der zoffset 0.2 war ist unklar. Vielleicht hat es sich nie ausgewirkt, jetzt sieht man aber Teile vom eigenen AvatarA.
+        // Darum lieber 0. Die View ist damit ganz leicht anders.
+        double zoffset = 0.2;
+        zoffset = 0;
+        LocalTransform viewpoint = new LocalTransform(new Vector3(0, /*movingsystem.getSettings().*/simplerayheight / 2 + 0.3f, zoffset/*0/*+0.4f*/),
                 //4.3.17: Blickrichtung nochmal 0.1 hoeher, das fühlt sich angenehmer an, nicht so stark nach unten zu blicken.
                 Quaternion.buildRotationX(new Degree(-20)));
         return viewpoint;
     }
 
     private Texture buildTexture(String s) {
-        return Texture.buildBundleTexture("data",s);
+        return Texture.buildBundleTexture("data", s);
     }
 
     public static MazeSettings init(int mode) {

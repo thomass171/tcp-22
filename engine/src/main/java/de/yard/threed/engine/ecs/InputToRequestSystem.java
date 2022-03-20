@@ -196,12 +196,12 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 if (!controlMenuAreaClicked) {
 
                     if (mouseClickMode == MOUSE_CLICK_MODE_SEGMENT) {
-                        // Mausclick irgendwo. Determine segment
+                        // Mausclick irgendwo. Determine segment. 20.3.21: But send it only with user id.
                         int segment = Input.getClickSegment(mouseClicklocation, Scene.getCurrent().getDimension(), 3);
                         logger.debug("clicked segment:" + segment);
                         RequestType sr = segmentRequests.get(segment);
-                        if (sr != null) {
-                            SystemManager.putRequest(new Request(sr));
+                        if (sr != null && userEntityId != null) {
+                            SystemManager.putRequest(new Request(sr, userEntityId));
                         }
                     }
                     if (mouseClickMode == MOUSE_CLICK_MODE_VR_LEFT) {

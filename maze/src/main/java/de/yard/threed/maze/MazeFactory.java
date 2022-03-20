@@ -37,5 +37,20 @@ public class MazeFactory {
         return mover;
     }
 
+    /**
+     * For outside ECS only? Testing?
+     *
+     * @param initialLocation
+     * @return
+     */
+    public static List<GridItem> buildDiamonds(List<Point> initialLocation){
+
+        List<GridItem> items = new ArrayList<GridItem>();
+        for (Point p:initialLocation) {
+            items.add(new SimpleGridItem(p));
+        }
+        return items;
+    }
+
 
 }

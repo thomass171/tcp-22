@@ -71,6 +71,8 @@ In detail these are:
 * AbstractSceneRunner:handler.handle
 * An @Override annotation needs to be removed in GraphVisualizer.cs manually
 * DefaultMenuProvider:menuBuilder.buildMenu
+* EcsEntity:entityFilter.matches
+* ReferenceScene:GeneralHandler.handle
 
 Furthermore Unity needs to know your HOSTDIR for finding bundle data.
 Go to file Main.js and adjust the SetEnvironmentVariable() call accordingly.

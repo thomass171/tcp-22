@@ -324,7 +324,9 @@ public class MazeTest {
         assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
         TestUtils.assertPosition(user1, new Point(4, 4));
 
-        // both user still on their start position
+        // both user still on their start position and have 3 bullets
+        assertEquals(3, MazeUtils.getBullets(user0).size(), "bullets");
+        assertEquals(3, MazeUtils.getBullets(user1).size(), "bullets");
         SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload(""), user0.getId()));
         sceneRunner.runLimitedFrames(1);
         assertEquals(3 - 1, MazeUtils.getBullets(user0).size(), "bullets");
@@ -340,9 +342,15 @@ public class MazeTest {
         }, 0.1, 1000);
         assertTrue(bc.isOnGround());
 
-        // Now step forward user1 and pick up the ball.
-        TestUtils.ecsWalk(sceneRunner, user1, new Point(5, 4));
+        // Step forward user1 and pick up the ball.
+        TestUtils.ecsWalk(sceneRunner, user1, true, new Point(5, 4));
         assertEquals(3 + 1, MazeUtils.getBullets(user1).size(), "bullets");
+
+        // Step forward user0
+        TestUtils.ecsWalk(sceneRunner, user0, true, new Point(5, 2));
+        TestUtils.ecsWalk(sceneRunner, user0, true, new Point(5, 3));
+        // But shouldn't reach field of user1
+        TestUtils.ecsWalk(sceneRunner, user0, false, new Point(5, 3));
 
 
     }

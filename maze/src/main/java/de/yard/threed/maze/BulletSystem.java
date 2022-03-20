@@ -85,10 +85,9 @@ public class BulletSystem extends DefaultEcsSystem {
     private BulletComponent pickBullet(List<EcsEntity> bullets, Point startLocation) {
         if (bullets.size() > 0) {
             BulletComponent bc = BulletComponent.getBulletComponent(bullets.get(0));
-            ItemComponent ic = ItemComponent.getItemComponent(bullets.get(0));
             //bc.bulletCount--;
             //ic.needsRefresh = true;
-            ic.collectedBy(-1);
+            bc.collectedBy(-1);
             bullets.get(0).scenenode.getTransform().setPosition(MazeUtils.point2Vector3(startLocation).add(new Vector3(0, 1.25, 0)));
             return bc;
         }

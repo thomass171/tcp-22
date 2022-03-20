@@ -39,35 +39,36 @@ public class MazeUtils {
     }
 
     public static List<EcsEntity> getAllItems() {
-        return getItems(-1);
+        return getItemsByOwner(-1);
     }
 
     public static List<EcsEntity> getItems(EcsEntity player) {
-        return getItems(player.getId());
+        return getItemsByOwner(player.getId());
     }
 
-    private static List<EcsEntity> getItems(int owner) {
+    private static List<EcsEntity> getItemsByOwner(int owner) {
         return SystemManager.findEntities(e -> {
 
-            ItemComponent itemComponent = ItemComponent.getItemComponent(e);
-            if (itemComponent == null) {
-                return false;
+            DiamondComponent diamondComponent = DiamondComponent.getDiamondComponent(e);
+            if (diamondComponent != null && (owner == -1 || owner == diamondComponent.getOwner())) {
+                return true;
             }
-            if (owner != -1 && owner != itemComponent.getOwner()) {
-                return false;
+            BulletComponent bulletComponent = BulletComponent.getBulletComponent(e);
+            if (bulletComponent != null && (owner == -1 || owner == bulletComponent.getOwner())) {
+                return true;
             }
-            return true;
+            return false;
         });
     }
 
     /**
      * Find items and bullets.
      */
-    public static List<EcsEntity> getStuffOnField(Point field) {
+    public static List<EcsEntity> getItemsByField(Point field) {
         return SystemManager.findEntities(e -> {
 
-            ItemComponent itemComponent = ItemComponent.getItemComponent(e);
-            if (itemComponent != null && itemComponent.getLocation() != null && field.equals(itemComponent.getLocation())) {
+            DiamondComponent diamondComponent = DiamondComponent.getDiamondComponent(e);
+            if (diamondComponent != null && diamondComponent.getLocation() != null && field.equals(diamondComponent.getLocation())) {
                 return true;
             }
             BulletComponent bulletComponent = BulletComponent.getBulletComponent(e);
@@ -157,7 +158,7 @@ public class MazeUtils {
             players.add(MoverComponent.getMoverComponent(player).getGridMover());
         }
         List<GridMover> boxes = buildBoxesFromEcs();
-        GridState state = new GridState(players.size() > 0 ? players.get(0) : null, boxes, buildItemsFromEcs());
+        GridState state = new GridState(players, boxes, buildItemsFromEcs());
         return state;
     }
 
@@ -171,15 +172,15 @@ public class MazeUtils {
 
     public static List<GridItem> buildItemsFromEcs() {
         List<GridItem> items = new ArrayList<GridItem>();
-        for (EcsEntity item : MazeUtils.getItems(-1)) {
-            items.add(ItemComponent.getItemComponent(item).getGridItem());
+        for (EcsEntity e : MazeUtils.getItemsByOwner(-1)) {
+            items.add(getItemComponent(e));
         }
         return items;
     }
 
     //TODO nur Components liefern? Alle Items sind enditities?->DVK
     public static List<EcsEntity> getInventory(int owner) {
-        return MazeUtils.getItems(owner);
+        return MazeUtils.getItemsByOwner(owner);
     }
 
     public static List<EcsEntity> getInventory(EcsEntity player) {
@@ -188,7 +189,8 @@ public class MazeUtils {
     }
 
     public static List<EcsEntity> getBullets(EcsEntity player) {
-        return EcsEntity.filterList(getInventory(player), e -> e.getComponent(BulletComponent.TAG) != null);
+        List<EcsEntity> inventory = getInventory(player);
+        return EcsEntity.filterList(inventory, e -> e.getComponent(BulletComponent.TAG) != null);
     }
 
     public static String readMazefile(String filename/*, String levelname*/) {
@@ -230,6 +232,15 @@ public class MazeUtils {
         return candidates.get(0);
     }
 
+    public static ItemComponent getItemComponent(EcsEntity e) {
+        ItemComponent component = DiamondComponent.getDiamondComponent(e);
+        if (component == null) {
+            // then it must be a bullet
+            component = BulletComponent.getBulletComponent(e);
+        }
+        return component;
+    }
+
     public static boolean isAnyMoving() {
 
         MoverComponent mover;
@@ -253,8 +264,8 @@ public class MazeUtils {
         return getPlayerOrBoxes(false);
     }
 
-    public static void setItemCollectedByPlayer(EcsEntity item, EcsEntity user) {
-        ItemComponent ic = ItemComponent.getItemComponent(item);
+    public static void setItemCollectedByPlayer(EcsEntity e, EcsEntity user) {
+        ItemComponent ic = getItemComponent(e);
         ic.collectedBy(user.getId());
     }
 }

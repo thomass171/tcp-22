@@ -5,7 +5,9 @@ import de.yard.threed.core.Point;
 import java.util.List;
 
 /**
- * Abstraction of an element that moves/rotates in a grid, but no item that can be collected (put into inventory).
+ * Abstraction of an element that moves/rotates in a grid, but no item (see {@GridItem}) that can be collected (put into inventory).
+ * An equals() method here is very inconvenient and maybe useless.
+ *
  * Independent from ECS.
  */
 public interface GridMover {
@@ -42,7 +44,7 @@ public interface GridMover {
      * 12.4.21: MA32: jetzt hier state changen ??
      * Might have effects like collecting items.
      */
-    GridMovement walk(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout) ;
+    GridMovement move(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout) ;
 
     /**
      * Nicht ganz schoen.
@@ -61,8 +63,6 @@ public interface GridMover {
      */
     //public boolean canWalk(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout);
 
-    //laestig boolean equals(GridMover obj);
-
     /**
      * push and relocate are also options.
      *
@@ -70,4 +70,8 @@ public interface GridMover {
      */
     List<GridMovement> getMoveOptions(GridState gridState, MazeLayout mazeLayout);
 
+    /**
+     * Some id that make the mover unique. Might be the entity id in ECS.
+     */
+    int getId();
 }

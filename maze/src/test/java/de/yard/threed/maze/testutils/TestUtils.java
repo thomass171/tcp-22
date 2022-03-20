@@ -37,14 +37,20 @@ public class TestUtils {
 
     }*/
 
-    public static GridMovement walkPlayer(GridMover player, List<GridMover> boxes, GridMovement gridMovement, MazeLayout layout, Point expected) {
-        GridMovement gm = player.walk(gridMovement, player.getOrientation(), new GridState(player, boxes, new ArrayList<GridItem>()), layout);
+    public static GridMovement move(GridMover player, List<GridMover> players, List<GridMover> boxes, GridMovement gridMovement, MazeLayout layout, Point expected) {
+        GridMovement gm = player.move(gridMovement, player.getOrientation(), new GridState(players, boxes, new ArrayList<GridItem>()), layout);
         TestUtil.assertPoint("new player location", expected, player.getLocation());
         return gm;
     }
 
-    public static GridMovement walkPlayer(GridMover player, List<GridMover> boxes, GridMovement gridMovement, MazeLayout layout, Point expected, GridMovement expectedGridMovement) {
-        GridMovement gm = walkPlayer(player, boxes, gridMovement, layout, expected);
+    public static GridMovement move(GridMover player, GridState gridState, GridMovement gridMovement, MazeLayout layout, Point expected) {
+        GridMovement gm = player.move(gridMovement, player.getOrientation(), gridState, layout);
+        TestUtil.assertPoint("new player location", expected, player.getLocation());
+        return gm;
+    }
+
+    public static GridMovement move(GridMover player, List<GridMover> players, List<GridMover> boxes, GridMovement gridMovement, MazeLayout layout, Point expected, GridMovement expectedGridMovement) {
+        GridMovement gm = move(player, players, boxes, gridMovement, layout, expected);
         if (expectedGridMovement != null) {
             TestUtil.assertNotNull("returned GridMovement", gm);
             TestUtil.assertEquals("returned GridMovement", expectedGridMovement.toString(), gm.toString());
@@ -54,8 +60,8 @@ public class TestUtils {
         return gm;
     }
 
-    public static void walkPlayer(GridMover mc, GridMovement gridMovement, GridState gridState, MazeLayout layout, Point expected) {
-        mc.walk(gridMovement, mc.getOrientation(), gridState, layout);
+    public static void move(GridMover mc, GridMovement gridMovement, GridState gridState, MazeLayout layout, Point expected) {
+        mc.move(gridMovement, mc.getOrientation(), gridState, layout);
         TestUtil.assertPoint("new player location", expected, mc.getLocation());
     }
 
@@ -80,45 +86,49 @@ public class TestUtils {
         return TestHelper.getDataBundleString("maze", name);
     }
 
-    public static Ray getHittingRayForTeleport(Point destinationField, char direction){
+    public static Ray getHittingRayForTeleport(Point destinationField, char direction) {
         double offset = GridTeleporter.getCenterOffset(MazeDimensions.GRIDSEGMENTSIZE);
-        Vector3 hitPoint=MazeUtils.point2Vector3(destinationField);
-        switch (direction){
+        Vector3 hitPoint = MazeUtils.point2Vector3(destinationField);
+        switch (direction) {
             case 'N':
-                hitPoint= hitPoint.add(new Vector3(0,0,-offset));
+                hitPoint = hitPoint.add(new Vector3(0, 0, -offset));
                 break;
             case 'E':
-                hitPoint= hitPoint.add(new Vector3(0,0,-offset));
+                hitPoint = hitPoint.add(new Vector3(0, 0, -offset));
                 break;
             case 'S':
-                hitPoint= hitPoint.add(new Vector3(0,0,-offset));
+                hitPoint = hitPoint.add(new Vector3(0, 0, -offset));
                 break;
             case 'W':
-                hitPoint= hitPoint.add(new Vector3(0,0,-offset));
+                hitPoint = hitPoint.add(new Vector3(0, 0, -offset));
                 break;
         }
-        Vector3 origin=new Vector3(hitPoint.getX(),100,hitPoint.getZ());
-        return new Ray(origin,hitPoint.subtract(origin));
+        Vector3 origin = new Vector3(hitPoint.getX(), 100, hitPoint.getZ());
+        return new Ray(origin, hitPoint.subtract(origin));
     }
 
-    public static List<EcsEntity> getFlyingBullets(){
-        return SystemManager.findEntities(e->{
+    public static List<EcsEntity> getFlyingBullets() {
+        return SystemManager.findEntities(e -> {
             BulletComponent bc = BulletComponent.getBulletComponent(e);
-            if (bc==null || bc.state!=1){
+            if (bc == null || bc.state != 1) {
                 return false;
             }
             return true;
         });
     }
 
-    public static void ecsWalk(SceneRunnerForTesting sceneRunner, EcsEntity player, Point expectedNewLocation) {
+    public static void ecsWalk(SceneRunnerForTesting sceneRunner, EcsEntity player, boolean expectedMovement, Point expectedNewLocation) {
         SystemManager.putRequest(new Request(TRIGGER_REQUEST_FORWARD, player.getId()));
         sceneRunner.runLimitedFrames(3, 0);
-        assertTrue(MazeUtils.isAnyMoving());
+        if (expectedMovement) {
+            assertTrue(MazeUtils.isAnyMoving(), "isAnyMoving");
+        } else {
+            assertFalse(MazeUtils.isAnyMoving(), "isAnyMoving");
+        }
         // 5 seems to be sufficient for completing the move
         sceneRunner.runLimitedFrames(5);
         assertPosition(player, expectedNewLocation);
-        assertFalse(MazeUtils.isAnyMoving());
+        assertFalse(MazeUtils.isAnyMoving(), "isAnyMoving");
     }
 
     public static void assertPosition(EcsEntity user, Point point) {

@@ -5,7 +5,7 @@ import de.yard.threed.core.Point;
 public class SimpleGridItem implements GridItem {
 
     int owner = -1;
-    Point location;
+    Point location = null;
 
     public SimpleGridItem() {
 
@@ -13,6 +13,10 @@ public class SimpleGridItem implements GridItem {
 
     public SimpleGridItem(int owner) {
         this.owner = owner;
+    }
+
+    public SimpleGridItem(Point initialLocation) {
+        this.location = initialLocation;
     }
 
     @Override
@@ -31,7 +35,13 @@ public class SimpleGridItem implements GridItem {
     }
 
     @Override
+    public void setOwner(int owner) {
+        this.owner = owner;
+    }
+
+    @Override
     public void collectedBy(int collector) {
         owner = collector;
+        location = null;
     }
 }

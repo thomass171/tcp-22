@@ -64,6 +64,7 @@ public final class EcsEntity {
         if (SystemManager.isinited) {
             SystemManager.initEntity(this);
         }
+        component.setEntityId(this.getId());
     }
 
     /**

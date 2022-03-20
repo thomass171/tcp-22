@@ -392,7 +392,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             if (mo != null) {
                 // successfully moved. Record it for replay and collect items on new field
                 MoveRecorder.getInstance().addMove(movement/*, nextstate*/);
-                foundStuff = MazeUtils.getStuffOnField(mover.getLocation());
+                //TODO 17.3.22 merge with collect in SimpleGridMover
+                foundStuff = MazeUtils.getItemsByField(mover.getLocation());
             }
         }
         return foundStuff;
@@ -438,7 +439,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     /**
      * Keine Pruefungen. Es wird erwartet, dass das geht.
      * TODO: Aktuelle Bewegunegen beachten. undo wird sehr schnell gemacht. Er scheint da schon mal  durcheinander zu kommen.
-     *
+     * TODO 17.3.22 Needs alternate implementation. GridState is no longer containing the current state.
      * @param movement
      */
     private void undo(GridState currentstate, MoverComponent mover, GridMovement movement, MazeLayout layout) {
@@ -446,36 +447,25 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
         switch (movement.movement) {
             case GridMovement.FORWARD:
-                if ((movement = mover.walk(GridMovement.Back, currentstate, layout)) != null) {
-                    /*MA32 nextstate =*/
-                    currentstate.execute(movement, layout);
-                }
+                mover.walk(GridMovement.Back, currentstate, layout);
                 break;
             case GridMovement.BACK:
-                if ((movement = mover.walk(GridMovement.Forward, currentstate, layout)) != null) {
-                    /*MA32 nextstate =*/
-                    currentstate.execute(movement, layout);
-                }
+                mover.walk(GridMovement.Forward, currentstate, layout);
                 break;
             case GridMovement.FORWARDMOVE:
                 Point boxloc = currentstate.getPullBoxLocation(layout);
-                GridState nextstate = currentstate.pull(layout);
+                Util.nomore();
+                GridState nextstate = null;//currentstate.pull(layout);
                 if (nextstate != null) {
                     Util.nomore();
                     //triggerPushPull(currentstate, mover, boxloc, GridMovement.Pull);
                 }
                 break;
             case GridMovement.TURNLEFT:
-                if ((movement = mover.rotate(false)) != null) {
-                    /*MA32 nextstate =*/
-                    currentstate.execute(movement, layout);
-                }
+                mover.rotate(false);
                 break;
             case GridMovement.TURNRIGHT:
-                if ((movement = mover.rotate(true)) != null) {
-                    /*MA32 nextstate =*/
-                    currentstate.execute(movement, layout);
-                }
+                mover.rotate(true);
                 break;
         }
     }
@@ -552,7 +542,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             SceneNode p = MazeModelBuilder.buildDiamond();
             EcsEntity diamond = new EcsEntity(p);
             p.getTransform().setPosition(MazeUtils.point2Vector3(b));
-            diamond.addComponent(new ItemComponent());
+            // no diamond owner initially
+            diamond.addComponent(new DiamondComponent());
             Scene.getCurrent().addToWorld(diamond.scenenode);
         }
         // only create bullets if we have bots (2 per bot). Bullets for player are created at join time
@@ -582,9 +573,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         for (int i = 0; i < cnt; i++) {
             SceneNode ball = MazeModelBuilder.buildSimpleBall(0.3, Color.YELLOW/*, mv.getLocation()*/);
             EcsEntity e = new EcsEntity(ball);
-            BulletComponent bulletComponent = new BulletComponent(/*mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), playername*/);
+            BulletComponent bulletComponent = new BulletComponent(owner);
             e.addComponent(bulletComponent);
-            e.addComponent(new ItemComponent(owner));
             e.setName("bullet");
         }
     }

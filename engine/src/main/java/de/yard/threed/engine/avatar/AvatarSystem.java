@@ -128,7 +128,7 @@ public class AvatarSystem extends DefaultEcsSystem {
                     //LocalTransform viewTransform = avatarBuilder.getViewTransform();
                     Observer.getInstance().initFineTune(viewTransform/*getSettings().getViewpoint()*/.position/*.add(new Vector3(0, MazeScene.rayy, 0))*/);
                     // Rotation for looking slightly down.
-                    Observer.getInstance().getInstance().getTransform().setRotation(viewTransform/*getSettings().getViewpoint()*/.rotation);
+                    Observer.getInstance().getTransform().setRotation(viewTransform/*getSettings().getViewpoint()*/.rotation);
                 }
                 isFirstJoin = false;
             }

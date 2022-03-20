@@ -7,12 +7,11 @@ import de.yard.threed.engine.ecs.EcsComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
 
 /**
- * TODO: merge nach ItemComponent? Hmm, not sure. ItermComponent might be a super class.
- * Has special properties like speed. Start merging making it a GridItem.
+ * A bullet is a special case of an item.
  * <p>
  * Created by thomass on 08.04.21.
  */
-public class BulletComponent extends EcsComponent {
+public class BulletComponent extends ItemComponent {
     //1=flying
     //2=falling after hit
     //3=lying around
@@ -26,14 +25,16 @@ public class BulletComponent extends EcsComponent {
     // Only orthogonal directions make things easier for now
     private Direction direction;
     private Vector3 vdirection;
-    public static boolean debugmovement = false;
     static String TAG = "BulletComponent";
-    private GridItem gridItem;
 
     public BulletComponent() {
-
+        super();
         state = 0;
-        gridItem = new SimpleGridItem();
+    }
+
+    public BulletComponent(int owner) {
+        super(owner);
+        state = 0;
     }
 
     public void launchBullet(Direction direction, String origin) {
@@ -44,6 +45,7 @@ public class BulletComponent extends EcsComponent {
         this.vdirection = MazeUtils.direction2Vector3(direction);
         this.origin = origin;
         state = 1;
+        setOwner(-1);
     }
 
     @Override
@@ -72,12 +74,8 @@ public class BulletComponent extends EcsComponent {
         return state == 3;
     }
 
-    public Point getLocation() {
-        return gridItem.getLocation();
-    }
-
     public void locateToGround(Point p) {
         state = 3;
-        gridItem.setLocation(p);
+        setLocation(p);
     }
 }

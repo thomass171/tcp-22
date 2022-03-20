@@ -10,8 +10,10 @@ import de.yard.threed.core.Point;
  * 2) collected, no location
  * 3) moving (no location, not collected)
  *
- *
  * Independent from ECS.
+ *
+ * 18.3.22: Yes, balls are also GridItems, even though they are not created initially by the maze grid but dynamically when player join.
+ * 'location' and 'owner' are mutually excluding.
  */
 public interface GridItem {
 
@@ -28,12 +30,16 @@ public interface GridItem {
     void setLocation(Point point);
 
     /**
-     * Owner is int (entity id) instead of GridMover for easier equals() and decoupling from instances in general.
+     * Owner is int (eg. entity id) instead of GridMover for easier equals() and decoupling from instances in general.
+     * Returns -1 for no owner.
      */
     int getOwner();
 
+    void setOwner(int owner);
+
     /**
-     * Owner is int (entity id) instead of GridMover for easier equals() and decoupling from instances in general.
+     * Set item state to 'collected'. Must clear location.
+     * Owner is int (eg. entity id) instead of GridMover for easier equals() and decoupling from instances in general.
      *
      */
     void collectedBy(int collector);

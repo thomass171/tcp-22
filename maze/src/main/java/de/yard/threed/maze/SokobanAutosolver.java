@@ -1,11 +1,13 @@
 package de.yard.threed.maze;
 
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Timestamp;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +53,7 @@ public class SokobanAutosolver {
         if (grid.getDiamonds().size()>0){
             throw new RuntimeException("no items in autosolve");
         }
-        GridState gridstate=new GridState(player, boxes, new ArrayList<GridItem>());
+        GridState gridstate=new GridState(Util.buildList(player), boxes, new ArrayList<GridItem>());
 
         solutionNode = solve(null, gridstate);
         logger.debug("Checked "+checkedstates.size()+" states. "+timestamp.getTookLogString("Solving "));
@@ -138,10 +140,11 @@ public class SokobanAutosolver {
         //logger.debug("known states now:" + solutions.size());
         for (GridMovement m : GridMovement.regularpossiblemoves) {
             //GridState nextstate = state.execute(m,grid.getLayout());
-            GridMovement rm = state.player.walk(m,state.player.getOrientation(),state,grid.getMazeLayout());
+            GridMover player = state.players.get(0);
+            GridMovement rm = player.move(m,player.getOrientation(),state,grid.getMazeLayout());
             GridState nextstate =null;
             if (rm != null){
-                nextstate=new GridState(state.player, state.boxes,state.items);
+                nextstate=new GridState(state.players, state.boxes,state.items);
             }
             if (nextstate != null) {
                 if (GridState.isSolved(state.boxes,grid.getMazeLayout())) {

@@ -11,9 +11,22 @@ package de.yard.threed.engine.ecs;
  */
 public abstract class EcsComponent {
 
+    // Sometimes its helpful to know the entity
+    int entityId = -1;
+
     public EcsComponent() {
     }
 
     public abstract String getTag();
 
+    public int getEntityId() {
+        return entityId;
+    }
+
+    /**
+     * Only for ECS internal usage.
+     */
+    public void setEntityId(int id) {
+        this.entityId = id;
+    }
 }

@@ -11,8 +11,6 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.*;
 
-import static de.yard.threed.engine.ecs.UserSystem.buildJoinRequest;
-
 /**
  * <p>
  * Created by thomass on 09.04.21.
@@ -69,7 +67,7 @@ public class BotSystem extends DefaultEcsSystem {
                 // A bot is no logged in user, thus will only join
                 EcsEntity user = new EcsEntity(new BotComponent());
                 user.setName("Bot" + i);
-                SystemManager.putRequest(buildJoinRequest(user.getId(), false));
+                SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId(), false));
             }
             botsNeeded = 0;
         }

@@ -13,7 +13,6 @@ import java.util.List;
 /**
  * Something moving in the maze, eg. Player, boxes, Bots.
  * <p>
- *
  * Created by thomass on 11.01.16.
  */
 public class MoverComponent extends EcsComponent implements GridMover {
@@ -92,17 +91,17 @@ public class MoverComponent extends EcsComponent implements GridMover {
      * Moving in direction of orientation.
      */
     public GridMovement walk(GridMovement movement, GridState gridState, MazeLayout mazeLayout) {
-        return walk(movement, gridMover.getOrientation(), gridState, mazeLayout);
+        return move(movement, gridMover.getOrientation(), gridState, mazeLayout);
     }
 
     /**
      * Moving in *some* direction which not needs to be the orientation.
      * 12.4.21: MA32: jetzt hier state changen. ??
      */
-    public GridMovement walk(GridMovement movement, GridOrientation orientation, GridState gridState, MazeLayout mazeLayout) {
+    public GridMovement move(GridMovement movement, GridOrientation orientation, GridState gridState, MazeLayout mazeLayout) {
 
         if (!isRotating() && !isWalking()) {
-            GridMovement gridMovement = gridMover.walk(movement, orientation, gridState, mazeLayout);
+            GridMovement gridMovement = gridMover.move(movement, orientation, gridState, mazeLayout);
             // bei einem kick/pull nicht selber walken!
             if (gridMovement != null && !gridMovement.isKick() && !gridMovement.isPull()) {
                 return setWalkStatus(movement, null, orientation);
@@ -140,6 +139,11 @@ public class MoverComponent extends EcsComponent implements GridMover {
 
     public SimpleTransform getMovable() {
         return movable;
+    }
+
+    @Override
+    public int getId() {
+        return getEntityId();
     }
 
     /**
@@ -205,8 +209,6 @@ public class MoverComponent extends EcsComponent implements GridMover {
     }
 
     /**
-     *
-     *
      * @param tpf
      * @return
      */
@@ -338,7 +340,7 @@ public class MoverComponent extends EcsComponent implements GridMover {
     /**
      * Keep 'movable' in sync with 'gridMover'.
      */
-    public void updateMovable(){
+    public void updateMovable() {
         Vector3 v = MazeUtils.point2Vector3(gridMover.getLocation());
         // y stays 0. The mover model should have a aligned container to fit its height.
         movable.setPosition(new Vector3(v.getX(), 0, v.getZ()));
