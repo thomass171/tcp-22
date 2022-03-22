@@ -1,6 +1,7 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.Vector2;
@@ -404,7 +405,7 @@ public class GridTest {
 
         // Neither move ...
         TestUtils.move(players.get(1), players, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 2));
-        // nor push should be possible
+        // nor push should be possible for player 1
         TestUtils.move(players.get(1), players, boxes, GridMovement.ForwardMove, grid.getMazeLayout(), new Point(4, 2));
         // and no pull
         TestUtils.move(players.get(1), players, boxes, GridMovement.Pull, grid.getMazeLayout(), new Point(4, 2), null);
@@ -432,6 +433,27 @@ public class GridTest {
         assertNull(diamonds.get(0).getLocation(), "diamond location");
     }
 
+    @Test
+    public void shouldNotEnterOtherHome() throws Exception {
+
+        loadGridAndTerrainFromString("##########\n" +
+                "#   @    #\n" +
+                "#        #\n" +
+                "#   @    #\n" +
+                "##########");
+
+        List<GridMover> players = initPlayer(new Point(4, 1), new Point(4, 3));
+        List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
+
+        // just leave home
+        TestUtils.move(players.get(1), players, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(5, 3), GridMovement.Forward);
+        TestUtils.move(players.get(0), players, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 2), GridMovement.Forward);
+        // don't enter others home.
+        TestUtils.move(players.get(0), players, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 2));
+        // but walk to own home should be possible
+        TestUtils.move(players.get(0), players, boxes, GridMovement.Back, grid.getMazeLayout(), new Point(4, 1), GridMovement.Back);
+    }
+
     private void loadGridAndTerrain(String mazeName) throws InvalidMazeException {
         grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", mazeName))).get(0);
 
@@ -450,16 +472,18 @@ public class GridTest {
         List<Point> usedLaunchPositions = new ArrayList<Point>();
 
         Point startPosition = grid.getMazeLayout().getNextLaunchPosition(usedLaunchPositions);
-        GridMover firstPlayer = MazeFactory.buildMover(startPosition);
+        GridMover firstPlayer = MazeFactory.buildMover(startPosition, grid.getMazeLayout().getInitialOrientation(startPosition), new Team(0, Util.buildList(startPosition)));
         usedLaunchPositions.add(startPosition);
         TestUtil.assertPoint("current location first player", points[0], firstPlayer.getLocation());
+        assertEquals( points[0], firstPlayer.getTeam().homeFields.get(0));
         List<GridMover> players = new ArrayList<>(Arrays.asList(firstPlayer));
 
         if (points.length > 1) {
             startPosition = grid.getMazeLayout().getNextLaunchPosition(usedLaunchPositions);
-            GridMover secondPlayer = MazeFactory.buildMover(startPosition);
+            GridMover secondPlayer = MazeFactory.buildMover(startPosition, grid.getMazeLayout().getInitialOrientation(startPosition), new Team(1, Util.buildList(startPosition)));
             usedLaunchPositions.add(startPosition);
             TestUtil.assertPoint("current location second player", points[1], secondPlayer.getLocation());
+            assertEquals( points[1], secondPlayer.getTeam().homeFields.get(0));
             assertNull(grid.getMazeLayout().getNextLaunchPosition(usedLaunchPositions));
             players.add(secondPlayer);
         }

@@ -271,8 +271,10 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             EcsEntity playerEntity = (EcsEntity) evt.getPayloadByIndex(0);
             MazeLayout layout = Grid.getInstance().getMazeLayout();
             Point launchPosition = layout.getNextLaunchPosition(usedLaunchPositions);
+            // for now only one player teams
+            Team team = new Team(usedLaunchPositions.size(),Util.buildList(launchPosition));
             if (launchPosition != null) {
-                joinPlayer(playerEntity, launchPosition);
+                joinPlayer(playerEntity, launchPosition, team);
             } else {
                 logger.warn("Rejecting join request due to too may players. Currently " + usedLaunchPositions.size());
             }
@@ -282,14 +284,14 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     /**
      * Join a new player.
      */
-    private void joinPlayer(EcsEntity playerEntity, Point launchPosition) {
+    private void joinPlayer(EcsEntity playerEntity, Point launchPosition, Team team) {
         //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
         //ist.
         // 14.2.22: More consistent approach. Independent from VR mode have a avatar and observer independent from each other, but
         // observer always attached to avatar (in AvatarSystem).
         MazeLayout layout = Grid.getInstance().getMazeLayout();
         MoverComponent mover;
-        mover = new MoverComponent(playerEntity.scenenode.getTransform(), true, launchPosition, layout.getInitialOrientation(launchPosition));
+        mover = new MoverComponent(playerEntity.scenenode.getTransform(), true, launchPosition, layout.getInitialOrientation(launchPosition), team);
         usedLaunchPositions.add(launchPosition);
         /*Now in AvatarSystem if (MazeScene.vrInstance == null) {
 
@@ -531,7 +533,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //static EcsEntity buildSokobanBox(int x, int y) {
             SceneNode p = MazeModelBuilder.buildSokobanBox(/*b.getX(), b.getY()*/);
             EcsEntity box = new EcsEntity(p);
-            MoverComponent mover = new MoverComponent(p.getTransform()/*this*/, false, b, new GridOrientation());
+            MoverComponent mover = new MoverComponent(p.getTransform()/*this*/, false, b, new GridOrientation(),null);
             mover.setLocation(b);
             box.addComponent(mover);
             //return box;

@@ -74,4 +74,10 @@ public interface GridMover {
      * Some id that make the mover unique. Might be the entity id in ECS.
      */
     int getId();
+
+    /**
+     * might be null (eg. for boxes)
+     * @return
+     */
+    Team getTeam();
 }

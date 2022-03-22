@@ -16,27 +16,33 @@ public class SimpleGridMover implements GridMover {
     Log logger = Platform.getInstance().getLog(SimpleGridMover.class);
 
     private Point location;
-    private GridOrientation ownOrientation = new GridOrientation();
+    private GridOrientation ownOrientation;
     private boolean debugmovement = false;
     private MoverComponent parent;
     // id to be used outside ECS.
     private int nonEcsId;
     private static int id = 1;
+    private Team team;
 
-    public SimpleGridMover(Point location, GridOrientation orientation) {
+    /**
+     * Constructor for non ECS usage (testing, dry run).
+     */
+    public SimpleGridMover(Point location, GridOrientation orientation, Team team) {
         this.location = location;
         this.ownOrientation = orientation;
         this.nonEcsId = id++;
+        this.team = team;
     }
 
     /**
      * Constructor for ECS usage.
      */
-    public SimpleGridMover(Point location, GridOrientation orientation, MoverComponent parent) {
+    public SimpleGridMover(Point location, GridOrientation orientation, MoverComponent parent, Team team) {
         this.location = location;
         this.ownOrientation = orientation;
         this.parent = parent;
         nonEcsId = -1;
+        this.team = team;
     }
 
     public Point getLocation() {
@@ -131,7 +137,7 @@ public class SimpleGridMover implements GridMover {
      * Only possible if target field is not occupied (by box or other player) and no wall.
      * <p>
      * Don't use own orientation here because it might be a push action.
-     *
+     * Also used for boxes that are about to be pushed?
      * @return
      */
     public boolean canWalk(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout) {
@@ -147,6 +153,11 @@ public class SimpleGridMover implements GridMover {
         }
         if ((b = gridState.isPlayerAtDestination(location, direction, 1)) != null) {
             logger.debug("cannot walk due to player");
+            return false;
+        }
+        // don't check others for boxes (where team is null). At least for now
+        if (getTeam() != null && gridState.isOtherHomeAtDestination(location, direction, 1, getTeam(), mazeLayout)) {
+            logger.debug("cannot walk due to other home");
             return false;
         }
         logger.debug("canWalk true");
@@ -213,6 +224,11 @@ public class SimpleGridMover implements GridMover {
         } else {
             return nonEcsId;
         }
+    }
+
+    @Override
+    public Team getTeam() {
+        return team;
     }
 
     /**

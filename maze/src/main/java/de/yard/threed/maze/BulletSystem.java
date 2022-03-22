@@ -63,17 +63,21 @@ public class BulletSystem extends DefaultEcsSystem {
 
             EcsEntity player = EcsHelper.findEntityById((int) request.getUserEntityId());
             MoverComponent mv = MoverComponent.getMoverComponent(player);
-            List<EcsEntity> bullets = MazeUtils.getBullets(player);
+            if (mv.isOnHomeField()) {
+                // Firing is not allowed on home field. Just ignore request
+            } else {
+                List<EcsEntity> bullets = MazeUtils.getBullets(player);
 
-            //InventoryComponent ic = InventoryComponent.getInventoryComponent(player);
-            BulletComponent bc;
-            if ((bc = pickBullet(bullets, mv.getLocation())) != null) {
+                //InventoryComponent ic = InventoryComponent.getInventoryComponent(player);
+                BulletComponent bc;
+                if ((bc = pickBullet(bullets, mv.getLocation())) != null) {
 
-                //SceneNode ball = buildSimpleBall(0.3, Color.YELLOW, mv.getLocation());
-                //EcsEntity e = new EcsEntity(ball);
-                //BulletComponent bulletComponent = new BulletComponent(mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), playername);
-                bc.launchBullet(mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), player.getName());
-                //e.addComponent(bulletComponent);
+                    //SceneNode ball = buildSimpleBall(0.3, Color.YELLOW, mv.getLocation());
+                    //EcsEntity e = new EcsEntity(ball);
+                    //BulletComponent bulletComponent = new BulletComponent(mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), playername);
+                    bc.launchBullet(mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), player.getName());
+                    //e.addComponent(bulletComponent);
+                }
             }
             //das event kann ich mir sparen. Ic muss ja es ins inventory sehen.
             //SystemManager.sendEvent(new Event(EventRegistry.EVENT_BULLET_FIRED, new Payload(playername)));
@@ -120,8 +124,8 @@ public class BulletSystem extends DefaultEcsSystem {
         }
         for (EcsEntity player : players) {
             MoverComponent mc = MoverComponent.getMoverComponent(player);
-            // don't hit myself
-            if (!player.getName().equals(bc.origin)) {
+            // don't hit myself. And player on a home filed are immune
+            if (!player.getName().equals(bc.origin) && !mc.isOnHomeField()) {
                 if (mc.getLocation().equals(ballLocation)) {
                     logger.debug("Hit detected of '" + player.getName() + "' with bullet by '" + bc.origin + "'");
                     bc.state = 2;

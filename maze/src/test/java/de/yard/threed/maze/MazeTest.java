@@ -232,6 +232,13 @@ public class MazeTest {
         assertEquals(3, inventory.size(), "inventory size");
         assertEquals(3, MazeUtils.getBullets(player).size(), "bullets");
 
+        // firing from home field should be ignored
+        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload(""), player.getId()));
+        sceneRunner.runLimitedFrames(1);
+        assertEquals(3, MazeUtils.getBullets(player).size(), "bullets");
+        TestUtils.ecsWalk(sceneRunner, player, true, new Point(6, 5));
+
+        // but from regular field is should be possible
         SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload(""), player.getId()));
         sceneRunner.runLimitedFrames(1);
         assertEquals(3 - 1, MazeUtils.getBullets(player).size(), "bullets");
@@ -327,6 +334,14 @@ public class MazeTest {
         // both user still on their start position and have 3 bullets
         assertEquals(3, MazeUtils.getBullets(user0).size(), "bullets");
         assertEquals(3, MazeUtils.getBullets(user1).size(), "bullets");
+
+        // firing from home field should be ignored
+        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload(""), user0.getId()));
+        sceneRunner.runLimitedFrames(1);
+        assertEquals(3, MazeUtils.getBullets(user0).size(), "bullets");
+
+        // Step forward user0 and fire again
+        TestUtils.ecsWalk(sceneRunner, user0, true, new Point(5, 2));
         SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload(""), user0.getId()));
         sceneRunner.runLimitedFrames(1);
         assertEquals(3 - 1, MazeUtils.getBullets(user0).size(), "bullets");
@@ -347,7 +362,6 @@ public class MazeTest {
         assertEquals(3 + 1, MazeUtils.getBullets(user1).size(), "bullets");
 
         // Step forward user0
-        TestUtils.ecsWalk(sceneRunner, user0, true, new Point(5, 2));
         TestUtils.ecsWalk(sceneRunner, user0, true, new Point(5, 3));
         // But shouldn't reach field of user1
         TestUtils.ecsWalk(sceneRunner, user0, false, new Point(5, 3));

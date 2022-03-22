@@ -87,7 +87,7 @@ public class GridState {
         return boxloc;*/
     }
 
-    public static boolean isWallAtDestination(Point gridposition, Direction direction, int steps, MazeLayout mazeLayout /*List<Point> walls*/) {
+    public static boolean isWallAtDestination(Point gridposition, Direction direction, int steps, MazeLayout mazeLayout) {
 
         //logger.debug("gridposition=" + gridposition + ",direction=" + direction + ",yaw=" + /*yaw*/0);
         Point destination = gridposition.add(direction.multiply(steps));
@@ -122,6 +122,15 @@ public class GridState {
             }
         }
         return null;
+    }
+
+    public boolean isOtherHomeAtDestination(Point gridposition, Direction direction, int steps, Team myTeam, MazeLayout mazeLayout) {
+        Point destination = gridposition.add(direction.multiply(steps));
+        int teamIdOfDestination = mazeLayout.getTeamByHome(destination);
+        if (teamIdOfDestination == -1) {
+            return false;
+        }
+        return teamIdOfDestination != myTeam.id;
     }
 
     public GridMover/*Point*/ isBoxAtLocation(Point location) {
@@ -172,7 +181,6 @@ public class GridState {
         logger.error("unknown move");
         return null;
     }*/
-
     @Override
     public String toString() {
         if (asstring == null) {

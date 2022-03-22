@@ -90,4 +90,15 @@ public class MazeLayout {
         }
         return false;
     }
+
+    public int getTeamByHome(Point p) {
+        for (int team = 0; team < initialPosition.size(); team++) {
+            for (Point point : initialPosition.get(team)) {
+                if (point.equals(p)) {
+                    return team;
+                }
+            }
+        }
+        return -1;
+    }
 }
