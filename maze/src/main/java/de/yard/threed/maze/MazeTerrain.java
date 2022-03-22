@@ -100,18 +100,11 @@ public class MazeTerrain implements AbstractMazeTerrain {
                     addCenterPillar(MazeModelFactory.buildPillar(), p);
                 }
                 if (grid.getMazeLayout().destinations.contains(p)) {
-
-                    float destinationsize = 1.1f;
-                    //etwas groesser um mit Box davor sichtbar zu sein.
-                    destinationsize = 1.3f;
-                    ShapeGeometry cubegeometry = ShapeGeometry.buildPlane(destinationsize, destinationsize, 1, 1);
-                    Material mat = Material.buildLambertMaterial(Texture.buildBundleTexture("data", "textures/SokobanTarget.png"));
-                    SceneNode dest = new SceneNode(new Mesh(cubegeometry, mat));
-                    // etwas hoeher wegen z-Fighting
-                    // Vector3 targetpos = new Vector3(xypos.getX(), 0.01f, xypos.getZ());
-                    // dest.object3d.setPosition(targetpos);
-                    //scene.add(dest);
-                    addGridElement(dest, x, y, 0.01f);
+                    addDecoratedField(x, y, Texture.buildBundleTexture("data", "textures/SokobanTarget.png"));
+                }
+                if (grid.getMazeLayout().isStartField(p) && grid.getMazeLayout().getNumberOfTeams() > 1) {
+                    // mark home position, but only when multiple teams are playing
+                    addDecoratedField(x, y, Texture.buildBundleTexture("data", "textures/MazeHome-red.png"));
                 }
                 int wallmode;
                 if ((wallmode = grid.isHWALL(p)) > 0) {
@@ -193,18 +186,29 @@ public class MazeTerrain implements AbstractMazeTerrain {
         logger.debug("grid visualized");
     }
 
+    private void addDecoratedField(int x, int y, Texture texture) {
+        float destinationsize = 1.1f;
+        // a bit larger for better visibility with box in front of it.
+        destinationsize = 1.3f;
+        ShapeGeometry cubegeometry = ShapeGeometry.buildPlane(destinationsize, destinationsize, 1, 1);
+        Material mat = Material.buildLambertMaterial(texture, true, true);
+        SceneNode dest = new SceneNode(new Mesh(cubegeometry, mat));
+        // raise a bit to avoid z-Fighting
+        addGridElement(dest, x, y, 0.01f);
+    }
+
     @Override
     public SceneNode getNode() {
         return node;
     }
 
     @Override
-    public Map<Point, SceneNode> getTiles(){
+    public Map<Point, SceneNode> getTiles() {
         return tiles;
     }
 
     @Override
-    public Map<Point, SceneNode> getWalls(){
+    public Map<Point, SceneNode> getWalls() {
         return walls;
     }
 

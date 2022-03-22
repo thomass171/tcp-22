@@ -24,7 +24,7 @@ public class AvatarPmlFactory {
 
     /**
      * Simple A-like avatar. Body runs along z-axis(?) facing up (+y)(?)
-     * Only specific colors are allowed: "red","blue","green","darkgreen"
+     * Only specific colors are allowed (due to faces needed): "red","blue","green","darkgreen"
      */
     public static PortableModelList buildAvatarA(String color) {
         double headRadius = 0.20;

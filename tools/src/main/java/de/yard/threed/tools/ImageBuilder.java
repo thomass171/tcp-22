@@ -50,7 +50,7 @@ public class ImageBuilder {
         }
 
         if (args.length <= 1) {
-            // just a preview
+            // just a development preview
             buildForPreview();
             return;
         }
@@ -92,52 +92,95 @@ public class ImageBuilder {
     }
 
     /**
-     * Die dynamischen Texturen erzeugen, die so gebraucht werden.
+     * Preview for development.
      */
     public static void buildForPreview() {
-        //buildSokobanTarget();
-        BufferedImage image = buildIconSet(Theme.ORANGE);
-        ImagePreviewer.preview(image);
 
-        image = buildIconSet(Theme.LIGHTBLUE);
-        ImagePreviewer.preview(image);
-        image = buildLabelSet(Theme.LIGHTBLUE);
-        ImagePreviewer.preview(image);
-        String[] helptext = new String[]{"Keys:", "[shift] x/y/z adjusts view position"};
-        image = buildTextPage(Theme.LIGHTBLUE, "Helptext-LightBlue.png", helptext);
-        ImagePreviewer.preview(image);
+        int previewOption = 7;
+        BufferedImage image = null;
 
-        image = TextureBuilder.buildFace(Color.BLUE);
+        switch (previewOption) {
+            case 1:
+                image = buildIconSet(Theme.ORANGE);
+                break;
+            case 2:
+                image = buildIconSet(Theme.LIGHTBLUE);
+                break;
+            case 3:
+                image = buildLabelSet(Theme.LIGHTBLUE);
+                break;
+            case 4:
+                String[] helptext = new String[]{"Keys:", "[shift] x/y/z adjusts view position"};
+                image = buildTextPage(Theme.LIGHTBLUE, "Helptext-LightBlue.png", helptext);
+                break;
+            case 5:
+                image = TextureBuilder.buildFace(Color.BLUE);
+                break;
+            case 6:
+                image = buildSokobanTarget();
+                break;
+            case 7:
+                // "red","blue","green","darkgreen" according to faces available
+                image = buildMazeHome(de.yard.threed.core.Color.DARKGREEN);
+                //image = buildMazeHome(de.yard.threed.core.Color.DARKGREEN);
+                break;
+        }
         ImagePreviewer.preview(image);
-
     }
 
 
     /**
-     * AWT zaehlt y von oben
+     * AWT has y from top.
      */
-    private static void buildSokobanTarget() {
-        int size = 512;
-        int offset = 40;
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d =
-                image.createGraphics();
+    private static BufferedImage buildSokobanTarget() {
+        MazeIconTheme mit = new MazeIconTheme(java.awt.Color.orange, null);
+        int size = mit.size;
+        int offset = mit.offset;
+
         float linewidth = 60;
-        BasicStroke linestyle = new BasicStroke(linewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-        g2d.setStroke(linestyle);
-        //TODO Taxiway Farbe nehmen
-        g2d.setColor(java.awt.Color.orange);
-        g2d.drawLine(offset, offset, size - offset, offset);
-        g2d.drawLine(size - offset, offset, size - offset, size - offset);
-        g2d.drawLine(offset, offset, offset, size - offset);
-        g2d.drawLine(offset, size - offset, size - offset, size - offset);
+        mit.g2d.drawLine(offset, offset, size - offset, offset);
+        mit.g2d.drawLine(size - offset, offset, size - offset, size - offset);
+        mit.g2d.drawLine(offset, offset, offset, size - offset);
+        mit.g2d.drawLine(offset, size - offset, size - offset, size - offset);
         offset = 3 * offset;
-        g2d.drawLine(offset, offset, size - offset, size - offset);
-        g2d.drawLine(size - offset, offset, offset, size - offset);
-        g2d.dispose();
+        mit.g2d.drawLine(offset, offset, size - offset, size - offset);
+        mit.g2d.drawLine(size - offset, offset, offset, size - offset);
+        mit.g2d.dispose();
 
         //   FileUtil.saveToPngFile(image, "SokobanTarget.png");
+        return mit.image;
+    }
 
+    /**
+     * AWT has y from top.
+     */
+    private static BufferedImage buildMazeHome(de.yard.threed.core.Color color) {
+        MazeIconTheme mit = new MazeIconTheme(toAwtColor(color), toAwtColor(de.yard.threed.core.Color.BLACK_FULLTRANSPARENT));
+        int size = mit.size;
+        int offset = mit.offset;
+
+        float linewidth = 60;
+        //top
+        mit.g2d.drawLine(4 * offset, size / 2, size - 4 * offset, size / 2);
+        //right
+        mit.g2d.drawLine(size - 4 * offset, size / 2, size - 4 * offset, size - 2 * offset);
+        //left
+        mit.g2d.drawLine(4 * offset, size / 2, 4 * offset, size - 2 * offset);
+        //bottom
+        mit.g2d.drawLine(4 * offset, size - 2 * offset, size - 4 * offset, size - 2 * offset);
+
+        //left roof
+        mit.g2d.drawLine(4 * offset, size / 2, size / 2, 3 * offset);
+        //right root
+        mit.g2d.drawLine(size - 4 * offset, size / 2, size / 2, 3 * offset);
+        mit.g2d.dispose();
+
+        /*try {
+            FileUtil.saveToPngFile(mit.image, "MazeHome.png");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+        return mit.image;
     }
 
     /**
@@ -354,5 +397,26 @@ class Theme {
             return ORANGE;
         }
         return null;
+    }
+}
+
+class MazeIconTheme {
+    public int size = 512;
+    public int offset = 40;
+    public Graphics2D g2d;
+    public BufferedImage image;
+
+    public MazeIconTheme(java.awt.Color color, java.awt.Color backgroundColor) {
+        image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        g2d = image.createGraphics();
+        if (backgroundColor != null) {
+            g2d.setBackground(backgroundColor);
+            g2d.clearRect(0, 0, size, size);
+        }
+        float linewidth = 60;
+        BasicStroke linestyle = new BasicStroke(linewidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+        g2d.setStroke(linestyle);
+        g2d.setColor(color);
+
     }
 }

@@ -161,7 +161,7 @@ public class ReferenceScene extends Scene {
 
         if (!vrEnabled) {
             //controlMenu = GuiGrid.buildControlMenu(getDefaultCamera(), 1);
-            controlMenu = GuiGrid.buildForCamera(getDefaultCamera(), 2, 1, 1, GuiGrid.BLACK_FULLTRANSPARENT);
+            controlMenu = GuiGrid.buildForCamera(getDefaultCamera(), 2, 1, 1, Color.BLACK_FULLTRANSPARENT);
             controlMenu.setName("ControlIcon");
             controlMenu.addButton(new Request(REQUEST_CYCLE), 0, 0, 1, Icon.ICON_POSITION, () -> {
                 controller.step(true);

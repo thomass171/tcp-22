@@ -61,7 +61,7 @@ public class Hud extends FovElementPlane {
     public void setText(int line, String text) {
         //25.9.17: das ist doof, den String zu verlaengern damit alte Reste verschwenden.
         //Der gelieferte Text ist 32 Pixel hoch
-        ImageData textimage = Text.buildTextImage(text + "               ", Color.RED,Color.TRANSPARENT);
+        ImageData textimage = Text.buildTextImage(text + "               ", Color.RED,Color.BLACK_FULLTRANSPARENT);
         Texture texture;
         boolean fortest = false;
         if (fortest) {
@@ -90,7 +90,7 @@ public class Hud extends FovElementPlane {
     public static Texture buildTextureForText(String text, Color backGround){
         //25.9.17: das ist doof, den String zu verlaengern damit alte Reste verschwenden.
         //Der gelieferte Text ist 32 Pixel hoch
-        ImageData textimage = Text.buildTextImage(text + "", Color.RED,Color.TRANSPARENT);
+        ImageData textimage = Text.buildTextImage(text + "", Color.RED,Color.BLACK_FULLTRANSPARENT);
         Texture texture;
         boolean fortest = false;
         if (fortest) {

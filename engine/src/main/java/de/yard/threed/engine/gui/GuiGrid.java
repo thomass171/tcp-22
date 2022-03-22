@@ -29,7 +29,6 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
     int rows;
     public static Color GREEN_SEMITRANSPARENT = new Color(0, 1, 0, 0.5f);
     public static Color GRAY_NONTRANSPARENT = new Color(0.8f, 0.8f, 0.8f, 1f);
-    public static Color BLACK_FULLTRANSPARENT = new Color(0, 0, 0, 0f);
     List<GridButton> buttons = new ArrayList<GridButton>();
     // cellwidth, cellheight ist inklusive margin
     public double cellwidth;
@@ -72,7 +71,7 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
 
     public void setText(int line, String text) {
 
-        ImageData textimage = Text.buildTextImage(text, Color.YELLOW, Color.TRANSPARENT);
+        ImageData textimage = Text.buildTextImage(text, Color.YELLOW, Color.BLACK_FULLTRANSPARENT);
         //Die Texttextur ist ausser der Schrift durchsichtig. Das wird im Hud aber z.Z. nicht benutzt
         textimage.setTransparentToColor(bg.background);
         bg.image.overlayImage(textimage, 40, 40 + line * 40);
@@ -271,7 +270,7 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
         this.zpos = zpos;
         this.buttonzpos = buttonzpos;*/
         int rows = menuitems.length;
-        GuiGrid guiGrid = new GuiGrid(dimension, zpos, buttonzpos, 3, 1, rows, GuiGrid.BLACK_FULLTRANSPARENT);
+        GuiGrid guiGrid = new GuiGrid(dimension, zpos, buttonzpos, 3, 1, rows, Color.BLACK_FULLTRANSPARENT);
 
         for (int i = 0; i < rows; i++) {
             guiGrid.addButton(null, 0, rows - 1 - i, 1, menuitems[i].guiTexture, menuitems[i].buttonDelegate);

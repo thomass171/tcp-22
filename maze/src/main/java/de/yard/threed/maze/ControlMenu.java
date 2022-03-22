@@ -1,5 +1,6 @@
 package de.yard.threed.maze;
 
+import de.yard.threed.core.Color;
 import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.ecs.InputToRequestSystem;
 import de.yard.threed.engine.ecs.SystemManager;
@@ -18,7 +19,7 @@ public class ControlMenu implements ControlMenuBuilder {
     public GuiGrid buildControlMenu(Camera camera) {
         // 7 Spalten (damits kleiner wird) und 2 Zeilen. Nicht mehr erfoderlich. Darum 3.
         // 4.10.18: Jetzt Pyramide wegen mehr Icons.
-        GuiGrid controlmenu = GuiGrid.buildForCamera(camera, 2, 5, 3, GuiGrid.BLACK_FULLTRANSPARENT);
+        GuiGrid controlmenu = GuiGrid.buildForCamera(camera, 2, 5, 3, Color.BLACK_FULLTRANSPARENT);
         int p = 0;
 
         //unten

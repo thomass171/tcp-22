@@ -1,5 +1,6 @@
 package de.yard.threed.engine.gui;
 
+import de.yard.threed.core.Color;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;
@@ -83,7 +84,7 @@ public class BrowseMenu {
     }
 
     private void buildGrid() {
-        grid = new GuiGrid/*.buildForCamera(camera,*/(dimension, zpos, buttonzpos, 3, 1, rows, GuiGrid.BLACK_FULLTRANSPARENT);
+        grid = new GuiGrid/*.buildForCamera(camera,*/(dimension, zpos, buttonzpos, 3, 1, rows, Color.BLACK_FULLTRANSPARENT);
         grid.addButton(new Request(REQUEST_UP), 0, 6, 1, Icon.ICON_UPARROW, () -> {
             logger.debug("up");
             cyclePage(-1);

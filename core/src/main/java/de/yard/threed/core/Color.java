@@ -44,7 +44,7 @@ public class Color {
     public static Color LIGHTGRAY = new Color(0xD3, 0xD3, 0xD3);
     // Die Default(?) Light Farbe in Unity
     public static Color UNITY = new Color(255, 244, 214);
-    public static Color TRANSPARENT = new Color(0, 0, 0, 0);
+    public static Color BLACK_FULLTRANSPARENT = new Color(0, 0, 0, 0);
     public static Color BLACK = new Color(0, 0, 0);
 
     public static  Color ral7043 = new Color(79, 82, 80);

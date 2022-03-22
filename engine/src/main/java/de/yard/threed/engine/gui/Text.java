@@ -78,7 +78,7 @@ public class Text implements GuiTexture {
             // Die Schrift in Fontmap ist schwarz auf transparent.
             chardata.replaceColor(Color.BLACK, textcolor);
             // 12.12.18: Background muss auch explizit gesetzt werden.
-            chardata.replaceColor(Color.TRANSPARENT, background);
+            chardata.replaceColor(Color.BLACK_FULLTRANSPARENT, background);
             image.overlayImage(chardata, i * basesize / 2, 0);
         }
         return image;
@@ -102,7 +102,7 @@ public class Text implements GuiTexture {
         int height = fontsize * 2;
 */
         ImageData image ;//1.3.17 pf.buildTextImage(label, /*size.getWidth() / 2 - width / 2, size.getHeight() / 2 - height / 2, */Color.BLACK, "Arial", fontsize);
-        image = Text.buildTextImage(label, /*size.getWidth() / 2 - width / 2, size.getHeight() / 2 - height / 2, */Color.BLACK,Color.TRANSPARENT);
+        image = Text.buildTextImage(label, /*size.getWidth() / 2 - width / 2, size.getHeight() / 2 - height / 2, */Color.BLACK,Color.BLACK_FULLTRANSPARENT);
 
         return image;
 

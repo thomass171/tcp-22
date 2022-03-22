@@ -73,7 +73,21 @@ public class MazeLayout {
         return orientation.rotate(false);
     }
 
+    /**
+     * If the number of teams is > 1 consider the game to be a battle game (with bullet firing, save home).
+     */
     public int getNumberOfTeams() {
         return initialPosition.size();
+    }
+
+    public boolean isStartField(Point p) {
+        for (List<Point> l : initialPosition) {
+            for (Point point : l) {
+                if (point.equals(p)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
