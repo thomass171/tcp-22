@@ -24,6 +24,7 @@ public class AvatarPmlFactory {
 
     /**
      * Simple A-like avatar. Body runs along z-axis(?) facing up (+y)(?)
+     * The total height is appx. 0.8 + 0.2.
      * Only specific colors are allowed (due to faces needed): "red","blue","green","darkgreen"
      */
     public static PortableModelList buildAvatarA(String color) {

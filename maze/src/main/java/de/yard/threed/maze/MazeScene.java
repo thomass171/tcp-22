@@ -115,7 +115,9 @@ public class MazeScene extends Scene {
         SystemManager.addSystem(new UserSystem());
         AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
         // AvatarA needs to be raised above ground (maze is in xz plane) to have the view point in head height for viewing other avatars eye to eye.
-        avatarSystem.setAvatarBuilder(new AvatarABuilder(new LocalTransform(new Vector3(0,0.7,0),Quaternion.buildRotationY(new Degree(-90)))));
+        // But since it only has a height of appx 1, we scale it up to avoid a hover effect. And it should not be to close to the ground to have the home marker
+        // visible.
+        avatarSystem.setAvatarBuilder(new AvatarABuilder(new LocalTransform(new Vector3(0,0.5,0),Quaternion.buildRotationY(new Degree(-90)),new Vector3(1.2,1.3,1.2))));
         avatarSystem.setViewTransform(getViewTransform());
         SystemManager.addSystem(avatarSystem);
         SystemManager.addSystem(new MazeVisualizationSystem());

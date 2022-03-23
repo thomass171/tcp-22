@@ -20,6 +20,7 @@ public class AvatarABuilder implements AvatarBuilder {
         SceneNode model = pml.buildModel(null, null);
         model.getTransform().setPosition(offset.position);
         model.getTransform().setRotation(offset.rotation);
+        model.getTransform().setScale(offset.scale);
         return new SceneNode(model);
     }
 
