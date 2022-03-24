@@ -280,6 +280,7 @@ public class MazeTest {
     }
 
     /**
+     * A monster is a bot player.
      * ##########
      * #   M    #
      * #  D# #  #
@@ -370,6 +371,7 @@ public class MazeTest {
     }
 
     /**
+     * A monster is a bot player.
      * ##########
      * #   M    #
      * #  D# #  #

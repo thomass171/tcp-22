@@ -22,6 +22,7 @@ public class GridState {
     // Collected items are not contained here. Why not? They just have no location. But they are dynamic elements that belong to a state.
     // But we might splits bullets and diamonds like we split player and boxes.
     List<GridItem> items;
+    // bots and monster also also player
     List<GridMover> players;
 
     // Optimization. Possible, because a state cannot change.
