@@ -24,6 +24,7 @@ public class BulletSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(BulletSystem.class);
 
     boolean bulletsystemdebuglog = false;
+    private RelocationStrategy relocationStrategy = new HomeRelocationStrategy();
 
     /**
      *
@@ -130,7 +131,7 @@ public class BulletSystem extends DefaultEcsSystem {
                     logger.debug("Hit detected of '" + player.getName() + "' with bullet by '" + bc.origin + "'");
                     bc.state = 2;
 
-                    Point p = new Point(2, 2);
+                    Point p = relocationStrategy.getLocation(player);
                     SystemManager.putRequest(RequestRegistry.buildRelocate(player.getName(), p, null));
                     locateToGround(bullet, ballLocation);
 

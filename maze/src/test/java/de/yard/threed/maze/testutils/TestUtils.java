@@ -37,6 +37,7 @@ public class TestUtils {
 
     }*/
 
+    @Deprecated
     public static GridMovement move(GridMover player, List<GridMover> players, List<GridMover> boxes, GridMovement gridMovement, MazeLayout layout, Point expected) {
         GridMovement gm = player.move(gridMovement, player.getOrientation(), new GridState(players, boxes, new ArrayList<GridItem>()), layout);
         TestUtil.assertPoint("new player location", expected, player.getLocation());
@@ -49,6 +50,7 @@ public class TestUtils {
         return gm;
     }
 
+    @Deprecated
     public static GridMovement move(GridMover player, List<GridMover> players, List<GridMover> boxes, GridMovement gridMovement, MazeLayout layout, Point expected, GridMovement expectedGridMovement) {
         GridMovement gm = move(player, players, boxes, gridMovement, layout, expected);
         if (expectedGridMovement != null) {
