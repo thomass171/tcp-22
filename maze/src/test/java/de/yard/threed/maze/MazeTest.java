@@ -281,10 +281,10 @@ public class MazeTest {
 
     /**
      * ##########
-     * #   @    #
+     * #   M    #
+     * #  D# #  #
      * #   # #  #
-     * #   # #  #
-     * #    @   #
+     * #    P   #
      * ##########
      */
     @Test
@@ -292,8 +292,8 @@ public class MazeTest {
 
         setup("maze/Maze-P-Simple.txt", false);
 
-        // no boxes, no player
-        assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
+        // no boxes, no player, one diamond
+        assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
         assertEquals(0, MazeUtils.getPlayer().size(), "number of player");
         assertNull(MazeUtils.getMainPlayer());
 
@@ -301,7 +301,7 @@ public class MazeTest {
         SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
         sceneRunner.runLimitedFrames(5);
 
-        assertEquals(1 + 3, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player+3 bullets)");
+        assertEquals(1 + 3 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player+3 bullets+1 diamond)");
         assertEquals(1, MazeUtils.getPlayer().size(), "number of player");
         assertNotNull(MazeUtils.getMainPlayer());
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
@@ -314,7 +314,7 @@ public class MazeTest {
         SystemManager.putRequest(UserSystem.buildLoginRequest("u1", ""));
         sceneRunner.runLimitedFrames(5);
 
-        assertEquals(2 + 2 * 3, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (two player+2*3 bullets)");
+        assertEquals(2 + 2 * 3 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (two player+2*3 bullets+1 diamond)");
         assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
         assertNotNull(MazeUtils.getMainPlayer());
         EcsEntity user1 = MazeUtils.getPlayerByUsername("u1");
@@ -371,10 +371,10 @@ public class MazeTest {
 
     /**
      * ##########
-     * #   @    #
+     * #   M    #
+     * #  D# #  #
      * #   # #  #
-     * #   # #  #
-     * #    @   #
+     * #    P   #
      * ##########
      */
     @Test
@@ -382,8 +382,8 @@ public class MazeTest {
 
         setup("maze/Maze-P-Simple.txt", true);
 
-        // no boxes, no player
-        assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
+        // no boxes, no player, 1 diamond
+        assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
         assertEquals(0, MazeUtils.getPlayer().size(), "number of player");
         assertNull(MazeUtils.getMainPlayer());
 
@@ -391,7 +391,7 @@ public class MazeTest {
         SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
         sceneRunner.runLimitedFrames(5);
 
-        assertEquals(1 + 1 + 2 * 3, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player + one bot + 2*3 bullets)");
+        assertEquals(1 + 1 + 2 * 3 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player + one bot + 2*3 bullets)");
         assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user0);

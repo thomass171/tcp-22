@@ -108,7 +108,7 @@ public class SimpleGridMover implements GridMover {
             return null;
         }
 
-        if (!canWalk(movement, gridOrientation, gridState, mazeLayout)) {
+        if (!gridState.canWalk(getLocation(), movement, gridOrientation, getTeam(), mazeLayout)) {
             //15.4.21 try push if requested
             if (movement.equals(GridMovement.ForwardMove) && combinedMove(gridState, this, mazeLayout)) {
                 return GridMovement.ForwardMove;
@@ -131,38 +131,6 @@ public class SimpleGridMover implements GridMover {
         return parent;
     }
 
-
-    /**
-     * Check whether a step in the direction can be done.
-     * Only possible if target field is not occupied (by box or other player) and no wall.
-     * <p>
-     * Don't use own orientation here because it might be a push action.
-     * Also used for boxes that are about to be pushed?
-     * @return
-     */
-    public boolean canWalk(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout) {
-        Direction direction = gridOrientation.getDirectionForMovement(movement);
-        if (GridState.isWallAtDestination(location, direction, 1, mazeLayout)) {
-            logger.debug("cannot walk due to wall");
-            return false;
-        }
-        GridMover b;
-        if ((b = gridState.isBoxAtDestination(location, direction, 1)) != null) {
-            logger.debug("cannot walk due to box");
-            return false;
-        }
-        if ((b = gridState.isPlayerAtDestination(location, direction, 1)) != null) {
-            logger.debug("cannot walk due to player");
-            return false;
-        }
-        // don't check others for boxes (where team is null). At least for now
-        if (getTeam() != null && gridState.isOtherHomeAtDestination(location, direction, 1, getTeam(), mazeLayout)) {
-            logger.debug("cannot walk due to other home");
-            return false;
-        }
-        logger.debug("canWalk true");
-        return true;
-    }
 
     /**
      * Check whether a move in direction of current orientation is possible by pushing a box.
@@ -202,7 +170,7 @@ public class SimpleGridMover implements GridMover {
 
         GridMovement[] candidates = new GridMovement[]{GridMovement.Forward, GridMovement.Left, GridMovement.Right, GridMovement.Back};
         for (GridMovement movement : candidates) {
-            if (canWalk(movement, ownOrientation, gridState, mazeLayout)) {
+            if (gridState.canWalk(getLocation(), movement, ownOrientation, getTeam(), mazeLayout)) {
                 result.add(movement);
             }
         }

@@ -113,22 +113,6 @@ class GridDraft {
                     Point p = new Point(x, y);
 
                     switch (c) {
-                        case '|':
-                            // ge = new GridElement(GridElementType.BLOCKWALL/*VWALL*/);
-                            //ge.hasTopPillar = true;
-                            // das Element in der Zeile darunter hat dann auch einen top Pillar
-                            // In der untersten Zeile darf es sowas nicht geben
-                            if (y == 0) {
-                                throw new InvalidMazeException("| not allowed in bottom row");
-                            }
-                            walls.add(p);
-                            break;
-                        case '-':
-                            walls.add(p);
-                            break;
-                        case '+':
-                            walls.add(p);
-                            break;
                         case '#':
                             walls.add(p);
                             break;
@@ -137,16 +121,17 @@ class GridDraft {
                             fields.add(p);
                             break;
                         case '*':
+                            // box on target
                             destinations.add(p);
                             boxes.add(p);
                             fields.add(p);
                             break;
                         case '.':
-                        case 'O':
                             destinations.add(p);
                             fields.add(p);
                             break;
-                        case 'x':
+                        case 'M':
+                        case 'P':
                         case '@':
                             addStartPosition(playerposition, p);
                             fields.add(p);

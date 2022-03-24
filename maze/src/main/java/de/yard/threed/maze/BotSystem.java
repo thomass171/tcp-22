@@ -34,9 +34,25 @@ public class BotSystem extends DefaultEcsSystem {
     @Override
     public void update(EcsEntity entity, EcsGroup group, double tpf) {
         BotComponent bc = BotComponent.getBotComponent(entity);
-
+        MoverComponent mc = MoverComponent.getMoverComponent(entity);
 
         if (botsystemdebuglog) {
+        }
+
+        // only spend time for grid state collection if bot is really willing to act
+        // join might not have been completely processed, so check for 'mc'.
+        if (mc != null && !mc.isMoving() && bc.isReadyToAct()) {
+            GridState currentstate = MazeUtils.buildGridStateFromEcs();
+
+            // For simplicity pass complete grid state, even this is not quite 'fair'
+            // more fair will be to pass only visible fields
+            // getVisibleFields(mc.getLocation(),currentstate));
+            Request request = bc.getNextRequest(mc, currentstate, Grid.getInstance().getMazeLayout());
+
+            if (request != null) {
+                request.setUserEntityId(entity.getId());
+                SystemManager.putRequest(request);
+            }
         }
     }
 
@@ -61,7 +77,7 @@ public class BotSystem extends DefaultEcsSystem {
             botsNeeded = grid.getMazeLayout().getNumberOfTeams() - 1;
         }
         if (evt.getType().equals(UserSystem.USER_EVENT_JOINED)) {
-            // Start a bot for remaining players. But only once, the login request fired here will als trigger a JOINED event again.
+            // Start a bot for remaining players. But only once, the login request fired here will also trigger a JOINED event again.
             // Be prepared for inconsistent (negative) botNeeded.
             for (int i = 0; botsNeeded > 0 && i < botsNeeded; i++) {
                 // A bot is no logged in user, thus will only join

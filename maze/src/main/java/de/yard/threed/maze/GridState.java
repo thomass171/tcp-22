@@ -153,6 +153,38 @@ public class GridState {
     }
 
     /**
+     * Check whether a step in the direction can be done.
+     * Only possible if target field is not occupied (by box or other player) and no wall.
+     * <p>
+     * Don't use own orientation here because it might be a push action.
+     * Also used for boxes that are about to be pushed?
+     * @return
+     */
+    public boolean canWalk(Point location, GridMovement movement, GridOrientation gridOrientation , Team team, MazeLayout mazeLayout) {
+        Direction direction = gridOrientation.getDirectionForMovement(movement);
+        if (GridState.isWallAtDestination(location, direction, 1, mazeLayout)) {
+            logger.debug("cannot walk due to wall");
+            return false;
+        }
+        GridMover b;
+        if ((b = isBoxAtDestination(location, direction, 1)) != null) {
+            logger.debug("cannot walk due to box");
+            return false;
+        }
+        if ((b = isPlayerAtDestination(location, direction, 1)) != null) {
+            logger.debug("cannot walk due to player");
+            return false;
+        }
+        // don't check others for boxes (where team is null). At least for now
+        if (team != null && isOtherHomeAtDestination(location, direction, 1, team, mazeLayout)) {
+            logger.debug("cannot walk due to other home");
+            return false;
+        }
+        logger.debug("canWalk true");
+        return true;
+    }
+
+    /**
      * 14.421: Statt FORWARDMOVE einen combined move versuchen.
      *
      * @return
