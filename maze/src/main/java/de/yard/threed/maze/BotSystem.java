@@ -10,6 +10,8 @@ import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.*;
+import de.yard.threed.engine.util.IntProvider;
+import de.yard.threed.engine.util.RandomIntProvider;
 
 /**
  * <p>
@@ -21,6 +23,7 @@ public class BotSystem extends DefaultEcsSystem {
 
     private boolean botsystemdebuglog = true;
     private int botsNeeded = 0;
+    private IntProvider rand = new RandomIntProvider();
 
     /**
      *
@@ -47,7 +50,7 @@ public class BotSystem extends DefaultEcsSystem {
             // For simplicity pass complete grid state, even this is not quite 'fair'
             // more fair will be to pass only visible fields
             // getVisibleFields(mc.getLocation(),currentstate));
-            Request request = bc.getNextRequest(mc, currentstate, Grid.getInstance().getMazeLayout());
+            Request request = bc.getNextRequest(mc, currentstate, Grid.getInstance().getMazeLayout(), rand);
 
             if (request != null) {
                 request.setUserEntityId(entity.getId());
@@ -87,5 +90,9 @@ public class BotSystem extends DefaultEcsSystem {
             }
             botsNeeded = 0;
         }
+    }
+
+    public void setIntProvider(IntProvider intProvider) {
+        this.rand = intProvider;
     }
 }

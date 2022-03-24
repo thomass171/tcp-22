@@ -5,6 +5,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.EcsComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.platform.common.Request;
+import de.yard.threed.engine.util.IntProvider;
 
 /**
  * 14.3.22: Not needed because a bot is just a regular user?
@@ -31,9 +32,9 @@ public class BotComponent extends EcsComponent {
         return false;
     }
 
-    public Request getNextRequest(GridMover mover, GridState gridState, MazeLayout layout) {
+    public Request getNextRequest(GridMover mover, GridState gridState, MazeLayout layout, IntProvider rand) {
         lastActionAt = Platform.getInstance().currentTimeMillis();
-        return botAI.getNextRequest(mover, gridState, layout);
+        return botAI.getNextRequest(mover, gridState, layout, rand);
     }
 
     @Override
