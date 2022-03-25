@@ -7,6 +7,7 @@ import de.yard.threed.engine.Ray;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.platform.common.Request;
+import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.maze.*;
 import de.yard.threed.core.testutil.TestUtil;
@@ -39,13 +40,17 @@ public class TestUtils {
 
     @Deprecated
     public static GridMovement move(GridMover player, List<GridMover> players, List<GridMover> boxes, GridMovement gridMovement, MazeLayout layout, Point expected) {
-        GridMovement gm = player.move(gridMovement, player.getOrientation(), new GridState(players, boxes, new ArrayList<GridItem>()), layout);
+        MoveResult moveResult = player.move(gridMovement, player.getOrientation(), new GridState(players, boxes, new ArrayList<GridItem>()), layout);
+        GridMovement gm = null;
+        if (moveResult != null) {
+            gm = moveResult.movement;
+        }
         TestUtil.assertPoint("new player location", expected, player.getLocation());
         return gm;
     }
 
     public static GridMovement move(GridMover player, GridState gridState, GridMovement gridMovement, MazeLayout layout, Point expected) {
-        GridMovement gm = player.move(gridMovement, player.getOrientation(), gridState, layout);
+        GridMovement gm = player.move(gridMovement, player.getOrientation(), gridState, layout).movement;
         TestUtil.assertPoint("new player location", expected, player.getLocation());
         return gm;
     }
@@ -120,7 +125,11 @@ public class TestUtils {
     }
 
     public static void ecsWalk(SceneRunnerForTesting sceneRunner, EcsEntity player, boolean expectedMovement, Point expectedNewLocation) {
-        SystemManager.putRequest(new Request(TRIGGER_REQUEST_FORWARD, player.getId()));
+        ecsWalk(TRIGGER_REQUEST_FORWARD, sceneRunner, player, expectedMovement, expectedNewLocation);
+    }
+
+    public static void ecsWalk(RequestType moveRequest, SceneRunnerForTesting sceneRunner, EcsEntity player, boolean expectedMovement, Point expectedNewLocation) {
+        SystemManager.putRequest(new Request(moveRequest, player.getId()));
         sceneRunner.runLimitedFrames(3, 0);
         if (expectedMovement) {
             assertTrue(MazeUtils.isAnyMoving(), "isAnyMoving");

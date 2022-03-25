@@ -231,10 +231,10 @@ public class ReferenceScene extends Scene {
 
         // 28.4.21: Inventory versuche ich mal einfacher als FovElement. Braucht aber (ausserhalb VR) eine deferredcamera.
         if (deferredcamera != null) {
-            inventory = ControlPanelHelper.buildInventoryForDeferredCamera(deferredcamera, getDimension(), controlPanelBackground);
+            inventory = ControlPanelHelper.buildInventoryForDeferredCamera(deferredcamera, getDimension(), controlPanelBackground, new Dimension(300, 20));
             // occupy mid third of inventory
             TextTexture textTexture = new TextTexture(Color.LIGHTGRAY);
-            inventory.addArea(new Vector2(0, 0), new DimensionF(inventory.getSize().getWidth() / 3, inventory.getSize().getHeight()), null).setTexture(textTexture.getTextureForText("1884"));
+            inventory.addArea(new Vector2(0, 0), new DimensionF(inventory.getSize().getWidth() / 3, inventory.getSize().getHeight()), null).setTexture(textTexture.getTextureForText("1884", Color.RED));
         }
         controlPanel = buildControlPanel(controlPanelBackground);
         // in front of left box, dami man mit einem teleport gut davorsteht zur Bedienung

@@ -79,13 +79,13 @@ public class MazeVrControlPanel extends ControlPanel {
         boxCountTextTexture = new TextTexture(controlPanelBackground);
         addArea(panelGrid.getPosition(0, 0), new DimensionF(ControlPanelColWidth[0], ControlPanelRowHeight), null).setIcon(Icon.IconCharacter(23));
         boxCountArea = addArea(panelGrid.getPosition(1, 0), new DimensionF(ControlPanelColWidth[1], ControlPanelRowHeight), null);
-        boxCountArea.setTexture(boxCountTextTexture.getTextureForText("-"));
+        boxCountArea.setTexture(boxCountTextTexture.getTextureForText("-", Color.RED));
         addArea(new Vector2(panelGrid.midx[3], panelGrid.midy[0]), new DimensionF(ControlPanelColWidth[3], ControlPanelRowHeight), buttonDelegates.get("down")).setIcon(Icon.ICON_DOWNARROW);
 
         //return cp;
     }
 
     public void setBoxesCount(int value) {
-        boxCountArea.setTexture(boxCountTextTexture.getTextureForText("" + value));
+        boxCountArea.setTexture(boxCountTextTexture.getTextureForText("" + value, Color.RED));
     }
 }

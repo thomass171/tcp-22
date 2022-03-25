@@ -159,9 +159,10 @@ public class GridState {
      * <p>
      * Don't use own orientation here because it might be a push action.
      * Also used for boxes that are about to be pushed?
+     *
      * @return
      */
-    public boolean canWalk(Point location, GridMovement movement, GridOrientation gridOrientation , Team team, MazeLayout mazeLayout) {
+    public boolean canWalk(Point location, GridMovement movement, GridOrientation gridOrientation, Team team, MazeLayout mazeLayout) {
         Direction direction = gridOrientation.getDirectionForMovement(movement);
         if (GridState.isWallAtDestination(location, direction, 1, mazeLayout)) {
             logger.debug("cannot walk due to wall");
@@ -245,22 +246,33 @@ public class GridState {
     }*/
 
     /**
-     * Geloest ist es, wenn auf jeder Destination eine Box steht.
-     *
      * @return
      */
-    public static boolean isSolved(List<GridMover> boxes, MazeLayout mazeLayout) {
+    public boolean isSolved(MazeLayout mazeLayout) {
+
+        boolean allItemsCollected = true;
+        for (GridItem item : items) {
+            if (item.getOwner() == -1) {
+                allItemsCollected = false;
+            }
+        }
+
         if (boxes.size() == 0) {
+            if (items.size() > 0 && allItemsCollected) {
+                return true;
+            }
             //No Sokoban
             //TODO check player on destination
             return false;
-        }
-        for (Point d : mazeLayout.destinations) {
-            if (MazeUtils.isBoxAtLocation(boxes, d) == null) {
-                return false;
+        } else {
+            // Sokoban style. Solved if on any destination there is a box
+            for (Point d : mazeLayout.destinations) {
+                if (MazeUtils.isBoxAtLocation(boxes, d) == null) {
+                    return false;
+                }
             }
+            return true;
         }
-        return true;
     }
 
     /**

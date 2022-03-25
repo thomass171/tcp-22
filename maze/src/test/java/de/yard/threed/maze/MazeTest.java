@@ -9,7 +9,6 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.core.InitMethod;
-import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.Payload;
@@ -20,6 +19,7 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.maze.testutils.TestUtils;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static de.yard.threed.maze.RequestRegistry.*;
@@ -293,48 +293,9 @@ public class MazeTest {
 
         setup("maze/Maze-P-Simple.txt", false);
 
-        // no boxes, no player, one diamond
-        assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
-        assertEquals(0, MazeUtils.getPlayer().size(), "number of player");
-        assertNull(MazeUtils.getMainPlayer());
-
-        assertTrue(SystemState.readyToJoin());
-        SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
-        sceneRunner.runLimitedFrames(5);
-
-        assertEquals(1 + 3 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player+3 bullets+1 diamond)");
-        assertEquals(1, MazeUtils.getPlayer().size(), "number of player");
-        assertNotNull(MazeUtils.getMainPlayer());
-        EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
-        assertNotNull(user0);
-        assertEquals(Direction.N.toString(), MazeUtils.getPlayerorientation(user0).getDirection().toString(), "user0 initial orientation");
-        assertEquals("Avatar", Observer.getInstance().getTransform().getParent().getSceneNode().getName(), "parent of observer");
-        // only native transforms are static
-        assertEquals(user0.scenenode.getTransform().transform, Observer.getInstance().getTransform().getParent().transform, "parent of observer");
-
-        SystemManager.putRequest(UserSystem.buildLoginRequest("u1", ""));
-        sceneRunner.runLimitedFrames(5);
-
-        assertEquals(2 + 2 * 3 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (two player+2*3 bullets+1 diamond)");
-        assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
-        assertNotNull(MazeUtils.getMainPlayer());
-        EcsEntity user1 = MazeUtils.getPlayerByUsername("u1");
-        assertNotNull(user1);
-        assertEquals(Direction.E.toString(), MazeUtils.getPlayerorientation(user1).getDirection().toString(), "user1 initial orientation");
-        // observer should stay attached to first player
-        assertEquals("Avatar", Observer.getInstance().getTransform().getParent().getSceneNode().getName(), "parent of observer");
-        // only native transforms are static
-        assertEquals(user0.scenenode.getTransform().transform, Observer.getInstance().getTransform().getParent().transform, "parent of observer");
-
-        // don't expect 3rd user (however, login should be possible)
-        SystemManager.putRequest(UserSystem.buildLoginRequest("u2", ""));
-        sceneRunner.runLimitedFrames(5);
-        assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
-        TestUtils.assertPosition(user1, new Point(4, 4));
-
-        // both user still on their start position and have 3 bullets
-        assertEquals(3, MazeUtils.getBullets(user0).size(), "bullets");
-        assertEquals(3, MazeUtils.getBullets(user1).size(), "bullets");
+        List<EcsEntity> users = initMaze_P_Simple();
+        EcsEntity user0 = users.get(0);
+        EcsEntity user1 = users.get(1);
 
         // firing from home field should be ignored
         SystemManager.putRequest(new Request(TRIGGER_REQUEST_FIRE, new Payload(""), user0.getId()));
@@ -401,4 +362,78 @@ public class MazeTest {
         assertNotNull(user1);
     }
 
+    /**
+     * A monster is a bot player.
+     * ##########
+     * #   M    #
+     * #  D# #  #
+     * #   # #  #
+     * #    P   #
+     * ##########
+     */
+    @Test
+    public void testCollect() throws Exception {
+
+        setup("maze/Maze-P-Simple.txt", false);
+
+        List<EcsEntity> users = initMaze_P_Simple();
+        EcsEntity user0 = users.get(0);
+        EcsEntity user1 = users.get(1);
+
+        TestUtils.ecsWalk(TRIGGER_REQUEST_LEFT, sceneRunner, user0, true, new Point(4, 1));
+        TestUtils.ecsWalk(TRIGGER_REQUEST_LEFT, sceneRunner, user0, true, new Point(3, 1));
+        TestUtils.ecsWalk(TRIGGER_REQUEST_FORWARD, sceneRunner, user0, true, new Point(3, 2));
+        assertEquals(3, MazeUtils.getInventory(user0).size(), "inventory (3 bullets)");
+
+        TestUtils.ecsWalk(TRIGGER_REQUEST_FORWARD, sceneRunner, user0, true, new Point(3, 3));
+        assertEquals(3 + 1, MazeUtils.getInventory(user0).size(), "inventory (3 bullets, 1 diamond)");
+    }
+
+    private List<EcsEntity> initMaze_P_Simple() {
+        // no boxes, no player, one diamond
+        assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
+        assertEquals(0, MazeUtils.getPlayer().size(), "number of player");
+        assertNull(MazeUtils.getMainPlayer());
+
+        assertTrue(SystemState.readyToJoin());
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
+        sceneRunner.runLimitedFrames(5);
+
+        assertEquals(1 + 3 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player+3 bullets+1 diamond)");
+        assertEquals(1, MazeUtils.getPlayer().size(), "number of player");
+        assertNotNull(MazeUtils.getMainPlayer());
+        EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
+        assertNotNull(user0);
+        assertEquals(Direction.N.toString(), MazeUtils.getPlayerorientation(user0).getDirection().toString(), "user0 initial orientation");
+        assertEquals("Avatar", Observer.getInstance().getTransform().getParent().getSceneNode().getName(), "parent of observer");
+        // only native transforms are static
+        assertEquals(user0.scenenode.getTransform().transform, Observer.getInstance().getTransform().getParent().transform, "parent of observer");
+
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u1", ""));
+        sceneRunner.runLimitedFrames(5);
+
+        assertEquals(2 + 2 * 3 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (two player+2*3 bullets+1 diamond)");
+        assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
+        assertNotNull(MazeUtils.getMainPlayer());
+        EcsEntity user1 = MazeUtils.getPlayerByUsername("u1");
+        assertNotNull(user1);
+        assertEquals(Direction.E.toString(), MazeUtils.getPlayerorientation(user1).getDirection().toString(), "user1 initial orientation");
+        // observer should stay attached to first player
+        assertEquals("Avatar", Observer.getInstance().getTransform().getParent().getSceneNode().getName(), "parent of observer");
+        // only native transforms are static
+        assertEquals(user0.scenenode.getTransform().transform, Observer.getInstance().getTransform().getParent().transform, "parent of observer");
+
+        // don't expect 3rd user (however, login should be possible)
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u2", ""));
+        sceneRunner.runLimitedFrames(5);
+        assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
+        TestUtils.assertPosition(user1, new Point(4, 4));
+
+        // both user still on their start position and have 3 bullets
+        assertEquals(3, MazeUtils.getBullets(user0).size(), "bullets");
+        assertEquals(3, MazeUtils.getBullets(user1).size(), "bullets");
+        assertEquals(3 + 3 + 1, MazeUtils.getAllItems().size(), "(2*3 bullets, 1 diamond)");
+
+        return Arrays.asList(user0, user1);
+    }
 }

@@ -26,8 +26,8 @@ public class SokobanAutosolver {
     //MA32GridState gridstate;
     //HashMAp wegen schnellerer Suche
     //List<SolutionNode> solutions = new ArrayList<SolutionNode>();
-    Map<GridState,SolutionNode> checkedstates = new HashMap<GridState,SolutionNode>();
-    
+    Map<GridState, SolutionNode> checkedstates = new HashMap<GridState, SolutionNode>();
+
     SolutionNode solutionNode = null;
     
     /*public static void main(String[] arg) {
@@ -39,24 +39,24 @@ public class SokobanAutosolver {
     }*/
 
     SokobanAutosolver(Grid grid/*MazeLayout layout/*MA32,GridState gridstate*/) {
-        this.grid=grid;
+        this.grid = grid;
         //MA32this.gridstate = gridstate;
     }
 
     public void solve() {
-        Timestamp timestamp=new Timestamp();
+        Timestamp timestamp = new Timestamp();
 
         GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null));
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
 
         //no items here for now.
-        if (grid.getDiamonds().size()>0){
+        if (grid.getDiamonds().size() > 0) {
             throw new RuntimeException("no items in autosolve");
         }
-        GridState gridstate=new GridState(Util.buildList(player), boxes, new ArrayList<GridItem>());
+        GridState gridstate = new GridState(Util.buildList(player), boxes, new ArrayList<GridItem>());
 
         solutionNode = solve(null, gridstate);
-        logger.debug("Checked "+checkedstates.size()+" states. "+timestamp.getTookLogString("Solving "));
+        logger.debug("Checked " + checkedstates.size() + " states. " + timestamp.getTookLogString("Solving "));
     }
 
     public String dumpSolution() {
@@ -127,8 +127,9 @@ public class SokobanAutosolver {
      * <p>
      * Liefert den Schritt, der zur Lösung geführt hat. Das könnten theoretisch auch mehrere sein.
      * Liefert in der Node alle Schritte, die zur Lösung geführt haben.
-     *
+     * <p>
      * 15.4.21: Tuts nicht mehr
+     *
      * @param state
      * @return
      */
@@ -136,18 +137,22 @@ public class SokobanAutosolver {
         // Vor dem rekursivem Abstieg muss diese Node gespeichert werden, damit erkennbar ist,
         // dass sie schon behandelt wird.
         SolutionNode node = new SolutionNode(predecessor, state);
-        checkedstates.put(state,node);
+        checkedstates.put(state, node);
         //logger.debug("known states now:" + solutions.size());
         for (GridMovement m : GridMovement.regularpossiblemoves) {
             //GridState nextstate = state.execute(m,grid.getLayout());
             GridMover player = state.players.get(0);
-            GridMovement rm = player.move(m,player.getOrientation(),state,grid.getMazeLayout());
-            GridState nextstate =null;
-            if (rm != null){
-                nextstate=new GridState(state.players, state.boxes,state.items);
+            GridMovement rm = null;
+            MoveResult moveResult = player.move(m, player.getOrientation(), state, grid.getMazeLayout());
+            if (moveResult != null) {
+                rm = moveResult.movement;
+            }
+            GridState nextstate = null;
+            if (rm != null) {
+                nextstate = new GridState(state.players, state.boxes, state.items);
             }
             if (nextstate != null) {
-                if (GridState.isSolved(state.boxes,grid.getMazeLayout())) {
+                if (state.isSolved(grid.getMazeLayout())) {
                     logger.debug("Solved");
                     node.addMovement(m, null);
                     // Wenn ich aus meinem State einen Schritt in Richtung Lösung gefunden habe, versuche ich keinen anderen mehr.
@@ -193,7 +198,7 @@ public class SokobanAutosolver {
 
     /**
      * Fuer Map.get() brauchts einen guten Hashcode.
-     * 
+     *
      * @param state
      * @return
      */

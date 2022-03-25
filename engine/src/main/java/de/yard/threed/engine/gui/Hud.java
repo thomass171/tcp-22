@@ -23,15 +23,15 @@ public class Hud extends FovElementPlane {
     /**
      * mode 0 = rechts oben
      * mode 1 = zentriert und fast bildschirmfuellend.
-     *
+     * <p>
      * 23.4.21: Der Constructor is independent from camera and nearplane.
      *
      * @param mode
      */
     public Hud(DimensionF dimension, double zpos, int mode) {
-        super(dimension,zpos);
+        super(dimension, zpos);
         this.mode = mode;
-        buildFovElement( null);
+        buildFovElement(null);
         setName("Hud");
     }
 
@@ -39,15 +39,14 @@ public class Hud extends FovElementPlane {
      * HUD with own deferred rendering camera at any near distance.
      * 6.10.19: Fuer deferredcamera soll der Aufrufer die doch reinstecken.
      * 28.4.21: Dafuer braeuchte die near plane aber nicht so nah sein. Das Wahre ist das auch nicht.
-     *
      */
-    public static Hud buildForCamera(Camera camera, int mode){
+    public static Hud buildForCamera(Camera camera, int mode) {
         //PerspectiveCamera deferredcamera = FovElement.getDeferredCamera(camera);
         DimensionF dimension = camera.getNearplaneSize();
-        int level=0;
-        double zpos = -camera.getNear() - 0.0001f+(level*0.00001f);
+        int level = 0;
+        double zpos = -camera.getNear() - 0.0001f + (level * 0.00001f);
 
-        Hud hud = new  Hud(/*deferredcamera*/dimension,zpos,mode);
+        Hud hud = new Hud(/*deferredcamera*/dimension, zpos, mode);
         hud.element.getTransform().setLayer(camera.getLayer()/*FovElement.LAYER*/);
         return hud;
     }
@@ -55,13 +54,14 @@ public class Hud extends FovElementPlane {
     /**
      * Der Text wirkt irgendwie unnötig groß, aber das liegt wohl in der Nature des Fonts mit 32 Pioxel Höhe.
      * 28.4.21: Hier mit dem Overlay zu arbeiten, ist doch deprecated (siehe Inventory).
+     *
      * @param line
      * @param text
      */
     public void setText(int line, String text) {
         //25.9.17: das ist doof, den String zu verlaengern damit alte Reste verschwenden.
         //Der gelieferte Text ist 32 Pixel hoch
-        ImageData textimage = Text.buildTextImage(text + "               ", Color.RED,Color.BLACK_FULLTRANSPARENT);
+        ImageData textimage = Text.buildTextImage(text + "               ", Color.RED, Color.BLACK_FULLTRANSPARENT);
         Texture texture;
         boolean fortest = false;
         if (fortest) {
@@ -75,7 +75,11 @@ public class Hud extends FovElementPlane {
         // BasicMaterial, damit Beleuchtung keine Rolle spielt.
         // 8.10.17: Dafuer muss ich doch keinen Effect bemuehen.
         Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, true);
-        element.getMesh().updateMaterial(mat);
+        Mesh mesh = element.getMesh();
+        if (mesh != null) {
+            // might be null when headless?
+            mesh.updateMaterial(mat);
+        }
 
     }
 
@@ -87,10 +91,10 @@ public class Hud extends FovElementPlane {
      * @param backGround
      * @return
      */
-    public static Texture buildTextureForText(String text, Color backGround){
+    public static Texture buildTextureForText(String text, Color color, Color backGround) {
         //25.9.17: das ist doof, den String zu verlaengern damit alte Reste verschwenden.
         //Der gelieferte Text ist 32 Pixel hoch
-        ImageData textimage = Text.buildTextImage(text + "", Color.RED,Color.BLACK_FULLTRANSPARENT);
+        ImageData textimage = Text.buildTextImage(text + "", color, Color.BLACK_FULLTRANSPARENT);
         Texture texture;
         boolean fortest = false;
         if (fortest) {

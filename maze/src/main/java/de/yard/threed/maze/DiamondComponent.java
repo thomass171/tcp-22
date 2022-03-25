@@ -1,5 +1,6 @@
 package de.yard.threed.maze;
 
+import de.yard.threed.core.Point;
 import de.yard.threed.engine.ecs.EcsEntity;
 
 public class DiamondComponent extends ItemComponent {
@@ -12,6 +13,12 @@ public class DiamondComponent extends ItemComponent {
 
     public DiamondComponent(int owner) {
         super(owner);
+    }
+
+    public DiamondComponent(Point b) {
+        super();
+        setLocation(b);
+        setOwner(-1);
     }
 
     @Override

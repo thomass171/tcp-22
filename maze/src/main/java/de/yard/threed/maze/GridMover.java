@@ -44,7 +44,7 @@ public interface GridMover {
      * 12.4.21: MA32: jetzt hier state changen ??
      * Might have effects like collecting items.
      */
-    GridMovement move(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout) ;
+    MoveResult move(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout) ;
 
     /**
      * Nicht ganz schoen.

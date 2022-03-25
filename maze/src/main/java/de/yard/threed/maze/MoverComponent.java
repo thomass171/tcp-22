@@ -90,7 +90,7 @@ public class MoverComponent extends EcsComponent implements GridMover {
     /**
      * Moving in direction of orientation.
      */
-    public GridMovement walk(GridMovement movement, GridState gridState, MazeLayout mazeLayout) {
+    public MoveResult walk(GridMovement movement, GridState gridState, MazeLayout mazeLayout) {
         return move(movement, gridMover.getOrientation(), gridState, mazeLayout);
     }
 
@@ -98,13 +98,16 @@ public class MoverComponent extends EcsComponent implements GridMover {
      * Moving in *some* direction which not needs to be the orientation.
      * 12.4.21: MA32: jetzt hier state changen. ??
      */
-    public GridMovement move(GridMovement movement, GridOrientation orientation, GridState gridState, MazeLayout mazeLayout) {
+    public MoveResult move(GridMovement movement, GridOrientation orientation, GridState gridState, MazeLayout mazeLayout) {
 
         if (!isRotating() && !isWalking()) {
-            GridMovement gridMovement = gridMover.move(movement, orientation, gridState, mazeLayout);
-            // bei einem kick/pull nicht selber walken!
-            if (gridMovement != null && !gridMovement.isKick() && !gridMovement.isPull()) {
-                return setWalkStatus(movement, null, orientation);
+            MoveResult moveResult = gridMover.move(movement, orientation, gridState, mazeLayout);
+            if (moveResult != null) {
+                // don't walk myself when kick or pull!
+                GridMovement gridMovement = moveResult.movement;
+                if (!gridMovement.isKick() && !gridMovement.isPull()) {
+                    return new MoveResult(setWalkStatus(movement, null, orientation));
+                }
             }
         }
         return null;
@@ -119,7 +122,8 @@ public class MoverComponent extends EcsComponent implements GridMover {
      * Liefert das Movement, wenn der Schritt ausgefuehrt wurde, sonst null.
      * 12.4.21: rotation nicht mehr reinstecken bzw. igmorieren. orientation isType needed for being moved.
      */
-    private GridMovement setWalkStatus(GridMovement movement/*boolean forward*/, Quaternion rotation, GridOrientation orientation) {
+    private GridMovement setWalkStatus(GridMovement movement/*boolean forward*/, Quaternion
+            rotation, GridOrientation orientation) {
         walkstatus = new WalkStatus(movement, false, /*rotation,*/ orientation);
         if (debugmovement) {
             logger.debug("start walk, player=" + player);

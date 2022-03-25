@@ -2,6 +2,7 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.core.Payload;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
@@ -19,6 +20,8 @@ import java.util.List;
 public class InventorySystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(InventorySystem.class);
 
+    public static EventType EVENT_ITEM_COLLECTED = new EventType("EVENT_ITEM_COLLECTED");
+
     boolean inventorysystemdebuglog = true;
     // Inventory display for main user
     /*ControlPanel*/ MazeInventory userInventory;
@@ -28,7 +31,7 @@ public class InventorySystem extends DefaultEcsSystem {
      */
     public InventorySystem(/*ControlPanel*/MazeInventory userInventory) {
         super(/*new String[]{InventoryComponent.TAG},*/ new RequestType[]{}, new EventType[]{
-                EventRegistry.EVENT_ITEM_COLLECTED, EventRegistry.EVENT_BULLET_FIRED});
+                EVENT_ITEM_COLLECTED, EventRegistry.EVENT_BULLET_FIRED});
         this.userInventory = userInventory;
     }
 
@@ -36,6 +39,7 @@ public class InventorySystem extends DefaultEcsSystem {
     public void init() {
         //3.5.21 userInventory.setSectionText(0, "-");
         userInventory.setBullets(0);
+        userInventory.setDiamonds(0);
     }
 
     /**
@@ -50,10 +54,11 @@ public class InventorySystem extends DefaultEcsSystem {
             userInventory.setSectionText(0, "" + ic.bulletCount);
         }*/
         if (entity == null && MazeUtils.getMainPlayer() != null) {
-            List<EcsEntity> items = MazeUtils.getInventory(MazeUtils.getMainPlayer());
+            // TODO: duplicate to event handling
+            List<EcsEntity> diamonds = MazeUtils.getDiamonds(MazeUtils.getMainPlayer());
             List<EcsEntity> bullets = MazeUtils.getBullets(MazeUtils.getMainPlayer());
             userInventory.setBullets(bullets.size());
-
+            userInventory.setDiamonds(diamonds.size());
         }
     }
 
@@ -62,12 +67,16 @@ public class InventorySystem extends DefaultEcsSystem {
         if (inventorysystemdebuglog) {
             logger.debug("got event " + evt.getType());
         }
-        if (evt.isType(EventRegistry.EVENT_ITEM_COLLECTED)) {
-            //String playername = (String) request.getPayloadByIndex(0);
-            //EcsEntity player = MazeUtils.getMainPlayer();
-            //MoverComponent mv = MoverComponent.getMoverComponent(player);
-
-
+        if (evt.isType(EVENT_ITEM_COLLECTED)) {
+            int userEntityId = (Integer) evt.getPayloadByIndex(0);
+            List<EcsEntity> diamonds = MazeUtils.getDiamonds(userEntityId);
+            List<EcsEntity> bullets = MazeUtils.getBullets(MazeUtils.getMainPlayer());
+            userInventory.setBullets(bullets.size());
+            userInventory.setDiamonds(diamonds.size());
         }
+    }
+
+    public static Event buildItemCollectedEvent(int userEntityId, int itemId) {
+        return new Event(EVENT_ITEM_COLLECTED, new Payload(new Integer(userEntityId), new Integer(itemId)));
     }
 }

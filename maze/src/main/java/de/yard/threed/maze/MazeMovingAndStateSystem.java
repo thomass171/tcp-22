@@ -144,7 +144,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             reVisualizeState();
         }
 
-        if (!SystemState.isOver() && GridState.isSolved(MazeUtils.buildBoxesFromEcs(), Grid.getInstance().getMazeLayout())) {
+        GridState currentstate = MazeUtils.buildGridStateFromEcs();
+        if (!SystemState.isOver() && currentstate.isSolved(Grid.getInstance().getMazeLayout())) {
             logger.info("solved");
             Hud hud = Hud.buildForCamera(Scene.getCurrent().getDefaultCamera(), 1);
             hud.setText(2, "Solved");
@@ -272,7 +273,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             MazeLayout layout = Grid.getInstance().getMazeLayout();
             Point launchPosition = layout.getNextLaunchPosition(usedLaunchPositions);
             // for now only one player teams
-            Team team = new Team(usedLaunchPositions.size(),Util.buildList(launchPosition));
+            Team team = new Team(usedLaunchPositions.size(), Util.buildList(launchPosition));
             if (launchPosition != null) {
                 joinPlayer(playerEntity, launchPosition, team);
             } else {
@@ -339,31 +340,31 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TURNLEFT)) {
             attemptRotate(currentstate, mover, true);
         } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_BACK)) {
-            foundStuff = attemptMove(currentstate, mover, GridMovement.Back);
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Back, user.getId());
         } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARD)) {
-            foundStuff = attemptMove(currentstate, mover, GridMovement.Forward);
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Forward, user.getId());
         } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_UNDO)) {
             undo(currentstate, mover, Grid.getInstance().getMazeLayout());
         } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_FORWARDMOVE)) {
             // 10.4.21: Wer triggered denn einen TRIGGER_REQUEST_FORWARDMOVE? Nur der Replay?
-            foundStuff = attemptMove(currentstate, mover, GridMovement.ForwardMove);
+            foundStuff = attemptMove(currentstate, mover, GridMovement.ForwardMove, user.getId());
         } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_LEFT)) {
-            foundStuff = attemptMove(currentstate, mover, GridMovement.Left);
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Left, user.getId());
         } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RIGHT)) {
-            foundStuff = attemptMove(currentstate, mover, GridMovement.Right);
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Right, user.getId());
         } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_PULL)) {
             // pull kommt evtl auch bei undo? 27.5.21: jetzt auch eigenstaendig. UNDO hat aber sein eigenes Event.
-            foundStuff = attemptMove(currentstate, mover, GridMovement.Pull);
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Pull, user.getId());
         } else if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_KICK)) {
-            foundStuff = attemptMove(currentstate, mover, GridMovement.Kick);
+            foundStuff = attemptMove(currentstate, mover, GridMovement.Kick, user.getId());
         } else {
             return false;
         }
-        if (foundStuff != null) {
+        /*collecting is handled during walk if (foundStuff != null) {
             for (EcsEntity item : foundStuff) {
                 MazeUtils.setItemCollectedByPlayer(item, user);
             }
-        }
+        }*/
         return true;
     }
 
@@ -374,7 +375,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
      * Only allows four basic movements, no ForwardMove, though that could be possible.
      * Items do not occupy a field. So items that might be located at the destination field do not affect movement.
      */
-    private List<EcsEntity> attemptMove(GridState currentstate, MoverComponent mover, GridMovement movement) {
+    private List<EcsEntity> attemptMove(GridState currentstate, MoverComponent mover, GridMovement movement, int userEntityId) {
         MazeLayout layout = Grid.getInstance().getMazeLayout();
 
         List<EcsEntity> foundStuff = null;
@@ -383,7 +384,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             logger.warn("cannot move. still moving");
         } else {
             // try basic movement
-            GridMovement mo = mover.walk(movement, currentstate, layout);
+            MoveResult mo = mover.walk(movement, currentstate, layout);
             if (mo == null) {
                 // no success. Try push, but only when the basic request was 'Forward'. Otherwise boxes could be pushed by 'Back'
                 if (movement.isForward()) {
@@ -395,7 +396,13 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 // successfully moved. Record it for replay and collect items on new field
                 MoveRecorder.getInstance().addMove(movement/*, nextstate*/);
                 //TODO 17.3.22 merge with collect in SimpleGridMover
-                foundStuff = MazeUtils.getItemsByField(mover.getLocation());
+                //24.3.22 better via event? Hmm.
+                //foundStuff = MazeUtils.getItemsByField(mover.getLocation());
+                if (mo.collected != null) {
+                    for (int itemId : mo.collected) {
+                        SystemManager.sendEvent(InventorySystem.buildItemCollectedEvent(userEntityId, itemId));
+                    }
+                }
             }
         }
         return foundStuff;
@@ -442,6 +449,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
      * Keine Pruefungen. Es wird erwartet, dass das geht.
      * TODO: Aktuelle Bewegunegen beachten. undo wird sehr schnell gemacht. Er scheint da schon mal  durcheinander zu kommen.
      * TODO 17.3.22 Needs alternate implementation. GridState is no longer containing the current state.
+     *
      * @param movement
      */
     private void undo(GridState currentstate, MoverComponent mover, GridMovement movement, MazeLayout layout) {
@@ -533,7 +541,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //static EcsEntity buildSokobanBox(int x, int y) {
             SceneNode p = MazeModelBuilder.buildSokobanBox(/*b.getX(), b.getY()*/);
             EcsEntity box = new EcsEntity(p);
-            MoverComponent mover = new MoverComponent(p.getTransform()/*this*/, false, b, new GridOrientation(),null);
+            MoverComponent mover = new MoverComponent(p.getTransform()/*this*/, false, b, new GridOrientation(), null);
             mover.setLocation(b);
             box.addComponent(mover);
             //return box;
@@ -545,7 +553,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             EcsEntity diamond = new EcsEntity(p);
             p.getTransform().setPosition(MazeUtils.point2Vector3(b));
             // no diamond owner initially
-            diamond.addComponent(new DiamondComponent());
+            diamond.addComponent(new DiamondComponent(b));
             Scene.getCurrent().addToWorld(diamond.scenenode);
         }
         // only create bullets if we have bots (2 per bot). Bullets for player are created at join time

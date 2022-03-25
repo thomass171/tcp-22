@@ -44,4 +44,9 @@ public class SimpleGridItem implements GridItem {
         owner = collector;
         location = null;
     }
+
+    @Override
+    public String toString() {
+        return "SimpleGridItem(owner=" + owner + ",location=" + location + ")";
+    }
 }

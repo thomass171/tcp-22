@@ -87,6 +87,9 @@ public class BulletSystem extends DefaultEcsSystem {
         return false;
     }
 
+    /**
+     * pick bullet from inventory
+     */
     private BulletComponent pickBullet(List<EcsEntity> bullets, Point startLocation) {
         if (bullets.size() > 0) {
             BulletComponent bc = BulletComponent.getBulletComponent(bullets.get(0));

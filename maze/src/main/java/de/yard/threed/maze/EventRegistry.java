@@ -12,7 +12,7 @@ public class EventRegistry {
 
     public static EventType EVENT_MAZE_LOADED = new EventType("EVENT_MAZE_LOADED");
 
-    public static EventType EVENT_ITEM_COLLECTED = new EventType("EVENT_ITEM_COLLECTED");
+
 
     public static EventType EVENT_BULLET_FIRED = new EventType("EVENT_BULLET_FIRED");
 }

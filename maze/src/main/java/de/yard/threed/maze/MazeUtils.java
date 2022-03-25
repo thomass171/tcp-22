@@ -193,6 +193,16 @@ public class MazeUtils {
         return EcsEntity.filterList(inventory, e -> e.getComponent(BulletComponent.TAG) != null);
     }
 
+    public static List<EcsEntity> getDiamonds(EcsEntity player) {
+        List<EcsEntity> inventory = getInventory(player);
+        return EcsEntity.filterList(inventory, e -> e.getComponent(DiamondComponent.TAG) != null);
+    }
+
+    public static List<EcsEntity> getDiamonds(int player) {
+        List<EcsEntity> inventory = getInventory(player);
+        return EcsEntity.filterList(inventory, e -> e.getComponent(DiamondComponent.TAG) != null);
+    }
+
     public static String readMazefile(String filename/*, String levelname*/) {
         Bundle mazebundle = BundleRegistry.getBundle("maze");
         BundleData bundleData = mazebundle.getResource(filename);
@@ -264,8 +274,8 @@ public class MazeUtils {
         return getPlayerOrBoxes(false);
     }
 
-    public static void setItemCollectedByPlayer(EcsEntity e, EcsEntity user) {
+    /*not needed for now public static void setItemCollectedByPlayer(EcsEntity e, EcsEntity user) {
         ItemComponent ic = getItemComponent(e);
         ic.collectedBy(user.getId());
-    }
+    }*/
 }

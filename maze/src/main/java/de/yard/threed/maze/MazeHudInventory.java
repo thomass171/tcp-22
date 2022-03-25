@@ -11,26 +11,30 @@ import de.yard.threed.core.Dimension;
 import de.yard.threed.core.DimensionF;
 
 /**
- * Unten rechts ausserhalb VR.
+ * An area at the right bottom of the display (Outside VR only).
  */
 public class MazeHudInventory implements MazeInventory {
 
     private ControlPanelArea bulletCountArea;
+    private ControlPanelArea diamondCountArea;
     ControlPanel controlPanel;
     // cache bullet value to avoid texture inflation
     private int bullets = -1;
-    private Color basecolor = MazeSettings.hudColor;
+    private int diamonds = -1;
+    private Color backgroundColor = MazeSettings.hudColor;
     private TextTexture textTexture;
 
     public MazeHudInventory(Camera deferredcamera, Dimension dimension) {
-        controlPanel = ControlPanelHelper.buildInventoryForDeferredCamera(deferredcamera, dimension, basecolor);
-        if (controlPanel == null){
+        controlPanel = ControlPanelHelper.buildInventoryForDeferredCamera(deferredcamera, dimension, backgroundColor, new Dimension(90, 20));
+        if (controlPanel == null) {
             // headless?
             return;
         }
+        double w3 = controlPanel.getSize().getWidth() / 3;
         // occupy mid third of inventory for now
-        bulletCountArea = controlPanel.addArea(new Vector2(0, 0), new DimensionF(controlPanel.getSize().getWidth() / 3, controlPanel.getSize().getHeight()), null);
-        textTexture = new TextTexture(basecolor);
+        bulletCountArea = controlPanel.addArea(new Vector2(0, 0), new DimensionF(w3, controlPanel.getSize().getHeight()), null);
+        diamondCountArea = controlPanel.addArea(new Vector2(-w3, 0), new DimensionF(w3, controlPanel.getSize().getHeight()), null);
+        textTexture = new TextTexture(backgroundColor);
     }
 
     @Override
@@ -39,15 +43,33 @@ public class MazeHudInventory implements MazeInventory {
             // no change
             return;
         }
-        if (bulletCountArea == null){
+        if (bulletCountArea == null) {
             // headless?
             return;
         }
         if (count == 0) {
-            bulletCountArea.setTexture(textTexture.getTextureForText("-"));
+            bulletCountArea.setTexture(textTexture.getTextureForText("-",Color.YELLOW));
         } else {
-            bulletCountArea.setTexture(textTexture.getTextureForText("" + count));
+            bulletCountArea.setTexture(textTexture.getTextureForText("" + count,Color.YELLOW));
         }
         bullets = count;
+    }
+
+    @Override
+    public void setDiamonds(int count) {
+        if (diamonds == count) {
+            // no change
+            return;
+        }
+        if (diamondCountArea == null) {
+            // headless?
+            return;
+        }
+        if (count == 0) {
+            diamondCountArea.setTexture(textTexture.getTextureForText("-",Color.LIGHTBLUE));
+        } else {
+            diamondCountArea.setTexture(textTexture.getTextureForText("" + count,Color.LIGHTBLUE));
+        }
+        diamonds = count;
     }
 }

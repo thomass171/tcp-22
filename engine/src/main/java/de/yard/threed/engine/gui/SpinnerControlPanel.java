@@ -33,7 +33,7 @@ public class SpinnerControlPanel extends ControlPanel {
         // text has no margin yet.
         textTexture = new TextTexture(Color.LIGHTGRAY);
         textArea = addArea(new Vector2(0, 0), new DimensionF(textareawidth, size.height), null);
-        textArea.setTexture(textTexture.getTextureForText("961"));
+        textArea.setTexture(textTexture.getTextureForText("961", Color.RED));
         refresh();
 
         addArea(new Vector2((textareawidth / 2 + iconareasize / 2), 0), new DimensionF(iconsize, iconsize), () -> {
@@ -46,7 +46,7 @@ public class SpinnerControlPanel extends ControlPanel {
     private void refresh() {
         if (handler != null) {
             String value = handler.getValue();
-            textArea.setTexture(textTexture.getTextureForText(value));
+            textArea.setTexture(textTexture.getTextureForText(value, Color.RED));
         }
     }
 

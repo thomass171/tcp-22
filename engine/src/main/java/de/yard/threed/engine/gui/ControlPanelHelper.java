@@ -14,20 +14,18 @@ import de.yard.threed.engine.Texture;
 public class ControlPanelHelper {
     static Log logger = Platform.getInstance().getLog(ControlPanelHelper.class);
 
-    static Dimension inventorySizeInPixel = new Dimension(300, 20);
-
     /**
      * Build the backplane for an inventory panel located in the lower right area and attach it to the camera.
      * <p>
-     * Die Dimensionierung ergibt sich aus dem Ziel, das Inventory unten im unteren rechten drittel darzustellen.
-     * Aber dann ist xy-Skalierung doof. Oder ausgehend von Requirement 300x20 Pixel. Hmm
+     * The size is defined in pixel.
+     * <p>
      *
      * @param camera
      * @param screenDimensionInPixel
      * @return
      */
-    public static ControlPanel buildInventoryForDeferredCamera(Camera camera, Dimension screenDimensionInPixel, Color basecolor) {
-        Material mat = Material.buildBasicMaterial(basecolor, /*Effect.buildUniversalEffect()*/ true);
+    public static ControlPanel buildInventoryForDeferredCamera(Camera camera, Dimension screenDimensionInPixel, Color basecolor, Dimension inventorySizeInPixel) {
+        Material mat = Material.buildBasicMaterial(basecolor, true);
         double zpos = 4;
 
         DimensionF worldPlaneSize = camera.getPlaneSize(zpos);
@@ -39,7 +37,6 @@ public class ControlPanelHelper {
             // headless?
             return null;
         }
-        //ControlPanel inventory = new ControlPanel(FovElementPlane.buildFovElementPlane(null, worldBackplaneSize, mat), worldBackplaneSize, basecolor);
         ControlPanel inventory = new ControlPanel(worldBackplaneSize, mat, 0.01);
         // move it to the lower right screen corner. TODO check: Why is zpos negated?
         inventory.getTransform().setPosition(new Vector3(worldPlaneSize.width / 2 - worldBackplaneSize.getWidth() / 2,
@@ -104,7 +101,7 @@ public class ControlPanelHelper {
         for (int i = 0; i < menuitems.length; i++) {
             Texture texture;
             if (menuitems[i].text != null) {
-                texture = textTexture.getTextureForText(menuitems[i].text);
+                texture = textTexture.getTextureForText(menuitems[i].text, Color.RED);
             } else {
                 texture = menuitems[i].guiTexture.getTexture();
             }
@@ -117,7 +114,7 @@ public class ControlPanelHelper {
     public static void addText(ControlPanel cp, String text, Vector2 pos, DimensionF size) {
         TextTexture textTexture = new TextTexture(Color.LIGHTGRAY);
         ControlPanelArea textArea = cp.addArea(pos, size, null);
-        textArea.setTexture(textTexture.getTextureForText(text));
+        textArea.setTexture(textTexture.getTextureForText(text, Color.RED));
     }
 
     /**

@@ -35,7 +35,7 @@ public class MazeSettings {
     public float sokobanboxsize = 0.6f;
     public ShapeGeometry sokobanboxgeo;
     public Material sokobanboxmaterial;
-    // die Farbe passt gut zum Ground
+    // Color is well fitting to ground
     public static Color hudColor = new Color(255, 217, 102, 128);
     public static String[] teamColors = new String[]{"darkgreen", "red"};
 

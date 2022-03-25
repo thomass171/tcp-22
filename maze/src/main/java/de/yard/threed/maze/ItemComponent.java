@@ -42,6 +42,9 @@ public abstract class ItemComponent extends EcsComponent implements GridItem {
         gridItem.setOwner(owner);
     }
 
+    /**
+     * not really needed here for now, but for interface
+     */
     @Override
     public void collectedBy(int collector) {
         gridItem.collectedBy(collector);

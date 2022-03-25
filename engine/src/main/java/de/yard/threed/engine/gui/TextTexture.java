@@ -15,8 +15,8 @@ public class TextTexture {
         this.background = background;
     }
 
-    public Texture getTextureForText(String text) {
-        Texture texture = Hud.buildTextureForText(text, background);
+    public Texture getTextureForText(String text, Color color) {
+        Texture texture = Hud.buildTextureForText(text, color, background);
         return texture;
     }
 }

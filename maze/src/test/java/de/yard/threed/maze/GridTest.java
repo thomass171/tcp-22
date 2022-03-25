@@ -20,8 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -154,9 +153,10 @@ public class GridTest {
         TestUtils.move(player, GridMovement.Forward, state, grid.getMazeLayout(), new Point(3, 1));
         TestUtils.rotatePlayer(player, true, new Point(3, 1));
 
-        TestUtil.assertFalse("solved", GridState.isSolved(boxes, grid.getMazeLayout()));
+        GridState gridState = new GridState(Util.buildList(player), boxes);
+        TestUtil.assertFalse("solved", gridState.isSolved(grid.getMazeLayout()));
         TestUtils.move(player, GridMovement.ForwardMove, state, grid.getMazeLayout(), new Point(3, 2));
-        TestUtil.assertTrue("solved", GridState.isSolved(boxes, grid.getMazeLayout()));
+        TestUtil.assertTrue("solved", gridState.isSolved(grid.getMazeLayout()));
 
     }
 
@@ -333,11 +333,20 @@ public class GridTest {
 
         initContent(new Point[]{new Point(5, 1), new Point(4, 4)}, new Point[]{}, new Point[]{new Point(3, 3)});
 
-        TestUtils.move(gridState.players.get(0), gridState, GridMovement.Left, grid.getMazeLayout(), new Point(4, 1));
-        TestUtils.move(gridState.players.get(0), gridState, GridMovement.Left, grid.getMazeLayout(), new Point(3, 1));
-        TestUtils.move(gridState.players.get(0), gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(3, 2));
-        TestUtils.move(gridState.players.get(0), gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(3, 3));
-        //TODO collect?
+        GridMover player = gridState.players.get(0);
+        TestUtils.move(player, gridState, GridMovement.Left, grid.getMazeLayout(), new Point(4, 1));
+        TestUtils.move(player, gridState, GridMovement.Left, grid.getMazeLayout(), new Point(3, 1));
+        TestUtils.move(player, gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(3, 2));
+
+        // collect. There are no bullets without ECS.
+        assertFalse(gridState.isSolved(grid.getMazeLayout()));
+        GridItem diamond = gridState.items.get(0);
+        assertEquals(-1, diamond.getOwner());
+        assertNotNull(diamond.getLocation());
+        TestUtils.move(player, gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(3, 3));
+        assertEquals(player.getId(), diamond.getOwner());
+        assertNull(diamond.getLocation());
+        assertTrue(gridState.isSolved(grid.getMazeLayout()));
     }
 
     @Test

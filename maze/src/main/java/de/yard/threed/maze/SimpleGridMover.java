@@ -82,7 +82,7 @@ public class SimpleGridMover implements GridMover {
      * 12.4.21: MA32: jetzt hier state changen
      */
     @Override
-    public GridMovement move(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout) {
+    public MoveResult move(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout) {
 
         // 22.5.21: Special case kick, that is possible from more far distance without self walking. Pull also.
         if (movement.equals(GridMovement.Kick) || movement.equals(GridMovement.Pull)) {
@@ -96,14 +96,14 @@ public class SimpleGridMover implements GridMover {
                 if ((boxloc = canPushFrom(pushLocation, gridOrientation, gridState, mazeLayout)) != null) {
                     //GridMover boxloc = currentstate.canPushFrom(from, orientation, layout);
                     derivedMove(boxloc, gridOrientation, GridMovement.Forward, gridState, mazeLayout);
-                    return GridMovement.Kick;
+                    return new MoveResult(GridMovement.Kick);
                     //}
                 }
             }
             // a pull box might not be a neighbor.
             if (movement.equals(GridMovement.Pull) && Point.getDistance(location, nextBox.getLocation()) > 1) {
                 derivedMove(nextBox, gridOrientation, GridMovement.Back, gridState, mazeLayout);
-                return GridMovement.Pull;
+                return new MoveResult(GridMovement.Pull);
             }
             return null;
         }
@@ -111,7 +111,7 @@ public class SimpleGridMover implements GridMover {
         if (!gridState.canWalk(getLocation(), movement, gridOrientation, getTeam(), mazeLayout)) {
             //15.4.21 try push if requested
             if (movement.equals(GridMovement.ForwardMove) && combinedMove(gridState, this, mazeLayout)) {
-                return GridMovement.ForwardMove;
+                return new MoveResult(GridMovement.ForwardMove);
             }
             return null;
         }
@@ -123,7 +123,7 @@ public class SimpleGridMover implements GridMover {
             item.collectedBy(getId());
         }
         location = location.add(direction.getPoint());
-        return movement;
+        return new MoveResult(movement);
     }
 
     @Override
