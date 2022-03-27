@@ -75,7 +75,7 @@ class GridDraft {
         // everything not a wall
         List<Point> fields;
         // Several sets of start positions
-        List<List<Point>> playerposition = new ArrayList<List<Point>>();
+        List<List<StartPosition>> playerposition = new ArrayList<List<StartPosition>>();
         int height;
         int maxwidth = 0;
 
@@ -131,9 +131,12 @@ class GridDraft {
                             fields.add(p);
                             break;
                         case 'M':
+                            addStartPosition(playerposition, p, true);
+                            fields.add(p);
+                            break;
                         case 'P':
                         case '@':
-                            addStartPosition(playerposition, p);
+                            addStartPosition(playerposition, p, false);
                             fields.add(p);
                             break;
                         case '$':
@@ -177,11 +180,11 @@ class GridDraft {
         return false;
     }
 
-    private void addStartPosition(List<List<Point>> playerposition, Point p) {
+    private void addStartPosition(List<List<StartPosition>> playerposition, Point p, boolean isMonster) {
         // TODO check extend existing
         boolean createNew = true;
         if (createNew) {
-            playerposition.add(Util.buildList(p));
+            playerposition.add(Util.buildList(new StartPosition(p, isMonster)));
         }
     }
 }

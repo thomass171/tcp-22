@@ -13,6 +13,8 @@ import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.engine.util.IntProvider;
 import de.yard.threed.engine.util.RandomIntProvider;
 
+import java.util.List;
+
 /**
  * <p>
  * Created by thomass on 09.04.21.
@@ -22,7 +24,7 @@ public class BotSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(BotSystem.class);
 
     private boolean botsystemdebuglog = true;
-    private int botsNeeded = 0;
+    private List<List<StartPosition>> startPositions;
     private IntProvider rand = new RandomIntProvider();
 
     /**
@@ -77,18 +79,21 @@ public class BotSystem extends DefaultEcsSystem {
 
         if (evt.getType().equals(EventRegistry.EVENT_MAZE_LOADED)) {
             Grid grid = (Grid) evt.getPayloadByIndex(0);
-            botsNeeded = grid.getMazeLayout().getNumberOfTeams() - 1;
+            startPositions = grid.getMazeLayout().getStartPositions();
         }
         if (evt.getType().equals(UserSystem.USER_EVENT_JOINED)) {
             // Start a bot for remaining players. But only once, the login request fired here will also trigger a JOINED event again.
             // Be prepared for inconsistent (negative) botNeeded.
-            for (int i = 0; botsNeeded > 0 && i < botsNeeded; i++) {
-                // A bot is no logged in user, thus will only join
-                EcsEntity user = new EcsEntity(new BotComponent());
-                user.setName("Bot" + i);
-                SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId(), false));
+            if (startPositions != null) {
+                logger.debug("Launching bots");
+                for (int i = 1; i < startPositions.size(); i++) {
+                    // A bot is no logged in user, thus will only join
+                    EcsEntity user = new EcsEntity(BotComponent.buildFromGridDefinition(startPositions.get(i).get(0)));
+                    user.setName("Bot" + (i-1));
+                    SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId(), false));
+                }
             }
-            botsNeeded = 0;
+            startPositions = null;
         }
     }
 

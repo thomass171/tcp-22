@@ -8,4 +8,5 @@ skbn/Sokoban10x10.txt
 skbn/SokobanSimple.txt
 skbn/SokobanTrivial.txt
 skbn/SokobanWikipedia.txt
+textures/Face-Monster.png
 maze.properties

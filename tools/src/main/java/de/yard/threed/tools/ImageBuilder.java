@@ -96,7 +96,7 @@ public class ImageBuilder {
      */
     public static void buildForPreview() {
 
-        int previewOption = 7;
+        int previewOption = 8;
         BufferedImage image = null;
 
         switch (previewOption) {
@@ -124,8 +124,17 @@ public class ImageBuilder {
                 image = buildMazeHome(de.yard.threed.core.Color.DARKGREEN);
                 //image = buildMazeHome(de.yard.threed.core.Color.DARKGREEN);
                 break;
+            case 8:
+                image = TextureBuilder.buildMonsterFace(new Color(0x993300));
+                break;
         }
         ImagePreviewer.preview(image);
+
+        /*try {
+            FileUtil.saveToPngFile(image, "Face-Monster.png");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
     }
 
 
@@ -175,11 +184,7 @@ public class ImageBuilder {
         mit.g2d.drawLine(size - 4 * offset, size / 2, size / 2, 3 * offset);
         mit.g2d.dispose();
 
-        /*try {
-            FileUtil.saveToPngFile(mit.image, "MazeHome.png");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+
         return mit.image;
     }
 

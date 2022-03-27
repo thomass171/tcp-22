@@ -3,9 +3,13 @@ package de.yard.threed.engine.avatar;
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformHelper;
+import de.yard.threed.engine.Geometry;
+import de.yard.threed.engine.Material;
+import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.ObserverComponent;
 import de.yard.threed.engine.Scene;
+import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ViewPoint;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.core.platform.Log;
@@ -88,7 +92,7 @@ public class AvatarSystem extends DefaultEcsSystem {
             int userEntityId = ((int) request.getPayloadByIndex(0));
             Boolean forLogin = (Boolean) request.getPayloadByIndex(1);
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
-            Avatar avatar = buildAvatarForUserEntity(userEntity);
+            SceneNode avatarNode = buildAvatarForUserEntity(userEntity);
 
             TeleportComponent tc = TeleportComponent.getTeleportComponent(userEntity);
             if (tc != null) {
@@ -118,8 +122,8 @@ public class AvatarSystem extends DefaultEcsSystem {
             // This is also reached for bot and MP joining.
             // 14.2.22 Attach observer independent from VR. But only to the first player (for now)
             if ((boolean) forLogin && Observer.getInstance() != null && isFirstJoin) {
-                logger.debug("Attaching oberserver " + Observer.getInstance().getTransform() + " to avatar " + avatar.getSceneNode().getTransform());
-                Observer.getInstance().getTransform().setParent(avatar.getSceneNode().getTransform());
+                logger.debug("Attaching oberserver " + Observer.getInstance().getTransform() + " to avatar " + avatarNode.getTransform());
+                Observer.getInstance().getTransform().setParent(avatarNode.getTransform());
 
                 // In non VR the position might need to be raised to head height and view direction slightly down. (eg in maze)
                 if (viewTransform != null && VrInstance.getInstance() == null) {
@@ -150,11 +154,25 @@ public class AvatarSystem extends DefaultEcsSystem {
     /**
      * Build avatar for user. No observer change here.
      */
-    private Avatar buildAvatarForUserEntity(EcsEntity user) {
+    private SceneNode buildAvatarForUserEntity(EcsEntity user) {
         logger.debug("Building avatar for player " + user);
 
-        Avatar av = new Avatar(user, avatarBuilder);
-        Scene.getCurrent().addToWorld(av.getSceneNode());
-        return av;
+        //Avatar av = new Avatar(user, avatarBuilder);
+        SceneNode mainNode;
+        if (avatarBuilder == null) {
+            // simple green cube avatar
+            mainNode = new SceneNode();
+            // Simple green cube for testing.
+            mainNode.setMesh(new Mesh(Geometry.buildCube(0.1f, 0.1f, 0.1f), Material.buildBasicMaterial(Color.GREEN)));
+        } else {
+            mainNode = avatarBuilder.buildAvatar(user);
+        }
+        mainNode.setName("Avatar");
+
+        user.scenenode = mainNode;
+        user.addComponent(new TeleportComponent(mainNode));
+        user.addComponent(new AvatarComponent());
+        Scene.getCurrent().addToWorld(mainNode);
+        return mainNode;
     }
 }

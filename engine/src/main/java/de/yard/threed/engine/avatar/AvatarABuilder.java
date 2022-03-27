@@ -2,6 +2,7 @@ package de.yard.threed.engine.avatar;
 
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.loader.PortableModelList;
 
 public class AvatarABuilder implements AvatarBuilder {
@@ -15,7 +16,7 @@ public class AvatarABuilder implements AvatarBuilder {
     }
 
     @Override
-    public SceneNode buildAvatar() {
+    public SceneNode buildAvatar(EcsEntity player) {
         PortableModelList pml = AvatarPmlFactory.buildAvatarA(nextColor());
         SceneNode model = pml.buildModel(null, null);
         model.getTransform().setPosition(offset.position);

@@ -29,30 +29,14 @@ import de.yard.threed.core.Color;
  * 11.5.21: Avatar is nothing more than the visual representation of a loggedin/joined player. Everything view related is in {@link Observer}. (MA35)
  * Könnte auch direkt SceneNode sein?
  * VR (vrdown,vrOffsetPosition) is no longer an avatar issue but an {@link Observer} issue.
+ * Deprecated because it can be replaced by AvatarBuilder.
  */
+@Deprecated
 public class Avatar {
     Log logger = Platform.getInstance().getLog(Avatar.class);
 
     private SceneNode mainNode;
     private boolean hasMesh = false;
-
-    public Avatar(EcsEntity entity, AvatarBuilder avatarBuilder) {
-
-        hasMesh = true;
-        if (avatarBuilder == null) {
-            // simple green cube avatar
-            mainNode = new SceneNode();
-            setMesh();
-        } else {
-            mainNode = avatarBuilder.buildAvatar();
-        }
-
-        mainNode.setName("Avatar");
-
-        entity.scenenode = mainNode;
-        entity.addComponent(new TeleportComponent(mainNode));
-        entity.addComponent(new AvatarComponent());
-    }
 
     /**
      * Avatar outside ECS with simple green cube body/mesh.

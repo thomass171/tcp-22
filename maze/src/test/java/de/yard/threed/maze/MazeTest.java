@@ -52,6 +52,7 @@ public class MazeTest {
                 SystemManager.addSystem(new MazeMovingAndStateSystem(levelname));
                 SystemManager.addSystem(new UserSystem());
                 AvatarSystem avatarSystem = new AvatarSystem();
+                avatarSystem.setAvatarBuilder(new MazeAvatarBuilder());
                 avatarSystem.setViewTransform(MazeScene.getViewTransform());
                 SystemManager.addSystem(avatarSystem);
                 SystemManager.addSystem(new BulletSystem());
@@ -345,6 +346,8 @@ public class MazeTest {
 
         setup("maze/Maze-P-Simple.txt", true);
 
+        //ready for botsystem? initMaze_P_Simple();
+
         // no boxes, no player, 1 diamond
         assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
         assertEquals(0, MazeUtils.getPlayer().size(), "number of player");
@@ -360,6 +363,8 @@ public class MazeTest {
         assertNotNull(user0);
         EcsEntity user1 = EcsHelper.findEntitiesByName("Bot0").get(0);
         assertNotNull(user1);
+
+        assertEquals(1, SceneNode.findByName("Monster").size());
     }
 
     /**
@@ -389,6 +394,11 @@ public class MazeTest {
         assertEquals(3 + 1, MazeUtils.getInventory(user0).size(), "inventory (3 bullets, 1 diamond)");
     }
 
+    /**
+     * Launch all player, check items
+     *
+     * @return list of player
+     */
     private List<EcsEntity> initMaze_P_Simple() {
         // no boxes, no player, one diamond
         assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");

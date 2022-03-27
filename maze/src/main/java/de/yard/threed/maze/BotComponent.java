@@ -20,6 +20,7 @@ public class BotComponent extends EcsComponent {
     BotAI botAI = new SimpleBotAI();
     long lastActionAt = 0;
     static long WAIT_TIME = 1500;
+    public boolean monster;
 
     public BotComponent() {
     }
@@ -47,4 +48,13 @@ public class BotComponent extends EcsComponent {
         return m;
     }
 
+    public static BotComponent buildFromGridDefinition(StartPosition startPosition) {
+        BotComponent bc = new BotComponent();
+        bc.monster = startPosition.isMonster;
+        return bc;
+    }
+
+    public boolean isMonster() {
+        return monster;
+    }
 }

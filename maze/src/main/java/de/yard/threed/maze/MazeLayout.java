@@ -21,12 +21,12 @@ public class MazeLayout {
     public List<Point> walls;
     public List<Point> destinations;
     // Several sets of start positions. Starting at lower (small y) left (small x).
-    private List<List<Point>> initialPosition;
+    private List<List<StartPosition>> initialPosition;
     //private static MazeLayout instance;
     int maxwidth, height;
     public List<Point> fields;
 
-    public MazeLayout(List<Point> walls, List<Point> destinations, List<List<Point>> initialPosition, int maxwidth, int height, List<Point> fields) {
+    public MazeLayout(List<Point> walls, List<Point> destinations, List<List<StartPosition>> initialPosition, int maxwidth, int height, List<Point> fields) {
         this.walls = walls;
         this.destinations = destinations;
         this.initialPosition = initialPosition;
@@ -41,10 +41,10 @@ public class MazeLayout {
     }
 
     public Point getNextLaunchPosition(List<Point> usedLaunchPositions) {
-        for (List<Point> pset : initialPosition) {
-            for (Point p : pset) {
-                if (usedLaunchPositions == null || !usedLaunchPositions.contains(p)) {
-                    return p;
+        for (List<StartPosition> pset : initialPosition) {
+            for (StartPosition p : pset) {
+                if (usedLaunchPositions == null || !usedLaunchPositions.contains(p.p)) {
+                    return p.p;
                 }
             }
         }
@@ -81,9 +81,9 @@ public class MazeLayout {
     }
 
     public boolean isStartField(Point p) {
-        for (List<Point> l : initialPosition) {
-            for (Point point : l) {
-                if (point.equals(p)) {
+        for (List<StartPosition> l : initialPosition) {
+            for (StartPosition point : l) {
+                if (point.p.equals(p)) {
                     return true;
                 }
             }
@@ -93,12 +93,16 @@ public class MazeLayout {
 
     public int getTeamByHome(Point p) {
         for (int team = 0; team < initialPosition.size(); team++) {
-            for (Point point : initialPosition.get(team)) {
-                if (point.equals(p)) {
+            for (StartPosition point : initialPosition.get(team)) {
+                if (point.p.equals(p)) {
                     return team;
                 }
             }
         }
         return -1;
+    }
+
+    public List<List<StartPosition>> getStartPositions(){
+        return initialPosition;
     }
 }

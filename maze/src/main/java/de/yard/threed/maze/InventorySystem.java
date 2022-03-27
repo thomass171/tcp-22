@@ -68,7 +68,7 @@ public class InventorySystem extends DefaultEcsSystem {
             logger.debug("got event " + evt.getType());
         }
         if (evt.isType(EVENT_ITEM_COLLECTED)) {
-            int userEntityId = (Integer) evt.getPayloadByIndex(0);
+            int userEntityId = (int) evt.getPayloadByIndex(0);
             List<EcsEntity> diamonds = MazeUtils.getDiamonds(userEntityId);
             List<EcsEntity> bullets = MazeUtils.getBullets(MazeUtils.getMainPlayer());
             userInventory.setBullets(bullets.size());
