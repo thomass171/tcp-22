@@ -5,7 +5,6 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsHelper;
-import de.yard.threed.engine.ecs.SystemManager;
 
 public class DiamondComponent extends ItemComponent {
 

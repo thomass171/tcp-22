@@ -114,7 +114,7 @@ public class ImageBuilder {
                 image = buildTextPage(Theme.LIGHTBLUE, "Helptext-LightBlue.png", helptext);
                 break;
             case 5:
-                image = TextureBuilder.buildFace(Color.BLUE);
+                image = TextureBuilder.buildFace(Color.green);
                 break;
             case 6:
                 image = buildSokobanTarget();
@@ -128,13 +128,16 @@ public class ImageBuilder {
                 image = TextureBuilder.buildMonsterFace(new Color(0x993300));
                 break;
         }
-        ImagePreviewer.preview(image);
 
+        // preview might modify image (blue frame?). So save it first.
         /*try {
             FileUtil.saveToPngFile(image, "Face-Monster.png");
         } catch (IOException e) {
             e.printStackTrace();
         }*/
+
+        ImagePreviewer.preview(image);
+
     }
 
 
