@@ -250,15 +250,15 @@ public class GridState {
      */
     public boolean isSolved(MazeLayout mazeLayout) {
 
-        boolean allItemsCollected = true;
+        boolean allItemsNeededCollected = true;
         for (GridItem item : items) {
-            if (item.getOwner() == -1) {
-                allItemsCollected = false;
+            if (item.getOwner() == -1 && item.isNeededForSolving()) {
+                allItemsNeededCollected = false;
             }
         }
 
         if (boxes.size() == 0) {
-            if (items.size() > 0 && allItemsCollected) {
+            if (items.size() > 0 && allItemsNeededCollected) {
                 return true;
             }
             //No Sokoban

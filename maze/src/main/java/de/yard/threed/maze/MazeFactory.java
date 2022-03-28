@@ -51,16 +51,21 @@ public class MazeFactory {
 
     /**
      * For outside ECS only? Testing?
-     * TODO pass type of item?
      *
      * @param initialLocation
      * @return
      */
-    public static List<GridItem> buildItems(List<Point> initialLocation) {
+    public static List<GridItem> buildItems(List<Point> initialLocation, char type) {
 
         List<GridItem> items = new ArrayList<GridItem>();
         for (Point p : initialLocation) {
-            items.add(new SimpleGridItem(p));
+            SimpleGridItem item = new SimpleGridItem(p);
+            switch (type) {
+                case 'D':
+                    item.setNeededForSolving();
+                    break;
+            }
+            items.add(item);
         }
         return items;
     }

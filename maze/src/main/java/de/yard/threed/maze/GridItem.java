@@ -44,4 +44,7 @@ public interface GridItem {
      */
     void collectedBy(int collector);
 
+    boolean isNeededForSolving();
+
+    void setNeededForSolving();
 }

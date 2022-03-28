@@ -53,4 +53,14 @@ public abstract class ItemComponent extends EcsComponent implements GridItem {
     public GridItem getGridItem() {
         return gridItem;
     }
+
+    @Override
+    public boolean isNeededForSolving() {
+        return gridItem.isNeededForSolving();
+    }
+
+    @Override
+    public void setNeededForSolving() {
+        gridItem.setNeededForSolving();
+    }
 }

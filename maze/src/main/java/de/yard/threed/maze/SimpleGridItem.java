@@ -6,6 +6,7 @@ public class SimpleGridItem implements GridItem {
 
     int owner = -1;
     Point location = null;
+    boolean neededForSolving = false;
 
     public SimpleGridItem() {
 
@@ -43,6 +44,16 @@ public class SimpleGridItem implements GridItem {
     public void collectedBy(int collector) {
         owner = collector;
         location = null;
+    }
+
+    @Override
+    public boolean isNeededForSolving() {
+        return neededForSolving;
+    }
+
+    @Override
+    public void setNeededForSolving() {
+        neededForSolving = true;
     }
 
     @Override

@@ -22,6 +22,7 @@ public class DiamondComponent extends ItemComponent {
         super();
         setLocation(b);
         setOwner(-1);
+        setNeededForSolving();
     }
 
     @Override

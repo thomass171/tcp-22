@@ -433,15 +433,12 @@ public class GridTest {
                 "#   @    #\n" +
                 "##########");
 
-        List<GridMover> players = initPlayer(new Point(4, 1));
-        List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
-        List<GridItem> diamonds = MazeFactory.buildItems(grid.getDiamonds());
-        TestUtil.assertEquals("diamonds", 1, diamonds.size());
-        GridState gridState = new GridState(players, boxes, diamonds);
+        initContent(new Point[]{new Point(4, 1)}, new Point[]{}, new Point[]{new Point(4, 2)});
+        TestUtil.assertEquals("diamonds", 1, gridState.items.size());
 
-        TestUtils.move(players.get(0), gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 2));
-        assertEquals(players.get(0).getId(), diamonds.get(0).getOwner(), "diamond owner");
-        assertNull(diamonds.get(0).getLocation(), "diamond location");
+        TestUtils.move(gridState.players.get(0), gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 2));
+        assertEquals(gridState.players.get(0).getId(), gridState.items.get(0).getOwner(), "diamond owner");
+        assertNull(gridState.items.get(0).getLocation(), "diamond location");
     }
 
     @Test
@@ -482,7 +479,7 @@ public class GridTest {
         for (int i = 0; i < boxes.size(); i++) {
             TestUtil.assertPoint(expectedBoxesLocations[i], boxes.get(i).getLocation());
         }
-        List<GridItem> items = MazeFactory.buildItems(grid.getDiamonds());
+        List<GridItem> items = MazeFactory.buildItems(grid.getDiamonds(), 'D');
         for (int i = 0; i < items.size(); i++) {
             TestUtil.assertPoint(expectedItemsLocations[i], items.get(i).getLocation());
         }
