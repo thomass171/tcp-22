@@ -1,7 +1,11 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
+import de.yard.threed.core.Vector3;
+import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EcsHelper;
+import de.yard.threed.engine.ecs.SystemManager;
 
 public class DiamondComponent extends ItemComponent {
 
@@ -29,5 +33,13 @@ public class DiamondComponent extends ItemComponent {
     public static DiamondComponent getDiamondComponent(EcsEntity e) {
         DiamondComponent m = (DiamondComponent) e.getComponent(DiamondComponent.TAG);
         return m;
+    }
+
+    @Override
+    public void collectedBy(int collector) {
+        super.collectedBy(collector);
+        SceneNode n = EcsHelper.findEntityById(getEntityId()).getSceneNode();
+        // make it invisble
+        n.getTransform().setScale(new Vector3());
     }
 }
