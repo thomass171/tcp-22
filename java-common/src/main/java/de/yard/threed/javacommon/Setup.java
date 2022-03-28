@@ -54,7 +54,7 @@ public class Setup {
 
             System.setProperty("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
-            //System.setProperty("scene", "de.yard.threed.maze.MazeScene");
+            System.setProperty("scene", "de.yard.threed.maze.MazeScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
             //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
 

@@ -551,7 +551,9 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         for (Point b : grid.getDiamonds()) {
             SceneNode p = MazeModelBuilder.buildDiamond();
             EcsEntity diamond = new EcsEntity(p);
-            p.getTransform().setPosition(MazeUtils.point2Vector3(b));
+            Vector3 dp = MazeUtils.point2Vector3(b);
+            dp = new Vector3(dp.getX(), 0.8, dp.getZ());
+            p.getTransform().setPosition(dp);
             // no diamond owner initially
             diamond.addComponent(new DiamondComponent(b));
             Scene.getCurrent().addToWorld(diamond.scenenode);

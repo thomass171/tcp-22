@@ -29,7 +29,7 @@ public class MazeAvatarBuilder implements AvatarBuilder {
         if (botComponent == null || !botComponent.isMonster()) {
             avatar = avatarABuilder.buildAvatar(player);
         } else {
-            avatar = MazeFactory.buildMonster();
+            avatar = MazeModelBuilder.buildMonster();
             // should be appx in head height (where bullets fly)
             avatar.getTransform().setPosition(new Vector3(0, 1.3, 0));
             avatar.getTransform().setRotation(Quaternion.buildRotationY(new Degree(-90)));

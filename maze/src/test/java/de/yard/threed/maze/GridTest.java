@@ -323,7 +323,7 @@ public class GridTest {
      * #   M    #
      * #  D# #  #
      * #   # #  #
-     * #    P   #
+     * #    P D #
      * ##########
      */
     @Test
@@ -331,16 +331,21 @@ public class GridTest {
 
         loadGridAndTerrain("maze/Maze-P-Simple.txt");
 
-        initContent(new Point[]{new Point(5, 1), new Point(4, 4)}, new Point[]{}, new Point[]{new Point(3, 3)});
+        initContent(new Point[]{new Point(5, 1), new Point(4, 4)}, new Point[]{}, new Point[]{new Point(7, 1), new Point(3, 3)});
 
         GridMover player = gridState.players.get(0);
+        TestUtils.move(player, gridState, GridMovement.Right, grid.getMazeLayout(), new Point(6, 1));
+        TestUtils.move(player, gridState, GridMovement.Right, grid.getMazeLayout(), new Point(7, 1));
+        TestUtils.move(player, gridState, GridMovement.Left, grid.getMazeLayout(), new Point(6, 1));
+        TestUtils.move(player, gridState, GridMovement.Left, grid.getMazeLayout(), new Point(5, 1));
         TestUtils.move(player, gridState, GridMovement.Left, grid.getMazeLayout(), new Point(4, 1));
         TestUtils.move(player, gridState, GridMovement.Left, grid.getMazeLayout(), new Point(3, 1));
         TestUtils.move(player, gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(3, 2));
 
         // collect. There are no bullets without ECS.
         assertFalse(gridState.isSolved(grid.getMazeLayout()));
-        GridItem diamond = gridState.items.get(0);
+        // how to know it is diamond 1?
+        GridItem diamond = gridState.items.get(1);
         assertEquals(-1, diamond.getOwner());
         assertNotNull(diamond.getLocation());
         TestUtils.move(player, gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(3, 3));

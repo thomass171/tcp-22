@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Dies und das
+ * See also {@MazeModelBuilder}
  * <p>
  * 13.4.21
  */
@@ -64,27 +64,4 @@ public class MazeFactory {
         }
         return items;
     }
-
-    /**
-     * Just a sphere. Has no elevation above anything, so needs to be raised.
-     *
-     * @return
-     */
-    public static SceneNode buildMonster() {
-
-        double headRadius = 0.20;
-
-        PortableMaterial faceMaterial = new PortableMaterial("faceMaterial", "maze:textures/Face-Monster.png");
-
-        PortableModelDefinition head = AvatarPmlFactory.buildHead(headRadius, "faceMaterial");
-
-        PortableModelList pml = new PortableModelList(null);
-        pml.addModel(head);
-        pml.addMaterial(faceMaterial);
-
-        SceneNode model = pml.buildModel(null, null);
-        model.setName("Monster");
-        return new SceneNode(model);
-    }
-
 }
