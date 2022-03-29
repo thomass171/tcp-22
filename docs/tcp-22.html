@@ -13,9 +13,12 @@
 
 <body class="w3-light-grey">
 <!--
+Reminder:
 w3-card-2:  Container for any HTML content (2px bordered shadow)
 w3-half: Half (1/2) screen column container
-w3-row-padding: Row where all columns have a default padding
+w3-row-padding: Row where all columns have a default padding (Responsive Class)
+w3-section:	Adds an 16px top and bottom margin to an element (Margin Class)
+w3-container: HTML container with 16px left and right padding (Container Class)
 -->
 <!-- Navigation (Stays on Top) -->
 <!--<div class="w3-top w3-bar w3-black">
@@ -89,9 +92,13 @@ w3-row-padding: Row where all columns have a default padding
             </div>
         </div>
 
-        <div class="w3-panel w3-padding-large w3-section  w3-white">
-            <h1 class="">Use Cases</h1>
+        <div class=" w3-padding-large w3-section w3-white">
+            <h1 class="">Use Case Maze Games</h1>
             <p class="w3-xlarge"></p>
+            All maze games are based on the same maze game engine that uses a generic simple ASCII
+            format for defining maze level. The game objective and all possible actions
+            are derived from the level definition. So several different styles of maze games
+            can be defined.
             <div class="w3-row-padding w3-padding-16">
                 <!--Sokoban-->
                 <div class="w3-half">
@@ -129,9 +136,9 @@ w3-row-padding: Row where all columns have a default padding
                 <div class="w3-half">
                     <div class="w3-card-2">
                         <div class="w3-container">
-                            <!--<img src="/w3images/steak.jpg" alt="Steak" style="width:100%">-->
                             <h3>Mazes</h3>
-                            <p>Just a maze.</p>
+                            <p>Just a maze. No boxes to move and no items to collect. Objective
+                            is to find the exit. But be aware of monster that might bother you.</p>
 
                             <select class="w3-select  " id="sel_sceneBox1">
                                 <option value="maze/Maze15x10.txt">Maze 15x10</option>
@@ -147,6 +154,91 @@ w3-row-padding: Row where all columns have a default padding
                         </div>
                     </div>
                 </div>
+                <!--P-Man-->
+                <div class="w3-half">
+                    <div class="w3-card-2">
+                        <div class="w3-container">
+                            <h3>P-Man</h3>
+                            <p>Objective is to collect all diamonds in a maze. Be aware of monster that might bother you.</p>
+                            <select class="w3-select  " id="sel_sceneBox2">
+                                <option value="maze/Maze-P-Simple.txt">P Simple</option>
+                            </select>
+                            <p></p>
+                            <button class=" w3-button  w3-round w3-khaki "
+                                    onclick="launchMazeScene(false,'sel_sceneBox2')">Launch
+                            </button>
+                            <button class=" w3-button  w3-round w3-khaki "
+                                    onclick="launchMazeScene(true,'sel_sceneBox2')">Launch VR
+                            </button>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- accordion for showing additional information optionally-->
+            <h4>Additional information about mazes</h4>
+            <p></p>
+
+            <button onclick="toggleAccordion('acc_notation')"
+                    class="w3-button w3-block w3-round w3-khaki w3-left-align">Maze level definition
+            </button>
+            <div id="acc_notation" class="w3-container w3-hide">
+                <p>t.b.c.</p>
+            </div>
+            <button onclick="toggleAccordion('acc_gameplay')"
+                    class="w3-button w3-block w3-round w3-khaki w3-left-align">Maze gameplay
+            </button>
+            <div id="acc_gameplay" class="w3-container w3-hide">
+                <p>t.b.c.</p>
+            </div>
+            <button onclick="toggleAccordion('acc_usercontrols')"
+                    class="w3-button w3-block w3-round w3-khaki w3-left-align">Maze user controls
+            </button>
+            <div id="acc_usercontrols" class="w3-container w3-hide">
+                <div class="w3-row-padding w3-padding-16">
+                    <div class="w3-third">
+                        <div class="w3-card-2">
+                            <div class="w3-container">
+                                <h3>Keyboard</h3>
+                                <p>Use arrow key for moving.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w3-third">
+                        <div class=" w3-card-2">
+                            <div class="w3-container">
+                                <h3>Touchscreen</h3>
+                                <p>Move by touching segments on the screen.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w3-third">
+                        <div class=" w3-card-2">
+                            <div class="w3-container">
+                                <h3>VR</h3>
+                                <p>Use left trigger for teleporting to marked element. Use right trigger to do an action
+                                    like
+                                    moving
+                                    a
+                                    box. Note: Only the trigger button of a controller is used. The left controller has a
+                                    wristwatch
+                                    controller with buttons for</p>
+                                <ul>
+                                    <li>Move VR position up/down</li>
+                                    <li>Pulling a box</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w3-panel w3-padding-large w3-section  w3-white">
+            <h1 class="">Use Case Traffic</h1>
+            <p class="w3-xlarge"></p>
+            <div class="w3-row-padding w3-padding-16">
                 <!--Traffic-->
                 <div class="w3-half">
                     <div class="w3-card-2">
@@ -167,42 +259,7 @@ w3-row-padding: Row where all columns have a default padding
             <h1 class="">User Controls</h1>
             <p class="">Controlling depends on the platform. In general, keys x/y/z can be used to fine tune the cameras
                 position.</p>
-            <div class="w3-row-padding w3-padding-16">
-                <div class="w3-third">
-                    <div class="w3-card-2">
-                        <div class="w3-container">
-                            <h3>Keyboard</h3>
-                            <p>Use arrow key for moving.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="w3-third">
-                    <div class=" w3-card-2">
-                        <div class="w3-container">
-                            <h3>Touchscreen</h3>
-                            <p>Move by touching segments on the screen.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="w3-third">
-                    <div class=" w3-card-2">
-                        <div class="w3-container">
-                            <h3>VR</h3>
-                            <p>Use left trigger for teleporting to marked element. Use right trigger to do an action
-                                like
-                                moving
-                                a
-                                box. Note: Only the trigger button of a controller is used. The left controller has a
-                                wristwatch
-                                controller with buttons for</p>
-                            <ul>
-                                <li>Move VR position up/down</li>
-                                <li>Pulling a box</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
         </div>
 
         <div class="w3-panel w3-padding-large w3-section  w3-white">
@@ -268,7 +325,9 @@ w3-row-padding: Row where all columns have a default padding
     <!-- End Content -->
 
     <footer class="w3-container w3-padding-32 w3-grey">
-        <div class=""><div id="versionInfo"></div></div>
+        <div class="">
+            <div id="versionInfo"></div>
+        </div>
     </footer>
 </div>
 
