@@ -105,7 +105,13 @@ public class MazeTerrain implements AbstractMazeTerrain {
                 if (grid.getMazeLayout().isStartField(p) && grid.getMazeLayout().getNumberOfTeams() > 1) {
                     // mark home position, but only when multiple teams are playing
                     int teamId = grid.getMazeLayout().getTeamByHome(p);
-                    addDecoratedField(x, y, Texture.buildBundleTexture("data", "textures/MazeHome-"+MazeSettings.teamColors[teamId]+".png"));
+                    String textureFile;
+                    if (grid.getMazeLayout().getStartPositionsOfTeam(teamId).get(0).isMonster) {
+                        textureFile = "textures/MazeHome-monster.png";
+                    } else {
+                        textureFile = "textures/MazeHome-" + MazeSettings.teamColors[teamId] + ".png";
+                    }
+                    addDecoratedField(x, y, Texture.buildBundleTexture("data", textureFile));
                 }
                 int wallmode;
                 if ((wallmode = grid.isHWALL(p)) > 0) {

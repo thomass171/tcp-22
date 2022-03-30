@@ -8,6 +8,7 @@ textures/MazeHome-red.png
 textures/MazeHome-blue.png
 textures/MazeHome-green.png
 textures/MazeHome-darkgreen.png
+textures/MazeHome-monster.png
 textures/texturedcube-atlas.jpg
 textures/earth/2_no_clouds_4k.jpg
 textures/gimp/Ground.png

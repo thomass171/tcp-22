@@ -96,8 +96,9 @@ public class ImageBuilder {
      */
     public static void buildForPreview() {
 
-        int previewOption = 8;
+        int previewOption = 7;
         BufferedImage image = null;
+        de.yard.threed.core.Color mazeMonsterColor = new de.yard.threed.core.Color(0x99, 0x33, 0);
 
         switch (previewOption) {
             case 1:
@@ -121,17 +122,17 @@ public class ImageBuilder {
                 break;
             case 7:
                 // "red","blue","green","darkgreen" according to faces available
-                image = buildMazeHome(de.yard.threed.core.Color.DARKGREEN);
+                image = buildMazeHome(mazeMonsterColor);
                 //image = buildMazeHome(de.yard.threed.core.Color.DARKGREEN);
                 break;
             case 8:
-                image = TextureBuilder.buildMonsterFace(new Color(0x993300));
+                image = TextureBuilder.buildMonsterFace(toAwtColor(mazeMonsterColor));
                 break;
         }
 
         // preview might modify image (blue frame?). So save it first.
         /*try {
-            FileUtil.saveToPngFile(image, "Face-Monster.png");
+            FileUtil.saveToPngFile(image, "imageFromPreview.png");
         } catch (IOException e) {
             e.printStackTrace();
         }*/
