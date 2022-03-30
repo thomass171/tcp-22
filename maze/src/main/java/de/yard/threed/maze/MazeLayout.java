@@ -102,7 +102,11 @@ public class MazeLayout {
         return -1;
     }
 
-    public List<List<StartPosition>> getStartPositions(){
+    public List<List<StartPosition>> getStartPositions() {
         return initialPosition;
+    }
+
+    public List<StartPosition> getStartPositionsOfTeam(int teamId) {
+        return initialPosition.get(teamId);
     }
 }

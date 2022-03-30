@@ -19,7 +19,8 @@ public class Point {
     }
 
     /**
-     * 27.5.21: einfach mal so definiert.
+     * The orthogonal distance between two fields. That is the number of steps needed for walking from
+     * one field to the other.
      */
     public static int getDistance(Point p1, Point p2) {
         return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);

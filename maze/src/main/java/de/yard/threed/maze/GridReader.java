@@ -181,10 +181,17 @@ class GridDraft {
     }
 
     private void addStartPosition(List<List<StartPosition>> playerposition, Point p, boolean isMonster) {
-        // TODO check extend existing
-        boolean createNew = true;
-        if (createNew) {
-            playerposition.add(Util.buildList(new StartPosition(p, isMonster)));
+        // check extend existing team
+        for (int team = 0; team < playerposition.size(); team++) {
+            for (StartPosition point : playerposition.get(team)) {
+                if (Point.getDistance(point.p, p) == 1) {
+                    // same team start location
+                    playerposition.get(team).add(new StartPosition(p, isMonster));
+                    return;
+                }
+            }
         }
+        // create new teams start positions
+        playerposition.add(Util.buildList(new StartPosition(p, isMonster)));
     }
 }

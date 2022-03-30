@@ -10,4 +10,8 @@ public class StartPosition {
         this.p = p;
         this.isMonster = isMonster;
     }
+
+    public Point getPoint(){
+        return p;
+    }
 }

@@ -50,7 +50,11 @@ public class TestUtils {
     }
 
     public static GridMovement move(GridMover player, GridState gridState, GridMovement gridMovement, MazeLayout layout, Point expected) {
-        GridMovement gm = player.move(gridMovement, player.getOrientation(), gridState, layout).movement;
+        MoveResult moveResult = player.move(gridMovement, player.getOrientation(), gridState, layout);
+        GridMovement gm = null;
+        if (moveResult != null) {
+            gm = moveResult.movement;
+        }
         TestUtil.assertPoint("new player location", expected, player.getLocation());
         return gm;
     }
