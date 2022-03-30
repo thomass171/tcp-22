@@ -37,6 +37,10 @@ public class MazeSettings {
     public Material sokobanboxmaterial;
     // Color is well fitting to ground
     public static Color hudColor = new Color(255, 217, 102, 128);
+    // Standard Color.YELLOW is too bright. Color needs to fit to hud background
+    public static Color bulletColor = new Color(0xff, 0x80, 00);
+    // Color.LIGHTBLUE is general background. So a custom lighter blue. .
+    public static Color diamondColor = new Color(0x99, 0xFF, 0xFF);
     public static String[] teamColors = new String[]{"darkgreen", "red"};
 
     MazeSettings(int mode) {

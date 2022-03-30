@@ -583,7 +583,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
     private void createBullets(int cnt, int owner) {
         for (int i = 0; i < cnt; i++) {
-            SceneNode ball = MazeModelBuilder.buildSimpleBall(0.3, Color.YELLOW/*, mv.getLocation()*/);
+            SceneNode ball = MazeModelBuilder.buildSimpleBall(0.3, MazeSettings.bulletColor);
             EcsEntity e = new EcsEntity(ball);
             BulletComponent bulletComponent = new BulletComponent(owner);
             e.addComponent(bulletComponent);

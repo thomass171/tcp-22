@@ -13,10 +13,8 @@ import de.yard.threed.core.platform.Platform;
  * nur von ein paar Utilities verwendet wird.
  * 10.4.2015: umgestellt auf float. Andere arbeiten auch mit float.
  * Ist auch besser für Lichtberechnungen.
- *
+ * <p>
  * color picker https://www.w3schools.com/colors/colors_picker.asp
- *
- * 30.6.21 TODO move to core
  * <p/>
  * Date: 14.02.14
  * Time: 16:41
@@ -47,7 +45,7 @@ public class Color {
     public static Color BLACK_FULLTRANSPARENT = new Color(0, 0, 0, 0);
     public static Color BLACK = new Color(0, 0, 0);
 
-    public static  Color ral7043 = new Color(79, 82, 80);
+    public static Color ral7043 = new Color(79, 82, 80);
 
     // 29.1.16: Nicht mehr ueber Platform
     //alpha=0 -> transparent
@@ -189,22 +187,22 @@ public class Color {
     }
 
     public static Color parseString(String data) {
-        if (StringUtils.toLowerCase(data).equals("green")){
+        if (StringUtils.toLowerCase(data).equals("green")) {
             return Color.GREEN;
         }
-        if (StringUtils.toLowerCase(data).equals("darkgreen")){
+        if (StringUtils.toLowerCase(data).equals("darkgreen")) {
             return Color.DARKGREEN;
         }
-        if (StringUtils.toLowerCase(data).equals("orange")){
+        if (StringUtils.toLowerCase(data).equals("orange")) {
             return Color.ORANGE;
         }
-        if (StringUtils.toLowerCase(data).equals("red")){
+        if (StringUtils.toLowerCase(data).equals("red")) {
             return Color.RED;
         }
-        if (StringUtils.toLowerCase(data).equals("blue")){
+        if (StringUtils.toLowerCase(data).equals("blue")) {
             return Color.BLUE;
         }
-        if (StringUtils.toLowerCase(data).equals("white")){
+        if (StringUtils.toLowerCase(data).equals("white")) {
             return Color.WHITE;
         }
         String[] s = StringUtils.split(data, " ");
@@ -212,5 +210,12 @@ public class Color {
             logger.error("parseString: invalid color data");
         }
         return new Color(Util.parseFloat(s[0]), Util.parseFloat(s[1]), Util.parseFloat(s[2]), Util.parseFloat(s[3]));
+    }
+
+    /**
+     * Apply transparency to a color.
+     */
+    public Color transparency(int a) {
+        return new Color(r, g, b, (float) a / 255);
     }
 }

@@ -42,8 +42,8 @@ public class MazeModelBuilder {
     public static SceneNode buildDiamond() {
         double size = MazeSettings.getSettings().sokobanboxsize / 2;
         Geometry cuboid = Geometry.buildCube(size, size, size);
-        // Color.LIGHTBLUE is general background. So a custom lighter blue. And not too much transparency (0xCC).
-        Mesh m = new Mesh(cuboid, Material.buildBasicMaterial(new Color(0xCC99FFFF), true));
+        // Not too much transparency (0xCC)
+        Mesh m = new Mesh(cuboid, Material.buildBasicMaterial(MazeSettings.diamondColor.transparency(0xCC), true));
         SceneNode diamond = new SceneNode(m);
         diamond.getTransform().setRotation(Quaternion.buildFromAngles(new Degree(45), new Degree(45), new Degree(45)));
         return new SceneNode(diamond);

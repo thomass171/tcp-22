@@ -48,9 +48,9 @@ public class MazeHudInventory implements MazeInventory {
             return;
         }
         if (count == 0) {
-            bulletCountArea.setTexture(textTexture.getTextureForText("-",Color.YELLOW));
+            bulletCountArea.setTexture(textTexture.getTextureForText("-", MazeSettings.bulletColor));
         } else {
-            bulletCountArea.setTexture(textTexture.getTextureForText("" + count,Color.YELLOW));
+            bulletCountArea.setTexture(textTexture.getTextureForText("" + count, MazeSettings.bulletColor));
         }
         bullets = count;
     }
@@ -66,9 +66,10 @@ public class MazeHudInventory implements MazeInventory {
             return;
         }
         if (count == 0) {
-            diamondCountArea.setTexture(textTexture.getTextureForText("-",Color.LIGHTBLUE));
+            // don't use diamond color in inventory because its too light.
+            diamondCountArea.setTexture(textTexture.getTextureForText("-", Color.LIGHTBLUE));
         } else {
-            diamondCountArea.setTexture(textTexture.getTextureForText("" + count,Color.LIGHTBLUE));
+            diamondCountArea.setTexture(textTexture.getTextureForText("" + count, Color.LIGHTBLUE));
         }
         diamonds = count;
     }
