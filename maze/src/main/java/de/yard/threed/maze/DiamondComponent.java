@@ -38,8 +38,5 @@ public class DiamondComponent extends ItemComponent {
     @Override
     public void collectedBy(int collector) {
         super.collectedBy(collector);
-        SceneNode n = EcsHelper.findEntityById(getEntityId()).getSceneNode();
-        // make it invisble
-        n.getTransform().setScale(new Vector3());
     }
 }

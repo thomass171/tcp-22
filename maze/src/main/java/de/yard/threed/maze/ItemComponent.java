@@ -1,10 +1,13 @@
 package de.yard.threed.maze;
 
+import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EcsHelper;
 
 /**
  * super class for all items.
@@ -14,6 +17,8 @@ public abstract class ItemComponent extends EcsComponent implements GridItem {
     Log logger = Platform.getInstance().getLog(ItemComponent.class);
 
     private GridItem gridItem;
+    // only set when hidden
+    private Vector3 savedScale = null;
 
     public ItemComponent() {
         gridItem = new SimpleGridItem();
@@ -43,11 +48,16 @@ public abstract class ItemComponent extends EcsComponent implements GridItem {
     }
 
     /**
-     * not really needed here for now, but for interface
+     * collected items should not be visible.
      */
     @Override
     public void collectedBy(int collector) {
         gridItem.collectedBy(collector);
+        if (collector == -1) {
+            unhide();
+        } else {
+            hide();
+        }
     }
 
     public GridItem getGridItem() {
@@ -62,5 +72,25 @@ public abstract class ItemComponent extends EcsComponent implements GridItem {
     @Override
     public void setNeededForSolving() {
         gridItem.setNeededForSolving();
+    }
+
+    /**
+     * make it invisble.
+     */
+    private void hide() {
+        SceneNode n = EcsHelper.findEntityById(getEntityId()).getSceneNode();
+        savedScale = n.getTransform().getScale();
+        n.getTransform().setScale(new Vector3());
+    }
+
+    /**
+     * make it visble again.
+     */
+    private void unhide() {
+        if (savedScale != null) {
+            SceneNode n = EcsHelper.findEntityById(getEntityId()).getSceneNode();
+            n.getTransform().setScale(savedScale);
+            savedScale = null;
+        }
     }
 }
