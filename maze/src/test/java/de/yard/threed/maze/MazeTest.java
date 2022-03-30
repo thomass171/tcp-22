@@ -395,6 +395,61 @@ public class MazeTest {
     }
 
     /**
+     * A monster is a bot player.
+     * ##############################
+     * #                            #
+     * #  #         # ##            #
+     * # .####         #            #
+     * ####            #        #####
+     * #    #            #          #
+     * #  ###         ####          #
+     * #  #           #             #
+     * #    #               MMM     #
+     * #                            #
+     * #  #         # ##            #
+     * #  #         # ##            #
+     * #  #         # ##            #
+     * #  ####         #            #
+     * ####            #        #####
+     * #    #            #          #
+     * #  ###         ####         @#
+     * #  #           #             #
+     * #    #                       #
+     * ##############################
+     */
+    @Test
+    public void testM30x20WithBot() {
+
+        setup("maze/Maze-M-30x20.txt", true);
+
+        //ready for botsystem? initMaze_P_Simple();
+
+        // no boxes, 0 player, 0 diamond
+        assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
+        assertEquals(0, MazeUtils.getPlayer().size(), "number of player");
+        assertNull(MazeUtils.getMainPlayer());
+
+        assertTrue(SystemState.readyToJoin());
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
+        sceneRunner.runLimitedFrames(5);
+
+        assertEquals(1 + 3 + 4 * 3, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (1 player + 3 bot + 4*3 bullets)");
+        assertEquals(4, MazeUtils.getPlayer().size(), "number of player");
+        EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
+        assertNotNull(user0);
+        EcsEntity user1 = EcsHelper.findEntitiesByName("Bot0").get(0);
+        assertNotNull(user1);
+
+        assertEquals(12,MazeUtils.buildItemsFromEcs().size());
+        GridState currentstate = MazeUtils.buildGridStateFromEcs();
+        assertEquals(4,currentstate.players.size());
+        assertEquals(12,currentstate.items.size());
+        assertEquals(0,currentstate.boxes.size());
+        assertFalse(currentstate.isSolved(Grid.getInstance().getMazeLayout()));
+        assertEquals(3, SceneNode.findByName("Monster").size());
+    }
+
+    /**
      * Launch all player, check items
      *
      * @return list of player

@@ -53,7 +53,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
      * Needs access from extending classes.
      */
     public SimpleHeadlessPlatform(NativeEventBus optionalEventbus) {
-        this.logfactory = logfactory;
+
         if (optionalEventbus == null) {
             eventBus = new JAEventBus();
         } else {
@@ -72,14 +72,16 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         this(null);
     }
 
-    public static /*Engine* /Platform*/PlatformInternals init(/*ResourceManager resourceManager, * /NativeLogFactory logfactory/*, */HashMap<String, String> properties, NativeEventBus eventbus) {
+    public static PlatformInternals init(HashMap<String, String> properties, NativeEventBus eventbus) {
         //System.out.println("PlatformOpenGL.init");
-        //if (instance == null || !(instance instanceof PlatformOpenGL)) {
+
+        DummySceneNode.sceneNodes.clear();
+
         for (String key : properties.keySet()) {
             //System.out.println("transfer of propery "+key+" to system");
             System.setProperty(PROPERTY_PREFIX + key, properties.get(key));
         }
-        instance = new SimpleHeadlessPlatform(/*resourceManager, * /logfactory*/eventbus);
+        instance = new SimpleHeadlessPlatform(eventbus);
         SimpleHeadlessPlatform shpInstance = (SimpleHeadlessPlatform) instance;
         //MA36 ((SimpleHeadlessPlatform)instance).resetInit();
 

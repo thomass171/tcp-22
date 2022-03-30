@@ -88,9 +88,12 @@ public class BotSystem extends DefaultEcsSystem {
                 logger.debug("Launching bots");
                 for (int i = 1; i < startPositions.size(); i++) {
                     // A bot is no logged in user, thus will only join
-                    EcsEntity user = new EcsEntity(BotComponent.buildFromGridDefinition(startPositions.get(i).get(0)));
-                    user.setName("Bot" + (i-1));
-                    SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId(), false));
+                    for (StartPosition startPosition : startPositions.get(i)) {
+                        EcsEntity user = new EcsEntity(BotComponent.buildFromGridDefinition(startPosition));
+                        //TODO improve unique naming
+                        user.setName("Bot" + (i - 1));
+                        SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId(), false));
+                    }
                 }
             }
             startPositions = null;

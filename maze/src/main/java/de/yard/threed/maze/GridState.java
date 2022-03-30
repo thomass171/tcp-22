@@ -250,15 +250,19 @@ public class GridState {
      */
     public boolean isSolved(MazeLayout mazeLayout) {
 
+        boolean itemsNeededToCollect = false;
         boolean allItemsNeededCollected = true;
         for (GridItem item : items) {
-            if (item.getOwner() == -1 && item.isNeededForSolving()) {
-                allItemsNeededCollected = false;
+            if (item.isNeededForSolving()) {
+                itemsNeededToCollect = true;
+                if (item.getOwner() == -1) {
+                    allItemsNeededCollected = false;
+                }
             }
         }
 
         if (boxes.size() == 0) {
-            if (items.size() > 0 && allItemsNeededCollected) {
+            if (itemsNeededToCollect && allItemsNeededCollected) {
                 return true;
             }
             //No Sokoban

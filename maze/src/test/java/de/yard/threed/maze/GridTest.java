@@ -327,6 +327,7 @@ public class GridTest {
 
         initContent(new Point[]{new Point(28, 3), new Point(21, 11), new Point(22, 11), new Point(23, 11)}, new Point[]{},
                 new Point[]{});
+        assertFalse(gridState.isSolved(grid.getMazeLayout()));
 
         GridMover player = gridState.players.get(0);
         TestUtils.move(player, gridState, GridMovement.Left, grid.getMazeLayout(), new Point(27, 3));
