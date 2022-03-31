@@ -240,7 +240,11 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
         if (mockedInputs.size() > 0) {
             MockedInput mi = mockedInputs.remove(0);
-            processPointer(mi.ray, mi.left);
+            if (mi.clicked) {
+                processTrigger(mi.ray, mi.left);
+            } else {
+                processPointer(mi.ray, mi.left);
+            }
         }
     }
 
@@ -338,8 +342,8 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     /**
      * Intended for testing
      */
-    public void mockInput(Ray ray, boolean left) {
-        mockedInputs.add(new MockedInput(ray, left));
+    public void mockInput(Ray ray, boolean clicked, boolean left) {
+        mockedInputs.add(new MockedInput(ray, clicked, left));
     }
 
     /**
@@ -367,18 +371,21 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
     private void processTrigger(Ray ray, boolean left) {
 
-        logger.debug("processTrigger, left=" + left);
-        for (ControlPanel cp : controlPanelList) {
-            //left/right independent?
-            if (cp.checkForClickedArea(ray)) {
-                return;
-            }
-        }
+        logger.debug("processTrigger, left=" + left + ",userEntityId=" + (int)userEntityId);
 
-        for (PointerHandler pointerHandler : pointerHandlerList) {
-            Request request = pointerHandler.getRequestByTrigger(ray, left);
-            if (request != null) {
-                SystemManager.putRequest(request);
+        if (userEntityId != null) {
+            for (ControlPanel cp : controlPanelList) {
+                //left/right independent?
+                if (cp.checkForClickedArea(ray)) {
+                    return;
+                }
+            }
+
+            for (PointerHandler pointerHandler : pointerHandlerList) {
+                Request request = pointerHandler.getRequestByTrigger((int)userEntityId, ray, left);
+                if (request != null) {
+                    SystemManager.putRequest(request);
+                }
             }
         }
     }
@@ -397,10 +404,12 @@ class KeyEntry {
  */
 class MockedInput {
     Ray ray;
+    boolean clicked;
     boolean left;
 
-    public MockedInput(Ray ray, boolean left) {
+    public MockedInput(Ray ray, boolean clicked, boolean left) {
         this.ray = ray;
         this.left = left;
+        this.clicked = clicked;
     }
 }

@@ -154,7 +154,7 @@ public class MazeScene extends Scene {
             rayy = 0;
 
             ControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
-            LocalTransform lt = vrInstance.getCpTransform();
+            /*LocalTransform lt = vrInstance.getCpTransform();
             if (lt != null) {
                 //leftControllerPanel.getTransform().setPosition(new Vector3(-0.5, 1.5, -2.5));
                 //200,90,0 are good rotations
@@ -162,9 +162,9 @@ public class MazeScene extends Scene {
                 leftControllerPanel.getTransform().setRotation(lt.rotation);
                 leftControllerPanel.getTransform().setScale(new Vector3(0.4, 0.4, 0.4));
             }
-            vrInstance.getController(0).attach(leftControllerPanel);
+            vrInstance.getController(0).attach(leftControllerPanel);*/
             inputToRequestSystem.addControlPanel(leftControllerPanel);
-
+            vrInstance.attachControlPanelToController(vrInstance.getController(0), leftControllerPanel);//.attachControlPanel(leftControllerPanel);
         } else {
             inputToRequestSystem.setControlMenuBuilder(new ControlMenu());
 

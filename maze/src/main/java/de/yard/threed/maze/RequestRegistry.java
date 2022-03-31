@@ -7,7 +7,7 @@ import de.yard.threed.engine.platform.common.RequestType;
 
 /**
  * Um Requests nicht im System zu definieren, weil sie ja auch übergreifend verwendet werden koennten.
- *
+ * <p>
  * Created on 24.10.20.
  */
 public class RequestRegistry {
@@ -41,11 +41,11 @@ public class RequestRegistry {
     public static RequestType TRIGGER_REQUEST_RELOCATE = new RequestType("TRIGGER_REQUEST_RELOCATE");
     public static RequestType TRIGGER_REQUEST_KICK = new RequestType("TRIGGER_REQUEST_KICK");
 
-    public static Request buildRelocate(String player, Point p, String orientation) {
-        return new Request(TRIGGER_REQUEST_RELOCATE,new Payload(player, "" + p.getX() + "," + p.getY(),orientation));
+    public static Request buildRelocate(int userEntityId, Point p, String orientation) {
+        return new Request(TRIGGER_REQUEST_RELOCATE, new Payload(new Integer(userEntityId), "" + p.getX() + "," + p.getY(), orientation));
     }
 
     public static Request buildKick() {
-        return new Request(TRIGGER_REQUEST_KICK,new Payload(""));
+        return new Request(TRIGGER_REQUEST_KICK, new Payload(""));
     }
 }

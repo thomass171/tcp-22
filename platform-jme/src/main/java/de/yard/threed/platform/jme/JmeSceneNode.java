@@ -130,15 +130,14 @@ public class JmeSceneNode /*16.9.16 extends JmeSpatial*/ implements NativeSceneN
         light = null;
     }
     
-    /*@Override
+    @Override
     public int getUniqueId() {
         // Die root node hat implizit die 0
         if (object3d.spatial == JmeScene.getInstance().getRootNode()){
             return 0;
         }
-        //14.11.16: TODO braucht der jetzt nicht eine eigene?
         return ((Integer) object3d.spatial.getUserData("uniqueid"));
-    }*/
+    }
 
     @Override
     public void destroy() {

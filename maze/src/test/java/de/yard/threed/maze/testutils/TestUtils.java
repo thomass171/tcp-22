@@ -2,12 +2,16 @@ package de.yard.threed.maze.testutils;
 
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.platform.NativeCollision;
 import de.yard.threed.engine.GridTeleporter;
 import de.yard.threed.engine.Ray;
+import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
+import de.yard.threed.engine.testutil.MockedCollision;
+import de.yard.threed.engine.testutil.MockedRay;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.maze.*;
 import de.yard.threed.core.testutil.TestUtil;
@@ -97,7 +101,10 @@ public class TestUtils {
         return TestHelper.getDataBundleString("maze", name);
     }
 
-    public static Ray getHittingRayForTeleport(Point destinationField, char direction) {
+    /**
+     * No ray in test platform for now. So mock it.
+     */
+    public static Ray mockHittingRayForTeleport(Point destinationField, char direction) {
         double offset = GridTeleporter.getCenterOffset(MazeDimensions.GRIDSEGMENTSIZE);
         Vector3 hitPoint = MazeUtils.point2Vector3(destinationField);
         switch (direction) {
@@ -105,17 +112,22 @@ public class TestUtils {
                 hitPoint = hitPoint.add(new Vector3(0, 0, -offset));
                 break;
             case 'E':
-                hitPoint = hitPoint.add(new Vector3(0, 0, -offset));
+                hitPoint = hitPoint.add(new Vector3(offset, 0, 0));
                 break;
             case 'S':
-                hitPoint = hitPoint.add(new Vector3(0, 0, -offset));
+                hitPoint = hitPoint.add(new Vector3(0, 0, offset));
                 break;
             case 'W':
-                hitPoint = hitPoint.add(new Vector3(0, 0, -offset));
+                hitPoint = hitPoint.add(new Vector3(-offset, 0, 0));
                 break;
         }
         Vector3 origin = new Vector3(hitPoint.getX(), 100, hitPoint.getZ());
-        return new Ray(origin, hitPoint.subtract(origin));
+
+        List<NativeCollision> collisions = new ArrayList<>();
+        SceneNode groundNode = MazeVisualizationSystem.view.terrain.getTiles().get(destinationField);
+        collisions.add(new MockedCollision(groundNode, hitPoint));
+
+        return new Ray(new MockedRay(origin, hitPoint.subtract(origin), collisions));
     }
 
     public static List<EcsEntity> getFlyingBullets() {

@@ -2,13 +2,14 @@ package de.yard.threed.engine;
 
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Ein Strahl bestimmter Laenge von einem Ausgangspunkt in eine Richtung.
  * Der Origin ist in world coordinates. Alles andere ja auch Unsinn.
- * 
+ * <p>
  * <p/>
  * Created by thomass on 25.11.14.
  */
@@ -27,8 +28,8 @@ public class Ray {
         ray = Platform.getInstance().buildRay(origin, direction.normalize());
         //29.11.15 this.length = length;
     }
-    
-    public Ray(NativeRay ray){
+
+    public Ray(NativeRay ray) {
         this.ray = ray;
     }
 
@@ -47,48 +48,37 @@ public class Ray {
 
 
     /**
-     * 29.3.18:Kombination auf Native intersects und dann Teilgraphsuche. TODO
-     * 21.5.21: Das mit dem Teilgraph scheint Unsinn zu sein.
+     * Be careful with parents/children. These are only tested with 'recursive'.
+     * <p>
+     * 30.3.22: Different approach to avoid deprecated native methods (MA22).
      */
-    public List<NativeCollision> getIntersections/*21.5.21 intersects*/(SceneNode model) {
-        //nicht so einfach, zumindest im Maze guigrid
-        /*21.5.21 boolean newmode=false;
-        if (newmode){
-            List<NativeCollision> intersections =new ArrayList<NativeCollision>();
-            List<NativeCollision> allintersections = getIntersections();
-            for (NativeCollision intersection : allintersections){
-                //die Suche uebr den Namen ist natuerlich etwas unsicher
-                if (model.findNodeByName(intersection.getSceneNode().getName(),true)!=null) {
-                    intersections.add(intersection);
-                }
-            }
-            return intersections;
-        }*/
-        return ray.intersects((NativeSceneNode) model.nativescenenode);
+    public List<NativeCollision> getIntersections(SceneNode model, boolean recursive) {
+        List<NativeCollision> collisions = ray.getIntersections();
+        return extractModelsHit(model, collisions, recursive);
     }
 
     /**
      * 21.5.21
+     *
      * @param model
      * @return
      */
-    public boolean intersects(SceneNode model) {
-        return getIntersections(model).size()>0;
+    public boolean intersects(SceneNode model, boolean recursive) {
+        return getIntersections(model, recursive).size() > 0;
     }
 
     /**
      * Die Reihenfolge der gelieferten Models ist nicht definiert.
+     * Be careful with parents/children. These are only tested with 'recursive'.
+     * 30.3.22: Different approach to avoid deprecated native methods (MA22).
      *
      * @param modellist
      * @return
      */
-    public List<NativeCollision> intersects(List<SceneNode> modellist) {
+    public List<NativeCollision> getIntersections(List<SceneNode> modellist, boolean recursive) {
         List<NativeCollision> imodellist = new ArrayList<NativeCollision>();
         for (SceneNode m : modellist) {
-            List<NativeCollision> nclist = ray.intersects((NativeSceneNode) m.nativescenenode);
-            for (NativeCollision nc : nclist) {
-                imodellist.add(nc);
-            }
+            imodellist.addAll(getIntersections(m, recursive));
         }
         return imodellist;
     }
@@ -96,13 +86,27 @@ public class Ray {
     /**
      * Einfach alle Collisions ermitteln, ohne einen (Teil)Graph zu uebergeben, in dem gesucht wird. Ist mehr Unity Like.
      * Und manchmal auch praktischer.
+     *
      * @return
      */
-    public List<NativeCollision> getIntersections(){
+    public List<NativeCollision> getIntersections() {
         return ray.getIntersections();
     }
-    
 
+    private List<NativeCollision> extractModelsHit(SceneNode model, List<NativeCollision> collisions, boolean recursive) {
+        List<NativeCollision> imodellist = new ArrayList<NativeCollision>();
 
-
+        for (NativeCollision collision : collisions) {
+            NativeSceneNode collidingNode = collision.getSceneNode();
+            if (model.nativescenenode.getUniqueId() == collidingNode.getUniqueId()) {
+                imodellist.add(collision);
+            }
+        }
+        if (recursive) {
+            for (Transform c : model.getTransform().getChildren()) {
+                imodellist.addAll(extractModelsHit(c.getSceneNode(), collisions, recursive));
+            }
+        }
+        return imodellist;
+    }
 }

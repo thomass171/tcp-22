@@ -40,12 +40,6 @@ public class JmeRay implements NativeRay {
     }
 
     @Override
-    public List<NativeCollision> intersects(NativeSceneNode model){
-        List<NativeCollision> results = findIntersections(((JmeSceneNode)model).getNode());
-        return results;
-    }
-
-    @Override
     public List<NativeCollision> getIntersections() {
         return findIntersections(JmeScene.getInstance().getRootNode());
     }

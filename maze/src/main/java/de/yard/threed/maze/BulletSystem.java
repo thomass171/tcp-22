@@ -135,7 +135,7 @@ public class BulletSystem extends DefaultEcsSystem {
                     bc.state = 2;
 
                     Point p = relocationStrategy.getLocation(player);
-                    SystemManager.putRequest(RequestRegistry.buildRelocate(player.getName(), p, null));
+                    SystemManager.putRequest(RequestRegistry.buildRelocate(player.getId(), p, null));
                     locateToGround(bullet, ballLocation);
 
                 }

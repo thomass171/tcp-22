@@ -109,7 +109,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             // show possible teleport destinations
             List<GridMovement> moveOptions = mc.getMoveOptions(state, Grid.getInstance().getMazeLayout());
 
-            logger.debug("found moves:" + moveOptions.size());
+            logger.debug("found " + moveOptions.size() + " possible teleport targets");
             List<SceneNode> tileCandidates = new ArrayList<SceneNode>();
             for (GridMovement m : moveOptions) {
                 if (m.isRelocate()) {
@@ -129,7 +129,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             double scale = 1.2;
             for (EcsEntity box : MazeUtils.getPlayerOrBoxes(true)) {
 
-                if (ray.intersects(box.getSceneNode())) {
+                if (ray.intersects(box.getSceneNode(), true)) {
                     box.getSceneNode().getTransform().setScale(new Vector3(scale, scale, scale));
                 } else {
                     // reset
@@ -139,7 +139,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             if (MazeUtils.playerHasBullets()) {
                 for (SceneNode wall : view.terrain.getWalls().values()) {
 
-                    List<NativeCollision> intersections = ray.getIntersections(wall);
+                    List<NativeCollision> intersections = ray.getIntersections(wall, true);
                     if (intersections.size() > 0) {
                         updateFireTargetMarker(ray, wall, intersections);
                     }
@@ -152,11 +152,14 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
 
 
     /**
+     * Derive Request from VR trigger event. For VR only!
      * Left pointer triggers teleport.
-     * Right triggers box push.
+     * Right triggers either
+     * 1) box push or
+     * 2) fire bullet
      */
     @Override
-    public Request getRequestByTrigger(Ray ray, boolean left) {
+    public Request getRequestByTrigger(int userEntityId, Ray ray, boolean left) {
         logger.debug("getRequestByTrigger,left=" + left + ",ray=" + ray);
         if (left) {
             for (SceneNode tile : view.terrain.getTiles().values()) {
@@ -167,17 +170,26 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                     if (transform.direction != null) {
                         orientation = "" + transform.direction;
                     }
-                    return RequestRegistry.buildRelocate("User0", p, orientation);
+                    return RequestRegistry.buildRelocate(userEntityId, p, orientation);
                 }
             }
         } else {
             for (EcsEntity box : MazeUtils.getPlayerOrBoxes(true)) {
 
-                if (ray.intersects(box.getSceneNode())) {
+                if (ray.intersects(box.getSceneNode(), true)) {
                     return RequestRegistry.buildKick();
                 }
             }
+            // look for hit avatar or just a destination wall? Outside VR fire is always possible (in direction of orientation), even without target.
+            // To have it similar here and to avoid non orthogonal bullet movement requirements, check for one of the four possible directions. So
+            // players orientation doesn't matter for firing in VR.
+            List<NativeCollision> intersectedWalls = ray.getIntersections(new ArrayList<SceneNode>(view.terrain.getWalls().values()), true);
+            logger.debug("intersectedWalls=" + intersectedWalls.size());
         }
+        return null;
+    }
+
+    private List<SceneNode> getHitWalls(){
         return null;
     }
 
@@ -211,7 +223,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         for (NativeCollision collision : intersections) {
             s += collision.getPoint() + ",";
         }
-        logger.debug("attaching with " + intersections.size() + " intersections:" + s);
+        logger.debug("attaching fire target marker with " + intersections.size() + " intersections:" + s);
         // tricky: je nach dem auf welcher Seite der Wall ich stehe, muss der marker andere z-Werte und gegensätzliche Rotation haben.
         wall.attach(fireTargetMarker);
     }

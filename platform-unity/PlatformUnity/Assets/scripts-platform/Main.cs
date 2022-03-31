@@ -83,6 +83,13 @@ public class Main : MonoBehaviour
             (Platform.getInstance()).setSystemProperty("argv.enableUsermode", "false");
             (Platform.getInstance()).setSystemProperty("argv.enableNearView", "true");
             (Platform.getInstance()).setSystemProperty("argv.initialMaze", "skbn/SokobanWikipedia.txt");
+
+            bool emulateVR = true;
+            if (emulateVR)
+            {
+                (Platform.getInstance()).setSystemProperty("argv.emulateVR", "true");
+                (Platform.getInstance()).setSystemProperty("argv.yoffsetVR", "1.3");
+            }
             //haengt haeufig UnityLog.setupNetworkstream ("192.168.98.20");
             //UnityLog.setupNetworkstream ("192.168.98.38");
             startUdpListener();

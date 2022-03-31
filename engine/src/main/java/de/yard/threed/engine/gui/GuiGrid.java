@@ -137,11 +137,12 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
 
     private GridButton getClickedButton(Ray pickingray) {
         if (pickingray == null) {
-            logger.debug("pickingray isType null");
+            logger.debug("pickingray is null");
             return null;
         }
         for (GridButton bn : buttons) {
-            List<NativeCollision> intersects = pickingray.getIntersections(bn);
+            // not the button node itself but the fov element will be hit
+            List<NativeCollision> intersects = pickingray.getIntersections(bn.element, false);
             if (intersects.size() > 0) {
                 return bn;
             }
@@ -202,7 +203,7 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
      */
     @Override
     public /*4.10.19 String*/ /*30.12.19 Request*/ boolean checkForClickedArea(Ray pickingray) {
-        logger.debug("guigrid picking ray isType " + pickingray);
+        logger.debug("guigrid picking ray is " + pickingray);
 
         GridButton button = getClickedButton(pickingray);
         if (button != null) {

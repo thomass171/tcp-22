@@ -12,7 +12,7 @@ public class ControlPanelArea extends SceneNode {
     public ControlPanelArea(DimensionF size, ButtonDelegate buttonDelegate) {
         this.size = size;
         this.buttonDelegate = buttonDelegate;
-
+        setName("ControlPanel-Area");
         // move to camera a little to avoid z-fighting. For testing y can be -0.8. But why -0.2?
         /*section.*///getTransform().setPosition(new Vector3(0, -0.2, 0.1f));
 

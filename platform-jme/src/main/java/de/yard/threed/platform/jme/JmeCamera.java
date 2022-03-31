@@ -65,8 +65,11 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
     JmeSceneNode carrier;
     // Viewport cannot be derived from camera.
     private ViewPort viewport;
+    // fov is not stored in JME natively. So keep it here for getter
+    private double fov;
 
     JmeCamera(Camera camera, Node rootnode, double fov, double aspect, double near, double far, Color backgroundColor, ViewPort pviewport) {
+        this.fov = fov;
         if (camera == null) {
             //additional camera viewport (https://wiki.jmonkeyengine.org/jme3/advanced/multiple_camera_views.html)
             //clone() appears to be the preferred way
@@ -340,7 +343,7 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
     public NativeRay buildPickingRay(NativeTransform real, Point mouselocation/*,Dimension screendimensions*/) {
         Dimension screendimensions = AbstractSceneRunner.getInstance().dimension;
 
-        NativeRay ray = rayHelper.buildPickingRay(new Transform(real),mouselocation.getX(), mouselocation.getY(), screendimensions);
+        NativeRay ray = rayHelper.buildPickingRay(new Transform(real), mouselocation.getX(), mouselocation.getY(), screendimensions);
         return ray;
     }
 
@@ -383,7 +386,7 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
     }
 
     @Override
-    public void  setFar(double far) {
+    public void setFar(double far) {
         camera.setFrustumFar(far);
     }
 
@@ -395,8 +398,8 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
 
     @Override
     public double getFov() {
-        double fov = Settings.defaultfov;//camera.get FrustumNear();
-        return fov;
+        // not available natively. Either recalculate or use saved value.
+        return this.fov;
     }
 
     //@Override

@@ -740,7 +740,7 @@ public class ReferenceScene extends Scene {
             // der Zufall dazu, welche wohl die erste gelieferte ist. Und dann wird entwder nur eine Box größer oder immer der Turm.
             // Evtl. ist die ganze Verwendung mit Model und Submodeln diesen Models fragwürdig.
             // 23.8.16: Man kann auch die root node zur picking object suche angeben.26.8.16:Im moment aber noch nicht.
-            List<NativeCollision> intersects = pickingray.intersects(towerrechts/*world*/);
+            List<NativeCollision> intersects = pickingray.getIntersections(towerrechts/*world*/, true);
             if (intersects.size() > 0) {
                 SceneNode intersect = new SceneNode(intersects.get(0).getSceneNode());
                 String names = "";
@@ -783,7 +783,7 @@ public class ReferenceScene extends Scene {
             //logger.debug("Click at " + mouselocation);
             Ray pickingray = getMainCamera().buildPickingRay(getMainCamera().getCarrier().getTransform(), mouselocation);
             //5.5.21: Warum eigentlich hud?
-            List<NativeCollision> intersects = pickingray.getIntersections(hud);
+            List<NativeCollision> intersects = pickingray.getIntersections(hud, true);
             if (intersects.size() > 0) {
                 SceneNode intersect = new SceneNode(intersects.get(0).getSceneNode());
                 String names = "";
@@ -1073,7 +1073,7 @@ class ReferenceTests {
         // 2.3.17: Jetzt durch Nutzung Rayhelper aber nicht mehr. Allerdings dürften diese fixen Werte nicht zum Unity aspect passen und damit scheitern.
         if (!isUnity()) {
             raycasterredbox = new Ray(new Vector3(0, 5, 11), new Vector3(0.23f, -0.37f, -0.9f));
-            intersects = raycasterredbox.getIntersections(towerrechts.get(0));
+            intersects = raycasterredbox.getIntersections(towerrechts.get(0), true);
             //liefert 1 oder 2 
             if (intersects.size() == 0) {
                 Assert.fail("no red box intersection found(1)");
@@ -1091,7 +1091,7 @@ class ReferenceTests {
             }
 
             Ray raycastermovingbox = new Ray(new Vector3(0, 5, 11), new Vector3(0.26f, -0.25f, -0.93f));
-            intersects = raycastermovingbox.getIntersections(movingbox);
+            intersects = raycastermovingbox.getIntersections(movingbox, true);
             //liefert 1 oder 2 
             if (intersects.size() == 0) {
                 Assert.fail("no moving box intersection found");
@@ -1114,7 +1114,7 @@ class ReferenceTests {
         double len = 1000 * 100;
         Vector3 campos = new Vector3(4 * len, 5 * len, 11 * len);
         raycasterredbox = new Ray(campos, redboxpos.subtract(campos));
-        intersects = raycasterredbox.getIntersections(towerrechts.get(0));
+        intersects = raycasterredbox.getIntersections(towerrechts.get(0), true);
         //liefert 1 oder 2 
         if (intersects.size() == 0) {
             Assert.fail("no red box intersection found(2)");

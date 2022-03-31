@@ -91,6 +91,7 @@ public class VrInstance {
         }
         if (emulated) {
             Camera camera = Scene.getCurrent().getDefaultCamera();
+            // put banner centered at top screen/display/window border
             ControlPanel controlPanel = ControlPanelHelper.buildForNearplaneBanner(camera, Scene.getCurrent().getDimension(), Color.GREEN);
             if (controlPanel != null) {
                 // headless?
@@ -185,7 +186,9 @@ public class VrInstance {
     public void attachControlPanelToController(VRController vrController, ControlPanel controllerPanel) {
 
         if (isEmulated()) {
-            // make it visible below the "VR emulation" banner. better to observer? TODO calc correct/best y position
+            // make it visible below the "emulateVR" banner. better to observer? That might effectively be the same.
+            // control panels in this case typical are too large to fit on z-plane. -3 is acceptable for both MazeScene and for VrScene.
+            // Thus y cannot also not be calculated from z-plane size.
             controllerPanel.getTransform().setPosition(new Vector3(0, 0.8, -3));
             controllerPanel.getTransform().setParent(Scene.getCurrent().getDefaultCamera().getCarrierTransform());
         } else {

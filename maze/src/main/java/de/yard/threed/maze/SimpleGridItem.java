@@ -2,6 +2,9 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
 
+/**
+ *
+ */
 public class SimpleGridItem implements GridItem {
 
     int owner = -1;

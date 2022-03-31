@@ -53,7 +53,7 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
 
         Mesh mesh = new Mesh(geo, mat);
         setMesh(mesh);
-        setName("Backplane");
+        setName("ControlPanel-Backplane");
 
         this.planeSize = planeSize;
     }
@@ -106,7 +106,7 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
             return null;
         }
         for (ControlPanelArea bn : areas) {
-            List<NativeCollision> intersects = pickingray.getIntersections(bn);
+            List<NativeCollision> intersects = pickingray.getIntersections(bn, true);
             if (intersects.size() > 0) {
                 return bn;
             }

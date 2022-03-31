@@ -339,7 +339,7 @@ public class J2CS {
         knownInterfaces.add("VehicleLoadedDelegate", "vehicleLoaded");
 
         //Maze
-        knownInterfaces.add("GridItem", new String[]{"getLocation", "setLocation", "getOwner", "collectedBy"});
+        knownInterfaces.add("GridItem", new String[]{"getLocation", "setLocation", "getOwner", "collectedBy","isNeededForSolving","setNeededForSolving"});
         knownInterfaces.add("PointerHandler", new String[]{"processPointer", "getRequestByTrigger"});
         knownInterfaces.add("GridMover", new String[]{"getLocation", "setLocation", "getOrientation", "rotate", "setOrientation", "walk", "getParent", "setOrientation","getMoveOptions","getId", "getTeam"});
 

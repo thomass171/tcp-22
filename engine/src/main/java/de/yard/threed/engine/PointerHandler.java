@@ -6,6 +6,6 @@ public interface PointerHandler {
 
     void processPointer(Ray ray, boolean left);
 
-    Request getRequestByTrigger(Ray ray, boolean left);
+    Request getRequestByTrigger(int userEntityId, Ray ray, boolean left);
 
 }

@@ -316,12 +316,12 @@ public class SceneNode /*extends Object3D*/ {
     @Deprecated
     public List<NativeCollision> getHits(Point mouselocation, Camera camera) {
         Ray pickingray = camera.buildPickingRay(camera.getCarrier().getTransform(),mouselocation);
-        List<NativeCollision> intersects = pickingray.getIntersections(this);
+        List<NativeCollision> intersects = pickingray.getIntersections(this, true);
         return intersects;
     }
 
     public List<NativeCollision> getHits(Ray pickingray) {
-        List<NativeCollision> intersects = pickingray.getIntersections(this);
+        List<NativeCollision> intersects = pickingray.getIntersections(this, true);
         return intersects;
     }
 

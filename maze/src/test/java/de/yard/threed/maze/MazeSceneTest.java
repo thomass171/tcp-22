@@ -5,13 +5,16 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.Camera;
+import de.yard.threed.engine.Ray;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
+import de.yard.threed.engine.ecs.InputToRequestSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
+import de.yard.threed.maze.testutils.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -63,16 +66,16 @@ public class MazeSceneTest {
         // 1.35 just taken as is. Where does it come from?
         assertEquals(1.35, worldPos.getY(), 0.001, "viewpoint absolut height");
         // teleport to ... for first moving of a box
-        /*No ray in test platform for now.
-        Ray ray = TestUtils.getHittingRayForTeleport(new Point(7, 3),'W');
-        ((InputToRequestSystem)SystemManager.findSystem(InputToRequestSystem.TAG)).mockInput(ray,true);
+        // No ray in test platform for now, so mock it.
+        Ray ray = TestUtils.mockHittingRayForTeleport(new Point(7, 3), 'W');
+        ((InputToRequestSystem) SystemManager.findSystem(InputToRequestSystem.TAG)).mockInput(ray, true, true);
         sceneRunner.runLimitedFrames(3);
 
         TestUtil.assertPoint("player location after teleport", new Point(7, 3), mc.getLocation());
         TestUtil.assertVector3("player location after teleport", MazeUtils.point2Vector3(new Point(7, 3)), user.getSceneNode().getTransform().getPosition());
-        assertEquals("location after teleport", new Point(7, 3).toString(), MazeUtils.getPlayerposition().toString());
-        assertEquals("orientation after teleport (should be left/WEST)", GridOrientation.fromDirection('W').toString(), MazeUtils.getPlayerorientation().toString());
-*/
+        assertEquals( new Point(7, 3).toString(), MazeUtils.getPlayerposition(user).toString(),"location after teleport");
+        assertEquals( GridOrientation.fromDirection('W').toString(), MazeUtils.getPlayerorientation(user).toString(),"orientation after teleport (should be left/WEST)");
+
     }
 
     /**

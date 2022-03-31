@@ -36,7 +36,7 @@ public class GridTeleporter {
      */
     public GridTeleportDestination updateDestinationMarker(Ray ray, SceneNode tileCandidate, double gridSize) {
         if (ray != null) {
-            List<NativeCollision> intersections = ray.getIntersections(tileCandidate);
+            List<NativeCollision> intersections = ray.getIntersections(tileCandidate, true);
             //logger.debug("ground intersections: " + intersections.size());
             //TODO only use first/nearest?
             for (int i = 0; i < intersections.size(); i++) {

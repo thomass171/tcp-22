@@ -266,6 +266,8 @@ class DummySceneNode implements NativeSceneNode {
     static List<NativeSceneNode> sceneNodes = new ArrayList<>();
     NativeTransform transform;
     String name;
+    private static int uniqueId=1000;
+    private int id = uniqueId++;
 
     DummySceneNode() {
         transform = new DummyTransform(this);
@@ -285,6 +287,11 @@ class DummySceneNode implements NativeSceneNode {
     @Override
     public void setLight(NativeLight light) {
 
+    }
+
+    @Override
+    public int getUniqueId() {
+        return id;
     }
 
     @Override

@@ -167,6 +167,7 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
     /**
      * mouselocation hat (0,0) links unten.
      * 11.5.21: Was ist denn eine "realViewPosition"? Anders als die der Camera? Kam wohl mal durch VR.
+     *
      * @param mouselocation
      * @return
      */
@@ -201,6 +202,7 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
         double aspect = getAspect();
         double fov = getFov();
         double h = (double) (2 * Math.tan(new Degree(fov).toRad() / 2) * z);
+        logger.debug("getPlaneSize: fov=" + fov + ",aspect=" + aspect + ",z=" + z + ",h=" + h);
         return new DimensionF(h * aspect, h);
     }
 

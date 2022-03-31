@@ -44,7 +44,7 @@ public class WebGlRay implements NativeRay {
         return WebGlVector3.fromWebGl(new WebGlVector3(getOrigin(raycaster)));
     }
 
-    @Override
+    //30.3.22@Override
     public List<NativeCollision> intersects(NativeSceneNode model) {
         JsArray objects = null;
         objects = (JsArray) JavaScriptObject.createArray();

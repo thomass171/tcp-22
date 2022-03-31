@@ -31,13 +31,11 @@ public interface NativeSceneNode /*16.9.16 extends  NativeObject3D/*Base3D*/ {
     void setLight(NativeLight light);
     
     /**
-     * 31.8.16: Aus nativeSceneNode hierhin verschoben. Wenn hier schon add und parent sind, dann brauch der auch eine Id, weil er auch im NodeTree liegt.
-     * 16.9.16: Wieder hier hin.
-     * 23.9.17: MA17: Eine eigene uniqueid ist kaum handhabbar. erstmal Raus. Eigentlich zwar praktisch, dann aber nativ über die Plaform. 
-     *
+     * 29.3.22: New approach for a platform id of the node. This id will stay the same independent of wrapping core platform nodes. So it
+     * is reliable to use it for checking find/collision results (MA17,MA22).
      * @return
      */
-    //public int getUniqueId();
+    int getUniqueId();
 
     /**
      * Entfernen aus Tree, destroy inkl. aller children.

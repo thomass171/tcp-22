@@ -2,6 +2,8 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.testutil.Assert;
+import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.ecs.*;
@@ -596,6 +598,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         /*1.4.21if (MazeView.ray == null) {
             logger.error("no ray in MazeView");
         }*/
+        Camera camera = Scene.getCurrent().getDefaultCamera();
+        Assert.assertEquals("fov", 60.0, camera.getFov(), 0.001);
         logger.debug("validate complete");
 
     }
@@ -639,14 +643,14 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     }
 
     /**
-     * Process a relocate request (eg. for hit players).
+     * Process a relocate request (eg. for hit players, for VR teleport).
      */
     private void relocate(Payload payload) {
 
-        String playername = (String) payload.o[0];
-        EcsEntity player = MazeUtils.findPlayerByName(playername);
+        int userEntityId = (int) (Integer) payload.o[0];
+        EcsEntity player = EcsHelper.findEntityById(userEntityId);
         if (player == null) {
-            logger.warn("unknown player for relocate:" + playername);
+            logger.warn("unknown player for relocate:" + userEntityId);
             return;
         }
 

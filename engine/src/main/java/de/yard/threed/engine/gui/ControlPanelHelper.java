@@ -47,6 +47,9 @@ public class ControlPanelHelper {
         return inventory;
     }
 
+    /**
+     * a panel located centered at top screen/display/window border (used for example for a banner)
+     */
     public static ControlPanel buildForNearplaneBanner(Camera camera, Dimension screenDimensionInPixel, Color basecolor) {
         Material mat = Material.buildBasicMaterial(basecolor, true);
 
