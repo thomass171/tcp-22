@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Ein Strahl bestimmter Laenge von einem Ausgangspunkt in eine Richtung.
- * Der Origin ist in world coordinates. Alles andere ja auch Unsinn.
+ * A ray with a length starting at origin in a direction. Origin is in world coordinates.
  * <p>
  * <p/>
  * Created by thomass on 25.11.14.
@@ -22,11 +21,9 @@ public class Ray {
     }
 
     public Ray(Vector3 origin, Vector3 direction, double length) {
-        // this.origin = origin;
-        // Das mit normalize ist aus http://gamedev.stackexchange.com/questions/72440/the-correct-way-to-transform-a-ray-with-a-matrix
-        // Sicherstellen, dass die direction immer normalisiert ist. ThreeJs ist da erwiesenermassen empfindlich.
+        // Normalize is from http://gamedev.stackexchange.com/questions/72440/the-correct-way-to-transform-a-ray-with-a-matrix
+        // Its important that direction is normalized. At least ThreeJs needs this.
         ray = Platform.getInstance().buildRay(origin, direction.normalize());
-        //29.11.15 this.length = length;
     }
 
     public Ray(NativeRay ray) {

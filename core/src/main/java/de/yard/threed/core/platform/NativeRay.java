@@ -10,20 +10,19 @@ import java.util.List;
  */
 public interface NativeRay {
     /**
-     * Liefert die Direction neutral von einer evtl. Handedness Konvertierung.
-     * siehe auch DVK.
+     * The direction independent from any handedness conversion.
      */
     Vector3 getDirection();
 
     /**
-     * Liefert origin neutral von einer evtl. Handedness Konvertierung.
-     * siehe auch DVK.
+     * The origin independent from any handedness conversion.
      */
     Vector3 getOrigin();
 
     /**
-     * Einfach alle Collisions ermitteln, ohne einen (Teil)Graph zu uebergeben, in dem gesucht wird. Ist mehr Unity Like.
-     * Und manchmal auch praktischer.
+     * Returns all collisions of the ray without considering any subgraph. Might be inefficient, but meets best the
+     * opportunities of all platforms.
+     * TODO: introduce a collider scene node marker to make it more efficient.
      */
     List<NativeCollision> getIntersections();
 
