@@ -19,14 +19,11 @@ public class WebGlSceneNode implements NativeSceneNode {
 
     // a light attached to this node
     WebGlLight light;
-    static int uniqueid = 1;
-    int id;
     WebGlObject3D object3d;
 
     WebGlSceneNode(JavaScriptObject nativeobject3d) {
         this.object3d = new WebGlObject3D(nativeobject3d, this, false);
         //super(mesh);
-        id = uniqueid++;
         if (WebGlScene.webglscene == null) {
             logger.error("no webgl scene");
         }
@@ -42,7 +39,6 @@ public class WebGlSceneNode implements NativeSceneNode {
 
     public WebGlSceneNode(String name) {
         this(WebGlObject3D.buildObject3D());
-        id = uniqueid++;
     }
 
     @Override
@@ -89,9 +85,9 @@ public class WebGlSceneNode implements NativeSceneNode {
         light = null;
     }
 
-    //@Override
+    @Override
     public int getUniqueId() {
-        return id;
+        return object3d.getId();
     }
 
     @Override

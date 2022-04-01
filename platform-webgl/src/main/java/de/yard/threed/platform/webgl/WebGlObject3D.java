@@ -126,6 +126,10 @@ public class WebGlObject3D implements NativeTransform {
         return getName(object3d);
     }
 
+    public int getId() {
+        return getId(object3d);
+    }
+
     @Override
     public NativeTransform getParent() {
         JavaScriptObject parent = getParent(object3d);
@@ -354,7 +358,6 @@ public class WebGlObject3D implements NativeTransform {
         }
         return 0;
     }
-
 
     /**
      * Die world matrix steht in "matrixWorld".
