@@ -103,7 +103,7 @@ public class MazeTest {
         assertEquals(2 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (2 boxes+avatar)");
 
         assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(MazeUtils.getMainPlayer()).toString(), "initial orientation");
-        assertEquals(new Point(6, 1).toString(), MazeUtils.getPlayerposition(MazeUtils.getMainPlayer()).toString(), "initial location");
+        assertEquals(new Point(6, 1).toString(), MazeUtils.getMoverposition(MazeUtils.getMainPlayer()).toString(), "initial location");
 
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNRIGHT, userEntityId));
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD, userEntityId));
@@ -392,6 +392,13 @@ public class MazeTest {
 
         TestUtils.ecsWalk(TRIGGER_REQUEST_FORWARD, sceneRunner, user0, true, new Point(3, 3));
         assertEquals(3 + 1, MazeUtils.getInventory(user0).size(), "inventory (3 bullets, 1 diamond)");
+
+        GridState currentstate = MazeUtils.buildGridStateFromEcs();
+        assertFalse(currentstate.isSolved(Grid.getInstance().getMazeLayout()));
+        TestUtils.ecsWalk(buildRelocate(user0.getId(),new Point(7, 1),"S"), sceneRunner, user0, false, new Point(7, 1));
+        assertEquals(3 + 2, MazeUtils.getInventory(user0).size(), "inventory (3 bullets, 2 diamond)");
+        assertEquals(GridOrientation.fromDirection('S').toString(), MazeUtils.getPlayerorientation(user0).toString(), "orientation after teleport (should be SOUTH)");
+        assertTrue(currentstate.isSolved(Grid.getInstance().getMazeLayout()));
     }
 
     /**

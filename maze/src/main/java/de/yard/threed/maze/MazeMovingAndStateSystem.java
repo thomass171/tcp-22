@@ -3,7 +3,6 @@ package de.yard.threed.maze;
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.Assert;
-import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.ecs.*;
@@ -142,7 +141,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         mover.update(tpf);
         // reVisualizeState() is a nice to have for avoiding inconsistencies, but with multiple movers it will
         // be difficult to find a frame where nobody moves.
-        if (!MazeUtils.isAnyMoving()) {
+        if (MazeUtils.isAnyMoving() == null) {
             reVisualizeState();
         }
 
@@ -194,7 +193,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             return true;
         }
         if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RELOCATE)) {
-            relocate(request.getPayload());
+            // 'Relocate' can be both a user request (VR teleport) or a system request (hit by bullet)
+            relocate(request.getPayload(), currentstate);
             return true;
         }
         return processSolutionOrUserRequest(currentstate, request);
@@ -400,10 +400,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 //TODO 17.3.22 merge with collect in SimpleGridMover
                 //24.3.22 better via event? Hmm.
                 //foundStuff = MazeUtils.getItemsByField(mover.getLocation());
-                if (mo.collected != null) {
-                    for (int itemId : mo.collected) {
-                        SystemManager.sendEvent(InventorySystem.buildItemCollectedEvent(userEntityId, itemId));
-                    }
+                for (int itemId : mo.getCollected()) {
+                    SystemManager.sendEvent(InventorySystem.buildItemCollectedEvent(userEntityId, itemId));
                 }
             }
         }
@@ -644,8 +642,9 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
     /**
      * Process a relocate request (eg. for hit players, for VR teleport).
+     * 'Relocate' can be both a user request or a system request, so treat it consistent to other user movement via attemptMove.
      */
-    private void relocate(Payload payload) {
+    private void relocate(Payload payload, GridState currentstate) {
 
         int userEntityId = (int) (Integer) payload.o[0];
         EcsEntity player = EcsHelper.findEntityById(userEntityId);
@@ -673,9 +672,12 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             }
         }
 
+        GridMovement movement = GridMovement.buildRelocate(p, gridOrientation);
+
         MoverComponent mc = MoverComponent.getMoverComponent(player);
 
-        mc.setLocation(p);
+        attemptMove(currentstate, mc, movement, userEntityId);
+        // attemptMove does not change orientation
         if (gridOrientation != null) {
             //otherwise keep orientation
             mc.setOrientation(gridOrientation);

@@ -65,18 +65,18 @@ public class Ray {
     }
 
     /**
-     * Die Reihenfolge der gelieferten Models ist nicht definiert.
      * Be careful with parents/children. These are only tested with 'recursive'.
      * 30.3.22: Different approach to avoid deprecated native methods (MA22).
      *
      * @param modellist
-     * @return
+     * @return collisions sorted by distance (closest at beginning of list)
      */
     public List<NativeCollision> getIntersections(List<SceneNode> modellist, boolean recursive) {
         List<NativeCollision> imodellist = new ArrayList<NativeCollision>();
         for (SceneNode m : modellist) {
             imodellist.addAll(getIntersections(m, recursive));
         }
+        imodellist.sort((o1, o2) -> Vector3.getDistance(getOrigin(), o1.getPoint()) < Vector3.getDistance(getOrigin(), o2.getPoint()) ? -1 : 1);
         return imodellist;
     }
 

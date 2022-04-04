@@ -47,4 +47,10 @@ public interface GridItem {
     boolean isNeededForSolving();
 
     void setNeededForSolving();
+
+    /**
+     * Some id that make the item unique. Might be the entity id in ECS.
+     */
+    int getId();
+
 }

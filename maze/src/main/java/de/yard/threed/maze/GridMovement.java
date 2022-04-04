@@ -35,22 +35,28 @@ public class GridMovement {
     public static GridMovement Pull = new GridMovement(PULL);
     public static GridMovement Left = new GridMovement(LEFT);
     public static GridMovement Right = new GridMovement(RIGHT);
-    // relocate needs additonal attribute target.
-    public static GridMovement Relocate = new GridMovement(RELOCATE);
+    // relocate needs additonal attribute target. So the constant here is private.
+    private static GridMovement Relocate = new GridMovement(RELOCATE);
     public static GridMovement Kick = new GridMovement(KICK);
     //Back ist nicht in den moves, weil es als Teil einer Lösung sehr speziell wäre. Vor allem, wenn es ohne Grund
     //eingesetzt wird. Left/Right aber schon, das kann deutlich Turns sparen.
     public static GridMovement[] regularpossiblemoves = new GridMovement[]{Forward, ForwardMove, TurnLeft, TurnRight, Left, Right/*, Back*/};
     int movement;
-    public Point relocateTarget = null;
+    private Point relocateTarget = null;
+    private GridOrientation relocateOrientation;
 
     public GridMovement(int movement) {
         this.movement = movement;
     }
 
-    public GridMovement(Point relocateTarget) {
+    private GridMovement(Point relocateTarget, GridOrientation relocateOrientation) {
         this.movement = RELOCATE;
         this.relocateTarget = relocateTarget;
+        this.relocateOrientation = relocateOrientation;
+    }
+
+    public static GridMovement buildRelocate(Point relocateTarget, GridOrientation relocateOrientation) {
+        return new GridMovement(relocateTarget, relocateOrientation);
     }
 
     @Override
@@ -121,5 +127,13 @@ public class GridMovement {
 
     public boolean isPull() {
         return movement == PULL;
+    }
+
+    public Point getRelocateTarget() {
+        return relocateTarget;
+    }
+
+    public GridOrientation getRelocateOrientation() {
+        return relocateOrientation;
     }
 }

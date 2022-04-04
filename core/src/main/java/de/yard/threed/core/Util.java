@@ -376,7 +376,6 @@ public class Util {
         }
         return a;
     }*/
-
     public static double toRadians(double angle) {
         return ((angle * Math.PI) / 180);
     }
@@ -493,6 +492,19 @@ public class Util {
 
     public static int currentTimeSeconds() {
         return (int) (Platform.getInstance().currentTimeMillis() / 1000);
+    }
+
+    public static Vector3 parseVector3(String s) {
+        return parseVector3(StringUtils.split(s, ","));
+    }
+
+    public static Vector3 parseVector3(String[] parts) {
+        if (parts.length == 3) {
+            return new Vector3(parseDouble(parts[0]), parseDouble(parts[1]), parseDouble(parts[2]));
+        } else {
+            logger.warn("invalid number of tuples for vector3: " + parts.length);
+            return new Vector3();
+        }
     }
 }
 

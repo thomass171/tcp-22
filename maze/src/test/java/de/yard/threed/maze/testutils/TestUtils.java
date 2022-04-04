@@ -130,6 +130,20 @@ public class TestUtils {
         return new Ray(new MockedRay(origin, hitPoint.subtract(origin), collisions));
     }
 
+    public static Ray mockHittingRayForKick(EcsEntity boxToKick) {
+        Point boxField = MoverComponent.getMoverComponent(boxToKick).getLocation();
+        double offset = GridTeleporter.getCenterOffset(MazeDimensions.GRIDSEGMENTSIZE);
+        // just mock the hit inside the box
+        Vector3 hitPoint = MazeUtils.point2Vector3(boxField).add(new Vector3(0, 0.5, 0));
+        Vector3 origin = new Vector3(hitPoint.getX(), 100, hitPoint.getZ());
+
+        List<NativeCollision> collisions = new ArrayList<>();
+        SceneNode groundNode = boxToKick.getSceneNode();
+        collisions.add(new MockedCollision(groundNode, hitPoint));
+
+        return new Ray(new MockedRay(origin, hitPoint.subtract(origin), collisions));
+    }
+
     public static List<EcsEntity> getFlyingBullets() {
         return SystemManager.findEntities(e -> {
             BulletComponent bc = BulletComponent.getBulletComponent(e);
@@ -145,17 +159,21 @@ public class TestUtils {
     }
 
     public static void ecsWalk(RequestType moveRequest, SceneRunnerForTesting sceneRunner, EcsEntity player, boolean expectedMovement, Point expectedNewLocation) {
-        SystemManager.putRequest(new Request(moveRequest, player.getId()));
+        ecsWalk(new Request(moveRequest, player.getId()), sceneRunner, player, expectedMovement, expectedNewLocation);
+    }
+
+    public static void ecsWalk(Request request, SceneRunnerForTesting sceneRunner, EcsEntity player, boolean expectedMovement, Point expectedNewLocation) {
+        SystemManager.putRequest(request);
         sceneRunner.runLimitedFrames(3, 0);
         if (expectedMovement) {
-            assertTrue(MazeUtils.isAnyMoving(), "isAnyMoving");
+            assertNotNull(MazeUtils.isAnyMoving(), "isAnyMoving");
         } else {
-            assertFalse(MazeUtils.isAnyMoving(), "isAnyMoving");
+            assertNull(MazeUtils.isAnyMoving(), "isAnyMoving:" + MazeUtils.isAnyMoving());
         }
         // 5 seems to be sufficient for completing the move
         sceneRunner.runLimitedFrames(5);
         assertPosition(player, expectedNewLocation);
-        assertFalse(MazeUtils.isAnyMoving(), "isAnyMoving");
+        assertNull(MazeUtils.isAnyMoving(), "isAnyMoving");
     }
 
     public static void assertPosition(EcsEntity user, Point point) {

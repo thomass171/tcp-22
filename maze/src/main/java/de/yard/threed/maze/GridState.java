@@ -134,10 +134,6 @@ public class GridState {
         return teamIdOfDestination != myTeam.id;
     }
 
-    public GridMover/*Point*/ isBoxAtLocation(Point location) {
-        return MazeUtils.isBoxAtLocation(boxes, location);
-    }
-
     /**
      * There can be only one item at a grid cell.
      */
@@ -145,8 +141,12 @@ public class GridState {
 
         //logger.debug("gridposition=" + gridposition + ",direction=" + direction + ",yaw=" + /*yaw*/0);
         Point destination = gridposition.add(direction.multiply(steps));
+        return isItemALocation(destination);
+    }
+
+    public GridItem isItemALocation(Point location) {
         for (GridItem item : items) {
-            if (item.getLocation() != null && item.getLocation().equals(destination)) {
+            if (item.getLocation() != null && item.getLocation().equals(location)) {
                 return item;
             }
         }
@@ -262,16 +262,25 @@ public class GridState {
         }
 
         if (boxes.size() == 0) {
-            if (itemsNeededToCollect && allItemsNeededCollected) {
+            //No Sokoban
+            if (itemsNeededToCollect) {
+                if (allItemsNeededCollected) {
+                    return true;
+                }
+            } else {
+                // just a maze
+                for (Point d : mazeLayout.destinations) {
+                    if (MazeUtils.getMoverFromListAtLocation(players, d) == null) {
+                        return false;
+                    }
+                }
                 return true;
             }
-            //No Sokoban
-            //TODO check player on destination
             return false;
         } else {
             // Sokoban style. Solved if on any destination there is a box
             for (Point d : mazeLayout.destinations) {
-                if (MazeUtils.isBoxAtLocation(boxes, d) == null) {
+                if (MazeUtils.getMoverFromListAtLocation(boxes, d) == null) {
                     return false;
                 }
             }
@@ -280,7 +289,9 @@ public class GridState {
     }
 
     /**
-     * Free in terms of relocate target.
+     * Free in terms of relocate target. That is:
+     * - no player or box on field
+     * - no wall
      *
      * @param p
      * @return
@@ -292,6 +303,11 @@ public class GridState {
 
         for (GridMover box : boxes) {
             if (box.getLocation().equals(p)) {
+                return false;
+            }
+        }
+        for (GridMover player : players) {
+            if (player.getLocation().equals(p)) {
                 return false;
             }
         }

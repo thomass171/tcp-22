@@ -2,6 +2,7 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.core.Payload;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
@@ -15,6 +16,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.apps.vr.VrSceneHelper;
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EcsHelper;
 import de.yard.threed.engine.ecs.InputToRequestSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.gui.Icon;
@@ -26,6 +28,8 @@ import de.yard.threed.engine.platform.common.RequestType;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FIRE;
 
 /**
  * Maze visualization. Not really needed for playing. Only visual. No collision detection isType used.
@@ -113,9 +117,9 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             List<SceneNode> tileCandidates = new ArrayList<SceneNode>();
             for (GridMovement m : moveOptions) {
                 if (m.isRelocate()) {
-                    SceneNode n = view.terrain.getTiles().get(m.relocateTarget);
+                    SceneNode n = view.terrain.getTiles().get(m.getRelocateTarget());
                     if (n == null) {
-                        logger.warn("No tile for field " + m.relocateTarget);
+                        logger.warn("No tile for field " + m.getRelocateTarget());
                     } else {
                         tileCandidates.add(n);
                     }
@@ -177,19 +181,28 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             for (EcsEntity box : MazeUtils.getPlayerOrBoxes(true)) {
 
                 if (ray.intersects(box.getSceneNode(), true)) {
-                    return RequestRegistry.buildKick();
+                    return RequestRegistry.buildKick(userEntityId);
                 }
             }
             // look for hit avatar or just a destination wall? Outside VR fire is always possible (in direction of orientation), even without target.
             // To have it similar here and to avoid non orthogonal bullet movement requirements, check for one of the four possible directions. So
             // players orientation doesn't matter for firing in VR.
+            // Due to semi walls etc all this might not be accurate enough?
             List<NativeCollision> intersectedWalls = ray.getIntersections(new ArrayList<SceneNode>(view.terrain.getWalls().values()), true);
             logger.debug("intersectedWalls=" + intersectedWalls.size());
+            if (intersectedWalls.size() > 0) {
+                Point wallLocation = MazeUtils.vector2Point(intersectedWalls.get(0).getPoint());
+                Point playerLocation = MoverComponent.getMoverComponent(EcsHelper.findEntityById(userEntityId)).getLocation();
+                if (playerLocation.getX() == wallLocation.getX() || playerLocation.getY() == wallLocation.getY()) {
+                    //TODO add fire orientation
+                    return new Request(TRIGGER_REQUEST_FIRE, new Payload(""), new Integer(userEntityId));
+                }
+            }
         }
         return null;
     }
 
-    private List<SceneNode> getHitWalls(){
+    private List<SceneNode> getHitWalls() {
         return null;
     }
 

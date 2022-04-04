@@ -1,7 +1,7 @@
 package de.yard.threed.engine.vr;
 
 import de.yard.threed.core.Color;
-import de.yard.threed.core.DimensionF;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
@@ -9,7 +9,9 @@ import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformHelper;
 import de.yard.threed.engine.Camera;
+import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.Scene;
+import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.World;
 import de.yard.threed.engine.gui.ControlPanel;
 import de.yard.threed.engine.gui.ControlPanelHelper;
@@ -37,16 +39,16 @@ public class VrInstance {
     //private static int MODE_WORLD = 2;
 
     private int mode;
-    private double yoffsetVR;
+    private Vector3 offsetVR;
     private static VrInstance instance = null;
     // the transform where to attach a control panel to the controller
     private LocalTransform cpTransform = null;
     private static VRController controller0 = null;
     private static VRController controller1 = null;
 
-    private VrInstance(int mode, double yoffsetVR) {
+    private VrInstance(int mode, Vector3 offsetVR) {
         this.mode = mode;
-        this.yoffsetVR = yoffsetVR;
+        this.offsetVR = offsetVR;
     }
 
     /*public static VrInstance getObserverMovingInstance() {
@@ -78,8 +80,12 @@ public class VrInstance {
                 return null;
             }
         }
-        Double yoffsetVR = PlatformHelper.getDoubleSystemProperty("argv.yoffsetVR");
-        double val = (double) ((yoffsetVR == null) ? 0 : yoffsetVR);
+
+        Vector3 val = new Vector3();
+        String s_offsetVR = Platform.getInstance().getSystemProperty("argv.offsetVR");
+        if (s_offsetVR != null) {
+            val = Util.parseVector3(s_offsetVR);
+        }
         instance = new VrInstance(emulated ? MODE_EMULATED : MODE_OBSERVER, val);
 
         String cpposrot = (Platform.getInstance()).getSystemProperty("argv.vr-controlpanel-posrot");
@@ -122,8 +128,8 @@ public class VrInstance {
         return cpTransform;
     }
 
-    public double getYoffsetVR() {
-        return yoffsetVR;
+    public Vector3 getOffsetVR() {
+        return offsetVR;
     }
 
     /**
@@ -187,7 +193,7 @@ public class VrInstance {
 
         if (isEmulated()) {
             // make it visible below the "emulateVR" banner. better to observer? That might effectively be the same.
-            // control panels in this case typical are too large to fit on z-plane. -3 is acceptable for both MazeScene and for VrScene.
+            // control panels in this case typical are too large to fit on z-plane. -3 is acceptable for all TravelScene, MazeScene and VrScene.
             // Thus y cannot also not be calculated from z-plane size.
             controllerPanel.getTransform().setPosition(new Vector3(0, 0.8, -3));
             controllerPanel.getTransform().setParent(Scene.getCurrent().getDefaultCamera().getCarrierTransform());
@@ -207,4 +213,25 @@ public class VrInstance {
     public boolean isEmulated() {
         return mode == MODE_EMULATED;
     }
+
+    public void dumpDebugInfo(){
+        Camera camera = Scene.getCurrent().getDefaultCamera();
+        logger.info("offsetVR=" + ((VrInstance.getInstance() != null) ? ("" + VrInstance.getInstance().getOffsetVR()) : ""));
+        logger.info("cam vr pos=" + camera.getVrPosition(true));
+        logger.info("world pos=" + Scene.getWorld().getTransform().getPosition());
+        Transform carrier = camera.getCarrier().getTransform();
+        logger.info("observer set pos=" + Observer.getInstance().getPosition());
+        logger.info("observer finetune=" + Observer.getInstance().getFinetune());
+        logger.info("observer real pos=" + Observer.getInstance().getTransform().getPosition());
+        logger.info("carrier pos=" + carrier.getPosition());
+        while (carrier.getParent() != null) {
+            carrier = carrier.getParent();
+            String name = "<unknwon>";
+            if (carrier.getSceneNode() != null && carrier.getSceneNode().getName() != null) {
+                name = carrier.getSceneNode().getName();
+            }
+            logger.info("carrier parent pos=" + carrier.getPosition() + ", name=" + name);
+        }
+    }
+
 }

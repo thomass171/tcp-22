@@ -146,23 +146,7 @@ public class VrScene extends Scene {
             reset();
         });
         buttonDelegates.put("info", () -> {
-            Camera camera = getDefaultCamera();
-            logger.info("YoffsetVR=" + ((VrInstance.getInstance() != null) ? ("" + VrInstance.getInstance().getYoffsetVR()) : ""));
-            logger.info("cam vr pos=" + camera.getVrPosition(true));
-            logger.info("world pos=" + Scene.getWorld().getTransform().getPosition());
-            Transform carrier = camera.getCarrier().getTransform();
-            logger.info("observer set pos=" + Observer.getInstance().getPosition());
-            logger.info("observer finetune=" + Observer.getInstance().getFinetune());
-            logger.info("observer real pos=" + Observer.getInstance().getTransform().getPosition());
-            logger.info("carrier pos=" + carrier.getPosition());
-            while (carrier.getParent() != null) {
-                carrier = carrier.getParent();
-                String name = "<unknwon>";
-                if (carrier.getSceneNode() != null && carrier.getSceneNode().getName() != null) {
-                    name = carrier.getSceneNode().getName();
-                }
-                logger.info("carrier parent pos=" + carrier.getPosition() + ", name=" + name);
-            }
+            VrInstance.getInstance().dumpDebugInfo();
             Observer.getInstance().dumpDebugInfo();
         });
         buttonDelegates.put("mainmenu", () -> {
@@ -368,7 +352,7 @@ public class VrScene extends Scene {
         logger.debug("Resetting");
         if (vrInstance != null) {
 
-            observer.initFineTune(vrInstance.getYoffsetVR());
+            observer.initFineTune(vrInstance.getOffsetVR());
             observer.setPosition(new Vector3(0, initialY, 0));
         } else {
             // No VR. Keep observer exactly on height of bar/avatar

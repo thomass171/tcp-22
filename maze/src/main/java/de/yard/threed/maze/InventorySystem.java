@@ -10,6 +10,7 @@ import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.platform.common.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,22 +25,23 @@ public class InventorySystem extends DefaultEcsSystem {
 
     boolean inventorysystemdebuglog = true;
     // Inventory display for main user
-    /*ControlPanel*/ MazeInventory userInventory;
+    List<MazeInventory> userInventoryList = new ArrayList<MazeInventory>();
 
     /**
      * Only once for main player.
      */
-    public InventorySystem(/*ControlPanel*/MazeInventory userInventory) {
-        super(/*new String[]{InventoryComponent.TAG},*/ new RequestType[]{}, new EventType[]{
+    public InventorySystem() {
+        super(new RequestType[]{}, new EventType[]{
                 EVENT_ITEM_COLLECTED, EventRegistry.EVENT_BULLET_FIRED});
-        this.userInventory = userInventory;
     }
 
     @Override
     public void init() {
         //3.5.21 userInventory.setSectionText(0, "-");
-        userInventory.setBullets(0);
-        userInventory.setDiamonds(0);
+        for (MazeInventory userInventory : userInventoryList) {
+            userInventory.setBullets(0);
+            userInventory.setDiamonds(0);
+        }
     }
 
     /**
@@ -57,8 +59,10 @@ public class InventorySystem extends DefaultEcsSystem {
             // TODO: duplicate to event handling
             List<EcsEntity> diamonds = MazeUtils.getDiamonds(MazeUtils.getMainPlayer());
             List<EcsEntity> bullets = MazeUtils.getBullets(MazeUtils.getMainPlayer());
-            userInventory.setBullets(bullets.size());
-            userInventory.setDiamonds(diamonds.size());
+            for (MazeInventory userInventory : userInventoryList) {
+                userInventory.setBullets(bullets.size());
+                userInventory.setDiamonds(diamonds.size());
+            }
         }
     }
 
@@ -71,12 +75,18 @@ public class InventorySystem extends DefaultEcsSystem {
             int userEntityId = (int) evt.getPayloadByIndex(0);
             List<EcsEntity> diamonds = MazeUtils.getDiamonds(userEntityId);
             List<EcsEntity> bullets = MazeUtils.getBullets(MazeUtils.getMainPlayer());
-            userInventory.setBullets(bullets.size());
-            userInventory.setDiamonds(diamonds.size());
+            for (MazeInventory userInventory : userInventoryList) {
+                userInventory.setBullets(bullets.size());
+                userInventory.setDiamonds(diamonds.size());
+            }
         }
     }
 
     public static Event buildItemCollectedEvent(int userEntityId, int itemId) {
         return new Event(EVENT_ITEM_COLLECTED, new Payload(new Integer(userEntityId), new Integer(itemId)));
+    }
+
+    public void addInventory(MazeInventory userInventory) {
+        userInventoryList.add(userInventory);
     }
 }

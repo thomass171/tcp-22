@@ -10,7 +10,7 @@ import de.yard.threed.core.DimensionF;
 
 import java.util.Map;
 
-public class MazeVrControlPanel extends ControlPanel {
+public class MazeVrControlPanel extends ControlPanel implements MazeInventory {
 
     static Log logger = Platform.getInstance().getLog(MazeVrControlPanel.class);
 
@@ -22,19 +22,19 @@ public class MazeVrControlPanel extends ControlPanel {
     private static Color controlPanelBackground = MazeSettings.hudColor;
 
     TextTexture boxCountTextTexture;
-    ControlPanelArea boxCountArea;
+    private BasicInventory basicInventory;
 
     /**
-     * A maze 3x3 control panel permanently attached to the left controller. Consists of
+     * A maze 4x3 control panel permanently attached to the left controller. Consists of
      * <p>
      * - three inventory counter
      * - finetune up/down
      * - info
      * TODO health indicator
-     * +---+-------------------+
-     * +cnt0+             up
-     * |cnt1
-     * |cnt2              down
+     * +-+----+-------------------+
+     * Bu|cnt0+             up
+     * Di|cnt1
+     * Bx|cnt2              down
      * -----------------------
      * <p>
      * Für Tests als Duplicate auch "im Raum" darstellbar.
@@ -78,14 +78,28 @@ public class MazeVrControlPanel extends ControlPanel {
         */
         boxCountTextTexture = new TextTexture(controlPanelBackground);
         addArea(panelGrid.getPosition(0, 0), new DimensionF(ControlPanelColWidth[0], ControlPanelRowHeight), null).setIcon(Icon.IconCharacter(23));
-        boxCountArea = addArea(panelGrid.getPosition(1, 0), new DimensionF(ControlPanelColWidth[1], ControlPanelRowHeight), null);
-        boxCountArea.setTexture(boxCountTextTexture.getTextureForText("-", Color.RED));
+        //boxCountArea = addArea(panelGrid.getPosition(1, 0), new DimensionF(ControlPanelColWidth[1], ControlPanelRowHeight), null);
+        //boxCountArea.setTexture(boxCountTextTexture.getTextureForText("-", Color.RED));
         addArea(new Vector2(panelGrid.midx[3], panelGrid.midy[0]), new DimensionF(ControlPanelColWidth[3], ControlPanelRowHeight), buttonDelegates.get("down")).setIcon(Icon.ICON_DOWNARROW);
 
-        //return cp;
+        basicInventory = new BasicInventory(
+                addArea(panelGrid.getPosition(1, 2), new DimensionF(ControlPanelColWidth[1], ControlPanelRowHeight), null),
+                addArea(panelGrid.getPosition(1, 1), new DimensionF(ControlPanelColWidth[1], ControlPanelRowHeight), null),
+                addArea(panelGrid.getPosition(1, 0), new DimensionF(ControlPanelColWidth[1], ControlPanelRowHeight), null),
+                new TextTexture(controlPanelBackground));
     }
 
     public void setBoxesCount(int value) {
-        boxCountArea.setTexture(boxCountTextTexture.getTextureForText("" + value, Color.RED));
+        basicInventory.setBoxesCount(value);
+    }
+
+    @Override
+    public void setBullets(int count) {
+        basicInventory.setBullets(count);
+    }
+
+    @Override
+    public void setDiamonds(int count) {
+        basicInventory.setDiamonds(count);
     }
 }

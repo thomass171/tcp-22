@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 /**
@@ -284,16 +285,23 @@ public class GridTest {
         TestUtil.assertNull("right of 6,2", pillar[1]);
         TestUtil.assertNotNull("center of 6,2", pillar[2]);
 
-        GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null));
-        List<GridMover> players = Arrays.asList(player);
-        List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
-        TestUtil.assertEquals("boxes", 0, boxes.size());
+        initContent(new Point[]{new Point(6, 4), new Point(6, 8)}, new Point[]{},
+                new Point[]{new Point(11, 2), new Point(6, 3), new Point(6, 6), new Point(10, 6)});
 
-
+        GridMover player = gridState.players.get(0);
         TestUtil.assertPoint("current location", new Point(6, 4), player.getLocation());
 
-        TestUtils.move(player, players, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(6, 5));
-        TestUtils.move(player, players, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(6, 6));
+        TestUtils.move(player, gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(6, 5));
+
+        // collect diamond on (6,6)
+        TestUtil.assertPoint(new Point(6, 6), gridState.items.get(2).getLocation(), "diamond location");
+        TestUtils.move(player, gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(6, 6));
+        assertNull(gridState.items.get(2).getLocation(), "diamond location");
+
+        // relocate to a diamond at (11,2) looking south. Should be collected.
+        TestUtil.assertPoint(new Point(11, 2), gridState.items.get(0).getLocation(), "diamond location");
+        TestUtils.move(player, gridState, GridMovement.buildRelocate(new Point(11, 2), null), grid.getMazeLayout(), new Point(11, 2));
+        assertNull(gridState.items.get(0).getLocation(), "diamond location");
 
     }
 
@@ -502,6 +510,24 @@ public class GridTest {
         TestUtils.move(players.get(0), players, boxes, GridMovement.Back, grid.getMazeLayout(), new Point(4, 1), GridMovement.Back);
     }
 
+    @Test
+    public void testSimpleMaze() throws Exception {
+
+        loadGridAndTerrainFromString("##########\n" +
+                "#   .    #\n" +
+                "#        #\n" +
+                "#   @    #\n" +
+                "##########", 1);
+
+        initContent(new Point[]{new Point(4, 1)}, new Point[]{}, new Point[]{});
+
+        assertFalse(gridState.isSolved(grid.getMazeLayout()));
+
+        TestUtils.move(gridState.players.get(0), gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 2));
+        TestUtils.move(gridState.players.get(0), gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 3));
+        assertTrue(gridState.isSolved(grid.getMazeLayout()));
+    }
+
     private void loadGridAndTerrain(String mazeName, int expectedNumberOfTeams) throws InvalidMazeException {
         loadGridAndTerrainFromString(TestHelper.getDataBundleString("maze", mazeName), expectedNumberOfTeams);
     }
@@ -539,9 +565,9 @@ public class GridTest {
             usedLaunchPositions.add(startPosition);
             TestUtil.assertPoint("current location player", points[players.size()], player.getLocation());
             assertTrue(player.getTeam().homeFields.contains(points[players.size()]));
-             players.add(player);
+            players.add(player);
         }
-        assertEquals(points.length,players.size());
+        assertEquals(points.length, players.size());
 
         return players;
     }

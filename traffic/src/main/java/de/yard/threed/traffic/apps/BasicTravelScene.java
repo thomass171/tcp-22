@@ -280,11 +280,8 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             logger.info("reset");
         });
         buttonDelegates.put("info", () -> {
-            logger.info("cam vr pos=" + getDefaultCamera().getVrPosition(true));
-            logger.info("cam carrier pos=" + getDefaultCamera().getCarrierPosition());
-            logger.info("cam carrier parent=" + getDefaultCamera().getCarrier().getTransform().getParent());
-            //logger.info("observer pos, finetune=" + observer.getPosition() + "," + observer.getFinetune());
-            logger.info("world pos=" + Scene.getWorld().getTransform().getPosition());
+            VrInstance.getInstance().dumpDebugInfo();
+            Observer.getInstance().dumpDebugInfo();
         });
         buttonDelegates.put("up", () -> {
             logger.info("up");
@@ -325,9 +322,11 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         inputToRequestSystem.addKeyMapping(KeyCode.Alpha9, UserSystem.USER_REQUEST_AUTOMOVE);
 
         if (vrInstance != null) {
+            // Even in VR the observer will be attached to avatar later
             // Observer was inited before
             Observer observer = Observer.getInstance();
-            observer.initFineTune(vrInstance.getYoffsetVR());
+            // 1.4.22 Probably still the need to change yoffsetvr here as long as green box avatar is used?
+            observer.initFineTune(vrInstance.getOffsetVR());
             observer.attach(vrInstance.getController(0));
             observer.attach(vrInstance.getController(1));
 

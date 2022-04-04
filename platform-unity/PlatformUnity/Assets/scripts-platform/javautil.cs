@@ -155,6 +155,11 @@ namespace java.util
             return new SimpleIterator<T>(this.iterator ());
         }*/
 
+        public void sort(Comparison<T> comparator)
+        {
+            list.Sort(comparator);
+        }
+
     }
 
     public class HashMap<T,T2> : Map <T,T2>

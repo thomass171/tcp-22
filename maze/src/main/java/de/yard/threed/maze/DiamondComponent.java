@@ -9,18 +9,8 @@ public class DiamondComponent extends ItemComponent {
 
     static String TAG = "DiamondComponent";
 
-    public DiamondComponent() {
-        super();
-    }
-
-    public DiamondComponent(int owner) {
-        super(owner);
-    }
-
     public DiamondComponent(Point b) {
-        super();
-        setLocation(b);
-        setOwner(-1);
+        super(b);
         setNeededForSolving();
     }
 

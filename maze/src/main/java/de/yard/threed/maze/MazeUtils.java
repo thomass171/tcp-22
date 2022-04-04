@@ -99,11 +99,28 @@ public class MazeUtils {
         return null;
     }
 
-    public static Point getPlayerposition(EcsEntity player) {
-        if (player == null) {
+    /**
+     * There can be only one.
+     */
+    public static EcsEntity findBoxByField(Point field) {
+        List<EcsEntity> boxes = getPlayerOrBoxes(true);
+        for (EcsEntity box : boxes) {
+            MoverComponent mc = MoverComponent.getMoverComponent(box);
+            if (mc.getLocation().equals(field)) {
+                return box;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * For player and boxes.
+     */
+    public static Point getMoverposition(EcsEntity mover) {
+        if (mover == null) {
             return null;
         }
-        MoverComponent mc = MoverComponent.getMoverComponent(player);
+        MoverComponent mc = MoverComponent.getMoverComponent(mover);
         return mc.getLocation();
     }
 
@@ -137,12 +154,12 @@ public class MazeUtils {
     }
 
 
-    public static GridMover/*Point*/ isBoxAtLocation(List<GridMover> boxes, Point location) {
+    public static GridMover getMoverFromListAtLocation(List<GridMover> movers, Point location) {
 
         //logger.debug("gridposition=" + gridposition + ",direction=" + direction + ",yaw=" + /*yaw*/0);
-        for (GridMover box : boxes) {
-            if (box.getLocation().equals(location)) {
-                return box;//destination;
+        for (GridMover mover : movers) {
+            if (mover.getLocation().equals(location)) {
+                return mover;
             }
         }
         return null;
@@ -251,23 +268,26 @@ public class MazeUtils {
         return component;
     }
 
-    public static boolean isAnyMoving() {
+    /**
+     * Return the mover if any is moving. null if nobody moves.
+     */
+    public static GridMover isAnyMoving() {
 
         MoverComponent mover;
         for (EcsEntity e : MazeUtils.getPlayerOrBoxes(false)) {
             mover = MoverComponent.getMoverComponent(e);
             if (mover.isMoving()) {
-                return true;
+                return mover;
             }
         }
 
         for (EcsEntity e : MazeUtils.getPlayerOrBoxes(true)) {
             mover = MoverComponent.getMoverComponent(e);
             if (mover.isMoving()) {
-                return true;
+                return mover;
             }
         }
-        return false;
+        return null;
     }
 
     public static List<EcsEntity> getPlayer() {

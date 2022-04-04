@@ -125,7 +125,13 @@ public class TestUtil {
         assertPoint("", expected, actual);
     }
 
+    @Deprecated
     public static void assertPoint(String label, Point expected, Point actual) {
+        Assert.assertEquals(label + "p.x", expected.getX(), actual.getX());
+        Assert.assertEquals(label + "p.y", expected.getY(), actual.getY());
+    }
+
+    public static void assertPoint(Point expected, Point actual, String label) {
         Assert.assertEquals(label + "p.x", expected.getX(), actual.getX());
         Assert.assertEquals(label + "p.y", expected.getY(), actual.getY());
     }

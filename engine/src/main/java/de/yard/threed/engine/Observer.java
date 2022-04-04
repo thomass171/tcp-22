@@ -179,10 +179,6 @@ public class Observer implements SimpleTransform {
         return fineTuneOffset;
     }
 
-    public void initFineTune(double offset) {
-        initFineTune(new Vector3(0, offset, 0));
-    }
-
     public void initFineTune(Vector3 offset) {
 
         logger.debug("initFineTune: offset=" + offset );

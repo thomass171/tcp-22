@@ -30,7 +30,7 @@ public class TrafficVrControlPanel extends ControlPanel {
     /**
      * A traffic 3x3 control panel permanently attached to the left controller. Consists of
      * <p>
-     * teleport - - finetune up
+     * teleport - info - finetune up
      * - speed down - up
      * - info - - finetune down
      * more to come: info, reset?, home? menu?
@@ -43,6 +43,7 @@ public class TrafficVrControlPanel extends ControlPanel {
 
         // top line:
         addArea(panelGrid.getPosition(0, 2), new DimensionF(ControlPanelColWidth[0], ControlPanelRowHeight), buttonDelegates.get("teleport")).setIcon(Icon.ICON_TURNRIGHT);
+        addArea(panelGrid.getPosition(1, 2), new DimensionF(ControlPanelColWidth[1], ControlPanelRowHeight), buttonDelegates.get("info")).setIcon(Icon.ICON_HELP);
         addArea(panelGrid.getPosition(2, 2), new DimensionF(ControlPanelColWidth[2], ControlPanelRowHeight), buttonDelegates.get("up")).setIcon(Icon.ICON_UPARROW);
 
         // mid line

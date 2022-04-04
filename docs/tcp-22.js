@@ -5,10 +5,6 @@
 var mazeScenes = ["skbn/SokobanWikipedia.txt","skbn/Sokoban10x10.txt","skbn/SokobanTrivial.txt","maze/Maze15x10.txt"];
 var host = "https://ts171.de/tcp-22";
 
-var chk_devMode;
-var inp_ctrlPanel;
-var inp_yoffsetVR;
-
 function addPanel(label, contentProvider, optionalElement) {
     //console.log("addPanel " + label);
     var headerid = "header" + getUniqueId();
@@ -53,15 +49,15 @@ function launchVrScene() {
 function launchTrafficScene(vr) {
 
     var args = new Map();
-    addCommonArgs(args);
+    addCommonArgs(args, "tf_");
     args.set("basename","traffic:tiles/Demo.xml");
     args.set("enableVR",vr);
     launchScene("BasicTravelScene",args);
 }
 
-function addCommonArgs(args) {
+function addCommonArgs(args, prefix) {
     args.set("vr-controlpanel-posrot",$("#inp_ctrlPanel").val());
-    args.set("yoffsetVR",$("#inp_yoffsetVR").val());
+    args.set("offsetVR",$("#inp_" + prefix + "offsetVR").val());
     args.set("devmode",$("#chk_devMode").prop("checked"));
 }
 
@@ -85,7 +81,11 @@ function init() {
 
     $("#inp_ctrlPanel").val("0,0,0,200,90,0");
     // With "ReferenceSpaceType" 'local' instead of 'local-floor' -0.1 is better than -0.9. 0.6 good for 1.80m player in maze
-    $("#inp_yoffsetVR").val("0.6");
+    // But for BasicTravelScene and VrScene 0 seem to be better. So better use a neutral value 0 here initially and let
+    // application adjust it. And have a vector3 tuple now.
+    $("#inp_offsetVR").val("0.0, 0.0, 0.0");
+    // for some unknown reason traffic needs to be lowered
+    $("#inp_tf_offsetVR").val("0.0, -1.0, 0.0");
 
     $.get(host + "/version.html", function(responseText) {
         var s = responseText;

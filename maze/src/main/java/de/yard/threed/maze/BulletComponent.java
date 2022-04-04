@@ -27,11 +27,6 @@ public class BulletComponent extends ItemComponent {
     private Vector3 vdirection;
     static String TAG = "BulletComponent";
 
-    public BulletComponent() {
-        super();
-        state = 0;
-    }
-
     public BulletComponent(int owner) {
         super(owner);
         state = 0;

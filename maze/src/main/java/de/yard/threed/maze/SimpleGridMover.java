@@ -76,8 +76,9 @@ public class SimpleGridMover implements GridMover {
     }
 
     /**
-     * See interface.
+     * See interface. Also called recursively for derived move of boxes.
      * <p>
+     * Returns the movement that was done, null if no move was done.
      * <p>
      * 12.4.21: MA32: jetzt hier state changen
      */
@@ -94,10 +95,10 @@ public class SimpleGridMover implements GridMover {
                 Point pushLocation = nextBox.getLocation().subtract(gridOrientation.getDirectionForMovement(GridMovement.Forward).getPoint());
                 GridMover boxloc;
                 if ((boxloc = canPushFrom(pushLocation, gridOrientation, gridState, mazeLayout)) != null) {
-                    //GridMover boxloc = currentstate.canPushFrom(from, orientation, layout);
+
                     derivedMove(boxloc, gridOrientation, GridMovement.Forward, gridState, mazeLayout);
                     return new MoveResult(GridMovement.Kick);
-                    //}
+
                 }
             }
             // a pull box might not be a neighbor.
@@ -108,6 +109,26 @@ public class SimpleGridMover implements GridMover {
             return null;
         }
 
+        GridItem item;
+        if (movement.isRelocate()) {
+            Point target = movement.getRelocateTarget();
+
+            if (!gridState.isFree(target, mazeLayout)) {
+                return null;
+            }
+            location = target;
+            if (movement.getRelocateOrientation() != null) {
+                ownOrientation = movement.getRelocateOrientation();
+            }
+
+            if ((item = gridState.isItemALocation(location)) != null) {
+                logger.debug("relocate with collect of " + item);
+                item.collectedBy(getId());
+                return new MoveResult(movement, item.getId());
+            }
+            return new MoveResult(movement);
+        }
+
         if (!gridState.canWalk(getLocation(), movement, gridOrientation, getTeam(), mazeLayout)) {
             //15.4.21 try push if requested
             if (movement.equals(GridMovement.ForwardMove) && combinedMove(gridState, this, mazeLayout)) {
@@ -116,14 +137,17 @@ public class SimpleGridMover implements GridMover {
             return null;
         }
         // so: do the move. If there is an item, collect it.
+        MoveResult moveResult;
         Direction direction = gridOrientation.getDirectionForMovement(movement);
-        GridItem item;
         if ((item = gridState.isItemAtDestination(location, direction, 1)) != null) {
             logger.debug("walk with collect of " + item);
             item.collectedBy(getId());
+            moveResult = new MoveResult(movement, item.getId());
+        } else {
+            moveResult = new MoveResult(movement);
         }
         location = location.add(direction.getPoint());
-        return new MoveResult(movement);
+        return moveResult;
     }
 
     @Override
@@ -225,13 +249,15 @@ public class SimpleGridMover implements GridMover {
     }
 
     /**
+     * A box move derived from a player move (or kick).
+     *
      * @param boxloc
      * @param movement
      * @param orientation
      * @param currentstate
      * @param layout
      */
-    private void/*boolean*/ derivedMove(GridMover boxloc/*Point from*/, GridOrientation orientation, GridMovement movement, GridState currentstate, MazeLayout layout) {
+    private void derivedMove(GridMover boxloc, GridOrientation orientation, GridMovement movement, GridState currentstate, MazeLayout layout) {
         if (!movement.equals(GridMovement.Forward) && !movement.equals(GridMovement.Back)) {
             throw new RuntimeException("invalid movement");
         }
@@ -240,13 +266,9 @@ public class SimpleGridMover implements GridMover {
             // Might be a MoverComponent (ECS)
             boxloc = boxloc.getParent();
         }
-        logger.debug("derivedMove: boxloc=" + ((boxloc == null) ? "null" : boxloc.getLocation().toString()));
-        //if (boxloc != null) {
+        logger.debug("derivedMove: boxloc=" + ((boxloc == null) ? "null" : boxloc.getLocation() + ",orientation=" + orientation));
 
         boxloc.move(movement, orientation, currentstate, layout);
-        //    return true;
-        //}
-        //return false;
     }
 
     /**
@@ -260,7 +282,7 @@ public class SimpleGridMover implements GridMover {
             if (!gridState.isFree(p, mazeLayout)) {
                 return;
             }
-            collector.add(new GridMovement(p.clone()));
+            collector.add(GridMovement.buildRelocate(p.clone(), null));
             collectVerticalMoveOptions(p, -1, gridState, mazeLayout, collector);
             collectVerticalMoveOptions(p, 1, gridState, mazeLayout, collector);
         }
@@ -277,7 +299,7 @@ public class SimpleGridMover implements GridMover {
             if (!gridState.isFree(p, mazeLayout)) {
                 return;
             }
-            collector.add(new GridMovement(p.clone()));
+            collector.add(GridMovement.buildRelocate(p.clone(), null));
         }
     }
 

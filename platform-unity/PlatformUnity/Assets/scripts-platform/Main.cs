@@ -88,7 +88,7 @@ public class Main : MonoBehaviour
             if (emulateVR)
             {
                 (Platform.getInstance()).setSystemProperty("argv.emulateVR", "true");
-                (Platform.getInstance()).setSystemProperty("argv.yoffsetVR", "1.3");
+                (Platform.getInstance()).setSystemProperty("argv.offsetVR", "0,0,0");
             }
             //haengt haeufig UnityLog.setupNetworkstream ("192.168.98.20");
             //UnityLog.setupNetworkstream ("192.168.98.38");

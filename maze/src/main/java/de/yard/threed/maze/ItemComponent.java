@@ -20,12 +20,12 @@ public abstract class ItemComponent extends EcsComponent implements GridItem {
     // only set when hidden
     private Vector3 savedScale = null;
 
-    public ItemComponent() {
-        gridItem = new SimpleGridItem();
+    public ItemComponent(int owner) {
+        gridItem = new SimpleGridItem(owner, this);
     }
 
-    public ItemComponent(int owner) {
-        gridItem = new SimpleGridItem(owner);
+    public ItemComponent(Point location) {
+        gridItem = new SimpleGridItem(location, this);
     }
 
     @Override
@@ -72,6 +72,11 @@ public abstract class ItemComponent extends EcsComponent implements GridItem {
     @Override
     public void setNeededForSolving() {
         gridItem.setNeededForSolving();
+    }
+
+    @Override
+    public int getId() {
+        return getEntityId();
     }
 
     /**

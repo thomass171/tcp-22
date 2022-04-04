@@ -155,6 +155,11 @@ public class MoverComponent extends EcsComponent implements GridMover {
         return gridMover.getTeam();
     }
 
+    @Override
+    public String toString() {
+        return "mover (" + getLocation() + ")";
+    }
+
     /**
      * Liefert die auf Gridkoordinaten umgerechnete Richtung.
      * Das Vorzeichen von "dir" wird dabei gedreht, weil die x-Ache entgegen der 3D z-Achse läuft!
@@ -183,12 +188,15 @@ public class MoverComponent extends EcsComponent implements GridMover {
     }
 
     /**
-     * Die Position duch runden der Koordinaten "fangen".
+     * 4.4.22: Redefined. Adjust visual location to final grid location. Is only used when movement completed.
+     *
      */
     private void catchPosition() {
         Vector3 loc = movable.getPosition();
         // y weglassen, weil der noch bloeder springt
         loc = new Vector3(round05(loc.getX()), loc.getY()/*round05(loc.getY())*/, round05(loc.getZ()));
+        Vector3 finalLoc = MazeUtils.point2Vector3(getLocation());
+        loc = new Vector3(round05(finalLoc.getX()), loc.getY()/*round05(loc.getY())*/, round05(finalLoc.getZ()));
         movable.setPosition(loc);
     }
 
@@ -362,6 +370,9 @@ public class MoverComponent extends EcsComponent implements GridMover {
     }
 }
 
+/**
+ * Also used for relocate.
+ */
 class WalkStatus {
     public double walklength = 0;
     //public boolean forward;
@@ -392,6 +403,12 @@ class WalkStatus {
      * @param singlestep
      */
     public boolean walked(double singlestep) {
+        // relocate is no move 'with movement'. Immediately complete.
+        if (movement.isRelocate()) {
+            walklength = 0;
+            return true;
+        }
+
         walklength -= singlestep;
         if (MoverComponent.debugmovement) {
             logger.debug("walked " + singlestep + ", remaining " + walklength);
@@ -406,6 +423,9 @@ class WalkStatus {
 
 }
 
+/**
+ * Also used for relocate.
+ */
 class RotateStatus {
     public int direction = 0;
     Degree yawdestination = null;

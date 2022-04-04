@@ -35,14 +35,15 @@ public interface GridMover {
     void setOrientation(GridOrientation gridOrientation);
 
     /**
-     * Ein Movement versuchen. Als "Forward" nur Walk, keine Box schieben. Als "ForwardMove" mit push.
-     * 20.5.21 Kann auch ein Relocate sein. Und auch ein "Kick/Pull". Muesste vielleicht mal umbenannt werden nach "act" oder execute? Oder activeMove/passiveMove?
+     * Try a movement. This might be in *any* direction which not needs to be the orientation of the mover!
+     * A 'Forward' is only a walk, no box push. A 'ForwardMove' is with push.
+     * 20.5.21 Can also be 'Relocate', 'Kick' or 'Pull'. Therefore the name is 'move', not 'walk' or similar.
      *
-     * Liefert den neuen state, wenn der walk moeglich ist, sonst null.
-     *
-     * Moving in *some* direction which not needs to be the orientation.
-     * 12.4.21: MA32: jetzt hier state changen ??
      * Might have effects like collecting items.
+     *
+     * The state of all affected elements is changed here, so no more action is required by the caller.
+     *
+     * Returns the move when it was possible, otherwise null.
      */
     MoveResult move(GridMovement movement, GridOrientation gridOrientation, GridState gridState, MazeLayout mazeLayout) ;
 

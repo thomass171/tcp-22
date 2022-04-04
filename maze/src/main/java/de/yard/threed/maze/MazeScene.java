@@ -148,12 +148,14 @@ public class MazeScene extends Scene {
 
 
         if (vrInstance != null) {
-            observer.initFineTune(vrInstance.getYoffsetVR());
+            // Even in VR the observer will be attached to avatar later
+            // 1.4.22: yoffsetvr now needs to be raised here for maze specificcally. And move a bit forward to avoid seeing own avatar.(-0.15 or -0.25 not sufficient)
+            observer.initFineTune(vrInstance.getOffsetVR().add(new Vector3(0, 0.6, -0.4)));
             observer.attach(vrInstance.getController(0));
             observer.attach(vrInstance.getController(1));
             rayy = 0;
 
-            ControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
+            MazeVrControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
             /*LocalTransform lt = vrInstance.getCpTransform();
             if (lt != null) {
                 //leftControllerPanel.getTransform().setPosition(new Vector3(-0.5, 1.5, -2.5));
@@ -165,12 +167,18 @@ public class MazeScene extends Scene {
             vrInstance.getController(0).attach(leftControllerPanel);*/
             inputToRequestSystem.addControlPanel(leftControllerPanel);
             vrInstance.attachControlPanelToController(vrInstance.getController(0), leftControllerPanel);//.attachControlPanel(leftControllerPanel);
+
+            InventorySystem inventorySystem = new InventorySystem();
+            inventorySystem.addInventory(leftControllerPanel);
+            SystemManager.addSystem(inventorySystem);
         } else {
             inputToRequestSystem.setControlMenuBuilder(new ControlMenu());
 
             deferredcamera = Camera.createAttachedDeferredCamera(getMainCamera(), HUDLAYER);
             deferredcamera.setName("deferred-camera");
-            SystemManager.addSystem(new InventorySystem(new MazeHudInventory(deferredcamera, getDimension())));
+            InventorySystem inventorySystem = new InventorySystem();
+            inventorySystem.addInventory(new MazeHudInventory(deferredcamera, getDimension()));
+            SystemManager.addSystem(inventorySystem);
 
             // Optional (test)Hud that shows VR control panel via deferred camera as HUD
             if (EngineHelper.isEnabled("argv.enableHud")) {
@@ -287,6 +295,7 @@ public class MazeScene extends Scene {
 
     /**
      * The preferred position/rotation of the oberver.
+     *
      * @return
      */
     public static LocalTransform getViewTransform() {
