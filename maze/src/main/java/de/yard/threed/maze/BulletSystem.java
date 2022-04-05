@@ -1,6 +1,7 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.EventType;
+import de.yard.threed.core.Payload;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
@@ -23,6 +24,8 @@ import java.util.List;
 public class BulletSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(BulletSystem.class);
 
+    public static RequestType TRIGGER_REQUEST_FIRE = new RequestType("TRIGGER_REQUEST_FIRE");
+
     boolean bulletsystemdebuglog = false;
     private RelocationStrategy relocationStrategy = new HomeRelocationStrategy();
 
@@ -30,7 +33,7 @@ public class BulletSystem extends DefaultEcsSystem {
      *
      */
     public BulletSystem() {
-        super(new String[]{BulletComponent.TAG}, new RequestType[]{RequestRegistry.TRIGGER_REQUEST_FIRE}, new EventType[]{});
+        super(new String[]{BulletComponent.TAG}, new RequestType[]{TRIGGER_REQUEST_FIRE}, new EventType[]{});
     }
 
     @Override
@@ -60,7 +63,7 @@ public class BulletSystem extends DefaultEcsSystem {
         if (bulletsystemdebuglog) {
             logger.debug("got request " + request.getType());
         }
-        if (request.isType(RequestRegistry.TRIGGER_REQUEST_FIRE)) {
+        if (request.isType(TRIGGER_REQUEST_FIRE)) {
 
             EcsEntity player = EcsHelper.findEntityById((int) request.getUserEntityId());
             MoverComponent mv = MoverComponent.getMoverComponent(player);
@@ -85,6 +88,10 @@ public class BulletSystem extends DefaultEcsSystem {
             return true;
         }
         return false;
+    }
+
+    public static Request buildFireRequest(int userEntityId, GridOrientation orientation) {
+        return new Request(TRIGGER_REQUEST_FIRE, new Payload(orientation.getDirectionCode()), userEntityId);
     }
 
     /**

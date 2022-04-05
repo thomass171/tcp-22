@@ -7,6 +7,8 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.avatar.AvatarABuilder;
 import de.yard.threed.engine.avatar.AvatarBuilder;
+import de.yard.threed.engine.avatar.AvatarComponent;
+import de.yard.threed.engine.ecs.AnimationComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
 
 public class MazeAvatarBuilder implements AvatarBuilder {
@@ -29,14 +31,19 @@ public class MazeAvatarBuilder implements AvatarBuilder {
         if (botComponent == null || !botComponent.isMonster()) {
             avatar = avatarABuilder.buildAvatar(player);
         } else {
-            avatar = MazeModelBuilder.buildMonster();
+            // decouple monster transform from scale for avoidng math effects and to make a hit monster markable by scaling without changing its position.
+            SceneNode monster = MazeModelBuilder.buildMonster();
+            monster.getTransform().setScale(new Vector3(1.2, 1.2, 1.2));
+
+            avatar = new SceneNode(monster);
             // should be appx in head height (where bullets fly)
             avatar.getTransform().setPosition(new Vector3(0, 1.3, 0));
             avatar.getTransform().setRotation(Quaternion.buildRotationY(new Degree(-90)));
-            avatar.getTransform().setScale(new Vector3(1.2, 1.2, 1.2));
-
             avatar = new SceneNode(avatar);
+            player.addComponent(new AnimationComponent(monster));
         }
+        // used ar marker
+        player.addComponent(new AvatarComponent());
         return avatar;
     }
 }

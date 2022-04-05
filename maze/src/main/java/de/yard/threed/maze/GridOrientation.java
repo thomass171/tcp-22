@@ -4,7 +4,7 @@ import de.yard.threed.core.Degree;
 
 /**
  * 10.4.21: Teilweise Redundanz zu Direction merged.
- *
+ * <p>
  * Created by thomass on 14.02.17.
  */
 public class GridOrientation {
@@ -36,8 +36,8 @@ public class GridOrientation {
             } else {
                 return new GridOrientation(dirs.length - 1);
             }
-        }else{
-            if (dir < dirs.length-1) {
+        } else {
+            if (dir < dirs.length - 1) {
                 return new GridOrientation(dir + 1);
             } else {
                 return new GridOrientation(0);
@@ -54,7 +54,7 @@ public class GridOrientation {
         // Forward als Default nehmen. Gilt auch fur ForwardMove.
         Direction p = getDirection();
 
-        switch (movement.movement){
+        switch (movement.movement) {
             case GridMovement.BACK:
                 p = p.getReverted();
                 break;
@@ -67,7 +67,7 @@ public class GridOrientation {
         }
         return p;
     }
-    
+
     public Degree getYaw() {
         return yaw[dir];
     }
@@ -78,12 +78,15 @@ public class GridOrientation {
     }
 
     @Override
-    public String toString(){
-        return "dir="+dir;
+    public String toString() {
+        return "dir=" + dir;
     }
 
-    public static GridOrientation fromDirection(char dir){
-        switch (dir){
+    public static GridOrientation fromDirection(Character dir) {
+        if (dir == null) {
+            return null;
+        }
+        switch (dir.charValue()) {
             case 'N':
                 return new GridOrientation(0);
             case 'E':
@@ -92,6 +95,20 @@ public class GridOrientation {
                 return new GridOrientation(2);
             case 'W':
                 return new GridOrientation(3);
+        }
+        return null;
+    }
+
+    public String getDirectionCode() {
+        switch (dir) {
+            case 0:
+                return "N";
+            case 1:
+                return "E";
+            case 2:
+                return "S";
+            case 3:
+                return "W";
         }
         return null;
     }

@@ -10,7 +10,7 @@ import de.yard.threed.core.platform.Log;
 
 /**
  * 24.1.22: VR (vrdown,vrOffsetPosition) is no longer an avatar issue but an {@link Observer} issue.
- * Currently this component isn't really needed.
+ * Currently this component isn't really needed. 5.4.22: But it is used as marker component for avatars.
  * <p>
  * Created by thomass on 27.11.20.
  */

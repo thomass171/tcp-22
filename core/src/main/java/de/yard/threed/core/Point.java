@@ -115,5 +115,7 @@ public class Point {
         return new Point(x,y+t);
     }
 
-
+    public boolean onSameAxis(Point p) {
+        return (p.getX() == x || p.getY() == y);
+    }
 }

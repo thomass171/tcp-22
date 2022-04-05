@@ -309,11 +309,11 @@ public class VrScene extends Scene {
     private void teleport(GridTeleportDestination markerTransform) {
 
         //move to marker position, not intersection
-        Vector3 destination = markerTransform.transform.position;
+        Vector3 destination = markerTransform.getTransform().position;
         // Move avatar and observer. TODO y1?
         avatar.setPosition(new Vector3(destination.getX(), 1, destination.getZ()));
-        if (markerTransform.transform.rotation != null) {
-            avatar.setRotation(markerTransform.transform.rotation);
+        if (markerTransform.getTransform().rotation != null) {
+            avatar.setRotation(markerTransform.getTransform().rotation);
         }
         //camera.getCarrier().getTransform().setPosition(new Vector3(destination.getX(), 0, destination.getZ()));
         /*observer.setPosition(new Vector3(destination.getX(), initialY, destination.getZ()));

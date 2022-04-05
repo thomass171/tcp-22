@@ -43,7 +43,7 @@ public class MazeSceneTest {
      */
     @Test
     public void testSokobanWikipedia() {
-        setup("skbn/SokobanWikipedia.txt");
+        setup("skbn/SokobanWikipedia.txt", true);
 
         assertEquals(2, Configuration.getDefaultConfiguration().size());
 
@@ -66,13 +66,13 @@ public class MazeSceneTest {
         Vector3 worldPos = camera.getCarrier().getTransform().getWorldModelMatrix().extractPosition();
         // 1.35 just taken as is. Where does it come from?
         assertEquals(1.35, worldPos.getY(), 0.001, "viewpoint absolut height");
-        // teleport to ... for first moving of a box
+        // teleport to (7,3) for first moving of a box
         // No ray in test platform for now, so mock it.
         Ray ray = TestUtils.mockHittingRayForTeleport(new Point(7, 3), 'W');
         inputToRequestSystem.mockInput(ray, true, true);
         sceneRunner.runLimitedFrames(3);
 
-        TestUtil.assertPoint("player location after teleport", new Point(7, 3), mc.getLocation());
+        TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after teleport");
         TestUtil.assertVector3("player location after teleport", MazeUtils.point2Vector3(new Point(7, 3)), user.getSceneNode().getTransform().getPosition());
         TestUtil.assertPoint(new Point(7, 3), MazeUtils.getMoverposition(user), "location after teleport");
         assertEquals(GridOrientation.fromDirection('W').toString(), MazeUtils.getPlayerorientation(user).toString(), "orientation after teleport (should be left/WEST)");
@@ -83,15 +83,28 @@ public class MazeSceneTest {
         inputToRequestSystem.mockInput(ray, true, false);
         sceneRunner.runLimitedFrames(3);
         TestUtil.assertPoint(new Point(5, 3), MazeUtils.getMoverposition(boxToKick), "location after teleport");
+        // player should not move
+        TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after kick (unchanged)");
+
+        // try to teleport to unreachable field
+        ray = TestUtils.mockHittingRayForTeleport(new Point(3, 4), 'W');
+        inputToRequestSystem.mockInput(ray, true, true);
+        sceneRunner.runLimitedFrames(3);
+        // player should not move
+        TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after kick (unchanged)");
+
     }
 
     /**
      * Needs parameter, so no @Before
      */
-    private void setup(String gridname) {
+    private void setup(String gridname, boolean gridTeleporterEnabled) {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.maze.MazeScene");
         properties.put("argv.initialMaze", gridname);
+        if (gridTeleporterEnabled) {
+            properties.put("argv.enableMazeGridTeleporter", "true");
+        }
         sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, properties, new String[]{"engine", "data", "maze"});
     }
 }

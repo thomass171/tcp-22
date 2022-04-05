@@ -4,8 +4,9 @@ import de.yard.threed.core.LocalTransform;
 
 public class GridTeleportDestination {
 
-    public LocalTransform transform;
-    public Character direction;
+    private LocalTransform transform;
+    // null if there is no change in direction
+    private Character direction;
 
     public GridTeleportDestination(LocalTransform transform, char direction) {
         this.transform = transform;
@@ -16,4 +17,11 @@ public class GridTeleportDestination {
         this.transform = transform;
     }
 
+    public LocalTransform getTransform() {
+        return transform;
+    }
+
+    public Character getDirection() {
+        return direction;
+    }
 }

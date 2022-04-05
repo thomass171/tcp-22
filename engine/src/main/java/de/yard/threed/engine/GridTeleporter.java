@@ -28,6 +28,7 @@ public class GridTeleporter {
     }
 
     /**
+     * Show a teleport destination marker on a tile depending on the position, where the ray hits the tile.
      * Skizze 65
      *
      * @param ray
@@ -47,6 +48,7 @@ public class GridTeleporter {
                 return markerTransform;
             }
         }
+        // no intersection of tile->no marker
         return null;
     }
 

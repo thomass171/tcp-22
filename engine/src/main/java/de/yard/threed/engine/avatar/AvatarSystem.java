@@ -164,6 +164,8 @@ public class AvatarSystem extends DefaultEcsSystem {
             mainNode = new SceneNode();
             // Simple green cube for testing.
             mainNode.setMesh(new Mesh(Geometry.buildCube(0.1f, 0.1f, 0.1f), Material.buildBasicMaterial(Color.GREEN)));
+            // used as marker
+            user.addComponent(new AvatarComponent());
         } else {
             mainNode = avatarBuilder.buildAvatar(user);
         }
@@ -171,7 +173,7 @@ public class AvatarSystem extends DefaultEcsSystem {
 
         user.scenenode = mainNode;
         user.addComponent(new TeleportComponent(mainNode));
-        user.addComponent(new AvatarComponent());
+
         Scene.getCurrent().addToWorld(mainNode);
         return mainNode;
     }

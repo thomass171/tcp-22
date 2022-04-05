@@ -104,7 +104,7 @@ public class MazeScene extends Scene {
 
         });
         buttonDelegates.put("pull", () -> {
-            SystemManager.putRequest(new Request(RequestRegistry.TRIGGER_REQUEST_PULL, new Payload("")));
+            InputToRequestSystem.sendRequestWithId(new Request(RequestRegistry.TRIGGER_REQUEST_PULL, new Payload("")));
         });
 
         vrInstance = VrInstance.buildFromArguments();
@@ -137,12 +137,12 @@ public class MazeScene extends Scene {
         inputToRequestSystem.addKeyMapping(KeyCode.H, RequestRegistry.TRIGGER_REQUEST_HELP);
         inputToRequestSystem.addKeyMapping(KeyCode.R, RequestRegistry.TRIGGER_REQUEST_RESET);
         inputToRequestSystem.addKeyMapping(KeyCode.K, RequestRegistry.TRIGGER_REQUEST_KICK);
-        inputToRequestSystem.addKeyMapping(KeyCode.Space, RequestRegistry.TRIGGER_REQUEST_FIRE);
+        inputToRequestSystem.addKeyMapping(KeyCode.Space, BulletSystem.TRIGGER_REQUEST_FIRE);
 
         inputToRequestSystem.setSegmentRequest(0, RequestRegistry.TRIGGER_REQUEST_LEFT);
         inputToRequestSystem.setSegmentRequest(2, RequestRegistry.TRIGGER_REQUEST_RIGHT);
         inputToRequestSystem.setSegmentRequest(3, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
-        inputToRequestSystem.setSegmentRequest(4, RequestRegistry.TRIGGER_REQUEST_FIRE);
+        inputToRequestSystem.setSegmentRequest(4, BulletSystem.TRIGGER_REQUEST_FIRE);
         inputToRequestSystem.setSegmentRequest(5, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
         inputToRequestSystem.setSegmentRequest(7, RequestRegistry.TRIGGER_REQUEST_FORWARD);
 
