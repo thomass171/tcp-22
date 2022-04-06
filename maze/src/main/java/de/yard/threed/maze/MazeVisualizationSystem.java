@@ -131,7 +131,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             MoverComponent mc = MoverComponent.getMoverComponent(mainplayer);
 
             // show possible teleport destinations
-            List<SceneNode> tileCandidates = getValidTeleportDestinationTiles(mc, state);
+            List<SceneNode> tileCandidates = getValidTeleportDestinationTiles(mc, state, "Pointer");
 
             for (SceneNode tile : tileCandidates) {
                 if (gridTeleporter != null) {
@@ -244,7 +244,8 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                 for (EcsEntity player : MazeUtils.getPlayerOrBoxes(false)) {
 
                     Point loc = MoverComponent.getMoverComponent(player).getLocation();
-                    if (loc.onSameAxis(myLocation) &&
+                    // dont't hit own avatar
+                    if (player.getId() != mainplayer.getId() && loc.onSameAxis(myLocation) &&
                             ray.intersects(player.getSceneNode(), true)) {
                         GridOrientation fireOrientation;
                         if (loc.getX() == myLocation.getX()) {
@@ -270,7 +271,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             if (gridTeleporter != null) {
                 GridState state = MazeUtils.buildGridStateFromEcs();
                 // only check for valid teleport destinations
-                List<SceneNode> tileCandidates = getValidTeleportDestinationTiles(mc, state);
+                List<SceneNode> tileCandidates = getValidTeleportDestinationTiles(mc, state, "trigger");
                 for (SceneNode tile : tileCandidates) {
                     GridTeleportDestination transform = gridTeleporter.updateDestinationMarker(ray, tile, MazeDimensions.GRIDSEGMENTSIZE);
                     if (transform != null) {
@@ -294,10 +295,9 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
     /**
      *
      */
-    private List<SceneNode> getValidTeleportDestinationTiles(MoverComponent mc, GridState state) {
+    private List<SceneNode> getValidTeleportDestinationTiles(MoverComponent mc, GridState state, String useCase) {
         List<GridMovement> moveOptions = mc.getMoveOptions(state, Grid.getInstance().getMazeLayout());
 
-        logger.debug("found " + moveOptions.size() + " possible teleport targets");
         List<SceneNode> tileCandidates = new ArrayList<SceneNode>();
         for (GridMovement m : moveOptions) {
             if (m.isRelocate()) {
@@ -309,6 +309,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                 }
             }
         }
+        logger.debug("found " + moveOptions.size() + " move options resulting in " + tileCandidates.size() + " teleport target tile candidates for " + useCase);
         return tileCandidates;
     }
 

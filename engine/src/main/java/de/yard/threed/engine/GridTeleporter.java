@@ -38,17 +38,19 @@ public class GridTeleporter {
     public GridTeleportDestination updateDestinationMarker(Ray ray, SceneNode tileCandidate, double gridSize) {
         if (ray != null) {
             List<NativeCollision> intersections = ray.getIntersections(tileCandidate, true);
-            //logger.debug("ground intersections: " + intersections.size());
+            //logger.debug("tile intersections: " + intersections.size());
             //TODO only use first/nearest?
             for (int i = 0; i < intersections.size(); i++) {
                 //logger.debug("intersection: " + intersections.get(i).getSceneNode().getName());
                 Vector3 ip = intersections.get(0).getPoint();
                 //destinationMarker.getTransform().setPosition(new Vector3(ip.getX(), 0.01, ip.getZ()));
                 GridTeleportDestination markerTransform = moveDestinationMarker(new Vector2(ip.getX(), ip.getZ()), locationMarker, directionMarker, gridSize);
+                //logger.debug("updateDestinationMarker: tile hit marker="+markerTransform);
                 return markerTransform;
             }
         }
         // no intersection of tile->no marker
+        //logger.debug("updateDestinationMarker: no marker with ray "+ray);
         return null;
     }
 
