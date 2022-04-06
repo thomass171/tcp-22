@@ -38,6 +38,10 @@ public class MazeUtils {
         });
     }
 
+    public static List<EcsEntity> getBoxes() {
+        return getPlayerOrBoxes(true);
+    }
+
     public static List<EcsEntity> getAllItems() {
         return getItemsByOwner(-1);
     }

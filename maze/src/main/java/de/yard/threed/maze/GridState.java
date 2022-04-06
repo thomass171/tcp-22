@@ -315,7 +315,7 @@ public class GridState {
     }
 
     /**
-     * Find next box in direction of orientation without obstacle.
+     * Find next box in direction of orientation without obstacle. Only that might be kicked.
      * <p>
      * Independent from move opportunities.
      */

@@ -39,6 +39,8 @@ public class RequestRegistry {
 
     // RELOCATE also for teleport: string payload: playername, logical target, orientation
     public static RequestType TRIGGER_REQUEST_RELOCATE = new RequestType("TRIGGER_REQUEST_RELOCATE");
+
+    // Kick only applies to a box in direction of orientation
     public static RequestType TRIGGER_REQUEST_KICK = new RequestType("TRIGGER_REQUEST_KICK");
 
     public static Request buildRelocate(int userEntityId, Point p, GridOrientation orientation) {

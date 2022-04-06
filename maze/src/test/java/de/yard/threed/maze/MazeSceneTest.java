@@ -77,12 +77,12 @@ public class MazeSceneTest {
         TestUtil.assertPoint(new Point(7, 3), MazeUtils.getMoverposition(user), "location after teleport");
         assertEquals(GridOrientation.fromDirection('W').toString(), MazeUtils.getPlayerorientation(user).toString(), "orientation after teleport (should be left/WEST)");
 
-        // kick the box now via trigger ray
+        // kick the (6,3) box now via trigger ray
         EcsEntity boxToKick = MazeUtils.findBoxByField(new Point(6, 3));
         ray = TestUtils.mockHittingRayForKick(boxToKick);
         inputToRequestSystem.mockInput(ray, true, false);
         sceneRunner.runLimitedFrames(3);
-        TestUtil.assertPoint(new Point(5, 3), MazeUtils.getMoverposition(boxToKick), "location after teleport");
+        TestUtil.assertPoint(new Point(5, 3), MazeUtils.getMoverposition(boxToKick), "box location after teleport");
         // player should not move
         TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after kick (unchanged)");
 
@@ -90,6 +90,16 @@ public class MazeSceneTest {
         ray = TestUtils.mockHittingRayForTeleport(new Point(3, 4), 'W');
         inputToRequestSystem.mockInput(ray, true, true);
         sceneRunner.runLimitedFrames(3);
+        // player should not move
+        TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after kick (unchanged)");
+
+        // kick again with trigger ray to box at (6,2). Shouldn't move neither box.
+        EcsEntity boxToHit = MazeUtils.findBoxByField(new Point(6, 2));
+        ray = TestUtils.mockHittingRayForKick(boxToHit);
+        inputToRequestSystem.mockInput(ray, true, false);
+        sceneRunner.runLimitedFrames(3);
+        TestUtil.assertPoint(new Point(6, 2), MazeUtils.getMoverposition(boxToHit), "box shouldn't move");
+        TestUtil.assertPoint(new Point(5, 3), MazeUtils.getMoverposition(boxToKick), "box shouldn't move");
         // player should not move
         TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after kick (unchanged)");
 

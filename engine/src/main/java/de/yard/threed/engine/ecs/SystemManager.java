@@ -232,14 +232,12 @@ public class SystemManager {
     }
 
     /**
-     * 7.4.21: Schon vor dem init() aufrufbar, um schon mal Requests aus einem init() und nicht aus dem update() einreihen zu koennen.
+     * 7.4.21: Can be used before inited for adding requests from an init() and not only from update().
      *
      * @param request
      */
     public static void putRequest(Request request) {
-        /*7.4.21 if (!isinited){
-            throw new RuntimeException("not inited");
-        }*/
+        logger.debug("putRequest " + request);
         requestQueue.addRequest(request);
     }
 
@@ -373,7 +371,7 @@ public class SystemManager {
         }
         if (evt.equals(UserSystem.USER_REQUEST_LOGIN.getLabel())) {
 //Event evt=new Event(E)
-            SystemManager.putRequest(UserSystem.buildLoginRequest("",""));
+            SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
         }
     }
 

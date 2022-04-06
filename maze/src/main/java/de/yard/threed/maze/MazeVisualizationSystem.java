@@ -214,12 +214,14 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         }
         MoverComponent mc = MoverComponent.getMoverComponent(mainplayer);
         Point myLocation = mc.getLocation();
+        GridState state = MazeUtils.buildGridStateFromEcs();
 
         if (!distinctLeftRightVrControllerEnabled || !left) {
             // right controller triggered
-            for (EcsEntity box : MazeUtils.getPlayerOrBoxes(true)) {
-
-                if (ray.intersects(box.getSceneNode(), true)) {
+            for (EcsEntity box : MazeUtils.getBoxes()) {
+                // Kick only applies to a box in direction of orientation. So check that intersected box is really one in direction
+                if (box.getId() == state.findNextBox(mc.getLocation(), mc.getGridOrientation(), Grid.getInstance().getMazeLayout()).getId() &&
+                        ray.intersects(box.getSceneNode(), true)) {
                     return RequestRegistry.buildKick(userEntityId);
                 }
             }
@@ -269,7 +271,6 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         if (!distinctLeftRightVrControllerEnabled || left) {
             // left controller triggered. Try teleport.
             if (gridTeleporter != null) {
-                GridState state = MazeUtils.buildGridStateFromEcs();
                 // only check for valid teleport destinations
                 List<SceneNode> tileCandidates = getValidTeleportDestinationTiles(mc, state, "trigger");
                 for (SceneNode tile : tileCandidates) {

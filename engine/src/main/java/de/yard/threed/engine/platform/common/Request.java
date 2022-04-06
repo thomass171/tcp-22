@@ -67,7 +67,12 @@ public class Request {
         return userEntityId;
     }
 
-    public void setUserEntityId(Integer userEntityId){
+    public void setUserEntityId(Integer userEntityId) {
         this.userEntityId = userEntityId;
+    }
+
+    @Override
+    public String toString() {
+        return "" + requesttype + "," + payload + "," + userEntityId;
     }
 }
