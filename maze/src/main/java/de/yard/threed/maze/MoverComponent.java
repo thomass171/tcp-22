@@ -96,11 +96,11 @@ public class MoverComponent extends EcsComponent implements GridMover {
 
     /**
      * Moving in *some* direction which not needs to be the orientation.
-     * 12.4.21: MA32: jetzt hier state changen. ??
+     * Relocate is allowed while moving because its not self triggered.
      */
     public MoveResult move(GridMovement movement, GridOrientation orientation, GridState gridState, MazeLayout mazeLayout) {
 
-        if (!isRotating() && !isWalking()) {
+        if ((!isRotating() && !isWalking()) || movement.isRelocate()) {
             MoveResult moveResult = gridMover.move(movement, orientation, gridState, mazeLayout);
             if (moveResult != null) {
                 // don't walk myself when kick or pull!

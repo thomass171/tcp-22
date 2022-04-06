@@ -24,6 +24,8 @@ public class GridMovement {
     public static final int RIGHT = 8;
     public static final int RELOCATE = 9;
     public static final int KICK = 10;
+    // Teleport is an own action that only is possible when not moving. Relocate is an extern action that is also possible while moving.
+    public static final int TELEPORT = 11;
     public static GridMovement Forward = new GridMovement(FORWARD);
     public static GridMovement TurnLeft = new GridMovement(TURNLEFT);
     public static GridMovement TurnRight = new GridMovement(TURNRIGHT);
@@ -35,13 +37,15 @@ public class GridMovement {
     public static GridMovement Pull = new GridMovement(PULL);
     public static GridMovement Left = new GridMovement(LEFT);
     public static GridMovement Right = new GridMovement(RIGHT);
-    // relocate needs additonal attribute target. So the constant here is private.
+    // relocate and teleport need additional attribute target. So the constant here is private.
     private static GridMovement Relocate = new GridMovement(RELOCATE);
+    private static GridMovement Teleport = new GridMovement(TELEPORT);
     public static GridMovement Kick = new GridMovement(KICK);
     //Back ist nicht in den moves, weil es als Teil einer Lösung sehr speziell wäre. Vor allem, wenn es ohne Grund
     //eingesetzt wird. Left/Right aber schon, das kann deutlich Turns sparen.
     public static GridMovement[] regularpossiblemoves = new GridMovement[]{Forward, ForwardMove, TurnLeft, TurnRight, Left, Right/*, Back*/};
     int movement;
+    // relocatetarget is also for teleport.
     private Point relocateTarget = null;
     private GridOrientation relocateOrientation;
 
@@ -49,14 +53,18 @@ public class GridMovement {
         this.movement = movement;
     }
 
-    private GridMovement(Point relocateTarget, GridOrientation relocateOrientation) {
-        this.movement = RELOCATE;
+    private GridMovement(int movement, Point relocateTarget, GridOrientation relocateOrientation) {
+        this.movement = movement;
         this.relocateTarget = relocateTarget;
         this.relocateOrientation = relocateOrientation;
     }
 
     public static GridMovement buildRelocate(Point relocateTarget, GridOrientation relocateOrientation) {
-        return new GridMovement(relocateTarget, relocateOrientation);
+        return new GridMovement(RELOCATE, relocateTarget, relocateOrientation);
+    }
+
+    public static GridMovement buildTeleport(Point relocateTarget, GridOrientation relocateOrientation) {
+        return new GridMovement(TELEPORT, relocateTarget, relocateOrientation);
     }
 
     @Override
@@ -82,6 +90,8 @@ public class GridMovement {
                 return "Relocate " + relocateTarget;
             case 10:
                 return "Kick";
+            case 11:
+                return "Teleport " + relocateTarget;
         }
         return "";
     }
@@ -119,6 +129,10 @@ public class GridMovement {
 
     public boolean isRelocate() {
         return movement == RELOCATE;
+    }
+
+    public boolean isTeleport() {
+        return movement == TELEPORT;
     }
 
     public boolean isKick() {

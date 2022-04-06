@@ -110,7 +110,7 @@ public class SimpleGridMover implements GridMover {
         }
 
         GridItem item;
-        if (movement.isRelocate()) {
+        if (movement.isRelocate() || movement.isTeleport()) {
             Point target = movement.getRelocateTarget();
 
             if (!gridState.isFree(target, mazeLayout)) {

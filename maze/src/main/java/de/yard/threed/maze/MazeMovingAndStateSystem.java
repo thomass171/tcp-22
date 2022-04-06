@@ -57,6 +57,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                         RequestRegistry.TRIGGER_REQUEST_RIGHT,
                         RequestRegistry.TRIGGER_REQUEST_PULL,
                         RequestRegistry.TRIGGER_REQUEST_RELOCATE,
+                        RequestRegistry.TRIGGER_REQUEST_TELEPORT,
                         RequestRegistry.TRIGGER_REQUEST_KICK,
                 },
                 new EventType[]{
@@ -192,9 +193,10 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             reset();
             return true;
         }
-        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RELOCATE)) {
-            // 'Relocate' can be both a user request (VR teleport) or a system request (hit by bullet)
-            relocate(request.getPayload(), currentstate);
+        if (request.getType().equals(RequestRegistry.TRIGGER_REQUEST_RELOCATE) ||
+                request.getType().equals(RequestRegistry.TRIGGER_REQUEST_TELEPORT)) {
+            // 6.4.22: 'Relocate' can only be a system request (hit by bullet) any more
+            relocateOrTeleport(request.getType(), request.getPayload(), currentstate);
             return true;
         }
         return processSolutionOrUserRequest(currentstate, request);
@@ -376,12 +378,13 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
      * <p>
      * Only allows four basic movements, no ForwardMove, though that could be possible.
      * Items do not occupy a field. So items that might be located at the destination field do not affect movement.
+     * Relocate is allowed while moving because its not self triggered.
      */
     private List<EcsEntity> attemptMove(GridState currentstate, MoverComponent mover, GridMovement movement, int userEntityId) {
         MazeLayout layout = Grid.getInstance().getMazeLayout();
 
         List<EcsEntity> foundStuff = null;
-        if (mover.isMoving()) {
+        if (mover.isMoving() && !movement.isRelocate()) {
             // Just to be sure. Shouldn't be called in this case.
             logger.warn("cannot move. still moving");
         } else {
@@ -641,19 +644,20 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     }
 
     /**
-     * Process a relocate request (eg. for hit players, for VR teleport).
-     * 'Relocate' can be both a user request or a system request, so treat it consistent to other user movement via attemptMove.
+     * Process a relocate request (eg. for hit players) or teleport request (for VR teleport).
+     * 'Relocate' can no longer be a user request, so no longer treat it like teleport. Relocate is possible
+     * while player is moving.
      */
-    private void relocate(Payload payload, GridState currentstate) {
+    private void relocateOrTeleport(RequestType type, Payload payload, GridState currentstate) {
 
         int userEntityId = (int) (Integer) payload.o[0];
         EcsEntity player = EcsHelper.findEntityById(userEntityId);
         if (player == null) {
-            logger.warn("unknown player for relocate:" + userEntityId);
+            logger.warn("unknown player for relocateOrTeleport:" + userEntityId);
             return;
         }
 
-        logger.debug("relocate " + player.getName());
+        logger.debug("relocateOrTeleport " + player.getName());
 
         String location = (String) payload.o[1];
         Point p = Util.parsePoint(location);
@@ -672,7 +676,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             }
         }
 
-        GridMovement movement = GridMovement.buildRelocate(p, gridOrientation);
+        GridMovement movement = (type == RequestRegistry.TRIGGER_REQUEST_RELOCATE) ? GridMovement.buildRelocate(p, gridOrientation) : GridMovement.buildTeleport(p, gridOrientation);
 
         MoverComponent mc = MoverComponent.getMoverComponent(player);
 

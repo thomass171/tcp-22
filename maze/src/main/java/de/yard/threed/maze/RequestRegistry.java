@@ -37,14 +37,19 @@ public class RequestRegistry {
     public static RequestType TRIGGER_REQUEST_PULL = new RequestType("TRIGGER_REQUEST_PULL");
 
 
-    // RELOCATE also for teleport: string payload: playername, logical target, orientation
+    // RELOCATE no longer for teleport: string payload: playername, logical target, orientation
     public static RequestType TRIGGER_REQUEST_RELOCATE = new RequestType("TRIGGER_REQUEST_RELOCATE");
+    public static RequestType TRIGGER_REQUEST_TELEPORT = new RequestType("TRIGGER_REQUEST_TELEPORT");
 
     // Kick only applies to a box in direction of orientation
     public static RequestType TRIGGER_REQUEST_KICK = new RequestType("TRIGGER_REQUEST_KICK");
 
     public static Request buildRelocate(int userEntityId, Point p, GridOrientation orientation) {
         return new Request(TRIGGER_REQUEST_RELOCATE, new Payload(new Integer(userEntityId), "" + p.getX() + "," + p.getY(), (orientation == null) ? "" : orientation.getDirectionCode()));
+    }
+
+    public static Request buildTeleport(int userEntityId, Point p, GridOrientation orientation) {
+        return new Request(TRIGGER_REQUEST_TELEPORT, new Payload(new Integer(userEntityId), "" + p.getX() + "," + p.getY(), (orientation == null) ? "" : orientation.getDirectionCode()));
     }
 
     public static Request buildKick(int userEntityId) {
