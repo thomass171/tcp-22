@@ -175,7 +175,7 @@ public class MazeTest {
         //da fehlt doch was by y??
         TestUtil.assertFloat("camera.world.y", 0.6 + 0.75, observerDummy.getTransform().getWorldModelMatrix().extractPosition().getY());
 
-        SystemManager.putRequest(BulletSystem.buildFireRequest(player.getId(),mc.getGridOrientation()));
+        SystemManager.putRequest(BulletSystem.buildFireRequest(player.getId(), mc.getGridOrientation()));
         sceneRunner.runLimitedFrames(1);
 
         // no balls without bot
@@ -294,7 +294,7 @@ public class MazeTest {
 
         setup("maze/Maze-P-Simple.txt", false);
 
-        List<EcsEntity> users = initMaze_P_Simple();
+        List<EcsEntity> users = initMaze_P(2);
         EcsEntity user0 = users.get(0);
         EcsEntity user1 = users.get(1);
 
@@ -381,7 +381,7 @@ public class MazeTest {
 
         setup("maze/Maze-P-Simple.txt", false);
 
-        List<EcsEntity> users = initMaze_P_Simple();
+        List<EcsEntity> users = initMaze_P(2);
         EcsEntity user0 = users.get(0);
         EcsEntity user1 = users.get(1);
 
@@ -395,7 +395,7 @@ public class MazeTest {
 
         GridState currentstate = MazeUtils.buildGridStateFromEcs();
         assertFalse(currentstate.isSolved(Grid.getInstance().getMazeLayout()));
-        TestUtils.ecsWalk(buildRelocate(user0.getId(),new Point(7, 1),GridOrientation.fromDirection('S')), sceneRunner, user0, false, new Point(7, 1));
+        TestUtils.ecsWalk(buildRelocate(user0.getId(), new Point(7, 1), GridOrientation.fromDirection('S')), sceneRunner, user0, false, new Point(7, 1));
         assertEquals(3 + 2, MazeUtils.getInventory(user0).size(), "inventory (3 bullets, 2 diamond)");
         assertEquals(GridOrientation.fromDirection('S').toString(), MazeUtils.getPlayerorientation(user0).toString(), "orientation after teleport (should be SOUTH)");
         assertTrue(currentstate.isSolved(Grid.getInstance().getMazeLayout()));
@@ -447,13 +447,47 @@ public class MazeTest {
         EcsEntity user1 = EcsHelper.findEntitiesByName("Bot0").get(0);
         assertNotNull(user1);
 
-        assertEquals(12,MazeUtils.buildItemsFromEcs().size());
+        assertEquals(12, MazeUtils.buildItemsFromEcs().size());
         GridState currentstate = MazeUtils.buildGridStateFromEcs();
-        assertEquals(4,currentstate.players.size());
-        assertEquals(12,currentstate.items.size());
-        assertEquals(0,currentstate.boxes.size());
+        assertEquals(4, currentstate.players.size());
+        assertEquals(12, currentstate.items.size());
+        assertEquals(0, currentstate.boxes.size());
         assertFalse(currentstate.isSolved(Grid.getInstance().getMazeLayout()));
         assertEquals(3, SceneNode.findByName("Monster").size());
+    }
+
+    /**
+     * Without diamonds its solved immediately.
+     */
+    @Test
+    public void testBot() throws Exception {
+
+        setup("##########\n" +
+                "#  #@#D  #\n" +
+                "#        #\n" +
+                "#        #\n" +
+                "#   @    #\n" +
+                "##########", true);
+
+        // initMaze_P not suited for bot system
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
+        sceneRunner.runLimitedFrames(3);
+
+        assertEquals(1 + 3 + 1 + 3 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player+3 bullets+bot with bullets +1 diamond)");
+        assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
+        EcsEntity user = MazeUtils.getPlayerByUsername("u0");
+        assertNotNull(user);
+        EcsEntity bot = MazeUtils.getPlayer().get(1);
+        assertNotNull(bot);
+        assertEquals(3, MazeUtils.getBullets(bot).size());
+
+        // bot must/will leave home field to make firing possible. By default it will wait real time for next move.
+
+        EcsTestHelper.processUntil(() -> {
+            return MazeUtils.getBullets(bot).size() < 3;
+        }, 0.1, 100000000);
+
+        // Anyway, user is on home filed and cannot be hit.
     }
 
     /**
@@ -461,9 +495,9 @@ public class MazeTest {
      *
      * @return list of player
      */
-    private List<EcsEntity> initMaze_P_Simple() {
+    private List<EcsEntity> initMaze_P(int diamonds) {
         // no boxes, no player, two diamond
-        assertEquals(2, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
+        assertEquals(diamonds, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
         assertEquals(0, MazeUtils.getPlayer().size(), "number of player");
         assertNull(MazeUtils.getMainPlayer());
 
@@ -471,7 +505,7 @@ public class MazeTest {
         SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
         sceneRunner.runLimitedFrames(5);
 
-        assertEquals(1 + 3 + 2, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player+3 bullets+2 diamond)");
+        assertEquals(1 + 3 + diamonds, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player+3 bullets+2 diamond)");
         assertEquals(1, MazeUtils.getPlayer().size(), "number of player");
         assertNotNull(MazeUtils.getMainPlayer());
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
@@ -484,7 +518,7 @@ public class MazeTest {
         SystemManager.putRequest(UserSystem.buildLoginRequest("u1", ""));
         sceneRunner.runLimitedFrames(5);
 
-        assertEquals(2 + 2 * 3 + 2, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (two player+2*3 bullets+2 diamond)");
+        assertEquals(2 + 2 * 3 + diamonds, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (two player+2*3 bullets+2 diamond)");
         assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
         assertNotNull(MazeUtils.getMainPlayer());
         EcsEntity user1 = MazeUtils.getPlayerByUsername("u1");
@@ -504,7 +538,7 @@ public class MazeTest {
         // both user still on their start position and have 3 bullets
         assertEquals(3, MazeUtils.getBullets(user0).size(), "bullets");
         assertEquals(3, MazeUtils.getBullets(user1).size(), "bullets");
-        assertEquals(3 + 3 + 2, MazeUtils.getAllItems().size(), "(2*3 bullets, 2 diamond)");
+        assertEquals(3 + 3 + diamonds, MazeUtils.getAllItems().size(), "(2*3 bullets, 2 diamond)");
 
         return Arrays.asList(user0, user1);
     }

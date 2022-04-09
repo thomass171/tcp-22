@@ -320,6 +320,14 @@ public class GridState {
      * Independent from move opportunities.
      */
     public GridMover findNextBox(Point from, GridOrientation gridOrientation, MazeLayout mazeLayout) {
+        return findNextMover(from, gridOrientation, mazeLayout, boxes);
+    }
+
+    public GridMover findNextPlayer(Point from, GridOrientation gridOrientation, MazeLayout mazeLayout) {
+        return findNextMover(from, gridOrientation, mazeLayout, players);
+    }
+
+    public GridMover findNextMover(Point from, GridOrientation gridOrientation, MazeLayout mazeLayout, List<GridMover> candidates) {
 
         Point p = from;
         Direction direction = gridOrientation.getDirectionForMovement(GridMovement.Forward);
@@ -328,7 +336,7 @@ public class GridState {
         while (true) {
 
             GridMover b;
-            if ((b = isBoxAtDestination(p, direction, 1)) != null) {
+            if ((b = isMoverAtDestination(p, direction, 1, candidates)) != null) {
                 return b;
             }
 

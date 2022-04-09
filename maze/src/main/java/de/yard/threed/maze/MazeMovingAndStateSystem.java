@@ -85,12 +85,20 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         if (initialMaze == null) {
             initialMaze = "skbn/SokobanWikipedia.txt";
         }
-        String name = StringUtils.substringBeforeLast(initialMaze, ".");
-        name = StringUtils.substringAfterLast(name, "/");
-        String filename = StringUtils.substringBeforeLast(initialMaze, ":");
-        String fileContent = MazeUtils.readMazefile(filename/*, name*/);
+        String fileContent;
+        String title;
+        if (StringUtils.startsWith(initialMaze, "##")) {
+            // directly grid definition
+            fileContent = initialMaze;
+            title = "on-the-fly";
+        } else {
+            String name = StringUtils.substringBeforeLast(initialMaze, ".");
+            name = StringUtils.substringAfterLast(name, "/");
+            String filename = StringUtils.substringBeforeLast(initialMaze, ":");
+            fileContent = MazeUtils.readMazefile(filename/*, name*/);
 
-        String title = StringUtils.substringAfterLast(initialMaze, ":");
+            title = StringUtils.substringAfterLast(initialMaze, ":");
+        }
         loadLevel(fileContent, title);
         //10.11.20 ob der hier gut ist, muss sich noch zeigen.
         MoveRecorder.init(/*movingsystem.* /currentstate*/);
