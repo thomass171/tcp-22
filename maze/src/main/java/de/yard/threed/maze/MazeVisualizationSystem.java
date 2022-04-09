@@ -252,15 +252,15 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                         GridOrientation fireOrientation;
                         if (loc.getX() == myLocation.getX()) {
                             if (loc.getY() < myLocation.getY()) {
-                                fireOrientation = GridOrientation.fromDirection('S');
+                                fireOrientation = GridOrientation.fromDirection("S");
                             } else {
-                                fireOrientation = GridOrientation.fromDirection('N');
+                                fireOrientation = GridOrientation.fromDirection("N");
                             }
                         } else {
                             if (loc.getX() < myLocation.getX()) {
-                                fireOrientation = GridOrientation.fromDirection('W');
+                                fireOrientation = GridOrientation.fromDirection("W");
                             } else {
-                                fireOrientation = GridOrientation.fromDirection('E');
+                                fireOrientation = GridOrientation.fromDirection("E");
                             }
                         }
                         return BulletSystem.buildFireRequest(userEntityId, fireOrientation);

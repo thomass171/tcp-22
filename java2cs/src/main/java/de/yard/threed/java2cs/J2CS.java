@@ -20,7 +20,6 @@ import static java.nio.file.FileVisitResult.CONTINUE;
 /**
  * Very basic Java to CS syntax converter.
  * Based on Pat Niemeyers Java to Swift converter (https://github.com/patniemeyer/j2swift)
- *
  */
 public class J2CS {
     Logger logger = Logger.getLogger(J2CS.class);
@@ -316,7 +315,7 @@ public class J2CS {
         //ist eigentlich eine abstrakte Klasse
         //geht nicht knownInterfaces.add("OriginMapProjection", new String[]{"calcPos"});
         knownInterfaces.add("GenericControlPanel", new String[]{"checkForClickedArea"});
-        knownInterfaces.add("Menu", new String[]{"checkForClickedArea","getNode","checkForSelectionByKey","remove"});
+        knownInterfaces.add("Menu", new String[]{"checkForClickedArea", "getNode", "checkForSelectionByKey", "remove"});
 
         //Animation ist abstrakte Klasse knownInterfaces.add("Animation", new String[]{"processAnimationStep"});
         //10.1.19: Manche sind jetzt abstract.
@@ -339,9 +338,10 @@ public class J2CS {
         knownInterfaces.add("VehicleLoadedDelegate", "vehicleLoaded");
 
         //Maze
-        knownInterfaces.add("GridItem", new String[]{"getLocation", "setLocation", "getOwner", "collectedBy","isNeededForSolving","setNeededForSolving"});
+        knownInterfaces.add("GridItem", new String[]{"getLocation", "setLocation", "getOwner", "collectedBy", "isNeededForSolving", "setNeededForSolving", "getId"});
         knownInterfaces.add("PointerHandler", new String[]{"processPointer", "getRequestByTrigger"});
-        knownInterfaces.add("GridMover", new String[]{"getLocation", "setLocation", "getOrientation", "rotate", "setOrientation", "walk", "getParent", "setOrientation","getMoveOptions","getId", "getTeam"});
+        knownInterfaces.add("GridMover", new String[]{"getLocation", "setLocation", "getOrientation", "rotate", "setOrientation", "walk", "getParent", "setOrientation", "getMoveOptions", "getId", "getTeam"});
+        knownInterfaces.add("MazeInventory", new String[]{"setBullets", "setDiamonds"});
 
         return knownInterfaces;
     }

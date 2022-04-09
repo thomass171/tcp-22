@@ -82,20 +82,14 @@ public class GridOrientation {
         return "dir=" + dir;
     }
 
-    public static GridOrientation fromDirection(Character dir) {
+    public static GridOrientation fromDirection(String dir) {
         if (dir == null) {
             return null;
         }
-        switch (dir.charValue()) {
-            case 'N':
-                return new GridOrientation(0);
-            case 'E':
-                return new GridOrientation(1);
-            case 'S':
-                return new GridOrientation(2);
-            case 'W':
-                return new GridOrientation(3);
-        }
+        if (dir.equals("N")) return new GridOrientation(0);
+        if (dir.equals("E")) return new GridOrientation(1);
+        if (dir.equals("S")) return new GridOrientation(2);
+        if (dir.equals("W")) return new GridOrientation(3);
         return null;
     }
 

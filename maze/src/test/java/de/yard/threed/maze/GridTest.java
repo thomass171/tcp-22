@@ -185,8 +185,8 @@ public class GridTest {
         TestUtil.assertPoint("start location", new Point(6, 1), player.getLocation());
         TestUtil.assertPoint("top box start location", new Point(6, 3), topbox.getLocation());
         TestUtil.assertPoint("bottom box start location", new Point(6, 2), bottombox.getLocation());
-        TestUtil.assertPoint("box push location", new Point(6, 3), gridState.findNextBox(new Point(2, 3), GridOrientation.fromDirection('E'), grid.getMazeLayout()).getLocation());
-        TestUtil.assertNotNull("can push box ", ((SimpleGridMover) player).canPushFrom(new Point(5, 3), GridOrientation.fromDirection('E'), gridState, grid.getMazeLayout()));
+        TestUtil.assertPoint("box push location", new Point(6, 3), gridState.findNextBox(new Point(2, 3), GridOrientation.fromDirection("E"), grid.getMazeLayout()).getLocation());
+        TestUtil.assertNotNull("can push box ", ((SimpleGridMover) player).canPushFrom(new Point(5, 3), GridOrientation.fromDirection("E"), gridState, grid.getMazeLayout()));
 
         // forward should fail because of unmovable box. Same for kick
         TestUtils.move(player, players, boxes, GridMovement.Forward, grid.getMazeLayout(), new Point(6, 1), null);

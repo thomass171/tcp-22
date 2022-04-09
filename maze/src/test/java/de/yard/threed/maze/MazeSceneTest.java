@@ -75,7 +75,7 @@ public class MazeSceneTest {
         TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after teleport");
         TestUtil.assertVector3("player location after teleport", MazeUtils.point2Vector3(new Point(7, 3)), user.getSceneNode().getTransform().getPosition());
         TestUtil.assertPoint(new Point(7, 3), MazeUtils.getMoverposition(user), "location after teleport");
-        assertEquals(GridOrientation.fromDirection('W').toString(), MazeUtils.getPlayerorientation(user).toString(), "orientation after teleport (should be left/WEST)");
+        assertEquals(GridOrientation.fromDirection("W").toString(), MazeUtils.getPlayerorientation(user).toString(), "orientation after teleport (should be left/WEST)");
 
         // kick the (6,3) box now via trigger ray
         EcsEntity boxToKick = MazeUtils.findBoxByField(new Point(6, 3));

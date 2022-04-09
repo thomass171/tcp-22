@@ -677,7 +677,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         GridOrientation gridOrientation = null;
         String orientation = (String) payload.o[2];
         if (orientation != null && StringUtils.length(orientation) > 0) {
-            gridOrientation = GridOrientation.fromDirection(StringUtils.charAt(orientation, 0));
+            gridOrientation = GridOrientation.fromDirection(orientation);
             if (gridOrientation == null) {
                 logger.warn("invalid orientation:" + orientation);
                 return;

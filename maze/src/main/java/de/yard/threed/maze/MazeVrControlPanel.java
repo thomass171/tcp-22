@@ -10,6 +10,9 @@ import de.yard.threed.core.DimensionF;
 
 import java.util.Map;
 
+/**
+ *
+ */
 public class MazeVrControlPanel extends ControlPanel implements MazeInventory {
 
     static Log logger = Platform.getInstance().getLog(MazeVrControlPanel.class);

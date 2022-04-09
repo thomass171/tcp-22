@@ -76,7 +76,7 @@ public class GridTeleporter {
 
         Quaternion rotation;
         Vector2 d;
-        char dir;
+        String dir;
 
         //logger.debug("center=" + center + ",xoffset=" + xoffset + ",yoffset=" + yoffset);
         if (Math.abs(xoffset) < s4) {
@@ -87,12 +87,12 @@ public class GridTeleporter {
                     //logger.debug("upper area");
                     rotation = Quaternion.buildRotationY(new Degree(0));
                     d = new Vector2(center.getX(), center.getY() - s4 - s8);
-                    dir = 'N';
+                    dir = "N";
                 } else {
                     //logger.debug("lower area");
                     rotation = Quaternion.buildRotationY(new Degree(180));
                     d = new Vector2(center.getX(), center.getY() + s4 + s8);
-                    dir = 'S';
+                    dir = "S";
                 }
                 transformMarker(d, directionMarker, localMarker, rotation);
                 return new GridTeleportDestination(new LocalTransform(new Vector3(d.getX(), 0, d.getY()), rotation), dir);
@@ -106,12 +106,12 @@ public class GridTeleporter {
                     //logger.debug("? area");
                     rotation = Quaternion.buildRotationY(new Degree(90));
                     d = new Vector2(center.getX() - s4 - s8, center.getY());
-                    dir = 'W';
+                    dir = "W";
                 } else {
                     //logger.debug("? area");
                     rotation = Quaternion.buildRotationY(new Degree(-90));
                     d = new Vector2(center.getX() + s4 + s8, center.getY());
-                    dir = 'E';
+                    dir = "E";
                 }
                 transformMarker(d, directionMarker, localMarker, rotation);
                 return new GridTeleportDestination(new LocalTransform(new Vector3(d.getX(), 0, d.getY()), rotation), dir);

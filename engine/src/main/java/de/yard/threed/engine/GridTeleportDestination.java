@@ -5,10 +5,10 @@ import de.yard.threed.core.LocalTransform;
 public class GridTeleportDestination {
 
     private LocalTransform transform;
-    // null if there is no change in direction
-    private Character direction;
+    // null if there is no change in direction. String instead of Character for easier CS operating.
+    private String direction;
 
-    public GridTeleportDestination(LocalTransform transform, char direction) {
+    public GridTeleportDestination(LocalTransform transform, String direction) {
         this.transform = transform;
         this.direction = direction;
     }
@@ -21,7 +21,11 @@ public class GridTeleportDestination {
         return transform;
     }
 
-    public Character getDirection() {
+    /**
+     * String instead of Character for easier CS operating
+     * @return
+     */
+    public String getDirection() {
         return direction;
     }
 }
