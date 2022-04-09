@@ -220,8 +220,9 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             // right controller triggered
             for (EcsEntity box : MazeUtils.getBoxes()) {
                 // Kick only applies to a box in direction of orientation. So check that intersected box is really one in direction
-                if (box.getId() == state.findNextBox(mc.getLocation(), mc.getGridOrientation(), Grid.getInstance().getMazeLayout()).getId() &&
-                        ray.intersects(box.getSceneNode(), true)) {
+                // And be sure sure the box is really intersected
+                GridMover nextBox = state.findNextBox(mc.getLocation(), mc.getGridOrientation(), Grid.getInstance().getMazeLayout());
+                if (nextBox != null && box.getId() == nextBox.getId() && ray.intersects(box.getSceneNode(), true)) {
                     return RequestRegistry.buildKick(userEntityId);
                 }
             }

@@ -77,12 +77,12 @@ public class MazeSceneTest {
         TestUtil.assertPoint(new Point(7, 3), MazeUtils.getMoverposition(user), "location after teleport");
         assertEquals(GridOrientation.fromDirection("W").toString(), MazeUtils.getPlayerorientation(user).toString(), "orientation after teleport (should be left/WEST)");
 
-        // kick the (6,3) box now via trigger ray
+        // kick the (6,3) box to (5,3) now via trigger ray
         EcsEntity boxToKick = MazeUtils.findBoxByField(new Point(6, 3));
         ray = TestUtils.mockHittingRayForKick(boxToKick);
         inputToRequestSystem.mockInput(ray, true, false);
         sceneRunner.runLimitedFrames(3);
-        TestUtil.assertPoint(new Point(5, 3), MazeUtils.getMoverposition(boxToKick), "box location after teleport");
+        TestUtil.assertPoint(new Point(5, 3), MazeUtils.getMoverposition(boxToKick), "box location after kick");
         // player should not move
         TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after kick (unchanged)");
 
@@ -93,7 +93,7 @@ public class MazeSceneTest {
         // player should not move
         TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after kick (unchanged)");
 
-        // kick again with trigger ray to box at (6,2). Shouldn't move neither box.
+        // kick again, but with trigger ray to box at (6,2). Shouldn't move neither box.
         EcsEntity boxToHit = MazeUtils.findBoxByField(new Point(6, 2));
         ray = TestUtils.mockHittingRayForKick(boxToHit);
         inputToRequestSystem.mockInput(ray, true, false);
@@ -103,6 +103,42 @@ public class MazeSceneTest {
         // player should not move
         TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after kick (unchanged)");
 
+        // kick the (5,3) box again (to (4,3)) via trigger ray
+        boxToKick = MazeUtils.findBoxByField(new Point(5, 3));
+        ray = TestUtils.mockHittingRayForKick(boxToKick);
+        inputToRequestSystem.mockInput(ray, true, false);
+        sceneRunner.runLimitedFrames(3);
+        TestUtil.assertPoint(new Point(4, 3), MazeUtils.getMoverposition(boxToKick), "box location after kick");
+        // player should not move
+        TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after kick (unchanged)");
+        // and to (3,3)
+        boxToKick = MazeUtils.findBoxByField(new Point(4, 3));
+        ray = TestUtils.mockHittingRayForKick(boxToKick);
+        inputToRequestSystem.mockInput(ray, true, false);
+        sceneRunner.runLimitedFrames(3);
+        TestUtil.assertPoint(new Point(3, 3), MazeUtils.getMoverposition(boxToKick), "box location after kick");
+        // player should not move
+        TestUtil.assertPoint(new Point(7, 3), mc.getLocation(), "player location after kick (unchanged)");
+
+        // teleport to reachable field (4,3)
+        ray = TestUtils.mockHittingRayForTeleport(new Point(4, 3), 'W');
+        inputToRequestSystem.mockInput(ray, true, true);
+        sceneRunner.runLimitedFrames(3);
+        // player should not move
+        TestUtil.assertPoint(new Point(4, 3), mc.getLocation(), "player location after teleport");
+
+        // and on field (4,4)
+        ray = TestUtils.mockHittingRayForTeleport(new Point(4, 4), 'S');
+        inputToRequestSystem.mockInput(ray, true, true);
+        sceneRunner.runLimitedFrames(3);
+        // player should not move
+        TestUtil.assertPoint(new Point(4, 4), mc.getLocation(), "player location after teleport");
+        // and (3,4): TODO do immediatel from (4,3)
+        ray = TestUtils.mockHittingRayForTeleport(new Point(3, 4), 'S');
+        inputToRequestSystem.mockInput(ray, true, true);
+        sceneRunner.runLimitedFrames(3);
+        // player should not move
+        TestUtil.assertPoint(new Point(3, 4), mc.getLocation(), "player location after teleport");
     }
 
     /**
