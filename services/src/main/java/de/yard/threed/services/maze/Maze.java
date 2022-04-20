@@ -21,6 +21,9 @@ public class Maze {
     @SequenceGenerator(name="maze_id_generator", sequenceName = "maze_seq", allocationSize = 1)
     private Long id;
 
+    @Column(name="name", nullable = false)
+    private String name;
+
     @Column(name="grid", nullable = false)
     private String grid;
 

@@ -1,30 +1,30 @@
-.board {
-    font-size: 0px;
-    white-space: nowrap;
-}
+/**
+ * CSS mainly for maze grid visualization.
+ */
 
 .cell {
-    font-size: 18px;
-    display: inline-block;
-    text-align: center;
-    width: 30px;
-    height: 30px;
+    /*font-size: 18px;
+        one of these causes heicht 24 instead of 8
+        display: inline-block;
+        text-align: center;*/
     border: 1px solid #999;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
-
-    position: relative;
 }
 
-.cell.known {
-    background: #ccc;
-    border-top-color: #ccc;
-    border-left-color: #ccc;
-    font-weight: bold;
+.cellsize8x8 {
+    width: 8px;
+    height: 8px;
 }
 
-.cell.empty {
+.cellsize30x30 {
+    text-align: center;
+    width: 30px;
+    height: 30px;
+}
+
+.cellempty {
     background: #e0e0e0;
     border-top-color: #fff;
     border-left-color: #fff;
@@ -33,20 +33,28 @@
 }
 
 /* color picker https://www.w3schools.com/colors/colors_picker.asp */
-.cell.wall {
+.cellwall {
     background: black;
 }
 
-.cell.destination {
+.celldestination {
     background: yellow;
 }
 
-.cell.start {
+.cellstart {
     background: #ff9900;
 }
 
-.cell.box {
+.cellbox {
     background: #993300;
+}
+
+.cellmonster {
+    background: #773300;
+}
+
+.celldiamond {
+    background: #99FFFF;
 }
 
 .cell.clickable {
@@ -57,16 +65,10 @@
     background: #eee;
 }
 
-.buttons {
-    margin-top: 1em;
+.mazetable {
+    border-collapse: collapse;
 }
 
-h2 {
-    margin-top: 1em;
-}
-
-#hint.hidden {
-    opacity: 0;
-    transition-property: opacity;
-    transition-duration: 1s;
+.mazetabletd {
+    padding: 0;
 }

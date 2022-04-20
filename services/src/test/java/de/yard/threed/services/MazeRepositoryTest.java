@@ -39,6 +39,7 @@ public class MazeRepositoryTest {
     @Test
     public void test1() {
         Maze maze1 = new Maze();
+        maze1.setName("name");
         maze1.setGrid("aa");
         maze1.setDescription("bb");
         maze1.setCreatedAt(ZonedDateTime.now());

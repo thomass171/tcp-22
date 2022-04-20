@@ -126,6 +126,7 @@ class GridDraft {
                             boxes.add(p);
                             fields.add(p);
                             break;
+                        case 'T':
                         case '.':
                             destinations.add(p);
                             fields.add(p);
@@ -139,6 +140,7 @@ class GridDraft {
                             addStartPosition(playerposition, p, false);
                             fields.add(p);
                             break;
+                        case 'B':
                         case '$':
                             boxes.add(p);
                             fields.add(p);
