@@ -53,7 +53,7 @@ public class Direction {
         }
     }
 
-    /*12.4.21: directions cannot be added/subtracted wird aber gemacht :-( TODO */
+    /*12.4.21: directions cannot be added/subtracted wird aber gemacht :-( TODO better move?*/
     @Deprecated
     public static Direction subtract(Point p1, Point p2) {
         return new Direction(p1.getX() - p2.getX(), p1.getY() - p2.getY());
@@ -62,6 +62,10 @@ public class Direction {
     @Deprecated
     public static Point add(Point p, Direction dir) {
         return new Point(p.getX() + dir.getPoint().getX(), p.getY() + dir.getPoint().getY());
+    }
+
+    public Point move(Point p) {
+        return new Point(p.getX() + point.getX(), p.getY() + point.getY());
     }
 
     public Point multiply(int steps) {

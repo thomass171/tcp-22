@@ -12,6 +12,7 @@ public class DeterministicIntProvider implements IntProvider {
     public DeterministicIntProvider(int[] values){
         this.values = values;
     }
+
     @Override
     public int nextInt() {
         return values[pos++];

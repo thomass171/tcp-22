@@ -22,7 +22,7 @@ public class Setup {
 
             // emulateVR for testing VR panel outside VR via mouse move/click (mouseclick is right trigger, shift pressed for left trigger)
             // After fix of webxr floor handling yoffsetVR can have a 'real' height (above avatar).
-            boolean emulateVR = true;
+            boolean emulateVR = false;
             if (emulateVR) {
                 properties.put("argv.emulateVR", "true");
                 // 1.3 is only good for maze, VrScene needs less (eg 0.3), or better 0 like BasicTravelScene. App does the rest.

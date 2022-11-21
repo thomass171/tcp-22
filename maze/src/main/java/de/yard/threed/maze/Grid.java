@@ -6,16 +6,17 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.StringReader;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Static data of a maze grid. Moving objects only have a start position here.
  * <p/>
- *
+ * <p>
  * - A pillar is always located in the mid on the boundary of two grid fields.
  * - There is no pillar at corners (where walls intersect) or on 'T's.
- *
+ * <p>
  * top is in Y-direction, right in X-direction
  * <p>
  * 26.4.21: Vielleicht mache ich den mal static? Aber nicht schoen wegen unabhaengiger Tests. TODO der static muss in ?? MazeScene? Oder als Provider ins System?
@@ -28,6 +29,7 @@ public class Grid {
     MazeLayout layout;
     List<Point> boxes;
     List<Point> diamonds;
+    // current grid in use? TODO: should have a better place
     static Grid instance;
     Map<String, String> tags;
 
@@ -36,12 +38,14 @@ public class Grid {
     static final int STRAIGHTWALLMODE_LOW_PART = 2;
     static final int STRAIGHTWALLMODE_HIGH_PART = 3;
 
-    public Grid(MazeLayout layout, List<Point> boxes, List<Point> diamonds, Map<String, String> tags) {
+    public Grid(MazeLayout layout, List<Point> boxes, List<Point> diamonds, Map<String, String> tags) throws InvalidMazeException {
         this.layout = layout;
         this.boxes = boxes;
         this.diamonds = diamonds;
         this.tags = tags;
-
+        if (!GridValidator.hasClosedWallBoundary(this)) {
+            throw new InvalidMazeException("no closed wall boundary");
+        }
     }
 
     public static List<Grid> loadByReader(StringReader ins) throws InvalidMazeException {
@@ -173,13 +177,16 @@ public class Grid {
         return layout.walls.contains(p);
     }
 
+    /**
+     * Is it an inner field, a field that could be visited. No walls.
+     */
     public boolean isField(Point p) {
-        return layout.fields.contains(p);
+        return layout.getFields().contains(p);
     }
 
     /**
      * Does the wall continue at top?
-     *
+     * <p>
      * 31.5.21: Also when it is a wall and beyond, but not to the left or right?
      * 1.6.21: No, then it is a center
      */
@@ -199,7 +206,7 @@ public class Grid {
 
     /**
      * Does the wall continue to the right?
-     *
+     * <p>
      * 31.5.21: Also when it is the end of a wall, ie wall to the left but not above and beyond?
      * 3.6.21: No, then it is a center
      */
@@ -251,4 +258,35 @@ public class Grid {
     public List<Point> getDiamonds() {
         return diamonds;
     }
+
+    /**
+     * Unused fields are inner fields without any purpose.
+     * start/destination are also used fields.
+     *
+     * @return
+     */
+    public List<Point> getUnusedFields() {
+        List<Point> unusedFields = new ArrayList<Point>();
+        unusedFields.addAll(layout.getFields());
+        unusedFields.removeAll(boxes);
+        unusedFields.removeAll(diamonds);
+        for (List<StartPosition> starts : layout.getStartPositions()) {
+            for (StartPosition start : starts) {
+                unusedFields.remove(start.p);
+            }
+        }
+        unusedFields.removeAll(layout.destinations);
+        return unusedFields;
+    }
+
+    public List<Point> getWallNeighbors(Point point) {
+        List<Point> wallNeighbors = new ArrayList<Point>();
+        for (Point p : layout.walls) {
+            if (Point.getDistance(p, point) == 1) {
+                wallNeighbors.add(p);
+            }
+        }
+        return wallNeighbors;
+    }
+
 }

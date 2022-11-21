@@ -4,6 +4,7 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,7 +25,8 @@ public class MazeLayout {
     private List<List<StartPosition>> initialPosition;
     //private static MazeLayout instance;
     int maxwidth, height;
-    public List<Point> fields;
+    // the inner fields that could be visited. No walls.
+    private List<Point> fields;
 
     public MazeLayout(List<Point> walls, List<Point> destinations, List<List<StartPosition>> initialPosition, int maxwidth, int height, List<Point> fields) {
         this.walls = walls;
@@ -108,5 +110,20 @@ public class MazeLayout {
 
     public List<StartPosition> getStartPositionsOfTeam(int teamId) {
         return initialPosition.get(teamId);
+    }
+
+    public List<Point> getFields() {
+        return fields;
+    }
+
+    public List<Point> getWalls() {
+        return walls;
+    }
+
+    public MazeLayout addWalls(List<Point> additionalWall){
+        List<Point> newWalls = new ArrayList<>();
+        newWalls.addAll(walls);
+        newWalls.addAll(additionalWall);
+        return new MazeLayout(newWalls, this.destinations, this.initialPosition, this.maxwidth, this.height, this.fields);
     }
 }
