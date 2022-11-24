@@ -2,10 +2,13 @@ package de.yard.threed.javacommon;
 
 import java.util.HashMap;
 
+/**
+ * Setup for Java platforms like JME, but not for Unity(?) and Browser.
+ *
+ * Also for other Java platforms like OpenGL.
+ */
 public class Setup {
-    /**
-     * Also for other Java platforms like OpenGL.
-     */
+
     public static HashMap<String, String> setUp(String[] args) {
         HashMap<String, String> properties = new HashMap<String, String>();
         for (String arg : args) {

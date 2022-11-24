@@ -111,7 +111,16 @@ sh bin/launchScene.sh de.yard.threed.engine.apps.reference.ReferenceScene
 ```
 ![](docs/JMonkeyEnginePreview.png)
 
-# Build your own scene
+# Development
+The most convenient way is to develop for a Java platform like JME initially and later test it on other platforms
+like ThreeJs and Unity. Thats because the other platforms need converting which reduces
+roundtrip time.
+
+In your IDE you might create a launch configuration like the following.
+
+![](docs/IDErunConfiguration.png)
+
+## Build your own scene
 The best starting point is to use class [ReferenceScene](engine/src/main/java/de/yard/threed/engine/apps/reference/ReferenceScene.java) and modify it for your needs.
 
 # Technical Details
