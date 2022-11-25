@@ -76,12 +76,11 @@ public class BulletSystem extends DefaultEcsSystem {
                 //InventoryComponent ic = InventoryComponent.getInventoryComponent(player);
                 BulletComponent bc;
                 if ((bc = pickBullet(bullets, mv.getLocation())) != null) {
-
-                    //SceneNode ball = buildSimpleBall(0.3, Color.YELLOW, mv.getLocation());
-                    //EcsEntity e = new EcsEntity(ball);
-                    //BulletComponent bulletComponent = new BulletComponent(mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), playername);
-                    bc.launchBullet(mv.getGridOrientation().getDirectionForMovement(GridMovement.Forward), player.getName());
-                    //e.addComponent(bulletComponent);
+                    // player has a bullet and is allowed to fire. So launch the bullet. The direction of the bullet must not be derived from the
+                    // orientation, because in VR the target direction can differ from orientation. In non VR its always the same. Only the trigger
+                    // knows the direction of targeting.
+                    Direction bulletDirection = (Direction) request.getPayloadByIndex(0);
+                    bc.launchBullet(bulletDirection, player.getName());
                 }
             }
             //das event kann ich mir sparen. Ic muss ja es ins inventory sehen.
@@ -91,8 +90,9 @@ public class BulletSystem extends DefaultEcsSystem {
         return false;
     }
 
-    public static Request buildFireRequest(int userEntityId, GridOrientation orientation) {
-        return new Request(TRIGGER_REQUEST_FIRE, new Payload(orientation.getDirectionCode()), userEntityId);
+
+    public static Request buildFireRequest(int userEntityId, Direction targetDirection) {
+        return new Request(TRIGGER_REQUEST_FIRE, new Payload(targetDirection), userEntityId);
     }
 
     /**

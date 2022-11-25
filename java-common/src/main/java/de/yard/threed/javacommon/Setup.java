@@ -3,7 +3,7 @@ package de.yard.threed.javacommon;
 import java.util.HashMap;
 
 /**
- * Setup for Java platforms like JME, but not for Unity(?) and Browser.
+ * Setup for Java platforms like JME, but not for Unity and Browser, which have their own setup.
  *
  * Also for other Java platforms like OpenGL.
  */
@@ -45,8 +45,8 @@ public class Setup {
             //properties.put("argv.enableFPC", "true");
             //18.11.19: NearView geht in VR eh nicht, darum damit üblicherweise auch sonst nicht arbeiten.
             //properties.put("argv.enableNearView", "true");
-            properties.put("argv.initialMaze", "skbn/SokobanWikipedia.txt");
-            //properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
+            //properties.put("argv.initialMaze", "skbn/SokobanWikipedia.txt");
+            properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
             //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");
             //properties.put("argv.initialMaze","maze/Area15x10.txt");
             //properties.put("argv.initialMaze","skbn/DavidJoffe.txt:1");

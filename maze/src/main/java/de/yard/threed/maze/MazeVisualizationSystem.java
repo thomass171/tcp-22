@@ -140,7 +140,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             }
         }
         if (!distinctLeftRightVrControllerEnabled || !left) {
-            // right pointer mark hit objects.
+            // right pointer marks/highlights hit objects.
 
             for (EcsEntity box : MazeUtils.getPlayerOrBoxes(true)) {
                 double hitBoxScale = 1.2;
@@ -250,21 +250,22 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                     // dont't hit own avatar
                     if (player.getId() != mainplayer.getId() && loc.onSameAxis(myLocation) &&
                             ray.intersects(player.getSceneNode(), true)) {
-                        GridOrientation fireOrientation;
+                        // In VR the target direction might differ from current player orientation.
+                        Direction targetDirection;
                         if (loc.getX() == myLocation.getX()) {
                             if (loc.getY() < myLocation.getY()) {
-                                fireOrientation = GridOrientation.fromDirection("S");
+                                targetDirection = Direction.S;
                             } else {
-                                fireOrientation = GridOrientation.fromDirection("N");
+                                targetDirection = Direction.N;
                             }
                         } else {
                             if (loc.getX() < myLocation.getX()) {
-                                fireOrientation = GridOrientation.fromDirection("W");
+                                targetDirection = Direction.W;
                             } else {
-                                fireOrientation = GridOrientation.fromDirection("E");
+                                targetDirection = Direction.E;
                             }
                         }
-                        return BulletSystem.buildFireRequest(userEntityId, fireOrientation);
+                        return BulletSystem.buildFireRequest(userEntityId, targetDirection);
                     }
                 }
             }

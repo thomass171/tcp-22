@@ -65,7 +65,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     public static int MOUSE_MOVE_MODE_VR_LEFT = 2;
     private int mouseMoveMode = MOUSE_MOVE_MODE_SEGMENT;
     private List<MockedInput> mockedInputs = new ArrayList<MockedInput>();
-    // null unless not logged in
+    // Entity id of the current player (the one controlling the game). null unless not logged in
     Integer userEntityId = null;
 
     public InputToRequestSystem() {
