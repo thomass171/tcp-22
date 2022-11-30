@@ -5,14 +5,28 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
 /**
- * Das sind die Keycodes aus GWT. Die entsprechen den Javascript Keycodes.
+ * Keycodes from GWT which corresponds to Javascript Keycodes.
  * JME hat andere. JME hat die Tasten der Tastatuer quasi zeilenweise durchnummeriert (so wie Scancodes?).
- * <p/>
- * 17.07.15:  Vielleicht sind Scnacodes doch besser, wegen deutscher Tadstatuir?
- * Created by thomass on 12.06.15.
  * <p/>
  * 19.1.16: Beginn Umstellung auf Unity Bezeichnungen. Unity hat auch eher sowas wie Scancodes.
  * 26.2.16: Scancodes sind wohl besser. Unterscheiden z.B. left/right shift
+ * 30.11.22: JS Keycodes are deprecated meanwhile. Indeed these are somehow arbitrary, not really scancodes
+ * and not really charcodes.  It highly depends on the
+ * use case what is the better choice. Typically for gaming is using scan codes (probably thats why Unity
+ * uses scancodes), where in an update loop is checked whether some key is pressed. This allows
+ * keyboard independent WASD controls and left/right shift distingushing.
+ * For writing a document however, charcodes are the only option to know, which character is on the key
+ * the user pressed. charcode probably need event processing, because sometimes these result from pressing
+ * multiple keys. Probing these in an update loop might be misleading.
+ * <p/>
+ * For our purposes we stay with the JS codes for now. Our use cases are
+ * - press 'm' for opening a mneu
+ * - press 'q' for quit (independent from keyboard layout)
+ * - use cursor keys for moving
+ * - enter a username
+ * Maybe scancodes and charcodes can be combined. scancodes for probing and charcodes as event.
+ *
+ * Created by thomass on 12.06.15.
  */
 
 public class KeyCode {

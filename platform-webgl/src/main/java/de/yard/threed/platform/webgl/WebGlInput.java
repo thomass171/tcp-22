@@ -26,7 +26,7 @@ public class WebGlInput {
     static List<Integer> stillpressed = new ArrayList();
 
     public static JsArrayInteger getPressedKeys() {
-        return getKeyDown();
+        return getLastKeysDown();
     }
 
     public static JsArrayInteger getUpKeys() {
@@ -65,16 +65,19 @@ public class WebGlInput {
         clear();
     }
 
+    /**
+     * Adds VR controller events to the array for keyboard input.
+     */
+    public static void collectVrControllerEvents(WebGlRenderer renderer) {
+        pollVrControllerEvents(renderer.renderer);
+    }
+
     private static native void clear()  /*-{
         $wnd.lastkeydown = new Array();
         $wnd.lastkeyup = new Array();
     }-*/;
 
-    private static native JsArrayInteger getKeyDown()  /*-{
-        //if ($wnd.lastkeyevent == null) {
-        //    return -1;
-        //}
-        //return $wnd.lastkeyevent.keyCode;
+    private static native JsArrayInteger getLastKeysDown()  /*-{
         return $wnd.lastkeydown;
     }-*/;
 
@@ -88,5 +91,9 @@ public class WebGlInput {
 
     private static native void clearLoadedmodel()  /*-{
         $wnd.loadedmodel = new Array();        
+    }-*/;
+
+    private static native void pollVrControllerEvents(JavaScriptObject renderer)  /*-{
+        $wnd.pollVrControllerEvents(renderer);
     }-*/;
 }

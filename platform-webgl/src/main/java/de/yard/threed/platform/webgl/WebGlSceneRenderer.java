@@ -285,7 +285,9 @@ public class WebGlSceneRenderer implements AnimationController {
             tpf = 0.001;
         }
 
-        // Die verwendeten KEycodes entsprechen denen von GWT/JS
+        // Used keycodes are those of GWT/JS
+        // VR controller events are added to the array for keyboard input.
+        WebGlInput.collectVrControllerEvents(renderer);
         JsArrayInteger jspressedkeys = WebGlInput.getPressedKeys();
         //logger.debug(""+jspressedkeys+" keys pressed");
         for (int i = 0; i < jspressedkeys.length(); i++) {

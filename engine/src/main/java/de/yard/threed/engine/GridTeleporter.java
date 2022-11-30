@@ -10,7 +10,9 @@ import java.util.List;
 /**
  * Display marker in y0 plane.
  * <p>
- * Not only/necassarily for VR.
+ * Not only/necessarily for VR.
+ * Might cause high CPU load in VR and might take up to 500ms for 189 tile candidates. Since VR controller
+ * stick can be used for teleporting as of 11/2022, the GrifTeleporter is not enabled by default any more.
  * <p>
  * 15.5.21
  */

@@ -24,6 +24,7 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.gui.Icon;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeCollision;
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 
@@ -91,7 +92,8 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                     fireTargetMarker.getTransform().setPosition(new Vector3(0, 1.2, 0.7));
                     Scene.getCurrent().addToWorld(fireTargetMarker);
                 }
-                gridTeleporterEnabled = true;
+                // Once gridTeleporterEnabled was set here in general. But since it is CPU consuming leave it up to the user.
+                //gridTeleporterEnabled = true;
             }
 
             if (gridTeleporterEnabled) {
@@ -125,16 +127,23 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             //no ray no pointer
             return;
         }
+        // Optionally do it not every frame to save CPU cycles. Tracking a ray might be time consuming.
+        // Unclear for now what good setting is.
+        if (AbstractSceneRunner.getInstance().getFrameCount() % 5 != 0) {
+            return;
+        }
+
         Point myLocation = MoverComponent.getMoverComponent(mainplayer).getLocation();
         if (!distinctLeftRightVrControllerEnabled || left) {
             GridState state = MazeUtils.buildGridStateFromEcs();
             MoverComponent mc = MoverComponent.getMoverComponent(mainplayer);
 
-            // show possible teleport destinations
-            List<SceneNode> tileCandidates = getValidTeleportDestinationTiles(mc, state, "Pointer");
+            if (gridTeleporter != null) {
+                // show possible teleport destinations. This is a very time consuming process, in a browser
+                // up to 500ms for 189 candidates.
+                List<SceneNode> tileCandidates = getValidTeleportDestinationTiles(mc, state, "Pointer");
 
-            for (SceneNode tile : tileCandidates) {
-                if (gridTeleporter != null) {
+                for (SceneNode tile : tileCandidates) {
                     gridTeleporter.updateDestinationMarker(ray, tile, MazeDimensions.GRIDSEGMENTSIZE);
                 }
             }
@@ -189,6 +198,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
 
     /**
      * Derive Request from VR trigger event. For VR only!
+     * Used when the trigger on the controller really was triggered.
      * Left pointer triggers teleport.
      * Right triggers either
      * 1) box push or
