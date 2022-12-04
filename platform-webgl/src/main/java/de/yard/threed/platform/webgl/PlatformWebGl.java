@@ -70,7 +70,12 @@ public class PlatformWebGl extends Platform {
         }
         PlatformInternals platformInternals = new PlatformInternals();
         // resolver order is important. most specific first.
-        instance.bundleResolver.addAll(WebGlBundleResolver.buildFromPath(((PlatformWebGl) instance).properties.get("argv.ADDITIONALBUNDLE")));
+        String additionalBundle = ((PlatformWebGl) instance).properties.get("argv.ADDITIONALBUNDLE");
+        if (additionalBundle.contains(" ")) {
+            // might be the result of a '+' which is valid in base64
+            additionalBundle = additionalBundle.replace(" ","+");
+        }
+        instance.bundleResolver.addAll(WebGlBundleResolver.buildFromPath(additionalBundle));
         instance.bundleResolver.add(new WebGlBundleResolver());
         return platformInternals;//(Platform) Platform.instance;
     }

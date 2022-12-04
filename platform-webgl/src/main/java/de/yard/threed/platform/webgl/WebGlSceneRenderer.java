@@ -362,6 +362,11 @@ public class WebGlSceneRenderer implements AnimationController {
         logger.debug("window resized to " + width + "x" + height);
         // 10.10.18: ignore resize with preferred size? Currently: no.
         renderer.setSize(width, height);
+        if (AbstractSceneRunner.getInstance() == null) {
+            // might happen during startup.
+            logger.warn("ResizeEvent ignored due to missing runner");
+            return;
+        }
         AbstractSceneRunner.getInstance().dimension = new Dimension(width, height);
         WebGlCamera camera = (WebGlCamera) scene.getMainCamera().getNativeCamera();
         camera.setAspect(((double) width) / (double) height);

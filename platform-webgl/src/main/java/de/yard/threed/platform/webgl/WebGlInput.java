@@ -11,8 +11,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Das ist keine ThreeJs Angelegenheit, sondern rein JS.
- * Arbeitet mit Tools.js
+ * Not releated to ThreeJs, pure JS.
+ * Uses Tools.js
  * <p/>
  * Created by thomass on 25.04.15.
  */

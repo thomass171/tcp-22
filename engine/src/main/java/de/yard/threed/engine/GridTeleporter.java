@@ -12,7 +12,7 @@ import java.util.List;
  * <p>
  * Not only/necessarily for VR.
  * Might cause high CPU load in VR and might take up to 500ms for 189 tile candidates. Since VR controller
- * stick can be used for teleporting as of 11/2022, the GrifTeleporter is not enabled by default any more.
+ * stick can be used for teleporting as of 11/2022, the GridTeleporter is not enabled by default any more.
  * <p>
  * 15.5.21
  */

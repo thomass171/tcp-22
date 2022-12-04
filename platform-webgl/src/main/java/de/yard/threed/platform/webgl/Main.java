@@ -49,18 +49,21 @@ public class Main implements EntryPoint {
         }
         String href = com.google.gwt.user.client.Window.Location.getHref();
 
+        // Logger is not available before plaform init. So log it native to realize
+        // potential init issues.
+        WebGlLog.logNative("Properties:");
+        for (String prop : properties.keySet()) {
+            WebGlLog.logNative(prop + "=" + properties.get(prop));
+        }
         if (PlatformWebGl.isDevmode) {
             setDevmode();
         }
-        // erst nach setzen von devmode den init machen. Und erst jetzt gibt es auch den log4j Logger.  
+        // devmode should be set before init.
         PlatformInternals platformInternals = PlatformWebGl.init(properties);
         Log logger = Platform.getInstance().getLog(Main.class);
 
         logger.info("Loading GWT Client from " + href + ", devmode=" + Platform.getInstance().isDevmode());
-        logger.debug("Parameter:");
-        for (String prop : properties.keySet()) {
-            logger.debug(prop + "=" + properties.get(prop));
-        }
+
         String scene = properties.get("argv.scene");//com.google.gwt.user.client.Window.Location.getParameter("scene");
         logger.debug("scene=" + scene);
         logger.debug("getHostPageBaseURL=" + GWT.getHostPageBaseURL());

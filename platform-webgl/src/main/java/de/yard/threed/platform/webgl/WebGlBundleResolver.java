@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WebGlBundleResolver extends BundleResolver {
-    Log logger = Platform.getInstance().getLog(WebGlBundleResolver.class);
+    static Log logger = Platform.getInstance().getLog(WebGlBundleResolver.class);
 
     String[] bundlelist;
     String url;
@@ -65,7 +65,16 @@ public class WebGlBundleResolver extends BundleResolver {
         if (bundlepathFromEnv != null) {
             String[] parts = StringUtils.split(bundlepathFromEnv, ":");
             for (int i = 0; i < parts.length; i++) {
-                l.add(new WebGlBundleResolver(WebGlCommon.atob(parts[i])));
+                // base64 natively uses '+','=' and '/' and might replace these by URL conform letters like '-'. Very confusing
+                // and finally not very helpful. So also accept pure (URL encoded) strings. But these conflict with ':' separator.
+                // So for now stay with base64.
+                String subPart = parts[i];
+                logger.debug("Found bundle sub path " + subPart);
+                if (false && StringUtils.contains(subPart,"@http")){
+                    l.add(new WebGlBundleResolver(subPart));
+                } else {
+                    l.add(new WebGlBundleResolver(WebGlCommon.atob(subPart)));
+                }
             }
         }
         return l;

@@ -81,6 +81,10 @@ vrControllerEventMap.set("right-stick-left", function () {lastkeydown.push(37)})
 vrControllerEventMap.set("right-stick-right", function () {lastkeydown.push(39)});
 vrControllerEventMap.set("right-stick-up", function () {lastkeydown.push(38)});
 vrControllerEventMap.set("right-stick-down", function () {lastkeydown.push(40)});
+vrControllerEventMap.set("left-stick-left", function () {lastkeydown.push(37)});
+vrControllerEventMap.set("left-stick-right", function () {lastkeydown.push(39)});
+vrControllerEventMap.set("left-stick-up", function () {lastkeydown.push(38)});
+vrControllerEventMap.set("left-stick-down", function () {lastkeydown.push(40)});
 
 function pollVrControllerEvents(renderer) {
   var handedness = "unknown";

@@ -111,6 +111,14 @@ sh bin/launchScene.sh de.yard.threed.engine.apps.reference.ReferenceScene
 ```
 ![](docs/JMonkeyEnginePreview.png)
 
+## Settings
+
+The following properties are evaluated from the environment or system properties.
+
+ADDITIONALBUNDLE
+
+This is a colon separated list of bundle locations, eg. filesystem paths or web URLs.
+
 # Development
 The most convenient way is to develop for a Java platform like JME initially and later test it on other platforms
 like ThreeJs and Unity. Thats because the other platforms need converting which reduces
@@ -123,9 +131,34 @@ In your IDE you might create a launch configuration like the following.
 ## Build your own scene
 The best starting point is to use class [ReferenceScene](engine/src/main/java/de/yard/threed/engine/apps/reference/ReferenceScene.java) and modify it for your needs.
 
+## GWT
+Platform platform-webgl uses GWT to compile Java code to JS. GWT Dev mode is started as usual by
+```
+cd platform-webgl
+mvn gwt:run
+```
+This starts a local Jetty and makes the main entry point "available at http://127.0.0.1:8888/webgl.html". 
+However, the page shown is empty, because parameter are missing. Open the
+dev console of the browser for additional information.
+
+For ReferenceScene use
+```
+ADDITIONALBUNDLE=engine,data@http://localhost:80/~thomas/tcp-22/bundles
+```
+which leads to URL
+```
+http://localhost:8888/webgl.html?scene=ReferenceScene&devmode=true&ADDITIONALBUNDLE=ZW5naW5lLGRhdGFAaHR0cDovL2xvY2FsaG9zdDo4MC9+dGhvbWFzL3RjcC0yMi9idW5kbGVz
+```
+
+For avoiding URL de/encoding issues, ADDITIONALBUNDLE parts which are URLs need to be base64 encoded.
+
+Don't forget to allow access in your web server by setting corresponding CORS header.
+
 # Technical Details
 
 ## Architecture
 
 ## Modules
+
+## Bundles
 

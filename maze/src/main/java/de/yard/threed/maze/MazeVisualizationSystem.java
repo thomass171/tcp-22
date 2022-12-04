@@ -112,7 +112,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
     /**
      * Check VR pointer destination. Intended for VR only.
      * <p>
-     * Left pointer shows teleport option marker.
+     * Left pointer shows teleport option marker (when gridTeleporter is enabled).
      * Right pointer shows fire targets, highlights hit objects
      */
     @Override

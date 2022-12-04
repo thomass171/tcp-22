@@ -50,6 +50,10 @@ public class WebGlLog implements Log {
         errorNative(buildMessage(msg));
     }
 
+    public static void logNative(String msg){
+        logConsoleNative(msg);
+    }
+
     private String buildMessage(String msg) {
         return label + ":" + msg;
     }
