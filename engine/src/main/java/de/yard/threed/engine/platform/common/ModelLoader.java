@@ -81,7 +81,7 @@ public class ModelLoader {
             model = loader.buildModel(loader.objects.get(0).kids.get(objindex),opttexturepath,true);
         } else {*/
 
-            if (lr.objects.size() == 0) {
+            if (lr.getObjectCount() == 0) {
                 logger.warn("empty model " + modelfile.getName());
                 return new BuildResult(new SceneNode().nativescenenode);
             }

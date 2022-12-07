@@ -159,7 +159,7 @@ public class LoaderGLTF extends AsciiLoader {
             for (int i = 0; i < nodecnt; i++) {
                 PortableModelDefinition n = nodelist.get(i);
                 if (n != null) {
-                    ppfile.objects.add(n);
+                    ppfile.addModel(n);
                 }
             }
         } catch (java.lang.Exception e) {

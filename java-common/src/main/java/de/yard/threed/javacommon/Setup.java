@@ -18,7 +18,7 @@ public class Setup {
             "      \"position\": \"0 0 0\",\n" +
             "      \"rotation\": \"0 0 0\",\n" +
             "      \"scale\": \"0.1 0.1 0.1\",\n" +
-            "      \"parent\": \"deferredCamera\"\n" +
+            "      \"parent\": \"deferred-camera\"\n" +
             "    }\n" +
             "  ]\n" +
             "}";

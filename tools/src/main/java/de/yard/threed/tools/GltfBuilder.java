@@ -88,8 +88,9 @@ public class GltfBuilder {
             processMaterial(mat);
         }
         // ob es eine AC world gibt oder nicht, spielt hier keine Rolle. Hier wird das ppfile konvertiert, egal was/wie drin ist.
-        for (PortableModelDefinition obj : ppfile.objects) {
-            processObject(obj);
+        //for (PortableModelDefinition obj : ppfile.objects) {
+        for (int i = 0; i < ppfile.getObjectCount(); i++) {
+            processObject(ppfile.getObject(i));
         }
 
         Gson gson = new Gson();
@@ -324,7 +325,7 @@ public class GltfBuilder {
             binarystream.writeFloat((float) v.getZ());
         }
         //2.5.19: Normale sind nicht mandatory
-        if (lnormals!=null) {
+        if (lnormals != null) {
             attributes.add("NORMAL", new JsonPrimitive(buildAccessor(cnt, 0)));
             for (int i = 0; i < cnt; i++) {
                 Vector3 v = lnormals.getElement(i);

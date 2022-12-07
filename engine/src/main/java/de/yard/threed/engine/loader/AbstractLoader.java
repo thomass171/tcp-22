@@ -19,6 +19,7 @@ public abstract class AbstractLoader {
     //public Platform pf = ((Platform)Platform.getInstance());
     private long starttime = Platform.getInstance().currentTimeMillis();
     private int loaddurationms;
+
     /**
      * InvalidAcDataException wird nicht abgefangen. Oder doch, wegen Zeilennummer.
      * 01.06.16: Doch alle
@@ -29,14 +30,14 @@ public abstract class AbstractLoader {
     protected void load() throws InvalidDataException {
         try {
             doload();
-            loaddurationms= (int) (Platform.getInstance().currentTimeMillis() - starttime);
+            loaddurationms = (int) (Platform.getInstance().currentTimeMillis() - starttime);
         } catch (Exception se) {
             //Sonderbares ExceptionHandling wegen C#
-            java.lang.Exception e = new java.lang.Exception (se);
+            java.lang.Exception e = new java.lang.Exception(se);
             throw new InvalidDataException("error in line " + getCurrentLine() + ": " + /*wegen C# e.getClass().getName() +*/ ":" + e.getMessage(), e);
         }
         // success info log isType in AsyncHelper
-       
+
     }
 
     protected abstract void doload() throws InvalidDataException;
@@ -52,11 +53,14 @@ public abstract class AbstractLoader {
         getLog().info("preprocessing");
         PortableModelList ppfile = new PortableModelList(loadedfile.texturebasepath);
         // source liegt hier nicht vor
-        ppfile.objects = preProcess(ppfile,loadedfile.objects);
+        List<PortableModelDefinition> objects = preProcess(ppfile, loadedfile.objects);
+        for (PortableModelDefinition obj : objects) {
+            ppfile.addModel(obj);
+        }
         ppfile.materials = loadedfile.materials;
         //29.12.18 ppfile.texturebasepath = loadedfile.texturebasepath;
         //27.12.17: Die Texturenames aus den Objects in die Materialien uebernehmen.
-        for (LoadedObject obj : loadedfile.objects){
+        for (LoadedObject obj : loadedfile.objects) {
             transferTextureNames(ppfile, obj);
         }
         ppfile.loaddurationms = loaddurationms;
@@ -67,43 +71,43 @@ public abstract class AbstractLoader {
      * Die Texturenames aus den (AC)Objects in die Materialien uebernehmen.
      * AC verwendet teilweise (z.B. 777 Overhead) Materialien mit verschiedenen Texturen. Dann muss das Material eben dupliziert werden.
      */
-    private void transferTextureNames(PortableModelList ppfile, LoadedObject obj){
-        if (obj.name != null && obj.name.equals("PANEL_B1")){
-            int z=8;
+    private void transferTextureNames(PortableModelList ppfile, LoadedObject obj) {
+        if (obj.name != null && obj.name.equals("PANEL_B1")) {
+            int z = 8;
         }
 
-        if (obj.texture!=null){
-            for (int index=0;index<obj.facelistmaterial.size();index++){
+        if (obj.texture != null) {
+            for (int index = 0; index < obj.facelistmaterial.size(); index++) {
                 String materialname = obj.facelistmaterial.get(index);
                 PortableMaterial mat = ppfile.findMaterial(materialname);
-                if (mat.texture == null){
+                if (mat.texture == null) {
                     mat.texture = obj.texture;
-                }else{
-                    if (!mat.texture.equals(obj.texture)){
+                } else {
+                    if (!mat.texture.equals(obj.texture)) {
                         //Duplicate material logging not required? 
-                        getLog().warn("ambicious texture name in material "+materialname+" in "+obj.name);
+                        getLog().warn("ambicious texture name in material " + materialname + " in " + obj.name);
                         //build unique name
-                        PortableMaterial dupmat = mat.duplicate(mat.name+ppfile.materials.size());
+                        PortableMaterial dupmat = mat.duplicate(mat.name + ppfile.materials.size());
                         ppfile.materials.add(dupmat);
                         dupmat.texture = obj.texture;
-                        obj.facelistmaterial.set(index,dupmat.name);
+                        obj.facelistmaterial.set(index, dupmat.name);
                     }
                 }
-               
+
             }
         }
-        for (LoadedObject o : obj.kids){
+        for (LoadedObject o : obj.kids) {
             transferTextureNames(ppfile, o);
         }
     }
-    
+
     private List<PortableModelDefinition> preProcess(PortableModelList ppfile, List<LoadedObject> objs) {
         List<PortableModelDefinition> ppobjs = new ArrayList<PortableModelDefinition>();
         for (int i = 0; i < objs.size(); i++) {
             LoadedObject obj = objs.get(i);
             PortableModelDefinition ppobj = new PortableModelDefinition();
             ppobj.name = obj.name;
-            ppobj.geolistmaterial=obj.facelistmaterial;
+            ppobj.geolistmaterial = obj.facelistmaterial;
             ppobj.translation = obj.location;
             ppobjs.add(ppobj);
             // Nicht mehrfach preprocessen. 11.12.17: Mit Aufsplittung nicht mehr pruefbar
@@ -137,7 +141,7 @@ public abstract class AbstractLoader {
             obj.vertices = null;
             obj.normals = null;
             //}
-            ppobj.kids = preProcess(ppfile,obj.kids);
+            ppobj.kids = preProcess(ppfile, obj.kids);
         }
         return ppobjs;
     }

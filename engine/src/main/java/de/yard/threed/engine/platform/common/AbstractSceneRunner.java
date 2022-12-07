@@ -486,6 +486,15 @@ public class AbstractSceneRunner {
         cameras.add(nativeCamera);
     }
 
+    public NativeCamera findCameraByName(String name) {
+        for (NativeCamera camera : cameras) {
+            if (name.equals(camera.getName())) {
+                return camera;
+            }
+        }
+        return null;
+    }
+
     /**
      * Das Bundle wird in jedem Fall asynchron, aber nicht multithreaded ueber die Platform geladen.
      * async analog zu Modeln

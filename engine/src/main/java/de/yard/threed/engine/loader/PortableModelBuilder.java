@@ -5,6 +5,7 @@ import de.yard.threed.core.ColorType;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.NativeGeometry;
 import de.yard.threed.core.platform.NativeMaterial;
 import de.yard.threed.core.platform.Platform;
@@ -13,8 +14,10 @@ import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.engine.GenericGeometry;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
+import de.yard.threed.engine.PerspectiveCamera;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.platform.EngineHelper;
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.SimpleGeometry;
 
 import java.util.ArrayList;
@@ -23,7 +26,6 @@ import java.util.List;
 
 /**
  * 06.12.22: A builder for universal model specification.
- *
  */
 public class PortableModelBuilder {
 
@@ -36,7 +38,7 @@ public class PortableModelBuilder {
     //Just an indicator for testing
     public boolean dummymaterialused;
 
-    public PortableModelBuilder( PortableModelList pml) {
+    public PortableModelBuilder(PortableModelList pml) {
         this.pml = pml;
     }
 
@@ -72,8 +74,16 @@ public class PortableModelBuilder {
         if (pml.getName() != null) {
             rootnode.setName(pml.getName());
         }
-        for (int i = 0; i < pml.objects.size(); i++) {
-            rootnode.attach(buildModel(bundle, pml.objects.get(i), alttexturepath));
+        for (int i = 0; i < pml.getObjectCount(); i++) {
+            String parent = pml.getParent(i);
+            SceneNode destinationNode = rootnode;
+            if (parent != null) {
+                logger.debug("looking for parent camera " + parent);
+                NativeCamera camera = AbstractSceneRunner.getInstance().findCameraByName(parent);
+                destinationNode = new PerspectiveCamera(camera).getCarrier();
+                logger.debug("found parent camera");
+            }
+            destinationNode.attach(buildModel(bundle, pml.getObject(i), alttexturepath));
         }
         return rootnode;
     }
@@ -240,7 +250,7 @@ public class PortableModelBuilder {
         if (dummyMaterial == null) {
             HashMap<ColorType, Color> color = new HashMap<ColorType, Color>();
             color.put(ColorType.MAIN, Color.WHITE);
-            dummyMaterial = ( Platform.getInstance()).buildMaterial(null, color, null, null, null);
+            dummyMaterial = (Platform.getInstance()).buildMaterial(null, color, null, null, null);
         }
         return dummyMaterial;
     }

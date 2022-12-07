@@ -1,27 +1,15 @@
 package de.yard.threed.engine.loader;
 
-import de.yard.threed.core.Color;
-import de.yard.threed.core.ColorType;
-import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.ResourcePath;
-import de.yard.threed.engine.GenericGeometry;
-import de.yard.threed.engine.Material;
-import de.yard.threed.engine.Mesh;
-import de.yard.threed.engine.SceneNode;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.platform.NativeGeometry;
-import de.yard.threed.core.platform.NativeMaterial;
 
 
-import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.*;
-import de.yard.threed.core.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -48,7 +36,7 @@ public class PortableModelList {
     int VERSION = 1;
     public List<PortableMaterial> materials = new ArrayList<PortableMaterial>();
     //30.12.18: Muesste es nicht eher "models" heissen? Objekte sind es ja noch nicht.
-    public List<PortableModelDefinition> objects = new ArrayList<PortableModelDefinition>();
+    private List<PortableModelDefinition> objects = new ArrayList<PortableModelDefinition>();
     //TODO besser double?? Noch wichtiger: Das ist BTG spezifisch und hat hier deswegen und wegen GLTF nichts zu suchen
     public /*SGVec3d*/ Vector3 gbs_center;
     // Die Texturen werden dort erwartet, also in dem ResourcePAth, wo auch das Model liegt.
@@ -64,6 +52,8 @@ public class PortableModelList {
     // Ein uebergeordneter Name, ohne funktionale Bedeutung, wird aber fuer rootnode verwendet Z.B. eine Herkunftsangabe (source).
     private String name = null;
     public int loaddurationms;
+    // optional parent per object
+    private List<String> parents = new ArrayList<String>();
 
     public PortableModelList(ResourcePath texturebasepath) {
         this.defaulttexturebasepath = texturebasepath;
@@ -301,6 +291,12 @@ public class PortableModelList {
 
     public void addModel(PortableModelDefinition model) {
         objects.add(model);
+        parents.add(null);
+    }
+
+    public void addModel(PortableModelDefinition model, String parent) {
+        objects.add(model);
+        parents.add(parent);
     }
 
     public void addMaterial(PortableMaterial material) {
@@ -313,5 +309,17 @@ public class PortableModelList {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getObjectCount() {
+        return objects.size();
+    }
+
+    public PortableModelDefinition getObject(int i) {
+        return objects.get(i);
+    }
+
+    public String getParent(int i) {
+        return parents.get(i);
     }
 }

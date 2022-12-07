@@ -74,9 +74,9 @@ public class LoaderTest {
         try {
             LoaderAC ac = new LoaderAC(new StringReader(LoaderAC.egkk_tower), false);
             PortableModelList ppfile = ac.preProcess();
-            TestUtil.assertEquals("", 1, ppfile.objects.size());
-            TestUtil.assertEquals("", 1, ppfile.objects.get(0).kids.size());
-            PortableModelDefinition tower = ppfile.objects.get(0).kids.get(0);
+            TestUtil.assertEquals("", 1, ppfile.getObjectCount());
+            TestUtil.assertEquals("", 1, ppfile.getObject(0).kids.size());
+            PortableModelDefinition tower = ppfile.getObject(0).kids.get(0);
             SimpleGeometry geo = tower.geolist.get(0);
             //29 durch ausprobieren
             TestUtil.assertEquals("vertices", 29, geo.getVertices().size());
@@ -101,9 +101,9 @@ public class LoaderTest {
 
         SceneLoader sceneLoader = new SceneLoader(TestHelper.loadFileFromClasspath("SimpleScene.json"), "");
         PortableModelList ppfile = sceneLoader.preProcess();
-        TestUtil.assertEquals("", 1, ppfile.objects.size());
-        TestUtil.assertEquals("", 0, ppfile.objects.get(0).kids.size());
-        PortableModelDefinition box = ppfile.objects.get(0);
+        TestUtil.assertEquals("", 1, ppfile.getObjectCount());
+        TestUtil.assertEquals("", 0, ppfile.getObject(0).kids.size());
+        PortableModelDefinition box = ppfile.getObject(0);
         SimpleGeometry geo = box.geolist.get(0);
         TestUtil.assertEquals("vertices", 3 * 8, geo.getVertices().size());
 

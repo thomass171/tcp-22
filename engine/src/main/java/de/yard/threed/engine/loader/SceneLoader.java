@@ -57,10 +57,9 @@ public class SceneLoader extends AsciiLoader {
         ppfile.setName(source);
         //4.1.17: hier mal keine Exception fangen, weil das schon der Modelloader macht. Andererseits passt es hier aber gut hin. Hmm
         try {
-            ppfile.objects = new ArrayList<PortableModelDefinition>();
             //int nodecnt = gltfo.get("nodes").isArray().size();
             for (int i = 0; i < objects.size(); i++) {
-                ppfile.objects.add(loadObject(objects.get(i).isObject(), ppfile.materials));
+                addObject(objects.get(i).isObject(), ppfile.materials, ppfile);
             }
 
         } catch (Exception e) {
@@ -90,7 +89,7 @@ public class SceneLoader extends AsciiLoader {
         return logger;
     }
 
-    private PortableModelDefinition loadObject(NativeJsonObject object, List<PortableMaterial> materials) throws InvalidDataException {
+    private void addObject(NativeJsonObject object, List<PortableMaterial> materials, PortableModelList ppfile) throws InvalidDataException {
         PortableModelDefinition pmd = new PortableModelDefinition();
 
         NativeJsonValue v = object.get("name");
@@ -111,11 +110,13 @@ public class SceneLoader extends AsciiLoader {
         if (v != null) {
             pmd.scale = ParsingHelper.getVector3(v.isString().stringValue());
         }
+
         v = object.get("parent");
         if (v != null) {
-           //TODO
+            ppfile.addModel(pmd, v.isString().stringValue());
+        } else {
+            ppfile.addModel(pmd);
         }
-        return pmd;
     }
 
     private void buildGeometry(NativeJsonString jgeometry, PortableModelDefinition pmd, String materialname) throws InvalidDataException {
