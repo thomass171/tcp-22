@@ -9,13 +9,14 @@ import java.util.HashMap;
  */
 public class Setup {
 
+    // optional red box in camera view (for debugging camera space)
     private static String sceneExtension0 = "{\n" +
             "  \"objects\": [\n" +
             "    {\n" +
             "      \"name\": \"extension red box\",\n" +
             "      \"geometry\": \"primitive: box\",\n" +
             "      \"material\": \"color: red\",\n" +
-            "      \"position\": \"0 0 0\",\n" +
+            "      \"position\": \"0 0 -3\",\n" +
             "      \"rotation\": \"0 0 0\",\n" +
             "      \"scale\": \"0.1 0.1 0.1\",\n" +
             "      \"parent\": \"deferred-camera\"\n" +

@@ -75,15 +75,18 @@ public class PortableModelBuilder {
             rootnode.setName(pml.getName());
         }
         for (int i = 0; i < pml.getObjectCount(); i++) {
+           SceneNode newModel = buildModel(bundle, pml.getObject(i), alttexturepath);
             String parent = pml.getParent(i);
             SceneNode destinationNode = rootnode;
             if (parent != null) {
                 logger.debug("looking for parent camera " + parent);
                 NativeCamera camera = AbstractSceneRunner.getInstance().findCameraByName(parent);
-                destinationNode = new PerspectiveCamera(camera).getCarrier();
-                logger.debug("found parent camera");
+                PerspectiveCamera perspectiveCamera = new PerspectiveCamera(camera);
+                destinationNode = perspectiveCamera.getCarrier();
+                newModel.getTransform().setLayer(perspectiveCamera.getLayer());
+                logger.debug("found parent camera with layer "+perspectiveCamera.getLayer());
             }
-            destinationNode.attach(buildModel(bundle, pml.getObject(i), alttexturepath));
+            destinationNode.attach(newModel);
         }
         return rootnode;
     }
