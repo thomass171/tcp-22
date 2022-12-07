@@ -92,7 +92,7 @@ public class LoaderTest {
     @Test
     public void testPortableModelList() {
         PortableModelList needle = ModelSamples.buildCompassNeedle(20, 30);
-        SceneNode n = needle.buildModel(null);
+        SceneNode n = needle.createPortableModelBuilder().buildModel(null);
         TestUtil.assertEquals("needle.name", "CompassNeedle", n.getName());
     }
 

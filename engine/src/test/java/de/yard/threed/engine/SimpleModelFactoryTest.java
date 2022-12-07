@@ -5,6 +5,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.engine.avatar.VehiclePmlFactory;
 import de.yard.threed.engine.loader.PortableMaterial;
+import de.yard.threed.engine.loader.PortableModelBuilder;
 import de.yard.threed.engine.loader.PortableModelList;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
@@ -31,8 +32,9 @@ public class SimpleModelFactoryTest {
         PortableModelList locomotive = VehiclePmlFactory.buildLocomotive();
         Bundle data = BundleRegistry.getBundle("data");
         int oldcnt =  EngineHelper.getStatistics().texturefailures;
-        SceneNode node = locomotive.buildModel(data);
-        TestUtil.assertFalse("dummymaterialused",locomotive.dummymaterialused);
+        PortableModelBuilder pmb = locomotive.createPortableModelBuilder();
+        SceneNode node = pmb.buildModel(data);
+        TestUtil.assertFalse("dummymaterialused",pmb.dummymaterialused);
         TestUtil.assertEquals("texturefailures",oldcnt, EngineHelper.getStatistics().texturefailures);
         for (PortableMaterial m : locomotive.materials) {
             TestUtil.assertTrue("shaded", m.shaded);

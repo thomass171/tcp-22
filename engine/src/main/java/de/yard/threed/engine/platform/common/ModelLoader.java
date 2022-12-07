@@ -87,7 +87,7 @@ public class ModelLoader {
             }
             if (lr/*.ppfile*/ != null) {
                 //22.12.17: Das object(0) soll sich zu einer root node entwickeln und dann auch umbenannt werden. NeeNee. Die root node entsteht erst hier.
-                model = lr./*ppfile.*/buildModel(modelfile.bundle, /*modelfile.getPath()*/ opttexturepath/*, true*/);
+                model = lr./*ppfile.*/createPortableModelBuilder().buildModel(modelfile.bundle, /*modelfile.getPath()*/ opttexturepath/*, true*/);
 
             } else {
                 //21.12.17  model = loader.buildModel(modelfile.bundle, modelfile.getPath(), loader.objects.get(0), opttexturepath, true);

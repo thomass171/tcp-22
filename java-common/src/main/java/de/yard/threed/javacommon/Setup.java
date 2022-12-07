@@ -9,6 +9,20 @@ import java.util.HashMap;
  */
 public class Setup {
 
+    private static String sceneExtension0 = "{\n" +
+            "  \"objects\": [\n" +
+            "    {\n" +
+            "      \"name\": \"extension red box\",\n" +
+            "      \"geometry\": \"primitive: box\",\n" +
+            "      \"material\": \"color: red\",\n" +
+            "      \"position\": \"0 0 0\",\n" +
+            "      \"rotation\": \"0 0 0\",\n" +
+            "      \"scale\": \"0.1 0.1 0.1\",\n" +
+            "      \"parent\": \"deferredCamera\"\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
+
     public static HashMap<String, String> setUp(String[] args) {
         HashMap<String, String> properties = new HashMap<String, String>();
         for (String arg : args) {
@@ -51,6 +65,7 @@ public class Setup {
             //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");
             //properties.put("argv.initialMaze","maze/Area15x10.txt");
             //properties.put("argv.initialMaze","skbn/DavidJoffe.txt:1");
+            properties.put("argv.sceneExtension0",sceneExtension0);
         }
         //properties.put("argv.vehiclelist","GenericRoad");
 
@@ -60,7 +75,7 @@ public class Setup {
 
             System.setProperty("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
-            System.setProperty("scene", "de.yard.threed.maze.MazeScene");
+            //System.setProperty("scene", "de.yard.threed.maze.MazeScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
             //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
 

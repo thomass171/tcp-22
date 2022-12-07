@@ -197,7 +197,7 @@ public class ModelPreviewScene extends Scene {
                 } else {
                     throw new RuntimeException("unknown pcm model " + modelname);
                 }
-                SceneNode node = pml.buildModel(null, null);
+                SceneNode node = pml.createPortableModelBuilder().buildModel(null, null);
                 result = new BuildResult(node.nativescenenode);
             } else {
                 Bundle bundle = BundleRegistry.getBundle(bundlename);

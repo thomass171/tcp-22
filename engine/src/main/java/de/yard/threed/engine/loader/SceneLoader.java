@@ -31,7 +31,6 @@ public class SceneLoader extends AsciiLoader {
 
     static Log logger = Platform.getInstance().getLog(SceneLoader.class);
     private NativeJsonObject top;
-    public PortableModelList ppfile;
     String source;
     int materialCount = 0;
 
@@ -53,7 +52,7 @@ public class SceneLoader extends AsciiLoader {
     protected void doload() throws InvalidDataException {
         NativeJsonArray objects = (top.get("objects") != null) ? top.get("objects").isArray() : null;
 
-        ppfile = new PortableModelList(null);
+        PortableModelList ppfile = new PortableModelList(null);
         ploadedfile = ppfile;
         ppfile.setName(source);
         //4.1.17: hier mal keine Exception fangen, weil das schon der Modelloader macht. Andererseits passt es hier aber gut hin. Hmm

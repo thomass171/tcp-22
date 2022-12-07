@@ -18,7 +18,12 @@ import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneAnimationController;
+import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.engine.loader.InvalidDataException;
+import de.yard.threed.engine.loader.PortableModelBuilder;
+import de.yard.threed.engine.loader.PortableModelList;
+import de.yard.threed.engine.loader.SceneLoader;
 import de.yard.threed.engine.platform.*;
 
 import java.util.ArrayList;
@@ -110,7 +115,7 @@ public class AbstractSceneRunner {
      * 2.8.21: Jetzt mit den PlatformInternals
      */
     public AbstractSceneRunner(PlatformInternals platformInternals) {
-        this.platformInternals=platformInternals;
+        this.platformInternals = platformInternals;
     }
 
 
@@ -176,7 +181,7 @@ public class AbstractSceneRunner {
 
         processCompletedJobs();
         //2.8.21: Den extrahierten bundleloader vor asnyhelper
-        List<Pair<BundleLoadDelegate,Bundle>> loadresult=null;
+        List<Pair<BundleLoadDelegate, Bundle>> loadresult = null;
         if (!Platform.getInstance().hasOwnAsync()) {
             // die Abfrgae hasOwnAsync() ist eigentlich redundant. Warum die Results gesammelt und die Delegates erst staeter ausgefuehrt werden, ist
             //nicht mehr ganz klar.Wahrscheinlich um Aufrufe von irgendwo aus der Tiefe zu vermeiden.
@@ -184,7 +189,7 @@ public class AbstractSceneRunner {
         }
         // Der AsynHelper wird fuer jede Platform verwendet, auch WebGl. Obwohl die auch wirklich async laden kann, macht sie es nicht unbedingt.
         AsyncHelper.processAsync(/*getResourceManager(),*/Platform.getInstance().bundleLoader);
-        for (GeneralHandler handler : platformInternals.beforeFrameHandler){
+        for (GeneralHandler handler : platformInternals.beforeFrameHandler) {
             handler.handle();
         }
 
@@ -333,7 +338,7 @@ public class AbstractSceneRunner {
 
     }
 
-    public void processDelegates(List<Pair<BundleLoadDelegate,Bundle>> loadresult) {
+    public void processDelegates(List<Pair<BundleLoadDelegate, Bundle>> loadresult) {
         //TODO threadsafe machen?
         //for (int i=0;i< modelbuilddelegates.size();i++){
         //C# kann keine iterator
@@ -355,7 +360,7 @@ public class AbstractSceneRunner {
         //modelbuilddelegates.clear();
         //modelbuildvalues.clear();
         //3.8.21 geht jetzt uber das loadresult
-        if (loadresult!=null) {
+        if (loadresult != null) {
             // List<Integer> bundledelegateids = new ArrayList<Integer>(bundledelegates.keySet());
             //for (int i = bundledelegateids.size() - 1; i >= 0; i--) {
             for (Pair<BundleLoadDelegate, Bundle> result : loadresult) {
@@ -398,8 +403,25 @@ public class AbstractSceneRunner {
         newJobList.add(new AsyncJobInfo(newJob, delaymillis));
     }
 
-
+    /**
+     * Called by scene runner after scene.init()
+     */
     public void postInit() {
+
+        String sceneExtension0;
+        if ((sceneExtension0 = Platform.getInstance().getSystemProperty("argv.sceneExtension0")) != null) {
+            SceneLoader sceneLoader = null;
+            try {
+                sceneLoader = new SceneLoader(sceneExtension0, "");
+                PortableModelList ppfile = sceneLoader.preProcess();
+                PortableModelBuilder pmb = ppfile.createPortableModelBuilder();
+                SceneNode node = pmb.buildModel(null);
+                ascene.addToWorld(node);
+            } catch (InvalidDataException e) {
+                logger.error("sceneExtension0 failed");
+                e.printStackTrace();
+            }
+        }
 
         SystemManager.initSystems();
         logger.info("Scene postInit done");
@@ -469,21 +491,22 @@ public class AbstractSceneRunner {
      * async analog zu Modeln
      * 20.2.18: Wenn ein Bundle schon geladen wurde, wird es nicht doppelt geladen (Eine Race Condition gibt es aber trotzdem).
      * Das Verhalten ist unabhaengig davon, ob das Model schon geladen wurde oder nicht.
-     *
+     * <p>
      * 22.7.21: Aus Platform hier hin. Nicht static. Muss von webgl overrided werden!
      * GHenerell async aber ohne MT.
      */
-    public  void /*Bundle*/ loadBundle(String bundlename, /*AsyncJobCallback*/BundleLoadDelegate bundleLoadDelegate, boolean delayed) {
+    public void /*Bundle*/ loadBundle(String bundlename, /*AsyncJobCallback*/BundleLoadDelegate bundleLoadDelegate, boolean delayed) {
         //2.8.21 AsyncHelper.asyncBundleLoad(bundlename, AbstractSceneRunner.getInstance().invokeLater(bundleLoadDelegate), delayed);
-        Platform.getInstance().bundleLoader.asyncBundleLoad(bundlename,bundleLoadDelegate, delayed);
+        Platform.getInstance().bundleLoader.asyncBundleLoad(bundlename, bundleLoadDelegate, delayed);
     }
 
-    public  void loadBundle(String bundlename, BundleLoadDelegate loadlistener) {
+    public void loadBundle(String bundlename, BundleLoadDelegate loadlistener) {
         loadBundle(bundlename, loadlistener, false);
     }
 
     /**
      * 2.8.21 direkt deprecated wegen doofen coupling
+     *
      * @return
      */
     @Deprecated

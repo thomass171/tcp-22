@@ -18,7 +18,7 @@ public class AvatarABuilder implements AvatarBuilder {
     @Override
     public SceneNode buildAvatar(EcsEntity player) {
         PortableModelList pml = AvatarPmlFactory.buildAvatarA(nextColor());
-        SceneNode model = pml.buildModel(null, null);
+        SceneNode model = pml.createPortableModelBuilder().buildModel(null, null);
         model.getTransform().setPosition(offset.position);
         model.getTransform().setRotation(offset.rotation);
         model.getTransform().setScale(offset.scale);

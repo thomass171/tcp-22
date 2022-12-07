@@ -498,11 +498,11 @@ public class ReferenceScene extends Scene {
         // Earth hat radius 1
         earth = ModelSamples.buildEarth();
         // eine unrotierte Needle, auf die man direkt sieht
-        SceneNode needle = ModelSamples.buildCompassNeedle(0.3f, 0.1f).buildModel(null);
+        SceneNode needle = ModelSamples.buildCompassNeedle(0.3f, 0.1f).createPortableModelBuilder().buildModel(null);
         needle.getTransform().setPosition(new Vector3(0, 0, 1.01f));
         earth.attach(needle);
         // und eine links halbhoch, wo manchmal Europa ist.
-        needle = ModelSamples.buildCompassNeedle(0.3f, 0.1f).buildModel(null);
+        needle = ModelSamples.buildCompassNeedle(0.3f, 0.1f).createPortableModelBuilder().buildModel(null);
         Vector3 pos = new Vector3(-0.75f, 0.75f, 0);
         needle.getTransform().setPosition(pos);
         // Warum man die direction nicht negieren muss, ist nicht ganz klar. Klappt aber.

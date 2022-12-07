@@ -76,7 +76,7 @@ public class MazeModelBuilder {
         pml.addModel(head);
         pml.addMaterial(faceMaterial);
 
-        SceneNode model = pml.buildModel(null, null);
+        SceneNode model = pml.createPortableModelBuilder().buildModel(null, null);
         model.setName("Monster");
         return new SceneNode(model);
     }
