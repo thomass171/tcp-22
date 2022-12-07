@@ -2,6 +2,7 @@ package de.yard.threed.traffic.config;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.LocalTransform;
+import de.yard.threed.core.ParsingHelper;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
@@ -32,7 +33,7 @@ public class ConfigHelper {
             }
             String angle = XmlHelper.getChildValue(node, "angle");
             if (!StringUtils.empty(angle)) {
-                double[] d = getTriple(angle);
+                double[] d = ParsingHelper.getTriple(angle);
                 rotation = Quaternion.buildFromAngles(new Degree(d[0]), new Degree(d[1]), new Degree(d[2]));
             }
             String s_scale = XmlHelper.getChildValue(node, "scale");
@@ -52,21 +53,13 @@ public class ConfigHelper {
      */
     public static Vector3 getVector3(String s) {
 
-        double[] p = getTriple(s);
+        double[] p = ParsingHelper.getTriple(s);
         if (p.length != 3) {
             return null;
         }
         return new Vector3(p[0], p[1], p[2]);
     }
 
-    public static double[] getTriple(String s) {
-        String[] p = StringUtils.split(s, ",");
-        double[] d = new double[p.length];
-        for (int i = 0; i < p.length; i++) {
-            d[i] = Util.parseDouble(p[i]);
-        }
-        return d;
-    }
 
     /**
      * From global vehicle list.

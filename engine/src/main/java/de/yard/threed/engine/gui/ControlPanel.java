@@ -40,15 +40,16 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
     DimensionF planeSize;
     // offset for components to be raised above the back plane. A positive value. Needs to be related to where the panel is used. A low value (eg. 0.000001) for
     // near plane usage, but larger (eg 0.01) for world usage.
-    private double zoffset;
+    // In the OpenGL camera space the z axis of the frustum runs into the negative part, so the zoffset here needs to be positive to be before the plane itself.
+    private double zoffsetForComponents;
     List<ControlPanelArea> areas = new ArrayList<ControlPanelArea>();
     List<ControlPanel> subPanel = new ArrayList<ControlPanel>();
 
     /**
      * Just a backplane.
      */
-    public ControlPanel(DimensionF planeSize, Material mat, double zoffset) {
-        this.zoffset = zoffset;
+    public ControlPanel(DimensionF planeSize, Material mat, double zoffsetForComponents) {
+        this.zoffsetForComponents = zoffsetForComponents;
         SimpleGeometry geo = Primitives.buildSimpleXYPlaneGeometry(planeSize.width, planeSize.height, new ProportionalUvMap());
 
         Mesh mesh = new Mesh(geo, mat);
@@ -61,7 +62,7 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
     public ControlPanelArea addArea(Vector2 position, DimensionF size, ButtonDelegate buttonDelegate) {
         ControlPanelArea cpa = new ControlPanelArea(size, buttonDelegate);
         attach(cpa);
-        cpa.getTransform().setPosition(new Vector3(position.getX(), position.getY(), zoffset));
+        cpa.getTransform().setPosition(new Vector3(position.getX(), position.getY(), zoffsetForComponents));
         areas.add(cpa);
         return cpa;
     }
@@ -71,7 +72,7 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
      */
     public void add(Vector2 position, ControlPanel controlPanel) {
         attach(controlPanel);
-        controlPanel.getTransform().setPosition(new Vector3(position.getX(), position.getY(), zoffset));
+        controlPanel.getTransform().setPosition(new Vector3(position.getX(), position.getY(), zoffsetForComponents));
         subPanel.add(controlPanel);
     }
 

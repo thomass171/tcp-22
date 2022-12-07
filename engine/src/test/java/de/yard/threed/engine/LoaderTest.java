@@ -10,17 +10,18 @@ import de.yard.threed.engine.platform.common.FaceN;
 import de.yard.threed.engine.platform.common.SimpleGeometry;
 import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.engine.test.testutil.TestUtil;
+import de.yard.threed.engine.testutil.TestHelper;
 import org.junit.jupiter.api.Test;
 
 
 /**
  * 9.3.21: "genie*", 3DS, shuttle, OBJ, splines nach "sandbox" verschoben.
- *
+ * <p>
  * Created by thomass on 08.02.16.
  */
 public class LoaderTest {
     //6.7.21 static EngineHelper platform = TestFactory.initPlatformForTest(false,false,null,true);
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
 
 
     @Test
@@ -40,7 +41,6 @@ public class LoaderTest {
             throw new RuntimeException("Error opening or reading ac file", e);
         }
     }
-
 
 
     @Test
@@ -86,22 +86,27 @@ public class LoaderTest {
         }
     }
 
-
-
-
-
-
-
-
     /**
      * 24.1.19: Liegt hier vielleicht nicht ganz ideal, aber einen besseren Platz gibt es nicht?
      */
     @Test
     public void testPortableModelList() {
-        PortableModelList needle = ModelSamples.buildCompassNeedle(20,30);
+        PortableModelList needle = ModelSamples.buildCompassNeedle(20, 30);
         SceneNode n = needle.buildModel(null);
-        TestUtil.assertEquals("needle.name","CompassNeedle",n.getName());
+        TestUtil.assertEquals("needle.name", "CompassNeedle", n.getName());
     }
 
+    @Test
+    public void testSceneLoader() throws Exception {
+
+        SceneLoader sceneLoader = new SceneLoader(TestHelper.loadFileFromClasspath("SimpleScene.json"), "");
+        PortableModelList ppfile = sceneLoader.preProcess();
+        TestUtil.assertEquals("", 1, ppfile.objects.size());
+        TestUtil.assertEquals("", 0, ppfile.objects.get(0).kids.size());
+        PortableModelDefinition box = ppfile.objects.get(0);
+        SimpleGeometry geo = box.geolist.get(0);
+        TestUtil.assertEquals("vertices", 3 * 8, geo.getVertices().size());
+
+    }
 
 }

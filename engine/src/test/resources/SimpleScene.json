@@ -1,0 +1,13 @@
+{
+  "objects": [
+    {
+      "name": "box",
+      "geometry": "primitive: box",
+      "material": "color: red",
+      "position": "0 0 0",
+      "rotation": "0 0 0",
+      "scale": "1 1 1",
+      "parent": "deferredCamera"
+    }
+  ]
+}

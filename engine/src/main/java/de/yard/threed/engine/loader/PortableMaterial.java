@@ -210,5 +210,7 @@ public class PortableMaterial {
         return new Material(nmat);
     }
 
-
+    public String getName() {
+        return name;
+    }
 }

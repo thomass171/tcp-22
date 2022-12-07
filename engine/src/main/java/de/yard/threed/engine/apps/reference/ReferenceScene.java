@@ -126,7 +126,7 @@ public class ReferenceScene extends Scene {
         camera.lookAt(new Vector3(0, 0, 0));
         // Zweite Camera fuer deferred rendering
         if (usedeferred) {
-
+            // Is there any reason for using the main cameras near/far?
             //deferredcamera = new PerspectiveCamera(camera.getFov(), camera.getAspect(), camera.getNear(), camera.getFar());
             deferredcamera = Camera.createAttachedDeferredCamera(camera, HIDDENCUBELAYER, camera.getNear(), camera.getFar());
             //deferredcamera.setLayer(HIDDENCUBELAYER);

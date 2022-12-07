@@ -2,6 +2,7 @@ package de.yard.threed.traffic.config;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.LocalTransform;
+import de.yard.threed.core.ParsingHelper;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.traffic.RoundBodyCalculations;
 import de.yard.threed.traffic.flight.FlightLocation;
@@ -19,7 +20,7 @@ public class PoiConfig extends ConfigNode {
 
     public PoiConfig(NativeNode nativeNode) {
         super(nativeNode);
-        double[] d = ConfigHelper.getTriple(nativeNode.getTextValue());
+        double[] d = ParsingHelper.getTriple(nativeNode.getTextValue());
         longitude = new Degree(d[0]);
         latitude = new Degree(d[1]);
         elevation = d[2];

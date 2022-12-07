@@ -277,6 +277,7 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
      * Camera for deferred rendering at any near distance with the same FOV of an existing camera
      * and attached to that camera for syncing transforms.
      * Der attach ist nur für sowas wie HUD sinnvoll, aber nicht für interior.
+     * What is "interior"?
      */
     public static PerspectiveCamera createAttachedDeferredCamera(Camera camera, int layer, double near, double far) {
         PerspectiveCamera deferredcamera = new PerspectiveCamera(camera.getFov(), camera.getAspect(), near, far);
@@ -287,6 +288,10 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
         return deferredcamera;
     }
 
+    /**
+     * Convenience method with near/far derived from parent camera,
+     * which probably is no good idea.
+     */
     public static PerspectiveCamera createAttachedDeferredCamera(Camera camera, int layer) {
         return createAttachedDeferredCamera(camera, layer, camera.getNear(), camera.getFar());
     }

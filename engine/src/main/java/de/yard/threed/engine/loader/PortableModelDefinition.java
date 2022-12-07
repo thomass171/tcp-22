@@ -30,6 +30,7 @@ public class PortableModelDefinition /*extends CustomGeometry */{
     //public String texture;
     public Vector3 translation = null;//3.5.19 new Vector3(0, 0, 0);
     public Quaternion rotation=null;
+    public Vector3 scale;
     public List<SimpleGeometry> geolist;
 
     public PortableModelDefinition() {

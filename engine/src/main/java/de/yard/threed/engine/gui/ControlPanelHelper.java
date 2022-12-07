@@ -16,6 +16,7 @@ public class ControlPanelHelper {
 
     /**
      * Build the backplane for an inventory panel located in the lower right area and attach it to the camera.
+     * The camera should be a 'deferred' camera to have the inventory always visible.
      * <p>
      * The size is defined in pixel.
      * <p>
@@ -26,9 +27,10 @@ public class ControlPanelHelper {
      */
     public static ControlPanel buildInventoryForDeferredCamera(Camera camera, Dimension screenDimensionInPixel, Color basecolor, Dimension inventorySizeInPixel) {
         Material mat = Material.buildBasicMaterial(basecolor, true);
-        double zpos = 4;
+        // zpos is negative because in the OpenGL camera space the z axis of the frustum runs into the negative part.
+        double zpos = -4;
 
-        DimensionF worldPlaneSize = camera.getPlaneSize(zpos);
+        DimensionF worldPlaneSize = camera.getPlaneSize(Math.abs(zpos));
         logger.debug("worldPlaneSize=" + worldPlaneSize);
 
         DimensionF worldBackplaneSize = buildDimensionByPixel(worldPlaneSize, screenDimensionInPixel, inventorySizeInPixel);
@@ -38,9 +40,9 @@ public class ControlPanelHelper {
             return null;
         }
         ControlPanel inventory = new ControlPanel(worldBackplaneSize, mat, 0.01);
-        // move it to the lower right screen corner. TODO check: Why is zpos negated?
+        // move it to the lower right screen corner.
         inventory.getTransform().setPosition(new Vector3(worldPlaneSize.width / 2 - worldBackplaneSize.getWidth() / 2,
-                -worldPlaneSize.height / 2 + worldBackplaneSize.getHeight() / 2, -zpos));
+                -worldPlaneSize.height / 2 + worldBackplaneSize.getHeight() / 2, zpos));
 
         camera.getCarrier().attach(inventory);
         inventory.getTransform().setLayer(camera.getLayer());

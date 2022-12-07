@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * AsciiLoader nur, weil der Ursprung ASCII ist. Dazwischen ist aber der JSON Parser. Und lineno wird auch kaum gesetzt werden können.
+ * AsciiLoader just because the origin is ASCII. Needs a JSON Parser and lineno likely cannot be used.
  * <p>
  * Created by thschonh on 08.12.17.
  */

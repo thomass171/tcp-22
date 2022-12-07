@@ -14,6 +14,12 @@ import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleData;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,7 +65,7 @@ public class TestHelper {
      */
     public static void processAsync() {
         AsyncHelper.processAsync(AbstractSceneRunner.getInstance().getBundleLoader());
-        List<Pair<BundleLoadDelegate,Bundle>> loadresult=Platform.getInstance().bundleLoader.processAsync();
+        List<Pair<BundleLoadDelegate, Bundle>> loadresult = Platform.getInstance().bundleLoader.processAsync();
         AbstractSceneRunner.getInstance().processDelegates(loadresult);
     }
 
@@ -69,7 +75,7 @@ public class TestHelper {
     @Deprecated
     public static void cleanupAsync() {
         AsyncHelper.cleanup();
-        if (AbstractSceneRunner.getInstance()!=null) {
+        if (AbstractSceneRunner.getInstance() != null) {
             AbstractSceneRunner.getInstance().cleanup();
         }
     }
@@ -97,6 +103,18 @@ public class TestHelper {
         return fgdatabasicmodel;
     }
 
+    public static String loadFileFromClasspath(String fileName) throws Exception {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
+        StringBuilder textBuilder = new StringBuilder();
+        try (Reader reader = new BufferedReader(new InputStreamReader
+                (inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
+            int c = 0;
+            while ((c = reader.read()) != -1) {
+                textBuilder.append((char) c);
+            }
+        }
+        return textBuilder.toString();
+    }
 
     /*12.2.16: jetzt in Platform public static InputStream getFileStream(String ressource) throws FileNotFoundException {
         final java.io.InputStream ins = new FileInputStream(ressource);//ClassLoader.getFileStream(ressource);

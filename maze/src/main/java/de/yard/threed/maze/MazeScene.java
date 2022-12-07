@@ -39,7 +39,7 @@ public class MazeScene extends Scene {
     //10.11.20 replaced by loaded event boolean gamestarted = false;
 
     static IntProvider rand = new RandomIntProvider();
-    Camera deferredcamera;
+    Camera deferredcameraForInventory;
     static int HUDLAYER = 9;
     // in VR 0, sonst die übliche bekannte Höhe. Ohne VR war das immer 0.6 unter diesem Namen
     //Ray Oberkante zum Test genau auf Pillaroberkante mit rayy = Pillar.HEIGHT - 0.15f
@@ -174,17 +174,17 @@ public class MazeScene extends Scene {
         } else {
             inputToRequestSystem.setControlMenuBuilder(new ControlMenu());
 
-            deferredcamera = Camera.createAttachedDeferredCamera(getMainCamera(), HUDLAYER);
-            deferredcamera.setName("deferred-camera");
+            deferredcameraForInventory = Camera.createAttachedDeferredCamera(getMainCamera(), HUDLAYER, 1.0,10.0);
+            deferredcameraForInventory.setName("deferred-camera");
             InventorySystem inventorySystem = new InventorySystem();
-            inventorySystem.addInventory(new MazeHudInventory(deferredcamera, getDimension()));
+            inventorySystem.addInventory(new MazeHudInventory(deferredcameraForInventory, getDimension()));
             SystemManager.addSystem(inventorySystem);
 
             // Optional (test)Hud that shows VR control panel via deferred camera as HUD
             if (EngineHelper.isEnabled("argv.enableHud")) {
                 ControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
                 leftControllerPanel.getTransform().setPosition(new Vector3(0.4, 0.8, -2));
-                deferredcamera.getCarrier().attach(leftControllerPanel);
+                deferredcameraForInventory.getCarrier().attach(leftControllerPanel);
                 inputToRequestSystem.addControlPanel(leftControllerPanel);
 
             }

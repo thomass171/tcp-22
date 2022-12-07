@@ -26,6 +26,9 @@ public class PerspectiveCamera extends Camera {
     //4.10.18 float near = 1;
     //4.10.18 float far = 1000;
 
+    /**
+     * near and far values here are distances? So positive.
+     */
     public PerspectiveCamera(/*int width, int height,*/ double fov, double aspect, double near, double far) {
         //super(width, height);
         super(Platform.getInstance().buildPerspectiveCamera(fov, aspect, near, far));
@@ -34,7 +37,7 @@ public class PerspectiveCamera extends Camera {
         //4.10.18 this.near = near;
         //4.10.18 this.far = far;
         logger = Platform.getInstance().getLog(PerspectiveCamera.class);
-
+        logger.debug("Built PerspectiveCamera with fov=" + fov + ", aspect=" + aspect + ", near=" + near + ", far=" + far);
     }
 
     /**
