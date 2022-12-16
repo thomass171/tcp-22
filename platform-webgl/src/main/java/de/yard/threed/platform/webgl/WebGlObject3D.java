@@ -16,24 +16,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Der Wrapper fuer ein ThreeJS.Object3D.
+ * The Wrapper fuer ein ThreeJS.Object3D.
  * <p>
  * Created by thomass on 25.04.15.
  * <p/>
  * ThreeJs verwendet Quaternions und hat keine diskreten Rotationswerte fuer einzelne Achsen.
  * Ich bleib mal beim Namen WebGlObject statt WebGlTransform, weil das Ding in ThreeJS ja
  * nun mal Object3D heisst und an verschiedenen Stellen eingesetzt wird (z.B.Mesh).
+ * 9.12.22: Why is it implementing NativeTransform? Shouldn't that be done by SceneNode or Tranform? And is it a node component or node? Or both?
+ * Well, its a multi purpose object:
+ * - its the one and only ThreeJs object for a SceneNode containing both the node and the transform (as it is the ThreeJs way).
  */
 public class WebGlObject3D implements NativeTransform {
     static Log logger = new WebGlLog(WebGlObject3D.class.getName());
-    // Das JavaScriptObject ist ein ThreeJS.Object3D.
+    // JavaScriptObject is a ThreeJS.Object3D.
     JavaScriptObject object3d;
-    // Die SceneNode, deren Komponente dies Object3D ist. null bei camera?
+    // The SceneNode, of which this Object3D is a component. null for camera?
     public WebGlSceneNode parentscenenode;
-    // 5.1.17: MErken ob hier ein Mesh als Child drinhaengt, denn das ist kein Child im Sinne der Platform.
-    public int meshholderindex = -1;
-    private Object meshHolder;
-    private int layer;
 
     WebGlObject3D(JavaScriptObject jo) {
         this.object3d = jo;
@@ -53,7 +52,10 @@ public class WebGlObject3D implements NativeTransform {
     }
 
     public int add(WebGlMesh mesh) {
-        return add(object3d, mesh.mesh);
+        int i = add(object3d, mesh.mesh);
+        // also propagate layer immediatley.
+        setLayer(mesh.mesh, getLayer());
+        return i;
     }
 
     public void remove(WebGlMesh mesh) {
@@ -133,7 +135,6 @@ public class WebGlObject3D implements NativeTransform {
     @Override
     public NativeTransform getParent() {
         JavaScriptObject parent = getParent(object3d);
-        //MA17 return (WebGlObject3D) Platform.getInstance().findObject3DById(getId(parent));
         if (parent == null) {
             return null;
         }
@@ -150,7 +151,7 @@ public class WebGlObject3D implements NativeTransform {
      * 7.5.21:Really set parent to null
      */
     public void clearParent() {
-        setParent(object3d,null);
+        setParent(object3d, null);
     }
 
     /**
@@ -161,41 +162,30 @@ public class WebGlObject3D implements NativeTransform {
     public WebGlObject3D getParent1() {
         //return /*new WebGlBase3D(*/getParent(object3d);
         JavaScriptObject parent = getParent(object3d);
-        //MA17 return (WebGlObject3D) Platform.getInstance().findObject3DById(getId(parent));
         if (parent == null) {
             return null;
         }
         return new WebGlObject3D(parent, null, true);
     }
 
-    //public static JavaScriptObject getParent(JavaScriptObject obj) {
-
     /**
-     * 23.1.17: Hier muss der meshholder beachtet werden, der beim Count rausgerechnet wurde.
      *
-     * @param index
-     * @return
      */
     @Override
     public NativeTransform getChild(int index) {
-        /*MA17if (meshholderindex != -1 && index >= meshholderindex) {
-            index++;
-        }*/
         return getChildren().get(index);
     }
 
     @Override
     public int getChildCount() {
-        /*MA17 int cnt = getChildCount(object3d);
-        if (meshholderindex != -1) {
-            // Im JME Sinne ist das ein Child, aber nicht im Sinne der Platform
-            cnt--;
-        }
-        logger.debug("found " + cnt + " childs. meshholderindex=" + meshholderindex);*/
         int cnt = getChildren().size();
         return cnt;
     }
 
+    /**
+     * Returns only children in terms of NativeTransform, ie. not technically all.
+     * A mesh eg. is not considered a child.
+     */
     @Override
     public List<NativeTransform> getChildren() {
         List<NativeTransform> l = new ArrayList<NativeTransform>();
@@ -213,6 +203,12 @@ public class WebGlObject3D implements NativeTransform {
         return l;
     }
 
+    public String getType() {
+        String type = GwtUtil.getType(object3d);
+        //logger.debug("child.type="+type);
+        return type;
+    }
+
     private boolean isMeshholder(JavaScriptObject child) {
         String type = GwtUtil.getType(child);
         //logger.debug("child.type="+type);
@@ -226,9 +222,7 @@ public class WebGlObject3D implements NativeTransform {
     }
 
     /**
-     * Einer der Children muss das Child fuer den Mesh sein.
-     *
-     * @return
+     * One of the children is supposed to hold the mesh.
      */
     public WebGlMesh getMeshHolder() {
         int cnt = getChildCount(object3d);
@@ -243,45 +237,18 @@ public class WebGlObject3D implements NativeTransform {
         return null;
     }
 
-    /*Na private boolean isCameraholder(JavaScriptObject child) {
-        String type = GwtUtil.getType(child);
-        logger.debug("child.type="+type);
-        return type.equals("Camera");
-    }
-
-    public WebGlCamera getCameraHolder() {
-        int cnt = getChildCount(object3d);
-        for (int i = 0; i < cnt; i++) {
-            JavaScriptObject child = getChild(object3d, i);
-            if (isCameraholder(child)) {
-                return new WebGlCamera(child);
-            }
-        }
-        //A ndde having no mesh isType no reason for logging
-        //logger.debug("no mesholder found");
-        return null;
-    }*/
-
+    /**
+     * Returns a new wrapper instance for the existing native object3d.
+     * As of MA17 the parent scenenode is no longer considered.
+     */
     @Override
     public NativeSceneNode getSceneNode() {
-        /*MA17if (parentscenenode==null){
-            logger.warn("parentscenenode isType null");
-        }
-        return parentscenenode;*/
         return new WebGlSceneNode(object3d, true);
-        //return Platform.getInstance().findSceneNodeById(((Integer) spatial.getUserData("uniqueid")));
-    }
-
-    public WebGlObject3D getChild1(int index) {
-        Util.nomore();//MA17
-        JavaScriptObject ch = getChild(object3d, index);
-        //MA17 return (WebGlObject3D) Platform.getInstance().findObject3DById(getId(ch));
-        return new WebGlObject3D(ch, null, true);
     }
 
     /**
      * parent==null kommt an world. 7.5.21: das ist doch irgendwie Kappes
-     * 1.11.19: layer des parent uebernehmen.
+     * 1.11.19: As defined in NativeTransform, propagate layer of parent (but not for carrier).
      *
      * @param parent
      */
@@ -289,13 +256,19 @@ public class WebGlObject3D implements NativeTransform {
         /*new WebGlBase3D(*/
         if (parent == null) {
             setParent(object3d, ((WebGlObject3D) Scene.getWorld().getTransform().transform).object3d);
-            //logger.debug("set layer 0 from null parent");
-            setLayer(0);
+            // don't spoil cameras related subtree
+            if (!isCarrier()) {
+                //logger.debug("setParent1: set layer 0 from null parent for " + getName());
+                setLayer(0);
+            }
         } else {
             setParent(object3d, parent.object3d);
-            int layer = parent.getLayer();
-            //logger.debug("set layer "+layer+" from parent");
-            setLayer(layer);
+            // don't spoil cameras related subtree
+            if (!isCarrier()) {
+                int parentlayer = parent.getLayer();
+                //logger.debug("setParent1: set layer " + parentlayer + " from parent " + parent.getName() + " for " + getName());
+                setLayer(parentlayer);
+            }
         }
     }
 
@@ -303,25 +276,25 @@ public class WebGlObject3D implements NativeTransform {
      * Muss im Mesh gesetzt werden, weil das ja gerendered wird. Layer isType an index, no bitmask.
      * Das Mesh ist ein Child von this(?). Zusaetzlich in node setzen, damit der getter geht (nicht jede Node hat ein Mesh).
      * Arbeitet rekursiv. Aber mit nativem setLayerRecursive kann man die Camera ueberschreiben!
+     * TODO check: Also exists recursive in SceneNode!
      *
      * @param layer
      */
     @Override
     public void setLayer(int layer) {
-        /*if (getMesh() != null) {
-            ((WebGlMesh) getMesh()).setLayer(layer);
-        }*/
+
         WebGlSceneNode sceneNode = (WebGlSceneNode) getSceneNode();
-        //logger.debug("setLayer "+layer+" for node "+sceneNode.getName());
+
         setLayer(sceneNode.object3d.object3d, layer);
         WebGlMesh mesh = (WebGlMesh) sceneNode.getMesh();
         if (mesh != null) {
             setLayer(mesh.mesh, layer);
         }
         // mark all subnodes, the complete subtree
-        //31.10.19 geht nicht in JS, weil das Mesh nicht die children hat.
-        //ueber die children auch nicht, da wird iregnwas vergessen. TODO klaeren warum.Das stimmt was mit dem getchildren doch nicht??
+        // 31.10.19 not possible in JS, because mesh doesn't know the children.
+        // TODO check if anything is missed here. Simething might be wrong with getchildren ??
         List<NativeTransform> children = /*getTransform().*/getChildren();
+        //logger.debug("setLayer " + layer + " for node " + sceneNode.getName() + " and " + children.size() + " children");
         for (NativeTransform c : children) {
             //logger.debug("c.setLayer");
             //c.getSceneNode().setLayer(layer);
@@ -331,8 +304,8 @@ public class WebGlObject3D implements NativeTransform {
     }
 
     /**
-     * returns bitmask. No longer.
-     * Layer liegt im Mesh, aber auch in Node (nicht jede Node hat ein Mesh).
+     * returns no longer the bitmask but the decoded layer.
+     * Layer resides in both mesh and node (not every node has a mesh.
      *
      * @return
      */
@@ -342,7 +315,7 @@ public class WebGlObject3D implements NativeTransform {
         WebGlSceneNode sceneNode = (WebGlSceneNode) getSceneNode();
         //WebGlMesh mesh = (WebGlMesh) sceneNode.getMesh();
         //if (mesh != null) {
-            layer = decodeLayer(getLayerMask(sceneNode.object3d.object3d));
+        layer = decodeLayer(getLayerMask(sceneNode.object3d.object3d));
         //}
         return layer;
     }
@@ -367,6 +340,27 @@ public class WebGlObject3D implements NativeTransform {
     @Override
     public Matrix4 getWorldModelMatrix() {
         return WebGlMatrix4.fromWebGl(new WebGlMatrix4(getMatrixWorld(object3d)));
+    }
+
+    /**
+     * Debug helper
+     */
+    static List<JavaScriptObject> findAllOtherLayer(JavaScriptObject obj) {
+        List<JavaScriptObject> result = new ArrayList<>();
+        if (getLayerMask(obj) != 0) {
+            result.add(obj);
+        }
+        JsArray children = getChildren(obj);
+
+        for (int i = 0; i < children.length(); i++) {
+            result.addAll(findAllOtherLayer(children.get(i)));
+        }
+        return result;
+    }
+
+    public boolean isCarrier() {
+        // might need a more reliable way to detect this. TODO use custom property
+        return getName().toLowerCase().endsWith("carrier");
     }
 
     protected static native JavaScriptObject buildObject3D()  /*-{
@@ -468,6 +462,7 @@ public class WebGlObject3D implements NativeTransform {
 
     /**
      * 7.5.21 Was genu ein setparent(null) sein soll, ist nicht ganz klar (definiert).
+     *
      * @param object3d
      * @param parent
      */
@@ -534,6 +529,7 @@ public class WebGlObject3D implements NativeTransform {
      * https://github.com/mrdoob/three.js/issues/10959
      * Rekursiv aufs Mesh bringt nichts, weil das Mesh nicht die children hat.
      * 15.11.19: Lieber nicht hier rekursiv, weil man damit den Layer einer Camra ueberschreiben kann.
+     * * TODO check: Also exists recursive in SceneNode!
      */
     static native void setLayerRecursive(JavaScriptObject object3d, int layer)  /*-{
         object3d.layers.set(layer);
@@ -543,11 +539,21 @@ public class WebGlObject3D implements NativeTransform {
         //$wnd.logger.debug("object3d layers.mask="+object3d.layers.mask);
     }-*/;
 
-    static native void setLayer(JavaScriptObject object3d, int layer)  /*-{
-        object3d.layers.set(layer);
+    /**
+     * layer is a channel bitmask in threejs: "this.mask = 1 << channel | 0"
+     * So only one bit will be set this call (though Threejs can have multiple)
+     */
+    static native void setLayer(JavaScriptObject object3d, int channel)  /*-{
+        //set() overrides/clears all existing
+        object3d.layers.set(channel);
         //$wnd.logger.debug("object3d layers.mask="+object3d.layers.mask);
+        //alert(camera.layers.mask);
     }-*/;
 
+    /**
+     * 31.10.19: Defined now with only one layer active at a time.
+     * Is decoded later.
+     */
     static native int getLayerMask(JavaScriptObject object3d)  /*-{
         return object3d.layers.mask;
     }-*/;

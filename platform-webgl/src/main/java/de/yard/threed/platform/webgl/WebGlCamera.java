@@ -23,7 +23,7 @@ import java.util.List;
  * Das auch von WebGlObject3D abzuleiten ist einfach praktisch, weil es
  * ThreeJs auch so macht und damit die ganzen Basisfunktionen (z.B. setPosition) schon da sind.
  * 16.11.16: Jetzt aber nicht mehr abeleitet wegen ECS.
- * 26.1.17: Muesste eigentlich nicht NativeTransform implementieren, macht es aber um einheitlich zu anderen Platformen zu sein, die das machen muessen.
+ * 26.1.17: Not implementing NativeTransform, because its just a component of a SceneNode(carrier) like eg. light.
  * 04.05.18: Fuer VR wie in Unity noch einen Adapter (carrier), an dem der VR Input wieder gespiegelt wird. Die WebGL Camera ist dann am Carrier
  * und alle translate/rotate Operationen laufen auf dem carrier. Vermeidet hoffentlich das Springen.
  * 29.09.18: Sinnvoll ist das wohl, vermeidet aber nicht das springen. Das springen sieht man übrigens auch in ThreeJS demo rollercoaster.
@@ -43,7 +43,8 @@ public class WebGlCamera implements NativeCamera/*, NativeTransform*/ {
         object3d = new WebGlObject3D(threejscamera);
         rayHelper = new RayHelper(this);
         carrier = new WebGlObject3D(WebGlObject3D.buildObject3D());
-        //set later carrier.setName("Main Camera Carrier");
+        //'real' name might be set later. For now just set a default name.
+        carrier.setName("Camera Carrier");
         //carrier in scene kommt spaeter
         WebGlScene.webglscene.add(object3d.object3d);
         //carrier.add(object3d);
@@ -114,18 +115,6 @@ public class WebGlCamera implements NativeCamera/*, NativeTransform*/ {
         //logger.debug("setPosition carrier position " + carrier.getPosition().getX() + "," + carrier.getPosition().getY() + "," + carrier.getPosition().getZ());
     }
 
-    /**
-     * Ob wirklich jede Camera eine lookat" Funktion hat, ist unklar.
-     * 4.5.18: Siehe Interface. Scheint mit Carrier nicht mehr zu gehen.
-     */
-    /*@Override
-    public void lookAt(Vector3 direction, Vector3 upVector) {
-        //up must be set getFirst
-        if (upVector != null) {
-            setUp(carrier/*object3d* /.object3d, ((WebGlVector3) upVector).vector3);
-        }
-        lookAt(carrier/*object3d* /.object3d, ((WebGlVector3) direction).vector3);
-    }*/
     @Override
     public Matrix4 getProjectionMatrix() {
         return WebGlMatrix4.fromWebGl(new WebGlMatrix4(getProjectionMatrix(object3d.object3d)));
@@ -238,16 +227,18 @@ public class WebGlCamera implements NativeCamera/*, NativeTransform*/ {
 
     @Override
     public void setLayer(int layer) {
+        // who uses layer -1?
         if (layer == -1) {
             layer = 0;
         }
-        logger.debug("setLayer " + layer);
-        setLayer(object3d.object3d, layer);
+        logger.debug("WebGlCamera.setLayer " + layer);
+        // carrier layer is set out of platform.
+        WebGlObject3D.setLayer(object3d.object3d, layer);
     }
 
     @Override
     public int getLayer() {
-        return WebGlObject3D.decodeLayer(getLayerMask(object3d.object3d));
+        return WebGlObject3D.decodeLayer(WebGlObject3D.getLayerMask(object3d.object3d));
     }
 
     @Override
@@ -345,6 +336,7 @@ public class WebGlCamera implements NativeCamera/*, NativeTransform*/ {
         camera.position.x = 0;
         camera.position.y = 0;
         camera.position.z = 0;
+        camera.name = "PerspectiveCamera";
         return camera;
     }-*/;
 
@@ -390,24 +382,4 @@ public class WebGlCamera implements NativeCamera/*, NativeTransform*/ {
         camera.aspect = aspect;
         camera.updateProjectionMatrix();            
     }-*/;
-
-    private static native void setLayer(JavaScriptObject camera, int layer) /*-{
-        //set() overrides/clears all existing
-        camera.layers.set(layer);
-        //alert(camera.layers.mask);
-    }-*/;
-
-    /**
-     * 31.10.19: Ist jetzt so definiert, dass immer nur ein Layer aktiv sein kann.
-     *
-     * @param camera
-     * @return
-     */
-    private static native int getLayerMask(JavaScriptObject camera) /*-{
-        //if (camera.layers != null) {
-        //    $wnd.logger.debug("camera.layers.mask="+camera.layers.mask);
-        //}
-        return camera.layers.mask;
-    }-*/;
-
 }

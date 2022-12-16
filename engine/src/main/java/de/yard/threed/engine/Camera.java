@@ -247,6 +247,8 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
 
     public void setLayer(int layer) {
         nativecamera.setLayer(layer);
+        // 9.12.22 carrier (and its subtree) needs same layer
+        getCarrier().getTransform().setLayer(layer);
     }
 
     public void setName(String name) {
@@ -292,9 +294,9 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
      * Convenience method with near/far derived from parent camera,
      * which probably is no good idea.
      */
-    public static PerspectiveCamera createAttachedDeferredCamera(Camera camera, int layer) {
+    /*public static PerspectiveCamera createAttachedDeferredCamera(Camera camera, int layer) {
         return createAttachedDeferredCamera(camera, layer, camera.getNear(), camera.getFar());
-    }
+    }*/
 
     /**
      * Das ganze ohne attach.

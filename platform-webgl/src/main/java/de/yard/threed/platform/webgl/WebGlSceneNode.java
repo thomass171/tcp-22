@@ -147,11 +147,11 @@ public class WebGlSceneNode implements NativeSceneNode {
 
     /**
      * 31.10.19 wegen Rekursion mal hier versuchen.
-     *
+     * TODO check: really used/needed?
      * @param object3d
      * @param layer
      */
-    static native void setLayer(JavaScriptObject object3d, int layer)  /*-{
+    static native void setLayerXX(JavaScriptObject object3d, int layer)  /*-{
         object3d.layers.set(layer);
         object3d.traverse( function(child) {
             //$wnd.logger.debug("setLayer"+layer);

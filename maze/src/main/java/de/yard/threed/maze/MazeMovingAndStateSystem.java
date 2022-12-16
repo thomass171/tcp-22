@@ -157,9 +157,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         GridState currentstate = MazeUtils.buildGridStateFromEcs();
         if (!SystemState.isOver() && currentstate.isSolved(Grid.getInstance().getMazeLayout())) {
             logger.info("solved");
-            Hud hud = Hud.buildForCamera(Scene.getCurrent().getDefaultCamera(), 1);
+            Hud hud = Hud.buildForCameraAndAttach(Scene.getCurrent().getDefaultCamera(), 1);
             hud.setText(2, "Solved");
-            Scene.getCurrent().getDefaultCamera().getCarrier().attach(hud);
 
             SystemState.state = SystemState.STATE_OVER;
         }
@@ -626,11 +625,12 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
     /**
      * 6.4.21 Im MP Sinne ist das hier in dieser Form aber unguenstig.
+     * 16.12.22: TODO check: still used/needed/helpful?
      */
     private void help() {
         logger.debug("help");
         if (helphud == null) {
-            helphud = Hud.buildForCamera(Scene.getCurrent().getDefaultCamera(), 1);
+            helphud = Hud.buildForCameraAndAttach(Scene.getCurrent().getDefaultCamera(), 1);
             helphud.setText(0, "r - ");
             helphud.setText(6, "u - undo");
             helphud.setText(7, "r - reset");

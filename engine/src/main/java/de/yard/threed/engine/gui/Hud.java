@@ -1,6 +1,8 @@
 package de.yard.threed.engine.gui;
 
 import de.yard.threed.core.Vector2;
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.DimensionF;
 import de.yard.threed.core.ImageData;
@@ -15,6 +17,7 @@ import de.yard.threed.core.ImageFactory;
  * Created by thomass on 15.12.15.
  */
 public class Hud extends FovElementPlane {
+    static Log logger = Platform.getInstance().getLog(Hud.class);
     ImageData image;
     // gruener Hintergrund, der durch Transparenz blasser erscheint.
     Color basecolor = new Color(0, 1, 0, 0.5f);
@@ -38,16 +41,16 @@ public class Hud extends FovElementPlane {
     /**
      * HUD with own deferred rendering camera at any near distance.
      * 6.10.19: Fuer deferredcamera soll der Aufrufer die doch reinstecken.
-     * 28.4.21: Dafuer braeuchte die near plane aber nicht so nah sein. Das Wahre ist das auch nicht.
+     * 16.12.22: Its build camera dependent, so it should also be attached here.
      */
-    public static Hud buildForCamera(Camera camera, int mode) {
-        //PerspectiveCamera deferredcamera = FovElement.getDeferredCamera(camera);
+    public static Hud buildForCameraAndAttach(Camera camera, int mode) {
+
         DimensionF dimension = camera.getNearplaneSize();
         int level = 0;
         double zpos = -camera.getNear() - 0.0001f + (level * 0.00001f);
 
-        Hud hud = new Hud(/*deferredcamera*/dimension, zpos, mode);
-        hud.element.getTransform().setLayer(camera.getLayer()/*FovElement.LAYER*/);
+        Hud hud = new Hud(dimension, zpos, mode);
+        camera.getCarrier().attach(hud);
         return hud;
     }
 
@@ -84,7 +87,9 @@ public class Hud extends FovElementPlane {
     }
 
     /**
-     * 28.4.21: Das erscheint zumindest etwas moderner, weil ohne overlay.
+     * Creates a text texture with background color. full transparent is currently not used.
+     *
+     * 28.4.21: Without overlay, which is the better approach.
      * Die Groesse der Textur ist wohl len*32x32.
      *
      * @param text
@@ -100,9 +105,10 @@ public class Hud extends FovElementPlane {
         if (fortest) {
             texture = new Texture(textimage);
         } else {
-            //Die Texttextur ist ausser der Schrift durchsichtig. Das wird im Hud aber z.Z. nicht benutzt
+            // The base text texture is full transparent. Das wird im Hud aber z.Z. nicht benutzt
             textimage.setTransparentToColor(backGround);
             texture = new Texture(textimage);
+            //logger.debug("textimage pixel0=" + textimage.pixel[0]);
         }
         return texture;
     }

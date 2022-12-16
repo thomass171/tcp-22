@@ -60,8 +60,13 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
     }
 
     public ControlPanelArea addArea(Vector2 position, DimensionF size, ButtonDelegate buttonDelegate) {
+        return addArea("",position,size,buttonDelegate);
+    }
+
+    public ControlPanelArea addArea(String name, Vector2 position, DimensionF size, ButtonDelegate buttonDelegate) {
         ControlPanelArea cpa = new ControlPanelArea(size, buttonDelegate);
         attach(cpa);
+        cpa.setName(name);
         cpa.getTransform().setPosition(new Vector3(position.getX(), position.getY(), zoffsetForComponents));
         areas.add(cpa);
         return cpa;
@@ -116,6 +121,7 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
     }
 
     public DimensionF getSize() {
+        //logger.debug("planeSize="+planeSize);
         return planeSize;
     }
 }

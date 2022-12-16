@@ -27,4 +27,9 @@ public interface MenuProvider {
      * @param mouselocation
      */
     Ray getRayForUserClick(Point mouselocation);
+
+    /**
+     * Just a callback.
+     */
+    void menuBuilt();
 }

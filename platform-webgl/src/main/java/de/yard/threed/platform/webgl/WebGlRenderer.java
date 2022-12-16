@@ -1,9 +1,11 @@
 package de.yard.threed.platform.webgl;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.Dimension;
+import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
 
@@ -64,11 +66,26 @@ public class WebGlRenderer {
             render(scene, webglcamera);
         } else {
             // Multipass Rendering
+            boolean debugLayer = false;
+            if (debugLayer && doLog) {
+                List<JavaScriptObject> other = WebGlObject3D.findAllOtherLayer(WebGlScene.webglscene.scene);
+                logger.debug("Found " + other.size() + " non 0 layer objects");
+                List<NativeSceneNode> redCubes = WebGlScene.webglscene.getObjectByName("extension red box");
+                logger.debug("Found " + redCubes.size() + " redcubes");
+                WebGlSceneNode redCube = (WebGlSceneNode) redCubes.get(0);
+                logger.debug("red cube layermask=" + WebGlObject3D.getLayerMask(redCube.object3d.object3d) + ",type=" + redCube.object3d.getType());
+                JsArray children = WebGlObject3D.getChildren(redCube.object3d.object3d);
+                for (int i = 0; i < children.length(); i++) {
+                    JavaScriptObject jchild = children.get(i);
+                    WebGlObject3D child = new WebGlObject3D(jchild);
+                    logger.debug("red cube child " + i + ": layermask=" + WebGlObject3D.getLayerMask(child.object3d) + ",type=" + child.getType());
+                }
+            }
             for (int i = 0; i < cameras.size(); i++) {
                 WebGlCamera webglcamera = ((WebGlCamera) cameras.get(i));
                 if (webglcamera.enabled) {
                     if (doLog) {
-                        //logger.debug("Rendering camera "+i+" with layer "+webglcamera.getLayer());
+                        //logger.debug("Rendering camera " + i + " with layer " + webglcamera.getLayer() + " with clearmode " + webglcamera.getClearmode());
                     }
                     clear(renderer, webglcamera.getClearmode());
                     //logger.debug("dump:"+WebGlObject3D.dumpUp(webglcamera.object3d.object3d));

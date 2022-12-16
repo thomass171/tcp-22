@@ -51,6 +51,7 @@ public class FovElement extends SceneNode {
     /**
      * HUD with own deferred rendering camera with layer 1 at any near distance.
      * All FovElements use the same camera.
+     * 16.12.22: Is this still the preferred way to use a deferred camera/build FOV elements? Shouldn't it be...?
      */
     public static PerspectiveCamera getDeferredCamera(Camera camera) {
         if (deferredcamera != null){

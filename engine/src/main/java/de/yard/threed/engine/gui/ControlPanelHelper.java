@@ -27,11 +27,12 @@ public class ControlPanelHelper {
      */
     public static ControlPanel buildInventoryForDeferredCamera(Camera camera, Dimension screenDimensionInPixel, Color basecolor, Dimension inventorySizeInPixel) {
         Material mat = Material.buildBasicMaterial(basecolor, true);
-        // zpos is negative because in the OpenGL camera space the z axis of the frustum runs into the negative part.
-        double zpos = -4;
+        // Shouldn't be a fix value but derived from the cameras near plane. And keep a distance for backplane
+        // elements.
+        double zpos = camera.getNear() + 0.1;
 
-        DimensionF worldPlaneSize = camera.getPlaneSize(Math.abs(zpos));
-        logger.debug("worldPlaneSize=" + worldPlaneSize);
+        DimensionF worldPlaneSize = camera.getPlaneSize(zpos);
+        logger.debug("worldPlaneSize=" + worldPlaneSize+ " for zpos "+ zpos);
 
         DimensionF worldBackplaneSize = buildDimensionByPixel(worldPlaneSize, screenDimensionInPixel, inventorySizeInPixel);
         logger.debug("worldBackplaneSize=" + worldBackplaneSize);
@@ -39,10 +40,12 @@ public class ControlPanelHelper {
             // headless?
             return null;
         }
-        ControlPanel inventory = new ControlPanel(worldBackplaneSize, mat, 0.01);
+        // zoffset needs to be lower than 0.01 to have no visual gap between the backplane and the component
+        ControlPanel inventory = new ControlPanel(worldBackplaneSize, mat, 0.001);
         // move it to the lower right screen corner.
+        // zpos is negative because in the OpenGL camera space the z axis of the frustum runs into the negative part.
         inventory.getTransform().setPosition(new Vector3(worldPlaneSize.width / 2 - worldBackplaneSize.getWidth() / 2,
-                -worldPlaneSize.height / 2 + worldBackplaneSize.getHeight() / 2, zpos));
+                -worldPlaneSize.height / 2 + worldBackplaneSize.getHeight() / 2, -zpos));
 
         camera.getCarrier().attach(inventory);
         inventory.getTransform().setLayer(camera.getLayer());

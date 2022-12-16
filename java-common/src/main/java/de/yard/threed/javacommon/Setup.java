@@ -66,7 +66,7 @@ public class Setup {
             //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");
             //properties.put("argv.initialMaze","maze/Area15x10.txt");
             //properties.put("argv.initialMaze","skbn/DavidJoffe.txt:1");
-            properties.put("argv.sceneExtension0",sceneExtension0);
+            //properties.put("argv.sceneExtension0",sceneExtension0);
         }
         //properties.put("argv.vehiclelist","GenericRoad");
 

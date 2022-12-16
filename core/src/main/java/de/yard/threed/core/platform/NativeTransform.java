@@ -7,9 +7,9 @@ import de.yard.threed.core.Vector3;
 import java.util.List;
 
 /**
- * Scale kommt hier bewusst nicht rein, weil es z.B. fuer camera Quatsch ist.
- * 6.12.16: Parent muss aber doch hier rein, oder? Und scale gehjort hier auch hin.
- * 26.1.17: Ersetzt jetzt als Native?Transform (vorher nur Transform) NativeBase3D.
+ * The base object that builds a scene graph and connects parents and children.
+ * A mesh will be a child.
+ * 26.1.17: Replaces as NativeTransform NativeBase3D.
  * <p>
  * Created by thomass on 15.09.16.
  */
@@ -33,10 +33,13 @@ public interface NativeTransform {
     /**
      * 06.12.16
      * 21.12.17: Der parent darf auch null sein. Wobei das eigentlich Unsinn ist, weil ich ja eine eignenes scene.world als root habe.
-     * 1.11.19:Bewirkt in der Platform auch die Übernahme des Layer(?). Ja, wichtig. Aber nicht in eine Camera, wenn der Carrier einen neuen Parent bekommt!
-     * @param parent
+     * 01.11.19: The platform must propagate the parent layer to the subtree. Thats important. But not for a carrier! That would spoil a hud attached to a moving camera.
+     * So a carrier will not propagate neither into a camera nor in other children when the carrier gets a new parent!
+     * 08.12.22: However, the carrier should have the same layer as the camera because otherwise objects attached to the camera will get the wrong layer
+     * propagated. The carriers layer should always comply to the camera.
+     * 9.12.22: Layer propagation needs to stop at a camera carrier, to avoid spoiling the camera layer and its subtree.
      */
-    void setParent(/*Object3D*/NativeTransform parent);
+    void setParent(NativeTransform parent);
 
     NativeTransform getParent();
 
@@ -76,27 +79,27 @@ public interface NativeTransform {
     NativeSceneNode getSceneNode();
 
     /**
-     * Layer isType no bitmask, just values 0-15 with 0 for default layer.
-     * Recursive for all children. Was heisst das denn genau? Und wenn ein Child einen anderen Layer setzt?
+     * Layer is no bitmask, just values 0-15 with 0 for default layer.
+     * Recursive for all children. Propagated only once, so any child might set its own layer later.
      * 14.10.19: Deswegen und weil ThreeJS und Unity es auch nur als Property betrachten nicht rekursiv.
      * 28.10.19: Das passt aber so gar nicht zum JME Viewport Konzept. Und ist auch eigentlich doch unpassend.
-     * Es würde doch eh rekursiv verwendet für einen Subgraph. Seis drum. Das wird jetzt als rekuriv definiert, dann kann das
-     * die Platform machen bzw. JME mit Viewport Subgraph.
+     * Es würde doch eh rekursiv verwendet für einen Subgraph.
+     * There was a long history of discussion recursive or not. Finally it is defined recursive and up to the platform
+     * eg. JME mit Viewport Subgraph.
      * Und ein bischen ist es auch eine Bitmask, weil es das in ThreeJS ist.
      * Darum: Gültig sind 0-15 (Viewports) und die sind disjunkt, also
      * eine Bitmask mit immer nur einem gesetzten Bit. Es kann immr nur EIN Layer/Viewport aktiv sein.
-     * 1.11.19:Aber muesste es wegen der subgraph Wirkung und wegen Parent change nicht ins Transform?
-     * Und doch Bitmask? Mit Layer 0 als default? Könnte in allen Platformen gehen. Nee, bei Unity ist layer wohl keine Bitmap, zumindest kann ein Objekt
-     * nicht in mehreren sein. Unity hat Wertebereich [0-31], aber nicht als Bitmap. Also doch keine Bitmask, sondern wie anfagngs schon beschrieben, bis es Viewports gibt.
-     * 3.11.19:Oder doch addScene() in Camera?
+     * In Unity layer is no bitmap, zumindest kann ein Objekt
+     * nicht in mehreren sein. Unity hat Wertebereich [0-31], aber nicht als Bitmap.
+     * 9.12.22: Layer propagation needs to stop at a camera carrier, to avoid spoiling the camera layer and its subtree.
+     * (See @link setParent())
      * @param layer
      */
     void setLayer(int layer);
 
     /**
-     * Returns bitmask! TODO: warum eigentlich. Unity kann doch nur einen LAyer?
-     * 31.10.19: Jetzt nicht mehr bitmask, sondern decoded.
-     * @return
+     * 31.10.19: Returns no longer a bitmask, but the decoded layer
+     * (Unity only works with a single layer?)
      */
     int getLayer();
 

@@ -369,6 +369,7 @@ public abstract class Platform {
      * Muesste eigentlich generisch sein, wird z.Z. aber nur fuer GLTF verwendet.
      * 22.9.21: Now like XML handling for replacing model mapper.
      * Assuming NativeJsonValue is fitting for all Json starting with '{' or '['
+     *
      * @param jsonstring
      * @return
      */
@@ -472,5 +473,15 @@ public abstract class Platform {
 
     public void addBundleResolver(BundleResolver bundleResolver) {
         this.bundleResolver.add(bundleResolver);
+    }
+
+    /**
+     * Very generic way to control platform behaviour. Useful for debugging/analysis of problems.
+     * Default implementation doing nothing.
+     */
+    public static String PLATFORM_OPTION_RENDEREDLAYER = "PLATFORM_OPTION_RENDEREDLAYER";
+
+    public void setOption(String option, String value) {
+        getLog().warn("setOption not implemented: " + option);
     }
 }

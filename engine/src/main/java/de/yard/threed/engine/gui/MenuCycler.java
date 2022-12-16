@@ -8,7 +8,7 @@ import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;
 
 /**
- * Helper for open,close,cycle menus on 'M'.
+ * Helper for open,close,cycle menus (MenuProvider) on 'M'.
  * Not single items but complete menus.
  */
 public class MenuCycler {
@@ -16,8 +16,6 @@ public class MenuCycler {
     MenuProvider[] menuBuilders;
     Menu menu = null;
     int index = 0;
-    //Camera cameraOfMenu;
-
 
     public MenuCycler(MenuProvider[] menuBuilders) {
         this.menuBuilders = menuBuilders;
@@ -98,7 +96,7 @@ public class MenuCycler {
             menu = menuBuilders[index].buildMenu();
             //27.1.22 menuBuilders[index].getAttachNode().attach(menu.getNode());
             menu.getNode().getTransform().setParent(menuBuilders[index].getAttachNode());
-            //cameraOfMenu= menuBuilders[index].getCamera();
+            menuBuilders[index].menuBuilt();
         } else {
             close();
 

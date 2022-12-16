@@ -11,10 +11,11 @@ import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 
 /**
- * 16.4.21: Erstmal no longer used. Level change geht einfach über Neustart.
+ * 16.4.21: For now no longer used. Level change is done by restart.
  * <p>
  * Created by thomass on 23.02.17.
  */
+/*
 public class MainMenu implements MenuProvider {
     Camera camera;
 
@@ -63,4 +64,8 @@ public class MainMenu implements MenuProvider {
     public Ray getRayForUserClick(Point mouselocation) {
         return (Ray) Util.notyet();
     }
-}
+
+    @Override
+    public void menuBuilt() {
+    }
+}*/

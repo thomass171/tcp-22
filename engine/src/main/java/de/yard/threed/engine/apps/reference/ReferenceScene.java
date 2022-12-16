@@ -45,10 +45,11 @@ import de.yard.threed.core.testutil.TestUtil;
  * v: Referenztests (war mal t). Es sollen etwa 4 FM kommen. Bei Erfolg kommt nachher ein grüner Cube, bei Fail ein roter.
  * f: enable/disable FPS Controller
  * c: enable/disable FPS Controller fuer weisse Box
- * m: Menu cyclen (z.B. mit anclickbaren Buttons). Darueber koennte man auch eine Helppage cyclen.
+ * m: Menu cycle: (Gridmenupanel), SecondMenu(greencube). Could also be used for help page.
  * e: Effects durchcyclen
  * l: toggle hiddencube layer
  * L: cycle lightNode
+ * r: cycle layer renedered
  * s: cycle shading of earth (nicht fertig)
  * <p>
  * 9.3.16: Jetzt auch mit einschaltbarem FPS Controller. Dann geht aber je nach Einstellung im FPS z.B. Pickingray nicht (wegen Mausmovehandling)
@@ -85,10 +86,11 @@ public class ReferenceScene extends Scene {
     Bundle databundle;
     SceneNode locomotive;
     int modelindex = 0;
-    //ein kleiner Button unten zentriert, der immer zu sehen ist und controller step macht.
-    private GuiGrid controlMenu;
+    // small centered button at bottom, thats always visible (by attaching to FOV camera) for stepping.
+    public GuiGrid controlMenu;
     // der liegt eigentlich unter der Plane und ist nur mit deferredRendering seines Layers zu sehen.
     public SceneNode hiddencube;
+    // deferred camera for inventory
     Camera deferredcamera;
     boolean usedeferred = true;
     //layer fuer hiddencube. Conflicts with menu hudcube layer?
@@ -99,13 +101,18 @@ public class ReferenceScene extends Scene {
     int shading = NumericValue.SMOOTH;
     RequestType REQUEST_CLOSE = new RequestType("close");
     RequestType REQUEST_CYCLE = new RequestType("cycle");
-    // Ohne VR ist inventory auch im HIDDENCUBELAYER mit derredcamera
+    // Outside VR inventory is in HIDDENCUBELAYER of derredcamera
     ControlPanel inventory;
     ControlPanel controlPanel;
     Color controlPanelBackground = new Color(128, 193, 255, 128);
     boolean vrEnabled = false;
     int lightIndex = 0;
     GeneralHandler[] lightCycle;
+    int renderedLayer = -1;
+    Vector3 INITIAL_CAMERA_POSITION = new Vector3(0, 5, 11);
+    double DEFERRED_CAMERA_NEAR = 4.0;
+    // far needs to cover hiddencube position in world space (its not attached)
+    double DEFERRED_CAMERA_FAR = 15.0;
 
     @Override
     public void init(boolean forServer) {
@@ -122,13 +129,13 @@ public class ReferenceScene extends Scene {
         // Der FirstPersonControls von ThreeJS ist einfach zu unruhig,
         // weil er sich staendig bewegt.
         Camera camera = getDefaultCamera();
-        camera.getCarrier().getTransform().setPosition(new Vector3(0, 5, 11));
+        camera.getCarrier().getTransform().setPosition(INITIAL_CAMERA_POSITION);
         camera.lookAt(new Vector3(0, 0, 0));
         // Zweite Camera fuer deferred rendering
         if (usedeferred) {
-            // Is there any reason for using the main cameras near/far?
+            // There is no reason for using the main cameras near/far. Use sensitive values.
             //deferredcamera = new PerspectiveCamera(camera.getFov(), camera.getAspect(), camera.getNear(), camera.getFar());
-            deferredcamera = Camera.createAttachedDeferredCamera(camera, HIDDENCUBELAYER, camera.getNear(), camera.getFar());
+            deferredcamera = Camera.createAttachedDeferredCamera(camera, HIDDENCUBELAYER, DEFERRED_CAMERA_NEAR, DEFERRED_CAMERA_FAR);
             //deferredcamera.setLayer(HIDDENCUBELAYER);
             deferredcamera.setName("deferred-camera");
             //deferredcamera.getCarrier().getTransform().setParent(camera.getCarrier().getTransform());
@@ -160,12 +167,14 @@ public class ReferenceScene extends Scene {
         tl.addEntryForLookat(new Vector3(0, 5, 11), new Vector3(0, 0, 0));
 
         if (!vrEnabled) {
+            logger.debug("Building controlMenu");
             //controlMenu = GuiGrid.buildControlMenu(getDefaultCamera(), 1);
             controlMenu = GuiGrid.buildForCamera(getDefaultCamera(), 2, 1, 1, Color.BLACK_FULLTRANSPARENT);
             controlMenu.setName("ControlIcon");
             controlMenu.addButton(new Request(REQUEST_CYCLE), 0, 0, 1, Icon.ICON_POSITION, () -> {
                 controller.step(true);
             });
+            // deferred fov camera has near/far 5/6.
             FovElement.getDeferredCamera(getDefaultCamera()).getCarrier().attach(controlMenu);
         }
     }
@@ -223,18 +232,18 @@ public class ReferenceScene extends Scene {
         //7.10.19: War das nicht immer eine deferred Cam? Tja, weiss nicht. Damit raucht JME aber ab. Mit Versetztem Aufruf von getDeferredCamera gehts wohl(??).
         if (!vrEnabled) {
             FovElement.getDeferredCamera(getDefaultCamera());
-            //hud = new Hud(getDefaultCamera());
-            hud = Hud.buildForCamera(FovElement.getDeferredCamera(null), 0);
+            //deferred fov camera has near/far 5/6.
+            hud = Hud.buildForCameraAndAttach(FovElement.getDeferredCamera(null), 0);
             hud.setText(1, "Hud");
-            FovElement.getDeferredCamera(null).getCarrier().attach(hud);
         }
 
-        // 28.4.21: Inventory versuche ich mal einfacher als FovElement. Braucht aber (ausserhalb VR) eine deferredcamera.
+        // 28.4.21: Outside VR inventory is a FovElement at deferredcamera.
         if (deferredcamera != null) {
             inventory = ControlPanelHelper.buildInventoryForDeferredCamera(deferredcamera, getDimension(), controlPanelBackground, new Dimension(300, 20));
             // occupy mid third of inventory
             TextTexture textTexture = new TextTexture(Color.LIGHTGRAY);
-            inventory.addArea(new Vector2(0, 0), new DimensionF(inventory.getSize().getWidth() / 3, inventory.getSize().getHeight()), null).setTexture(textTexture.getTextureForText("1884", Color.RED));
+            ControlPanelArea area1884 = inventory.addArea("area1884", new Vector2(0, 0), new DimensionF(inventory.getSize().getWidth() / 3, inventory.getSize().getHeight()), null);
+            area1884.setTexture(textTexture.getTextureForText("1884", Color.RED));
         }
         controlPanel = buildControlPanel(controlPanelBackground);
         // in front of left box, dami man mit einem teleport gut davorsteht zur Bedienung
@@ -458,7 +467,8 @@ public class ReferenceScene extends Scene {
     }
 
     /**
-     * 21.10.19 bischen kleiner
+     * A cube with the layer of the deferredcamera, but not attached to it.
+     * 21.10.19 make it smaller.
      */
     private void buildHiddenCubes() {
         double size = 0.5;
@@ -475,7 +485,7 @@ public class ReferenceScene extends Scene {
         //guckt dann oben halb raus.
         hiddencubechild.getTransform().setPosition(new Vector3(0, size / 2, 0));
         hiddencube.attach(hiddencubechild);
-        //setlayer ist rekursiv
+        //setlayer is recursive
         hiddencube.getTransform().setLayer(HIDDENCUBELAYER);
 
     }
@@ -630,7 +640,9 @@ public class ReferenceScene extends Scene {
         if (Input.GetKeyDown(KeyCode.V)) {
             // Die Reihenfolge der Tests hat keine Bedeutung. Man kann belieibg tauschen falls einzelne mal scheitern.
             // 23.1.18: Maintest dazu
+            // LayerTest runs twice to see where it breaks.
             logger.debug("v key was pressed. currentdelta=" + tpf);
+            ReferenceTests.testLayer(this);
             MainTest.runTest(null);
             ReferenceTests.testPyramideBackLeftFront(pyramideblf);
             ReferenceTests.mvpTest(getMainCamera(), getDimension(), usedeferred);
@@ -646,6 +658,7 @@ public class ReferenceScene extends Scene {
             ReferenceTests.testGetParent(this, towerrechts.get(2));
             ReferenceTests.testFindNodeByName(this);
             ReferenceTests.testJson();
+            ReferenceTests.testLayer(this);
             logger.info("tests completed");
             //Der AsyncTest provoziert Fehler zum Test, so dass geloggte error Meldungen dabei korrekt sind.
             new AsyncTest().runtest(this);
@@ -693,6 +706,7 @@ public class ReferenceScene extends Scene {
                 }
                 setLight();
             } else {
+                // toggle hidden cube layer
                 int layer = hiddencube.getTransform().getLayer();
                 logger.debug("hiddencube.layer=" + layer);
                 hiddencube.getTransform().setLayer(((layer == HIDDENCUBELAYER)) ? 0 : HIDDENCUBELAYER);
@@ -700,6 +714,9 @@ public class ReferenceScene extends Scene {
         }
         if (Input.GetKeyDown(KeyCode.S)) {
             cycleShading();
+        }
+        if (Input.GetKeyDown(KeyCode.R)) {
+            cycleRendering();
         }
     }
 
@@ -715,6 +732,19 @@ public class ReferenceScene extends Scene {
 
     }
 
+    private void cycleRendering() {
+        switch (renderedLayer) {
+            case -1:
+                renderedLayer = 1;
+                break;
+            case 1:
+                renderedLayer = HIDDENCUBELAYER;
+                break;
+            case 9://HIDDENCUBELAYER:
+                renderedLayer = -1;
+        }
+        Platform.getInstance().setOption(Platform.PLATFORM_OPTION_RENDEREDLAYER, "" + renderedLayer);
+    }
 
     private void checkForPickingRay() {
         Point mouselocation;
@@ -1214,11 +1244,16 @@ class ReferenceTests {
         Vector3 target = camworldposition.add(pickingray.getDirection().multiply(camworldposition.length()));
         TestUtil.assertVector3("target", new Vector3(-10758, 18599, -58545), target, 2000f);
         // zurueck auf Anfang
+        logger.debug("Stepping back");
+        // TODO 8.22 mving a carrier
+
         rs.controller.stepTo(rs.controller.viewpointList.size() - 1);
+        logger.debug("Stepped back");
     }
 
 
     public static void testPyramideBackLeftFront(SceneNode pyramideblf) {
+        logger.info("testPyramideBackLeftFront");
         //Referenzwerte aus ThreeJS
         Matrix4 pyramidworldmatrix = (pyramideblf.getTransform().getWorldModelMatrix());
         logger.debug("pyramid worldmatrix=\n" + pyramidworldmatrix.dump("\n"));
@@ -1256,11 +1291,13 @@ class ReferenceTests {
     }
 
     public static void testFind(ReferenceScene rs, SceneNode movebox) {
+        logger.info("testFind");
         SceneNode mb = new SceneNode(Platform.getInstance().findSceneNodeByName(ReferenceScene.MOVEBOXNAME).get(0));
         TestUtil.assertNotNull("find movebox", mb);
     }
 
     public static void testGetParent(ReferenceScene referenceScene, SceneNode movingbox) {
+        logger.info("testGetParent");
         SceneNode parent = movingbox.getTransform().getParent().getSceneNode();
         parent = parent.getTransform().getParent().getSceneNode();
         TestUtil.assertEquals("parent name", "rechts 0", parent.getName());
@@ -1276,6 +1313,7 @@ class ReferenceTests {
      * @param referenceScene
      */
     public static void testFindNodeByName(ReferenceScene referenceScene) {
+        logger.info("testFindNodeByName");
         // Einfach erstmal etwas suchen, was es nicht gibt). Vorher einen Dump.
         String graph = ReferenceScene.dumpSceneGraph();
         logger.debug("\n" + graph);
@@ -1311,6 +1349,7 @@ class ReferenceTests {
      * GWT JsonParser doesn't like line breaks. TODO add test?
      */
     public static void testJson() {
+        logger.info("testJson");
         String jsonString = "{" +
                 JsonHelper.buildProperty("a", "b") + "," +
                 JsonHelper.buildProperty("c", "\"d") +
@@ -1325,42 +1364,66 @@ class ReferenceTests {
         TestUtil.assertEquals("property a", "b", parsed.isObject().get("a").isString().stringValue());
         TestUtil.assertEquals("property c", "\"d", parsed.isObject().get("c").isString().stringValue());
     }
+
+    public static void testLayer(ReferenceScene rs) {
+        logger.info("testLayer");
+        TestUtil.assertEquals("hiddencube.layer", rs.HIDDENCUBELAYER, rs.hiddencube.getTransform().getLayer());
+        TestUtil.assertEquals("hiddencube.child.layer", rs.HIDDENCUBELAYER, rs.hiddencube.getTransform().getChild(0).getLayer());
+        TestUtil.assertEquals("deferredcamera.layer", rs.HIDDENCUBELAYER, rs.deferredcamera.getLayer());
+        TestUtil.assertEquals("deferredcamera.carrier.layer", rs.HIDDENCUBELAYER, rs.deferredcamera.getCarrier().getTransform().getLayer());
+        Camera fovCamera = FovElement.getDeferredCamera(null);
+        TestUtil.assertEquals("fovCamera.layer", 1, fovCamera.getLayer());
+        TestUtil.assertEquals("fovCamera.carrier.layer", 1, fovCamera.getCarrier().getTransform().getLayer());
+        // inventory child 0 is the text "1884"
+        Transform area1884transform = rs.inventory.getTransform().getChild(0);
+        TestUtil.assertEquals("inventory.layer", rs.HIDDENCUBELAYER, rs.inventory.getTransform().getLayer());
+        TestUtil.assertEquals("inventory.child.layer", rs.HIDDENCUBELAYER, area1884transform.getLayer());
+        TestUtil.assertEquals("inventory.area1884.name", "area1884", area1884transform.getSceneNode().getName());
+        TestUtil.assertEquals("inventory.z", -4.1, rs.inventory.getTransform().getPosition().getZ());
+        TestUtil.assertEquals("inventory.child.z", 0.001, area1884transform.getPosition().getZ());
+        // difficult to calculate world expected reference value
+        // TestUtil.assertEquals("inventory.child.world.z", rs.INITIAL_CAMERA_POSITION.getZ() - 4.0 + 0.01, rs.inventory.getTransform().getChild(0).getWorldModelMatrix().extractPosition().getZ());
+        SceneNode area1884 =   new SceneNode(SceneNode.findByName("area1884").get(0));
+
+    }
+
+    /**
+     * Used when menu opens/closes, no regular test.
+     */
+    public static void testCycledMenu(SceneNode[] expectedChildren) {
+        logger.info("test FOV camera");
+        Camera cameraOfSecondMenu = FovElement.getDeferredCamera(null);
+        Transform carrierTransform = cameraOfSecondMenu.getCarrier().getTransform();
+        for (Transform child : carrierTransform.getChildren()) {
+            logger.debug("fov camera child: " + child.getSceneNode().getName());
+        }
+        TestUtil.assertEquals("FOV camera.children.count", expectedChildren.length, cameraOfSecondMenu.getCarrier().getTransform().getChildCount());
+        // 'Hud" and "controlMenu" are always attached to the FOV camera.
+        TestUtil.assertEquals("FOV camera.hud", "Hud", carrierTransform.getChild(0).getSceneNode().getName());
+        TestUtil.assertEquals("FOV camera.controlmenu", "ControlIcon", carrierTransform.getChild(1).getSceneNode().getName());
+    }
 }
 
 /**
- * Ein Cube oben links mit deferred camera.
- * 15.11.19: ist doch gar nicht mehr mit deferred cam(?). Doch, im Builder.
+ * Not really a menu, just a green cube top left with deferred camera (set up in the builder).
  */
 class SecondMenu implements Menu {
     Log logger;
     SceneNode hudCube;
+    ReferenceScene rs;
 
-    SecondMenu(Log logger) {
-        this.logger = logger;
-        // Einen Cube links oben. Hier den Layer zu setzen bringt noch nichts, weil spaeter ein SetParent gemacht wird.
-
-        //hudCube = FovElement.buildSceneNodeForDeferredCamera(camera);
-        SceneNode cube = ModelSamples.buildCube(2, Color.LIGHTGREEN, new Vector3(-9, 8, -24));
+    SecondMenu(ReferenceScene rs) {
+        this.rs = rs;
+        // cube at top left. Independent from camera used in the menu builder. Layer is set later by setting parent.
+        // 16.12.22: But position needs to fit to cameras near/far, so its not really independent. deffered fov camera has near/far 5/6.
+        // For JME this apparently doesn't matter. Also needs scale down
+        Vector3 position = new Vector3(-9, 8, -24);
+        position = new Vector3(-2, 1.8, -5.5);
+        SceneNode cube = ModelSamples.buildCube(2, Color.LIGHTGREEN, position);
+        cube.getTransform().setScale(new Vector3(0.2, 0.2, 0.2));
         cube.setName("HudCube");
-        //hudCube.attach(cube);
-        //hudCube.setLayer(hudCube.getLayer());
         hudCube = cube;
-
     }
-
-    /*@Override
-    public Camera getMenuCamera() {
-       return FovElement.getDeferredCamera(null);
-    }*/
-
-  /*      @Override
-    public Request checkForClickedButton(Point mouselocation) {
-        /*List<NativeCollision> hits = hudCube.getHits(mouselocation, FovElement.getDeferredCamera(null));
-        if (hits.size() > 0) {
-            logger.debug("hudCube was clicked");
-        }* /
-        return null;
-    }*/
 
     @Override
     public SceneNode getNode() {
@@ -1379,22 +1442,15 @@ class SecondMenu implements Menu {
 
     @Override
     public void checkForSelectionByKey(int position) {
-
     }
-
-    /*@Override
-    public void checkForSelectionByKey(int position) {
-
-    }*/
 
     @Override
     public void remove() {
-        //TODO check/test das er weg ist
         SceneNode.removeSceneNode(hudCube);
         hudCube = null;
+        // check its gone.
+        ReferenceTests.testCycledMenu(new SceneNode[]{rs.hud, rs.controlMenu});
     }
-
-
 }
 
 class MainMenuBuilder implements MenuProvider {
@@ -1411,10 +1467,12 @@ class MainMenuBuilder implements MenuProvider {
         // In der Mitte rechts ein Button mit Image
         menu.addButton(/*new Request(rs.REQUEST_CLOSE), */4, 1, 1, Icon.ICON_CLOSE, () -> {
             rs.menuCycler.close();
+            ReferenceTests.testCycledMenu(new SceneNode[]{rs.hud, rs.controlMenu});
         });
         // und unten in der Mitte ein breiter Button mit Text
         menu.addButton(/*new Request(rs.REQUEST_CLOSE),*/ 2, 0, 2, new Text("Close", Color.BLUE, Color.LIGHTBLUE), () -> {
             rs.menuCycler.close();
+            ReferenceTests.testCycledMenu(new SceneNode[]{rs.hud, rs.controlMenu});
         });
         menu.addButton(null, 3, 1, 1, Texture.buildBundleTexture("data", "images/river.jpg"));
         menu.addButton(null, 2, 1, 1, Texture.buildBundleTexture("data", "images/river.jpg"));
@@ -1426,6 +1484,7 @@ class MainMenuBuilder implements MenuProvider {
 
     @Override
     public Transform getAttachNode() {
+        // 16.12.22: For some reason (or maybe just an accident) it is attached to the main camera. Just keep it that way.
         return rs.getDefaultCamera().getCarrier().getTransform();
     }
 
@@ -1442,10 +1501,17 @@ class MainMenuBuilder implements MenuProvider {
         Ray ray = null;//avatar.controller1.getRay();
         return ray;
     }
+
+    @Override
+    public void menuBuilt() {
+        // main menu is attached to main camera, so no change here.
+        ReferenceTests.testCycledMenu(new SceneNode[]{rs.hud, rs.controlMenu});
+    }
 }
 
 class SecondMenuBuilder implements MenuProvider {
     ReferenceScene rs;
+    SecondMenu menu;
 
     SecondMenuBuilder(ReferenceScene rs) {
         this.rs = rs;
@@ -1453,13 +1519,13 @@ class SecondMenuBuilder implements MenuProvider {
 
     @Override
     public Menu buildMenu() {
-        return new SecondMenu(ReferenceScene.logger);
+        menu = new SecondMenu(rs);
+        return menu;
     }
 
     /**
-     * Was soll das eigentlich so genau? Ist as OK, das Menu an den Carrier zu haengen?
-     *
-     * @return
+     * Should use a deferred camera to have it visible always. The carrier of the deferred camera
+     * is the attach point. It will also propagate the layer.
      */
     @Override
     public Transform getAttachNode() {
@@ -1478,9 +1544,13 @@ class SecondMenuBuilder implements MenuProvider {
         if (mouselocation != null) {
             return rs.getDefaultCamera().buildPickingRay(rs.getDefaultCamera().getCarrier().getTransform(), mouselocation);
         }
-        //Hat keinen Avatar
-        Ray ray = null;//avatar.controller1.getRay();
-        return ray;
+        //No avatar, so no ray from controller (VR?)
+        return null;
+    }
+
+    @Override
+    public void menuBuilt() {
+        ReferenceTests.testCycledMenu(new SceneNode[]{rs.hud, rs.controlMenu, new SceneNode(SceneNode.findByName("HudCube").get(0))});
     }
 
 }

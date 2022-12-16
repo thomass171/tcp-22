@@ -142,6 +142,9 @@ public class WebGlScene implements NativeScene {
         return AbstractSceneRunner.getInstance().dimension;
     }
 
+    /**
+     * Find an object by name.
+     */
     public List<NativeSceneNode> getObjectByName(String name) {
         List<NativeSceneNode> l = new ArrayList<NativeSceneNode>();
 
@@ -199,6 +202,9 @@ public class WebGlScene implements NativeScene {
         return mesh;
     }-*/;
 
+    /**
+     * General purpose finder.
+     */
     private static native JavaScriptObject getObjectByName(JavaScriptObject scene, String name, boolean recursive)  /*-{
         return scene.getObjectByName(name,recursive);
     }-*/;

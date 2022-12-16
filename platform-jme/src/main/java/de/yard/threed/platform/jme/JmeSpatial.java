@@ -178,6 +178,9 @@ public class JmeSpatial implements /*Native*/NativeTransform {
         return new JmeSpatial(parent, null, true);
     }
 
+    /**
+     * No need to adjust layer? layer are handled by viewports in JME.
+     */
     @Override
     public void setParent(NativeTransform/*Object*/ parent) {
         if (parent == null) {
@@ -392,8 +395,9 @@ public class JmeSpatial implements /*Native*/NativeTransform {
      */
     @Override
     public void setLayer(int layer) {
-        int currentlayer = getLayerOfSpatial(spatial);
-        if (currentlayer != 0) {
+        //logger.debug("setLayer " + layer);
+        Integer currentlayer = getLayerOfSpatial(spatial);
+        if (currentlayer != null) {
             JmeCamera deferredcamera = JmeCamera.findCameraByLayer(currentlayer);
             if (deferredcamera != null) {
                 deferredcamera.getViewPort().detachScene(spatial);
@@ -411,6 +415,8 @@ public class JmeSpatial implements /*Native*/NativeTransform {
                 deferredcamera.getViewPort().attachScene(spatial);
             }
         }
+        // 9.12.22: Set layer as property only to have it available later for a getLayer(). No need to set it recursively.
+        // getLayer() will look up to the next parent that has the property.
         spatial.setUserData("layer", new Integer(layer));
         //setLayerIndex((Node) spatial,layer);
 
@@ -429,24 +435,30 @@ public class JmeSpatial implements /*Native*/NativeTransform {
             }
         }
     }*/
+
+    /**
+     * look up to the next parent that has the property set.
+     * 9.12.22 seems to more consistent with aborting at layer 0. It is a layer set, so why not use it.
+     */
     @Override
     public int getLayer() {
-
+        //logger.debug("getLayer for spatial " + spatial);
         //return /*1 <<*/ getLayerIndex();
-        int layer;
+        Integer layer;
         Spatial s = spatial;
         do {
             layer = getLayerOfSpatial(s);
             s = s.getParent();
-        } while (layer == 0 && s != null);
-        return layer;
+        } while (layer == null && s != null);
+        //logger.debug("getLayer for spatial " + spatial + "found "+  layer);
+        return layer==null?0:layer;
     }
 
-    public static int getLayerOfSpatial(Spatial spatial) {
+    public static Integer getLayerOfSpatial(Spatial spatial) {
         Integer layer = spatial.getUserData("layer");
-        if (layer == null || layer == 0) {
+        /*if (layer == null || layer == 0) {
             return 0;
-        }
+        }*/
         return layer;
     }
 

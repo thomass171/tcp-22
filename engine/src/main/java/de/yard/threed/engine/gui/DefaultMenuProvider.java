@@ -42,6 +42,10 @@ public class DefaultMenuProvider implements MenuProvider {
     }
 
     @Override
+    public void menuBuilt() {
+    }
+
+    @Override
     public Menu buildMenu() {
         return menuBuilder.buildMenu();
     }

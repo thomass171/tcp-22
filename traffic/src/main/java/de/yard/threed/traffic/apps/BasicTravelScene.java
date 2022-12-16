@@ -269,8 +269,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         //31.3.20: Seit dem Einbau einer deferred Cam bzw. nearview scheint das nicht mehr zu gehen. Offenbar muss man jetzt selber den attach machen.
         String argv_enableHud = (Platform.getInstance()).getSystemProperty("argv.enableHud");
         if (!Util.isFalse(argv_enableHud)) {
-            hud = Hud.buildForCamera(getDefaultCamera(), 0);
-            getDefaultCamera().getCarrier().attach(hud);
+            hud = Hud.buildForCameraAndAttach(getDefaultCamera(), 0);
         }
     }
 

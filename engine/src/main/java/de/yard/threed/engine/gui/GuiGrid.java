@@ -245,9 +245,10 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
     }*/
 
     /**
-     * GuiGrid at near plane distance intended to be attached to camera.
-     * 6.10.19: Fuer deferredcamera soll der Aufrufer die doch reinstecken.
-     * 3.4.21: Ein solches Menu an der nearplane wird für VR unbrauchbar sein.
+     * GuiGrid at near plane distance intended to be attached to a camera. Its not attached here!
+     * 6.10.19: For deferredcamera the caller should just provide it. However, near/far are supposed zpos used here.
+     * 3.4.21: Not suitable for VR.
+     * 16.12.22: Passing the camera is confusing because it might differ from the camera where it is attached.
      */
     public static GuiGrid buildForCamera(Camera camera, int mode, int columns, int rows, Color background) {
         //PerspectiveCamera deferredcamera = FovElement.getDeferredCamera(camera);

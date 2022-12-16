@@ -141,7 +141,9 @@ public class JmeSceneNode /*16.9.16 extends JmeSpatial*/ implements NativeSceneN
 
     @Override
     public void destroy() {
-        if (JmeSpatial.getLayerOfSpatial(object3d.spatial) > 0) {
+        // here layer is used just as marker of the node that is attached to some camera viewport
+        Integer layer = JmeSpatial.getLayerOfSpatial(object3d.spatial);
+        if (layer != null && layer > 0) {
             //remove spatial from the corresponding camera.
             for (NativeCamera c : AbstractSceneRunner.getInstance().getCameras()) {
                 JmeCamera jmeCamera = (JmeCamera) c;

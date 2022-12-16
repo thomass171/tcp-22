@@ -85,7 +85,7 @@ public class ModelPreviewScene extends Scene {
         getDefaultCamera().getCarrier().getTransform().setPosition(new Vector3(120, 0, 30));
         getDefaultCamera().lookAt(new Vector3(0, 0, 0), new Vector3(0, 0, 1));
 
-        hud = Hud.buildForCamera(getDefaultCamera(), 0);
+        hud = Hud.buildForCameraAndAttach(getDefaultCamera(), 0);
 
         customInit();
 
