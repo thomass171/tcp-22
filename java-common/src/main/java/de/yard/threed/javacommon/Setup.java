@@ -61,7 +61,7 @@ public class Setup {
             //18.11.19: NearView geht in VR eh nicht, darum damit üblicherweise auch sonst nicht arbeiten.
             //properties.put("argv.enableNearView", "true");
             properties.put("argv.initialMaze", "skbn/SokobanWikipedia.txt");
-            //properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
+            properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
             //properties.put("argv.initialMaze", "maze/Maze-P-60x20.txt");
             //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");
             //properties.put("argv.initialMaze","maze/Area15x10.txt");
@@ -76,7 +76,7 @@ public class Setup {
 
             System.setProperty("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
-            //System.setProperty("scene", "de.yard.threed.maze.MazeScene");
+            System.setProperty("scene", "de.yard.threed.maze.MazeScene");
             //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
             //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
 

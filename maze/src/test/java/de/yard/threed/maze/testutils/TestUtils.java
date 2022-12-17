@@ -181,4 +181,8 @@ public class TestUtils {
         assertNotNull(mc, "user1.MoverComponent");
         TestUtil.assertPoint(" point", point, mc.getLocation());
     }
+
+    public static void assertDirection(Direction expected, Direction actual) {
+        assertEquals(expected.toString(), actual.toString());
+    }
 }

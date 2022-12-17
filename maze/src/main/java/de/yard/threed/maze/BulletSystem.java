@@ -77,9 +77,13 @@ public class BulletSystem extends DefaultEcsSystem {
                 BulletComponent bc;
                 if ((bc = pickBullet(bullets, mv.getLocation())) != null) {
                     // player has a bullet and is allowed to fire. So launch the bullet. The direction of the bullet must not be derived from the
-                    // orientation, because in VR the target direction can differ from orientation. In non VR its always the same. Only the trigger
-                    // knows the direction of targeting.
+                    // orientation, because in VR the target direction can differ from orientation. In non VR its always the same. The trigger
+                    // not always knows the direction of targeting, eg. keyboard/pad events do not know about orientation. So, if payload doesn't contain a direction,
+                    // derive it from currents player orientation.
                     Direction bulletDirection = (Direction) request.getPayloadByIndex(0);
+                    if (bulletDirection == null) {
+                        bulletDirection = mv.getGridOrientation().getDirection();
+                    }
                     bc.launchBullet(bulletDirection, player.getName());
                 }
             }

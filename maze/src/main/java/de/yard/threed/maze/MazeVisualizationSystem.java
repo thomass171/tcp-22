@@ -248,8 +248,8 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                     Point wallLocation = MazeUtils.vector2Point(intersectedWalls.get(0).getPoint());
                     Point playerLocation = MoverComponent.getMoverComponent(EcsHelper.findEntityById(userEntityId)).getLocation();
                     if (playerLocation.onSameAxis(wallLocation)) {
-                        //TODO add fire orientation
-                        return new Request(BulletSystem.TRIGGER_REQUEST_FIRE, new Payload(""), new Integer(userEntityId));
+                        Direction direction = Direction.of(playerLocation, wallLocation);
+                        return BulletSystem.buildFireRequest(userEntityId, direction);
                     }
                 }
             }
@@ -261,20 +261,8 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                     if (player.getId() != mainplayer.getId() && loc.onSameAxis(myLocation) &&
                             ray.intersects(player.getSceneNode(), true)) {
                         // In VR the target direction might differ from current player orientation.
-                        Direction targetDirection;
-                        if (loc.getX() == myLocation.getX()) {
-                            if (loc.getY() < myLocation.getY()) {
-                                targetDirection = Direction.S;
-                            } else {
-                                targetDirection = Direction.N;
-                            }
-                        } else {
-                            if (loc.getX() < myLocation.getX()) {
-                                targetDirection = Direction.W;
-                            } else {
-                                targetDirection = Direction.E;
-                            }
-                        }
+                        Direction targetDirection = Direction.of(myLocation, loc);
+
                         return BulletSystem.buildFireRequest(userEntityId, targetDirection);
                     }
                 }

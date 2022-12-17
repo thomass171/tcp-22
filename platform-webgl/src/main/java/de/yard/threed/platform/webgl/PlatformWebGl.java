@@ -71,7 +71,7 @@ public class PlatformWebGl extends Platform {
         PlatformInternals platformInternals = new PlatformInternals();
         // resolver order is important. most specific first.
         String additionalBundle = ((PlatformWebGl) instance).properties.get("argv.ADDITIONALBUNDLE");
-        if (additionalBundle.contains(" ")) {
+        if (additionalBundle != null && additionalBundle.contains(" ")) {
             // might be the result of a '+' which is valid in base64
             additionalBundle = additionalBundle.replace(" ","+");
         }

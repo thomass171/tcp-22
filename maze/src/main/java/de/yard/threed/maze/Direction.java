@@ -14,11 +14,11 @@ import de.yard.threed.engine.util.RandomIntProvider;
  * Created by thomass on 19.01.16.
  */
 public class Direction {
-    public static  Direction S/*N*/ = new Direction(0, -1);
-    public static  Direction N/*S*/ = new Direction(0, 1);
-    public static  Direction W = new Direction(-1, 0);
-    public static  Direction E = new Direction(1, 0);
-    static  Direction[] ORTHODIRECTIONS = new Direction[]{N, S, W, E};
+    public static Direction S/*N*/ = new Direction(0, -1);
+    public static Direction N/*S*/ = new Direction(0, 1);
+    public static Direction W = new Direction(-1, 0);
+    public static Direction E = new Direction(1, 0);
+    static Direction[] ORTHODIRECTIONS = new Direction[]{N, S, W, E};
     //public int xo;
     //public int yo;
     private Point point;
@@ -36,6 +36,7 @@ public class Direction {
 
     /**
      * 9.8.21: Was ist das denn, ein sich selbt veraenderndens array??
+     *
      * @return
      */
     public static Direction[] getRandomOrthoDirections() {
@@ -64,6 +65,26 @@ public class Direction {
         return new Point(p.getX() + dir.getPoint().getX(), p.getY() + dir.getPoint().getY());
     }
 
+    public static Direction of(Point from, Point to) {
+        if (to.getX() == from.getX()) {
+            if (to.getY() < from.getY()) {
+                return Direction.S;
+            }
+            if (to.getY() > from.getY()) {
+                return Direction.N;
+            }
+        }
+        if (to.getY() == from.getY()) {
+            if (to.getX() < from.getX()) {
+                return Direction.W;
+            }
+            if (to.getX() > from.getX()) {
+                return Direction.E;
+            }
+        }
+        return null;
+    }
+
     public Point move(Point p) {
         return new Point(p.getX() + point.getX(), p.getY() + point.getY());
     }
@@ -81,24 +102,24 @@ public class Direction {
     }
 
     @Override
-    public String toString(){
-        if (point.getX() != 0){
-            if (point.getY() != 0){
+    public String toString() {
+        if (point.getX() != 0) {
+            if (point.getY() != 0) {
                 return "invalid";
             }
-            if (point.getX() < 0){
+            if (point.getX() < 0) {
                 return "West";
-            }else{
+            } else {
                 return "East";
             }
         } else {
             // x==0
-            if (point.getY() == 0){
+            if (point.getY() == 0) {
                 return "invalid";
             }
-            if (point.getY() < 0){
+            if (point.getY() < 0) {
                 return "South";
-            }else{
+            } else {
                 return "North";
             }
         }
