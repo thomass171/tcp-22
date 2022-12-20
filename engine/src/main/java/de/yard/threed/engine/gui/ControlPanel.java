@@ -48,11 +48,11 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
     /**
      * Just a backplane.
      */
-    public ControlPanel(DimensionF planeSize, Material mat, double zoffsetForComponents) {
+    public ControlPanel(DimensionF planeSize, Material backplaneMaterial, double zoffsetForComponents) {
         this.zoffsetForComponents = zoffsetForComponents;
         SimpleGeometry geo = Primitives.buildSimpleXYPlaneGeometry(planeSize.width, planeSize.height, new ProportionalUvMap());
 
-        Mesh mesh = new Mesh(geo, mat);
+        Mesh mesh = new Mesh(geo, backplaneMaterial);
         setMesh(mesh);
         setName("ControlPanel-Backplane");
 
@@ -68,6 +68,7 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
         attach(cpa);
         cpa.setName(name);
         cpa.getTransform().setPosition(new Vector3(position.getX(), position.getY(), zoffsetForComponents));
+        cpa.setName("ControlPanel-Area");
         areas.add(cpa);
         return cpa;
     }

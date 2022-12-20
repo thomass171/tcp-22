@@ -27,7 +27,9 @@ public class SpinnerControlPanel extends ControlPanel {
 
         addArea(new Vector2(-(textareawidth / 2 + iconareasize / 2), 0), new DimensionF(iconsize, iconsize), () -> {
             logger.debug("left arrow clicked");
-            handler.down();
+            if (handler != null) {
+                handler.down();
+            }
             refresh();
         }).setIcon(Icon.ICON_LEFTARROW);
         // text has no margin yet.
@@ -38,7 +40,9 @@ public class SpinnerControlPanel extends ControlPanel {
 
         addArea(new Vector2((textareawidth / 2 + iconareasize / 2), 0), new DimensionF(iconsize, iconsize), () -> {
             logger.debug("right arrow clicked");
-            handler.up();
+            if (handler != null) {
+                handler.up();
+            }
             refresh();
         }).setIcon(Icon.ICON_RIGHTARROW);
     }

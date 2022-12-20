@@ -168,14 +168,15 @@ public class ReferenceScene extends Scene {
 
         if (!vrEnabled) {
             logger.debug("Building controlMenu");
-            //controlMenu = GuiGrid.buildControlMenu(getDefaultCamera(), 1);
-            controlMenu = GuiGrid.buildForCamera(getDefaultCamera(), 2, 1, 1, Color.BLACK_FULLTRANSPARENT);
+            // control menu with one single teleport/step button
+            // deferred fov camera has near/far 5/6.
+            Camera cameraForControlMenu = FovElement.getDeferredCamera(getDefaultCamera());
+            controlMenu = GuiGrid.buildForCamera(cameraForControlMenu, 2, 1, 1, Color.BLACK_FULLTRANSPARENT, true);
             controlMenu.setName("ControlIcon");
             controlMenu.addButton(new Request(REQUEST_CYCLE), 0, 0, 1, Icon.ICON_POSITION, () -> {
                 controller.step(true);
             });
-            // deferred fov camera has near/far 5/6.
-            FovElement.getDeferredCamera(getDefaultCamera()).getCarrier().attach(controlMenu);
+            cameraForControlMenu.getCarrier().attach(controlMenu);
         }
     }
 
@@ -601,6 +602,7 @@ public class ReferenceScene extends Scene {
 
         Point mouselocation = Input.getMouseClick();
         if (mouselocation != null) {
+            // needs to use position of main camera. Deferred cameras are attached there.
             Ray mousePickingRay = getDefaultCamera().buildPickingRay(getDefaultCamera().getCarrier().getTransform(), mouselocation);
             controlMenu.checkForClickedArea(mousePickingRay);
             controlPanel.checkForClickedArea(mousePickingRay);
@@ -1463,7 +1465,7 @@ class MainMenuBuilder implements MenuProvider {
     @Override
     public Menu buildMenu() {
         // 6 Spalten und 3 Zeilen
-        GuiGrid menu = GuiGrid.buildForCamera(rs.getDefaultCamera(), 1, 6, 3, GuiGrid.GREEN_SEMITRANSPARENT);
+        GuiGrid menu = GuiGrid.buildForCamera(rs.getDefaultCamera(), 1, 6, 3, GuiGrid.GREEN_SEMITRANSPARENT, true);
         // In der Mitte rechts ein Button mit Image
         menu.addButton(/*new Request(rs.REQUEST_CLOSE), */4, 1, 1, Icon.ICON_CLOSE, () -> {
             rs.menuCycler.close();

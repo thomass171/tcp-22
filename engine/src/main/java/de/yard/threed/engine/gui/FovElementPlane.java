@@ -29,22 +29,23 @@ import de.yard.threed.engine.platform.common.SimpleGeometry;
  * 20.4.21: Independent from camera. An die Camera kommt es erst durch den attach(). (statt an world)
  * 28.4.21: Mal deprecated mit Inventory als more straightforward Alternativentwurf (der auch VR abdeckt)?
  * NeeNee, das hier ist fuer ausserhalb VR ganz ok, aber doch irgendwie umstaendlich. Also doch deprecaten? Oder mehr static?
+ * 20.12.22: Back to deprecated.
  * <p/>
  * Created by thomass on 15.12.15.
  */
-//@Deprecated
+@Deprecated
 public abstract class FovElementPlane extends SceneNode {
     //das eigentlich sichtbare Element
     public SceneNode element;
     public DimensionF nearplaneSize;
     //Depending on the mode of usage (eg. button) the effective plane size might differ from the available total size.
-    private DimensionF planeSize;
+    public DimensionF planeSize;
     protected int level = 0;
     double zpos;
 
-    public FovElementPlane(DimensionF dimension, double zpos) {
+    public FovElementPlane(DimensionF nearplaneSize, double zpos) {
         this.zpos = zpos;
-        nearplaneSize = dimension;
+        this.nearplaneSize = nearplaneSize;
     }
 
     /**

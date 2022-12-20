@@ -4,8 +4,6 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.Point;
 
 
-
-
 /**
  * Date: 04.06.14
  */
@@ -117,7 +115,7 @@ public class TestUtil {
 
     public static void assertIndices(String msg, int[] expected, int[] actual) {
         for (int i = 0; i < expected.length; i++) {
-            assertEquals(msg + ""+i, expected[i], actual[i]);
+            assertEquals(msg + "" + i, expected[i], actual[i]);
         }
     }
 
@@ -174,7 +172,6 @@ public class TestUtil {
     }
 
 
-
     public static void assertFloat(String label, double expected, double actual) {
         Assert.assertEquals(label, expected, actual, doubletesttolerance);
     }
@@ -188,7 +185,12 @@ public class TestUtil {
     }
 
     public static void assertLatLon(String label, LatLon expected, LatLon actual, double tolerance) {
-        assertFloat(label,expected.getLatDeg().getDegree(),actual.getLatDeg().getDegree(),tolerance);
-        assertFloat(label,expected.getLonDeg().getDegree(),actual.getLonDeg().getDegree(),tolerance);
+        assertFloat(label, expected.getLatDeg().getDegree(), actual.getLatDeg().getDegree(), tolerance);
+        assertFloat(label, expected.getLonDeg().getDegree(), actual.getLonDeg().getDegree(), tolerance);
+    }
+
+    public static void assertDimensionF(String label, DimensionF expected, DimensionF actual, double tolerance) {
+        assertFloat(label, expected.getWidth(), actual.getWidth(), tolerance);
+        assertFloat(label, expected.getHeight(), actual.getHeight(), tolerance);
     }
 }

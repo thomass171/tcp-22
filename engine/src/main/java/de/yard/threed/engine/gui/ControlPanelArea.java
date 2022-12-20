@@ -22,12 +22,16 @@ public class ControlPanelArea extends SceneNode {
      * Primary use is displaying text.
      * Always creates new mesh/material. For updating use updateText().
      */
-    public void setTexture(Texture texture) {
+    public void setTexture(Texture texture, UvMap1 uvmap) {
         Material mat = Material.buildBasicMaterial(texture, null, true);
 
         // use height of plane and width by text len??
-        SimpleGeometry geo = Primitives.buildSimpleXYPlaneGeometry(size.width, size.height, new ProportionalUvMap());
+        SimpleGeometry geo = Primitives.buildSimpleXYPlaneGeometry(size.width, size.height, uvmap);
         setMesh(new Mesh(geo, mat));
+    }
+
+    public void setTexture(Texture texture) {
+        setTexture(texture, new ProportionalUvMap());
     }
 
     public void updateTexture(Texture text) {

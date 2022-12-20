@@ -4,6 +4,7 @@ import de.yard.threed.engine.*;
 
 /**
  * This is not very specific. Just a scene node (control panel) that can be opened/closed (shown/hidden) and where parts can be selected/clicked/pressed.
+ * Different to a control panel it can be closed/removed.
  */
 public interface Menu extends GenericControlPanel {
     /**

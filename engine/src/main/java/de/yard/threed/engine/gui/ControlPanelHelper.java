@@ -128,7 +128,7 @@ public class ControlPanelHelper {
     /**
      * @return
      */
-    private static DimensionF buildDimensionByPixel(DimensionF planeSize, Dimension dimension, Dimension expectedSizeInPixel) {
+    public static DimensionF buildDimensionByPixel(DimensionF planeSize, Dimension dimension, Dimension expectedSizeInPixel) {
         if (dimension == null) {
             // headless?
             return null;

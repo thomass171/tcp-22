@@ -12,16 +12,19 @@ import java.util.List;
 
 
 /**
- * Ein gridartiges FovElement. Gut geeignet um ButtonAreas darzustellen.
+ * A grid of planes (like FovElement) for displaying buttons for user interaction.
+ * <p>
+ * Depending on the mode of usage (eg. button) the effective plane size might differ from the available total nearplane size.
+ * <p>
+ * The buttons are locatod according to mode and x/y.
+ * <p>
  * Kann direkt vor die Camera gehangen werden an die nearPlane. Dann sind die Dimensionen entsprechend sehr klein.
  * Buttons können auch Requests auslösen.
  * 26.11.19: Besser Request statt RequestType, damit auch Parameter mitkommen können.
  * <p>
- * 7.10.19: Saudoofe Hierarchie.
- * 7.2.22: Deprecated by {@link ControlPanel} and {@link GenericControlPanel}? Probably. Mark deprecated
+ * 7.10.19: Because of its weird implementation using FovElement* is deprecated by {@link ControlPanel} and {@link GenericControlPanel}.
  */
-@Deprecated
-public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
+public class GuiGrid extends SceneNode implements Menu {
     private double buttonzpos;
     Log logger = Platform.getInstance().getLog(GuiGrid.class);
     public int mode;
@@ -31,10 +34,15 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
     public static Color GRAY_NONTRANSPARENT = new Color(0.8f, 0.8f, 0.8f, 1f);
     List<GridButton> buttons = new ArrayList<GridButton>();
     // cellwidth, cellheight ist inklusive margin
-    public double cellwidth;
-    public double cellheight;
+    private double cellwidth;
+    private double cellheight;
     private double margin;
-    BgElement bg;
+    private BgElement bg;
+    private ControlPanel cp;
+    private DimensionF nearPlaneDimension, backPlaneDimension;
+    private final double zpos;
+    public static double MAIN_Z_OFFSET = 0.0001;
+    public static double MAIN_BUTTON_Z_OFFSET = 0.00001;
 
    /* public GuiGrid(Camera camera) {
         this(camera, 0);
@@ -49,27 +57,56 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
      * 7.3.17: Die Cellgroesse anhand der Screensize zu berechnen, ist schwer zu verallgemeinern. Besser die Groesse fest verdrahten.
      * 02.10.19: Verwendet keine deferred Camera und ist deshalb doch wohl deprecated?
      */
-    public GuiGrid(/*Camera camera,*/DimensionF dimension, double zpos, double buttonzpos, int mode, int columns, int rows, Color background) {
-        //super(/*camera*/dimension,zpos);
-        bg = new BgElement(dimension, zpos, this, background);
+    public GuiGrid(DimensionF nearPlaneDimension, double zpos, double buttonzpos, int mode, int columns, int rows, Color background) {
+        this(nearPlaneDimension, zpos, buttonzpos, mode, columns, rows, background, false);
+    }
+
+    public GuiGrid(DimensionF nearPlaneDimension, double zpos, double buttonzpos, int mode, int columns, int rows, Color background, boolean useControlPanel) {
+        //super(/*camera* /dimension,zpos);
+
+        this.nearPlaneDimension = nearPlaneDimension;
         if (mode == 3) {
             columns = 1;
         }
-        attach(bg);
         this.mode = mode;
         this.columns = columns;
         this.rows = rows;
         this.buttonzpos = buttonzpos;
+        this.zpos = zpos;
         //margin durch ausprobieren
         margin = 0.0002f;
         margin = 0.0004f;
-        setName("Gui Grid");
-        bg.buildFovElement(/*camera,*/ null);
 
+        calcSizes(nearPlaneDimension);
+
+        if (useControlPanel) {
+            // zoffsetforCompnents should be lower than MAIN_Z_OFFSET
+            cp = new ControlPanel(backPlaneDimension, GuiGrid.buildBackplaneMaterial(background), 0.00001);
+            attach(cp);
+        } else {
+            bg = new BgElement(nearPlaneDimension, zpos, this, background);
+            attach(bg);
+        }
+
+        setName("Gui Grid");
+        if (bg != null) {
+            bg.buildFovElement(/*camera,*/ null);
+        }
     }
 
+    public DimensionF getNearPlaneDimension() {
+        return nearPlaneDimension;
+    }
 
-    public void setText(int line, String text) {
+    public DimensionF getBackPlaneDimension() {
+        return backPlaneDimension;
+    }
+
+    public DimensionF getCellDimension() {
+        return new DimensionF(cellwidth, cellheight);
+    }
+
+    /*18.12.22 public void setText(int line, String text) {
 
         ImageData textimage = Text.buildTextImage(text, Color.YELLOW, Color.BLACK_FULLTRANSPARENT);
         //Die Texttextur ist ausser der Schrift durchsichtig. Das wird im Hud aber z.Z. nicht benutzt
@@ -78,10 +115,10 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
         Texture texture = new Texture(bg.image);
         // BasicMaterial, damit Beleuchtung keine Rolle spielt.
         //8.10.17: wie bei Hud kein Effect
-        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, true);
+        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()* /null, true);
         bg.element.getMesh().updateMaterial(mat);
 
-    }
+    }*/
 
 
     /**
@@ -111,43 +148,51 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
     }
 
     public GridButton addButton(/*4.10.19 String*/ Request/*Type*/ command, int x, int y, int gridspan, GuiTexture icon, ButtonDelegate buttonDelegate) {
-        GridButton btn = new GridButton(command, getButtonSize(gridspan), getButtonTranslation(x, y), icon, buttonDelegate, buttonzpos);
-        buttons.add(btn);
-        attach(btn);
-        return btn;
+        if (bg != null) {
+            GridButton btn = new GridButton(command, getButtonSize(gridspan), getButtonTranslation(x, y), icon, buttonDelegate, buttonzpos);
+            buttons.add(btn);
+            attach(btn);
+            return btn;
+        }
+
+        Vector2 p = getButtonTranslation(x, y);
+        //p=new Vector2(0,0);
+        ControlPanelArea area = cp.addArea(p, getButtonSize(gridspan), buttonDelegate);
+        area.setTexture(icon.getTexture(), icon.getUvMap());
+
+        return null;
+
     }
 
     public GridButton addButton(Request/*Type*/ command, int x, int y, int gridspan, Texture texture, ButtonDelegate buttonDelegate) {
-        GridButton btn = new GridButton(command, getButtonSize(gridspan), getButtonTranslation(x, y), texture, /*3.5.21 UvMap1.rightRotatedTexture*/new ProportionalUvMap(), buttonDelegate, buttonzpos);
-        buttons.add(btn);
-        attach(btn);
-        return btn;
+        if (bg != null) {
+            GridButton btn = new GridButton(command, getButtonSize(gridspan), getButtonTranslation(x, y), texture, /*3.5.21 UvMap1.rightRotatedTexture*/new ProportionalUvMap(), buttonDelegate, buttonzpos);
+            buttons.add(btn);
+            attach(btn);
+            return btn;
+        }
+        ControlPanelArea area = cp.addArea(getButtonTranslation(x, y), getButtonSize(gridspan), buttonDelegate);
+        area.setTexture(texture);
+        return null;
     }
 
     private Vector2 getButtonTranslation(int x, int y) {
-        Vector2 v = new Vector2(-bg.getElementsize().getWidth() / 2 + cellwidth / 2 + cellwidth * x,
-                -bg.getElementsize().getHeight() / 2 + cellheight / 2 + cellheight * y);
+        if (bg != null) {
+            Vector2 v = new Vector2(-bg.getElementsize().getWidth() / 2 + cellwidth / 2 + cellwidth * x,
+                    -bg.getElementsize().getHeight() / 2 + cellheight / 2 + cellheight * y);
+            // Das Grid noch dazu, weil die Buttons keine echten Childs sind
+            return v.add(bg.getXyTranslation(bg.nearplaneSize));
+        }
+
+        // button is attached to backplane, so values differ from above
+        Vector2 v = new Vector2(-backPlaneDimension.getWidth() / 2 + cellwidth / 2 + cellwidth * x,
+                -backPlaneDimension.getHeight() / 2 + cellheight / 2 + cellheight * y);
         // Das Grid noch dazu, weil die Buttons keine echten Childs sind
-        return v.add(bg.getXyTranslation(bg.nearplaneSize));
+        return v.add(getXyTranslation(backPlaneDimension));
     }
 
     private DimensionF getButtonSize(int gridspan) {
         return new DimensionF(cellwidth * gridspan - 2f * margin, cellheight - 2f * margin);
-    }
-
-    private GridButton getClickedButton(Ray pickingray) {
-        if (pickingray == null) {
-            logger.debug("pickingray is null");
-            return null;
-        }
-        for (GridButton bn : buttons) {
-            // not the button node itself but the fov element will be hit
-            List<NativeCollision> intersects = pickingray.getIntersections(bn.element, false);
-            if (intersects.size() > 0) {
-                return bn;
-            }
-        }
-        return null;
     }
 
     /**
@@ -205,20 +250,26 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
     public /*4.10.19 String*/ /*30.12.19 Request*/ boolean checkForClickedArea(Ray pickingray) {
         logger.debug("guigrid picking ray is " + pickingray);
 
-        GridButton button = getClickedButton(pickingray);
-        if (button != null) {
-            //command might be null
-            logger.debug("button clicked ");
-            if (button.buttonDelegate != null) {
-                button.buttonDelegate.buttonpressed();
-            }
-            return true;
-            //if (button.command != null) {
-            //SystemManager.putRequest(button.command);
-            //return (button.command);
-            //}
+        if (pickingray == null) {
+            logger.debug("pickingray is null");
         }
-        return false;
+        if (bg != null) {
+            for (GridButton bn : buttons) {
+                // not the button node itself but the fov element will be hit
+                List<NativeCollision> intersects = pickingray.getIntersections(bn.element, false);
+                if (intersects.size() > 0) {
+
+                    logger.debug("button clicked ");
+                    if (bn.buttonDelegate != null) {
+                        bn.buttonDelegate.buttonpressed();
+                    }
+                    return true;
+
+                }
+            }
+            return false;
+        }
+        return cp.checkForClickedArea(pickingray);
     }
 
     /**
@@ -250,27 +301,60 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
      * 3.4.21: Not suitable for VR.
      * 16.12.22: Passing the camera is confusing because it might differ from the camera where it is attached.
      */
-    public static GuiGrid buildForCamera(Camera camera, int mode, int columns, int rows, Color background) {
+    public static GuiGrid buildForCamera(Camera camera, int mode, int columns, int rows, Color background, boolean useControlPanel) {
         //PerspectiveCamera deferredcamera = FovElement.getDeferredCamera(camera);
         DimensionF dimension = camera.getNearplaneSize();
-        int level = 0;
-        double zpos = -camera.getNear() - 0.0001f + (level * 0.00001f);
-        level = 1;
-        double buttonzpos = -camera.getNear() - 0.0001f + (level * 0.00001f);
-        GuiGrid hud = new GuiGrid(dimension, zpos, buttonzpos, mode, columns, rows, background/*, GuiGrid.BLACK_FULLTRANSPARENT*/);
-        hud/*5.12.18 .element*/.getTransform().setLayer(FovElement.LAYER);
+        //int level = 0;
+        double zpos = -camera.getNear() - MAIN_Z_OFFSET /*+(level * 0.00001f)*/;
+        //double zpos = camera.getNear() + 0.1;
+        //level = 1;
+        double buttonzpos = -camera.getNear() - MAIN_Z_OFFSET + MAIN_BUTTON_Z_OFFSET;
+
+        DimensionF worldPlaneSize = camera.getPlaneSize(zpos);
+        //logger.debug("worldPlaneSize=" + worldPlaneSize+ " for zpos "+ zpos);
+
+        DimensionF worldBackplaneSize = worldPlaneSize;//ControlPanelHelper.buildDimensionByPixel(worldPlaneSize, screenDimensionInPixel, inventorySizeInPixel);
+        //logger.debug("worldBackplaneSize=" + worldBackplaneSize);
+        if (worldBackplaneSize == null) {
+            // headless?
+            return null;
+        }
+        if (useControlPanel) {
+            // ControlPanels fitting z offset.
+            // zpos = -camera.getNear() - 0.1;
+        }
+
+        GuiGrid hud = new GuiGrid(dimension, zpos, buttonzpos, mode, columns, rows, background/*, GuiGrid.BLACK_FULLTRANSPARENT*/, useControlPanel);
+        //18.12.22 use layer of camera hud/*5.12.18 .element*/.getTransform().setLayer(FovElement.LAYER);
+        // move it to expected location.
+        // zpos is negative because in the OpenGL camera space the z axis of the frustum runs into the negative part.
+        if (hud.cp != null) {
+            // move panel where backplane was in legacy grid. Depends on mode.
+            /*hud.getTransform().setPosition(new Vector3(worldPlaneSize.width / 2 - worldBackplaneSize.getWidth() / 2,
+                    -worldPlaneSize.height / 2 + worldBackplaneSize.getHeight() / 2, -zpos));*/
+            Vector2 xytranslation = hud.getXyTranslation(hud.getNearPlaneDimension());
+            hud.cp.getTransform().setPosition(new Vector3(xytranslation.getX(), xytranslation.getY(), zpos));
+            // also set slayer of camera
+            camera.getCarrier().attach(hud);
+            hud.getTransform().setLayer(camera.getLayer());
+        } else {
+            hud/*5.12.18 .element*/.getTransform().setLayer(FovElement.LAYER);
+        }
         return hud;
     }
 
+    public static GuiGrid buildForCamera(Camera camera, int mode, int columns, int rows, Color background) {
+        return buildForCamera(camera, mode, columns, rows, background, false);
+    }
     /**
      * Alternative zu BrowsMenu.
      */
-    public static GuiGrid buildSingleColumnFromMenuitems(DimensionF dimension, double zpos, double buttonzpos, MenuItem[] menuitems) {
+    /*18.12.22 public static GuiGrid buildSingleColumnFromMenuitems(DimensionF dimension, double zpos, double buttonzpos, MenuItem[] menuitems) {
         // this.camera = camera;
         /*this.dimension = dimension;
         this.menuitems = menuitems;
         this.zpos = zpos;
-        this.buttonzpos = buttonzpos;*/
+        this.buttonzpos = buttonzpos;* /
         int rows = menuitems.length;
         GuiGrid guiGrid = new GuiGrid(dimension, zpos, buttonzpos, 3, 1, rows, Color.BLACK_FULLTRANSPARENT);
 
@@ -278,9 +362,13 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
             guiGrid.addButton(null, 0, rows - 1 - i, 1, menuitems[i].guiTexture, menuitems[i].buttonDelegate);
         }
         return guiGrid;
-    }
+    }*/
 
-    public DimensionF calcSize(DimensionF nearplaneSize) {
+    /**
+     * @param nearplaneSize
+     * @return
+     */
+    private void calcSizes(DimensionF nearplaneSize) {
         // 0.008f ist fuer Android ganz gut. 3.12.18: Aber das muss doch near abhaengig berechnet werden.
         // Gar nicht so einfach. Von der Anzahl Spalten ausgehen führt zu nichts, weil die dann zu groß werden können.
         double cellsize = 0.008f;
@@ -323,7 +411,8 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
         }
         logger.debug("elsize=" + elsize + ",cellwidth=" + cellwidth);
 
-        return elsize;
+        backPlaneDimension = elsize;
+        //return elsize;
     }
 
     public Vector2 getXyTranslation(DimensionF nearplaneSize) {
@@ -361,16 +450,40 @@ public class GuiGrid extends SceneNode/*FovElementPlane*/ implements Menu {
     /*public Camera getMenuCamera(){
         return camera;
     }*/
+
+    /**
+     * wie BgElement, aber wo kommt grün her? gruener Hintergrund, der durch Transparenz blasser erscheint.
+     *
+     * @return
+     */
+    private static Material buildBackplaneMaterial(Color background) {
+        ImageData image = ImageFactory.buildSingleColor(256, 256, background);
+        Texture texture = new Texture(image);
+        //CustomShaderMaterial mat = new CustomShaderMaterial("basetex",texture, Effect.buildUniversalEffect(true));
+        // BasicMaterial, damit Beleuchtung keine Rolle spielt.
+        //8.10.17: wie bei Hud kein Effect. Fuer trasnparent muss die Color den richtigen Alpha haben.
+        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, true);
+        return mat;
+    }
+
+    public double getZpos() {
+        return zpos;
+    }
+
+    public double getButtonZpos() {
+        return buttonzpos;
+    }
 }
 
+@Deprecated
 class BgElement extends FovElementPlane {
     public ImageData image;
     // gruener Hintergrund, der durch Transparenz blasser erscheint.
     public Color background;
     GuiGrid guiGrid;
 
-    public BgElement(DimensionF dimension, double zpos, GuiGrid guiGrid, Color background) {
-        super(dimension, zpos);
+    public BgElement(DimensionF nearPlaneDimension, double zpos, GuiGrid guiGrid, Color background) {
+        super(nearPlaneDimension, zpos);
         this.guiGrid = guiGrid;
         this.background = background;
 
@@ -397,7 +510,8 @@ class BgElement extends FovElementPlane {
     public DimensionF getSize(DimensionF nearplaneSize) {
 
 
-        DimensionF elsize = guiGrid.calcSize(nearplaneSize);
+        //DimensionF elsize = guiGrid.calcElementSize(nearplaneSize);
+        DimensionF elsize = guiGrid.getBackPlaneDimension();
         return elsize;
     }
 
@@ -473,7 +587,7 @@ class GridButton extends FovElementPlane {
         Material mat;
 
 
-            mat = Material.buildBasicMaterial(texture/*icon.getTexture()*/);
+        mat = Material.buildBasicMaterial(texture/*icon.getTexture()*/);
 
         return mat;
     }

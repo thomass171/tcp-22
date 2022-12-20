@@ -4,7 +4,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.*;
-
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
 
 import java.util.ArrayList;
@@ -44,15 +44,24 @@ public class WebGlRay implements NativeRay {
         return WebGlVector3.fromWebGl(new WebGlVector3(getOrigin(raycaster)));
     }
 
-    //30.3.22@Override
+    /**
+     * ThreeJS raycaster needs an object where to start looking for intersections.
+     * And the raycaster honors layers (so later enableAll is used).
+     * @return
+     */
     public List<NativeCollision> intersects(NativeSceneNode model) {
         JsArray objects = null;
         objects = (JsArray) JavaScriptObject.createArray();
         if (model != null) {
             objects.push(((WebGlSceneNode) model).object3d.object3d);
         } else {
-            // dann von der root node aus.
+            // Then use root node. But is there really one single root node? At least camera carrier
+            // need to be added here to grab also objects attached to deferred cameras. So apparently there is no single root node.
             objects.push(((WebGlScene) WebGlSceneRenderer.getInstance().scene.scene).getRootNode().object3d);
+            List<NativeCamera> nativeCameras = AbstractSceneRunner.getInstance().getCameras();
+            for (NativeCamera c:nativeCameras){
+                objects.push(((WebGlCamera)c).carrier.object3d);
+            }
         }
         // logger.debug("name="+((JavaScriptObject)objects.get(0)).getClass().getName());
         JsArray intersectedobjects = intersectObjects(raycaster, objects, true);
@@ -118,16 +127,10 @@ public class WebGlRay implements NativeRay {
         // JsArray ist wegen des Cross-Frame Problems kein JS array (im Sinne von instanceof)
         var nobjects = new $wnd.Array();
         for (var o in objects){
-            //$wnd.logger.debug("name="+o.name);
-           // for (var key in Object.keys(o)) {
-                //if (o.hasOwnProperty(key)) {
-             //    var property = o[key];
-               //    $wnd.logger.debug(key+"="+property);
-                 //      }
-              //}
             nobjects.push(objects[o]);
         }
-        //return new Array();
+        // enable all layers in raycaster to make sure to consider all objects
+        raycaster.layers.enableAll();
         return raycaster.intersectObjects(nobjects,recursive);
     }-*/;
 
