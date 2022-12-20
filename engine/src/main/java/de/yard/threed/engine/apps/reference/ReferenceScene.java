@@ -41,7 +41,7 @@ import de.yard.threed.core.testutil.TestUtil;
  * Tasten:
  * <p>
  * a: Scenenode wechselweise adden/removen
- * b: animierte Verschiebung der gr�nen(oberen) Box von Tower1  zu Tower 2
+ * b: Animated move of green(top) box from tower1 to tower 2
  * v: Referenztests (war mal t). Es sollen etwa 4 FM kommen. Bei Erfolg kommt nachher ein grüner Cube, bei Fail ein roter.
  * f: enable/disable FPS Controller
  * c: enable/disable FPS Controller fuer weisse Box
@@ -109,7 +109,7 @@ public class ReferenceScene extends Scene {
     int lightIndex = 0;
     GeneralHandler[] lightCycle;
     int renderedLayer = -1;
-    Vector3 INITIAL_CAMERA_POSITION = new Vector3(0, 5, 11);
+    public static Vector3 INITIAL_CAMERA_POSITION = new Vector3(0, 5, 11);
     double DEFERRED_CAMERA_NEAR = 4.0;
     // far needs to cover hiddencube position in world space (its not attached)
     double DEFERRED_CAMERA_FAR = 15.0;
@@ -655,7 +655,7 @@ public class ReferenceScene extends Scene {
             ReferenceTests.testIntersect(towerrechts, towerrechts.get(2));
             ReferenceTests.testMovingboxView(this);
             ReferenceTests.testRayFromFarAway(getDimension(), this);
-            ReferenceTests.rayTest(getDimension(), getMainCamera());
+            ReferenceTests.testRay(getDimension(), getMainCamera());
             ReferenceTests.testFind(this, towerrechts.get(2));
             ReferenceTests.testGetParent(this, towerrechts.get(2));
             ReferenceTests.testFindNodeByName(this);
@@ -933,8 +933,8 @@ class ReferenceTests {
     /**
      * Pickingray aus der Default Camera Position (0,5,11) genau in die Mitte der Scene (mousevector =0,0,0.5)
      */
-    public static void rayTest(Dimension dim, Camera camera) {
-        logger.info("rayTest");
+    public static void testRay(Dimension dim, Camera camera) {
+        logger.info("testRay");
         Ray ray = camera.buildPickingRay(camera.getCarrier().getTransform(), new Point(dim.width / 2, dim.height / 2)/*, dim*/);
         logger.debug("ray origin=" + ray.getOrigin().dump("") + " for dimension " + dim.toString());
         logger.debug("ray direction=" + ray.getDirection().dump("") + " for dimension " + dim.toString());
@@ -961,6 +961,14 @@ class ReferenceTests {
                 Assert.fail("test failed: expecteddirection deviation =" + distance);
             }
         }
+        // ray to controlMenu should find that intersection (important for ThreeJS special way of raycaster works)
+        ray = new Ray(ReferenceScene.INITIAL_CAMERA_POSITION, new Vector3(0.0012989715968508482, -0.6979321644779659, -0.7161626955237842));
+        // hits button, backplane and ground. In webgl its 7 (button and backplane three times each)??
+        List<NativeCollision> intersections = ray.getIntersections();
+        for (NativeCollision nc : intersections) {
+            logger.debug("Hit " + nc.getSceneNode().getName());
+        }
+        TestUtil.assertTrue("controlMenu ray intersections", intersections.size() >= 3);
     }
 
     public static void mvpTest(Camera camera, Dimension screensize, boolean usedeferred) {
@@ -1385,7 +1393,7 @@ class ReferenceTests {
         TestUtil.assertEquals("inventory.child.z", 0.001, area1884transform.getPosition().getZ());
         // difficult to calculate world expected reference value
         // TestUtil.assertEquals("inventory.child.world.z", rs.INITIAL_CAMERA_POSITION.getZ() - 4.0 + 0.01, rs.inventory.getTransform().getChild(0).getWorldModelMatrix().extractPosition().getZ());
-        SceneNode area1884 =   new SceneNode(SceneNode.findByName("area1884").get(0));
+        SceneNode area1884 = new SceneNode(SceneNode.findByName("area1884").get(0));
 
     }
 

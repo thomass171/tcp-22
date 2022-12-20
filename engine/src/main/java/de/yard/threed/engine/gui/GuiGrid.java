@@ -10,17 +10,16 @@ import de.yard.threed.engine.platform.common.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- * A grid of planes (like FovElement) for displaying buttons for user interaction.
+ * A grid of planes (like FovElement) for displaying buttons for user interaction. Can be located directly behind the near plane of a camera
+ * or attached to a dedicated deferred camera.
  * <p>
  * Depending on the mode of usage (eg. button) the effective plane size might differ from the available total nearplane size.
  * <p>
  * The buttons are locatod according to mode and x/y.
  * <p>
- * Kann direkt vor die Camera gehangen werden an die nearPlane. Dann sind die Dimensionen entsprechend sehr klein.
- * Buttons können auch Requests auslösen.
- * 26.11.19: Besser Request statt RequestType, damit auch Parameter mitkommen können.
+ * Buttons can also trigger Requests.
+ * 26.11.19: Better use Request instead of RequestType for passing parameter
  * <p>
  * 7.10.19: Because of its weird implementation using FovElement* is deprecated by {@link ControlPanel} and {@link GenericControlPanel}.
  */
@@ -44,25 +43,19 @@ public class GuiGrid extends SceneNode implements Menu {
     public static double MAIN_Z_OFFSET = 0.0001;
     public static double MAIN_BUTTON_Z_OFFSET = 0.00001;
 
-   /* public GuiGrid(Camera camera) {
-        this(camera, 0);
-    }*/
-
     /**
-     * mode 1 = zentriert und fast bildschirmfuellend, aber so dass das grid quadratische cells hat. Geeignet für eingeblendete Menus.
-     * mode 2 = zentriert am unteren Rand auch mit quadratischen cells. Geeignet fuer Controlbuttons.
-     * mode 3 = zentriert und fast bildschirmfuellend,immer mit einer Spalte. Geeignet für eingeblendete Menus.
-     * mode 4 = oben links
+     * mode 1 = centered und almost full screen, aber so dass das grid quadratische cells hat. Geeignet für eingeblendete Menus.
+     * mode 2 = centered at lower border auch mit quadratischen cells. Suitable for Controlbuttons.
+     * mode 3 = centered und almost full screen,immer mit einer Spalte. Suitable for popup menus.
+     * mode 4 = top left
      * <p>
      * 7.3.17: Die Cellgroesse anhand der Screensize zu berechnen, ist schwer zu verallgemeinern. Besser die Groesse fest verdrahten.
-     * 02.10.19: Verwendet keine deferred Camera und ist deshalb doch wohl deprecated?
      */
     public GuiGrid(DimensionF nearPlaneDimension, double zpos, double buttonzpos, int mode, int columns, int rows, Color background) {
         this(nearPlaneDimension, zpos, buttonzpos, mode, columns, rows, background, false);
     }
 
     public GuiGrid(DimensionF nearPlaneDimension, double zpos, double buttonzpos, int mode, int columns, int rows, Color background, boolean useControlPanel) {
-        //super(/*camera* /dimension,zpos);
 
         this.nearPlaneDimension = nearPlaneDimension;
         if (mode == 3) {
@@ -73,7 +66,7 @@ public class GuiGrid extends SceneNode implements Menu {
         this.rows = rows;
         this.buttonzpos = buttonzpos;
         this.zpos = zpos;
-        //margin durch ausprobieren
+        //margin by probing
         margin = 0.0002f;
         margin = 0.0004f;
 
@@ -90,7 +83,7 @@ public class GuiGrid extends SceneNode implements Menu {
 
         setName("Gui Grid");
         if (bg != null) {
-            bg.buildFovElement(/*camera,*/ null);
+            bg.buildFovElement(null);
         }
     }
 
@@ -106,40 +99,23 @@ public class GuiGrid extends SceneNode implements Menu {
         return new DimensionF(cellwidth, cellheight);
     }
 
-    /*18.12.22 public void setText(int line, String text) {
-
-        ImageData textimage = Text.buildTextImage(text, Color.YELLOW, Color.BLACK_FULLTRANSPARENT);
-        //Die Texttextur ist ausser der Schrift durchsichtig. Das wird im Hud aber z.Z. nicht benutzt
-        textimage.setTransparentToColor(bg.background);
-        bg.image.overlayImage(textimage, 40, 40 + line * 40);
-        Texture texture = new Texture(bg.image);
-        // BasicMaterial, damit Beleuchtung keine Rolle spielt.
-        //8.10.17: wie bei Hud kein Effect
-        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()* /null, true);
-        bg.element.getMesh().updateMaterial(mat);
-
-    }*/
-
-
     /**
      * y=0 ist unten
      * gridspan ist kompliziert(?)
      * 11.10.-19:wWirklich? Nur die x Ausrichtung stimmt noch nicht ganz
      */
     public void addButton(/*4.10.19 String*/ Request/*Type*/ command, int x, int y, int gridspan, Texture texture) {
-        //buttons.add(mkGridButton(command, getButtonSize(1), getButtonTranslation(x, y), buttonzpos));
         addButton(command, x, y, gridspan, texture, null);
     }
 
     /**
      * 11.10.19: gridspan wieder aufgenommen, geht aber noch nicht ganz von der Ausrichtung.
      */
-    public void addButton(Request/*Type*/ command, int x, int y, int gridspan,/* String*/Text text) {
-        //buttons.add(mkGridButton(command, getButtonSize(gridspan), getButtonTranslation(x, y), buttonzpos));
+    public void addButton(Request command, int x, int y, int gridspan,/* String*/Text text) {
         addButton(command, x, y, gridspan, text, null);
     }
 
-    public void addButton(/*4.10.19 String*/ Request/*Type*/ command, int x, int y, GuiTexture icon) {
+    public void addButton(Request command, int x, int y, GuiTexture icon) {
         addButton(command, x, y, 1, icon, null);
     }
 
@@ -161,7 +137,6 @@ public class GuiGrid extends SceneNode implements Menu {
         area.setTexture(icon.getTexture(), icon.getUvMap());
 
         return null;
-
     }
 
     public GridButton addButton(Request/*Type*/ command, int x, int y, int gridspan, Texture texture, ButtonDelegate buttonDelegate) {
@@ -207,36 +182,9 @@ public class GuiGrid extends SceneNode implements Menu {
         buttons.clear();
     }
 
-  /*  //@Override
-    public VRController getController1() {
-
-        return null;
-    }*/
-
-    //@Override
     public SceneNode getNode() {
         return this;
     }
-
-    /**
-     * Wird aus update aufgerufen. Geht wegen der Verwendung von getMouseClick() nur in dem Frame, in dem
-     * der Mausbutton released wurde.
-     * Arbeitet for convenience auch mit null input.
-     * 4.10.19: Deprecated zugunsten Ray MEthode
-     */
-   /*@Override
-    @Deprecated
-    public /*4.10.19 String* / Request checkForClickedButton(Point mouselocation) {
-        if (mouselocation != null) {
-            // Mausbutton released
-            int x = mouselocation.getX();
-            int y = mouselocation.getY();
-            //logger.debug("Mouse Click at " + mouselocation);
-            Ray pickingray = camera.buildPickingRay(mouselocation);
-            return checkForClickedArea(pickingray);
-        }
-        return null;
-    }*/
 
     /**
      * 30.12.19: Es ist doch nur konsequent, hier parallel zum Delegate den Request zu verschicken statt ihn zurückzuliefern.
@@ -247,7 +195,7 @@ public class GuiGrid extends SceneNode implements Menu {
      * @return true if a button/area was clicked, false otherwise
      */
     @Override
-    public /*4.10.19 String*/ /*30.12.19 Request*/ boolean checkForClickedArea(Ray pickingray) {
+    public boolean checkForClickedArea(Ray pickingray) {
         logger.debug("guigrid picking ray is " + pickingray);
 
         if (pickingray == null) {
@@ -284,16 +232,6 @@ public class GuiGrid extends SceneNode implements Menu {
             }
         }
     }
-
-    /**
-     * Eigentlich nur ein einzeiliges GuiGrid mit horinzontaler unterer Ausrichtung.
-     * <p>
-     * Created by thomass on 28.9.18.
-     */
-    /*6.10.19 public static GuiGrid buildControlMenu(Camera camera, int columns) {
-        GuiGrid menu = new GuiGrid(camera, 2, columns, 1, GuiGrid.BLACK_FULLTRANSPARENT);
-        return menu;
-    }*/
 
     /**
      * GuiGrid at near plane distance intended to be attached to a camera. Its not attached here!
@@ -447,22 +385,16 @@ public class GuiGrid extends SceneNode implements Menu {
         return tr;
     }
 
-    /*public Camera getMenuCamera(){
-        return camera;
-    }*/
-
     /**
-     * wie BgElement, aber wo kommt grün her? gruener Hintergrund, der durch Transparenz blasser erscheint.
+     * Like BgElement.
      *
      * @return
      */
     private static Material buildBackplaneMaterial(Color background) {
         ImageData image = ImageFactory.buildSingleColor(256, 256, background);
         Texture texture = new Texture(image);
-        //CustomShaderMaterial mat = new CustomShaderMaterial("basetex",texture, Effect.buildUniversalEffect(true));
-        // BasicMaterial, damit Beleuchtung keine Rolle spielt.
-        //8.10.17: wie bei Hud kein Effect. Fuer trasnparent muss die Color den richtigen Alpha haben.
-        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, true);
+        // Double transparence? Color and material?
+        Material mat = Material.buildBasicMaterial(texture, null, true);
         return mat;
     }
 

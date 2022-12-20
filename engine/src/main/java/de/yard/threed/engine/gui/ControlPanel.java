@@ -1,5 +1,6 @@
 package de.yard.threed.engine.gui;
 
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
@@ -17,19 +18,19 @@ import java.util.List;
  * Just a flat panel with components (like buttons, textareas) added. Can be used for user menus, inventory, control panel aso.
  * To be attached to either a (deferred) camera, traditional on a near plane, or in VR at a controller.
  * <p>
- * Mal als ausgereiftereren Alternativentwurf zu FovElementPlane (und Hud/GuiGrid, denn das ist doch sehr ähnlich). Und auch zu allen Menus.
- * War mal Inventory, aber ControlPanel trifft es viel besser. Allgemein erstmal nur eine Plane, auf der
+ * A more sophisticated concept than FovElementPlane (and Hud/GuiGrid, which is similar). And also compared to menus.
+ * In general just a plane for placing thing like
  * <p>
  * - clickable areas (buttons, menu items)
- * - Stratusanzeigen (Inventory)
+ * - status display (Inventory)
  * - Text
  * <p>
- * angezeigt werden. Und mannche Teile sind per click/ray wählbar/triggerbar. Und das ganze stackable(??).
+ * And some parts can be selected by click/ray wählbar/triggerbar. Maybe even stackable(??).
  *
  * <p>
- * Bietet als HUD eine 300x20 Pixel area unten rechts (ControlPanelHelper.buildInventoryForDeferredCamera).
+ * For inventory its a 300x20 Pixel area right at the bottom (ControlPanelHelper.buildInventoryForDeferredCamera).
  * <p>
- * Weil anders als bei Hud kein ständig geändertes Overlayimage verwendet wird, ist Transparenz kaskadierend und damit optisch auffällig.
+ * Different from Guigrid based on FovElement, transparency might be cascading and thus be eye-catching?
  * <p>
  * 28.4.21
  */
@@ -60,15 +61,18 @@ public class ControlPanel extends SceneNode implements GenericControlPanel {
     }
 
     public ControlPanelArea addArea(Vector2 position, DimensionF size, ButtonDelegate buttonDelegate) {
-        return addArea("",position,size,buttonDelegate);
+        return addArea(null, position, size, buttonDelegate);
     }
 
     public ControlPanelArea addArea(String name, Vector2 position, DimensionF size, ButtonDelegate buttonDelegate) {
         ControlPanelArea cpa = new ControlPanelArea(size, buttonDelegate);
         attach(cpa);
-        cpa.setName(name);
+        if (StringUtils.empty(name)) {
+            cpa.setName("ControlPanel-Area");
+        } else {
+            cpa.setName(name);
+        }
         cpa.getTransform().setPosition(new Vector3(position.getX(), position.getY(), zoffsetForComponents));
-        cpa.setName("ControlPanel-Area");
         areas.add(cpa);
         return cpa;
     }

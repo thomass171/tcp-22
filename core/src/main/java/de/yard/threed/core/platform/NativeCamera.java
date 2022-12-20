@@ -5,67 +5,35 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 
 /**
- * Ob die Ableitung von Base3D gut ist, ist weiter offen.
- * 12.6.15: Mal ohne die Ableitung, weil scale und auch Rotation vielleicht zu speziell (oder allgemein?) sind.
- * JME hat auch keine solche Ableitung.
- * 9.3.16: Rotation dürfte gar nicht so speziell sein, aber lassen wir es mal weiterhin mit
- * der Ableitung. Immerhin hat JME diese merkwürdige 180 Grad Spiegelung.
- * <p>
- * 26.1.17: Umgestellt auf NativeTransform
- * <p>
- * 28.11.18: [[MA29]] Camera ist jetzt eine Component wie Mesh.
+ * A camera component (like a mesh). So no transform here. [[MA29]]
+ *
+ * There is no lookat(). This is just a convenience method that could be implemented independent from the platform. lookat() functions
+ * in the platform use different concepts.
+ * And there is no up-vector for similar reasons. An up-vector just feeds the illusion of 'rotations can be simple'.
  * <p>
  * Created by thomass on 05.06.15.
  */
 public interface NativeCamera {
 
     /**
-     * 2.3.16: Die Signatur hier in der Platform ist local space!
-     * 10.8.16: Ein Vektor für die Blickrichtung reicht eigentlich nicht aus, weil der up-Vector fehlt. (z.B. Blick auf Erdkugel).
-     * 17.11.16: Wenn upVector null ist, wird ein Default genommen.
-     * JME hat auch einen Parameter dafür in seiner lookat().
-     * 1.2.18: Bei ThreeJS und Unity ist lookat aber im world space. ThreeJS schränkt noch ein, dass der parent keinen Transform haben darf.
-     * Meine Nutzung ist anscheinend uneinheitlich. Vielleicht besser nicht mehr ueber die Platform? oder deprecated.
-     * mal deprecated. Wird eh kaum verwendet.
+     *
      */
-    /*29.9.18 @Deprecated
-    void lookAt(Vector3 lookat, Vector3 upVector);*/
     public Matrix4 getProjectionMatrix();
 
     /**
-     * Liefert die Matrix neutral von einer evtl. Handedness Konvertierung.
+     * Returns matrix neutral from possible handedness conversion.
      * siehe auch DVK.
      *
      * @return
      */
     public Matrix4 getViewMatrix();
 
-    //public Matrix4 getWorldModelMatrix();
-
     /**
-     * 7.4.16: Ausgelagert in die Platform, weil Unity das outOfTheBox kann.
-     * 22.4.16: Die Dimesnion weiss die Platform selber.
-     * 4.11.19: Bei WebVR kann es bei Firefox sein, dass der reale Viewpoint auch mit disAbled VR(!) 1.7m hoeher ist als die Camera Position ausweist!
-     * Das kann man nicht erkennen. Darum lieber den reale Viewpoint mit reingeben.
-     * @param mouselocation
-     * @return
+     * 7.4.16: Build a picking ray derived from the current mouselocation. Thats why its located in camera.
+     * 4.11.19: Not suitable in WebVR because the real viewpoint auch mit disAbled VR(!) 1.7m higher than the claimed camera Position! So better pass real view point.
+     * 20.12.22: But what is the purpose of mouse location in VR?
      */
-    NativeRay buildPickingRay(NativeTransform realViewPosition, Point mouselocation/*,Dimension screendimensions*/);
-
-    /**
-     * 20.5.16: Ein Model an die Camera haengen, das sich damit dann im CameraSpace befindet und sich immer mit der Camera bewegt.
-     * (z.B. ein HUD). Das ist was anderes als attach! 26.11.18: Aber verwirrend. Kann auch Camera sein?
-     *
-     */
-    //MA29 public void add(NativeTransform model);
-
-    //MA29 public void detach();
-
-    /**
-     * Die Camera wird an ein Model gehangen. 26.11.18: oder umgekehrt?
-     * NeeNee, nicht umgekehrt, aber verwirrend zu SceneNode.attach. TODO vereinheitlichen MA29
-     */
-    //MA29 void attach(NativeTransform model);
+    NativeRay buildPickingRay(NativeTransform realViewPosition, Point mouselocation);
 
     double getNear();
 
@@ -75,11 +43,9 @@ public interface NativeCamera {
 
     double getFov();
 
-    //MA29 NativeTransform getTransform();
-
     /**
-     * Liefert die "echte" Camera Position unabhaengig von einem Carrier. Nur bei VR interessant.
-     *
+     * Returns "real" camera position independent from carrier. Only for VR.
+     * 20.12.22: What is it needed for?
      * @return
      */
     Vector3 getVrPosition(boolean dumpInfo);
@@ -92,8 +58,7 @@ public interface NativeCamera {
     void setLayer(int layer);
 
     /**
-     * 7.10.19 Hat die Methode ienen Sinn, weil es Bitmap sein kann?
-     * @return
+     * 7.10.19 Useful even when the platform might use bitmaps for layer. These are flattened to only one layer.
      */
     int getLayer();
 
@@ -102,7 +67,6 @@ public interface NativeCamera {
     String getName();
 
     NativeSceneNode getCarrier();
-
 
     void setClearDepth(boolean clearDepth);
 
@@ -113,7 +77,6 @@ public interface NativeCamera {
      * @param b
      */
     void setEnabled(boolean b);
-
 
     void  setFar(double far);
 }
