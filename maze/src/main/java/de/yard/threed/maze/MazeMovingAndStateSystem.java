@@ -297,6 +297,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
      * Join a new player.
      */
     private void joinPlayer(EcsEntity playerEntity, Point launchPosition, Team team) {
+        logger.debug("New player joins: " + playerEntity + "for team "+ team);
         //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
         //ist.
         // 14.2.22: More consistent approach. Independent from VR mode have a avatar and observer independent from each other, but
@@ -568,21 +569,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             diamond.addComponent(new DiamondComponent(b));
             Scene.getCurrent().addToWorld(diamond.scenenode);
         }
-        // only create bullets if we have bots (2 per bot). Bullets for player are created at join time
-        /* TODO 14.3.22 Hmm for (Point b : grid.getBots()) {
-            //SceneNode p = MazeModelBuilder.buildSokobanBox();
-            SceneNode body = MazeModelBuilder.buildSimpleBody(MazeSettings.getSettings().simplerayheight, MazeSettings.getSettings().simpleraydiameter, Color.ORANGE);
-            EcsEntity bot = new EcsEntity(body);
-
-            bot.setName("Bot");
-            MoverComponent mover = new MoverComponent(body.getTransform(), true, b, new GridOrientation());
-            mover.setLocation(b);
-            bot.addComponent(mover);
-            //bot.addComponent(new InventoryComponent());
-            Scene.getCurrent().addToWorld(bot.scenenode);
-            createBullets(2, bot.getId());
-        }*/
-
+        // 20.12.22: Bullets for player are created at join time. Since bots are just a kind of multiplayer, the same applies to bots.
 
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
         SystemManager.sendEvent(new Event(EventRegistry.EVENT_MAZE_LOADED, new Payload(grid)));
@@ -592,12 +579,15 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     }
 
     private void createBullets(int cnt, int owner) {
+        logger.debug("create "+cnt+" Bullets for "+owner);
         for (int i = 0; i < cnt; i++) {
             SceneNode ball = MazeModelBuilder.buildSimpleBall(0.3, MazeSettings.bulletColor);
             EcsEntity e = new EcsEntity(ball);
             BulletComponent bulletComponent = new BulletComponent(owner);
             e.addComponent(bulletComponent);
             e.setName("bullet");
+            // a new bullet related to an owner should initially be hidden because its in the inventory of the owner.
+            bulletComponent.collectedBy(owner);
         }
     }
 

@@ -18,8 +18,10 @@ import de.yard.threed.maze.testutils.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**
@@ -142,9 +144,50 @@ public class MazeSceneTest {
     }
 
     /**
+     * A monster is a bot player.
+     * ##########
+     * #   M    #
+     * #  D# #  #
+     * #   # #  #
+     * #    P D #
+     * ##########
+     */
+    @Test
+    public void test_P_Simple() {
+        setup("maze/Maze-P-Simple.txt", false);
+
+        assertEquals(2, Configuration.getDefaultConfiguration().size());
+
+        assertTrue(SystemState.readyToJoin());
+
+        EcsEntity user = UserSystem.getInitialUser();
+        assertNotNull(user);
+        // The default maze user has an empty user name
+        assertEquals("", user.getName(), "user name");
+        MoverComponent mc = MoverComponent.getMoverComponent(user);
+        TestUtil.assertPoint("player location", new Point(5, 1), mc.getLocation());
+
+        assertEquals(1 + 3 + 1 + 3 + 2, SystemManager.findEntities((EntityFilter) null).size(),
+                "number of entites (2player with 3 bullets each, 2 diamonds)");
+
+        assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(MazeUtils.getMainPlayer()).toString(), "initial orientation");
+        assertEquals(new Point(5, 1).toString(), MazeUtils.getMoverposition(MazeUtils.getMainPlayer()).toString(), "initial location");
+
+        List<EcsEntity> bullets = SystemManager.findEntities(e -> e.getComponent(BulletComponent.TAG) != null);
+        assertEquals(6,bullets.size());
+        // Initially bullets are in the inventory of the player and should be hidden
+        for (EcsEntity bullet:bullets){
+            BulletComponent bulletComponent = BulletComponent.getBulletComponent(bullet);
+            assertTrue(bulletComponent.isHidden());
+        }
+
+    }
+
+    /**
      * Needs parameter, so no @Before
      */
     private void setup(String gridname, boolean gridTeleporterEnabled) {
+        Configuration.reset();
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.maze.MazeScene");
         properties.put("argv.initialMaze", gridname);

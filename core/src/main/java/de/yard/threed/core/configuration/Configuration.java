@@ -93,4 +93,11 @@ public class Configuration {
         }
         return defaultConfiguration;
     }
+
+    /**
+     * Needed for testing.
+     */
+    public static void reset() {
+        defaultConfiguration = null;
+    }
 }

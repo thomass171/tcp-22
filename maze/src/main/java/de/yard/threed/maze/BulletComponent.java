@@ -30,6 +30,8 @@ public class BulletComponent extends ItemComponent {
     public BulletComponent(int owner) {
         super(owner);
         state = 0;
+        // a new bullet related to an owner should initially be hidden because its in the inventory of the owner.
+        // But hide() is not yet available. So its up to the creatr to hide it.
     }
 
     public void launchBullet(Direction direction, String origin) {

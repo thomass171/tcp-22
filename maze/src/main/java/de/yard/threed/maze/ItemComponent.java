@@ -11,6 +11,9 @@ import de.yard.threed.engine.ecs.EcsHelper;
 
 /**
  * super class for all items.
+ * An item might be in the inventory of a player (collected), where it should not be visible at all. It is
+ * hidden by scaling the size to 0.
+ *
  * Created by thomass on 08.04.21.
  */
 public abstract class ItemComponent extends EcsComponent implements GridItem {
@@ -77,6 +80,10 @@ public abstract class ItemComponent extends EcsComponent implements GridItem {
     @Override
     public int getId() {
         return getEntityId();
+    }
+
+    public boolean isHidden() {
+        return savedScale != null;
     }
 
     /**

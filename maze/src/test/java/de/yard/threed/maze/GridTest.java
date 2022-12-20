@@ -26,8 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 /**
- * Tests without ECS (See MazeTest for tests with ECS).
- * Auch fuer GridState, MazeTerrain, Direction und GridOrientation.
+ * Tests without ECS (See MazeTest for tests with ECS) and without visuals.
+ * Just for testing the grid (the maze logic).
+ * Also for GridState, MazeTerrain, Direction and GridOrientation.
  * <p>
  * <p>
  * Created by thomass on 15.07.15.
