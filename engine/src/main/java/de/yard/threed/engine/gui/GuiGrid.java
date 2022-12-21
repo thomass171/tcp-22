@@ -285,14 +285,14 @@ public class GuiGrid extends SceneNode implements Menu {
         return buildForCamera(camera, mode, columns, rows, background, false);
     }
     /**
-     * Alternative zu BrowsMenu.
+     * Alternative zu BrowsMenu. Used outside tcp-22.
      */
-    /*18.12.22 public static GuiGrid buildSingleColumnFromMenuitems(DimensionF dimension, double zpos, double buttonzpos, MenuItem[] menuitems) {
+    public static GuiGrid buildSingleColumnFromMenuitems(DimensionF dimension, double zpos, double buttonzpos, MenuItem[] menuitems) {
         // this.camera = camera;
         /*this.dimension = dimension;
         this.menuitems = menuitems;
         this.zpos = zpos;
-        this.buttonzpos = buttonzpos;* /
+        this.buttonzpos = buttonzpos;*/
         int rows = menuitems.length;
         GuiGrid guiGrid = new GuiGrid(dimension, zpos, buttonzpos, 3, 1, rows, Color.BLACK_FULLTRANSPARENT);
 
@@ -300,7 +300,7 @@ public class GuiGrid extends SceneNode implements Menu {
             guiGrid.addButton(null, 0, rows - 1 - i, 1, menuitems[i].guiTexture, menuitems[i].buttonDelegate);
         }
         return guiGrid;
-    }*/
+    }
 
     /**
      * @param nearplaneSize

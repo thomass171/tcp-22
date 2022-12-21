@@ -78,6 +78,6 @@ public class MazeGeneratorTest {
     private Grid buildSimpleGrid(MazeGenerator generator, int width, int height) throws InvalidMazeException {
         List<List<StartPosition>> startPositions = Arrays.asList(Arrays.asList(new StartPosition(new Point(4, 1), false)));
         List<Point> destinations = Arrays.asList(new Point(2, 3));
-        return generator.base(new Dimension(width, height), destinations, startPositions);
+        return generator.baseGrid(new Dimension(width, height), destinations, startPositions);
     }
 }

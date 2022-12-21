@@ -89,29 +89,29 @@ public class SceneLoader extends AsciiLoader {
         return logger;
     }
 
-    private void addObject(NativeJsonObject object, List<PortableMaterial> materials, PortableModelList ppfile) throws InvalidDataException {
+    private void addObject(NativeJsonObject obj, List<PortableMaterial> materials, PortableModelList ppfile) throws InvalidDataException {
         PortableModelDefinition pmd = new PortableModelDefinition();
 
-        NativeJsonValue v = object.get("name");
+        NativeJsonValue v = obj.get("name");
         if (v != null) {
             pmd.name = v.isString().stringValue();
         }
 
-        PortableMaterial material = buildMaterial(object.get("material").isString());
+        PortableMaterial material = buildMaterial(obj.get("material").isString());
         materials.add(material);
-        buildGeometry(object.get("geometry").isString(), pmd, material.getName());
+        buildGeometry(obj.get("geometry").isString(), pmd, material.getName());
 
-        v = object.get("position");
+        v = obj.get("position");
         if (v != null) {
             pmd.translation = ParsingHelper.getVector3(v.isString().stringValue());
         }
         //TODO rotation
-        v = object.get("scale");
+        v = obj.get("scale");
         if (v != null) {
             pmd.scale = ParsingHelper.getVector3(v.isString().stringValue());
         }
 
-        v = object.get("parent");
+        v = obj.get("parent");
         if (v != null) {
             ppfile.addModel(pmd, v.isString().stringValue());
         } else {

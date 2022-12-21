@@ -159,6 +159,19 @@ For avoiding URL de/encoding issues, ADDITIONALBUNDLE parts which are URLs need 
 
 Don't forget to allow access in your web server by setting corresponding CORS header.
 
+# Releases
+This is the release list In terms of installations to the examples hosting
+server used from https://thomass171.github.io/tcp-22/tcp-22.html. Every release contains lots of bug fixes.
+Only major changes are listed here.
+
+## 2021-06
+Initial release
+## 2022-04
+Major changes:
+  * Additional 'P' style maze games 
+## 2022-12
+Major changes:
+  * VR moving in mazes by controller stick instead of using teleport location marker.
 # Technical Details
 
 ## Architecture

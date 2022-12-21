@@ -26,7 +26,7 @@ public class MazeGenerator {
         this.intProvider = intProvider;
     }
 
-    public Grid base(Dimension dimension, List<Point> destinations, List<List<StartPosition>> initialPositions) throws InvalidMazeException {
+    public Grid baseGrid(Dimension dimension, List<Point> destinations, List<List<StartPosition>> initialPositions) throws InvalidMazeException {
 
         int width = dimension.getWidth();
         int height = dimension.getHeight();
