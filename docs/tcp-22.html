@@ -34,7 +34,7 @@ w3-container: HTML container with 16px left and right padding (Container Class)
     <header class="w3-container w3-center w3-padding-32 w3-grey">
         <h1 class="">Tcp-22</h1>
         <p class="">A cross platform 3D graphics meta engine for Java</p>
-        <p class="">(still WiP!)</p>
+        <p class="">(still WiP on <a href="https://github.com/thomass171/tcp-22" target="_blank">Github</a>!)</p>
         <p id="debuginfo" style="font-size:8px;color:yellow"></p>
     </header>
 
@@ -101,10 +101,13 @@ w3-container: HTML container with 16px left and right padding (Container Class)
             can be defined.
             <div class="w3-row-padding w3-padding-16">
                 <!--Sokoban-->
-                <div class="w3-half">
+                <div class="w3-third">
                     <div class="w3-card-2">
                         <div class="w3-container">
                             <h3>Sokoban</h3>
+                            <div class="w3-container w3-center">
+                                <img src="Maze-S-Preview.png" style="width:100%">
+                            </div>
                             <p>The famous game in a first person 3D view. Move the boxes to the indicated locations.
                                 This
                                 might
@@ -133,10 +136,13 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                     </div>
                 </div>
                 <!--Mazes-->
-                <div class="w3-half">
+                <div class="w3-third">
                     <div class="w3-card-2">
                         <div class="w3-container">
                             <h3>Mazes</h3>
+                            <div class="w3-container w3-center">
+                                <img src="Maze-M-Preview.png" style="width:100%">
+                            </div>
                             <p>Just a maze. No boxes to move and no items to collect. Objective
                             is to find the exit. But be aware of monster that might bother you.</p>
 
@@ -156,10 +162,13 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                     </div>
                 </div>
                 <!--P-Man-->
-                <div class="w3-half">
+                <div class="w3-third">
                     <div class="w3-card-2">
                         <div class="w3-container">
                             <h3>P-Man</h3>
+                            <div class="w3-container w3-center">
+                                <img src="Maze-P-Preview.png" style="width:100%">
+                            </div>
                             <p>Objective is to collect all diamonds in a maze. Be aware of monster that might bother you.</p>
                             <select class="w3-select  " id="sel_sceneBox2">
                                 <option value="maze/Maze-P-Simple.txt">P Simple</option>
@@ -178,32 +187,33 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                 </div>
             </div>
 
-            <!-- accordion for showing additional information optionally-->
-            <h4>Additional information about mazes</h4>
-            <p></p>
+            <!-- accordion for showing additional information optionally, but shown by default-->
+            <!--<h4>Additional information about mazes</h4>
+            <p></p>-->
 
-            <button onclick="toggleAccordion('acc_notation')"
+            <!--<button onclick="toggleAccordion('acc_notation')"
                     class="w3-button w3-block w3-round w3-khaki w3-left-align">Maze level definition
             </button>
             <div id="acc_notation" class="w3-container w3-hide">
                 <p>t.b.c.</p>
-            </div>
+            </div>-->
             <button onclick="toggleAccordion('acc_gameplay')"
                     class="w3-button w3-block w3-round w3-khaki w3-left-align">Maze gameplay
             </button>
-            <div id="acc_gameplay" class="w3-container w3-hide">
-                <p>t.b.c.</p>
+            <div id="acc_gameplay" class="w3-container w3-show">
+                <p>Pulling a box needs a gap between box and player. Firing is only possible if the player has bullets
+                    (see inventory) and orthogonally.</p>
             </div>
             <button onclick="toggleAccordion('acc_usercontrols')"
                     class="w3-button w3-block w3-round w3-khaki w3-left-align">Maze user controls
             </button>
-            <div id="acc_usercontrols" class="w3-container w3-hide">
+            <div id="acc_usercontrols" class="w3-container w3-show">
                 <div class="w3-row-padding w3-padding-16">
                     <div class="w3-third">
                         <div class="w3-card-2">
                             <div class="w3-container">
                                 <h3>Keyboard</h3>
-                                <p>Use arrow key for moving.</p>
+                                <p>Use arrow keys for moving and space for firing. Pull box by 'P'.</p>
                             </div>
                         </div>
                     </div>
@@ -211,7 +221,9 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                         <div class=" w3-card-2">
                             <div class="w3-container">
                                 <h3>Touchscreen</h3>
-                                <p>Move by touching segments on the screen.</p>
+                                <p>Move by touching segments 3,5,7 on the screen.
+                                    <img src="SegmentGrid.png" style="width:50%">
+                                    Segment 1 is for opening the control menu. Segment 4 is for firing.
                             </div>
                         </div>
                     </div>
@@ -219,13 +231,9 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                         <div class=" w3-card-2">
                             <div class="w3-container">
                                 <h3>VR</h3>
-                                <p>Use left trigger for teleporting to marked element. Use right trigger to do an action
-                                    like
-                                    moving
-                                    a
-                                    box. Note: Only the trigger button of a controller is used. The left controller has a
-                                    wristwatch
-                                    controller with buttons for</p>
+                                <p>Use left or right controller stick for moving. Use right trigger to do an action like
+                                    moving a box. The left controller has a wristwatch
+                                    menu with buttons for</p>
                                 <ul>
                                     <li>Move VR position up/down</li>
                                     <li>Pulling a box</li>
