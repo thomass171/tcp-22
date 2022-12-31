@@ -14,7 +14,7 @@ import de.yard.threed.engine.platform.common.*;
  * Ob man das auch im server einsetzen kann, ist aber unklar. Ein listen() geht hier z.B. nicht.
  * Ich lass das mal. Das Gegenstueck ist jetzt NetworkSystem. Aber mit Superklasse.
  *
- *
+ * 28.12.22: Is it really useful to have this as a dedicated system? Shouldn't the platform just extend the event bus?
  *
  * <p>
  * Created by thomass on 16.02.21.

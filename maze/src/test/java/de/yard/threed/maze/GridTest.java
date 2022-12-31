@@ -36,11 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class GridTest {
     static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
 
-    Grid grid;
-    // not the interface. Really tests the traditional implementation.
-    MazeTerrain terrain;
-    GridState gridState;
-
     /**
      * +---------+
      * |         |
@@ -239,8 +234,9 @@ public class GridTest {
     @Test
     public void testTerrainWikipedia() throws Exception {
 
-        loadGridAndTerrain("skbn/SokobanWikipedia.txt", 1);
-
+        Grid grid = loadGridAndTerrain("skbn/SokobanWikipedia.txt", 1);
+        MazeTerrain terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());
+        terrain.visualizeGrid(grid);
         TestUtil.assertEquals("tiles", grid.getMaxWidth() * grid.getHeight(), terrain.getTiles().values().size());
     }
 
@@ -259,7 +255,9 @@ public class GridTest {
     @Test
     public void testArea15x10() throws Exception {
 
-        loadGridAndTerrain("maze/Area15x10.txt", 2);
+        Grid grid = loadGridAndTerrain("maze/Area15x10.txt", 2);
+        MazeTerrain terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());
+        terrain.visualizeGrid(grid);
 
         SceneNode[] pillar = terrain.getPillar(new Point(5, 3));
         TestUtil.assertNull("top of 5,3", pillar[0]);
@@ -286,7 +284,7 @@ public class GridTest {
         TestUtil.assertNull("right of 6,2", pillar[1]);
         TestUtil.assertNotNull("center of 6,2", pillar[2]);
 
-        initContent(new Point[]{new Point(6, 4), new Point(6, 8)}, new Point[]{},
+        GridState gridState = initContent(grid, new Point[]{new Point(6, 4), new Point(6, 8)}, new Point[]{},
                 new Point[]{new Point(11, 2), new Point(6, 3), new Point(6, 6), new Point(10, 6)});
 
         GridMover player = gridState.players.get(0);
@@ -332,9 +330,9 @@ public class GridTest {
     @Test
     public void testM_30x20() throws Exception {
 
-        loadGridAndTerrain("maze/Maze-M-30x20.txt", 2);
+        Grid grid = loadGridAndTerrain("maze/Maze-M-30x20.txt", 2);
 
-        initContent(new Point[]{new Point(28, 3), new Point(21, 11), new Point(22, 11), new Point(23, 11)}, new Point[]{},
+        GridState gridState = initContent(grid, new Point[]{new Point(28, 3), new Point(21, 11), new Point(22, 11), new Point(23, 11)}, new Point[]{},
                 new Point[]{});
         assertFalse(gridState.isSolved(grid.getMazeLayout()));
 
@@ -378,9 +376,9 @@ public class GridTest {
     @Test
     public void testP_Simple() throws Exception {
 
-        loadGridAndTerrain("maze/Maze-P-Simple.txt", 2);
+        Grid grid = loadGridAndTerrain("maze/Maze-P-Simple.txt", 2);
 
-        initContent(new Point[]{new Point(5, 1), new Point(4, 4)}, new Point[]{}, new Point[]{new Point(7, 1), new Point(3, 3)});
+        GridState gridState = initContent(grid, new Point[]{new Point(5, 1), new Point(4, 4)}, new Point[]{}, new Point[]{new Point(7, 1), new Point(3, 3)});
 
         GridMover player = gridState.players.get(0);
         TestUtils.move(player, gridState, GridMovement.Right, grid.getMazeLayout(), new Point(6, 1));
@@ -406,12 +404,12 @@ public class GridTest {
     @Test
     public void shouldNotWalkOnPlayer() throws Exception {
 
-        loadGridAndTerrainFromString("##########\n" +
+        Grid grid = loadGridAndTerrainFromString("##########\n" +
                 "#   @    #\n" +
                 "#   @    #\n" +
                 "##########", 1);
 
-        List<GridMover> players = initPlayer(new Point(4, 1), new Point(4, 2));
+        List<GridMover> players = initPlayer(grid, new Point(4, 1), new Point(4, 2));
 
         TestUtils.move(players.get(0), players, Collections.emptyList(), GridMovement.Forward, grid.getMazeLayout(), new Point(4, 1));
     }
@@ -419,13 +417,13 @@ public class GridTest {
     @Test
     public void shouldNotPushPlayer() throws Exception {
 
-        loadGridAndTerrainFromString("##########\n" +
+        Grid grid = loadGridAndTerrainFromString("##########\n" +
                 "#        #\n" +
                 "#   @    #\n" +
                 "#   @    #\n" +
                 "##########", 1);
 
-        List<GridMover> players = initPlayer(new Point(4, 1), new Point(4, 2));
+        List<GridMover> players = initPlayer(grid, new Point(4, 1), new Point(4, 2));
 
         // Neither move ...
         TestUtils.move(players.get(0), players, Collections.emptyList(), GridMovement.Forward, grid.getMazeLayout(), new Point(4, 1));
@@ -436,13 +434,13 @@ public class GridTest {
     @Test
     public void shouldNotPushOnPlayer() throws Exception {
 
-        loadGridAndTerrainFromString("##########\n" +
+        Grid grid = loadGridAndTerrainFromString("##########\n" +
                 "#   @    #\n" +
                 "#   $    #\n" +
                 "#   @    #\n" +
                 "##########", 2);
 
-        List<GridMover> players = initPlayer(new Point(4, 1), new Point(4, 3));
+        List<GridMover> players = initPlayer(grid, new Point(4, 1), new Point(4, 3));
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
 
         // Neither move ...
@@ -454,13 +452,13 @@ public class GridTest {
     @Test
     public void shouldNotPullOnPlayer() throws Exception {
 
-        loadGridAndTerrainFromString("##########\n" +
+        Grid grid = loadGridAndTerrainFromString("##########\n" +
                 "#   $    #\n" +
                 "#   @    #\n" +
                 "#   @    #\n" +
                 "##########", 1);
 
-        List<GridMover> players = initPlayer(new Point(4, 1), new Point(4, 2));
+        List<GridMover> players = initPlayer(grid, new Point(4, 1), new Point(4, 2));
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
 
         // Neither move ...
@@ -477,12 +475,12 @@ public class GridTest {
     @Test
     public void testCollect() throws Exception {
 
-        loadGridAndTerrainFromString("##########\n" +
+        Grid grid = loadGridAndTerrainFromString("##########\n" +
                 "#   D    #\n" +
                 "#   @    #\n" +
                 "##########", 1);
 
-        initContent(new Point[]{new Point(4, 1)}, new Point[]{}, new Point[]{new Point(4, 2)});
+        GridState gridState = initContent(grid, new Point[]{new Point(4, 1)}, new Point[]{}, new Point[]{new Point(4, 2)});
         TestUtil.assertEquals("diamonds", 1, gridState.items.size());
 
         TestUtils.move(gridState.players.get(0), gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 2));
@@ -493,13 +491,13 @@ public class GridTest {
     @Test
     public void shouldNotEnterOtherHome() throws Exception {
 
-        loadGridAndTerrainFromString("##########\n" +
+        Grid grid = loadGridAndTerrainFromString("##########\n" +
                 "#   @    #\n" +
                 "#        #\n" +
                 "#   @    #\n" +
                 "##########", 2);
 
-        List<GridMover> players = initPlayer(new Point(4, 1), new Point(4, 3));
+        List<GridMover> players = initPlayer(grid, new Point(4, 1), new Point(4, 3));
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
 
         // just leave home
@@ -514,13 +512,13 @@ public class GridTest {
     @Test
     public void testSimpleMaze() throws Exception {
 
-        loadGridAndTerrainFromString("##########\n" +
+        Grid grid = loadGridAndTerrainFromString("##########\n" +
                 "#   .    #\n" +
                 "#        #\n" +
                 "#   @    #\n" +
                 "##########", 1);
 
-        initContent(new Point[]{new Point(4, 1)}, new Point[]{}, new Point[]{});
+        GridState gridState = initContent(grid, new Point[]{new Point(4, 1)}, new Point[]{}, new Point[]{});
 
         assertFalse(gridState.isSolved(grid.getMazeLayout()));
 
@@ -529,20 +527,22 @@ public class GridTest {
         assertTrue(gridState.isSolved(grid.getMazeLayout()));
     }
 
-    private void loadGridAndTerrain(String mazeName, int expectedNumberOfTeams) throws InvalidMazeException {
-        loadGridAndTerrainFromString(TestHelper.getDataBundleString("maze", mazeName), expectedNumberOfTeams);
+    public static Grid loadGridAndTerrain(String mazeName, int expectedNumberOfTeams) throws InvalidMazeException {
+        return loadGridAndTerrainFromString(TestHelper.getDataBundleString("maze", mazeName), expectedNumberOfTeams);
     }
 
-    private void loadGridAndTerrainFromString(String gridData, int expectedNumberOfTeams) throws InvalidMazeException {
-        grid = Grid.loadByReader(new StringReader(gridData)).get(0);
+    public static Grid loadGridAndTerrainFromString(String gridData, int expectedNumberOfTeams) throws InvalidMazeException {
+        Grid grid = Grid.loadByReader(new StringReader(gridData)).get(0);
         assertEquals(expectedNumberOfTeams, grid.getMazeLayout().getNumberOfTeams());
 
-        terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());
-        terrain.visualizeGrid(grid);
+        return grid;
     }
 
-    private void initContent(Point[] expectedPlayerLocations, Point[] expectedBoxesLocations, Point[] expectedItemsLocations) {
-        List<GridMover> players = initPlayer(expectedPlayerLocations);
+    /**
+     * Monster are also player.
+     */
+    public static GridState initContent(Grid grid, Point[] expectedPlayerLocations, Point[] expectedBoxesLocations, Point[] expectedItemsLocations) {
+        List<GridMover> players = initPlayer(grid, expectedPlayerLocations);
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
         for (int i = 0; i < boxes.size(); i++) {
             TestUtil.assertPoint(expectedBoxesLocations[i], boxes.get(i).getLocation());
@@ -551,10 +551,10 @@ public class GridTest {
         for (int i = 0; i < items.size(); i++) {
             TestUtil.assertPoint(expectedItemsLocations[i], items.get(i).getLocation());
         }
-        gridState = new GridState(players, boxes, items);
+        return new GridState(players, boxes, items);
     }
 
-    private List<GridMover> initPlayer(Point... points) {
+    public static List<GridMover> initPlayer(Grid grid, Point... points) {
         List<Point> usedLaunchPositions = new ArrayList<Point>();
         List<GridMover> players = new ArrayList<>();
 

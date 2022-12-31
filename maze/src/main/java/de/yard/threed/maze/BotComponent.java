@@ -57,4 +57,8 @@ public class BotComponent extends EcsComponent {
     public boolean isMonster() {
         return monster;
     }
+
+    public void setBotAI(BotAI botAI){
+        this.botAI = botAI;
+    }
 }

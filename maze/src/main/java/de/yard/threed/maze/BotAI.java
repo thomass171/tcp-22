@@ -9,4 +9,6 @@ public interface BotAI {
      * For simplicity pass far too much data, even this is not quite 'fair'
      */
     Request getNextRequest(GridMover mover, GridState gridState, MazeLayout layout, IntProvider rand);
+
+    String getName();
 }

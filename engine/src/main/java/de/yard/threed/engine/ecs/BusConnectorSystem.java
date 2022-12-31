@@ -16,6 +16,8 @@ import de.yard.threed.engine.platform.common.*;
  * <p>
  * Common super class for client and server.
  * <p>
+ * * 28.12.22: Is it really useful to have this as a dedicated system? Shouldn't the platform just extend the event bus?
+ *
  * Created by thomass on 16.02.21.
  */
 public abstract class BusConnectorSystem extends DefaultEcsSystem {

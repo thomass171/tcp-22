@@ -11,7 +11,6 @@ import de.yard.threed.engine.ecs.*;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
-import de.yard.threed.core.Payload;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
@@ -488,6 +487,56 @@ public class MazeTest {
         }, 0.1, 100000000);
 
         // Anyway, user is on home filed and cannot be hit.
+    }
+
+    /**
+     * Without diamonds its solved immediately.
+     */
+    @Test
+    public void testMultiBot() throws Exception {
+
+        setup("##########\n" +
+                "###   D  #\n" +
+                "#@@      #\n" +
+                "#        #\n" +
+                "#   @    #\n" +
+                "##########", true);
+
+        // initMaze_P not suited for bot system
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
+        sceneRunner.runLimitedFrames(3);
+
+        assertEquals(1 + 3 + 2 * (1 + 3) + 1, SystemManager.findEntities((EntityFilter) null).size(),
+                "number of entites (one player+3 bullets+2 bots with bullets +1 diamond)");
+        assertEquals(3, MazeUtils.getPlayer().size(), "number of player");
+        EcsEntity user = MazeUtils.getPlayerByUsername("u0");
+        assertNotNull(user);
+        EcsEntity bot0 = MazeUtils.getPlayer().get(1);
+        assertNotNull(bot0);
+        EcsEntity bot1 = MazeUtils.getPlayer().get(2);
+        assertNotNull(bot1);
+        assertEquals(3, MazeUtils.getBullets(bot0).size());
+
+        // bot must/will leave home field to make firing possible. By default it will wait real time for next move.
+
+        TestUtils.assertPosition(bot0, new Point(1, 3));
+        assertEquals(Direction.E.toString(), MazeUtils.getPlayerorientation(bot0).getDirection().toString(), "bot0 initial orientation");
+        TestUtils.assertPosition(bot1, new Point(2, 3));
+        assertEquals(Direction.E.toString(), MazeUtils.getPlayerorientation(bot1).getDirection().toString(), "bot1 initial orientation");
+
+        DeterministicBotAI dbAI0=new DeterministicBotAI(new Request[]{new Request(TRIGGER_REQUEST_FORWARD)});
+        DeterministicBotAI dbAI1=new DeterministicBotAI(new Request[]{new Request(TRIGGER_REQUEST_FORWARD)});
+        BotComponent.getBotComponent(bot0).setBotAI(dbAI0);
+        BotComponent.getBotComponent(bot1).setBotAI(dbAI1);
+        // bot by default will wait real time for next move.
+        EcsTestHelper.processUntil(() -> {
+            return dbAI0.index < 1 && dbAI1.index < 1;
+        }, 0.1, 100000000);
+
+        //TestUtils.assertPosition(bot0, new Point(2, 3));
+        TestUtils.assertPosition(bot1, new Point(3, 3));
+
+
     }
 
     /**

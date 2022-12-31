@@ -17,7 +17,8 @@ public class SimpleBotAI implements BotAI {
 
         GridMover nextPlayer;
         if (!mover.getTeam().homeFields.contains(mover.getLocation()) && (nextPlayer = gridState.findNextPlayer(mover.getLocation(), mover.getOrientation(), layout)) != null) {
-            if (Point.getDistance(mover.getLocation(), nextPlayer.getLocation()) < 3) {
+            // don't fire own team member.
+            if (mover.getTeam().id != nextPlayer.getTeam().id && Point.getDistance(mover.getLocation(), nextPlayer.getLocation()) < 3) {
                 // Different from VR player, for bots firing direction is the same as orientation.
                 return BulletSystem.buildFireRequest(mover.getId(), mover.getOrientation().getDirectionForMovement(GridMovement.Forward));
             }
@@ -28,5 +29,10 @@ public class SimpleBotAI implements BotAI {
         }
         // just turn left or right
         return new Request((rand.nextInt() % 2 == 0) ? RequestRegistry.TRIGGER_REQUEST_TURNLEFT : RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+    }
+
+    @Override
+    public String getName() {
+        return "SimpleBotAI";
     }
 }
