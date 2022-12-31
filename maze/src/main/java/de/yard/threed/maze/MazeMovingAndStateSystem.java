@@ -283,10 +283,10 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             EcsEntity playerEntity = (EcsEntity) evt.getPayloadByIndex(0);
             MazeLayout layout = Grid.getInstance().getMazeLayout();
             Point launchPosition = layout.getNextLaunchPosition(usedLaunchPositions);
-            // for now only one player teams
-            Team team = new Team(usedLaunchPositions.size(), Util.buildList(launchPosition));
+
             if (launchPosition != null) {
-                joinPlayer(playerEntity, launchPosition, team);
+                int teamid = layout.getTeamByHome(launchPosition);
+                joinPlayer(playerEntity, launchPosition, teamid);
             } else {
                 logger.warn("Rejecting join request due to too may players. Currently " + usedLaunchPositions.size());
             }
@@ -296,7 +296,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     /**
      * Join a new player.
      */
-    private void joinPlayer(EcsEntity playerEntity, Point launchPosition, Team team) {
+    private void joinPlayer(EcsEntity playerEntity, Point launchPosition, int team) {
         logger.debug("New player joins: " + playerEntity + "for team "+ team);
         //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
         //ist.
@@ -552,7 +552,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //static EcsEntity buildSokobanBox(int x, int y) {
             SceneNode p = MazeModelBuilder.buildSokobanBox(/*b.getX(), b.getY()*/);
             EcsEntity box = new EcsEntity(p);
-            MoverComponent mover = new MoverComponent(p.getTransform()/*this*/, false, b, new GridOrientation(), null);
+            MoverComponent mover = new MoverComponent(p.getTransform()/*this*/, false, b, new GridOrientation(), -1);
             mover.setLocation(b);
             box.addComponent(mover);
             //return box;

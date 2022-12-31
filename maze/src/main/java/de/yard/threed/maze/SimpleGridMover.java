@@ -22,12 +22,12 @@ public class SimpleGridMover implements GridMover {
     // id to be used outside ECS.
     private int nonEcsId;
     private static int id = 1;
-    private Team team;
+    private int team;
 
     /**
      * Constructor for non ECS usage (testing, dry run).
      */
-    public SimpleGridMover(Point location, GridOrientation orientation, Team team) {
+    public SimpleGridMover(Point location, GridOrientation orientation, int team) {
         this.location = location;
         this.ownOrientation = orientation;
         this.nonEcsId = id++;
@@ -37,7 +37,7 @@ public class SimpleGridMover implements GridMover {
     /**
      * Constructor for ECS usage.
      */
-    public SimpleGridMover(Point location, GridOrientation orientation, MoverComponent parent, Team team) {
+    public SimpleGridMover(Point location, GridOrientation orientation, MoverComponent parent, int team) {
         this.location = location;
         this.ownOrientation = orientation;
         this.parent = parent;
@@ -219,7 +219,7 @@ public class SimpleGridMover implements GridMover {
     }
 
     @Override
-    public Team getTeam() {
+    public int getTeam() {
         return team;
     }
 

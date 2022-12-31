@@ -9,22 +9,23 @@ public class SimpleBotAI implements BotAI {
     /**
      * Priority of actions:
      * 1) fire at near player ahead (but not from home field)
-     * 2) forward if possible
+     * 2) forward if possible. Monster however shouldn't enter destination and solve mazes.
      * 3) turn
      */
     @Override
     public Request getNextRequest(GridMover mover, GridState gridState, MazeLayout layout, IntProvider rand) {
 
         GridMover nextPlayer;
-        if (!mover.getTeam().homeFields.contains(mover.getLocation()) && (nextPlayer = gridState.findNextPlayer(mover.getLocation(), mover.getOrientation(), layout)) != null) {
+        if (!MazeUtils.getHomesOfTeam(layout, mover.getTeam()).contains(mover.getLocation()) && (nextPlayer = gridState.findNextPlayer(mover.getLocation(), mover.getOrientation(), layout)) != null) {
             // don't fire own team member.
-            if (mover.getTeam().id != nextPlayer.getTeam().id && Point.getDistance(mover.getLocation(), nextPlayer.getLocation()) < 3) {
+            if (mover.getTeam() != nextPlayer.getTeam() && Point.getDistance(mover.getLocation(), nextPlayer.getLocation()) < 3) {
                 // Different from VR player, for bots firing direction is the same as orientation.
                 return BulletSystem.buildFireRequest(mover.getId(), mover.getOrientation().getDirectionForMovement(GridMovement.Forward));
             }
         }
 
         if (gridState.canWalk(mover.getLocation(), GridMovement.Forward, mover.getOrientation(), mover.getTeam(), layout)) {
+            //gridState.
             return new Request(RequestRegistry.TRIGGER_REQUEST_FORWARD);
         }
         // just turn left or right

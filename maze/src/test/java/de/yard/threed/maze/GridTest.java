@@ -562,10 +562,10 @@ public class GridTest {
         while ((startPosition = grid.getMazeLayout().getNextLaunchPosition(usedLaunchPositions)) != null) {
             int teamID = grid.getMazeLayout().getTeamByHome(startPosition);
             List<Point> teamHomes = grid.getMazeLayout().getStartPositionsOfTeam(teamID).stream().map(StartPosition::getPoint).collect(Collectors.toList());
-            GridMover player = MazeFactory.buildMover(startPosition, grid.getMazeLayout().getInitialOrientation(startPosition), new Team(teamID, teamHomes));
+            GridMover player = MazeFactory.buildMover(startPosition, grid.getMazeLayout().getInitialOrientation(startPosition), teamID/*new Team(teamID, teamHomes)*/);
             usedLaunchPositions.add(startPosition);
             TestUtil.assertPoint("current location player", points[players.size()], player.getLocation());
-            assertTrue(player.getTeam().homeFields.contains(points[players.size()]));
+            assertTrue(MazeUtils.getHomesOfTeam(grid.getMazeLayout(), player.getTeam()).contains(points[players.size()]));
             players.add(player);
         }
         assertEquals(points.length, players.size());

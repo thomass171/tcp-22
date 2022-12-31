@@ -125,13 +125,13 @@ public class GridState {
         return null;
     }
 
-    public boolean isOtherHomeAtDestination(Point gridposition, Direction direction, int steps, Team myTeam, MazeLayout mazeLayout) {
+    public boolean isOtherHomeAtDestination(Point gridposition, Direction direction, int steps, int myTeam, MazeLayout mazeLayout) {
         Point destination = gridposition.add(direction.multiply(steps));
         int teamIdOfDestination = mazeLayout.getTeamByHome(destination);
         if (teamIdOfDestination == -1) {
             return false;
         }
-        return teamIdOfDestination != myTeam.id;
+        return teamIdOfDestination != myTeam/*.id*/;
     }
 
     /**
@@ -162,7 +162,7 @@ public class GridState {
      *
      * @return
      */
-    public boolean canWalk(Point location, GridMovement movement, GridOrientation gridOrientation, Team team, MazeLayout mazeLayout) {
+    public boolean canWalk(Point location, GridMovement movement, GridOrientation gridOrientation, int team, MazeLayout mazeLayout) {
         Direction direction = gridOrientation.getDirectionForMovement(movement);
         if (GridState.isWallAtDestination(location, direction, 1, mazeLayout)) {
             logger.debug("cannot walk due to wall");
@@ -178,7 +178,7 @@ public class GridState {
             return false;
         }
         // don't check others for boxes (where team is null). At least for now
-        if (team != null && isOtherHomeAtDestination(location, direction, 1, team, mazeLayout)) {
+        if (team != -1/*null*/ && isOtherHomeAtDestination(location, direction, 1, team, mazeLayout)) {
             logger.debug("cannot walk due to other home");
             return false;
         }

@@ -67,7 +67,7 @@ public class BulletSystem extends DefaultEcsSystem {
 
             EcsEntity player = EcsHelper.findEntityById((int) request.getUserEntityId());
             MoverComponent mv = MoverComponent.getMoverComponent(player);
-            if (mv.isOnHomeField()) {
+            if (mv.isOnHomeField(Grid.getInstance().getMazeLayout())) {
                 logger.debug("Ignoring fire from home field");
                 // Firing is not allowed on home field. Just ignore request
             } else {
@@ -141,12 +141,12 @@ public class BulletSystem extends DefaultEcsSystem {
         for (EcsEntity player : players) {
             MoverComponent mc = MoverComponent.getMoverComponent(player);
             // don't hit myself. And player on a home filed are immune
-            if (!player.getName().equals(bc.origin) && !mc.isOnHomeField()) {
+            if (!player.getName().equals(bc.origin) && !mc.isOnHomeField(layout)) {
                 if (mc.getLocation().equals(ballLocation)) {
                     logger.debug("Hit detected of '" + player.getName() + "' with bullet by '" + bc.origin + "'");
                     bc.state = 2;
 
-                    Point p = relocationStrategy.getLocation(player);
+                    Point p = relocationStrategy.getLocation(layout, player);
                     SystemManager.putRequest(RequestRegistry.buildRelocate(player.getId(), p, null));
                     locateToGround(bullet, ballLocation);
 

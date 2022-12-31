@@ -302,4 +302,13 @@ public class MazeUtils {
         ItemComponent ic = getItemComponent(e);
         ic.collectedBy(user.getId());
     }*/
+
+    public static List<Point> getHomesOfTeam(MazeLayout layout, int teamid) {
+        List<Point> homes = new ArrayList<Point>();
+        for (StartPosition startPosition : layout.getStartPositionsOfTeam(teamid)) {
+            homes.add(startPosition.getPoint());
+        }
+        return homes;
+    }
+
 }

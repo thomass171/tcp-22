@@ -207,7 +207,7 @@ public class MazeScene extends Scene {
 
         addLight();
 
-        // last init statement. Queue login request
+        // last init statement. Queue login request for main user
         SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
 
     }

@@ -5,8 +5,8 @@ import de.yard.threed.engine.ecs.EcsEntity;
 
 public class HomeRelocationStrategy implements RelocationStrategy {
     @Override
-    public Point getLocation(EcsEntity player) {
+    public Point getLocation(MazeLayout layout, EcsEntity player) {
         MoverComponent mc = MoverComponent.getMoverComponent(player);
-        return mc.getTeam().homeFields.get(0);
+        return layout.getStartPositionsOfTeam(mc.getTeam()).get(0).getPoint();
     }
 }

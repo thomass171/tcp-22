@@ -77,8 +77,8 @@ public interface GridMover {
     int getId();
 
     /**
-     * might be null (eg. for boxes)
+     * might be null/-1 (eg. for boxes)
      * @return
      */
-    Team getTeam();
+    int getTeam();
 }

@@ -174,13 +174,71 @@ public class MazeSceneTest {
         assertEquals(new Point(5, 1).toString(), MazeUtils.getMoverposition(MazeUtils.getMainPlayer()).toString(), "initial location");
 
         List<EcsEntity> bullets = SystemManager.findEntities(e -> e.getComponent(BulletComponent.TAG) != null);
-        assertEquals(6,bullets.size());
+        assertEquals(6, bullets.size());
         // Initially bullets are in the inventory of the player and should be hidden
-        for (EcsEntity bullet:bullets){
+        for (EcsEntity bullet : bullets) {
             BulletComponent bulletComponent = BulletComponent.getBulletComponent(bullet);
             assertTrue(bulletComponent.isHidden());
         }
 
+    }
+
+    /**
+     * A monster is a bot player.
+     * ##############################
+     * #                            #
+     * #  #         # ##            #
+     * # .####         #            #
+     * ####            #        #####
+     * #    #            #          #
+     * #  ###         ####          #
+     * #  #           #             #
+     * #    #               MMM     #
+     * #                            #
+     * #  #         # ##            #
+     * #  #         # ##            #
+     * #  #         # ##            #
+     * #  ####         #            #
+     * ####            #        #####
+     * #    #            #          #
+     * #  ###         ####         @#
+     * #  #           #             #
+     * #    #                       #
+     * ##############################
+     */
+    @Test
+    public void testM_30x20() throws Exception {
+
+        setup("maze/Maze-M-30x20.txt", false);
+
+        assertEquals(2, Configuration.getDefaultConfiguration().size());
+
+        assertTrue(SystemState.readyToJoin());
+
+        EcsEntity user = UserSystem.getInitialUser();
+        assertNotNull(user);
+        // The default maze user has an empty user name
+        assertEquals("", user.getName(), "user name");
+        MoverComponent mc = MoverComponent.getMoverComponent(user);
+        TestUtil.assertPoint(new Point(28, 3), mc.getLocation(), "player location");
+
+        assertEquals(4 * (1 + 3), SystemManager.findEntities((EntityFilter) null).size(),
+                "number of entites (4 player with 3 bullets each)");
+
+        EcsEntity bot0 = MazeUtils.findPlayerByName("Bot0");
+        assertNotNull(bot0);
+        TestUtil.assertPoint(new Point(21, 12), MoverComponent.getMoverComponent(bot0).getLocation(), "bot0 location");
+        EcsEntity bot1 = MazeUtils.findPlayerByName("Bot1");
+        assertNotNull(bot1);
+        TestUtil.assertPoint(new Point(22, 12), MoverComponent.getMoverComponent(bot1).getLocation(), "bot1 location");
+        EcsEntity bot2 = MazeUtils.findPlayerByName("Bot2");
+        assertNotNull(bot2);
+        TestUtil.assertPoint(new Point(23, 12), MoverComponent.getMoverComponent(bot2).getLocation(), "bot2 location");
+
+        assertEquals(0, MoverComponent.getMoverComponent(user).getTeam());
+        assertEquals(1, MoverComponent.getMoverComponent(bot0).getTeam());
+        assertEquals(1, MoverComponent.getMoverComponent(bot1).getTeam());
+        assertEquals(1, MoverComponent.getMoverComponent(bot2).getTeam());
     }
 
     /**

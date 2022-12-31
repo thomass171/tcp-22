@@ -37,7 +37,7 @@ public class MoverComponent extends EcsComponent implements GridMover {
     private boolean player;
     //private int type = -1;
 
-    public MoverComponent(SimpleTransform movable, boolean player, Point location, GridOrientation orientation, Team team) {
+    public MoverComponent(SimpleTransform movable, boolean player, Point location, GridOrientation orientation, int team) {
         this.movable = movable;
         this.player = player;
         gridMover = new SimpleGridMover(location, orientation, this, team);
@@ -151,7 +151,7 @@ public class MoverComponent extends EcsComponent implements GridMover {
     }
 
     @Override
-    public Team getTeam() {
+    public int getTeam() {
         return gridMover.getTeam();
     }
 
@@ -365,8 +365,8 @@ public class MoverComponent extends EcsComponent implements GridMover {
         catchRotation();
     }
 
-    public boolean isOnHomeField() {
-        return getTeam().homeFields.contains(getLocation());
+    public boolean isOnHomeField(MazeLayout layout) {
+        return MazeUtils.getHomesOfTeam(layout, getTeam()).contains(getLocation());
     }
 }
 

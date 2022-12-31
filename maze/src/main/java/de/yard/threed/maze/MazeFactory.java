@@ -25,10 +25,10 @@ public class MazeFactory {
      */
     public static GridMover buildMover(Point initialLocation) {
 
-        return buildMover(initialLocation, new GridOrientation(), null);
+        return buildMover(initialLocation, new GridOrientation(), -1);
     }
 
-    public static GridMover buildMover(Point initialLocation, GridOrientation initialOrientation, Team team) {
+    public static GridMover buildMover(Point initialLocation, GridOrientation initialOrientation, int team) {
 
         return new SimpleGridMover(initialLocation, initialOrientation, team);
     }
@@ -41,7 +41,7 @@ public class MazeFactory {
      */
     public static List<GridMover> buildMovers(List<Point> initialLocation) {
 
-        Team team = null;
+        int team = -1;
         List<GridMover> mover = new ArrayList<GridMover>();
         for (Point p : initialLocation) {
             mover.add(new SimpleGridMover(p, new GridOrientation(), team));
