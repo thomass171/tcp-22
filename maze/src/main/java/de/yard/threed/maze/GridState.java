@@ -349,4 +349,10 @@ public class GridState {
         }
         //return null;
     }
+
+    public boolean isDestinationAhead(Point location, GridOrientation gridOrientation, MazeLayout mazeLayout) {
+        Direction direction = gridOrientation.getDirectionForMovement(GridMovement.Forward);
+        Point destination = location.add(direction.multiply(1));
+        return mazeLayout.isDestinationAt(destination);
+    }
 }

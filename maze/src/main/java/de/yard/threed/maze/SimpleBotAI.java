@@ -25,8 +25,10 @@ public class SimpleBotAI implements BotAI {
         }
 
         if (gridState.canWalk(mover.getLocation(), GridMovement.Forward, mover.getOrientation(), mover.getTeam(), layout)) {
-            //gridState.
-            return new Request(RequestRegistry.TRIGGER_REQUEST_FORWARD);
+            // don't solve
+            if (!gridState.isDestinationAhead(mover.getLocation(),  mover.getOrientation(), layout)) {
+                return new Request(RequestRegistry.TRIGGER_REQUEST_FORWARD);
+            }
         }
         // just turn left or right
         return new Request((rand.nextInt() % 2 == 0) ? RequestRegistry.TRIGGER_REQUEST_TURNLEFT : RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);

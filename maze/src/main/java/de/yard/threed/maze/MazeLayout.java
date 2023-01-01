@@ -126,4 +126,8 @@ public class MazeLayout {
         newWalls.addAll(additionalWall);
         return new MazeLayout(newWalls, this.destinations, this.initialPosition, this.maxwidth, this.height, this.fields);
     }
+
+    public boolean isDestinationAt(Point p) {
+        return destinations.contains(p);
+    }
 }

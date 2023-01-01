@@ -22,10 +22,10 @@ public class SimpleBotAITest {
     static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
 
     @Test
-    public void testNotFiringSameTeam() throws Exception {
+    public void testNotFiringSameTeamAndNotSolving() throws Exception {
 
         Grid grid = GridTest.loadGridAndTerrainFromString("##########\n" +
-                "#  MM    #\n" +
+                "#  MM   .#\n" +
                 "#    @   #\n" +
                 "##########", 2);
 
@@ -53,5 +53,11 @@ public class SimpleBotAITest {
         request = botAI.getNextRequest(leftBot, gridState, grid.getMazeLayout(), intProvider);
         // should now fire player
         assertEquals(BulletSystem.TRIGGER_REQUEST_FIRE.getLabel(), request.getType().getLabel());
+
+        // right bot should not solve
+        TestUtils.move(rightBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(7, 2));
+        request = botAI.getNextRequest(rightBot, gridState, grid.getMazeLayout(), intProvider);
+        assertEquals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
+
     }
 }
