@@ -25,6 +25,7 @@ while getopts "b:s" o; do
             ;;
         s)
             COPYCMD="scp -pr"
+            echo "Using scp. Be sure to delete deprecated files by hand."
             ;;
         *)
             usage
@@ -44,6 +45,7 @@ fi
 echo Ready to deploy to $HOSTDIR. Hit CR
 read
 
+# rsync copy will delete deprecated files
 $COPYCMD $BUILDDIR/js $HOSTDIR
 $COPYCMD $BUILDDIR/webgl $HOSTDIR
 $COPYCMD $BUILDDIR/threejs $HOSTDIR

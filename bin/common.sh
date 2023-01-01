@@ -21,7 +21,8 @@ CLASSPATH=$CLASSPATH:$MR/org/apache/commons/commons-compress/1.8.1/commons-compr
 
 export CLASSPATH MR
 
-COPYCMD="rsync -rt --chmod=ugo+rx"
+# 1.1.23 Delete no longer existing files because GWT generated files are not unique
+COPYCMD="rsync -rt --chmod=ugo+rx --delete"
 
 error() {
         echo $*
