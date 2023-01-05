@@ -1,6 +1,7 @@
 package de.yard.threed.engine.test;
 
 import de.yard.threed.engine.Scene;
+import de.yard.threed.engine.SceneMode;
 
 /**
  * Nur eine Huelle, um die Platform Tests in der Engine aufzurufen.
@@ -10,7 +11,7 @@ import de.yard.threed.engine.Scene;
  */
 public class MainTestScene extends Scene {
     @Override
-    public void init(boolean forServer) {
+    public void init(SceneMode sceneMode) {
         MainTest.runTest(null);
     }
 

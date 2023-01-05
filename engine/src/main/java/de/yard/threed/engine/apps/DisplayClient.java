@@ -39,10 +39,13 @@ import de.yard.threed.engine.platform.common.Settings;
  *
  * 15.2.21: Nachfolger der mal angedachten GenericScene.
  * 24.1.22: Still a valid concept?
+ * 2.1.23: A maze client should eg. create FORWARD requets from CURUP or monster highlight for ray hitting monster. Difficult to to this generic. So
+ * set deprecated.
  * <p>
  * <p>
  * Created by thomass on 11.11.20.
  */
+@Deprecated
 public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
     public Log logger = Platform.getInstance().getLog(DisplayClient.class);
     Avatar avatar = null;
@@ -72,7 +75,7 @@ public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
     }*/
 
     @Override
-    public void init(boolean forServer) {
+    public void init(SceneMode sceneMode) {
         logger.debug("init GenericScene");
         processArguments();
 
@@ -109,7 +112,8 @@ public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
         inputToRequestSystem.addKeyMapping( KeyCode.C, UserSystem.USER_REQUEST_LOGIN);
         SystemManager.addSystem(inputToRequestSystem);
 
-        SystemManager.addSystem(new ClientSystem());
+        //SystemManager.addSystem(new ClientSystem());
+        SystemManager.setBusConnector(new ClientSystem());
 
         //1.4.21 Player.init(avatar);
 

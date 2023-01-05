@@ -33,7 +33,7 @@ public class LightedRotatingCubeScene extends Scene {
     int loop = 0;
 
     @Override
-    public void init(boolean forServer) {
+    public void init(SceneMode sceneMode) {
         logger.info("init LightedRotatingCube");
 
         camera = getDefaultCamera();

@@ -59,7 +59,7 @@ public class VrScene extends Scene {
     StepController controller;
 
     @Override
-    public void init(boolean forServer) {
+    public void init(SceneMode sceneMode) {
         processArguments();
 
         vrInstance = VrInstance.buildFromArguments();

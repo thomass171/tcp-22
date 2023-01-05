@@ -172,11 +172,23 @@ Major changes:
 ## 2022-12
 Major changes:
   * VR moving in mazes by controller stick instead of using teleport location marker.
+
 # Technical Details
 
 ## Architecture
 
+<!-- two similar options ![svg not processed?](docs/Architecture-base.svg)-->
+<img src="docs/Architecture-base.svg" width="100%">
+
 ## Modules
+
+### Scene Server
+A simple Java network server, no GWT, no C#. Uses a headless platform. Might also be a Web server (Jetty,
+Tomcat, SpringBoot), but for now its just using plain (web)socket communication. This might be replaced later by a more
+sophisticated network layer (MQTT?).
+
+Because there is no need for GWT and C#, there is no limitation in using Java. So logging 
+outside the platform (SL4J) and reflection might be used..
 
 ## Bundles
 

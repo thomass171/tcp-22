@@ -51,7 +51,7 @@ public class MazeScene extends Scene {
     }
 
     @Override
-    public void init(boolean forServer) {
+    public void init(SceneMode sceneMode) {
         logger.info("init MazeScene");
 
         // command line arguments are handled in system builder

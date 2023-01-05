@@ -133,7 +133,7 @@ public class WebGlSceneRenderer implements AnimationController {
     void init() {
         logger.debug("init started");
 
-        scene.init(false);
+        scene.init(SceneMode.forMonolith());
         AbstractSceneRunner.getInstance().postInit();
 
         canvasPanel.addMouseMoveHandler(mouseMoveEvent -> {

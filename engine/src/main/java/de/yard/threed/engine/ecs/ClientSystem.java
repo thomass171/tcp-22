@@ -1,5 +1,6 @@
 package de.yard.threed.engine.ecs;
 
+import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.Platform;
@@ -19,19 +20,19 @@ import de.yard.threed.engine.platform.common.*;
  * <p>
  * Created by thomass on 16.02.21.
  */
-public class ClientSystem extends BusConnectorSystem {
+public class ClientSystem implements BusConnector {
     static Log logger = Platform.getInstance().getLog(ClientSystem.class);
 
     protected NativeSocket socket;
 
-    public ClientSystem() {
+    /*public ClientSystem() {
         // not component/entity related. no "updatepergroup"
         super(new RequestType[]{
                         UserSystem.USER_REQUEST_TELEPORT,
                         UserSystem.USER_REQUEST_LOGIN,
                         UserSystem.USER_REQUEST_JOIN},
                 new EventType[]{});
-    }
+    }*/
 
     /**
      * no "updatepergroup"
@@ -46,12 +47,16 @@ public class ClientSystem extends BusConnectorSystem {
         }
     }
 
-    @Override
+    //@Override
     protected NativeSocket getSocket() {
         return socket;
     }
 
     @Override
+    public void process(Event request) {
+
+    }
+    //@Override
     public boolean processRequest(Request request) {
         logger.debug("got request " + request.getType());
         if (request.getType().equals(UserSystem.USER_REQUEST_LOGIN)) {

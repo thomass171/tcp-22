@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Basic generic scene for traffic scene definitions like "traffic:tiles/Wayland.xml" and "traffic:tiles/Demo.xml".
+ *
  * MA37: Entwicklung zu einer BasicTravelScene.
  * <p>
  * Konsolidierung von (Flat)TravelScene (früher OsmSceneryScene und GroundServicesScene) und RailingScene
@@ -134,7 +136,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     ControlPanel leftControllerPanel = null;
 
     @Override
-    public void init(boolean forServer) {
+    public void init(SceneMode sceneMode) {
         logger.debug("init BasicTravelScene");
         processArguments();
 
@@ -158,7 +160,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             SystemManager.addSystem(new ObserverSystem(), 0);
         }
         SystemManager.addSystem(new UserSystem());
-        SystemManager.addSystem(new AvatarSystem(!forServer), 0);
+        SystemManager.addSystem(new AvatarSystem(!sceneMode.isServer()), 0);
 
         //visualizeTrack soll auch im usermode verfuegbar sein.
         /*if (visualizeTrack) {
@@ -171,7 +173,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         // Observer concept: Den Observer kann es direkt noch vor login/join geben. Er zeigt dann z.B. einen Overview.
         // Bei login/join kann er dann an den Avatar? Auch für VR? (MA35) Oder nie? Oder unabhaengig/doppelt?
         // server has no camera.
-        if (!forServer) {
+        if (!sceneMode.isServer()) {
             Observer.buildForDefaultCamera();
         }
 

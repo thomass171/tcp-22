@@ -16,6 +16,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
+import de.yard.threed.engine.SceneMode;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.Dimension;
 import de.yard.threed.core.platform.NativeSceneRunner;
@@ -130,7 +131,7 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
                 /*BundleLoaderExceptGwt*/
                 SyncBundleLoader.preLoad(scene.getPreInitBundle(), rm, Platform.getInstance().bundleResolver);
 
-                scene.init(false);
+                scene.init(SceneMode.forMonolith());
 
                 postInit();
                 // Wenn die Scene sich keine Camera eingerichtet hat, wird jetzt Default FPS einregichtet

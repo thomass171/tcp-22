@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     version="1.1" baseProfile="full"
+     width="400px" height="300px" viewBox="0 0 400 300">
+
+    <!-- arrows: http://thenewcode.com/1068/Making-Arrows-in-SVG -->
+    <defs>
+        <marker id="sa" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"
+                markerUnits="strokeWidth">
+            <polygon points="10 0, 10 7, 0 3.5" fill="black"/>
+        </marker>
+        <marker id="ea" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"
+                markerUnits="strokeWidth">
+            <polygon points="0 0, 10 3.5, 0 7" fill="black"/>
+        </marker>
+    </defs>
+
+    <!-- screen -->
+    <g transform="translate(200,10)">
+        <rect x="0" y="0" rx="5" ry="5" width="90" height="50" fill="white" stroke="black"/>
+        <text x="5" y="20" fill="black" transform="scale(1.7)">Screen</text>
+    </g>
+
+    <!-- 3D Scene -->
+    <g transform="translate(20,70)">
+        <rect x="0" y="0" rx="5" ry="5" width="170" height="140" fill="white" stroke="black"/>
+        <text x="20" y="15" fill="black" transform="scale(1.7)">3D Scene</text>
+        <g>
+            <rect x="40" y="70" width="100" height="40" fill="white" stroke="black"/>
+            <rect x="35" y="75" width="100" height="40" fill="white" stroke="black"/>
+            <rect x="30" y="80" width="100" height="40" fill="white" stroke="black"/>
+            <text x="40" y="100" fill="black">ECS System</text>
+        </g>
+    </g>
+
+    <!-- platform -->
+    <g transform="translate(220,70)">
+        <rect x="0" y="0" rx="5" ry="5" width="50" height="140" fill="white" stroke="black"/>
+        <g transform="translate(5,5)">
+            <rect x="0" y="0" rx="5" ry="5" width="40" height="20" fill="white" stroke="black"/>
+            <text x="5" y="12" fill="black" transform="scale(0.7)">Renderer</text>
+        </g>
+        <!-- happy rotation :-) -->
+        <text x="0" y="0" fill="black" transform="scale(1.7) rotate(90) translate(20,-10)">Platform</text>
+    </g>
+
+    <!-- Bus-->
+    <g transform="translate(20,230)">
+        <line x1="0" y1="0" x2="260" y2="0" stroke="black"/>
+        <line x1="0" y1="3" x2="260" y2="3" stroke="black"/>
+        <text x="40" y="15" fill="black">Event/Request Bus</text>
+    </g>
+
+    <!-- interaction -->
+    <g transform="translate(245,60)">
+        <line x1="0" y1="0" x2="0" y2="15" stroke="black" marker-start="url(#sa)"/>
+    </g>
+    <g transform="translate(190,140)">
+        <line x1="0" y1="0" x2="21" y2="0" stroke="black" marker-end="url(#ea)"/>
+    </g>
+    <g transform="translate(90,190)">
+        <line x1="0" y1="0" x2="0" y2="30" stroke="black" marker-start="url(#sa)" marker-end="url(#ea)"/>
+    </g>
+</svg>
+
+ 

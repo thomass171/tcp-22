@@ -10,6 +10,7 @@ import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.Scene;
+import de.yard.threed.engine.SceneMode;
 import de.yard.threed.engine.World;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
@@ -32,7 +33,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         if (scene == null) {
             scene = new Scene() {
                 @Override
-                public void init(boolean forServer) {
+                public void init(SceneMode sceneMode) {
                     if (sceneIinitMethod != null) {
                         sceneIinitMethod.init();
                     }
@@ -78,7 +79,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         TestHelper.cleanupAsync();
 
         //27.3.20 dann doch vorher auch den Sceneinit fuer ein paar Systems
-        scene.init(false);
+        scene.init(SceneMode.forMonolith());
         // 9.1.17: Der Vollstaendigkeithalber auch der postinit
         postInit();
     }

@@ -115,7 +115,7 @@ public class ReferenceScene extends Scene {
     double DEFERRED_CAMERA_FAR = 15.0;
 
     @Override
-    public void init(boolean forServer) {
+    public void init(SceneMode sceneMode) {
         logger.debug("init ReferenceScene");
         databundle = BundleRegistry.getBundle("data");
 

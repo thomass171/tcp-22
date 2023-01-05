@@ -14,7 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Aus http://www.richardlord.net/blog/what-is-an-entity-framework
+ * From http://www.richardlord.net/blog/what-is-an-entity-framework.
+ *
+ * Singleton by making all elements static.
+ *
  * <p>
  * Created by thomass on 28.11.16.
  */
@@ -23,7 +26,7 @@ public class SystemManager {
 
     private static List<EcsSystem> systems = new ArrayList<EcsSystem>();
     private static List<EcsEntity> entities = new ArrayList<EcsEntity>();
-    private static SystemManager instance = null;
+    //3.1.23 private static SystemManager instance = null;
     //1.8.17: Es kann aber mehrere Listener fuer ein Event geben
     private static Map<EventType, List<EcsSystem>> eventhandler = new HashMap<EventType, List<EcsSystem>>();
     public static boolean isinited = false;
@@ -33,6 +36,7 @@ public class SystemManager {
     private static Map<String, EcsService> services = new HashMap<String, EcsService>();
     //11.10.19: Die Requests sollten auch ueber den EventBus gehen. TODO ja, 20.3.20. 12.10.21: Aber Requests haben Handler.Hmm.
     private static RequestQueue requestQueue = new RequestQueue();
+    private static BusConnector busConnector = null;
 
     /* private SystemManager(){ }
 
@@ -128,6 +132,9 @@ public class SystemManager {
                 for (EcsSystem ebs : handler) {
                     ebs.process(evt);
                 }
+            }
+            if (busConnector != null) {
+                busConnector.process(evt);
             }
         }
         for (EcsSystem system : systems) {
@@ -382,5 +389,10 @@ public class SystemManager {
             }
         }
         return null;
+    }
+
+
+    public static void setBusConnector(BusConnector pbusConnector) {
+        busConnector = pbusConnector;
     }
 }

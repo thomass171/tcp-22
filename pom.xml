@@ -35,6 +35,7 @@
         <module>java2cs</module>
         <module>platform-jme</module>
         <module>services</module>
+        <module>sceneserver</module>
         <!-- the longest running at the end -->
         <module>platform-webgl</module>
     </modules>
