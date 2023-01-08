@@ -1,4 +1,4 @@
-package de.yard.threed.server;
+package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;

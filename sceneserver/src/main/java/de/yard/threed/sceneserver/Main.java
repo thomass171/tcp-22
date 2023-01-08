@@ -1,4 +1,4 @@
-package de.yard.threed.server;
+package de.yard.threed.sceneserver;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

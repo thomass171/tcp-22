@@ -47,9 +47,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static de.yard.threed.core.testutil.TestUtil.assertNotNull;
+
 /**
  * Basic generic scene for traffic scene definitions like "traffic:tiles/Wayland.xml" and "traffic:tiles/Demo.xml".
- *
+ * <p>
  * MA37: Entwicklung zu einer BasicTravelScene.
  * <p>
  * Konsolidierung von (Flat)TravelScene (früher OsmSceneryScene und GroundServicesScene) und RailingScene
@@ -84,7 +86,7 @@ import java.util.Map;
  * (H)elp. Brauchts vielleicht nicht mehr seit Toggle/Browsemenü?
  * (L)oad vehicle. Das naechste aus der Config das noch nicht geladen wurde. Sollte erst nicht mehr dabei sein und wird im UserMode nicht unbedingt gebraucht.
  * Seit controlmenu weg ist aber ganz praktisch.
- * (E) run tests. internal.
+ * (V) run tests. internal.
  * (CursorTasten) für View Left/Right/Up/Down, ohne vorher F drücken zu müssen. Geht über ObserverSystem.
  * (X/Y/Z) für tuning der Avatarposition
  * <p>
@@ -92,8 +94,8 @@ import java.util.Map;
  * <p>
  * Start Sequence:
  * - Splash screen und "Loading" (transparent) mit progress. In the background scenery isType loading.
- * - Vehicle isType loaded by argument "initialVehicle".
- * - When vehicle isType available fadeout, teleport, fadein.
+ * - Vehicle is loaded by argument "initialVehicle".
+ * - When vehicle is available fadeout, teleport, fadein.
  * - "Click for Start" Button. Das ist dann quasi der 's' Key.
  * <p>
  * <p>
@@ -134,10 +136,11 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     VrInstance vrInstance;
     Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
     ControlPanel leftControllerPanel = null;
+    public static String DEFAULT_USER_NAME = "Freds account name";
 
     @Override
     public void init(SceneMode sceneMode) {
-        logger.debug("init BasicTravelScene");
+        logger.debug("init BasicTravelScene with scene mode " + sceneMode.getMode());
         processArguments();
 
         vrInstance = VrInstance.buildFromArguments();
@@ -160,7 +163,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             SystemManager.addSystem(new ObserverSystem(), 0);
         }
         SystemManager.addSystem(new UserSystem());
-        SystemManager.addSystem(new AvatarSystem(!sceneMode.isServer()), 0);
+        SystemManager.addSystem(new AvatarSystem(sceneMode.isClient()), 0);
 
         //visualizeTrack soll auch im usermode verfuegbar sein.
         /*if (visualizeTrack) {
@@ -173,7 +176,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         // Observer concept: Den Observer kann es direkt noch vor login/join geben. Er zeigt dann z.B. einen Overview.
         // Bei login/join kann er dann an den Avatar? Auch für VR? (MA35) Oder nie? Oder unabhaengig/doppelt?
         // server has no camera.
-        if (!sceneMode.isServer()) {
+        if (sceneMode.isClient()) {
             Observer.buildForDefaultCamera();
         }
 
@@ -418,7 +421,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE, new Payload(tilename/*17.10.21 TrafficWorld2D.basename*/, getVehicleList())));
 
         // Avatar anlegen (via login)
-        SystemManager.putRequest(UserSystem.buildLoginRequest("Freds account name", ""));
+        SystemManager.putRequest(UserSystem.buildLoginRequest(DEFAULT_USER_NAME, ""));
 
         // 24.1.22: State ready to join now needed for 'login'
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
@@ -709,6 +712,9 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     }
 
     protected void runTests() {
+        logger.debug("Running tests");
+        // When there was a user starting tests there should also be an observer.
+        assertNotNull("observer", Observer.getInstance());
     }
 
     public RoundBodyCalculations getRbcp() {

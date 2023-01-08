@@ -1,12 +1,12 @@
-package de.yard.threed.server;
+package de.yard.threed.sceneserver;
 
 
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Packet;
 import de.yard.threed.engine.testutil.TestFactory;
-import de.yard.threed.server.testutils.PlatformSceneServerFactoryForTesting;
-import de.yard.threed.server.testutils.TestClient;
-import de.yard.threed.server.testutils.TestUtils;
+import de.yard.threed.sceneserver.testutils.PlatformSceneServerFactoryForTesting;
+import de.yard.threed.sceneserver.testutils.TestClient;
+import de.yard.threed.sceneserver.testutils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

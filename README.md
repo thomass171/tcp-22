@@ -119,6 +119,19 @@ ADDITIONALBUNDLE
 
 This is a colon separated list of bundle locations, eg. filesystem paths or web URLs.
 
+## Properties
+(what is the difference to 'Settings'?)
+
+### Generic
+
+### Use Case Maze
+
+### Use Case Traffic
+| Property       | Purpose                                                                          |
+|----------------|----------------------------------------------------------------------------------|
+| enableAutomove | Start vehicle immediately after scene start without the need for a start request |
+|    |                                                                                  |
+
 # Development
 The most convenient way is to develop for a Java platform like JME initially and later test it on other platforms
 like ThreeJs and Unity. Thats because the other platforms need converting which reduces

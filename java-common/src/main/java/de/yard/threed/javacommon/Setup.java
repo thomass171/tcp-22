@@ -89,8 +89,7 @@ public class Setup {
             boolean demo = true;
             if (demo) {
                 properties.put("argv.basename", "traffic:tiles/Demo.xml");
-                // GraphMovingComponent.automove is needed.
-                // properties.put("argv.enableAutomove", "true");
+                // automove is enabled in Demo.xml.
                 System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
             }
         }

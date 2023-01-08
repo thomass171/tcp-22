@@ -1,4 +1,4 @@
-package de.yard.threed.server.testutils;
+package de.yard.threed.sceneserver.testutils;
 
 
 import de.yard.threed.core.Packet;
@@ -7,8 +7,8 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.javanative.QueuingSocketListener;
 import de.yard.threed.javanative.SocketClient;
-import de.yard.threed.server.ClientListener;
-import de.yard.threed.server.SceneServerBusConnector;
+import de.yard.threed.sceneserver.ClientListener;
+import de.yard.threed.sceneserver.SceneServerBusConnector;
 
 import java.io.IOException;
 import java.util.ArrayList;

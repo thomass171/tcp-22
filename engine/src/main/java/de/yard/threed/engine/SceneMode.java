@@ -27,4 +27,8 @@ public class SceneMode {
     public boolean isServer() {
         return mode == 1 || mode == 3;
     }
+
+    public int getMode() {
+        return mode;
+    }
 }

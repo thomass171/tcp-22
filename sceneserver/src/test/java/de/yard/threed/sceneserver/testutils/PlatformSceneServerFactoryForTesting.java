@@ -1,4 +1,4 @@
-package de.yard.threed.server.testutils;
+package de.yard.threed.sceneserver.testutils;
 
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;

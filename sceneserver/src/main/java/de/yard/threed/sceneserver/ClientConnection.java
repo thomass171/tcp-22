@@ -1,4 +1,4 @@
-package de.yard.threed.server;
+package de.yard.threed.sceneserver;
 
 import de.yard.threed.javanative.QueuingSocketListener;
 import de.yard.threed.javanative.SocketEndpoint;
@@ -12,7 +12,7 @@ import java.net.Socket;
 import java.util.List;
 
 public class ClientConnection /*extends Thread */ {
-    private static final Logger logger = LoggerFactory.getLogger(de.yard.threed.server.ClientConnection.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ClientConnection.class.getName());
     Socket clientSocket;
     boolean terminateflag = false;
     boolean terminated = false;

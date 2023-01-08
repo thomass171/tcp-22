@@ -1,7 +1,6 @@
-package de.yard.threed.server;
+package de.yard.threed.sceneserver;
 
 
-import de.yard.threed.server.testutils.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

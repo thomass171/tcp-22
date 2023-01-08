@@ -1,13 +1,15 @@
-package de.yard.threed.server;
+package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
+import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
-import de.yard.threed.server.testutils.TestClient;
-import de.yard.threed.server.testutils.TestUtils;
+import de.yard.threed.sceneserver.testutils.TestClient;
+import de.yard.threed.sceneserver.testutils.TestUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,14 +18,15 @@ import java.util.HashMap;
 import java.util.List;
 
 import static de.yard.threed.engine.BaseEventRegistry.BASE_EVENT_ENTITY_CHANGE;
-import static de.yard.threed.server.testutils.TestUtils.waitForClientConnected;
-import static de.yard.threed.server.testutils.TestUtils.waitForClientPacket;
+import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientConnected;
+import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientPacket;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test for traffic "Demo.xml" scene (traffic scene definition "traffic:tiles/Demo.xml").
  */
+@Slf4j
 public class DemoSceneTest {
 
     static final int INITIAL_FRAMES = 10;
@@ -34,6 +37,7 @@ public class DemoSceneTest {
     public void setup() throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("argv.basename", "traffic:tiles/Demo.xml");
+        // just to be sure to have automove. automove is already enabled in Demo.xml
         properties.put("argv.enableAutomove", "true");
         System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         sceneServer = TestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES, properties);
@@ -41,6 +45,7 @@ public class DemoSceneTest {
 
     @Test
     public void testLaunch() throws IOException {
+        log.debug("testLaunch");
         //?assertRunningThreads(); läuft docvh nur der clientlistener?
         assertEquals(INITIAL_FRAMES, sceneServer.getSceneRunner().getFrameCount());
         assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (ball)");
@@ -67,7 +72,8 @@ public class DemoSceneTest {
 
         // join happened implicitly, so Avatar should exist.
         TestUtils.assertPacket(UserSystem.USER_EVENT_JOINED.getLabel(), null, packets);
-        assertEquals(1 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (ball+avatar)");
+        List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
+        assertEquals(1 + 1, entities.size(), "number of entites (ball+avatar)");
 
         // Movements also should arrive in client
         TestUtils.assertPacket(BASE_EVENT_ENTITY_CHANGE.getLabel(), new Pair[]{

@@ -1,4 +1,4 @@
-package de.yard.threed.server;
+package de.yard.threed.sceneserver;
 
 import de.yard.threed.engine.Scene;
 import de.yard.threed.javanative.ConfigurationHelper;

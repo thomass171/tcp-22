@@ -1,18 +1,18 @@
-package de.yard.threed.server;
+package de.yard.threed.sceneserver;
 
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
-import de.yard.threed.server.testutils.TestClient;
-import de.yard.threed.server.testutils.TestUtils;
+import de.yard.threed.sceneserver.testutils.TestClient;
+import de.yard.threed.sceneserver.testutils.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-import static de.yard.threed.server.testutils.TestUtils.waitForClientConnected;
-import static de.yard.threed.server.testutils.TestUtils.waitForClientPacket;
+import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientConnected;
+import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientPacket;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WaylandTest {

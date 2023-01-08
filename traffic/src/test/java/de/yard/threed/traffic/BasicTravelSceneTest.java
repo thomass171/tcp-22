@@ -12,6 +12,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.VelocityComponent;
+import de.yard.threed.traffic.apps.BasicTravelScene;
 import de.yard.threed.traffic.testutils.TrafficTestUtils;
 
 import org.junit.jupiter.api.Test;
@@ -100,6 +101,12 @@ public class BasicTravelSceneTest {
         assertEquals(1 + 2, tc.getPointCount(), "teleport destinations");
         // should start at externel overview point. For now its in vehicle.
         assertEquals(2, tc.getIndex(), "teleport index");
+
+        EcsEntity userEntity = SystemManager.findEntities(e -> BasicTravelScene.DEFAULT_USER_NAME.equals(e.getName())).get(0);
+        assertNotNull(userEntity, "user entity");
+        EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
+        assertNotNull(locEntity, "loc entity");
+
     }
 
     /**

@@ -1,12 +1,12 @@
-package de.yard.threed.server.testutils;
+package de.yard.threed.sceneserver.testutils;
 
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.engine.testutil.TestFactory;
-import de.yard.threed.server.ClientConnection;
-import de.yard.threed.server.ClientListener;
-import de.yard.threed.server.SceneServer;
-import de.yard.threed.server.ServerSceneRunner;
+import de.yard.threed.sceneserver.ClientConnection;
+import de.yard.threed.sceneserver.ClientListener;
+import de.yard.threed.sceneserver.SceneServer;
+import de.yard.threed.sceneserver.ServerSceneRunner;
 
 import java.util.HashMap;
 import java.util.List;
