@@ -189,7 +189,7 @@ public class TeleporterSystem extends DefaultEcsSystem {
         }
         //logger.debug("distance to (0,0,0) isType " + Vector3.getDistance(posrot.position, new Vector3()));
         // Neue Position publishen (fuer Scenery)
-        SystemManager.sendEvent(new Event(EVENT_POSITIONCHANGED, new Payload(posrot)));
+        SystemManager.sendEvent(new Event(EVENT_POSITIONCHANGED, new Payload(new Object[]{posrot})));
 
         return posrot;
     }

@@ -45,7 +45,7 @@ public class UserSystem extends DefaultEcsSystem {
     @Override
     public boolean processRequest(Request request) {
         if (usersystemdebuglog) {
-            logger.debug("got request " + request.getType());
+            logger.debug("got request " + request);
         }
         if (request.getType().equals(USER_REQUEST_LOGIN) && SystemState.readyToJoin()) {
             String username = (String) request.getPayloadByIndex(0);

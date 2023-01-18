@@ -3,6 +3,9 @@ package de.yard.threed.engine.ecs;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.Payload;
+import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeEventBus;
 import de.yard.threed.core.platform.Platform;
@@ -15,7 +18,7 @@ import java.util.Map;
 
 /**
  * From http://www.richardlord.net/blog/what-is-an-entity-framework.
- *
+ * <p>
  * Singleton by making all elements static.
  *
  * <p>
@@ -36,7 +39,7 @@ public class SystemManager {
     private static Map<String, EcsService> services = new HashMap<String, EcsService>();
     //11.10.19: Die Requests sollten auch ueber den EventBus gehen. TODO ja, 20.3.20. 12.10.21: Aber Requests haben Handler.Hmm.
     private static RequestQueue requestQueue = new RequestQueue();
-    private static BusConnector busConnector = null;
+    private static DefaultBusConnector busConnector = null;
 
     /* private SystemManager(){ }
 
@@ -122,7 +125,7 @@ public class SystemManager {
             return;
         }
         // 21.3.19: Requests einfach mal vor den Events.
-        requestQueue.process();
+        requestQueue.process(busConnector);
 
         NativeEventBus eb = Platform.getInstance().getEventBus();
         Event evt;
@@ -134,7 +137,7 @@ public class SystemManager {
                 }
             }
             if (busConnector != null) {
-                busConnector.process(evt);
+                busConnector.pushEvent(evt);
             }
         }
         for (EcsSystem system : systems) {
@@ -371,14 +374,15 @@ public class SystemManager {
 
     public static void publishPacket(Packet packet) {
 
-        String evt = packet.getValue("event");
-        if (evt == null) {
-            logger.error("no event in packet");
-            return;
-        }
-        if (evt.equals(UserSystem.USER_REQUEST_LOGIN.getLabel())) {
-//Event evt=new Event(E)
-            SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
+        Event event;
+        Request request;
+
+        if ((event = DefaultBusConnector.decodeEvent(packet)) != null) {
+            throw new RuntimeException("not yet");
+        } else if ((request = DefaultBusConnector.decodeRequest(packet)) != null) {
+            SystemManager.putRequest(request);
+        } else {
+            logger.error("unsupported packet");
         }
     }
 
@@ -392,7 +396,15 @@ public class SystemManager {
     }
 
 
-    public static void setBusConnector(BusConnector pbusConnector) {
+    public static void setBusConnector(DefaultBusConnector pbusConnector) {
         busConnector = pbusConnector;
+    }
+
+    /**
+     * 13.1.23: ugly workround needed for Requestqueue.
+     */
+    @Deprecated
+    public static DefaultBusConnector getBusConnector() {
+        return busConnector;
     }
 }

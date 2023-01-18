@@ -220,7 +220,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     @Override
     public boolean processRequest(Request request) {
         if (trafficsystemdebuglog) {
-            logger.debug("got event " + request.getType());
+            logger.debug("got request " + request.getType());
         }
         if (request.getType().equals(RequestRegistry.TRAFFIC_REQUEST_VEHICLE_MOVE)) {
             EcsEntity vehicle = (EcsEntity) request.getPayloadByIndex(0);
@@ -258,9 +258,10 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     //throw new RuntimeException("no trafficContext");
                     logger.warn("no trafficContext");
                 }
+                // In server mode no user might be logged in yet, so maybe there is no TeleportComponent
                 TrafficHelper.launchVehicles(TrafficSystem.vehiclelist,
                         trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
-                        /*4.3.22 (AvatarSystem.getAvatar() == null) ? null :*/ TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
+                         (UserSystem.getInitialUser() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
                         SphereSystem.getSphereNode()/*getWorld()*/, sphereProjections.backProjection,
                         /*27.12.21airportConfig,*/ baseTransformForVehicleOnGraph, vehicleLoader, genericVehicleBuiltDelegate);
                 return true;

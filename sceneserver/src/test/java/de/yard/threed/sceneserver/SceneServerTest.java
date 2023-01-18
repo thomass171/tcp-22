@@ -1,6 +1,7 @@
 package de.yard.threed.sceneserver;
 
 
+import de.yard.threed.engine.testutil.TestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,20 +14,12 @@ public class SceneServerTest {
     @BeforeEach
     public void setup() throws Exception {
 
+        TestFactory.resetInit();
         ServerSceneRunner.dropInstance();
     }
 
     @Test
     public void testLaunch() throws Exception {
-        HashMap<String, String> properties = new HashMap<String, String>();
-        properties.put("argv.basename", "traffic:tiles/Demo.xml");
-        properties.put("argv.enableAutomove", "true");
-        System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
-
-        SceneServer sceneServer = new SceneServer("subdir", "de.yard.threed.traffic.apps.BasicTravelScene", properties);
-        sceneRunner = (ServerSceneRunner) sceneServer.nsr;
-
-        sceneRunner.frameLimit = 300;
-        sceneServer.runServer();
+       // what to test here? Scenes are tested in dedicated tests.
     }
 }

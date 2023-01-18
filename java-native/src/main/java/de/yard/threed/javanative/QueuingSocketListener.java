@@ -26,6 +26,7 @@ public class QueuingSocketListener extends Thread {
     BufferedReader in;
     List<String> lines = new Vector<>();
     List<List<String>> blocks = new Vector<>();
+    boolean debuglog = false;
 
     public QueuingSocketListener(BufferedReader in) {
 
@@ -61,9 +62,13 @@ public class QueuingSocketListener extends Thread {
                 String inputLine;//, outputLine;
 
                 while ((inputLine = in.readLine()) != null) {
-                    logger.debug("inputline=" + inputLine);
+                    if (debuglog) {
+                        logger.debug("inputline=" + inputLine);
+                    }
                     if (inputLine.length() == 0) {
-                        logger.debug("found block end");
+                        if (debuglog) {
+                            logger.debug("found block end");
+                        }
                         blocks.add(lines);
                         lines = new ArrayList<>();
                     } else {
@@ -73,6 +78,7 @@ public class QueuingSocketListener extends Thread {
 
             }
         } catch (SocketException e) {
+            // regular disconnect?
             logger.debug("SocketException. Stopping thread:"+e.getMessage());
             return;
         } catch (IOException e) {

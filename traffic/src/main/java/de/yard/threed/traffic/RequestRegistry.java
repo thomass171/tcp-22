@@ -16,11 +16,11 @@ public class RequestRegistry {
      * 29.10.21: Und ein Request to load all vehicles for a single graph (payload0,groundnet payload1). Needs to wait unitl
      * everything is ready, eg. Elevation available.(// 27.3.20: Und die Vehicles brauchen ja auch Terrain wegen der Elevation. Das soll bei client/server aber nicht mehr so sein.
      *             // 12.5.20: Doch, die brauchen ja auch ein richtige Elevation, also passend zum Client
-     *
+     * 18.1.23: TRAFFIC_REQUEST_LOADVEHICLES loads vehicles from a list (additional to initial vehicle? No! There is only one load vehicles when terrain is available!)
      */
     @Deprecated
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLE = new RequestType("TRAFFIC_REQUEST_LOADVEHICLE");
-    public static RequestType TRAFFIC_REQUEST_LOADVEHICLE2 = new RequestType("TRAFFIC_REQUEST_LOADVEHICLE2");
+    //public static RequestType TRAFFIC_REQUEST_LOADVEHICLE2 = new RequestType("TRAFFIC_REQUEST_LOADVEHICLE2");
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLES = new RequestType("TRAFFIC_REQUEST_LOADVEHICLES");
 
     /**

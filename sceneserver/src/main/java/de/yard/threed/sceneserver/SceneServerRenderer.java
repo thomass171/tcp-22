@@ -62,8 +62,12 @@ public class SceneServerRenderer extends HomeBrewRenderer {
         */
     }
 
-    public static void syncElement(int id, String bundlename, String modelfile, Vector3 position, Quaternion rotation){
-        Map<String, String> map = new HashMap<>();
+    /**
+     * Publish entity state.
+     *
+     */
+    public static void sendEntityState(int id, String bundlename, String modelfile, Vector3 position, Quaternion rotation){
+        Map<String, Object> map = new HashMap<String, Object>();
         map.put("id", Integer.toString(id));
         map.put("bundle",bundlename);
         map.put("model",modelfile);

@@ -1,7 +1,6 @@
 package de.yard.threed.engine.ecs;
 
 import de.yard.threed.core.Event;
-import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
@@ -20,7 +19,7 @@ import de.yard.threed.engine.platform.common.*;
  * <p>
  * Created by thomass on 16.02.21.
  */
-public class ClientSystem implements BusConnector {
+public class ClientSystem extends DefaultBusConnector {
     static Log logger = Platform.getInstance().getLog(ClientSystem.class);
 
     protected NativeSocket socket;
@@ -52,10 +51,8 @@ public class ClientSystem implements BusConnector {
         return socket;
     }
 
-    @Override
-    public void process(Event request) {
 
-    }
+
     //@Override
     public boolean processRequest(Request request) {
         logger.debug("got request " + request.getType());

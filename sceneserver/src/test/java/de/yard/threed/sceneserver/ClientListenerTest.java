@@ -25,9 +25,9 @@ public class ClientListenerTest {
         ClientListener.dropInstance();
 
         // System (eg UserSystem) need a platform
-        TestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod)null);
+        TestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod) null);
 
-        clientListener = ClientListener.getInstance("localhost",-1);
+        clientListener = ClientListener.getInstance("localhost", -1);
         clientListener.start();
         // race condition. Wait for socket listening
         sleepMs(100);
@@ -46,11 +46,10 @@ public class ClientListenerTest {
 
         TestUtils.waitForClientConnected();
 
-        Packet packet = waitForClientPacket(clientListener.getClientConnections().get(0));
-        assertNotNull(packet);
-        assertEquals(2,packet.getData().size());
+        Packet requestLoginPacket = waitForClientPacket(clientListener.getClientConnections().get(0));
+        assertNotNull(requestLoginPacket);
+        assertEquals(1 + 2, requestLoginPacket.getData().size());
     }
-
 
 
     private Packet waitForClientPacket(ClientConnection clientConnection) {
@@ -59,7 +58,7 @@ public class ClientListenerTest {
 
         Packet packet;
 
-        while ((packet = clientConnection.getPacket())==null) {
+        while ((packet = clientConnection.getPacket()) == null) {
             sleepMs(100);
             if (cnt++ > 50) {
                 // dont wait more than 5 seconds

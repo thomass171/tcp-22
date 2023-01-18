@@ -183,7 +183,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         commoninit();
 
         customInit();
-        postInit();
+        postInit(sceneMode);
     }
 
     public SceneConfig getSceneConfig() {
@@ -236,7 +236,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
                 logger.info("Ignoring initialVehicle due to FPC");
             } else {
                 Request request;
-                request = new Request(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE, new Payload(argv_initialVehicle));
+                request = new Request(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE, new Payload(new Object[]{argv_initialVehicle}));
                 requestQueue.addRequest(request);
             }
         }
@@ -301,7 +301,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         });
         buttonDelegates.put("teleport", () -> {
             IntHolder option = new IntHolder(0);
-            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(option));
+            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{option}));
             SystemManager.putRequest(request);
         });
 
@@ -357,7 +357,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         return new MenuItem[]{
                 new MenuItem("teleport", () -> {
                     IntHolder option = new IntHolder(0);
-                    Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(option));
+                    Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{option}));
                     SystemManager.putRequest(request);
                 })
         };
@@ -395,7 +395,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         return new String[]{"engine", "data", "traffic"};
     }
 
-    private void postInit() {
+    private void postInit(SceneMode sceneMode) {
         //27.10.21 War sonst früher
         //8.12.21 addLight();
 
@@ -420,9 +420,10 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         //Sphere laden. Von da wird dann das alte "sendInitialEvents" gemacht.
         SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE, new Payload(tilename/*17.10.21 TrafficWorld2D.basename*/, getVehicleList())));
 
-        // Avatar anlegen (via login)
-        SystemManager.putRequest(UserSystem.buildLoginRequest(DEFAULT_USER_NAME, ""));
-
+        // create player/Avatar (via login)
+        if (sceneMode.isClient()) {
+            SystemManager.putRequest(UserSystem.buildLoginRequest(DEFAULT_USER_NAME, ""));
+        }
         // 24.1.22: State ready to join now needed for 'login'
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
         //sendInitialEvents(initialPosition);
@@ -509,7 +510,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             runTests();
         }
 
-        requestQueue.process();
+        requestQueue.process(SystemManager.getBusConnector());
 
         //for x/y/z. Only in debug mode (MazeSettings.getSettings().debug)? Better location??
         if (Observer.getInstance() != null) {

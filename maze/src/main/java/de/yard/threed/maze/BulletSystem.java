@@ -96,7 +96,7 @@ public class BulletSystem extends DefaultEcsSystem {
 
 
     public static Request buildFireRequest(int userEntityId, Direction targetDirection) {
-        return new Request(TRIGGER_REQUEST_FIRE, new Payload(targetDirection), userEntityId);
+        return new Request(TRIGGER_REQUEST_FIRE, new Payload(new Object[]{targetDirection}), userEntityId);
     }
 
     /**

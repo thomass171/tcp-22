@@ -15,6 +15,7 @@ import de.yard.threed.engine.ecs.VelocityComponent;
 import de.yard.threed.traffic.apps.BasicTravelScene;
 import de.yard.threed.traffic.testutils.TrafficTestUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>
  * Created by thomass on 29.11.21.
  */
+@Slf4j
 public class BasicTravelSceneTest {
 
     SceneNode world;
@@ -107,6 +109,13 @@ public class BasicTravelSceneTest {
         EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
         assertNotNull(locEntity, "loc entity");
 
+        SceneNode locNode = locEntity.getSceneNode();
+        double xpos0 = locNode.getTransform().getPosition().getX();
+        sceneRunner.runLimitedFrames(50);
+        double xpos1 = locNode.getTransform().getPosition().getX();
+        double xdiff = Math.abs(xpos0 - xpos1);
+        log.debug("xdiff={}", xdiff);
+        assertTrue(xdiff > 3.0);
     }
 
     /**

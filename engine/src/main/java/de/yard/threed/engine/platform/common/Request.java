@@ -73,6 +73,6 @@ public class Request {
 
     @Override
     public String toString() {
-        return "" + requesttype + "," + payload + "," + userEntityId;
+        return "type=" + requesttype + ",payload=" + payload + ",userEntityId=" + userEntityId;
     }
 }

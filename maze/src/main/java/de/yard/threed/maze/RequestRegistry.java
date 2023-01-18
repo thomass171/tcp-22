@@ -53,6 +53,6 @@ public class RequestRegistry {
     }
 
     public static Request buildKick(int userEntityId) {
-        return new Request(TRIGGER_REQUEST_KICK, new Payload(""), new Integer(userEntityId));
+        return new Request(TRIGGER_REQUEST_KICK, new Payload(new Object[]{""}), new Integer(userEntityId));
     }
 }

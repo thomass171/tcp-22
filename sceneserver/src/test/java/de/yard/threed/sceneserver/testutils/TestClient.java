@@ -5,6 +5,7 @@ import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.SystemState;
+import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.javanative.QueuingSocketListener;
 import de.yard.threed.javanative.SocketClient;
 import de.yard.threed.sceneserver.ClientListener;
@@ -14,13 +15,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.yard.threed.engine.ecs.UserSystem.USER_REQUEST_LOGIN;
-
 
 public class TestClient {
+    Log logger = Platform.getInstance().getLog(TestClient.class);
     SocketClient testClient;
     QueuingSocketListener listener;
-    Log logger = Platform.getInstance().getLog(TestClient.class);
+    public static String USER_NAME = "carl";
 
     public TestClient() {
         testClient = new SocketClient("localhost", ClientListener.DEFAULT_PORT);
@@ -32,7 +32,8 @@ public class TestClient {
         }
         testClient.connect();
         listener = testClient.startListen();
-        testClient.writePacket(SceneServerBusConnector.buildPacket(USER_REQUEST_LOGIN, new String[]{"carl"}).getData());
+
+        testClient.writePacket(SceneServerBusConnector.encodeRequest(UserSystem.buildLoginRequest(USER_NAME, "34")).getData());
     }
 
     public Packet getPacket() {

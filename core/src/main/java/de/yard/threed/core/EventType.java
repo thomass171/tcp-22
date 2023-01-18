@@ -1,7 +1,11 @@
 package de.yard.threed.core;
 
 
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
 
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Klassifierung von verschiedenen Events. Heisst nicht "id", weil das zu sehr auf ein konkretes Event hindeutet.
@@ -13,6 +17,7 @@ package de.yard.threed.core;
  * Created by thomass on 27.12.16.
  */
 public class EventType {
+    static Log logger = Platform.getInstance().getLog(EventType.class);
     public int type;
     String label = "";
     // 477 willkuerlich
@@ -25,10 +30,14 @@ public class EventType {
     public static EventType EVENT_NODEPARENTCHANGED = new EventType();
     public static EventType EVENT_NODECHANGED = new EventType();
     public static EventType EVENT_MATLIBCREATED = new EventType();
-
+    private static Map<Integer, EventType> registry;
 
     public EventType() {
         this.type = uniquetype++;
+        if (registry == null) {
+            registry = new HashMap<Integer, EventType>();
+        }
+        registry.put(this.type, this);
     }
 
     public EventType(String label) {
@@ -49,8 +58,16 @@ public class EventType {
         return label;
     }
 
+    public static EventType findById(int type) {
+        EventType requestType = registry.get(type);
+        if (requestType == null) {
+            logger.warn("EventType not found:" + type);
+        }
+        return requestType;
+    }
+
     @Override
     public String toString() {
-        return "" + type+"("+label+")";
+        return "" + type + "(" + label + ")";
     }
 }

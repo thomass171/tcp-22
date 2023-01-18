@@ -137,9 +137,9 @@ public class AvatarSystem extends DefaultEcsSystem {
                 isFirstJoin = false;
             }
             //avatar.avatarE.setName("Player");
-            logger.debug(userEntity.getName() + " joined");
+            logger.debug("User '" + userEntity.getName() + "' joined");
 
-            SystemManager.sendEvent(new Event(UserSystem.USER_EVENT_JOINED, new Payload(userEntity)));
+            SystemManager.sendEvent(new Event(UserSystem.USER_EVENT_JOINED, new Payload(new Object[]{userEntity})));
 
             return true;
         }

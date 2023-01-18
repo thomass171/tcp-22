@@ -34,7 +34,7 @@ public class TestPlatform extends /*16.6.21 SimpleHeadless*/DefaultPlatform {
 
     @Override
     public Log getLog(Class clazz) {
-        return null;
+        return logfactory.getLog(clazz);
     }
 
     @Override

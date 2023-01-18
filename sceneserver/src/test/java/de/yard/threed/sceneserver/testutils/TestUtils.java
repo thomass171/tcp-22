@@ -1,5 +1,7 @@
 package de.yard.threed.sceneserver.testutils;
 
+import de.yard.threed.core.Event;
+import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.engine.testutil.TestFactory;
@@ -47,10 +49,10 @@ public class TestUtils {
         }
     }
 
-    public static void assertPacket(String expectedLabel, Pair<String, String>[] expectedProperties, List<Packet> packets) {
+    public static void assertEventPacket(EventType expectedEventType, Pair<String, String>[] expectedProperties, List<Packet> packets) {
         boolean found = false;
         for (Packet packet : packets) {
-            if (expectedLabel.equals(packet.getValue("event"))) {
+            if ((""+expectedEventType.getType()).equals(packet.getValue("event"))) {
                 found = true;
                 if (expectedProperties != null) {
                     for (Pair p : expectedProperties) {
@@ -64,7 +66,7 @@ public class TestUtils {
             }
         }
         if (!found) {
-            fail("Event " + expectedLabel + " not found in " + packets.size() + " packets");
+            fail("Event " + expectedEventType + " not found in " + packets.size() + " packets");
         }
     }
 

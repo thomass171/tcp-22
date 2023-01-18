@@ -33,6 +33,6 @@ public class EcsSystemEventFactory {
     }*/
 
     public static Event buildPositionChangedEvent(LocalTransform newpos) {
-        return new Event(TeleporterSystem.EVENT_POSITIONCHANGED,new Payload(newpos));
+        return new Event(TeleporterSystem.EVENT_POSITIONCHANGED,new Payload(new Object[]{newpos}));
     }
 }

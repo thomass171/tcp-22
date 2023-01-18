@@ -42,11 +42,8 @@ public class WaylandTest {
     public void testLaunch() throws IOException {
 
         assertEquals(INITIAL_FRAMES, sceneServer.getSceneRunner().getFrameCount());
-        assertEquals(1, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (ball)");
-        // "ball" should be synced
-        //assertEquals("number of scene synced nodes",1, mpServer.getSceneRunner().getSyncedSceneNodeCount());
-        //steht aber nicht drin
-        //assertEquals("lok",  sceneRunner.getSyncedSceneNode(0).getName());
+        // no user/avatar and graph yet.
+        assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
 
         SystemState.state=SystemState.STATE_READY_TO_JOIN;
 

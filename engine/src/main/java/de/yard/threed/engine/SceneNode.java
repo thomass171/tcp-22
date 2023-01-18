@@ -25,7 +25,7 @@ public class SceneNode /*extends Object3D*/ {
     public SceneNode() {
         nativescenenode/*object3d*/ = ( /*Engine*/Platform.getInstance()).buildModel();
         //object3d = new Transform(nativescenenode.getTransform());
-        /*((EngineHelper) Engine*/Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODECREATED, new Payload(this)));
+        /*((EngineHelper) Engine*/Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODECREATED, new Payload(new Object[]{this})));
     }
 
     public SceneNode(String name){
@@ -117,7 +117,7 @@ public class SceneNode /*extends Object3D*/ {
     public void attach(SceneNode n) {
         n.nativescenenode.getTransform().setParent(nativescenenode.getTransform());
 
-        Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODEPARENTCHANGED, new Payload(n)));
+        Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODEPARENTCHANGED, new Payload(new Object[]{n})));
     }
 
     /**
@@ -190,7 +190,7 @@ public class SceneNode /*extends Object3D*/ {
 
     public void setName(String name) {
         nativescenenode.setName(name);
-        Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODECHANGED, new Payload(this)));
+        Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODECHANGED, new Payload(new Object[]{this})));
     }
 
 

@@ -104,7 +104,7 @@ public class MazeScene extends Scene {
 
         });
         buttonDelegates.put("pull", () -> {
-            InputToRequestSystem.sendRequestWithId(new Request(RequestRegistry.TRIGGER_REQUEST_PULL, new Payload("")));
+            InputToRequestSystem.sendRequestWithId(new Request(RequestRegistry.TRIGGER_REQUEST_PULL, new Payload(new Object[]{""})));
         });
 
         vrInstance = VrInstance.buildFromArguments();

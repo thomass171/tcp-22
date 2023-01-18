@@ -7,7 +7,7 @@ import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.BaseEventRegistry;
-import de.yard.threed.engine.ecs.BusConnector;
+import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.ecs.UserSystem;
@@ -23,15 +23,15 @@ import de.yard.threed.engine.platform.common.RequestType;
  *
  * Created by thomass on 16.02.21.
  */
-public class SceneServerBusConnector implements BusConnector {
+public class SceneServerBusConnector extends DefaultBusConnector {
     static Log logger = Platform.getInstance().getLog(SceneServerBusConnector.class);
 
-    ServerSocket serverSocket;
+    //ServerSocket serverSocket;
 
     GeneralHandlerMap<String> eventHandler = new GeneralHandlerMap<String>();
 
     public SceneServerBusConnector(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
+        this.socket = serverSocket;
     }
 
     /*public BusConnectorSystem(RequestType[] requestTypes, EventType[] eventTypes) {
@@ -56,48 +56,16 @@ public class SceneServerBusConnector implements BusConnector {
      * @param evt
      */
     //@Override
-    public void process(Event evt) {
+    /*12.1.23 public void process(Event evt) {
         //logger.debug("got event " + event.getType());
         Packet packet = buildPacket(evt);
         if (packet != null) {
             serverSocket.sendPacket(packet);
         }
-    }
+    }*/
 
-    public static Packet buildPacket(RequestType requestType, String[] args) {
-        Packet packet = new Packet();
-        if (requestType.getLabel().equals(UserSystem.USER_REQUEST_LOGIN.getLabel())) {
-            packet.add("event", UserSystem.USER_REQUEST_LOGIN.getLabel());
-            packet.add("id", args[0]);
-        } else {
-            logger.warn("unhandled request " + requestType);
-            return null;
-        }
 
-        return packet;
-    }
 
-    public Packet buildPacket(Event evt) {
-        EventType eventType = evt.getType();
-
-        Packet packet = new Packet();
-        if (eventType.getLabel().equals(UserSystem.USER_EVENT_LOGGEDIN.getLabel())) {
-            packet.add("event", UserSystem.USER_EVENT_LOGGEDIN.getLabel());
-            //packet.add("id",args[0]);
-        } else if (eventType.getLabel().equals(UserSystem.USER_EVENT_JOINED.getLabel())) {
-            packet.add("event", UserSystem.USER_EVENT_JOINED.getLabel());
-            //packet.add("id",args[0]);
-        } else if (eventType.getLabel().equals(BaseEventRegistry.BASE_EVENT_ENTITY_CHANGE.getLabel())) {
-            packet.add("event", BaseEventRegistry.BASE_EVENT_ENTITY_CHANGE.getLabel());
-            packet.add(evt.getPayloadAsMap());
-            //packet.add("id",args[0]);
-        } else {
-            logger.warn("buildPacket: unhandled event " + eventType);
-            return null;
-        }
-
-        return packet;
-    }
 
 
 }

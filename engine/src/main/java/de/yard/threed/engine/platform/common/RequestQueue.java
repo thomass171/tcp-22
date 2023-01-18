@@ -3,6 +3,7 @@ package de.yard.threed.engine.platform.common;
 
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.ecs.DefaultBusConnector;
 
 import java.util.*;
 
@@ -17,7 +18,7 @@ public class RequestQueue {
     private List<Request> requests = new ArrayList<Request>();
     private Map<RequestType, List<RequestHandler>> requesthandler = new HashMap<RequestType, List<RequestHandler>>();
 
-    public void process() {
+    public void process(DefaultBusConnector busConnector) {
         // Jeder Request nur einmal.
         List<Request> processedrequests = new ArrayList<Request>();
         //during processing new requests might be created (eg. "startFlight"). So clone. iterator doesn't help. TODO improve
@@ -38,6 +39,9 @@ public class RequestQueue {
                         }
                     }
                 }
+            }
+            if (busConnector != null) {
+                busConnector.pushRequest(request);
             }
         }
         requests.removeAll(processedrequests);

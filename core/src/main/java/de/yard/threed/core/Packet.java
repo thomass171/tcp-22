@@ -7,10 +7,10 @@ import java.util.Map;
 
 public class Packet {
 
-    //Only LinkedHashMap isType sorted, but GWT,C#??
+    //Only LinkedHashMap is sorted, but GWT,C#?? Need to sort? Probably not.
     Map<String, String> map = new HashMap<String, String>();
 
-    public Packet(){
+    public Packet() {
 
     }
 
@@ -19,13 +19,17 @@ public class Packet {
     }*/
 
     public static Packet buildFromBlock(List<String> block) {
-        if (block==null){
+        if (block == null) {
             return null;
         }
-        Packet packet=new Packet();
-        for (String s:block){
-            String[] parts = StringUtils.split(s,"=");
-            packet.add(parts[0],parts[1]);
+        Packet packet = new Packet();
+        for (String s : block) {
+            String[] parts = StringUtils.split(s, "=");
+            if (parts.length == 1) {
+                packet.add(parts[0], null);
+            } else {
+                packet.add(parts[0], parts[1]);
+            }
         }
         return packet;
     }
@@ -49,10 +53,24 @@ public class Packet {
     /**
      * add well prepared key=value lines
      */
-    public void add( Map<String, String> p ) {
+    public void add(Map<String, String> p) {
         //C# has no putAll()
-        for (String key:p.keySet()){
-            map.put(key,p.get(key));
+        for (String key : p.keySet()) {
+            map.put(key, p.get(key));
         }
+    }
+
+    public boolean isByIndex() {
+
+        for (String key : map.keySet()) {
+            if (StringUtils.startsWith(key, "p_")) {
+                return false;
+            }
+            if (key.equals("p0")) {
+                return true;
+            }
+        }
+        // no payload? Hmm
+        return false;
     }
 }

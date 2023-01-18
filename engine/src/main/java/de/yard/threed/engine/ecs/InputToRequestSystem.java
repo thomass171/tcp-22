@@ -127,7 +127,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         //26.10.18: 'T' statt P, damit P fuer Pause ist.
         if (Input.GetKeyDown(KeyCode.T)) {
             IntHolder option = new IntHolder(0);
-            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(option));
+            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{option}));
             if (Input.GetKey(KeyCode.Shift)) {
                 //cyclePosition(tc, (false));
                 option.setValue(1);

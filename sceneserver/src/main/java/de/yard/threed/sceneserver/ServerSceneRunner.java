@@ -73,7 +73,7 @@ public class ServerSceneRunner extends AbstractSceneRunner implements NativeScen
     }
 
     /**
-     * 25.2.21: Das ist doch Kokelores
+     * 25.2.21: Isn't this nonsense? Why isn't it part of TestFactory.resetInit()?
      */
     public static void dropInstance() {
         scenerunner = null;
@@ -212,17 +212,24 @@ public class ServerSceneRunner extends AbstractSceneRunner implements NativeScen
                 //Matrix4 worldModelMatrix = mesh.getSceneNodeWorldModelMatrix();
                 //Vector3 position = worldModelMatrix.extractPosition();
                 //worldModelMatrix.extractQuaternion()
+
+                // 17.1.23:Shouldn't we publish every entity, independent from having a node(most will have one)?
                 SceneNode node = entity.getSceneNode();
                 if (node!=null) {
                     Vector3 position = node.getTransform().getPosition();
                     Quaternion rotation = node.getTransform().getRotation();
-                    SceneServerRenderer.syncElement(entity.getId(), "a", "b", position, rotation);
+                    SceneServerRenderer.sendEntityState(entity.getId(), "a", "b", position, rotation);
                 }
             }
         }
 
     }
 
+    /**
+     * For now all entities are synced between server and client.
+     * @param entity
+     * @return
+     */
     private boolean isSynced(EcsEntity entity) {
         return true;
     }
