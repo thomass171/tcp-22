@@ -13,7 +13,7 @@ import de.yard.threed.core.platform.Platform;
  * In OpenGL werden bevorzugt column-major matrices verwendet.
  */
 public class Matrix4 /*30.5.implements Dumpable*/ {
-    Log logger = Platform.getInstance().getLog(Matrix4.class);
+    //Log logger = Platform.getInstance().getLog(Matrix4.class);
     // Das Array ist in column order, wie OpenGL es verwendet,d.h.
     // 0,4,8,12
     // 1,5,9,13

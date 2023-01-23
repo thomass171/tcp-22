@@ -38,11 +38,7 @@ public class Main {
 
         try {
             if (scene == null) {
-                //Scene updater = new LightedRotatingCube();
-                //updater = new MazeScene();
-                // updater = new ShowroomScene();
-                //6.6. TODO new SceneViewer(updater);
-                logger.warn("Not yet available in JME");
+                logger.warn("No scene");
             } else {
                 //24.10.18 Scene updater = ScenePool.buildSceneUpdater(scene);
                 Scene updater = (Scene) Class.forName(scene).newInstance();

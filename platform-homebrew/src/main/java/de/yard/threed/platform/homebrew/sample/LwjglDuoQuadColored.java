@@ -1,6 +1,9 @@
 package de.yard.threed.platform.homebrew.sample;
 
-import de.yard.threed.platform.homebrew.OpenGlMatrix4;
+import de.yard.threed.core.Matrix3;
+import de.yard.threed.core.Matrix4;
+import de.yard.threed.platform.homebrew.HomeBrewMaterial;
+import de.yard.threed.platform.homebrew.OpenGlBufferUtils;
 import de.yard.threed.platform.homebrew.PlatformHomeBrew;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -165,15 +168,15 @@ public class LwjglDuoQuadColored {
 
         if (useshader) {
             pId.use();
-            pId.setUniformMatrix4("projection", new OpenGlMatrix4().toFloatBuffer());//camera.getProjectionMatrix()));
-            pId.setUniformMatrix4("viewer", new OpenGlMatrix4().toFloatBuffer());//camera.getViewMatrix()));
+            pId.setUniformMatrix4("projection", OpenGlBufferUtils.toFloatBuffer(new Matrix4()));//camera.getProjectionMatrix()));
+            pId.setUniformMatrix4("viewer", OpenGlBufferUtils.toFloatBuffer(new Matrix4()));//camera.getViewMatrix()));
 
-            pId.setUniformMatrix4("model", linksunten.getModelMatrix(cycle).toFloatBuffer());
+            pId.setUniformMatrix4("model", OpenGlBufferUtils.toFloatBuffer(linksunten.getModelMatrix(cycle)));
         }        
         linksunten.draw();
         
         if (useshader) {
-            pId.setUniformMatrix4("model", rechtsoben.getModelMatrix(cycle).toFloatBuffer());
+            pId.setUniformMatrix4("model", OpenGlBufferUtils.toFloatBuffer(rechtsoben.getModelMatrix(cycle)));
         }
         rechtsoben.draw();
         
@@ -288,9 +291,9 @@ class Quad {
 
     }
 
-    OpenGlMatrix4 getModelMatrix(int cycle) {
+    Matrix4 getModelMatrix(int cycle) {
         float scale = (float) (0.5f * Math.sin((float) (cycle % 100) / 100));
-        OpenGlMatrix4 modelmatrix = new OpenGlMatrix4(
+        Matrix4 modelmatrix = new Matrix4(
                 scale, 0, 0, offset,
                 0, scale, 0, offset,
                 0, 0, scale, 0,

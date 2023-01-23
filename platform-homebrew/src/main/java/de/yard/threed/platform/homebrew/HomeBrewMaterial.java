@@ -8,8 +8,10 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeMaterial;
 import de.yard.threed.core.platform.NativeTexture;
 import de.yard.threed.engine.platform.common.*;
+import de.yard.threed.javacommon.BufferHelper;
 
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -249,13 +251,13 @@ public class HomeBrewMaterial implements NativeMaterial {
             sp.use();
             if (OpenGlShader.use15) {
                 // Das ist jetzt erstmal auf den Universalshader zugeschnitten
-                sp.setUniformMatrix4("PROJECTIONMATRIX", OpenGlMatrix4.toFloatBuffer(projectionmatrix)/*MatrixUtil.toFloatBuffer(camera.getProjectionMatrix())*/);
+                sp.setUniformMatrix4("PROJECTIONMATRIX", OpenGlBufferUtils.toFloatBuffer(projectionmatrix)/*MatrixUtil.toFloatBuffer(camera.getProjectionMatrix())*/);
                 //shaderProgram.setUniform("viewer", MatrixUtil.toFloatBuffer(camera.getViewMatrix()));
                 // In 1.2 gibt es keine separate VIEWMATRIX und MODELMATRIX. Darum hier auch nicht
                 //sp.setUniform("VIEWMATRIX", viewmatrix/*camera.getViewMatrix()*/.toFloatBuffer());
                 //sp.setUniform("MODELMATRIX", modelmatrix/*camera.getViewMatrix()*/.toFloatBuffer());
                 Matrix4 modelviewmatrix = viewmatrix.multiply(modelmatrix);
-                sp.setUniformMatrix4("MODELVIEWMATRIX", OpenGlMatrix4.toFloatBuffer(modelviewmatrix));
+                sp.setUniformMatrix4("MODELVIEWMATRIX", OpenGlBufferUtils.toFloatBuffer(modelviewmatrix));
                 //Ob Model oder ModelView für Normale ist noch nicht ganz klar. 
                 // TODO klaeren, optisch erkennt man das nur schlecht.Vieles spricht für modelviewmatrix
                 // Als Matrix3 verwenden (siehe Wiki). Die Berechnung scheint korrekt; optisch verglichen mit Berechnung
@@ -263,7 +265,7 @@ public class HomeBrewMaterial implements NativeMaterial {
                 Matrix4 normalmatrix = ((Matrix4) MathUtil2.transpose(MathUtil2.getInverse(modelviewmatrix)));
                 Matrix3 normalmatrix3 = MathUtil2.getInverseAsMatrix3(normalmatrix).transpose();//.extractRotationAndScale();
                 //sp.setUniformMatrix4("NORMALMATRIX", normalmatrix.toFloatBuffer());
-                sp.setUniformMatrix3("NORMALMATRIX", OpenGlMatrix3.toFloatBuffer(normalmatrix3));
+                sp.setUniformMatrix3("NORMALMATRIX", OpenGlBufferUtils.toFloatBuffer(normalmatrix3));
                 //logger.debug("mat4="+new Matrix4(normalmatrix).dump("\n "));
                 //logger.debug("mat3=" + normalmatrix3.dump("\n "));
 
@@ -295,10 +297,10 @@ public class HomeBrewMaterial implements NativeMaterial {
                 }
             } else {
                 // 3.3.16 Dieser Zweig ist unfertig!
-                sp.setUniformMatrix4("projection", OpenGlMatrix4.toFloatBuffer(projectionmatrix)/*MatrixUtil.toFloatBuffer(camera.getProjectionMatrix())*/);
+                sp.setUniformMatrix4("projection", OpenGlBufferUtils.toFloatBuffer(projectionmatrix)/*MatrixUtil.toFloatBuffer(camera.getProjectionMatrix())*/);
                 //shaderProgram.setUniform("viewer", MatrixUtil.toFloatBuffer(camera.getViewMatrix()));
-                sp.setUniformMatrix4("viewer", OpenGlMatrix4/*camera.getViewMatrix()*/.toFloatBuffer(viewmatrix));
-                sp.setUniformMatrix4("model", OpenGlMatrix4/*camera.getViewMatrix()*/.toFloatBuffer(modelmatrix));
+                sp.setUniformMatrix4("viewer", /*camera.getViewMatrix()*/OpenGlBufferUtils.toFloatBuffer(viewmatrix));
+                sp.setUniformMatrix4("model", /*camera.getViewMatrix()*/OpenGlBufferUtils.toFloatBuffer(modelmatrix));
 
             }
             OpenGlContext.getGlContext().exitOnGLError(gl, "material.prepareRender");
@@ -337,5 +339,7 @@ public class HomeBrewMaterial implements NativeMaterial {
     public boolean isTransparent() {
         return transparent;
     }
+
+
 }
 

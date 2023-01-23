@@ -1,5 +1,6 @@
 package de.yard.threed.platform.homebrew;
 
+import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.Point;
@@ -122,18 +123,18 @@ public class OpenGLSceneRenderer implements SceneRenderer {
         // Clear the screen and depth buffer      
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
-        OpenGlMatrix4 projectionmatrix, viewmatrix;
+        Matrix4 projectionmatrix, viewmatrix;
         if (camera == null) {
-            projectionmatrix = new OpenGlMatrix4();
-            viewmatrix = new OpenGlMatrix4();
+            projectionmatrix = new Matrix4();
+            viewmatrix = new Matrix4();
         } else {
-            projectionmatrix = OpenGlMatrix4.toOpenGl(camera.getProjectionMatrix());
-            viewmatrix = OpenGlMatrix4.toOpenGl(camera.getViewMatrix());
+            projectionmatrix = /*OpenGlMatrix4.toOpenGl*/(camera.getProjectionMatrix());
+            viewmatrix = /*OpenGlMatrix4.toOpenGl*/(camera.getViewMatrix());
         }
 
         //26.4.20 neue Stelle fuer Rendering
         //scene.render(OpenGlContext.getGlContext(), OpenGlMatrix4.fromOpenGl(projectionmatrix), OpenGlMatrix4.fromOpenGl(viewmatrix));
-        renderer.render( OpenGlMatrix4.fromOpenGl(projectionmatrix), OpenGlMatrix4.fromOpenGl(viewmatrix),scene.getLights());
+        renderer.render( /*OpenGlMatrix4.fromOpenGl*/(projectionmatrix), /*OpenGlMatrix4.fromOpenGl*/(viewmatrix),scene.getLights());
     }
 
 

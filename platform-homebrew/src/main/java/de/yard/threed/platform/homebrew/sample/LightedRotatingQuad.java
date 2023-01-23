@@ -13,6 +13,7 @@ import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneMode;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.engine.apps.LightedRotatingCubeScene;
 import de.yard.threed.engine.apps.reference.ReferenceScene;
 import de.yard.threed.engine.platform.common.Face;
 import de.yard.threed.engine.platform.common.Face3;
@@ -43,14 +44,11 @@ import java.util.List;
 public class LightedRotatingQuad extends Scene {
     /*OpenGl*/ Camera camera;
     Log logger = PlatformHomeBrew.getInstance().getLog(LightedRotatingQuad.class);
-    HomeBrewScene scene;
-    HomeBrewSceneRunner renderer;
-    int WIDTH = 800;
-    int HEIGHT = 600;
     float angle = 0.01f;
     SceneNode quad;
     boolean isrotating = true;
     int loop = 0;
+    boolean backfaceculling = false;
 
     public static void main(String[] argv) {
         HashMap<String, String> properties = new HashMap<>();
@@ -59,24 +57,22 @@ public class LightedRotatingQuad extends Scene {
         LightedRotatingQuad quadExample = new LightedRotatingQuad();
 
         runner.runScene(quadExample);
-        //ReferenceScene is also possible this way
+        //Other scenes can also be used this way
         //runner.runScene(new ReferenceScene());
+        //runner.runScene(new LightedRotatingCubeScene());
         System.out.println("started");
     }
 
     @Override
     public void init(SceneMode forServer) {
-        //scene = new OpenGlScene();
 
-        camera = getDefaultCamera();//new OpenGlPerspectiveCamera(new Dimension(WIDTH, HEIGHT));
+        camera = getDefaultCamera();
         camera.getCarrierTransform().setPosition(new Vector3(0, 1.5f, 3f));
         camera.lookAt(new Vector3(0, 0, 0));
 
         quad = buildColoredQuad();
         addToWorld(new SceneNode(quad));
         addLight();
-        //addSceneUpdater(this);
-
     }
 
     /**
@@ -87,19 +83,12 @@ public class LightedRotatingQuad extends Scene {
         return new String[]{"engine", "data"};
     }
 
-    /**
-     * So positioniert dass die Obeseite stark, die Vorderseite leicht und die rechte gar nicht
-     * beschienen ist.
-     */
     private void addLight() {
-        // create a point light
-        //OpenGlLight pointLight = new OpenGlLight(Color.WHITE);
+
         Light pointLight = new DirectionalLight(Color.WHITE, new Vector3(0, 1, 1.5f));
         // pointLight.setPosition();
         addLightToWorld(pointLight);
-
     }
-
 
     @Override
     public void update() {
@@ -118,10 +107,9 @@ public class LightedRotatingQuad extends Scene {
             loop++;
             //angle += 0.00001;
         }
-
     }
 
-    public static SceneNode buildColoredQuad() {
+    public SceneNode buildColoredQuad() {
         // Vertices, the order is not important. XYZW instead of XYZ
         List<Vector3> vertices = new ArrayList<Vector3>();
         vertices.add(new Vector3(-0.5f, 0.5f, 0f/*, 1f*/));
@@ -129,33 +117,19 @@ public class LightedRotatingQuad extends Scene {
         vertices.add(new Vector3(0.5f, -0.5f, 0f/*, 1f*/));
         vertices.add(new Vector3(0.5f, 0.5f, 0f/*, 1f*/));
 
-
-        float[] colors = {
-                1f, 0f, 0f, 1f,
-                0f, 1f, 0f, 1f,
-                0f, 0f, 1f, 1f,
-                1f, 1f, 1f, 1f,
-        };
-
-        // OpenGL expects to draw vertices in counter clockwise order by default
-        byte[] indices = {
-                0, 1, 2,
-                2, 3, 0
-        };
         Vector2 uv = new Vector2(0, 0);
         List<Face> faces = new ArrayList<Face>();
-        faces.add(new Face3(0, 1, 2, uv, uv, uv));
+
+        //Variant with CCC and CW triangles for test of Culling.
+        // OpenGL expects to draw vertices in counter clockwise order by default
+        if (backfaceculling) {
+            // CW triangle left bottom (not visible with backface culling)
+            faces.add(new Face3(0, 2, 1, uv, uv, uv));
+        } else {
+            faces.add(new Face3(0, 1, 2, uv, uv, uv));
+        }
+        // CCW triangle top right
         faces.add(new Face3(2, 3, 0, uv, uv, uv));
-
-        //Variante mit CCC und CW Dreiecken zum Test von Culling
-       /*OGL  if (backfaceculling)
-
-        {
-            indices = new byte[]{
-                    0, 2, 1,// CW Dreieck links unten (bei Backfaceculling nicht sichtbar)
-                    2, 3, 0 // CCW Dreieck rechts oben
-            };
-        }*/
 
         List<FaceList> facelist = new ArrayList<FaceList>();
         facelist.add(new FaceList(faces));
@@ -163,10 +137,6 @@ public class LightedRotatingQuad extends Scene {
         List<SimpleGeometry> geolist = GeometryHelper.prepareGeometry(vertices, facelist, null, true, false);
 
         SceneNode cube = new SceneNode(new Mesh(new GenericGeometry(geolist.get(0)).getNativeGeometry(), material, false, false));
-        //HomeBrewSceneNode mesh = new HomeBrewSceneNode((HomeBrewMesh) new Mesh(new GenericGeometry(Primitives.buildBox(0.5,0.5,0.5)).getNativeGeometry(), material, false, false).nativemesh);
-        //       ShapeGeometry shape = ShapeGeometry.buildBox(1, 1, 1);
-        //MeshLambertMaterial material = new MeshLambertMaterial(new Color(255, 0, 0));
-        // MeshPhongMaterial material = new MeshPhongMaterial(new Color(255, 0, 0));
-        return cube;//new Mesh(shape, material);
+        return cube;
     }
 }

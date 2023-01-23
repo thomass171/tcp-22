@@ -10,20 +10,14 @@ import de.yard.threed.core.Color;
 
 /**
  * Date: 14.02.14
- * Time: 07:05
  * <p/>
- * Hergeleitet aus einem Internet OpenGL Beispiel (mit unbekannten Autor)
- * Der Cube ist hier beleuchtet.
- * Rotation kann ueber die Taste r gestoppt/gestartet werden.
+ * From an internet OpenGL example (unknown author). Cube is lighted here. Rotation can be started/sopped by key 'r'.
  * <p/>
- * 8.4.15: Das Light scheint sich mitzudrehen, zumindest sind immer die gleichen Flaechen
- * beleuchtet.
- * Pendant zur ThreeJS Referenzanwendung
- * 10.4.15: Der Würfel dreht anders als in ThreeJS, evtl. aufgrund unterschiedlicher Eulerreihenfolge?
- * 2.3.16: Geht jetzt auch mit OpenGL.
- * 23.3.16: Das ist die einfachste aller Scenes.
+ * 8.4.15: Light seems to be rotating too, at least always the same faces are lighted.
+ * 10.4.15: The cube rotates different from ThreeJS, maybe due to euler order?
+ * 2.3.16: Also runs in platform-homebrew.
+ * 23.3.16: The most simple scene.
  */
-
 public class LightedRotatingCubeScene extends Scene {
     Camera camera;
     Log logger = Platform.getInstance().getLog(LightedRotatingCubeScene.class);
@@ -53,21 +47,13 @@ public class LightedRotatingCubeScene extends Scene {
     }
 
     public static SceneNode buildColoredCube() {
-        // ohne eigene shapes weil es auch ein einfacher Test sein soll.
+
         Geometry cubegeometry =  Geometry.buildCube(1, 1, 1);
         Material mat = Material.buildLambertMaterial(Color.RED);
         SceneNode cube = new SceneNode(new Mesh(cubegeometry, mat));
         cube.getTransform().translateX(0.5f);
         return cube;
     }
-
-    /*23.3.16: Aufruf jetzt auch ueber SceneRunner public static void main(String[] argv){
-        //PlatformOpenGL.getInstance();
-        NativeSceneRunner renderer = Platform.getInstance().getSceneRunner();
-        LightedRotatingCube quadExample = new LightedRotatingCube();
-        renderer.runScene(quadExample);
-        System.out.println("started");
-    }*/
     
     /**
      * So positioniert dass die Obeseite stark, die Vorderseite leicht und die rechte gar nicht
@@ -75,7 +61,7 @@ public class LightedRotatingCubeScene extends Scene {
      */
     private void addLight() {
         // create a point light
-        //2.2.16: Pointlight benötigt eine spezielle Behandlung im Shader, darum erstmal directional
+        //2.2.16: Pointlight needs special handling in shader, darum erstmal directional
         //Light pointLight = new PointLight(Color.WHITE);
         Light light = new DirectionalLight(Color.WHITE,new Vector3(0,2,3));
         //light.setPosition(new Vector3(0, 2, 1.5f));
