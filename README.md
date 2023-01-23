@@ -111,6 +111,14 @@ sh bin/launchScene.sh de.yard.threed.engine.apps.reference.ReferenceScene
 ```
 ![](docs/JMonkeyEnginePreview.png)
 
+## HomeBrew
+
+Start a scene by the wrapper script launchScene.sh, eg.:
+
+```
+sh bin/launchScene.sh -p homebrew de.yard.threed.engine.apps.reference.ReferenceScene
+```
+
 ## Settings
 
 The following properties are evaluated from the environment or system properties.
@@ -133,13 +141,16 @@ This is a colon separated list of bundle locations, eg. filesystem paths or web 
 |    |                                                                                  |
 
 # Development
-The most convenient way is to develop for a Java platform like JME initially and later test it on other platforms
+The most convenient way is to develop for a Java platform like JME (or homebrew) initially and later test it on other platforms
 like ThreeJs and Unity. Thats because the other platforms need converting which reduces
 roundtrip time.
 
 In your IDE you might create a launch configuration like the following.
 
 ![](docs/IDErunConfiguration.png)
+
+For running Java 3D software native libraries like 'lwjgl' are required.
+These are typically located in the current working directory or via LD_LIBRARY_PATH.
 
 ## Build your own scene
 The best starting point is to use class [ReferenceScene](engine/src/main/java/de/yard/threed/engine/apps/reference/ReferenceScene.java) and modify it for your needs.

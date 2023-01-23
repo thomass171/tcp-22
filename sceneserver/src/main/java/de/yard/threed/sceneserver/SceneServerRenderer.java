@@ -8,11 +8,11 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.platform.opengl.HomeBrewRenderer;
-import de.yard.threed.platform.opengl.OpenGlLight;
-import de.yard.threed.platform.opengl.OpenGlMesh;
-import de.yard.threed.platform.opengl.OpenGlSceneNode;
-import de.yard.threed.platform.opengl.Renderables;
+import de.yard.threed.platform.homebrew.HomeBrewRenderer;
+import de.yard.threed.platform.homebrew.OpenGlLight;
+import de.yard.threed.platform.homebrew.HomeBrewMesh;
+import de.yard.threed.platform.homebrew.HomeBrewSceneNode;
+import de.yard.threed.platform.homebrew.Renderables;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +40,7 @@ public class SceneServerRenderer extends HomeBrewRenderer {
     }*/
 
     @Override
-    public void doRender(OpenGlSceneNode node, Matrix4 projectionmatrix, Matrix4 viewmatrix, List<OpenGlLight> lights) {
+    public void doRender(HomeBrewSceneNode node, Matrix4 projectionmatrix, Matrix4 viewmatrix, List<OpenGlLight> lights) {
         //mesh.getSceneNode();
 
         //logger.debug("doRender:"+node.getName());
@@ -81,7 +81,7 @@ public class SceneServerRenderer extends HomeBrewRenderer {
     }
 
     @Override
-    protected void doRender(OpenGlMesh mesh, Matrix4 projectionmatrix, Matrix4 viewmatrix, List<OpenGlLight> lights) {
+    protected void doRender(HomeBrewMesh mesh, Matrix4 projectionmatrix, Matrix4 viewmatrix, List<OpenGlLight> lights) {
         // not needed
     }
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Launches a scene via JMonkeyEngine
+# Launches a scene via platform JMonkeyEngine or platform homebrew.
 #
 
 OWNDIR=`dirname $0`
@@ -10,11 +10,18 @@ source $OWNDIR/common.sh || exit 1
 
 validateHOSTDIR
 
-cd $OWNDIR/../platform-jme
+PLATFORM=jme
+if [ "$1" == "-p" ]
+then
+  PLATFORM=$2
+  shift
+  shift
+fi
+cd $OWNDIR/../platform-$PLATFORM
 checkrc cd
 
 usage() {
-	echo "$0: <sceneclass>"
+	echo "$0: [-p <platform>] <sceneclass>"
 	exit 1
 }
 

@@ -1,7 +1,5 @@
 package de.yard.threed.sceneserver;
 
-import com.jme3.app.SimpleApplication;
-import com.jme3.scene.Node;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
@@ -21,8 +19,8 @@ import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
 import de.yard.threed.javacommon.DefaultResourceReader;
 import de.yard.threed.outofbrowser.SyncBundleLoader;
-import de.yard.threed.platform.opengl.HomeBrewRenderer;
-import de.yard.threed.platform.opengl.OpenGlScene;
+import de.yard.threed.platform.homebrew.HomeBrewRenderer;
+import de.yard.threed.platform.homebrew.HomeBrewScene;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,8 +40,6 @@ public class ServerSceneRunner extends AbstractSceneRunner implements NativeScen
     static private ServerSceneRunner scenerunner = null;
     //public JmeCamera jmecamera;
     //3.12.18 super class Dimension dimension;
-    public Node rootnode;
-    public SimpleApplication simpleApplication;
     Settings scsettings;
     Scene scene;
     HomeBrewRenderer renderer;
@@ -92,7 +88,7 @@ public class ServerSceneRunner extends AbstractSceneRunner implements NativeScen
         //JAResourceManager rm = JAResourceManager.getInstance();
 
         // in der native Scene liegen ja alle Nodes
-        NativeScene nativeScene = new OpenGlScene();
+        NativeScene nativeScene = new HomeBrewScene();
         //TODO brauchts sowas? JmeScene.init(this, this.flyCam);
 
         initAbstract(nativeScene, /*rm,*/ scene);

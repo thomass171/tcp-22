@@ -44,6 +44,14 @@ public class LightedRotatingCubeScene extends Scene {
         addLight();
     }
 
+    /**
+     * 21.1.23 provide shader.
+     */
+    @Override
+    public String[] getPreInitBundle() {
+        return new String[]{"engine", "data"};
+    }
+
     public static SceneNode buildColoredCube() {
         // ohne eigene shapes weil es auch ein einfacher Test sein soll.
         Geometry cubegeometry =  Geometry.buildCube(1, 1, 1);

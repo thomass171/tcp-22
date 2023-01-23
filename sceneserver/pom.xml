@@ -37,7 +37,7 @@
             <!-- provided because its not needed during runtime-->
             <scope>provided</scope>
         </dependency>
-        <!-- jetzt die eigenen Projektabhaengigkeiten-->
+        <!-- own project dependencies-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>
@@ -59,35 +59,17 @@
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>de.yard.granada</groupId>
-            <artifactId>module-desktop</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-        <!--10.3.22<dependency>
-            <groupId>org.osm2world</groupId>
-            <artifactId>module-core</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
-        </dependency>-->
-        <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-traffic</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <!--opengl wegen Renderer-->
         <dependency>
-            <groupId>de.yard.granada</groupId>
-            <artifactId>module-platform-opengl</artifactId>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-platform-homebrew</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-
-        <!-- 9.3.21 das ist erstmal zu gross? 9.11.21: Ja, confirmed.<dependency>
-            <groupId>de.yard.granada</groupId>
-            <artifactId>module-traffic-ext</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>-->
-
-
-        <!-- 23.12.17: auch die core tests. Idea bekommt das auch direkt mit -->
+        <!-- project modules test modules-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>

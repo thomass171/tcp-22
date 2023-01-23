@@ -90,7 +90,7 @@
             <version>1.3.1</version>
         </dependency>
 
-        <!-- jetzt die eigenen Projektabhaengigkeiten-->
+        <!-- own project dependencies-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>

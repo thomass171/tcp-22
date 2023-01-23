@@ -20,7 +20,8 @@ public class RequestRegistry {
      */
     @Deprecated
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLE = new RequestType("TRAFFIC_REQUEST_LOADVEHICLE");
-    //public static RequestType TRAFFIC_REQUEST_LOADVEHICLE2 = new RequestType("TRAFFIC_REQUEST_LOADVEHICLE2");
+    //used in other projects:
+    public static RequestType TRAFFIC_REQUEST_LOADVEHICLE2 = new RequestType("TRAFFIC_REQUEST_LOADVEHICLE2");
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLES = new RequestType("TRAFFIC_REQUEST_LOADVEHICLES");
 
     /**

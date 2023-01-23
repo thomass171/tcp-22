@@ -42,7 +42,7 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.6.1</version>
         </dependency>
-        <!-- jetzt die eigenen Projektabhaengigkeiten-->
+        <!-- own project dependencies-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>

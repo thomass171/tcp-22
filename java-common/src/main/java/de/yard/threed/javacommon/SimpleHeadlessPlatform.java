@@ -25,21 +25,15 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Simple Platform implementation eg. for unit tests.
+ * Simple Platform implementation eg. for unit tests. This is less than a full platform and PlatformHomeBrew without renderer but more
+ * than DefaultPlatform. However clear difference is not yet defined.
+ * Therefore it resides in java-common. Not for C#.
+ * Has no renderer (headless!).
  * <p>
- * Just provides a logger. ResourceManager must be added later because it might need the LogFactory.#
- * 4.4.19: Aber auch ein StringHelper.
- * Nichts fuer C#.
+ * Just provides a logger and StringHelper. ResourceManager must be added later because it might need the LogFactory.
  * <p>
- * Wie ist denn die Abgrenzung zu PlatformHomeBrew?
- * 10.9.20: Ist headless nicht einfach PlatformHomeBrew ohne Renderer? 30.6.21: Ja, so duerfte es ein.
- * 5.7.21: Nicht so ganz. PlatformHomeBrew verwendet ja die ganzen OpneGL NAtive Implemetierungen. SimpleHeadlessPlatform muss etwas dazwischen sein.
- * Mehr als core-Platform und DefaultPlatform, aber weniger als eine full platform (Abgrenzung weiter unklar).
- * Und sinnvoll ist sie nur zum Testen oder als Ersatz fuer core?
- * Aber es muss ja wirklich etwas (Java basiert) implementiert werden, z.B. Logging.
- * Darum kommt sie mal regulaer nach java-common. Das koennte auch die Basis fur JME sein (??).
- * Weils zum Testen in "engine" verwendet wird, ist ein rudimentaerer NodeTree (mit Mesh) tatsaechlich hilfreich.
- * <p>
+ * Probably no option as base for JME sein.
+ * Because its used for testing in "engine", a simple node tree (incl mesh) is useful indeed.
  * <p>
  * Created on 05.12.18.
  */

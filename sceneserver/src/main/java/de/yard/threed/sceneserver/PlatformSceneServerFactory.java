@@ -2,14 +2,14 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
-import de.yard.threed.platform.opengl.PlatformHomeBrew;
+import de.yard.threed.platform.homebrew.PlatformHomeBrew;
 
 import java.util.HashMap;
 
 /**
- * HomeBrew mit Spezialrenderer? Darum ist es kein SimpleHeadless.
+ * HomeBrewPlatform with custom renderer? Thats the reason for not using SimpleHeadless. But thats not the only reason.
+ * HomeBrewPlatform is a full platform, which SimpleHeadless isn't.
  *
- * 10.9.20: Sowas gibt es jetzt auch in desktop.
  */
 public class PlatformSceneServerFactory implements PlatformFactory {
     @Override

@@ -3,7 +3,7 @@ package de.yard.threed.sceneserver.testutils;
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
-import de.yard.threed.platform.opengl.PlatformHomeBrew;
+import de.yard.threed.platform.homebrew.PlatformHomeBrew;
 
 import java.util.HashMap;
 

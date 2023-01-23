@@ -1,0 +1,96 @@
+package de.yard.threed.sceneserver;
+
+import de.yard.threed.core.Packet;
+import de.yard.threed.core.Pair;
+import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EntityFilter;
+import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.engine.ecs.SystemState;
+import de.yard.threed.engine.ecs.UserSystem;
+import de.yard.threed.sceneserver.testutils.TestClient;
+import de.yard.threed.sceneserver.testutils.TestUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+
+import static de.yard.threed.engine.BaseEventRegistry.BASE_EVENT_ENTITY_CHANGE;
+import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientConnected;
+import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientPacket;
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Tests for MazeScene.
+ */
+@Slf4j
+public class MazeSceneTest {
+
+    static final int INITIAL_FRAMES = 10;
+
+    SceneServer sceneServer;
+
+    @BeforeEach
+    public void setup() throws Exception {
+        HashMap<String, String> properties = new HashMap<String, String>();
+        properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
+        //System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
+        sceneServer = TestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties);
+    }
+
+    //20.1.23 @Test
+    public void testLaunch() throws IOException {
+        log.debug("testLaunch");
+        //?assertRunningThreads(); läuft docvh nur der clientlistener?
+        assertEquals(INITIAL_FRAMES, sceneServer.getSceneRunner().getFrameCount());
+        // no user/avatar and graph yet.
+        assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
+
+        SystemState.state = SystemState.STATE_READY_TO_JOIN;
+
+        TestClient testClient = new TestClient();
+        testClient.connectAndLogin();
+        waitForClientConnected();
+        waitForClientPacket();
+
+        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
+        assertEquals(INITIAL_FRAMES + 5, sceneServer.getSceneRunner().getFrameCount());
+
+        // Check login succeeded.
+        // possible race condition with movements arriving before login/joined event
+        List<Packet> packets = testClient.getAllPackets();
+        assertTrue(packets.size() > 0);
+        TestUtils.assertEventPacket(UserSystem.USER_EVENT_LOGGEDIN, null, packets);
+
+        // join happened implicitly, so Avatar should exist.
+        TestUtils.assertEventPacket(UserSystem.USER_EVENT_JOINED, null, packets);
+
+        // wait for terrain available to load vehicle
+        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
+        List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
+        assertEquals(1 + 1, entities.size(), "number of entites (avatar+loc)");
+        EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME.equals(e.getName())).get(0);
+        assertNotNull(userEntity, "user entity");
+        EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
+        assertNotNull(locEntity, "loc entity");
+
+        // Movements also should arrive in client
+        TestUtils.assertEventPacket(BASE_EVENT_ENTITY_CHANGE, new Pair[]{
+                new Pair("p_position", "*")
+        }, packets);
+
+
+        SceneNode locNode = locEntity.getSceneNode();
+        double xpos0 = locNode.getTransform().getPosition().getX();
+        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
+        double xpos1 = locNode.getTransform().getPosition().getX();
+        double xdiff = Math.abs(xpos0 - xpos1);
+        log.debug("xdiff={}", xdiff);
+        assertTrue(xdiff > 3.0);
+
+    }
+
+}
