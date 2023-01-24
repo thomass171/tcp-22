@@ -32,7 +32,7 @@ public class MazeAvatarBuilder implements AvatarBuilder {
             avatar = avatarABuilder.buildAvatar(player);
         } else {
             // decouple monster transform from scale for avoidng math effects and to make a hit monster markable by scaling without changing its position.
-            SceneNode monster = MazeModelBuilder.buildMonster();
+            SceneNode monster = MazeModelFactory.getInstance().buildMonster();
             monster.getTransform().setScale(new Vector3(1.2, 1.2, 1.2));
 
             avatar = new SceneNode(monster);

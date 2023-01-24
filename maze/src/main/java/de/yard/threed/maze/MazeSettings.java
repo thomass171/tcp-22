@@ -29,12 +29,7 @@ public class MazeSettings {
     public float simpleraydiameter = 0.1f;
     private static MazeSettings st;
     public boolean debug = false;
-    public Texture walltexture;
-    public Texture[] wallnormalmap;
-    public Material pillarmaterial, groundmaterial;
     public float sokobanboxsize = 0.6f;
-    public ShapeGeometry sokobanboxgeo;
-    public Material sokobanboxmaterial;
     // Color is well fitting to ground
     public static Color hudColor = new Color(255, 217, 102, 128);
     // Standard Color.YELLOW is too bright. Color needs to fit to hud background
@@ -43,7 +38,7 @@ public class MazeSettings {
     public static Color diamondColor = new Color(0x99, 0xFF, 0xFF);
     public static String[] teamColors = new String[]{"darkgreen", "red"};
 
-    MazeSettings(int mode) {
+    private MazeSettings(int mode) {
         switch (mode) {
             case MODE_MAZE:
                 grid = "maze/grid1.txt";
@@ -56,52 +51,7 @@ public class MazeSettings {
                 theme = THEME_WOOD;
                 break;
         }
-        switch (theme) {
-            case THEME_DRAFT:
-                Util.nomore();
-                /*14.6.21 unauusgegoren
-                walltexture =buildTexture ("images/BrickLargeBare0001_1_M.jpg");
-                pillarmaterial = Material.buildLambertMaterial(buildTexture("images/WoodPlanksDirty0085_M.jpg"));
-                UvMap1 uvmap = new ProportionalUvMap(new Vector2(0, 1f / 3f), new Vector2(0.5f, 2f / 3f));
-                List<UvMap1> uvmaps = new ArrayList<UvMap1>();
-                for (int i = 0; i < 6; i++) {
-                    uvmaps.add(uvmap);
-                }
-                sokobanboxgeo = ShapeGeometry.buildBox(sokobanboxsize, sokobanboxsize, sokobanboxsize, uvmaps);
-                sokobanboxmaterial = Material.buildLambertMaterial(buildTexture("images/texturedcube-atlas.jpg"));
-                groundmaterial = Material.buildPhongMaterialWithNormalMap(buildTexture("images/FloorsMedieval0034_6_M.jpg"),
-                        Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));*/
-                break;
-            case THEME_WOOD:
-                walltexture = buildTexture("textures/gimp/wood/BucheHell.png");
-                pillarmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheDunkel.png"));
-                sokobanboxgeo = ShapeGeometry.buildBox(sokobanboxsize, sokobanboxsize, sokobanboxsize, null);
-                sokobanboxmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheMedium.png"));
-                //22.3.17: Wandmaterial auch fuer Boden statt Ground.png
-                groundmaterial = Material.buildPhongMaterialWithNormalMap(buildTexture("textures/gimp/wood/BucheHell.png"),
-                        Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));
-                //wallnormalmap = buildTexture("textures/gimp/SampleWallNormalMapByPetry.png"));
-                //Ein paar anlegen, damit nicht alle gleich aussehen. Die werden durch randon alle unterschiedlich
-                wallnormalmap = new Texture[5];
-                wallnormalmap[0] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
-                wallnormalmap[1] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
-                wallnormalmap[2] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
-                wallnormalmap[3] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
-                wallnormalmap[4] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
-                break;
-            case THEME_REALWOOD:
-                walltexture = buildTexture("textures/gimp/wood/BucheHell.png");
-                pillarmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheDunkel.png"));
-                sokobanboxgeo = ShapeGeometry.buildBox(sokobanboxsize, sokobanboxsize, sokobanboxsize, null);
-                sokobanboxmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheMedium.png"));
-                //22.3.17: Wandmaterial auch fuer Boden statt Ground.png
-                groundmaterial = Material.buildPhongMaterialWithNormalMap(buildTexture("textures/gimp/wood/BucheHell.png"),
-                        Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));
-                wallnormalmap = null;
-                walltexture = buildTexture("textures/realwood/Wall.png");
 
-                break;
-        }
     }
 
     public LocalTransform getViewpoint() {
@@ -122,10 +72,6 @@ public class MazeSettings {
         return viewpoint;
     }
 
-    private Texture buildTexture(String s) {
-        return Texture.buildBundleTexture("data", s);
-    }
-
     public static MazeSettings init(int mode) {
         if (st == null) {
             st = new MazeSettings(mode);
@@ -134,9 +80,10 @@ public class MazeSettings {
     }
 
     public static MazeSettings getSettings() {
-        /*if (st == null) {
-            st = new MazeSettings(mode);
-        }*/
         return st;
+    }
+
+    public int getTheme(){
+        return theme;
     }
 }

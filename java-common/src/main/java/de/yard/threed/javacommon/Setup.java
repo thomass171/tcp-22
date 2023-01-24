@@ -63,7 +63,7 @@ public class Setup {
             properties.put("argv.initialMaze", "skbn/SokobanWikipedia.txt");
             properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
             //properties.put("argv.initialMaze", "maze/Maze-P-60x20.txt");
-            properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");
+            //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");
             //properties.put("argv.initialMaze","maze/Area15x10.txt");
             //properties.put("argv.initialMaze","skbn/DavidJoffe.txt:1");
             //properties.put("argv.sceneExtension0",sceneExtension0);
@@ -86,7 +86,7 @@ public class Setup {
                 properties.put("argv.enableAutomove", "true");
                 System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
             }
-            boolean demo = true;
+            boolean demo = false;
             if (demo) {
                 properties.put("argv.basename", "traffic:tiles/Demo.xml");
                 // automove is enabled in Demo.xml.

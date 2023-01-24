@@ -550,7 +550,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         for (Point b : grid.getBoxes()) {
             //EcsEntity box = MazeMovingAndStateSystem.buildSokobanBox(b.getX(), b.getY());
             //static EcsEntity buildSokobanBox(int x, int y) {
-            SceneNode p = MazeModelBuilder.buildSokobanBox(/*b.getX(), b.getY()*/);
+            SceneNode p = MazeModelFactory.getInstance().buildSokobanBox(/*b.getX(), b.getY()*/);
             EcsEntity box = new EcsEntity(p);
             MoverComponent mover = new MoverComponent(p.getTransform()/*this*/, false, b, new GridOrientation(), -1);
             mover.setLocation(b);
@@ -560,7 +560,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             Scene.getCurrent().addToWorld(box.scenenode);
         }
         for (Point b : grid.getDiamonds()) {
-            SceneNode p = MazeModelBuilder.buildDiamond();
+            SceneNode p = MazeModelFactory.getInstance().buildDiamond();
             EcsEntity diamond = new EcsEntity(p);
             Vector3 dp = MazeUtils.point2Vector3(b);
             dp = new Vector3(dp.getX(), 0.8, dp.getZ());
@@ -581,7 +581,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     private void createBullets(int cnt, int owner) {
         logger.debug("create "+cnt+" Bullets for "+owner);
         for (int i = 0; i < cnt; i++) {
-            SceneNode ball = MazeModelBuilder.buildSimpleBall(0.3, MazeSettings.bulletColor);
+            SceneNode ball = MazeModelFactory.getInstance().buildSimpleBall(0.3, MazeSettings.bulletColor);
             EcsEntity e = new EcsEntity(ball);
             BulletComponent bulletComponent = new BulletComponent(owner);
             e.addComponent(bulletComponent);

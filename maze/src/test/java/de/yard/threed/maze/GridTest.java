@@ -81,7 +81,7 @@ public class GridTest {
         boolean iscorner = true;
         float distance = 0.8f;
         float d2 = distance / 2;
-        MazeModelFactory mf = new MazeModelFactory();
+        MazeModelFactory mf = MazeModelFactory.getInstance();
         Shape shape = mf.buildWallShape(6, istop, false, distance);
         List<Vector2> points = shape.getPoints();
         TestUtil.assertVector2("p0", new Vector2(-3, 0), points.get(0));
@@ -345,7 +345,7 @@ public class GridTest {
 
     @Test
     public void testTerrain() {
-        MazeModelFactory mf = new MazeModelFactory();
+        MazeModelFactory mf = MazeModelFactory.getInstance();
         MazeTerrain terrain = new MazeTerrain(3, 6);
         terrain.addGridElement(mf.buildWall(1, Grid.STRAIGHTWALLMODE_FULL), 0, 0, 0);
         SceneNode wall = terrain.getNode().getTransform().getChild(0).getSceneNode();

@@ -48,13 +48,13 @@ public class MazeTerrain implements AbstractMazeTerrain {
         if (simpleground) {
             // eigentlich nur fuer Tests. Nur eine einzige grosse Plane. Die ist schon in der xz Ebene.
             ShapeGeometry planeGeometry = ShapeGeometry.buildPlane(effectivewidth, effectiveheight, width, height);
-            Material material = MazeSettings.getSettings().groundmaterial;
+            Material material = MazeModelFactory.getInstance().getGroundmaterial();
             /*terrain = new SceneNode(*/
             node.setMesh(new Mesh(planeGeometry, material/*, false, true*/));
         } else {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    SceneNode tile = MazeModelFactory.buildGroundElement();
+                    SceneNode tile = MazeModelFactory.getInstance().buildGroundElement();
                     //Position relativ zum terrain
                     addGridElement(tile, x, y, 0);
                     Point point = new Point(x, y);
@@ -79,7 +79,7 @@ public class MazeTerrain implements AbstractMazeTerrain {
      */
     @Override
     public void visualizeGrid(Grid grid) {
-        MazeModelFactory mf = new MazeModelFactory();
+        MazeModelFactory mf = MazeModelFactory.getInstance();
 
         int w = grid.getMaxWidth();
         int h = grid.getHeight();
@@ -91,13 +91,13 @@ public class MazeTerrain implements AbstractMazeTerrain {
                     int hh = 9;
                 }
                 if (grid.hasTopPillar(p)) {
-                    addTopPillar(MazeModelFactory.buildPillar(), p);
+                    addTopPillar(mf.buildPillar(), p);
                 }
                 if (grid.hasRightPillar(p)) {
-                    addRightPillar(MazeModelFactory.buildPillar(), p);
+                    addRightPillar(mf.buildPillar(), p);
                 }
                 if (grid.hasCenterPillar(p)) {
-                    addCenterPillar(MazeModelFactory.buildPillar(), p);
+                    addCenterPillar(mf.buildPillar(), p);
                 }
                 if (grid.getMazeLayout().destinations.contains(p)) {
                     addDecoratedField(x, y, Texture.buildBundleTexture("data", "textures/SokobanTarget.png"));
