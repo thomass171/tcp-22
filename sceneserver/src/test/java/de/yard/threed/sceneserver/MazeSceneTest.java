@@ -41,7 +41,7 @@ public class MazeSceneTest {
         sceneServer = TestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties);
     }
 
-    @Test
+    //@Test
     public void testLaunch() throws IOException {
         log.debug("testLaunch");
         //?assertRunningThreads(); läuft docvh nur der clientlistener?

@@ -44,7 +44,7 @@ public class HomeBrewMaterial implements NativeMaterial {
     OpenGlTexture basetex = null;
 
 
-    private HomeBrewMaterial(String name, Color col, OpenGlTexture diffusemap /*HashMap<String, NativeTexture> textures*/, OpenGlShaderProgram sp, boolean transparent) {
+    private HomeBrewMaterial(GlInterface glcontext,String name, Color col, OpenGlTexture diffusemap /*HashMap<String, NativeTexture> textures*/, OpenGlShaderProgram sp, boolean transparent) {
         this.name = name;
         this.color = col;
         if (col != null) {
@@ -71,11 +71,11 @@ public class HomeBrewMaterial implements NativeMaterial {
         this.sp = sp;
         this.basetex = diffusemap;
 
-        OpenGlContext.getGlContext().exitOnGLError(OpenGlContext.getGlContext(), "OpenGlMaterial.constructor");
+        glcontext.exitOnGLError(glcontext, "OpenGlMaterial.constructor");
 
     }
 
-    public static HomeBrewMaterial buildMaterial(MaterialDefinition definition, Effect effect) {
+    public static HomeBrewMaterial buildMaterial(GlInterface glcontext,MaterialDefinition definition, Effect effect) {
         Color col = (definition.color == null) ? null : definition.color.get(ColorType.MAIN);
         Float transparency = NumericValue.transparency(definition.parameters);
         boolean hasnormalmap = false;
@@ -145,12 +145,12 @@ public class HomeBrewMaterial implements NativeMaterial {
             logger.warn("Using SolidColor shader!");
             fragmentshader = "shader/SolidColor.frag";
         }
-        OpenGlShaderProgram sp = OpenGlShaderProgram.getOrBuildShader(effect.shader.vertexshader, fragmentshader, varstobind);
+        OpenGlShaderProgram sp = OpenGlShaderProgram.getOrBuildShader(glcontext, effect.shader.vertexshader, fragmentshader, varstobind);
 
         //OpenGlShaderProgram sp = new OpenGlShaderProgram(new OpenGlVertexShader(OpenGlShader.loadFromFile(effect.shader.vertexshader), "?"),
         //        new OpenGlFragmentShader(OpenGlShader.loadFromFile(effect.shader.fragmentshader), "?"), varstobind);
 
-        return new HomeBrewMaterial(definition.name, col, diffusemap/* textures*/, sp, transparency != null/*, effect.transparent*/);
+        return new HomeBrewMaterial(glcontext, definition.name, col, diffusemap/* textures*/, sp, transparency != null/*, effect.transparent*/);
     }
 
     private static void addVar(List<String> varstobind, String var) {
@@ -248,16 +248,16 @@ public class HomeBrewMaterial implements NativeMaterial {
      */
     public void prepareRender(GlInterface gl, Matrix4 modelmatrix, Matrix4 projectionmatrix, Matrix4 viewmatrix, List<OpenGlLight> lights) {
         if (sp != null) {
-            sp.use();
+            sp.use(gl);
             if (OpenGlShader.use15) {
                 // Das ist jetzt erstmal auf den Universalshader zugeschnitten
-                sp.setUniformMatrix4("PROJECTIONMATRIX", OpenGlBufferUtils.toFloatBuffer(projectionmatrix)/*MatrixUtil.toFloatBuffer(camera.getProjectionMatrix())*/);
+                sp.setUniformMatrix4(gl,"PROJECTIONMATRIX", OpenGlBufferUtils.toFloatBuffer(projectionmatrix)/*MatrixUtil.toFloatBuffer(camera.getProjectionMatrix())*/);
                 //shaderProgram.setUniform("viewer", MatrixUtil.toFloatBuffer(camera.getViewMatrix()));
                 // In 1.2 gibt es keine separate VIEWMATRIX und MODELMATRIX. Darum hier auch nicht
                 //sp.setUniform("VIEWMATRIX", viewmatrix/*camera.getViewMatrix()*/.toFloatBuffer());
                 //sp.setUniform("MODELMATRIX", modelmatrix/*camera.getViewMatrix()*/.toFloatBuffer());
                 Matrix4 modelviewmatrix = viewmatrix.multiply(modelmatrix);
-                sp.setUniformMatrix4("MODELVIEWMATRIX", OpenGlBufferUtils.toFloatBuffer(modelviewmatrix));
+                sp.setUniformMatrix4(gl,"MODELVIEWMATRIX", OpenGlBufferUtils.toFloatBuffer(modelviewmatrix));
                 //Ob Model oder ModelView für Normale ist noch nicht ganz klar. 
                 // TODO klaeren, optisch erkennt man das nur schlecht.Vieles spricht für modelviewmatrix
                 // Als Matrix3 verwenden (siehe Wiki). Die Berechnung scheint korrekt; optisch verglichen mit Berechnung
@@ -265,16 +265,16 @@ public class HomeBrewMaterial implements NativeMaterial {
                 Matrix4 normalmatrix = ((Matrix4) MathUtil2.transpose(MathUtil2.getInverse(modelviewmatrix)));
                 Matrix3 normalmatrix3 = MathUtil2.getInverseAsMatrix3(normalmatrix).transpose();//.extractRotationAndScale();
                 //sp.setUniformMatrix4("NORMALMATRIX", normalmatrix.toFloatBuffer());
-                sp.setUniformMatrix3("NORMALMATRIX", OpenGlBufferUtils.toFloatBuffer(normalmatrix3));
+                sp.setUniformMatrix3(gl,"NORMALMATRIX", OpenGlBufferUtils.toFloatBuffer(normalmatrix3));
                 //logger.debug("mat4="+new Matrix4(normalmatrix).dump("\n "));
                 //logger.debug("mat3=" + normalmatrix3.dump("\n "));
 
                 if (color != null) {
-                    sp.setUniform("isunicolor", true);
-                    sp.setUniform("unicolor", color);
+                    sp.setUniform(gl,"isunicolor", true);
+                    sp.setUniform(gl,"unicolor", color);
                 }
                 if (basetex/*textures*/ != null) {
-                    sp.setUniform("isunicolor", false);
+                    sp.setUniform(gl,"isunicolor", false);
                     int unit = 0;
                     String uniformname = "basetex";
                     //25.9.19: Weiß gar nicht mehr wofuer das war(??). Auf jeden Fall jetzt nur noch diffusemap.
@@ -288,45 +288,45 @@ public class HomeBrewMaterial implements NativeMaterial {
                     } else {
 
 
-                        texture.active(unit);
-                        texture.bind();
+                        texture.active(gl, unit);
+                        texture.bind(gl);
                     }
-                    sp.setUniform(uniformname, unit);
+                    sp.setUniform(gl,uniformname, unit);
                     unit++;
                     //}
                 }
             } else {
                 // 3.3.16 Dieser Zweig ist unfertig!
-                sp.setUniformMatrix4("projection", OpenGlBufferUtils.toFloatBuffer(projectionmatrix)/*MatrixUtil.toFloatBuffer(camera.getProjectionMatrix())*/);
+                sp.setUniformMatrix4(gl,"projection", OpenGlBufferUtils.toFloatBuffer(projectionmatrix)/*MatrixUtil.toFloatBuffer(camera.getProjectionMatrix())*/);
                 //shaderProgram.setUniform("viewer", MatrixUtil.toFloatBuffer(camera.getViewMatrix()));
-                sp.setUniformMatrix4("viewer", /*camera.getViewMatrix()*/OpenGlBufferUtils.toFloatBuffer(viewmatrix));
-                sp.setUniformMatrix4("model", /*camera.getViewMatrix()*/OpenGlBufferUtils.toFloatBuffer(modelmatrix));
+                sp.setUniformMatrix4(gl,"viewer", /*camera.getViewMatrix()*/OpenGlBufferUtils.toFloatBuffer(viewmatrix));
+                sp.setUniformMatrix4(gl,"model", /*camera.getViewMatrix()*/OpenGlBufferUtils.toFloatBuffer(modelmatrix));
 
             }
-            OpenGlContext.getGlContext().exitOnGLError(gl, "material.prepareRender");
+           gl.exitOnGLError(gl, "material.prepareRender");
 
             if (lights != null) {
                 //TODO es kann mehrere lights geben
                 OpenGlLight light = lights.get(0);
                 // Nicht jeder Shader verarbeitet Licht. Darum die uniform nur setzen, wenn die Shader sie auch haben.
-                if (sp.hasUniform("lightcolor"))
-                    sp.setUniform("lightcolor", 1, 1, 1); //TODO echten Wert setzen
+                if (sp.hasUniform(gl,"lightcolor"))
+                    sp.setUniform(gl,"lightcolor", 1, 1, 1); //TODO echten Wert setzen
 
                 // Die Richtung des Lichts ergibt sich aus der Position der Quelle und der Position des beleuchteten
                 // Objekts (zumindest wenn die Quelle relativ weit weg ist. 10.7.14: Das ist doch nicht geeignt!
                 // Die Direction muss pro Vertex berechnet werden.
                 //Vector3 lightdirection = light.position.subtract(this.getPosition());
                 //lightdirection = new Vector3(0,-1,0);
-                if (sp.hasUniform("lightposition"))
-                    sp.setUniform("lightposition", light.getPosition());
-                if (sp.hasUniform("u_lightdirection") && light.getDirection() != null) {
-                    sp.setUniform("u_lightdirection", light.getDirection().normalize());
+                if (sp.hasUniform(gl,"lightposition"))
+                    sp.setUniform(gl,"lightposition", light.getPosition());
+                if (sp.hasUniform(gl,"u_lightdirection") && light.getDirection() != null) {
+                    sp.setUniform(gl,"u_lightdirection", light.getDirection().normalize());
                 }
-                if (sp.hasUniform("u_lightcolor") && light.getColor() != null) {
-                    sp.setUniform("u_lightcolor", light.getColor());
+                if (sp.hasUniform(gl,"u_lightcolor") && light.getColor() != null) {
+                    sp.setUniform(gl,"u_lightcolor", light.getColor());
                 }
-                if (sp.hasUniform("u_ambientlightcolor"))
-                    sp.setUniform("u_ambientlightcolor", new Color(0.3f, 0.3f, 0.3f)); //TODO echten Wert setzen
+                if (sp.hasUniform(gl,"u_ambientlightcolor"))
+                    sp.setUniform(gl,"u_ambientlightcolor", new Color(0.3f, 0.3f, 0.3f)); //TODO echten Wert setzen
             }
         }
         if (transparent) {

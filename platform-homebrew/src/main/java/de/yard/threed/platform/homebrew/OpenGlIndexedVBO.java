@@ -73,8 +73,6 @@ public /*abstract*/ class OpenGlIndexedVBO /*29.7.21 implements NativeVBO /* imp
     private static final int elementCount = positionElementCount + colorElementCount + textureElementCount;
     private int stride = -1;
 
-    GlInterface glcontext;
-
     public static int totalvertexcnt = 0;
 
     /**
@@ -113,7 +111,6 @@ public /*abstract*/ class OpenGlIndexedVBO /*29.7.21 implements NativeVBO /* imp
             if (sts != null && usetextures)
                 sts.set(sts.size() - 1, v.st);* /
         }*/
-        glcontext = OpenGlContext.getGlContext();
     }
 
     //@Override
@@ -247,7 +244,7 @@ public /*abstract*/ class OpenGlIndexedVBO /*29.7.21 implements NativeVBO /* imp
         IndexList list = ea.l_indices.get(indexlistindex);
         // Der Element Buffer wird nicht auch ueber das VAO gebinded. Sonst koennte man auch nicht mehrere draws mit demselben VAO machen.
         glcontext.glBindBuffer(glcontext.GL_ELEMENT_ARRAY_BUFFER(), list.vboiId);
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "drawElements");
+        glcontext.exitOnGLError(glcontext, "drawElements");
         //20.6 indices.drawElements(wireframe);
         final int sizeofunsignedint = 4;
         //logger.debug("drawElements: glcontext="+glcontext.dump(""));
@@ -267,7 +264,7 @@ public /*abstract*/ class OpenGlIndexedVBO /*29.7.21 implements NativeVBO /* imp
         } else {
             glcontext.glDrawElements(glcontext.GL_TRIANGLES(), list.triangles * 3, glcontext.GL_UNSIGNED_INT(), 0);
             //25.9.19 nicht abbrechen, sondern reporten OpenGlContext.getGlContext().exitOnGLError(glcontext,"drawElements");
-            if (OpenGlContext.getGlContext().hadGLError(glcontext, "drawElements", logger)) {
+            if (glcontext.hadGLError(glcontext, "drawElements", logger)) {
                 success = false;
             }
 
@@ -276,7 +273,7 @@ public /*abstract*/ class OpenGlIndexedVBO /*29.7.21 implements NativeVBO /* imp
             }
         }
         glcontext.glBindBuffer(glcontext.GL_ELEMENT_ARRAY_BUFFER(), 0);
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "drawElements");
+        glcontext.exitOnGLError(glcontext, "drawElements");
         return success;
     }
 
@@ -309,7 +306,7 @@ public /*abstract*/ class OpenGlIndexedVBO /*29.7.21 implements NativeVBO /* imp
         OpenGlContext.getGlContext().exitOnGLError(glcontext,"rebuild");*/
 
         vboId = gl.GenBuffers();
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "rebuild");
+        gl.exitOnGLError(gl, "rebuild");
 
         rebuild(gl, transformationmatrix);
         // Bei vielen (z.B.40000) dauer der Dump Ewigkeiten
@@ -346,28 +343,29 @@ public /*abstract*/ class OpenGlIndexedVBO /*29.7.21 implements NativeVBO /* imp
         }
         verticesBuffer.flip();
 
-        gl.glBindBuffer(glcontext.GL_ARRAY_BUFFER(), vboId);
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "rebuild");
-        gl.glBufferData(glcontext.GL_ARRAY_BUFFER(), verticesBuffer, glcontext.GL_STATIC_DRAW());
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "rebuild");
+        GlInterface glcontext = gl;
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), vboId);
+        gl.exitOnGLError(gl, "rebuild");
+        gl.glBufferData(gl.GL_ARRAY_BUFFER(), verticesBuffer, gl.GL_STATIC_DRAW());
+       glcontext.exitOnGLError(glcontext, "rebuild");
         int attribindex = 0;
         gl.VertexAttribPointer(attribindex++, positionElementCount, glcontext.GL_FLOAT(),
                 false, stride, positionByteOffset);
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "rebuild");
+       glcontext.exitOnGLError(glcontext, "rebuild");
         if (colors != null) {
             gl.VertexAttribPointer(attribindex++, colorElementCount, glcontext.GL_FLOAT(),
                     false, stride, colorByteOffset);
-            OpenGlContext.getGlContext().exitOnGLError(glcontext, "rebuild");
+           glcontext.exitOnGLError(glcontext, "rebuild");
         }
         if (sts != null) {
             gl.VertexAttribPointer(attribindex++, textureElementCount, glcontext.GL_FLOAT(),
                     false, stride, textureByteOffset);
-            OpenGlContext.getGlContext().exitOnGLError(glcontext, "rebuild");
+           glcontext.exitOnGLError(glcontext, "rebuild");
         }
         if (normals != null) {
             gl.VertexAttribPointer(attribindex++, normalElementCount, glcontext.GL_FLOAT(),
                     false, stride, normalByteOffset);
-            OpenGlContext.getGlContext().exitOnGLError(glcontext, "rebuild");
+           glcontext.exitOnGLError(glcontext, "rebuild");
         }
         /*gl.glBindBuffer(glcontext.GL_ARRAY_BUFFER(), 0);
         OpenGlContext.getGlContext().exitOnGLError(glcontext,"rebuild");

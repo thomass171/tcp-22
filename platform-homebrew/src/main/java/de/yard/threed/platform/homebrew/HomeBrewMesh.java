@@ -81,16 +81,16 @@ public class HomeBrewMesh /*19.7.16 extends OpenGlObject3D*/ implements NativeMe
         }else{
             // auch wireframe (GL_LINE_LOOP braucht wohl einen Shader
             MaterialDefinition materialDefinition=new MaterialDefinition("wireframe",Material.buildColorMap(Color.WHITE), null, Material.buildParam(NumericType.SHADING, new NumericValue(NumericValue.UNSHADED)));
-            wireframematerial = (HomeBrewMaterial) HomeBrewMaterial.buildMaterial(materialDefinition, null);
+            wireframematerial = (HomeBrewMaterial) HomeBrewMaterial.buildMaterial(gl, materialDefinition, null);
         }
-        OpenGlContext.getGlContext().exitOnGLError(gl, "setup.material.setup");
+       gl.exitOnGLError(gl, "setup.material.setup");
 
 
         if (Settings.usevertexarrays) {
             vaoId = gl.GenVertexArrays();
             gl.glBindVertexArray(vaoId);
         }
-        OpenGlContext.getGlContext().exitOnGLError(gl, "setup.glBindVertexArray");
+       gl.exitOnGLError(gl, "setup.glBindVertexArray");
 
         /*if (material == null){
             OpenGlContext.getGlContext().glEnableVertexAttribArray(0);
@@ -101,7 +101,7 @@ public class HomeBrewMesh /*19.7.16 extends OpenGlObject3D*/ implements NativeMe
         if (Settings.usevertexarrays) {
             gl.glBindVertexArray(0);
         }
-        OpenGlContext.getGlContext().exitOnGLError(gl, "after setup");
+       gl.exitOnGLError(gl, "after setup");
         setup = true;
         needssetup = false;
     }

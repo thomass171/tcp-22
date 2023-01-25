@@ -5,10 +5,10 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
 import de.yard.threed.sceneserver.ClientConnection;
 import de.yard.threed.sceneserver.ClientListener;
 import de.yard.threed.sceneserver.SceneServer;
-import de.yard.threed.sceneserver.ServerSceneRunner;
 
 import java.util.HashMap;
 import java.util.List;
@@ -79,10 +79,11 @@ public class TestUtils {
     public static SceneServer setupServerForScene(String sceneclass, int initialFrames, HashMap<String, String> properties) throws Exception {
 
         TestFactory.resetInit();
-        ServerSceneRunner.dropInstance();
+        HomeBrewSceneRunner.dropInstance();
 
         SceneServer sceneServer = new SceneServer("subdir", sceneclass, properties);
-        ServerSceneRunner sceneRunner = (ServerSceneRunner) sceneServer.nsr;
+        HomeBrewSceneRunner sceneRunner = (HomeBrewSceneRunner) sceneServer.nsr;
+        sceneRunner.renderbrake=200;
 
         sceneRunner.frameLimit = initialFrames;
 
@@ -91,7 +92,7 @@ public class TestUtils {
         return sceneServer;
     }
 
-    public static void runAdditionalFrames(ServerSceneRunner sceneRunner, int frames) {
+    public static void runAdditionalFrames(HomeBrewSceneRunner sceneRunner, int frames) {
         sceneRunner.frameLimit = frames;
         sceneRunner.startRenderloop();
     }

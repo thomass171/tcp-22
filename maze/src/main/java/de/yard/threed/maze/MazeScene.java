@@ -39,7 +39,6 @@ public class MazeScene extends Scene {
     //10.11.20 replaced by loaded event boolean gamestarted = false;
 
     static IntProvider rand = new RandomIntProvider();
-    Camera deferredcameraForInventory;
     static int HUDLAYER = 9;
     // in VR 0, sonst die übliche bekannte Höhe. Ohne VR war das immer 0.6 unter diesem Namen
     //Ray Oberkante zum Test genau auf Pillaroberkante mit rayy = Pillar.HEIGHT - 0.15f
@@ -117,35 +116,39 @@ public class MazeScene extends Scene {
         avatarSystem.setAvatarBuilder(new MazeAvatarBuilder());
         avatarSystem.setViewTransform(getViewTransform());
         SystemManager.addSystem(avatarSystem);
-        SystemManager.addSystem(new MazeVisualizationSystem());
-        //16.4.21: Kein main menu mehr. Level change geht einfach über Neustart. Dafuer das control menu togglen.
-        InputToRequestSystem inputToRequestSystem = new InputToRequestSystem(/*new MainMenu(getMainCamera())*/);
-        //'M' nur Provisorium? Och wieso? Man kann KEys immer als Fallback haben.
-        //inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
-        inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_CONTROLMENU);
-        inputToRequestSystem.addKeyMapping(KeyCode.W, RequestRegistry.TRIGGER_REQUEST_FORWARD);
-        inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, RequestRegistry.TRIGGER_REQUEST_FORWARD);
 
-        inputToRequestSystem.addKeyMapping(KeyCode.S, RequestRegistry.TRIGGER_REQUEST_BACK);
-        inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, RequestRegistry.TRIGGER_REQUEST_BACK);
+        InputToRequestSystem inputToRequestSystem = null;
+        if (sceneMode.isClient()) {
+            SystemManager.addSystem(new MazeVisualizationSystem());
+            //16.4.21: Kein main menu mehr. Level change geht einfach über Neustart. Dafuer das control menu togglen.
+            inputToRequestSystem = new InputToRequestSystem(/*new MainMenu(getMainCamera())*/);
+            //'M' nur Provisorium? Och wieso? Man kann KEys immer als Fallback haben.
+            //inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
+            inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_CONTROLMENU);
+            inputToRequestSystem.addKeyMapping(KeyCode.W, RequestRegistry.TRIGGER_REQUEST_FORWARD);
+            inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, RequestRegistry.TRIGGER_REQUEST_FORWARD);
 
-        inputToRequestSystem.addKeyMapping(KeyCode.LeftArrow, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
-        inputToRequestSystem.addKeyMapping(KeyCode.RightArrow, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+            inputToRequestSystem.addKeyMapping(KeyCode.S, RequestRegistry.TRIGGER_REQUEST_BACK);
+            inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, RequestRegistry.TRIGGER_REQUEST_BACK);
 
-        inputToRequestSystem.addKeyMapping(KeyCode.U, RequestRegistry.TRIGGER_REQUEST_UNDO);
-        inputToRequestSystem.addKeyMapping(KeyCode.V, RequestRegistry.TRIGGER_REQUEST_VALIDATE);
-        inputToRequestSystem.addKeyMapping(KeyCode.H, RequestRegistry.TRIGGER_REQUEST_HELP);
-        inputToRequestSystem.addKeyMapping(KeyCode.R, RequestRegistry.TRIGGER_REQUEST_RESET);
-        inputToRequestSystem.addKeyMapping(KeyCode.K, RequestRegistry.TRIGGER_REQUEST_KICK);
-        inputToRequestSystem.addKeyMapping(KeyCode.Space, BulletSystem.TRIGGER_REQUEST_FIRE);
+            inputToRequestSystem.addKeyMapping(KeyCode.LeftArrow, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
+            inputToRequestSystem.addKeyMapping(KeyCode.RightArrow, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
 
-        inputToRequestSystem.setSegmentRequest(0, RequestRegistry.TRIGGER_REQUEST_LEFT);
-        inputToRequestSystem.setSegmentRequest(2, RequestRegistry.TRIGGER_REQUEST_RIGHT);
-        inputToRequestSystem.setSegmentRequest(3, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
-        inputToRequestSystem.setSegmentRequest(4, BulletSystem.TRIGGER_REQUEST_FIRE);
-        inputToRequestSystem.setSegmentRequest(5, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
-        inputToRequestSystem.setSegmentRequest(7, RequestRegistry.TRIGGER_REQUEST_FORWARD);
+            inputToRequestSystem.addKeyMapping(KeyCode.U, RequestRegistry.TRIGGER_REQUEST_UNDO);
+            inputToRequestSystem.addKeyMapping(KeyCode.V, RequestRegistry.TRIGGER_REQUEST_VALIDATE);
+            inputToRequestSystem.addKeyMapping(KeyCode.H, RequestRegistry.TRIGGER_REQUEST_HELP);
+            inputToRequestSystem.addKeyMapping(KeyCode.R, RequestRegistry.TRIGGER_REQUEST_RESET);
+            inputToRequestSystem.addKeyMapping(KeyCode.K, RequestRegistry.TRIGGER_REQUEST_KICK);
+            inputToRequestSystem.addKeyMapping(KeyCode.Space, BulletSystem.TRIGGER_REQUEST_FIRE);
 
+            inputToRequestSystem.setSegmentRequest(0, RequestRegistry.TRIGGER_REQUEST_LEFT);
+            inputToRequestSystem.setSegmentRequest(2, RequestRegistry.TRIGGER_REQUEST_RIGHT);
+            inputToRequestSystem.setSegmentRequest(3, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
+            inputToRequestSystem.setSegmentRequest(4, BulletSystem.TRIGGER_REQUEST_FIRE);
+            inputToRequestSystem.setSegmentRequest(5, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+            inputToRequestSystem.setSegmentRequest(7, RequestRegistry.TRIGGER_REQUEST_FORWARD);
+            SystemManager.addSystem(inputToRequestSystem);
+        }
 
         if (vrInstance != null) {
             // Even in VR the observer will be attached to avatar later
@@ -172,25 +175,26 @@ public class MazeScene extends Scene {
             inventorySystem.addInventory(leftControllerPanel);
             SystemManager.addSystem(inventorySystem);
         } else {
-            inputToRequestSystem.setControlMenuBuilder(new ControlMenu());
-
-            deferredcameraForInventory = Camera.createAttachedDeferredCamera(getMainCamera(), HUDLAYER, 1.0,10.0);
-            deferredcameraForInventory.setName("deferred-camera");
+            // regular display, non VR
             InventorySystem inventorySystem = new InventorySystem();
-            inventorySystem.addInventory(new MazeHudInventory(deferredcameraForInventory, getDimension()));
             SystemManager.addSystem(inventorySystem);
 
-            // Optional (test)Hud that shows VR control panel via deferred camera as HUD
-            if (EngineHelper.isEnabled("argv.enableHud")) {
-                ControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
-                leftControllerPanel.getTransform().setPosition(new Vector3(0.4, 0.8, -2));
-                deferredcameraForInventory.getCarrier().attach(leftControllerPanel);
-                inputToRequestSystem.addControlPanel(leftControllerPanel);
+            if (sceneMode.isClient()) {
+                inputToRequestSystem.setControlMenuBuilder(new ControlMenu());
+                Camera deferredcameraForInventory = Camera.createAttachedDeferredCamera(getMainCamera(), HUDLAYER, 1.0, 10.0);
+                deferredcameraForInventory.setName("deferred-camera");
+                inventorySystem.addInventory(new MazeHudInventory(deferredcameraForInventory, getDimension()));
 
+                // Optional (test)Hud that shows VR control panel via deferred camera as HUD
+                if (EngineHelper.isEnabled("argv.enableHud")) {
+                    ControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
+                    leftControllerPanel.getTransform().setPosition(new Vector3(0.4, 0.8, -2));
+                    deferredcameraForInventory.getCarrier().attach(leftControllerPanel);
+                    inputToRequestSystem.addControlPanel(leftControllerPanel);
+                }
             }
         }
 
-        SystemManager.addSystem(inputToRequestSystem);
         SystemManager.addSystem(new BulletSystem());
         SystemManager.addSystem(new BotSystem());
 

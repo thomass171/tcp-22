@@ -22,7 +22,6 @@ public class OpenGlShaderProgram {
     OpenGlFragmentShader fragmentShader;
     List<String> varstobind;
     Log logger = Platform.getInstance().getLog(OpenGlShaderProgram.class);
-    GlInterface glcontext = OpenGlContext.getGlContext();
     static HashMap<String, OpenGlShaderProgram> shader = new HashMap<String, OpenGlShaderProgram>();
     
     //String vertexshadersource;
@@ -41,7 +40,7 @@ public class OpenGlShaderProgram {
      * @param fragmentShader
      * @param varstobind
      */
-    public OpenGlShaderProgram(OpenGlVertexShader vertexShader, OpenGlFragmentShader fragmentShader, List<String> varstobind) {
+    public OpenGlShaderProgram(GlInterface glcontext,OpenGlVertexShader vertexShader, OpenGlFragmentShader fragmentShader, List<String> varstobind) {
         this.vertexShader = vertexShader;
         this.fragmentShader = fragmentShader;
         this.varstobind = varstobind;
@@ -58,28 +57,28 @@ public class OpenGlShaderProgram {
         // remain fixed (and their values can be queried) until the next link command occurs.
 
         //TODO this.exitOnGLError("setupShaders");
-        setup();
+        setup(glcontext);
     }
 
-    private void setup() {
+    private void setup(GlInterface glcontext) {
 
 
         //TODO wo genau kommt der errorcheck hin
         int errorCheckValue = glcontext.glGetError();
 
         // Load the vertex shader
-        vertexShader.setup();// = new VertexShader(vertexshadersource);
+        vertexShader.setup(glcontext);// = new VertexShader(vertexshadersource);
         // Load the fragment shader
-        fragmentShader.setup();// = new FragmentShader(fragmentshadersource);
+        fragmentShader.setup(glcontext);// = new FragmentShader(fragmentshadersource);
 
         // Create a new shader program that links both shaders
         shaderProgramid = glcontext.glCreateProgram();
         glcontext.glAttachShader(shaderProgramid, vertexShader.getId());
-        GlInterface gl = OpenGlContext.getGlContext();
-        OpenGlContext.getGlContext().exitOnGLError(gl, "after attach");
+        GlInterface gl = glcontext;
+        glcontext.exitOnGLError(gl, "after attach");
         glcontext.glAttachShader(shaderProgramid, fragmentShader.getId());
 
-        OpenGlContext.getGlContext().exitOnGLError(gl, "after attach");
+        glcontext.exitOnGLError(gl, "after attach");
 
         for (int index = 0; index < varstobind.size(); index++) {
             if (Settings.usevertexarrays) {
@@ -88,18 +87,18 @@ public class OpenGlShaderProgram {
                 //TODO andere ausser gl_vertex
                 //18.3.16 zu alt glcontext.glVertexPointerFloat(3, 0, 0);
             }
-            OpenGlContext.getGlContext().exitOnGLError(gl, "bind");
+            glcontext.exitOnGLError(gl, "bind");
 
             logger.info("vertex attribute index " + index + " bound to attribute variable " + varstobind.get(index));
         }
-        link();
+        link(gl);
 //??        GlImpl.exitOnGLError("after link");
     }
 
     /**
      * Muss nach glBindAttribLocation gemacht werden
      */
-    public void link() {
+    public void link(GlInterface glcontext) {
         if (!glcontext.glLinkProgram(shaderProgramid)) {
             System.err.println("Unable to link shader program:");
             System.exit(1);//TODO
@@ -120,63 +119,66 @@ public class OpenGlShaderProgram {
         return GL20.glGetAttribLocation(shaderProgramid, attr);
     }*/
 
-    public void setUniformMatrix3(String name, FloatBuffer value) {
+    public void setUniformMatrix3(GlInterface glcontext,String name, FloatBuffer value) {
         glcontext.glUniformMatrix3(glcontext.glGetUniformLocation(shaderProgramid, name), value);
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "setUniformMatrix3 (glUniform3f) name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
+        glcontext.exitOnGLError(glcontext, "setUniformMatrix3 (glUniform3f) name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
     }
 
-    public void setUniformMatrix4(String name, FloatBuffer value) {
+    public void setUniformMatrix4(GlInterface glcontext,String name, FloatBuffer value) {
         glcontext.glUniformMatrix4(glcontext.glGetUniformLocation(shaderProgramid, name), value);
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "setUniformMatrix4 (glUniform3f) name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
+        glcontext.exitOnGLError(glcontext, "setUniformMatrix4 (glUniform3f) name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
     }
 
-    public void setUniform(String name, Color value) {
+    public void setUniform(GlInterface glcontext,String name, Color value) {
         int ul = glcontext.glGetUniformLocation(shaderProgramid, name);
         glcontext.glUniform4f(ul, value.getR(), value.getG(), value.getB(), value.getAlpha());
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "setUniformColor name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
+        glcontext.exitOnGLError(glcontext, "setUniformColor name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
     }
 
-    public void setUniform(String name, int value) {
+    public void setUniform(GlInterface glcontext,String name, int value) {
         int ul = glcontext.glGetUniformLocation(shaderProgramid, name);
         glcontext.glUniform1i(ul, value);
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "setUniformColor name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
+        glcontext.exitOnGLError(glcontext, "setUniformColor name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
     }
 
-    public void setUniform(String name, boolean value) {
+    public void setUniform(GlInterface glcontext,String name, boolean value) {
         glcontext.glUniform1i(glcontext.glGetUniformLocation(shaderProgramid, name), value ? 1 : 0);
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "setUniformBoolean name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
+        glcontext.exitOnGLError(glcontext, "setUniformBoolean name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
     }
 
-    public boolean hasUniform(String name) {
+    public boolean hasUniform(GlInterface glcontext, String name) {
         return glcontext.glGetUniformLocation(shaderProgramid, name) != -1;
     }
 
-    public void setUniform(String name, Vector3 v) {
-        setUniform(name, (float)v.getX(),(float) v.getY(), (float)v.getZ());
+    public void setUniform(GlInterface glcontext,String name, Vector3 v) {
+        setUniform(glcontext, name, (float)v.getX(),(float) v.getY(), (float)v.getZ());
     }
 
-    public void setUniform(String name, float v0, float v1, float v2) {
+    public void setUniform(GlInterface glcontext,String name, float v0, float v1, float v2) {
         int location = glcontext.glGetUniformLocation(shaderProgramid, name);
         //logger.debug("location="+location);
         if (location == -1)
             throw new RuntimeException("uniform " + name + " not found in shader program " + getName());
         glcontext.glUniform3f(location, v0, v1, v2);
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "setUniform2 (glUniform3f) name=" + name + ", shaderprogram=" + this);
+        glcontext.exitOnGLError(glcontext, "setUniform2 (glUniform3f) name=" + name + ", shaderprogram=" + this);
     }
 
-    public void use() {
+    public void use(GlInterface glcontext) {
         glcontext.glUseProgram(shaderProgramid);
     }
 
-    public void bind() {
+   /*25.1.23 public void bind() {
+        GlInterface glcontext = PlatformHomeBrew.getGlContext();
         glcontext.glUseProgram(shaderProgramid);
     }
 
     public void unbind() {
+        GlInterface glcontext = PlatformHomeBrew.getGlContext();
         glcontext.glUseProgram(0);
     }
 
     public void destroyOpenGL() {
+        GlInterface glcontext = PlatformHomeBrew.getGlContext();
         glcontext.glUseProgram(0);
         glcontext.glDetachShader(getId(), vertexShader.getId());
         glcontext.glDetachShader(getId(), fragmentShader.getId());
@@ -184,26 +186,26 @@ public class OpenGlShaderProgram {
         glcontext.glDeleteShader(vertexShader.getId());
         glcontext.glDeleteShader(fragmentShader.getId());
         glcontext.glDeleteProgram(getId());
-    }
+    }*/
 
     /**
      * Vorher muss das VAO gebunden worden sein.
      */
-    public void glEnableVertexAttribArray() {
+    public void glEnableVertexAttribArray(GlInterface glcontext) {
         for (int index = 0; index < varstobind.size(); index++) {
             glcontext.glEnableVertexAttribArray(index);
-            OpenGlContext.getGlContext().exitOnGLError(glcontext, "glEnableVertexAttribArray");
+            glcontext.exitOnGLError(glcontext, "glEnableVertexAttribArray");
         }
     }
 
-    public void DisableVertexAttribArray() {
+    public void DisableVertexAttribArray(GlInterface glcontext) {
         for (int index = 0; index < varstobind.size(); index++) {
             glcontext.glDisableVertexAttribArray(index);
-            OpenGlContext.getGlContext().exitOnGLError(glcontext, "DisableVertexAttribArray");
+            glcontext.exitOnGLError(glcontext, "DisableVertexAttribArray");
         }
     }
 
-    public static OpenGlShaderProgram getOrBuildShader(String vertexshader, String fragmentshader, List<String> varstobind) {
+    public static OpenGlShaderProgram getOrBuildShader(GlInterface glcontext,String vertexshader, String fragmentshader, List<String> varstobind) {
         String id = vertexshader + fragmentshader;
         for (String s:varstobind){
             id+=s;
@@ -212,8 +214,8 @@ public class OpenGlShaderProgram {
         if (prg == null) {
             // Dann anlegen    
 
-            prg = new OpenGlShaderProgram(new OpenGlVertexShader(OpenGlShader.loadFromFile(vertexshader), "?"),
-                    new OpenGlFragmentShader(OpenGlShader.loadFromFile(fragmentshader), "?"), varstobind);
+            prg = new OpenGlShaderProgram(glcontext,new OpenGlVertexShader(OpenGlShader.loadFromFile(glcontext,vertexshader), "?"),
+                    new OpenGlFragmentShader(OpenGlShader.loadFromFile(glcontext,fragmentshader), "?"), varstobind);
             shader.put(id,prg);
         }
         return prg;

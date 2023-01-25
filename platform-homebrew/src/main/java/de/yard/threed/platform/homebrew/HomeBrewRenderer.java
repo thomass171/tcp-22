@@ -1,18 +1,59 @@
 package de.yard.threed.platform.homebrew;
 
+import de.yard.threed.core.Dimension;
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Util;
+import de.yard.threed.core.platform.NativeCamera;
+import de.yard.threed.core.platform.NativeScene;
+import de.yard.threed.engine.Camera;
+import de.yard.threed.engine.Scene;
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
+import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
 /**
- * Abstraction of "redrawing" of objects. Could by OpenGL or remote.
- * Also used for testing. Nichts fuer C# oder GWT.
- * 22.2.21 jetzt hab ich auch noch einen SceneRenderer(??). Das sind aber verschiedene Ebenen(??)
+ * Abstraction of "redrawing" of objects. Could by OpenGL or remote on a server without display.
+ * Also used for testing. Not for C# oder GWT.
+ * 22.2.21 There is also a SceneRenderer, but that works on a higher level.
  * 26.4.20
  */
 public abstract class HomeBrewRenderer {
+
+    //25.4.20: Set by implementor
+    protected GlInterface glcontext;
+
+    /**
+     * Einen einzelnen Frame rendern
+     * <p/>
+     * <p/>
+     * Hier werden
+     * 1) Controllerevents gesammelt
+     * 2) Updater aufgerufen
+     * 3) Szene neu gerendered
+     * @param camera
+     */
+    public void renderFrame(AbstractSceneRunner runner, /*HomeBrewNativeScene scene*/List<OpenGlLight> lights, NativeCamera camera) {
+
+        collectKeyboardAndMouseEvents(runner);
+
+        Scene sc = Scene.getCurrent();
+        sc.deltaTime = runner./*runnerhelper.*/calcTpf();
+        runner./*runnerhelper.*/prepareFrame(sc.deltaTime);
+
+        //TODO multiple cameras inlc. enabled
+        renderScene(lights, camera);
+        updateDisplay();
+
+    }
+
+    protected abstract void renderScene(List<OpenGlLight> lights,/*HomeBrewScene scene, /*HomeBrew*/NativeCamera camera);
+
+
+    /*public HomeBrewRenderer getRenderer() {
+        return renderer;
+    }*/
 
     /**
      * Rendern aller Objekte innerhalb von Homebrew.
@@ -38,7 +79,7 @@ public abstract class HomeBrewRenderer {
                 //renderable.render(glImpl, projectionmatrix, viewmatrix, lights);
                 doRender(renderable, projectionmatrix, viewmatrix, lights);
             }
-            // special feature in MP.
+            // special feature in MP. TODO 23.1.23 MP has its own renderer. So: still needed?
             for (HomeBrewSceneNode renderable : renderables.nodes) {
                 //renderable.render(glImpl, projectionmatrix, viewmatrix, lights);
                 doRender(renderable, projectionmatrix, viewmatrix, lights);
@@ -53,6 +94,9 @@ public abstract class HomeBrewRenderer {
     protected void collectRenderables(Renderables renderables) {
         HomeBrewSceneNode.collectRenderables(renderables);
     }
+
+    protected abstract void collectKeyboardAndMouseEvents(AbstractSceneRunner runner);
+    protected abstract void updateDisplay();
 
     /**
      * Das ist aber noch nicht zu Ende gedacht. in OpenGlMesh ist immer noch sehr viel.
@@ -75,6 +119,13 @@ public abstract class HomeBrewRenderer {
      */
     protected abstract void doRender(HomeBrewSceneNode mesh, Matrix4 projectionmatrix, Matrix4 viewmatrix, List<OpenGlLight> lights);
 
+    public abstract void init(Dimension dimension);
 
+    public  GlInterface getGlContext(){
+        return glcontext;
+    }
 
+    public abstract boolean userRequestsTerminate();
+
+    public abstract void close();
 }

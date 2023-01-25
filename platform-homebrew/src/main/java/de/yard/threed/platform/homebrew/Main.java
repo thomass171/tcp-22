@@ -3,6 +3,7 @@ package de.yard.threed.platform.homebrew;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.engine.SceneMode;
 import de.yard.threed.javacommon.Setup;
 
 import java.util.HashMap;
@@ -27,7 +28,8 @@ public class Main {
         properties.put("BUNDLEDIR", "/Users/thomas/Projekte/Granada/bundles");
 
         //10.7.21 NativeSceneRunner nsr = OpenGlSceneRunner.init(properties);
-        HomeBrewSceneRunner nsr = HomeBrewSceneRunner.init(properties);
+        ;
+        HomeBrewSceneRunner nsr = HomeBrewSceneRunner.init(properties, new OpenGlRenderer(/*PlatformHomeBrew/*OpenGlContext* /.getGlContext()*/), SceneMode.forMonolith());
 
         logger = Platform.getInstance().getLog(Main.class);
 

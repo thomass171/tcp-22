@@ -52,8 +52,6 @@ private static boolean usesvec3 = true;
     private static final int elementCount = positionElementCount + colorElementCount + textureElementCount;
     private int stride = -1;
 
-    GlInterface glcontext;
-
     public static int totalvertexcnt = 0;
     /**
      * Zunaechst werden die schon bekannten Vertices angelegt.
@@ -74,7 +72,6 @@ private static boolean usesvec3 = true;
             if (sts != null && usetextures)
                 sts.set(sts.size() - 1, v.st);* /
         }*/
-        glcontext = OpenGlContext.getGlContext();
     }
 
     @Override
@@ -168,7 +165,7 @@ private static boolean usesvec3 = true;
             list.genBuffer(gl);
         }
 
-        OpenGlContext.getGlContext().exitOnGLError(glcontext,"rebuild");
+        gl.exitOnGLError(gl,"rebuild");
         rebuild(gl, transformationmatrix);
 
 
@@ -181,8 +178,8 @@ private static boolean usesvec3 = true;
     public void rebuild(GlInterface gl, Matrix4 transformationmatrix) {
         validate();
 
-        gl.glBindBuffer(glcontext.GL_ARRAY_BUFFER(), 0);
-        OpenGlContext.getGlContext().exitOnGLError(glcontext,"rebuild");
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), 0);
+        gl.exitOnGLError(gl,"rebuild");
 
         for (IndexList list : l_indices) {
             list.fillBuffer(gl);
@@ -310,11 +307,11 @@ class IndexList {
         }
         intbuffer.flip();
         gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER(), vboiId);
-        OpenGlContext.getGlContext().exitOnGLError(gl,"rebuild");
+        gl.exitOnGLError(gl,"rebuild");
         gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER(), intbuffer, gl.GL_STATIC_DRAW());
-        OpenGlContext.getGlContext().exitOnGLError(gl,"rebuild");
+        gl.exitOnGLError(gl,"rebuild");
         //29.1.16 gl.glBindBuffer(glcontext.GL_ELEMENT_ARRAY_BUFFER(), 0);
-        OpenGlContext.getGlContext().exitOnGLError(gl,"rebuild");
+        gl.exitOnGLError(gl,"rebuild");
 
     }
 }

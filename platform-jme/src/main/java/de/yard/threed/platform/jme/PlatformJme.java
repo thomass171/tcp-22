@@ -51,7 +51,8 @@ import java.util.List;
 
 
 /**
- * 5.7.21: Jetzt mal als Erweiterung der SimpleHeadlessPlatform
+ * 5.7.21: Jetzt mal als Erweiterung der SimpleHeadlessPlatform.
+ * 25.1.23: Why? This doesn't really make sense.
  * <p>
  * Created by thomass on 20.04.15.
  */

@@ -28,19 +28,18 @@ public class OpenGlTexture implements NativeTexture {
     private int height;
     private int width;
     static Log logger = Platform.getInstance().getLog(OpenGlTexture.class);
-    GlInterface glcontext = OpenGlContext.getGlContext();
     public static int totalsize = 0;
     public static int totaltexturecnt;
     String name="unknown";
-    
-    public OpenGlTexture(ImageData image, int mode) {
+
+    public OpenGlTexture(GlInterface glContext, ImageData image, int mode) {
         //this.target = GL15.GL_ARRAY_BUFFER;
         // images.add(image);
         this.mode = mode;
         this.width = image.width;
         this.height = image.height;
-        ByteBuffer buffer = BufferHelper.buildTextureBuffer(image.width, image.height, image.pixel,BYTES_PER_PIXEL);
-        setup(buffer);
+        ByteBuffer buffer = BufferHelper.buildTextureBuffer(image.width, image.height, image.pixel, BYTES_PER_PIXEL);
+        setup(glContext, buffer);
         totalsize += image.width*image.height*BYTES_PER_PIXEL;
         totaltexturecnt++;
         buffer.clear();
@@ -54,7 +53,7 @@ public class OpenGlTexture implements NativeTexture {
         totaltexturecnt++;
 
     }
-    
+
         //bufferData(floats);
     private void buildFromBufferedImage(ImageData image) {
         logger.debug("bi.width=" + image.width);
@@ -90,11 +89,11 @@ public class OpenGlTexture implements NativeTexture {
     /**
      * Texture zur GPU senden.
      */
-    private void setup(ByteBuffer buffer) {
-        gltextureid = createId();
+    private void setup( GlInterface glcontext, ByteBuffer buffer) {
+        gltextureid = createId(glcontext);
         // 3.3.16 active und bind ist dafür erforderlich
-        active(0);
-        bind();
+        active(glcontext, 0);
+        bind(glcontext);
 
         assert buffer != null;
 
@@ -104,29 +103,29 @@ public class OpenGlTexture implements NativeTexture {
                 break;
             case 1:
                 glcontext.glUploadTexture(width,height,buffer,false);
-                break;               
+                break;
         }
         buffer.clear();
-        OpenGlContext.getGlContext().exitOnGLError(glcontext, "loadPNGTexture");
+        glcontext.exitOnGLError(glcontext, "loadPNGTexture");
     }
 
     /**
      * Der offset ab 0.
      * @param unitoffset
      */
-    public void active(int unitoffset) {
+    public void active(GlInterface glcontext, int unitoffset) {
         glcontext.glActiveTexture(unitoffset);
     }
 
-    public void bind() {
+    public void bind(GlInterface glcontext) {
         glcontext.glBindTexture( gltextureid);
     }
 
-    public void unbind() {
+    public void unbind(GlInterface glcontext) {
         glcontext.glBindTexture( 0);
     }
 
-    private  int createId() {
+    private  int createId( GlInterface glcontext) {
         return glcontext.glGenTextures();
     }
 
@@ -141,11 +140,11 @@ public class OpenGlTexture implements NativeTexture {
 
     /**
      * Liefert null bei error.
-     * 
+     *
      * @param filename
      * @return
      */
-    static OpenGlTexture loadFromFile(NativeResource filename,int mode) {
+    static OpenGlTexture loadFromFile(GlInterface glContext, NativeResource filename,int mode) {
         long starttime = System.currentTimeMillis();
         /*if (!filename.startsWith("/")) {
             //TODO auch hier. 20.3.16: Geklaert?
@@ -157,31 +156,31 @@ public class OpenGlTexture implements NativeTexture {
         // Nicht nur fuer PNG, denn er weiss, ob bei JPg o.ae. nicht aehnliches gilt.
         // 23.7.21:TODO merge mit load in JmeTexture
         if (true && filename.getName().toUpperCase().endsWith(".PNG")){
-            int textureid = OpenGlContext.getGlContext().loadPngTextureFromFile(filename,mode==0);
+            int textureid = glContext.loadPngTextureFromFile(filename,mode==0);
             if (textureid==-1){
                 return null;
             }
             tex = new OpenGlTexture(textureid,mode,filename.getName());
-            
+
         }else {
             //2.10.19: Im Test laedt der ja gar nichts. Das ist doof. TODO.
-            tex = buildFromImage(OpenGlContext.getGlContext().loadImageFromFile(filename));
+            tex = buildFromImage(glContext, glContext.loadImageFromFile(filename));
             logger.debug(String.format("loadFromFile took %d ms", System.currentTimeMillis() - starttime));
         }
         return tex;
     }
 
-    
+
 
     public Dimension getDimension() {
         return new Dimension(getWidth(), getHeight());
     }
 
-    public static OpenGlTexture buildFromImage(ImageData imagedata) {
+    public static OpenGlTexture buildFromImage(GlInterface glContext, ImageData imagedata) {
         if (imagedata == null){
             return null;
         }
-        return new OpenGlTexture(imagedata, 0);
+        return new OpenGlTexture(glContext, imagedata, 0);
     }
 
 

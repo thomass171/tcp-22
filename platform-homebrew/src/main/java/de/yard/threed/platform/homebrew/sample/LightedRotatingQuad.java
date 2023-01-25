@@ -24,9 +24,11 @@ import de.yard.threed.core.Color;
 import de.yard.threed.engine.platform.common.FaceList;
 import de.yard.threed.engine.geometry.GeometryHelper;
 import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.platform.homebrew.GlImplLwjgl;
 import de.yard.threed.platform.homebrew.HomeBrewMaterial;
 import de.yard.threed.platform.homebrew.HomeBrewScene;
 import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
+import de.yard.threed.platform.homebrew.OpenGlRenderer;
 import de.yard.threed.platform.homebrew.PlatformHomeBrew;
 
 import java.util.ArrayList;
@@ -52,7 +54,7 @@ public class LightedRotatingQuad extends Scene {
 
     public static void main(String[] argv) {
         HashMap<String, String> properties = new HashMap<>();
-        HomeBrewSceneRunner runner = HomeBrewSceneRunner.init(properties);
+        HomeBrewSceneRunner runner = HomeBrewSceneRunner.init(properties,new OpenGlRenderer(), SceneMode.forMonolith());
 
         LightedRotatingQuad quadExample = new LightedRotatingQuad();
 

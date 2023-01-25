@@ -9,6 +9,7 @@ import java.util.HashMap;
 /**
  * HomeBrewPlatform with custom renderer? Thats the reason for not using SimpleHeadless. But thats not the only reason.
  * HomeBrewPlatform is a full platform, which SimpleHeadless isn't.
+ * 25.1.23:No longer needed because HomeBrewScenerunner creates platform?
  *
  */
 public class PlatformSceneServerFactory implements PlatformFactory {

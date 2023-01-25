@@ -2,6 +2,7 @@ package de.yard.threed.sceneserver;
 
 
 import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -9,13 +10,13 @@ import java.util.HashMap;
 
 public class SceneServerTest {
     SceneServer sceneServer;
-    ServerSceneRunner sceneRunner;
+    HomeBrewSceneRunner sceneRunner;
 
     @BeforeEach
     public void setup() throws Exception {
 
         TestFactory.resetInit();
-        ServerSceneRunner.dropInstance();
+        HomeBrewSceneRunner.dropInstance();
     }
 
     @Test

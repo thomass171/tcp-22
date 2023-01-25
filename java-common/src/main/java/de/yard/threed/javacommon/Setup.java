@@ -36,7 +36,8 @@ public class Setup {
         if (args.length == 0) {
             properties.put("argv.enableUsermode", "false");
             properties.put("argv.visualizeTrack", "true");
-            //properties.put("argv.enableHud", "true");
+            // VR control panel visible for debugging 25.1.23:TODO check count values not visible?
+            properties.put("argv.enableHud", "true");
 
             // emulateVR for testing VR panel outside VR via mouse move/click (mouseclick is right trigger, shift pressed for left trigger)
             // After fix of webxr floor handling yoffsetVR can have a 'real' height (above avatar).

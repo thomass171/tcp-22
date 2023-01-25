@@ -22,8 +22,7 @@ public class OpenGlShader {
         this.name = name;
     }
 
-    public void setup() {
-        GlInterface glcontext = OpenGlContext.getGlContext();
+    public void setup(GlInterface glcontext) {
         shader = glcontext.glCreateShader(type);
         glcontext.glShaderSource(shader, /*1,*/ source/*, null*/);
         String log;
@@ -49,7 +48,7 @@ public class OpenGlShader {
      * @param filename
      * @return
      */
-    public static String loadFromFile(String filename) {
+    public static String loadFromFile(GlInterface glcontext, String filename) {
         StringBuilder shaderSource = new StringBuilder();
         String source;
         try {
@@ -61,7 +60,6 @@ public class OpenGlShader {
             //aber nach Desktop.
             String/*byte[]*/ bytebuf = new String(BundleRegistry.getBundle("engine").getResource(loc).getContentAsString());//isType.readFully();
             source = bytebuf;//new String(bytebuf, "UTF-8");
-            GlInterface glcontext = OpenGlContext.getGlContext();
             //HashMap<String,String> translatemap = new HashMap<String, String>();
             source = ShaderUtil.preprocess(source/*,translatemap*/);
             if (filename.endsWith(".vert")) {

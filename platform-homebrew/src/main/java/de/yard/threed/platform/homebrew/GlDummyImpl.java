@@ -14,12 +14,12 @@ import java.nio.IntBuffer;
 
 
 /**
- * Zur Nutzung in Unittests mit OpenGL.
+ * For unit tests or platform without display.
  */
-public class GlImplDummyForTests implements GlInterface {
-    static Log logger = Platform.getInstance().getLog(GlImplDummyForTests.class);
+public class GlDummyImpl implements GlInterface {
+    // logger not yet available
 
-    public GlImplDummyForTests() {
+    public GlDummyImpl() {
     }
 
     @Override
@@ -355,7 +355,7 @@ public class GlImplDummyForTests implements GlInterface {
         /*16.10.18 wird ja eh nicht wirklich gemacht.
         02.10.19: Das ist aber eine doofe Kaschierung von z.B. Bundle Resolve Problemen. Nutzung von nativem IO duerfte hier im Test kein Problem sein*/
         if (!new File(filename.getFullName()).exists()) {
-            logger.error("file for resource does not exist:" + filename.getFullName());
+            Platform.getInstance().getLog(GlDummyImpl.class).error("file for resource does not exist:" + filename.getFullName());
         }
         /*try {
             de.yard.threed.platform.common.InputStream isType = FileReader.getFileStream(filename);

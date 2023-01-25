@@ -1,19 +1,30 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.Dimension;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Matrix4;
+import de.yard.threed.core.Packet;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
+import de.yard.threed.platform.homebrew.GlDummyImpl;
 import de.yard.threed.platform.homebrew.HomeBrewRenderer;
+import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
 import de.yard.threed.platform.homebrew.OpenGlLight;
 import de.yard.threed.platform.homebrew.HomeBrewMesh;
 import de.yard.threed.platform.homebrew.HomeBrewSceneNode;
+import de.yard.threed.platform.homebrew.PlatformHomeBrew;
 import de.yard.threed.platform.homebrew.Renderables;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +43,16 @@ import static de.yard.threed.engine.BaseEventRegistry.BASE_EVENT_ENTITY_CHANGE;
  * wieder ganz gut (und effizient).
  */
 public class SceneServerRenderer extends HomeBrewRenderer {
-    Log logger = Platform.getInstance().getLog(SceneServerRenderer.class);
+    //not yet available  Log logger = Platform.getInstance().getLog(SceneServerRenderer.class);
     //SyncedObjectsRegistry syncedObjectsRegistry;
 
     /*public MpServerRenderer(SyncedObjectsRegistry syncedObjectsRegistry) {
         this.syncedObjectsRegistry = syncedObjectsRegistry;
     }*/
+
+    public SceneServerRenderer() {
+        glcontext = new GlDummyImpl();
+    }
 
     @Override
     public void doRender(HomeBrewSceneNode node, Matrix4 projectionmatrix, Matrix4 viewmatrix, List<OpenGlLight> lights) {
@@ -62,15 +77,37 @@ public class SceneServerRenderer extends HomeBrewRenderer {
         */
     }
 
+    @Override
+    public void init(Dimension dimension) {
+        // nothing to do?
+        // Now ECS isType running. Allow clients to connect (asyn/MT).
+        ClientListener.dropInstance();
+        ClientListener clientListener = ClientListener.getInstance("", -1);
+        clientListener.start();
+        SystemManager.setBusConnector(new SceneServerBusConnector(ClientListener.getInstance().getMpSocket()));
+
+
+    }
+
+    @Override
+    public boolean userRequestsTerminate() {
+        // no user->no user request
+        return false;
+    }
+
+    @Override
+    public void close() {
+        // nothing to do?
+    }
+
     /**
      * Publish entity state.
-     *
      */
-    public static void sendEntityState(int id, String bundlename, String modelfile, Vector3 position, Quaternion rotation){
+    public static void sendEntityState(int id, String bundlename, String modelfile, Vector3 position, Quaternion rotation) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("id", Integer.toString(id));
-        map.put("bundle",bundlename);
-        map.put("model",modelfile);
+        map.put("bundle", bundlename);
+        map.put("model", modelfile);
         map.put("position", position.toString());
         map.put("rotation", rotation.toString());
         //Gson gson = new Gson();
@@ -86,8 +123,51 @@ public class SceneServerRenderer extends HomeBrewRenderer {
     }
 
     /**
+     * Camera, Ligfht, View und Porjection duerfte hier nicht erforderlich sein.
+     */
+    @Override
+    protected void renderScene(List<OpenGlLight> lights, NativeCamera camera) {
+
+        // Clear the screen and depth buffer
+        /*GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+
+        OpenGlMatrix4 projectionmatrix, viewmatrix;
+        if (camera == null) {
+            projectionmatrix = new OpenGlMatrix4();
+            viewmatrix = new OpenGlMatrix4();
+        } else {
+            projectionmatrix = OpenGlMatrix4.toOpenGl(camera.getProjectionMatrix());
+            viewmatrix = OpenGlMatrix4.toOpenGl(camera.getViewMatrix());
+        }*/
+
+        //26.4.20 neue Stelle fuer Rendering
+        //scene.render(OpenGlContext.getGlContext(), OpenGlMatrix4.fromOpenGl(projectionmatrix), OpenGlMatrix4.fromOpenGl(viewmatrix));
+        ((PlatformHomeBrew) PlatformHomeBrew.getInstance()).renderer.render(null, null, new ArrayList<>()/*OpenGlMatrix4.fromOpenGl(projectionmatrix), OpenGlMatrix4.fromOpenGl(viewmatrix),scene.getLights()*/);
+
+        // 18.11.21: Neuer sync Ansatz statt ueber renderer
+        List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
+        for (EcsEntity entity : entities) {
+            if (isSynced(entity)) {
+                //TODO send local or global pos?
+                //Matrix4 worldModelMatrix = mesh.getSceneNodeWorldModelMatrix();
+                //Vector3 position = worldModelMatrix.extractPosition();
+                //worldModelMatrix.extractQuaternion()
+
+                // 17.1.23:Shouldn't we publish every entity, independent from having a node(most will have one)?
+                SceneNode node = entity.getSceneNode();
+                if (node != null) {
+                    Vector3 position = node.getTransform().getPosition();
+                    Quaternion rotation = node.getTransform().getRotation();
+                    SceneServerRenderer.sendEntityState(entity.getId(), "a", "b", position, rotation);
+                }
+            }
+        }
+    }
+
+    /**
      * 18.11.21: Statt separate Liste lieber ueber die Entities. Eigentlich braucht man hier doch gar nichts zu machen.
      * Eigentlic! Aber sonst wird der dorender nicht aufgerufen?
+     *
      * @param renderables
      */
     @Override
@@ -105,5 +185,66 @@ public class SceneServerRenderer extends HomeBrewRenderer {
         }*/
     }
 
+    @Override
+    protected void collectKeyboardAndMouseEvents(AbstractSceneRunner runner) {
+        // instead of keyboard/mouse events get remote events.
 
+        // client events einspielen vor prepareFrame weil darin die Events verteilt werden.
+        List<ClientConnection> clientConnections = ClientListener.getInstance().getClientConnections();
+        for (ClientConnection clientConnection : clientConnections) {
+            Packet packet;
+            while ((packet = clientConnection.getPacket()) != null) {
+                SystemManager.publishPacket(packet);
+            }
+        }
+    }
+
+    @Override
+    protected void updateDisplay() {
+// nothing to do on server
+    }
+
+    /**
+     * For now all entities are synced between server and client.
+     *
+     * @param entity
+     * @return
+     */
+    private boolean isSynced(EcsEntity entity) {
+        return true;
+    }
+
+     /*18.11.21 public void addSyncedSceneNode(SyncedSceneElement nativeSceneNode) {
+        //logger.debug("addSyncedSceneNode:"+(new SceneNode(nativeSceneNode)).getPath());
+        syncedSceneNodes.add(nativeSceneNode);
+    }
+
+    @Override
+    public boolean isSyncedSceneNode(NativeSceneNode nativeSceneNode) {
+        return syncedSceneNodes.contains(nativeSceneNode);
+    }
+
+    @Override
+    public SyncedSceneElement getSyncedSceneNode(NativeSceneNode nativeSceneNode) {
+        for (SyncedSceneElement sse : syncedSceneNodes) {
+            if (sse.nativeSceneNode == nativeSceneNode) {
+
+                return sse;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public List<SyncedSceneElement> getSyncedSceneNodes() {
+        return syncedSceneNodes;
+    }
+
+    public int getSyncedSceneNodeCount() {
+        return syncedSceneNodes.size();
+    }
+
+    public SyncedSceneElement getSyncedSceneNode(int index) {
+        return syncedSceneNodes.get(index);
+    }*/
 }

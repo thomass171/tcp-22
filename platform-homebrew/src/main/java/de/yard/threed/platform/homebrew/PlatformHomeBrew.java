@@ -51,7 +51,7 @@ import java.util.Map;
  * <p/>
  * Created by thomass on 20.07.15.
  */
-public class PlatformHomeBrew extends Platform {
+public class PlatformHomeBrew extends DefaultPlatform {
     // kann nicht ueber die Factory gebaut werden, weil die gerade noch initialisiert wird
     static public Log logger = new OpenGlLog();
     public NativeResourceReader resourcemanager;
@@ -62,9 +62,8 @@ public class PlatformHomeBrew extends Platform {
     public Map<String, NativeTexture> texturemap = new HashMap<String, NativeTexture>();
     public List<String> texturelist = new ArrayList<String>();
     public String hostdir;
-
-    //25.4.20: Jetzt mal der optionale Renderer
-    GlInterface glcontext;
+    // Render needs to be here instead of runner because it cannot be looked up in runner due to possibly various runner.
+    public HomeBrewRenderer renderer;
 
     private PlatformHomeBrew() {
         //21.7.21 jetzt hier
@@ -196,11 +195,6 @@ public class PlatformHomeBrew extends Platform {
      */
     @Override
     public NativeSceneNode buildLine(Vector3 from, Vector3 to, Color color) {
-        if (glcontext == null) {
-            // 25.4.20 kein Renderer->kein line. Aber ein Objekt muss schon zurueckkommen.
-            // Naja, kann aber sowas wie andere Nodes auch sein.
-            //return null;
-        }
         Vector3Array vertices = buildVector3Array(2);
         vertices.setElement(0, from);
         vertices.setElement(1, to);
@@ -220,9 +214,7 @@ public class PlatformHomeBrew extends Platform {
         MaterialDefinition materialDefinition = new MaterialDefinition("name", colors, null, null);
 
         HomeBrewMaterial material = null;
-        if (glcontext != null) {
-            material = HomeBrewMaterial.buildMaterial(materialDefinition, null);
-        }
+        material = HomeBrewMaterial.buildMaterial(renderer.getGlContext(),materialDefinition, null);
         HomeBrewMesh linemesh = new HomeBrewMesh(geo, material, false, false);
         HomeBrewSceneNode n = new HomeBrewSceneNode((String) null);
         n.setMesh(linemesh);
@@ -251,22 +243,14 @@ public class PlatformHomeBrew extends Platform {
 
     @Override
     public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameter, Object/*Effect*/ effect) {
-        if (glcontext == null) {
-            // 25.4.20 kein Renderer->kein material
-            return null;
-        }
         MaterialDefinition materialDefinition = new MaterialDefinition(name, color, texture, parameter);
-        return HomeBrewMaterial.buildMaterial(materialDefinition, (Effect) effect);
+        return HomeBrewMaterial.buildMaterial(renderer.getGlContext(), materialDefinition, (Effect) effect);
     }
 
     /**
      * @return
      */
     private NativeTexture buildNativeTextureOpenGL(NativeResource filename, HashMap<NumericType, NumericValue> params) {
-        if (glcontext == null) {
-            // 25.4.20 no Renderer->no texture
-            return null;
-        }
         //default kein Repeat
         int mode = 1;
         NumericValue wraps = params.get(NumericType.TEXTURE_WRAP_S);
@@ -282,7 +266,7 @@ public class PlatformHomeBrew extends Platform {
         if (filename.getFullName().contains("yoke")) {
             int h = 9;
         }
-        OpenGlTexture tex = OpenGlTexture.loadFromFile(filename, mode);
+        OpenGlTexture tex = OpenGlTexture.loadFromFile(renderer.getGlContext(), filename, mode);
         if (tex == null) {
             logger.warn("Loading texture " + filename.getFullName() + " failed. Using default");
             return null;
@@ -332,7 +316,7 @@ public class PlatformHomeBrew extends Platform {
 
     @Override
     public NativeTexture buildNativeTexture(ImageData imagedata, boolean fornormalmap) {
-        return OpenGlTexture.buildFromImage((imagedata));
+        return OpenGlTexture.buildFromImage(renderer.getGlContext(), imagedata);
     }
 
     @Override
@@ -608,20 +592,6 @@ public class PlatformHomeBrew extends Platform {
     @Override
     public void abort() {
         Util.notyet();
-    }
-
-
-    /**
-     * One time init opportunity.
-     * 25.4.20
-     */
-    public void setRenderer(GlInterface glInterface) {
-        if (glcontext != null) {
-            throw new RuntimeException("glcontext already exists");
-        }
-        glcontext = glInterface;
-        //25.4.20 muss vorerst auch gesetzt werden. Wird zu oft verwendet
-        OpenGlContext.init(glInterface);
     }
 
     @Override
