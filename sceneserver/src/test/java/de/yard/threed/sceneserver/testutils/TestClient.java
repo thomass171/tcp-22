@@ -6,6 +6,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
+import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.javanative.QueuingSocketListener;
 import de.yard.threed.javanative.SocketClient;
 import de.yard.threed.sceneserver.ClientListener;
@@ -33,7 +34,11 @@ public class TestClient {
         testClient.connect();
         listener = testClient.startListen();
 
-        testClient.writePacket(SceneServerBusConnector.encodeRequest(UserSystem.buildLoginRequest(USER_NAME, "34")).getData());
+        sendRequest(UserSystem.buildLoginRequest(USER_NAME, "34"));
+    }
+
+    public void sendRequest(Request request) {
+        testClient.writePacket(SceneServerBusConnector.encodeRequest(request).getData());
     }
 
     public Packet getPacket() {

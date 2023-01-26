@@ -42,6 +42,8 @@ public class MazeSceneTest {
      * # #  #$ #
      * # . .#@ #
      * #########
+     *
+     * Tests grid teleporting by ray
      */
     @Test
     public void testSokobanWikipedia() {

@@ -42,7 +42,7 @@ public class DemoSceneTest {
         // just to be sure to have automove. automove is already enabled in Demo.xml
         properties.put("argv.enableAutomove", "true");
         System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
-        sceneServer = TestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES, properties);
+        sceneServer = TestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES, properties, 50);
     }
 
     @Test

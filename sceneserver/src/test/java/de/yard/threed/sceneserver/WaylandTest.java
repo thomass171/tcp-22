@@ -32,7 +32,7 @@ public class WaylandTest {
             System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
 
-        sceneServer = TestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES,properties);
+        sceneServer = TestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES,properties,200);
     }
 
     /**

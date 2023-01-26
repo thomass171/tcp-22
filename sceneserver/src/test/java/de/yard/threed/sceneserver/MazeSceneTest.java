@@ -1,27 +1,27 @@
 package de.yard.threed.sceneserver;
 
-import de.yard.threed.core.Packet;
-import de.yard.threed.core.Pair;
-import de.yard.threed.engine.SceneNode;
+import de.yard.threed.core.Point;
+import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
-import de.yard.threed.engine.ecs.UserSystem;
-import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
+import de.yard.threed.engine.platform.common.Request;
+import de.yard.threed.maze.GridOrientation;
+import de.yard.threed.maze.MazeUtils;
+import de.yard.threed.maze.MoverComponent;
 import de.yard.threed.sceneserver.testutils.TestClient;
+import de.yard.threed.sceneserver.testutils.TestContext;
 import de.yard.threed.sceneserver.testutils.TestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import static de.yard.threed.engine.BaseEventRegistry.BASE_EVENT_ENTITY_CHANGE;
-import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientConnected;
-import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientPacket;
+import static de.yard.threed.maze.RequestRegistry.*;
+import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FORWARD;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -33,12 +33,16 @@ public class MazeSceneTest {
     static final int INITIAL_FRAMES = 10;
 
     SceneServer sceneServer;
+TestContext testContext;
 
     @BeforeEach
     public void setup() throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
-        properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
-        sceneServer = TestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties);
+        //Use a deterministic grid without bot/monster automovement
+        //properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
+        properties.put("argv.initialMaze", "skbn/SokobanWikipedia.txt");
+        sceneServer = TestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties,20);
+
     }
 
     @Test
@@ -51,15 +55,30 @@ public class MazeSceneTest {
 
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
 
-        TestClient testClient = new TestClient();
-        TestUtils.assertConnectAndLogin(sceneServer.getSceneRunner(), testClient);
+        testContext=new TestContext(sceneServer,new TestClient());
+        TestUtils.assertConnectAndLogin(sceneServer.getSceneRunner(), testContext.testClient);
 
         entities = SystemManager.findEntities((EntityFilter) null);
-        assertEquals(2 + 2 * (1+3), entities.size(), "number of entites (diamonds+player+bot+bullets each)");
+        assertEquals(1 + 2, entities.size(), "number of entites (player+2 boxes)");
         EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME.equals(e.getName())).get(0);
         assertNotNull(userEntity, "user entity");
-        EcsEntity botEntity = SystemManager.findEntities(e -> "Bot0".equals(e.getName())).get(0);
-        assertNotNull(botEntity, "bot entity");
+        //EcsEntity botEntity = SystemManager.findEntities(e -> "Bot0".equals(e.getName())).get(0);
+        //assertNotNull(botEntity, "bot entity");
+
+        MoverComponent mc = MoverComponent.getMoverComponent(userEntity);
+        assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(userEntity).toString(), "initial orientation");
+        assertEquals(new Point(6, 1).toString(), MazeUtils.getMoverposition(userEntity).toString(), "initial location");
+
+        testContext.sendRequestAndWait(new Request(TRIGGER_REQUEST_TURNRIGHT, userEntity.getId()));
+        testContext.sendRequestAndWait(new Request(TRIGGER_REQUEST_FORWARD, userEntity.getId()));
+        testContext.sendRequestAndWait(new Request(TRIGGER_REQUEST_TURNLEFT, userEntity.getId()));
+        testContext.sendRequestAndWait(new Request(TRIGGER_REQUEST_FORWARD, userEntity.getId()));
+
+        // 30 is not sufficient
+        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
+
+        TestUtil.assertPoint("player location", new Point(7, 2), mc.getLocation());
+
 
     }
 

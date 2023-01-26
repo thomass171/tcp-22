@@ -79,14 +79,17 @@ public class TestUtils {
      * @param sceneclass
      * @throws Exception
      */
-    public static SceneServer setupServerForScene(String sceneclass, int initialFrames, HashMap<String, String> properties) throws Exception {
+    public static SceneServer setupServerForScene(String sceneclass, int initialFrames, HashMap<String, String> properties, int renderbrake) throws Exception {
 
         TestFactory.resetInit();
         HomeBrewSceneRunner.dropInstance();
 
         SceneServer sceneServer = new SceneServer("subdir", sceneclass, properties);
         HomeBrewSceneRunner sceneRunner = (HomeBrewSceneRunner) sceneServer.nsr;
-        sceneRunner.renderbrake=200;
+        //why should we throttle that much? why anyway? Because some movement depends on tpf, which might be too low to detect it.
+        //also maze movement needs some time
+        //sceneRunner.renderbrake=200;
+        sceneRunner.renderbrake = renderbrake;
 
         sceneRunner.frameLimit = initialFrames;
 

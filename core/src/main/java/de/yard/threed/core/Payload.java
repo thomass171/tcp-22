@@ -130,7 +130,7 @@ public class Payload {
 
     private static Object decodeObject(String s_p) {
 
-        if (s_p.length()==0) {
+        if (s_p.length() == 0) {
             // empty string will start with 's:'
             Platform.getInstance().getLog(Payload.class).warn("null payload class ");
             return null;
@@ -151,8 +151,13 @@ public class Payload {
     @Override
     public String toString() {
         String s = "";
-        for (Object obj : o) {
-            s += obj + ",";
+        if (o != null) {
+            for (Object obj : o) {
+                s += obj + ",";
+            }
+        }
+        if (values != null) {
+            s += values;
         }
         return s;
     }
