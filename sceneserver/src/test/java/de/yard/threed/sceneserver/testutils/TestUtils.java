@@ -4,17 +4,20 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
+import de.yard.threed.engine.ecs.SystemState;
+import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
 import de.yard.threed.sceneserver.ClientConnection;
 import de.yard.threed.sceneserver.ClientListener;
 import de.yard.threed.sceneserver.SceneServer;
+import de.yard.threed.sceneserver.SceneServerBusConnector;
 
 import java.util.HashMap;
 import java.util.List;
 
 import static de.yard.threed.javanative.JavaUtil.sleepMs;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class TestUtils {
@@ -93,7 +96,27 @@ public class TestUtils {
     }
 
     public static void runAdditionalFrames(HomeBrewSceneRunner sceneRunner, int frames) {
+        long before = sceneRunner.getFrameCount();
         sceneRunner.frameLimit = frames;
         sceneRunner.startRenderloop();
+        assertEquals(before + frames, sceneRunner.getFrameCount());
+    }
+
+
+    public static void assertConnectAndLogin(HomeBrewSceneRunner sceneRunner, TestClient testClient) throws Exception {
+        testClient.connectAndLogin();
+        waitForClientConnected();
+        waitForClientPacket();
+
+        TestUtils.runAdditionalFrames(sceneRunner, 5);
+
+        // Check login succeeded.
+        // possible race condition with movements arriving before login/joined event
+        List<Packet> packets = testClient.getAllPackets();
+        assertTrue(packets.size() > 0);
+        TestUtils.assertEventPacket(UserSystem.USER_EVENT_LOGGEDIN, null, packets);
+
+        // join happened implicitly, so Avatar should exist.
+        TestUtils.assertEventPacket(UserSystem.USER_EVENT_JOINED, null, packets);
     }
 }

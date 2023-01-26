@@ -198,22 +198,19 @@ public class MazeScene extends Scene {
         SystemManager.addSystem(new BulletSystem());
         SystemManager.addSystem(new BotSystem());
 
+        addLight();
         //31.10.20 backendAdapter=new MazeLocalBackendAdapter();
-        commonInit();
+
+        if (sceneMode.isServer() && sceneMode.isClient()) {
+            // standalone. Handle like a client that connected.
+            backendConnected();
+        }
     }
 
     @Override
     public void backendConnected() {
-        commonInit();
-    }
-
-    private void commonInit() {
-
-        addLight();
-
         // last init statement. Queue login request for main user
         SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
-
     }
 
     @Override
@@ -294,7 +291,9 @@ public class MazeScene extends Scene {
     @Override
     public void update() {
         //for x/y/z. Only in debug mode (MazeSettings.getSettings().debug)? Better location??
-        Observer.getInstance().update();
+        if (Observer.getInstance() != null) {
+            Observer.getInstance().update();
+        }
     }
 
     /**

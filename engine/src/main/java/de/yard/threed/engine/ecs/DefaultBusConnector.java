@@ -67,7 +67,9 @@ public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
     public static Packet encodeRequest(Request request) {
         Packet packet = new Packet();
         packet.add("request", "" + request.getType().getType());
-        request.getPayload().encode(packet);
+        if (request.getPayload() != null) {
+            request.getPayload().encode(packet);
+        }
         if (request.getUserEntityId() != null) {
             packet.add("userentityid", "" + request.getUserEntityId());
         }

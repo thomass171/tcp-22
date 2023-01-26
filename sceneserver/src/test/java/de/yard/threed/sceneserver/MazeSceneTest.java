@@ -8,6 +8,7 @@ import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
+import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import de.yard.threed.sceneserver.testutils.TestUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -37,59 +38,28 @@ public class MazeSceneTest {
     public void setup() throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
-        //System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         sceneServer = TestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties);
     }
 
-    //@Test
-    public void testLaunch() throws IOException {
+    @Test
+    public void testLaunch() throws Exception {
         log.debug("testLaunch");
-        //?assertRunningThreads(); läuft docvh nur der clientlistener?
         assertEquals(INITIAL_FRAMES, sceneServer.getSceneRunner().getFrameCount());
-        // no user/avatar and graph yet.
-        assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
+        // no user/avatar and graph yet. Only 2 diamonds. Bots are currently launched after after user joined.
+        List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
+        assertEquals(2, entities.size(), "number of entities");
 
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
 
         TestClient testClient = new TestClient();
-        testClient.connectAndLogin();
-        waitForClientConnected();
-        waitForClientPacket();
+        TestUtils.assertConnectAndLogin(sceneServer.getSceneRunner(), testClient);
 
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
-        assertEquals(INITIAL_FRAMES + 5, sceneServer.getSceneRunner().getFrameCount());
-
-        // Check login succeeded.
-        // possible race condition with movements arriving before login/joined event
-        List<Packet> packets = testClient.getAllPackets();
-        assertTrue(packets.size() > 0);
-        TestUtils.assertEventPacket(UserSystem.USER_EVENT_LOGGEDIN, null, packets);
-
-        // join happened implicitly, so Avatar should exist.
-        TestUtils.assertEventPacket(UserSystem.USER_EVENT_JOINED, null, packets);
-
-        // wait for terrain available to load vehicle
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
-        List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
-        assertEquals(1 + 1, entities.size(), "number of entites (avatar+loc)");
+        entities = SystemManager.findEntities((EntityFilter) null);
+        assertEquals(2 + 2 * (1+3), entities.size(), "number of entites (diamonds+player+bot+bullets each)");
         EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME.equals(e.getName())).get(0);
         assertNotNull(userEntity, "user entity");
-        EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
-        assertNotNull(locEntity, "loc entity");
-
-        // Movements also should arrive in client
-        TestUtils.assertEventPacket(BASE_EVENT_ENTITY_CHANGE, new Pair[]{
-                new Pair("p_position", "*")
-        }, packets);
-
-
-        SceneNode locNode = locEntity.getSceneNode();
-        double xpos0 = locNode.getTransform().getPosition().getX();
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
-        double xpos1 = locNode.getTransform().getPosition().getX();
-        double xdiff = Math.abs(xpos0 - xpos1);
-        log.debug("xdiff={}", xdiff);
-        assertTrue(xdiff > 3.0);
+        EcsEntity botEntity = SystemManager.findEntities(e -> "Bot0".equals(e.getName())).get(0);
+        assertNotNull(botEntity, "bot entity");
 
     }
 

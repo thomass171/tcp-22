@@ -46,7 +46,7 @@ public class DemoSceneTest {
     }
 
     @Test
-    public void testLaunch() throws IOException {
+    public void testLaunch() throws Exception {
         log.debug("testLaunch");
         //?assertRunningThreads(); läuft docvh nur der clientlistener?
         assertEquals(INITIAL_FRAMES, sceneServer.getSceneRunner().getFrameCount());
@@ -56,21 +56,7 @@ public class DemoSceneTest {
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
 
         TestClient testClient = new TestClient();
-        testClient.connectAndLogin();
-        waitForClientConnected();
-        waitForClientPacket();
-
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
-        assertEquals(INITIAL_FRAMES + 5, sceneServer.getSceneRunner().getFrameCount());
-
-        // Check login succeeded.
-        // possible race condition with movements arriving before login/joined event
-        List<Packet> packets = testClient.getAllPackets();
-        assertTrue(packets.size() > 0);
-        TestUtils.assertEventPacket(UserSystem.USER_EVENT_LOGGEDIN, null, packets);
-
-        // join happened implicitly, so Avatar should exist.
-        TestUtils.assertEventPacket(UserSystem.USER_EVENT_JOINED, null, packets);
+        TestUtils.assertConnectAndLogin(sceneServer.getSceneRunner(), testClient);
 
         // wait for terrain available to load vehicle
         TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
@@ -81,6 +67,7 @@ public class DemoSceneTest {
         EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
         assertNotNull(locEntity, "loc entity");
 
+        List<Packet> packets = testClient.getAllPackets();
         // Movements also should arrive in client
         TestUtils.assertEventPacket(BASE_EVENT_ENTITY_CHANGE, new Pair[]{
                 new Pair("p_position", "*")
@@ -99,6 +86,7 @@ public class DemoSceneTest {
 
     /**
      * Scene will have no client connected, thus no player/user.
+     * Just for make sure no late arriving request/event causes problems.
      */
     @Test
     public void testLongRunning() {
