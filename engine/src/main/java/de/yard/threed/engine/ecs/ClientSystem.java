@@ -11,18 +11,19 @@ import de.yard.threed.engine.platform.common.*;
 
 /**
  * Connection to a MP server. And back to the client.
- * Ob man das auch im server einsetzen kann, ist aber unklar. Ein listen() geht hier z.B. nicht.
- * Ich lass das mal. Das Gegenstueck ist jetzt NetworkSystem. Aber mit Superklasse.
  *
  * 28.12.22: Is it really useful to have this as a dedicated system? Shouldn't the platform just extend the event bus?
+ * 27.1.23: But some instance is needed to handle events that are not used in monolith mode like entity change events.
+ * But no base network operation (listen, socket) here.
  *
+ * To some degree this is the counterpart of {@link ServerSystem).
  * <p>
  * Created by thomass on 16.02.21.
  */
-public class ClientSystem extends DefaultBusConnector {
+public class ClientSystem extends DefaultEcsSystem/*DefaultBusConnector*/ {
     static Log logger = Platform.getInstance().getLog(ClientSystem.class);
 
-    protected NativeSocket socket;
+    //protected NativeSocket socket;
 
     /*public ClientSystem() {
         // not component/entity related. no "updatepergroup"
@@ -40,7 +41,7 @@ public class ClientSystem extends DefaultBusConnector {
      * @param group
      * @param tpf
      */
-    public void update(EcsEntity entity, EcsGroup group, double tpf) {
+    /*public void update(EcsEntity entity, EcsGroup group, double tpf) {
         if (socket != null) {
             processExternalEvents();
         }
@@ -49,12 +50,12 @@ public class ClientSystem extends DefaultBusConnector {
     //@Override
     protected NativeSocket getSocket() {
         return socket;
-    }
+    }*/
 
 
 
     //@Override
-    public boolean processRequest(Request request) {
+  /*  public boolean processRequest(Request request) {
         logger.debug("got request " + request.getType());
         if (request.getType().equals(UserSystem.USER_REQUEST_LOGIN)) {
             // connect/login to server
@@ -66,16 +67,16 @@ public class ClientSystem extends DefaultBusConnector {
 
         }
         return false;
-    }
+    }*/
 
     /**
      * Ueber socket eingehende Events in den lokalen Eventbus einstellen.
      */
-    private void processExternalEvents() {
+    /*private void processExternalEvents() {
         Packet packet;
         while ((packet = socket.getPacket()) != null) {
             //Event evt = Packet.buildEvent(packet);
             //SystemManager.sendEvent(evt);
         }
-    }
+    }*/
 }

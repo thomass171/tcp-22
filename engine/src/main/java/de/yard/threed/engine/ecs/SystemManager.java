@@ -137,6 +137,7 @@ public class SystemManager {
                 }
             }
             if (busConnector != null) {
+                // TODO avoid client server ping pong
                 busConnector.pushEvent(evt);
             }
         }

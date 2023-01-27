@@ -11,7 +11,9 @@ import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.avatar.AvatarABuilder;
+import de.yard.threed.engine.ecs.ClientSystem;
 import de.yard.threed.engine.ecs.InputToRequestSystem;
+import de.yard.threed.engine.ecs.ServerSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.gui.ButtonDelegate;
@@ -197,6 +199,13 @@ public class MazeScene extends Scene {
 
         SystemManager.addSystem(new BulletSystem());
         SystemManager.addSystem(new BotSystem());
+
+        if (sceneMode.isServer() && !sceneMode.isClient()) {
+            SystemManager.addSystem(ServerSystem.buildForInitialEventsForClient(new EventType[]{EventRegistry.EVENT_MAZE_LOADED}));
+        }
+        if (!sceneMode.isServer() && sceneMode.isClient()) {
+            SystemManager.addSystem(new ClientSystem());
+        }
 
         addLight();
         //31.10.20 backendAdapter=new MazeLocalBackendAdapter();

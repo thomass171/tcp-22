@@ -113,7 +113,7 @@ public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
         SystemManager.addSystem(inputToRequestSystem);
 
         //SystemManager.addSystem(new ClientSystem());
-        SystemManager.setBusConnector(new ClientSystem());
+        SystemManager.addSystem(new ClientSystem());
 
         //1.4.21 Player.init(avatar);
 
