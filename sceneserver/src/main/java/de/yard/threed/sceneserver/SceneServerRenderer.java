@@ -204,7 +204,7 @@ public class SceneServerRenderer extends HomeBrewRenderer {
 
     @Override
     protected void updateDisplay() {
-// nothing to do on server
+        // nothing to do on server
     }
 
     /**

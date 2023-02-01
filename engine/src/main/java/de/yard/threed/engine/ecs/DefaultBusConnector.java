@@ -32,6 +32,13 @@ public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
 
     GeneralHandlerMap<String> eventHandler = new GeneralHandlerMap<String>();
 
+    // Events on a scene node level for something like an inspector. Currently not used.
+    public static boolean nodeSyncEnabled = false;
+    public static EventType EVENT_MODELLOADED = new EventType("EVENT_MODELLOADED");
+    public static EventType EVENT_NODECREATED = new EventType("EVENT_NODECREATED");
+    public static EventType EVENT_NODEPARENTCHANGED = new EventType("EVENT_NODEPARENTCHANGED");
+    public static EventType EVENT_NODECHANGED = new EventType("EVENT_NODECHANGED");
+
     /*public BusConnectorSystem(RequestType[] requestTypes, EventType[] eventTypes) {
         super(requestTypes, eventTypes);
     }*/
