@@ -3,9 +3,8 @@ package de.yard.threed.maze;
 import de.yard.threed.core.EventType;
 
 /**
- * Um Events nicht im System zu definieren, weil sie ja auch übergreifend verwendet werden koennten.
+ * Events outside of systems.
  *
- * 30.10.20: Allmaehlich umbenennen Event->Request
  * Created on 24.10.18.
  */
 public class EventRegistry {

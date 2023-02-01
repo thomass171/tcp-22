@@ -17,36 +17,52 @@ import java.util.Map;
 public class Payload {
 
     // by index
+    @Deprecated
     public Object[] o = null;
     // by name
     public Map<String, Object> values = null;
+
+    public Payload() {
+        values = new HashMap<String, Object>();
+    }
 
     public Payload(Map<String, Object> values) {
         this.values = values;
     }
 
+    @Deprecated
     public Payload(Object[] payload) {
         o = payload;
     }
 
+    @Deprecated
     public Payload(Object payload0, Object payload1) {
         o = new Object[]{payload0, payload1};
     }
 
+    @Deprecated
     public Payload(Object payload0, Object payload1, Object payload2) {
         o = new Object[]{payload0, payload1, payload2};
     }
 
+    @Deprecated
     public Payload(Object payload0, Object payload1, Object payload2, Object payload3) {
         o = new Object[]{payload0, payload1, payload2, payload3};
     }
 
+    @Deprecated
     public Payload(Object payload0, Object payload1, Object payload2, Object payload3, Object payload4) {
         o = new Object[]{payload0, payload1, payload2, payload3, payload4};
     }
 
+    @Deprecated
     public Payload(List<Object> objs) {
         o = (Object[]) objs.toArray(new Object[0]);
+    }
+
+    public Payload add(String key, String value){
+        values.put(key,value);
+        return this;
     }
 
     /*public boolean isByIndex() {

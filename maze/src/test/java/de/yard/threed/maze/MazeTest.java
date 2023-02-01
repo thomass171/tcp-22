@@ -48,7 +48,7 @@ public class MazeTest {
             public void init() {
                 SystemManager.reset();
                 // No visualization to reveal model-view coupling.
-                SystemManager.addSystem(new MazeMovingAndStateSystem(levelname));
+                SystemManager.addSystem(new MazeMovingAndStateSystem());
                 SystemManager.addSystem(new UserSystem());
                 AvatarSystem avatarSystem = new AvatarSystem();
                 avatarSystem.setAvatarBuilder(new MazeAvatarBuilder());
@@ -58,8 +58,10 @@ public class MazeTest {
                 replaySystem = new ReplaySystem();
                 SystemManager.addSystem(replaySystem);
                 if (withBotSystem) {
-                    SystemManager.addSystem(new BotSystem());
+                    SystemManager.addSystem(new BotSystem(false));
                 }
+                MazeDataProvider.reset();
+                MazeDataProvider.init(levelname);
             }
         };
 

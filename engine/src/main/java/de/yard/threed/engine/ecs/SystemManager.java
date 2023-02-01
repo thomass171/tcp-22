@@ -242,6 +242,14 @@ public class SystemManager {
         Platform.getInstance().getEventBus().publish(new Event(evt.getType(), evt.payload));
     }
 
+    public static void sendEventToClient(Event evt, String clientId) {
+        if (busConnector == null) {
+            logger.warn("No bus connector");
+            return;
+        }
+        busConnector.pushEvent(evt,clientId);
+    }
+
     /**
      * 7.4.21: Can be used before inited for adding requests from an init() and not only from update().
      *
@@ -373,6 +381,9 @@ public class SystemManager {
         return requestQueue.getRequest(i);
     }
 
+    /**
+     * Publish packet from network to local bus.
+     */
     public static void publishPacket(Packet packet) {
 
         Event event;

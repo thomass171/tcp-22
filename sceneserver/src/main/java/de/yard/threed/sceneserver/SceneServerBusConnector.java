@@ -5,6 +5,7 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.GeneralHandlerMap;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
@@ -12,6 +13,8 @@ import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.RequestType;
+
+import java.util.List;
 
 
 /**
@@ -30,8 +33,7 @@ public class SceneServerBusConnector extends DefaultBusConnector {
 
     GeneralHandlerMap<String> eventHandler = new GeneralHandlerMap<String>();
 
-    public SceneServerBusConnector(ServerSocket serverSocket) {
-        this.socket = serverSocket;
+    public SceneServerBusConnector() {
     }
 
     /*public BusConnectorSystem(RequestType[] requestTypes, EventType[] eventTypes) {
@@ -47,6 +49,12 @@ public class SceneServerBusConnector extends DefaultBusConnector {
      */
     public void update(EcsEntity entity, EcsGroup group, double tpf) {
 
+    }
+
+    @Override
+    public List<NativeSocket> getSockets(String clientId) {
+        //ClientListener.getInstance().getMpSocket());
+        return ClientListener.getInstance().getSockets();
     }
 
 

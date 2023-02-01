@@ -30,8 +30,6 @@ import java.util.List;
 public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
     static Log logger = Platform.getInstance().getLog(DefaultBusConnector.class);
 
-    public NativeSocket socket;
-
     GeneralHandlerMap<String> eventHandler = new GeneralHandlerMap<String>();
 
     /*public BusConnectorSystem(RequestType[] requestTypes, EventType[] eventTypes) {
@@ -51,18 +49,37 @@ public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
 */
 
     /**
-     * Send event to network.
+     * Send event to network for all clients (or server).
      */
     public void pushEvent(Event event) {
-        socket.sendPacket(encodeEvent(event));
+        pushEvent(event, null);
+    }
+
+    /**
+     * Send event to network (optionally to specific client).
+     */
+    public void pushEvent(Event event, String clientId) {
+        for (NativeSocket socket : getSockets(clientId)) {
+            socket.sendPacket(encodeEvent(event));
+        }
     }
 
     /**
      * Send request to network.
      */
     public void pushRequest(Request request) {
-        socket.sendPacket(encodeRequest(request));
+        for (NativeSocket socket : getSockets(null)) {
+            socket.sendPacket(encodeRequest(request));
+        }
     }
+
+    /**
+     * Client and server usable socket provider.
+     *
+     * @param clientId null to return all client sockets.
+     * @return List of sockets on server, always one socket in client.
+     */
+    public abstract List<NativeSocket> getSockets(String clientId);
 
     public static Packet encodeRequest(Request request) {
         Packet packet = new Packet();
@@ -108,6 +125,12 @@ public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
             Payload payload = Payload.decode(packet);
             return new Event(eventType, payload);
         }
+        logger.warn("no event in packet " + packet.getData());
         return null;
+    }
+
+    public static boolean isEvent(Packet packet) {
+        String evt = packet.getValue("event");
+        return evt != null;
     }
 }

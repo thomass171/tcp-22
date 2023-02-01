@@ -1,5 +1,6 @@
 package de.yard.threed.engine.ecs;
 
+import de.yard.threed.core.EventType;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
@@ -30,5 +31,14 @@ public class EcsHelper {
             logger.error("inconsistency: Multiple entity id " + id);
         }
         return candidates.get(0);
+    }
+
+    public static EventType[] extendEventTypeArray(EventType[] a, EventType e) {
+        EventType[] na = new EventType[a.length + 1];
+        for (int i = 0; i < a.length; i++) {
+            na[i] = a[i];
+        }
+        na[a.length] = e;
+        return na;
     }
 }

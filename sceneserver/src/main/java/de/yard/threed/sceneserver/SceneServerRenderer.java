@@ -23,6 +23,7 @@ import de.yard.threed.platform.homebrew.HomeBrewMesh;
 import de.yard.threed.platform.homebrew.HomeBrewSceneNode;
 import de.yard.threed.platform.homebrew.PlatformHomeBrew;
 import de.yard.threed.platform.homebrew.Renderables;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import static de.yard.threed.engine.BaseEventRegistry.BASE_EVENT_ENTITY_CHANGE;
  * Die ParentNode eines Model z.B. hat aber gar kein Mesh. Aber man kann ihm passende renderables geben. Und das ist dann
  * wieder ganz gut (und effizient).
  */
+@Slf4j
 public class SceneServerRenderer extends HomeBrewRenderer {
     //not yet available  Log logger = Platform.getInstance().getLog(SceneServerRenderer.class);
     //SyncedObjectsRegistry syncedObjectsRegistry;
@@ -84,7 +86,7 @@ public class SceneServerRenderer extends HomeBrewRenderer {
         ClientListener.dropInstance();
         ClientListener clientListener = ClientListener.getInstance("", -1);
         clientListener.start();
-        SystemManager.setBusConnector(new SceneServerBusConnector(ClientListener.getInstance().getMpSocket()));
+        SystemManager.setBusConnector(new SceneServerBusConnector());
 
 
     }
@@ -189,8 +191,9 @@ public class SceneServerRenderer extends HomeBrewRenderer {
     protected void collectKeyboardAndMouseEvents(AbstractSceneRunner runner) {
         // instead of keyboard/mouse events get remote events.
 
-        // client events einspielen vor prepareFrame weil darin die Events verteilt werden.
+        // get clients packets and publish before prepareFrame, which distributes the events.
         List<ClientConnection> clientConnections = ClientListener.getInstance().getClientConnections();
+        log.debug("Reading packets from {} clients", clientConnections.size());
         for (ClientConnection clientConnection : clientConnections) {
             Packet packet;
             while ((packet = clientConnection.getPacket()) != null) {

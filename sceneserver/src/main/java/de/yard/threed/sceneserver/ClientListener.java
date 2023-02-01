@@ -1,5 +1,6 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.platform.NativeSocket;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,9 @@ import java.util.List;
 import static de.yard.threed.javanative.JavaUtil.sleepMs;
 
 /**
- * Client Registry und
+ * Client Listener and Registry.
+ *
+ * und
  * Konvertierung zwischen ECS Events/Requests und einem per Socket angebundenem Client.
  * <p>
  * Kann nicht ins ClientSystem wegen GWT/C# bzw. listen().
@@ -137,7 +140,15 @@ public class ClientListener extends Thread {
         }
     }
 
-    public ServerSocket getMpSocket() {
-        return new ServerSocket(getClientConnections());
+    /**
+     * Needs optimization.
+     */
+    public List<NativeSocket> getSockets() {
+
+        List<NativeSocket> sockets = new ArrayList<NativeSocket>();
+        for (ClientConnection connection:getClientConnections()){
+            sockets.add(connection);
+        }
+        return sockets;
     }
 }

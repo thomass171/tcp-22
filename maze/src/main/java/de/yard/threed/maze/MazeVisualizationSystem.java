@@ -2,7 +2,6 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
-import de.yard.threed.core.Payload;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
@@ -79,7 +78,9 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
 
         if (evt.getType().equals(EventRegistry.EVENT_MAZE_LOADED)) {
             //wird scheitern, wenn noch kein Login und damit kein Ray.
-            createView((Grid) evt.getPayloadByIndex(0));
+            // gridname is not really needed currently to load the grid from the data provider
+            Grid grid = MazeDataProvider.getGrid();
+            createView(grid);
 
             // VR und zum Testen
             if (MazeScene.vrInstance != null) {

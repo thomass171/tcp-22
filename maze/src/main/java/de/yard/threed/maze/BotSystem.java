@@ -26,14 +26,16 @@ public class BotSystem extends DefaultEcsSystem {
     private boolean botsystemdebuglog = true;
     private List<List<StartPosition>> startPositions;
     private IntProvider rand = new RandomIntProvider();
+    private boolean serverMode;
 
     /**
      *
      */
-    public BotSystem() {
+    public BotSystem(boolean serverMode) {
         super(new String[]{BotComponent.TAG},
                 new RequestType[]{},
                 new EventType[]{EventRegistry.EVENT_MAZE_LOADED, UserSystem.USER_EVENT_JOINED});
+        this.serverMode = serverMode;
     }
 
     @Override
@@ -78,11 +80,13 @@ public class BotSystem extends DefaultEcsSystem {
         }
 
         if (evt.getType().equals(EventRegistry.EVENT_MAZE_LOADED)) {
-            Grid grid = (Grid) evt.getPayloadByIndex(0);
+            Grid grid = MazeDataProvider.getGrid();
             startPositions = grid.getMazeLayout().getStartPositions();
         }
-        if (evt.getType().equals(UserSystem.USER_EVENT_JOINED)) {
-            // Start a bot for remaining players. But only once, the login request fired here will also trigger a JOINED event again.
+        if (evt.getType().equals(UserSystem.USER_EVENT_JOINED) && !serverMode) {
+            // Start a bot for remaining players when running standalone.
+            // TODO Also for monster?
+            // But only once, the login request fired here will also trigger a JOINED event again.
             // Be prepared for inconsistent (negative) botNeeded.
             if (startPositions != null) {
                 logger.debug("Launching bots");

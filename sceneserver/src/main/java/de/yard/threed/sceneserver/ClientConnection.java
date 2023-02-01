@@ -1,5 +1,6 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.javanative.QueuingSocketListener;
 import de.yard.threed.javanative.SocketEndpoint;
 import de.yard.threed.core.Packet;
@@ -11,7 +12,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 
-public class ClientConnection /*extends Thread */ {
+/**
+ *
+ */
+public class ClientConnection implements NativeSocket {
     private static final Logger logger = LoggerFactory.getLogger(ClientConnection.class.getName());
     Socket clientSocket;
     boolean terminateflag = false;
@@ -105,6 +109,7 @@ public class ClientConnection /*extends Thread */ {
      *
      * @return
      */
+    @Override
     public Packet getPacket() {
         List<String> s = queuingSocketListener.getPacket();
         return Packet.buildFromBlock(s);
@@ -113,6 +118,15 @@ public class ClientConnection /*extends Thread */ {
     public boolean hasPacket() {
        return queuingSocketListener.hasPacket();
     }
+
+    @Override
+    public void sendPacket(Packet packet) {
+        /*for (ClientConnection clientConnection : clientConnections) {
+            clientConnection.writePacket(packet.getData());
+        }*/
+        writePacket(packet.getData());
+    }
+
 }
 
 

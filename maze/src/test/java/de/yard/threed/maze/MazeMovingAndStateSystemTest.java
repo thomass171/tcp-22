@@ -36,7 +36,12 @@ public class MazeMovingAndStateSystemTest {
      */
     @BeforeEach
     public void setup() {
-        InitMethod initMethod = () -> SystemManager.addSystem(new MazeMovingAndStateSystem());
+        InitMethod initMethod = () -> {
+            SystemManager.addSystem(new MazeMovingAndStateSystem());
+            MazeDataProvider.reset();
+            // what is the grid expected here?
+            MazeDataProvider.init();
+        };
         SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());
         TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, platformFactory, initMethod);
     }

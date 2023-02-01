@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * An ECS entity.
+ *
  * Ableitung von SceneNode oder Attribute ScenenNode. Erster Ansatz als Ableitung von SceneNode. Koennte final sein, weil
  * Entities nur ComponentAggregationen sein sollen.
  * Gerade die Aggregation spricht aber doch gegen Ableitung. Also erstmal nicht.
@@ -79,8 +81,8 @@ public final class EcsEntity {
         }
         if (groupid == null) {
             if (!wranlogged) {
-                //12.4.17: manchmal zu haeufig
-                logger.warn("groupid isType null in entity " + name);
+                //12.4.17: sometimes too often
+                logger.warn("groupid is null in entity " + name);
                 wranlogged = true;
             }
         }

@@ -248,6 +248,8 @@ public class MazeSceneTest {
      */
     private void setup(String gridname, boolean gridTeleporterEnabled) {
         Configuration.reset();
+        MazeDataProvider.reset();
+
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.maze.MazeScene");
         properties.put("argv.initialMaze", gridname);

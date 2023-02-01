@@ -7,21 +7,16 @@ import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
-import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import de.yard.threed.sceneserver.testutils.TestUtils;
-import de.yard.threed.traffic.apps.BasicTravelScene;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
 import static de.yard.threed.engine.BaseEventRegistry.BASE_EVENT_ENTITY_CHANGE;
-import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientConnected;
-import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientPacket;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -55,23 +50,23 @@ public class DemoSceneTest {
 
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
 
-        TestClient testClient = new TestClient();
-        TestUtils.assertConnectAndLogin(sceneServer.getSceneRunner(), testClient);
+        TestClient testClient = new TestClient(TestClient.USER_NAME0);
+        testClient.assertConnectAndLogin(sceneServer);
 
         // wait for terrain available to load vehicle
         TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
         List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
         assertEquals(1 + 1, entities.size(), "number of entites (avatar+loc)");
-        EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME.equals(e.getName())).get(0);
+        EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME0.equals(e.getName())).get(0);
         assertNotNull(userEntity, "user entity");
         EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
         assertNotNull(locEntity, "loc entity");
 
-        List<Packet> packets = testClient.getAllPackets();
+        List<Packet> packets = testClient.readLatestPackets();
         // Movements also should arrive in client
         TestUtils.assertEventPacket(BASE_EVENT_ENTITY_CHANGE, new Pair[]{
                 new Pair("p_position", "*")
-        }, packets);
+        }, packets,-1);
 
 
         SceneNode locNode = locEntity.getSceneNode();

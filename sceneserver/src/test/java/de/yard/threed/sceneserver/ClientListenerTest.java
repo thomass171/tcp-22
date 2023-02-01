@@ -41,7 +41,7 @@ public class ClientListenerTest {
 
     @Test
     public void testSimple() throws Exception {
-        TestClient testClient = new TestClient();
+        TestClient testClient = new TestClient(TestClient.USER_NAME0);
         testClient.connectAndLogin();
 
         TestUtils.waitForClientConnected();
