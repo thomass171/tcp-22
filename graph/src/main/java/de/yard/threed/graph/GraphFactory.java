@@ -355,7 +355,7 @@ public class GraphFactory {
                 } else {
                     GraphEdge c = graph.connectNodes(bn, en, name);
                     if (center != null) {
-                        RailingFactory.setArc(c, Vector3.parseString(center), Util.parseDouble(radius), Util.parseDouble(angle));
+                        RailingFactory.setArc(c, Util.parseVector3(center), Util.parseDouble(radius), Util.parseDouble(angle));
                     }
                 }
             }

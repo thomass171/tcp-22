@@ -256,7 +256,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             // Init player (entity already created) and publish "new player". But not before maze was loaded.
             // 1.4.21: Avatar was build by AvatarSystem (and attached to world and previously created user entity).
 
-            EcsEntity playerEntity = (EcsEntity) evt.getPayloadByIndex(0);
+            Integer playerEntityId = (Integer) evt.getPayload().get("userentityid");
+            EcsEntity playerEntity = EcsHelper.findEntityById(playerEntityId);
             MazeLayout layout = Grid.getInstance().getMazeLayout();
             Point launchPosition = layout.getNextLaunchPosition(usedLaunchPositions);
 
@@ -528,12 +529,12 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             Scene.getCurrent().addToWorld(box.scenenode);
         }
         for (Point b : grid.getDiamonds()) {
-            SceneNode p = MazeModelFactory.getInstance().buildDiamond();
-            EcsEntity diamond = new EcsEntity(p);
+            EcsEntity diamond = new EcsEntity();
+            diamond.buildSceneNodeByModelFactory(MazeModelFactory.MAZE_MODEL_DIAMOND, MazeModelFactory.getInstance());
             diamond.setName("diamond");
             Vector3 dp = MazeUtils.point2Vector3(b);
             dp = new Vector3(dp.getX(), 0.8, dp.getZ());
-            p.getTransform().setPosition(dp);
+            diamond.getSceneNode().getTransform().setPosition(dp);
             // no diamond owner initially
             diamond.addComponent(new DiamondComponent(b));
             Scene.getCurrent().addToWorld(diamond.scenenode);

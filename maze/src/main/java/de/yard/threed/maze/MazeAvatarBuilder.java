@@ -4,14 +4,15 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.engine.ModelBuilder;
+import de.yard.threed.engine.ModelBuilderRegistry;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.avatar.AvatarABuilder;
-import de.yard.threed.engine.avatar.AvatarBuilder;
 import de.yard.threed.engine.avatar.AvatarComponent;
 import de.yard.threed.engine.ecs.AnimationComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
 
-public class MazeAvatarBuilder implements AvatarBuilder {
+public class MazeAvatarBuilder implements ModelBuilderRegistry {
 
     AvatarABuilder avatarABuilder;
 
@@ -23,6 +24,10 @@ public class MazeAvatarBuilder implements AvatarBuilder {
     }
 
     @Override
+    public ModelBuilder lookupModelBuilder(String key) {
+        return (destinationNode, entity) -> destinationNode.attach(buildAvatar(entity));
+    }
+
     public SceneNode buildAvatar(EcsEntity player) {
         BotComponent botComponent = BotComponent.getBotComponent(player);
 

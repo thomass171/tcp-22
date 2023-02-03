@@ -61,10 +61,24 @@ public class Payload {
     }
 
     public Payload add(String key, String value){
-        values.put(key,value);
+        values.put(key, value);
         return this;
     }
 
+    public Payload add(String key, int value){
+        values.put(key, new Integer(value));
+        return this;
+    }
+
+    public Payload add(String key, Vector3 value){
+        values.put(key, value);
+        return this;
+    }
+
+    public Payload add(String key, Quaternion value){
+        values.put(key, value);
+        return this;
+    }
     /*public boolean isByIndex() {
         return o != null;
     }
@@ -111,6 +125,10 @@ public class Payload {
             return ("i:" + ((Integer) o));
         } else if (o instanceof Boolean) {
             return ("b:" + ((Boolean) o));
+        } else if (o instanceof Vector3) {
+            return ("v:" + ((Vector3) o).toSimpleString());
+        } else if (o instanceof Quaternion) {
+            return ("q:" + ((Quaternion) o).toSimpleString());
         } else {
             Platform.getInstance().getLog(Payload.class).warn("unknown payload class " + o.getClass().getName());
             return ("");
@@ -152,15 +170,20 @@ public class Payload {
             return null;
         }
 
+        String content = StringUtils.substring(s_p, 2);
         switch (StringUtils.charAt(s_p, 0)) {
             case 's':
-                return (StringUtils.substring(s_p, 2));
+                return content;
             case 'i':
-                return (new Integer(Util.atoi(StringUtils.substring(s_p, 2))));
+                return (new Integer(Util.atoi(content)));
             case 'b':
-                return (new Boolean(StringUtils.toLowerCase(StringUtils.substring(s_p, 2)).equals("true")));
+                return (new Boolean(StringUtils.toLowerCase(content).equals("true")));
+            case 'v':
+                return Util.parseVector3(content);
+            case 'q':
+                return Util.parseQuaternion(content);
             default:
-                throw new RuntimeException("invalid content in packet");
+                throw new RuntimeException("invalid content in packet: " + s_p);
         }
     }
 

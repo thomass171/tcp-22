@@ -494,17 +494,30 @@ public class Util {
         return (int) (Platform.getInstance().currentTimeMillis() / 1000);
     }
 
-    public static Vector3 parseVector3(String s) {
-        return parseVector3(StringUtils.split(s, ","));
+    public static Vector3 parseVector3(String data) {
+        String[] s;
+        if (StringUtils.contains(data, ",")) {
+            s = StringUtils.split(data, ",");
+        } else {
+            s = StringUtils.split(data, " ");
+        }
+        if (s.length != 3) {
+            throw new NumberFormatException("parseString: invalid vector3 data "+data);
+        }
+        return new Vector3(Util.parseDouble(s[0]), Util.parseDouble(s[1]), Util.parseDouble(s[2]));
     }
 
-    public static Vector3 parseVector3(String[] parts) {
-        if (parts.length == 3) {
-            return new Vector3(parseDouble(parts[0]), parseDouble(parts[1]), parseDouble(parts[2]));
+    public static Quaternion parseQuaternion(String data) {
+        String[] s;
+        if (StringUtils.contains(data, ",")) {
+            s = StringUtils.split(data, ",");
         } else {
-            logger.warn("invalid number of tuples for vector3: " + parts.length);
-            return new Vector3();
+            s = StringUtils.split(data, " ");
         }
+        if (s.length != 4) {
+            throw new NumberFormatException("parseString: invalid quaternion data "+data);
+        }
+        return new Quaternion(Util.parseDouble(s[0]), Util.parseDouble(s[1]), Util.parseDouble(s[2]), Util.parseDouble(s[3]));
     }
 }
 

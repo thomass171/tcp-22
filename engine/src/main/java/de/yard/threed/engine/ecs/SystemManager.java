@@ -3,9 +3,6 @@ package de.yard.threed.engine.ecs;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
-import de.yard.threed.core.Payload;
-import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeEventBus;
 import de.yard.threed.core.platform.Platform;
@@ -139,6 +136,11 @@ public class SystemManager {
             if (busConnector != null) {
                 // TODO avoid client server ping pong
                 busConnector.pushEvent(evt);
+                if (DefaultBusConnector.entitySyncEnabled) {
+                    for (EcsEntity entity : entities) {
+                        busConnector.pushEvent(DefaultBusConnector.buildEntitiyStateEvent(entity));
+                    }
+                }
             }
         }
         for (EcsSystem system : systems) {
@@ -247,7 +249,7 @@ public class SystemManager {
             logger.warn("No bus connector");
             return;
         }
-        busConnector.pushEvent(evt,clientId);
+        busConnector.pushEvent(evt, clientId);
     }
 
     /**
@@ -301,7 +303,7 @@ public class SystemManager {
      * @return
      */
     public static List<EcsEntity> findEntities(EntityFilter filter) {
-        return EcsEntity.filterList(entities, filter);
+        return EcsHelper.filterList(entities, filter);
     }
 
     public static void processEntityGroups(String groupid, EcsGroupHandler ecsGroupHandler) {
@@ -386,13 +388,12 @@ public class SystemManager {
      */
     public static void publishPacket(Packet packet) {
 
-        Event event;
         Request request;
 
-        if ((event = DefaultBusConnector.decodeEvent(packet)) != null) {
-            throw new RuntimeException("not yet");
+        if (DefaultBusConnector.isEvent(packet)) {
+            sendEvent(DefaultBusConnector.decodeEvent(packet));
         } else if ((request = DefaultBusConnector.decodeRequest(packet)) != null) {
-            SystemManager.putRequest(request);
+            putRequest(request);
         } else {
             logger.error("unsupported packet");
         }

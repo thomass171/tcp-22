@@ -18,6 +18,7 @@ import static de.yard.threed.engine.ecs.UserSystem.USER_EVENT_LOGGEDIN;
  * Requests are transmitted by SystemManager for now.
  * <p>
  * Seems to be better to have a dedicated system instead of integrating it in SystemManager.
+ * But SystemManager seems a better location for publishing entity states because it has all infos.
  * <p>
  * To some degree this is the counterpart of {@link ClientSystem ).
  * <p>

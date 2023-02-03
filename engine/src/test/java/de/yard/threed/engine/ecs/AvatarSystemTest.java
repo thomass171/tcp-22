@@ -90,7 +90,8 @@ public class AvatarSystemTest {
         List<Event> joinEvents = EcsTestHelper.getEventsFromHistory(UserSystem.USER_EVENT_JOINED);
         assertEquals(1, joinEvents.size());
         Event joinEvent = joinEvents.get(0);
-        EcsEntity playerEntity = (EcsEntity) joinEvent.getPayloadByIndex(0);
+        int playerEntityId = (Integer) joinEvent.getPayload().get("userentityid");
+        EcsEntity playerEntity = EcsHelper.findEntityById(playerEntityId);
         assertNotNull("player", playerEntity);
         assertNotNull("Player", playerEntity.getName());
         assertEquals(testUserName, playerEntity.getName());

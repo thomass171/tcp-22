@@ -90,6 +90,18 @@ public class MazeSceneTest {
 
     }
 
+    /**
+     * ###############
+     * #     @       #
+     * #  #        # #
+     * #  ## D # D## #
+     * #  #   ###  # #
+     * #     @ #     #
+     * #    #D ####  #
+     * #   ###   #D  #
+     * #             #
+     * ###############
+     */
     @Test
     public void testMultiUser() throws Exception {
         setup("maze/Area15x10.txt");
@@ -107,5 +119,6 @@ public class MazeSceneTest {
         testClient0.assertEventMazeLoaded("maze/Area15x10.txt");
         testClient1.assertEventMazeLoaded("maze/Area15x10.txt");
 
+        testClient0.assertEventEntityState(testClient0.getUserEntity().getId(), new Point(6, 4), GridOrientation.fromDirection("N"));
     }
 }

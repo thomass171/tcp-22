@@ -172,7 +172,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                             Color color = Color.parseString(XmlHelper.getStringAttribute(nn, "color"));
                             String direction = XmlHelper.getStringAttribute(nn, "direction");
                             if (direction != null) {
-                                lds[index] = new LightDefinition(color, Vector3.parseString(direction));
+                                lds[index] = new LightDefinition(color, Util.parseVector3(direction));
                             } else {
                                 lds[index] = new LightDefinition(color, null);
                             }

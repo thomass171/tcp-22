@@ -4,6 +4,7 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EcsHelper {
@@ -40,5 +41,19 @@ public class EcsHelper {
         }
         na[a.length] = e;
         return na;
+    }
+
+    /**
+     * 30.4.21: Always helpful.
+     */
+    public static List<EcsEntity> filterList(List<EcsEntity> list, EntityFilter filter) {
+
+        List<EcsEntity> result = new ArrayList<EcsEntity>();
+        for (EcsEntity e : list) {
+            if (filter == null || filter.matches(e)) {
+                result.add(e);
+            }
+        }
+        return result;
     }
 }

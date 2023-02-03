@@ -51,7 +51,7 @@ public class MazeTest {
                 SystemManager.addSystem(new MazeMovingAndStateSystem());
                 SystemManager.addSystem(new UserSystem());
                 AvatarSystem avatarSystem = new AvatarSystem();
-                avatarSystem.setAvatarBuilder(new MazeAvatarBuilder());
+                avatarSystem.setAvatarBuilder("avatar", new MazeAvatarBuilder());
                 avatarSystem.setViewTransform(MazeScene.getViewTransform());
                 SystemManager.addSystem(avatarSystem);
                 SystemManager.addSystem(new BulletSystem());

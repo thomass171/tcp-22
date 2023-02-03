@@ -2,6 +2,8 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.Util;
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.engine.apps.WoodenToyFactory;
@@ -22,7 +24,11 @@ import de.yard.threed.engine.platform.common.SimpleGeometry;
 /**
  * Created by thomass on 06.03.17.
  */
-public class MazeModelFactory {
+public class MazeModelFactory implements ModelBuilderRegistry {
+
+    private static Log logger = Platform.getInstance().getLog(MazeModelFactory.class);
+
+    public static String MAZE_MODEL_DIAMOND = "diamond";
     //Der Abstand zwischen den beiden Oberflächen einer Wand
     //float elementdistance = 0.01f;
     // mit groesserer Distance kann man Probleme besser erkennen.
@@ -447,6 +453,15 @@ public class MazeModelFactory {
         //ball.getTransform().setPosition(MazeUtils.point2Vector3(position).add(new Vector3(0, 1.25, 0)));
         Scene.getCurrent().addToWorld(ball);
         return ball;
+    }
+
+    @Override
+    public ModelBuilder lookupModelBuilder(String key) {
+        if (key.equals(MAZE_MODEL_DIAMOND)) {
+            return (destinationNode, entity) -> destinationNode.attach(buildDiamond());
+        }
+        logger.error("No model buuilder found for key" + key);
+        return null;
     }
 
     /**

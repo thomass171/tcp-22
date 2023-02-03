@@ -24,7 +24,7 @@ public class UserSystem extends DefaultEcsSystem {
     public static RequestType USER_REQUEST_JOIN = new RequestType("USER_REQUEST_JOIN");
 
     public static EventType USER_EVENT_LOGGEDIN = new EventType("USER_EVENT_LOGGEDIN");
-    // payload ist entity id
+    // payload is entity id
     public static EventType USER_EVENT_JOINED = new EventType("USER_EVENT_JOINED");
 
     //MA31 aus RequestRegistry nach hier verschoben. Ob automove allerdings hier so passt? Mal sehen.

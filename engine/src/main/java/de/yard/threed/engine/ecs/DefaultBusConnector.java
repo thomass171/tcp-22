@@ -5,16 +5,14 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.GeneralHandlerMap;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Payload;
-import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.BaseEventRegistry;
+import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -39,6 +37,12 @@ public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
     public static EventType EVENT_NODEPARENTCHANGED = new EventType("EVENT_NODEPARENTCHANGED");
     public static EventType EVENT_NODECHANGED = new EventType("EVENT_NODECHANGED");
 
+    // Events on entity level appear to be more efficient
+    public static boolean entitySyncEnabled = true;
+    public static EventType EVENT_ENTITYSTATE = new EventType("EVENT_ENTITYSTATE");
+    //public static EventType EVENT_ENTITYMODELCREATED = new EventType("EVENT_ENTITYMODELCREATED");
+    //public static EventType EVENT_ENTITYCHANGED = new EventType("EVENT_ENTITYCHANGED");
+
     /*public BusConnectorSystem(RequestType[] requestTypes, EventType[] eventTypes) {
         super(requestTypes, eventTypes);
     }*/
@@ -58,16 +62,16 @@ public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
     /**
      * Send event to network for all clients (or server).
      */
-    public void pushEvent(Event event) {
-        pushEvent(event, null);
+    public void pushEvent(Event evt) {
+        pushEvent(evt, null);
     }
 
     /**
      * Send event to network (optionally to specific client).
      */
-    public void pushEvent(Event event, String clientId) {
+    public void pushEvent(Event evt, String clientId) {
         for (NativeSocket socket : getSockets(clientId)) {
-            socket.sendPacket(encodeEvent(event));
+            socket.sendPacket(encodeEvent(evt));
         }
     }
 
@@ -87,6 +91,19 @@ public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
      * @return List of sockets on server, always one socket in client.
      */
     public abstract List<NativeSocket> getSockets(String clientId);
+
+    public static Event buildEntitiyStateEvent(EcsEntity entity) {
+        Payload payload = new Payload()
+                .add("entityid", entity.getId())
+                .add("buildername", (entity.getBuilderName() != null) ? entity.getBuilderName() : "");
+        if (entity.getSceneNode() != null) {
+            Transform transform = entity.getSceneNode().getTransform();
+            payload = payload.add("position", transform.getPosition())
+                    .add("rotation", transform.getRotation())
+                    .add("scale", transform.getScale());
+        }
+        return new Event(EVENT_ENTITYSTATE, payload);
+    }
 
     public static Packet encodeRequest(Request request) {
         Packet packet = new Packet();

@@ -6,6 +6,7 @@ import de.yard.threed.core.platform.PlatformHelper;
 import de.yard.threed.engine.Geometry;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
+import de.yard.threed.engine.ModelBuilderRegistry;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.ObserverComponent;
 import de.yard.threed.engine.Scene;
@@ -22,7 +23,7 @@ import java.util.List;
 /**
  * Avatar administration.
  * <p>
- * Building the avatar isType the step USER_REQUEST_JOIN->USER_EVENT_JOINED.
+ * Building the avatar is the step USER_REQUEST_JOIN->USER_EVENT_JOINED.
  * <p>
  * 22.11.21: The name AvatarSystem is confusing. In fact its a player system. And the player just might have an avatar model (body).
  * <p>
@@ -38,7 +39,8 @@ public class AvatarSystem extends DefaultEcsSystem {
 
     public static LocalTransform initialTransform = null;
     boolean enableObserverComponent = false;
-    private AvatarBuilder avatarBuilder = null;
+    String builderName;
+    ModelBuilderRegistry modelBuilderRegistry;
     private boolean isFirstJoin = true;
     private LocalTransform viewTransform;
 
@@ -66,8 +68,9 @@ public class AvatarSystem extends DefaultEcsSystem {
         return new AvatarSystem(false);
     }
 
-    public void setAvatarBuilder(AvatarBuilder avatarBuilder) {
-        this.avatarBuilder = avatarBuilder;
+    public void setAvatarBuilder(String builderName, ModelBuilderRegistry modelBuilderRegistry) {
+        this.builderName = builderName;
+        this.modelBuilderRegistry = modelBuilderRegistry;
     }
 
     public void setViewTransform(LocalTransform viewTransform) {
@@ -139,7 +142,7 @@ public class AvatarSystem extends DefaultEcsSystem {
             //avatar.avatarE.setName("Player");
             logger.debug("User '" + userEntity.getName() + "' joined");
 
-            SystemManager.sendEvent(new Event(UserSystem.USER_EVENT_JOINED, new Payload(new Object[]{userEntity})));
+            SystemManager.sendEvent(buildUserJoinedEvent(userEntity));
 
             return true;
         }
@@ -151,6 +154,10 @@ public class AvatarSystem extends DefaultEcsSystem {
         logger.debug("got event " + evt.getType());
     }
 
+    public static Event buildUserJoinedEvent(EcsEntity userEntity) {
+        return new Event(UserSystem.USER_EVENT_JOINED, new Payload().add("userentityid", userEntity.getId()));
+    }
+
     /**
      * Build avatar for user. No observer change here.
      */
@@ -159,7 +166,7 @@ public class AvatarSystem extends DefaultEcsSystem {
 
         //Avatar av = new Avatar(user, avatarBuilder);
         SceneNode mainNode;
-        if (avatarBuilder == null) {
+        if (builderName == null || modelBuilderRegistry == null) {
             // simple green cube avatar
             mainNode = new SceneNode();
             // Simple green cube for testing.
@@ -167,7 +174,7 @@ public class AvatarSystem extends DefaultEcsSystem {
             // used as marker
             user.addComponent(new AvatarComponent());
         } else {
-            mainNode = avatarBuilder.buildAvatar(user);
+            mainNode = user.buildSceneNodeByModelFactory(builderName, modelBuilderRegistry);
         }
         mainNode.setName("Avatar");
 

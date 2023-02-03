@@ -114,9 +114,19 @@ public class Quaternion implements Dumpable {
         return s;
     }
 
+    /**
+     * For human readability
+     */
     @Override
     public String toString() {
         return "(" + getX() + "," + getY() + "," + getZ() + "," + getW() + ")";
+    }
+
+    /**
+     * For machine readability
+     */
+    public String toSimpleString() {
+        return "" + getX() + "," + getY() + "," + getZ() + "," + getW();
     }
 
     /**

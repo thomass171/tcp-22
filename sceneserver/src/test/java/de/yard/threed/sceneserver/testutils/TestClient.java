@@ -4,19 +4,25 @@ package de.yard.threed.sceneserver.testutils;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.Point;
+import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
+import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.testutil.EventFilter;
 import de.yard.threed.engine.ecs.ServerSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.Request;
-import de.yard.threed.engine.testutil.PayloadHook;
+import de.yard.threed.engine.testutil.TestHelper;
 import de.yard.threed.javanative.QueuingSocketListener;
 import de.yard.threed.javanative.SocketClient;
 import de.yard.threed.maze.EventRegistry;
+import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeUtils;
 import de.yard.threed.sceneserver.ClientListener;
 import de.yard.threed.sceneserver.SceneServer;
@@ -27,8 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class TestClient {
@@ -36,14 +41,14 @@ public class TestClient {
     SocketClient socketClient;
     QueuingSocketListener listener;
     public static String USER_NAME0 = "carl";
-    public static String USER_NAME1 = "carl";
+    public static String USER_NAME1 = "wayne";
     public String username;
     List<Packet> allPackets = new ArrayList<>();
     List<Event> allEvents = new ArrayList<>();
     List<Request> allRequests = new ArrayList<>();
 
     public TestClient(String username) {
-        this.username = "carl";
+        this.username = username;
         socketClient = new SocketClient("localhost", ClientListener.DEFAULT_PORT);
     }
 
@@ -145,6 +150,12 @@ public class TestClient {
         return allPackets;
     }
 
+    public EcsEntity getUserEntity() {
+        EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME0.equals(e.getName())).get(0);
+        assertNotNull(userEntity, "user entity");
+        return userEntity;
+    }
+
     public List<Event> findEvents(EventFilter filter) {
         List<Event> result = new ArrayList<Event>();
         for (Event e : allEvents) {
@@ -162,5 +173,25 @@ public class TestClient {
 
         assertEquals(1, ((ServerSystem) SystemManager.findSystem(ServerSystem.TAG)).getSavedEvents().size());
 
+    }
+
+    /**
+     * Look for latest event of a specific entity
+     */
+    public void assertEventEntityState(int entityId, Point expectedLocation, GridOrientation expectedOrientation) {
+        List<Event> entityStateEvents = TestHelper.filterEventList(allEvents, e -> {
+            return e.getType().getType() == DefaultBusConnector.EVENT_ENTITYSTATE.getType() &&
+                    (Integer) e.getPayload().get("entityid") == entityId;
+        });
+
+        Event latest = entityStateEvents.get(entityStateEvents.size() - 1);
+        //assertEquals(gridName, p.get("gridname"));
+        Vector3 position = (Vector3) latest.getPayload().get("position");
+        assertNotNull(position, "position");
+        TestUtil.assertVector3(MazeUtils.point2Vector3(expectedLocation), position);
+        Quaternion rotation = (Quaternion) latest.getPayload().get("rotation");
+        assertNotNull(rotation, "rotation");
+        // rotation taken as is, but seem
+        TestUtil.assertQuaternion("rotation", expectedOrientation.getRotation(), rotation);
     }
 }
