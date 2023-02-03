@@ -1,11 +1,7 @@
 package de.yard.threed.sceneserver;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.configuration2.BaseConfiguration;
-import org.apache.commons.configuration2.Configuration;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByArgs;
 
 import java.util.HashMap;
 
@@ -14,18 +10,17 @@ public class Main {
 
         try {
 
-            Options options = new Options();
-            options.addOption("s", "scene", true, "scene class");
+            for (String arg : args) {
+                System.out.println("arg=" + arg);
+            }
+            String sceneName = args[args.length - 1];
+            String subdir = null;//cmd.getOptionValue("d");
 
-            CommandLineParser parser = new DefaultParser();
-            CommandLine cmd = parser.parse(options, args);
-
-            String sceneName = cmd.getOptionValue("s");
-            String subdir = cmd.getOptionValue("d");
-            Configuration customconfig = new BaseConfiguration();
+            Configuration configuration = Configuration.init();
+            configuration.addConfiguration(new ConfigurationByArgs(args), false);
 
             HashMap<String, String> properties = new HashMap<String, String>();
-            SceneServer sceneServer = new SceneServer(subdir, sceneName,properties);
+            SceneServer sceneServer = new SceneServer(subdir, sceneName, properties);
             // start (blocking) render loop
             sceneServer.runServer();
 

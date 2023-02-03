@@ -2,6 +2,7 @@ package de.yard.threed.core.platform;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourcePath;
@@ -162,14 +163,15 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public void setSystemProperty(String key, String value) {
-
-    }
+    public void setSystemProperty(String key, String value) { }
 
     @Override
     public String getSystemProperty(String key) {
         return null;
     }
+
+    @Override
+    public Configuration getConfiguration() { return null; };
 
     @Override
     public NativeEventBus getEventBus() {

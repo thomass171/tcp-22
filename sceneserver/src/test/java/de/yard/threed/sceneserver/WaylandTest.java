@@ -1,5 +1,6 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
@@ -23,6 +24,9 @@ public class WaylandTest {
 
     @BeforeEach
     public void setup() throws Exception {
+
+        Configuration.reset();
+        Configuration.init();
 
         HashMap<String, String> properties = new HashMap<String, String>();
         boolean wayland=true;

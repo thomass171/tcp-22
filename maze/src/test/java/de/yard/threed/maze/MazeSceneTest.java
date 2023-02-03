@@ -49,7 +49,8 @@ public class MazeSceneTest {
     public void testSokobanWikipedia() {
         setup("skbn/SokobanWikipedia.txt", true);
 
-        assertEquals(2, Configuration.getDefaultConfiguration().size());
+        // only the properties file
+        assertEquals(1, Configuration.getDefaultConfiguration().size());
 
         assertTrue(SystemState.readyToJoin());
 
@@ -158,7 +159,8 @@ public class MazeSceneTest {
     public void test_P_Simple() {
         setup("maze/Maze-P-Simple.txt", false);
 
-        assertEquals(2, Configuration.getDefaultConfiguration().size());
+        // only the properties file
+        assertEquals(1, Configuration.getDefaultConfiguration().size());
 
         assertTrue(SystemState.readyToJoin());
 
@@ -213,7 +215,8 @@ public class MazeSceneTest {
 
         setup("maze/Maze-M-30x20.txt", false);
 
-        assertEquals(2, Configuration.getDefaultConfiguration().size());
+        // only the properties file
+        assertEquals(1, Configuration.getDefaultConfiguration().size());
 
         assertTrue(SystemState.readyToJoin());
 
@@ -248,6 +251,7 @@ public class MazeSceneTest {
      */
     private void setup(String gridname, boolean gridTeleporterEnabled) {
         Configuration.reset();
+        Configuration.init();
         MazeDataProvider.reset();
 
         HashMap<String, String> properties = new HashMap<String, String>();

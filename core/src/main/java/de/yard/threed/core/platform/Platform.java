@@ -2,6 +2,7 @@ package de.yard.threed.core.platform;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
@@ -320,10 +321,15 @@ public abstract class Platform {
      * weil manche Properties nachher abhängig von der Platform gesetztw erden (z.B. Unity handheld).
      * <p>
      * 16.7.18: Parameter aus der command line sind mit dem prefix "argv." eingetragen, z.B. basename bei viewScenery.
+     * 5.2.23: What is the latest design for properties/configuration? These methods? Or configuration? Or both?
+     * At least using prefixes like "argv" to provide the origin appear highly unwanted. It seems to switch to configuration that is supplied by
+     * the platform to be more future ready. The phrase 'SystemProperty' doesn't fit to configurations coming from the command line.
      */
+    @Deprecated
     public abstract void setSystemProperty(String key, String value);
-
+    @Deprecated
     public abstract String getSystemProperty(String key);
+    public abstract Configuration getConfiguration();
 
 
     //private void addSceneNode(String ke)

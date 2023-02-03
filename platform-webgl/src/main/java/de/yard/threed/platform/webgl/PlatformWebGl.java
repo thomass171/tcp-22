@@ -12,6 +12,7 @@ import com.google.gwt.xhr.client.XMLHttpRequest;
 import com.google.gwt.xml.client.XMLParser;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
@@ -404,6 +405,12 @@ public class PlatformWebGl extends Platform {
     @Override
     public String getSystemProperty(String key) {
         return properties.get(key);
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        //5.2.23 Hmm
+        throw new RuntimeException("not yet");
     }
 
     @Override

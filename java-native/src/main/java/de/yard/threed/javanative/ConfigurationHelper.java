@@ -14,10 +14,11 @@ public class ConfigurationHelper {
 
     /**
      * If the file cannot be loaded, this is just logged
-     *
+     * 5.2.23: Should use own configuration instead of apache
      * @param configfilename
      * @return
      */
+    @Deprecated
     public static Configuration loadSingleConfigFromClasspath(String configfilename) {
         Configuration config = new BaseConfiguration();
         InputStream configFile = null;

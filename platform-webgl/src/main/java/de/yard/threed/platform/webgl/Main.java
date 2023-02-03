@@ -3,6 +3,7 @@ package de.yard.threed.platform.webgl;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.resource.BundleRegistry;
@@ -70,8 +71,9 @@ public class Main implements EntryPoint {
         logger.debug("getModuleBaseURL=" + GWT.getModuleBaseURL());
         logger.debug("getModuleName=" + GWT.getModuleName());
         logger.debug("getModuleBaseForStaticFiles=" + GWT.getModuleBaseForStaticFiles());
+        //5.2.23 TODO refactor configuration
         Config.initFromArguments();
-        
+        Configuration.init();
         /*GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
             @Override
             public void onUncaughtException(Throwable throwable) {

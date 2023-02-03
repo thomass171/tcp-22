@@ -1,5 +1,6 @@
 package de.yard.threed.platform.homebrew;
 
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.engine.SceneMode;
 import de.yard.threed.javacommon.DefaultResourceReader;
 import de.yard.threed.core.platform.Platform;
@@ -44,6 +45,10 @@ public class HomeBrewSceneRunner extends AbstractSceneRunner implements NativeSc
         super(platformInternals);
         logger.info("Building HomeBrewSceneRunner");
         this.sceneMode = sceneMode;
+        if (Configuration.getDefaultConfiguration().getInt("throttle") != null) {
+            renderbrake = Configuration.getDefaultConfiguration().getInt("throttle");
+            logger.debug("setting renderbrake to " + renderbrake);
+        }
     }
 
     public static HomeBrewSceneRunner init(HashMap<String, String> properties, HomeBrewRenderer renderer, SceneMode sceneMode) {
@@ -129,7 +134,7 @@ public class HomeBrewSceneRunner extends AbstractSceneRunner implements NativeSc
             long starttime = System.currentTimeMillis();
 
 
-            renderer.renderFrame(this,((HomeBrewScene)(PlatformHomeBrew.getInstance()).nativeScene).getLights(),cameraToRender);
+            renderer.renderFrame(this, ((HomeBrewScene) (PlatformHomeBrew.getInstance()).nativeScene).getLights(), cameraToRender);
 
             //logger.debug("renderFrame took "+(System.currentTimeMillis()-starttime)+" ms.");
 

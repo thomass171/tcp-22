@@ -1,5 +1,6 @@
 package de.yard.threed.platform.jme;
 
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
@@ -35,7 +36,7 @@ public class Main {
         logger.debug("Parameter:");
         logger.debug("scene=" + scene);
 
-
+        Configuration.init();
         try {
             if (scene == null) {
                 logger.warn("No scene");

@@ -5,6 +5,9 @@ import de.yard.threed.core.Util;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Intended to replace properties map platform init?
+ */
 public class Configuration {
 
     List<Configuration> configurationList = new ArrayList<Configuration>();
@@ -85,12 +88,22 @@ public class Configuration {
 
     /**
      * The default configuration is always a command line configuration initially.
+     * 5.2.23: "byargs" needs args!! So better have a separate explicit init.
      */
     public static Configuration getDefaultConfiguration() {
         if (defaultConfiguration == null) {
-            defaultConfiguration = new Configuration();
-            defaultConfiguration.addConfiguration(new ConfigurationByArgs(), false);
+            throw new RuntimeException("not inited");
+            //defaultConfiguration = new Configuration();
+            //defaultConfiguration.addConfiguration(new ConfigurationByArgs(), false);
         }
+        return defaultConfiguration;
+    }
+
+    public static Configuration init() {
+        if (defaultConfiguration != null) {
+            throw new RuntimeException("already inited");
+        }
+        defaultConfiguration = new Configuration();
         return defaultConfiguration;
     }
 
