@@ -6,6 +6,8 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.resource.*;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.engine.*;
@@ -64,12 +66,14 @@ public class PlatformHomeBrew extends DefaultPlatform {
     public String hostdir;
     // Render needs to be here instead of runner because it cannot be looked up in runner due to possibly various runner.
     public HomeBrewRenderer renderer;
+    // 6.2.23 switch to use configuration
+    private Configuration configuration;
 
-    private PlatformHomeBrew() {
+    private PlatformHomeBrew(Configuration configuration) {
         //21.7.21 jetzt hier
         eventBus = new JAEventBus();
         logfactory = new JALogFactory();
-
+        this.configuration=configuration;
     }
 
     /**
@@ -79,26 +83,27 @@ public class PlatformHomeBrew extends DefaultPlatform {
      *
      * @return
      */
-    public static PlatformInternals init(HashMap<String, String> properties) {
+    public static PlatformInternals init(Configuration configuration/*HashMap<String, String> properties*/) {
         //System.out.println("PlatformOpenGL.init");
         //if (instance == null || !(instance instanceof PlatformOpenGL)) {
-        for (String key : properties.keySet()) {
+        // 6.2.23 Since configuration system properties is deprecated
+        /*for (String key : properties.keySet()) {
             //System.out.println("transfer of propery "+key+" to system");
             System.setProperty(key, properties.get(key));
-        }
-        instance = new PlatformHomeBrew();
+        }*/
+        instance = new PlatformHomeBrew(configuration/*properties*/);
         //MA36((Platform)instance).resetInit();
         //defaulttexture wird spaeter "irgendwo" geladen
         ((PlatformHomeBrew) instance).resourcemanager = new DefaultResourceReader();
         PlatformInternals platformInternals = new PlatformInternals();
 
-        ((PlatformHomeBrew) instance).hostdir = SimpleHeadlessPlatform.getProperty("HOSTDIR");
+        ((PlatformHomeBrew) instance).hostdir = configuration.getString("HOSTDIR");
         if (((PlatformHomeBrew) instance).hostdir == null) {
             throw new RuntimeException("HOSTDIR not set");
         }
         ((PlatformHomeBrew) instance).resourcemanager = new DefaultResourceReader();
         instance.bundleResolver.add(new SimpleBundleResolver(((PlatformHomeBrew) instance).hostdir + "/bundles", ((PlatformHomeBrew) instance).resourcemanager));
-        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(SimpleHeadlessPlatform.getProperty("ADDITIONALBUNDLE"), ((PlatformHomeBrew) instance).resourcemanager));
+        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), ((PlatformHomeBrew) instance).resourcemanager));
         instance.bundleLoader = new AsyncBundleLoader(new DefaultResourceReader());
         //}
         instance.nativeScene = new HomeBrewScene();
@@ -107,8 +112,8 @@ public class PlatformHomeBrew extends DefaultPlatform {
         return platformInternals;// (Platform) instance;
     }
 
-    public static PlatformInternals init(HashMap<String, String> properties, NativeEventBus eventBus) {
-        PlatformInternals pl = init(properties);
+    public static PlatformInternals init(Configuration configuration, NativeEventBus eventBus) {
+        PlatformInternals pl = init(configuration);
         ((PlatformHomeBrew) instance).eventBus = eventBus;
         return pl;
     }
@@ -214,7 +219,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
         MaterialDefinition materialDefinition = new MaterialDefinition("name", colors, null, null);
 
         HomeBrewMaterial material = null;
-        material = HomeBrewMaterial.buildMaterial(renderer.getGlContext(),materialDefinition, null);
+        material = HomeBrewMaterial.buildMaterial(renderer.getGlContext(), materialDefinition, null);
         HomeBrewMesh linemesh = new HomeBrewMesh(geo, material, false, false);
         HomeBrewSceneNode n = new HomeBrewSceneNode((String) null);
         n.setMesh(linemesh);
@@ -238,7 +243,6 @@ public class PlatformHomeBrew extends DefaultPlatform {
         HomeBrewPerspectiveCamera camera = new HomeBrewPerspectiveCamera(fov, aspect, near, far);
         return camera;
     }
-
 
 
     @Override
@@ -567,15 +571,8 @@ public class PlatformHomeBrew extends DefaultPlatform {
         return "OpenGL";
     }
 
-    public void setSystemProperty(String key, String value) {
-        System.setProperty(key, value);
-        //System.out.println("PlatformOpenGL:set property "+key+" to "+value);
-    }
-
-    public String getSystemProperty(String key) {
-        //System.out.println("get property "+key);
-        return System.getProperty(key);
-    }
+    @Override
+    public Configuration getConfiguration() { return configuration; };
 
     @Override
     public NativeEventBus getEventBus() {

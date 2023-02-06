@@ -1,5 +1,6 @@
 package de.yard.threed.engine.testutil;
 
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 @Deprecated
 public class PlatformFactoryHeadless implements PlatformFactory {
     @Override
-    public /*Engine*/PlatformInternals createPlatform(HashMap<String, String> properties) {
+    public /*Engine*/PlatformInternals createPlatform(Configuration configuration) {
         // resetInit() wird im init() gemacht.
         /*Engine*/PlatformInternals pl ; /*MA36 = (PlatformHomeBrew) PlatformHomeBrew.init(properties);
         pl.setEventBus(new SimpleEventBusForTesting());
@@ -28,7 +29,7 @@ public class PlatformFactoryHeadless implements PlatformFactory {
         //25.4.20 ohne renderer no material. Obwohl, was wird damit eigentlich getestet?
         ((PlatformHomeBrew) pl).setRenderer(OpenGlContext.getGlContext());
 */
-         pl = SimpleHeadlessPlatform.init(properties);
+         pl = SimpleHeadlessPlatform.init(configuration);
         // 12.6.17: In Tests aync laden
         //5.7.21 Hmm ((PlatformHomeBrew) pl).resourcemanager = new TestResourceManager();
         Platform.getInstance().getEventBus().clear();

@@ -25,9 +25,6 @@ public class WaylandTest {
     @BeforeEach
     public void setup() throws Exception {
 
-        Configuration.reset();
-        Configuration.init();
-
         HashMap<String, String> properties = new HashMap<String, String>();
         boolean wayland=true;
         if (wayland) {

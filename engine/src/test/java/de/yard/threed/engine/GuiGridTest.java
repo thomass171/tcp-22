@@ -39,13 +39,13 @@ public class GuiGridTest {
         // 3 Spalten  und 2 Zeilen. 
         GuiGrid menu = GuiGrid.buildForCamera(camera, 2, 3, 2, GuiGrid.GREEN_SEMITRANSPARENT);
         int p = 0;
-        menu.addButton(new Request(new RequestType("Left")), p + 0, 0, Icon.ICON_LEFTARROW);
-        menu.addButton(new Request(new RequestType("Up")), p + 1, 1, Icon.ICON_UPARROW);
-        menu.addButton(new Request(new RequestType("Right")), p + 2, 0, Icon.ICON_RIGHTARROW);
+        menu.addButton(new Request(RequestType.register(1010,"Left")), p + 0, 0, Icon.ICON_LEFTARROW);
+        menu.addButton(new Request(RequestType.register(1011,"Up")), p + 1, 1, Icon.ICON_UPARROW);
+        menu.addButton(new Request(RequestType.register(1012,"Right")), p + 2, 0, Icon.ICON_RIGHTARROW);
 
-        menu.addButton(new Request(new RequestType("Menu")), p + 0, 1, Icon.ICON_VERTICALLINE);
-        menu.addButton(new Request(new RequestType("Undo")), p + 1, 0, Icon.IconCharacter(20));
-        menu.addButton(new Request(new RequestType("Auto")), p + 2, 1, Icon.ICON_HORIZONTALLINE);
+        menu.addButton(new Request(RequestType.register(1013,"Menu")), p + 0, 1, Icon.ICON_VERTICALLINE);
+        menu.addButton(new Request(RequestType.register(1014,"Undo")), p + 1, 0, Icon.IconCharacter(20));
+        menu.addButton(new Request(RequestType.register(1015,"Auto")), p + 2, 1, Icon.ICON_HORIZONTALLINE);
         //irgendwie nicht richtig testbar.
     }
 

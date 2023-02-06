@@ -43,7 +43,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
     private static Log logger = Platform.getInstance().getLog(MazeVisualizationSystem.class);
 
     boolean mazevisualizationsystemdebuglog = true;
-
+    public static String TAG = "MazeVisualizationSystem";
     //TODO irgendwie lokal in entity. 9.4.21: view in entity?
     static public MazeView view;
 
@@ -65,7 +65,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         super(new String[]{}, new RequestType[]{}, new EventType[]{EventRegistry.EVENT_MAZE_LOADED});
 
         Boolean b;
-        if ((b = PlatformHelper.getBooleanSystemProperty("argv.enableMazeGridTeleporter")) != null) {
+        if ((b = Platform.getInstance().getConfiguration().getBoolean("argv.enableMazeGridTeleporter")) != null) {
             gridTeleporterEnabled = (boolean) b;
         }
     }
@@ -290,6 +290,11 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         gridTeleporterEnabled = enabled;
     }
 
+    @Override
+    public String getTag() {
+        return TAG;
+    }
+
     private List<SceneNode> getHitWalls() {
         return null;
     }
@@ -328,7 +333,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         logger.debug("visualizing maze terrain");
         view = new MazeView();
 
-        Configuration configuration = Configuration.getDefaultConfiguration();
+        Configuration configuration = Platform.getInstance().getConfiguration();
         String terrainbuilder = configuration.getString("maze.visualization", "");
         if (terrainbuilder.equals("traditional")) {
             view.terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());

@@ -31,7 +31,7 @@ public class MainMenu implements MenuProvider {
         //
         Menu menu = new GuiGridMenu(guiGrid);
 
-        guiGrid.addButton(new Request(new RequestType("close")), 2, 5, 1, Icon.ICON_CLOSE, () -> {
+        guiGrid.addButton(new Request(RequestType.register("close")), 2, 5, 1, Icon.ICON_CLOSE, () -> {
             // close myself. Might have sideeffects with invalid references to menu?
             menu.remove();
             //3.4.21 abstractMazeScene.openCloseMenu();
@@ -40,7 +40,7 @@ public class MainMenu implements MenuProvider {
             for (int x = 0; x < 3; x++) {
                 // nr ab 1
                 int nr = 1 + 3 * y + x;
-                guiGrid.addButton(new Request(new RequestType("level" + nr)), x, 4 - y, 1, Icon.IconNumber(nr), () -> {
+                guiGrid.addButton(new Request(RequestType.register("level" + nr)), x, 4 - y, 1, Icon.IconNumber(nr), () -> {
                     int levelnr = nr;
                     //10.11.20 abstractMazeScene.loadLevel(abstractMazeScene.abstractMaze.levellist.get(levelnr - 1));
                     //3.4.21 abstractMazeScene.openCloseMenu();

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * configuration from a properties file in a bundle.
+ * configuration from a properties file in a bundle or a properties list.
  */
 public class ConfigurationByProperties extends Configuration {
 
@@ -23,6 +23,10 @@ public class ConfigurationByProperties extends Configuration {
                 properties.put(parts[0], parts[1]);
             }
         }
+    }
+
+    public ConfigurationByProperties(Map<String, String> properties) {
+        this.properties.putAll(properties);
     }
 
     @Override

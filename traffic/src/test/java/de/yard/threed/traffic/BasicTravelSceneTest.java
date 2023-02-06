@@ -2,6 +2,8 @@ package de.yard.threed.traffic;
 
 
 import de.yard.threed.core.Event;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.EntityFilter;
@@ -125,6 +127,6 @@ public class BasicTravelSceneTest {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         properties.put("argv.basename", tileName);
-        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, properties, new String[]{"engine", "data", "traffic"});
+        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, Configuration.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "traffic"});
     }
 }

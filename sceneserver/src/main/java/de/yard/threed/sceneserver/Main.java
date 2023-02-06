@@ -2,6 +2,7 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.configuration.ConfigurationByArgs;
+import de.yard.threed.core.configuration.ConfigurationByEnv;
 
 import java.util.HashMap;
 
@@ -16,11 +17,10 @@ public class Main {
             String sceneName = args[args.length - 1];
             String subdir = null;//cmd.getOptionValue("d");
 
-            Configuration configuration = Configuration.init();
-            configuration.addConfiguration(new ConfigurationByArgs(args), false);
+            Configuration configuration = new ConfigurationByArgs(args).addConfiguration(new ConfigurationByEnv(), false);
 
             HashMap<String, String> properties = new HashMap<String, String>();
-            SceneServer sceneServer = new SceneServer(subdir, sceneName, properties);
+            SceneServer sceneServer = new SceneServer(subdir, sceneName, configuration);
             // start (blocking) render loop
             sceneServer.runServer();
 

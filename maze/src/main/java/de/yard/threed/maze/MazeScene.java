@@ -55,7 +55,7 @@ public class MazeScene extends Scene {
         logger.info("init MazeScene");
 
         // command line arguments are handled in system builder
-        Configuration configuration = Configuration.getDefaultConfiguration();
+        Configuration configuration = Platform.getInstance().getConfiguration();
         configuration.addConfiguration(new ConfigurationByProperties(new BundleResource(BundleRegistry.getBundle("maze"), "maze.properties")), true);
 
         boolean isMP = false;

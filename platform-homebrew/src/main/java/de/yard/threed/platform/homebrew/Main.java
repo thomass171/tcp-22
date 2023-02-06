@@ -1,5 +1,6 @@
 package de.yard.threed.platform.homebrew;
 
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.core.platform.Log;
@@ -29,7 +30,7 @@ public class Main {
 
         //10.7.21 NativeSceneRunner nsr = OpenGlSceneRunner.init(properties);
         ;
-        HomeBrewSceneRunner nsr = HomeBrewSceneRunner.init(properties, new OpenGlRenderer(/*PlatformHomeBrew/*OpenGlContext* /.getGlContext()*/), SceneMode.forMonolith());
+        HomeBrewSceneRunner nsr = HomeBrewSceneRunner.init(new ConfigurationByProperties(properties), new OpenGlRenderer(/*PlatformHomeBrew/*OpenGlContext* /.getGlContext()*/), SceneMode.forMonolith());
 
         logger = Platform.getInstance().getLog(Main.class);
 

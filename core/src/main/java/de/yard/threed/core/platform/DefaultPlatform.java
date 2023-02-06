@@ -163,14 +163,6 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public void setSystemProperty(String key, String value) { }
-
-    @Override
-    public String getSystemProperty(String key) {
-        return null;
-    }
-
-    @Override
     public Configuration getConfiguration() { return null; };
 
     @Override

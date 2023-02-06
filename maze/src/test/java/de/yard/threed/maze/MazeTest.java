@@ -2,6 +2,8 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.core.Point;
@@ -19,6 +21,7 @@ import de.yard.threed.maze.testutils.TestUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static de.yard.threed.maze.RequestRegistry.*;
@@ -65,7 +68,8 @@ public class MazeTest {
             }
         };
 
-        TestFactory.initPlatformForTest(new String[]{"engine", "maze", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod);
+        TestFactory.initPlatformForTest(new String[]{"engine", "maze", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
+                Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
         observerDummy = new SceneNode();

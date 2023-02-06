@@ -121,7 +121,7 @@ public class SystemManager {
         if (paused) {
             return;
         }
-        // 21.3.19: Requests einfach mal vor den Events.
+        // 21.3.19: Requests are processed before events without any special reason. And published to the net.
         requestQueue.process(busConnector);
 
         NativeEventBus eb = Platform.getInstance().getEventBus();

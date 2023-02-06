@@ -1,13 +1,13 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneMode;
 import de.yard.threed.javanative.ConfigurationHelper;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
-import de.yard.threed.platform.homebrew.GlDummyImpl;
 import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
-import org.apache.commons.configuration2.Configuration;
 
 import java.util.HashMap;
 
@@ -22,13 +22,13 @@ public class SceneServer {
     public /*Native*/ AbstractSceneRunner nsr;
     Scene updater;
 
-    public SceneServer(String subdir, String sceneName, HashMap<String, String> properties) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public SceneServer(String subdir, String sceneName, Configuration configuration) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
 
 
-        loadConfig(subdir);
+        //loadConfig(subdir);
 
         //nsr = ServerSceneRunner.init(properties, SceneMode.forServer());
-        nsr = HomeBrewSceneRunner.init(properties,new SceneServerRenderer(),SceneMode.forServer());
+        nsr = HomeBrewSceneRunner.init(configuration, new SceneServerRenderer(),SceneMode.forServer());
 
         // here reflection can be used.
         try {
@@ -46,10 +46,10 @@ public class SceneServer {
         nsr.runScene(updater);
     }
 
-    private static Configuration loadConfig(String subdir) {
+    /*private static Configuration loadConfig(String subdir) {
         String configfilename = subdir + "/configuration.properties";
         return ConfigurationHelper.loadSingleConfigFromClasspath(configfilename);
-    }
+    }*/
 
     /**
      * Only for testing?

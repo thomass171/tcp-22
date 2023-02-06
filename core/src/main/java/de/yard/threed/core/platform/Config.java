@@ -15,7 +15,7 @@ public class Config {
     public static boolean animationdebuglog = false;
 
     public static void initFromArguments() {
-        String arg = Platform.getInstance().getSystemProperty("argv.config.asyncdebuglog");
+        String arg = Platform.getInstance().getConfiguration().getString("argv.config.asyncdebuglog");
         if (arg != null) {
             asyncdebuglog = Util.isTrue(arg);
         }

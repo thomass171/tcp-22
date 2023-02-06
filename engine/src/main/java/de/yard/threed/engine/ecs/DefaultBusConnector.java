@@ -32,16 +32,16 @@ public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
 
     // Events on a scene node level for something like an inspector. Currently not used.
     public static boolean nodeSyncEnabled = false;
-    public static EventType EVENT_MODELLOADED = new EventType("EVENT_MODELLOADED");
-    public static EventType EVENT_NODECREATED = new EventType("EVENT_NODECREATED");
-    public static EventType EVENT_NODEPARENTCHANGED = new EventType("EVENT_NODEPARENTCHANGED");
-    public static EventType EVENT_NODECHANGED = new EventType("EVENT_NODECHANGED");
+    public static EventType EVENT_MODELLOADED = EventType.register(1004, "EVENT_MODELLOADED");
+    public static EventType EVENT_NODECREATED = EventType.register(1005, "EVENT_NODECREATED");
+    public static EventType EVENT_NODEPARENTCHANGED = EventType.register(1006, "EVENT_NODEPARENTCHANGED");
+    public static EventType EVENT_NODECHANGED = EventType.register(1007, "EVENT_NODECHANGED");
 
     // Events on entity level appear to be more efficient
     public static boolean entitySyncEnabled = true;
-    public static EventType EVENT_ENTITYSTATE = new EventType("EVENT_ENTITYSTATE");
-    //public static EventType EVENT_ENTITYMODELCREATED = new EventType("EVENT_ENTITYMODELCREATED");
-    //public static EventType EVENT_ENTITYCHANGED = new EventType("EVENT_ENTITYCHANGED");
+    public static EventType EVENT_ENTITYSTATE = EventType.register(1008, "EVENT_ENTITYSTATE");
+    //public static EventType EVENT_ENTITYMODELCREATED = EventType.register("EVENT_ENTITYMODELCREATED");
+    //public static EventType EVENT_ENTITYCHANGED = EventType.register("EVENT_ENTITYCHANGED");
 
     /*public BusConnectorSystem(RequestType[] requestTypes, EventType[] eventTypes) {
         super(requestTypes, eventTypes);

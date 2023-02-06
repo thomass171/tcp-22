@@ -99,8 +99,8 @@ public class ReferenceScene extends Scene {
     int HIDDENCUBELAYER = 9;//1 << 8;
     SceneNode lightNode;
     int shading = NumericValue.SMOOTH;
-    RequestType REQUEST_CLOSE = new RequestType("close");
-    RequestType REQUEST_CYCLE = new RequestType("cycle");
+    RequestType REQUEST_CLOSE = RequestType.register(1008,"close");
+    RequestType REQUEST_CYCLE = RequestType.register(1009,"cycle");
     // Outside VR inventory is in HIDDENCUBELAYER of derredcamera
     ControlPanel inventory;
     ControlPanel controlPanel;

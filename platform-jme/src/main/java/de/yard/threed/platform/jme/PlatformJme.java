@@ -9,6 +9,7 @@ import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.*;
@@ -61,6 +62,11 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
     Log logger = new JALog(/*LogFactory.getLog(*/PlatformJme.class);
     JmeResourceManager jmeResourceManager;
 
+    private PlatformJme(Configuration configuration) {
+        super(null, configuration);
+        this.configuration = configuration;
+    }
+
     /**
      * 16.11.16: Umbenannt von getInstance zu init, um die Bedeutung zu verdeutlichen. Braucht Properties, die schon in der Platform
      * gebraucht werden.
@@ -70,14 +76,14 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
      *
      * @return
      */
-    public static PlatformInternals init(HashMap<String, String> properties) {
+    public static PlatformInternals init(Configuration configuration) {
         //if (EngineHelper.instance == null || !(EngineHelper.instance instanceof PlatformJme)) {
-        if (properties != null) {
+        /*if (properties != null) {
             for (String key : properties.keySet()) {
                 System.setProperty(key, properties.get(key));
             }
-        }
-        instance = new PlatformJme();
+        }*/
+        instance = new PlatformJme(configuration);
         //  Als default texture sowas wie void.png o.ae. nehmen
         //((EngineHelper)EngineHelper.instance).defaulttexture = JmeTexture.loadFromFile(new BundleResource("FontMap.png"));
         //}
@@ -86,7 +92,7 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
         PlatformInternals platformInternals = new PlatformInternals();
         DefaultResourceReader resourceReader = new DefaultResourceReader();
         instance.bundleResolver.add(new SimpleBundleResolver(((PlatformJme) instance).hostdir + "/bundles", resourceReader));
-        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(SimpleHeadlessPlatform.getProperty("ADDITIONALBUNDLE"), resourceReader));
+        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
         return platformInternals/*instance*/;
     }
 

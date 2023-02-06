@@ -1,6 +1,7 @@
 package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Point;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
@@ -41,7 +42,7 @@ public class MazeSceneTest {
         HashMap<String, String> properties = new HashMap<String, String>();
         //Use a deterministic grid without bot/monster automovement
         //properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
-        properties.put("argv.initialMaze", gridname);
+        properties.put("initialMaze", gridname);
         sceneServer = TestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties, 20);
 
     }

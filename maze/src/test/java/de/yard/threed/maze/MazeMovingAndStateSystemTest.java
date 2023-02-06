@@ -3,6 +3,8 @@ package de.yard.threed.maze;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Point;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.GridTeleportDestination;
@@ -20,7 +22,9 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static de.yard.threed.core.testutil.TestUtil.assertNotNull;
 
@@ -43,7 +47,7 @@ public class MazeMovingAndStateSystemTest {
             MazeDataProvider.init();
         };
         SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());
-        TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, platformFactory, initMethod);
+        TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, platformFactory, initMethod, Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
     }
 
     @Test
@@ -60,7 +64,10 @@ public class MazeMovingAndStateSystemTest {
     @Test
     public void testSimpleVR() throws Exception {
 
-        Platform.getInstance().setSystemProperty("argv.enableVR", "true");
+        Map<String,String> properties=new HashMap<>();
+        properties.put("argv.enableVR", "true");
+        Platform.getInstance().getConfiguration().addConfiguration(new ConfigurationByProperties(properties),true);
+
         VrInstance.buildFromArguments();
         assertNotNull("VrInstance", VrInstance.getInstance());
 

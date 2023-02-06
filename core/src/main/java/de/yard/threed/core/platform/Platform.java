@@ -322,13 +322,9 @@ public abstract class Platform {
      * <p>
      * 16.7.18: Parameter aus der command line sind mit dem prefix "argv." eingetragen, z.B. basename bei viewScenery.
      * 5.2.23: What is the latest design for properties/configuration? These methods? Or configuration? Or both?
-     * At least using prefixes like "argv" to provide the origin appear highly unwanted. It seems to switch to configuration that is supplied by
-     * the platform to be more future ready. The phrase 'SystemProperty' doesn't fit to configurations coming from the command line.
+     * It seems to switch to configuration that is supplied by
+     * the platform to be more future ready.
      */
-    @Deprecated
-    public abstract void setSystemProperty(String key, String value);
-    @Deprecated
-    public abstract String getSystemProperty(String key);
     public abstract Configuration getConfiguration();
 
 

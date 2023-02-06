@@ -60,17 +60,24 @@ public class TestClient {
         sendRequestToServer(UserSystem.buildLoginRequest(username, "34"));
     }
 
+    /**
+     * Also for using real server. Then sceneserver will be null.
+     */
     public void assertConnectAndLogin(SceneServer sceneServer) throws Exception {
         connectAndLogin();
         //TestUtils.waitForClientConnected();
         //TestUtils.waitForClientPacketAvailableInServer();
 
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
-
+        if (sceneServer != null) {
+            TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
+        } else {
+            // give server time
+            Thread.sleep(2000);
+        }
         // Check login succeeded.
         // possible race condition with movements arriving before login/joined event
         List<Packet> packets = readLatestPackets();
-        assertTrue(packets.size() > 0);
+        assertTrue(packets.size() > 0, "packets from server found");
         TestUtils.assertEventPacket(UserSystem.USER_EVENT_LOGGEDIN, null, packets, 1);
 
         // join happened implicitly, so Avatar should exist.
@@ -170,9 +177,11 @@ public class TestClient {
         TestUtils.assertEvent(EventRegistry.EVENT_MAZE_LOADED, allEvents, 1, p -> {
             assertEquals(gridName, p.get("gridname"));
         });
-
-        assertEquals(1, ((ServerSystem) SystemManager.findSystem(ServerSystem.TAG)).getSavedEvents().size());
-
+        //ServerSystem not available with real server
+        ServerSystem serverSystem = ((ServerSystem) SystemManager.findSystem(ServerSystem.TAG));
+        if (serverSystem != null) {
+            assertEquals(1, serverSystem.getSavedEvents().size());
+        }
     }
 
     /**

@@ -22,11 +22,11 @@ public class ClientSystem extends DefaultEcsSystem/*DefaultBusConnector*/ {
 
     /*public ClientSystem() {
         // not component/entity related. no "updatepergroup"
-        super(new RequestType[]{
+        super(RequestType.register[]{
                         UserSystem.USER_REQUEST_TELEPORT,
                         UserSystem.USER_REQUEST_LOGIN,
                         UserSystem.USER_REQUEST_JOIN},
-                new EventType[]{});
+                EventType.register[]{});
     }*/
 
     /**

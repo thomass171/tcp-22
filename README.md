@@ -204,6 +204,14 @@ Major changes:
 <!-- two similar options ![svg not processed?](docs/Architecture-base.svg)-->
 <img src="docs/Architecture-base.svg" width="100%">
 
+## ECS
+An Entity Component System (ECS) is a software architectural pattern that helps organizing software.
+
+Events and Requests are the main elements for inter system communication. But where to register these?
+
+For example in client/server mode a "UserSystem" runs on the server not the client. But the client needs to
+send LOGIN requests and might process LoggedIn events. This suggests to decouple event/request registration from specific systems.
+
 ## Modules
 
 ### Scene Server

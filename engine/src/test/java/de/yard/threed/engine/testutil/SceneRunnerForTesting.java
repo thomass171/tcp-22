@@ -4,6 +4,8 @@ package de.yard.threed.engine.testutil;
 
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Util;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformFactory;
@@ -90,19 +92,20 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
      *
      * @return
      */
-    public static SceneRunnerForTesting init(HashMap<String, String> properties, PlatformFactory platformFactory, InitMethod sceneIinitMethod, String[] bundlelist) {
+    public static SceneRunnerForTesting init(Configuration configuration, PlatformFactory platformFactory, InitMethod sceneIinitMethod, String[] bundlelist) {
         if (instance != null) {
             throw new RuntimeException("already inited");
         }
         //5.12.18: Mal ohne OpenGL sondern spezieller TestPlatform. Geht aber nicht bei Tests die z.B. nodes brauchen (z.B. world)
         //MA36 jetzt muesste/soll aber Platform gehen.
         /*Engine*/
-        PlatformInternals pl = /*(EngineHelper)*/ platformFactory.createPlatform(properties);
+        PlatformInternals pl = /*(EngineHelper)*/ platformFactory.createPlatform(configuration);
         Scene scene = null;
         // better to use "argv.scene"?? Hmm, unclear.
-        if (properties.containsKey("scene")) {
+        //6.2.23 still used? Yes.
+         if (configuration.getString("scene")!=null) {
             try {
-                scene = (Scene) Class.forName(properties.get("scene")).newInstance();
+                scene = (Scene) Class.forName(configuration.getString("scene")).newInstance();
             } catch (Exception e) {
                 //TODO log
             }
@@ -155,9 +158,9 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
      * Scene name is taken from properties.
      *
      */
-    public static SceneRunnerForTesting setupForScene(int initialFrames, HashMap<String, String> properties, String[] bundles)  {
+    public static SceneRunnerForTesting setupForScene(int initialFrames, Configuration configuration, String[] bundles)  {
 
-        TestFactory.initPlatformForTest( bundles, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()),properties);
+        TestFactory.initPlatformForTest( bundles, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()),null, configuration);
 
         SceneRunnerForTesting sceneRunner =  (SceneRunnerForTesting) SceneRunnerForTesting.getInstance();
         sceneRunner.runLimitedFrames(initialFrames);

@@ -4,6 +4,9 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.testutil.PayloadHook;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.maze.MazeDataProvider;
@@ -81,8 +84,8 @@ public class TestUtils {
     public static void assertEvent(EventType expectedEventType, List<Event> events, int expectedCount, PayloadHook payloadHook) {
         int found = 0;
         for (Event event : events) {
-            if (event==null){
-                int h=9;
+            if (event == null) {
+                Platform.getInstance().getLog(TestUtils.class).warn("event is null");
             }
             if (expectedEventType.getType() == event.getType().getType()) {
                 found++;
@@ -112,7 +115,7 @@ public class TestUtils {
         HomeBrewSceneRunner.dropInstance();
         MazeDataProvider.reset();
 
-        SceneServer sceneServer = new SceneServer("subdir", sceneclass, properties);
+        SceneServer sceneServer = new SceneServer("subdir", sceneclass, Configuration.buildDefaultConfigurationWithEnv(properties));
         HomeBrewSceneRunner sceneRunner = (HomeBrewSceneRunner) sceneServer.nsr;
         //why should we throttle that much? why anyway? Because some movement depends on tpf, which might be too low to detect it.
         //also maze movement needs some time
@@ -136,7 +139,7 @@ public class TestUtils {
     /**
      * Lauch a standalone Java process. From "https://lankydan.dev/running-a-java-class-as-a-subprocess".
      */
-    public static int execJavaProcess(Class clazz, List<String> jvmArgs, List<String> args) throws Exception {
+    public static Process execJavaProcess(Class clazz, List<String> jvmArgs, List<String> args) throws Exception {
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
         String classpath = System.getProperty("java.class.path");
@@ -157,7 +160,7 @@ public class TestUtils {
                 .redirectInput(ProcessBuilder.Redirect.INHERIT)
                 .redirectOutput(ProcessBuilder.Redirect.INHERIT)
                 .redirectError(ProcessBuilder.Redirect.INHERIT);*/
-        process.waitFor();
-        return process.exitValue();
+        //process.waitFor();
+        return process;
     }
 }

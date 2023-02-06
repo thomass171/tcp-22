@@ -2,6 +2,7 @@ package de.yard.threed.core.testutil;
 
 import de.yard.threed.core.JavaStringHelper;
 import de.yard.threed.core.buffer.NativeByteBuffer;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.*;
 
 import java.util.HashMap;
@@ -20,11 +21,8 @@ public class TestPlatform extends /*16.6.21 SimpleHeadless*/DefaultPlatform {
         this.logfactory=logfactory;
     }
 
-    public static /*16.6.21 Engine*/PlatformInternals init(NativeLogFactory logfactory, HashMap<String, String> properties) {
-        for (String key : properties.keySet()) {
-            //System.out.println("transfer of propery "+key+" to system");
-            System.setProperty(key, properties.get(key));
-        }
+    public static /*16.6.21 Engine*/PlatformInternals init(NativeLogFactory logfactory, Configuration configuration) {
+
         Platform.instance = new TestPlatform( logfactory);
         // 16.5.21: reset not needed here?
         //((EnginePlatform) Platform.instance).resetInit();

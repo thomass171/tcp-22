@@ -21,7 +21,7 @@ import java.util.List;
 public class InventorySystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(InventorySystem.class);
 
-    public static EventType EVENT_ITEM_COLLECTED = new EventType("EVENT_ITEM_COLLECTED");
+    public static EventType EVENT_ITEM_COLLECTED = EventType.register(2000, "EVENT_ITEM_COLLECTED");
 
     boolean inventorysystemdebuglog = true;
     // Inventory display for main user

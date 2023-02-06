@@ -1,6 +1,7 @@
 package de.yard.threed.platform.homebrew.sample;
 
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.DirectionalLight;
 import de.yard.threed.engine.GenericGeometry;
@@ -54,7 +55,7 @@ public class LightedRotatingQuad extends Scene {
 
     public static void main(String[] argv) {
         HashMap<String, String> properties = new HashMap<>();
-        HomeBrewSceneRunner runner = HomeBrewSceneRunner.init(properties,new OpenGlRenderer(), SceneMode.forMonolith());
+        HomeBrewSceneRunner runner = HomeBrewSceneRunner.init(new ConfigurationByProperties(properties),new OpenGlRenderer(), SceneMode.forMonolith());
 
         LightedRotatingQuad quadExample = new LightedRotatingQuad();
 

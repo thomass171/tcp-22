@@ -1,5 +1,7 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.platform.homebrew.PlatformHomeBrew;
@@ -14,8 +16,8 @@ import java.util.HashMap;
  */
 public class PlatformSceneServerFactory implements PlatformFactory {
     @Override
-    public PlatformInternals createPlatform(HashMap<String, String> properties) {
-       return PlatformHomeBrew.init(properties);
+    public PlatformInternals createPlatform(Configuration configuration) {
+       return PlatformHomeBrew.init(configuration);
 
     }
 }

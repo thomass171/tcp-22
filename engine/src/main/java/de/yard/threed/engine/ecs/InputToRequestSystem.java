@@ -43,8 +43,8 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     //a menu is attached to some node. Well, in principle both should be ready for nearView/cameraRelated and scene located.
     //Even though its quite the same, a control menu is intended to be displayed all the time, while a menu is toggled for
     // a short time and quickly closed again. And a menu can be shown in addition to a control menu.
-    public static RequestType USER_REQUEST_MENU = new RequestType("USER_REQUEST_MENU");
-    public static RequestType USER_REQUEST_CONTROLMENU = new RequestType("USER_REQUEST_CONTROLMENU");
+    public static RequestType USER_REQUEST_MENU = RequestType.register(1006, "USER_REQUEST_MENU");
+    public static RequestType USER_REQUEST_CONTROLMENU = RequestType.register(1007, "USER_REQUEST_CONTROLMENU");
 
     boolean keytorequestsystemdebuglog = true;
     private Menu menu = null;

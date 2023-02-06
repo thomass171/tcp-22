@@ -1,6 +1,8 @@
 package de.yard.threed.engine.ecs;
 
 import de.yard.threed.core.Event;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.KeyCode;
@@ -20,6 +22,7 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,13 +39,14 @@ public class InputToRequestSystemTest {
             public void init() {
                 SystemManager.reset();
                 InputToRequestSystem inputToRequestSystem = new InputToRequestSystem();
-                inputToRequestSystem.addKeyMapping(KeyCode.KEY_K, new RequestType("requestForKeyK"));
+                inputToRequestSystem.addKeyMapping(KeyCode.KEY_K, RequestType.register(1016, "requestForKeyK"));
                 SystemManager.addSystem(inputToRequestSystem);
 
             }
         };
 
-        TestFactory.initPlatformForTest(new String[]{"engine", "engine", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod);
+        TestFactory.initPlatformForTest(new String[]{"engine", "engine", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
+                Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
         sceneRunner.runLimitedFrames(3);

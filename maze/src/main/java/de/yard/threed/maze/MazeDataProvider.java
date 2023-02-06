@@ -1,6 +1,7 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.DataProvider;
@@ -25,6 +26,7 @@ public class MazeDataProvider implements DataProvider {
 
     private MazeDataProvider(String initialMaze) {
 
+        logger.debug("Building for initialMaze " + initialMaze);
         // only for system init
         if (initialMaze == null) {
             initialMaze = "skbn/SokobanWikipedia.txt";
@@ -50,7 +52,12 @@ public class MazeDataProvider implements DataProvider {
     }
 
     public static void init() {
-        init(((Platform) Platform.getInstance()).getSystemProperty("argv.initialMaze"));
+        Configuration configuration = Platform.getInstance().getConfiguration();
+        String initialMaze = configuration.getString("argv.initialMaze");
+        if (initialMaze == null) {
+            initialMaze = configuration.getString("initialMaze");
+        }
+        init(initialMaze);
     }
 
     public static void init(String initialMaze) {

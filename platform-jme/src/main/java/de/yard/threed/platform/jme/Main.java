@@ -1,6 +1,7 @@
 package de.yard.threed.platform.jme;
 
 import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
@@ -28,7 +29,7 @@ public class Main {
         boolean useinspector = false;
         HashMap<String, String> properties = Setup.setUp(args);
 
-        JmeSceneRunner nsr = JmeSceneRunner.init(properties);
+        JmeSceneRunner nsr = JmeSceneRunner.init(Configuration.buildDefaultConfigurationWithEnv(properties));
 
         logger = Platform.getInstance().getLog(Main.class);
         logger.info("Loading JME Client");
@@ -36,7 +37,6 @@ public class Main {
         logger.debug("Parameter:");
         logger.debug("scene=" + scene);
 
-        Configuration.init();
         try {
             if (scene == null) {
                 logger.warn("No scene");

@@ -1,4 +1,4 @@
-package de.yard.threed.platform.commondesktop;
+package de.yard.threed.javacommon.commondesktop;
 
 import de.yard.threed.core.Color;
 import de.yard.threed.core.ImageData;

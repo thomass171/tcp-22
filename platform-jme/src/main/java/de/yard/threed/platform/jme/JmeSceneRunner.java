@@ -16,6 +16,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.engine.SceneMode;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.Dimension;
@@ -60,12 +61,12 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
         logger.info("Building JmeSceneRunner");
     }
 
-    public static JmeSceneRunner init(HashMap<String, String> properties) {
+    public static JmeSceneRunner init(Configuration configuration) {
         if (scenerunner != null) {
             throw new RuntimeException("already inited");
         }
         // 25.2.21 TODO Es ist doch ein haessliches Coupling (z.B. fuer Testen), dass der Runner die Platform anlegt.
-        PlatformInternals platformInternals = PlatformJme.init(properties);
+        PlatformInternals platformInternals = PlatformJme.init(configuration);
         scenerunner = new JmeSceneRunner(platformInternals);
         //MA36 ((EngineHelper) PlatformJme.getInstance()).runner = scenerunner;
         //MA36 scenerunner./*((PlatformJme) PlatformJme.getInstance()).*/httpClient = new AirportDataProviderMock();

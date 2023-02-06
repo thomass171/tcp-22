@@ -3,6 +3,8 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.sceneserver.testutils.PlatformSceneServerFactoryForTesting;
 import de.yard.threed.sceneserver.testutils.TestClient;
@@ -10,6 +12,8 @@ import de.yard.threed.sceneserver.testutils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
 
 import static de.yard.threed.javanative.JavaUtil.sleepMs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +29,8 @@ public class ClientListenerTest {
         ClientListener.dropInstance();
 
         // System (eg UserSystem) need a platform
-        TestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod) null);
+        TestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod) null,
+                Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
         clientListener = ClientListener.getInstance("localhost", -1);
         clientListener.start();

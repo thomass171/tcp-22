@@ -79,7 +79,7 @@ public class QueuingSocketListener extends Thread {
             }
         } catch (SocketException e) {
             // regular disconnect?
-            logger.debug("SocketException. Stopping thread:"+e.getMessage());
+            logger.debug("SocketException. Stopping thread (client closed connection?):"+e.getMessage());
             return;
         } catch (IOException e) {
             logger.error("IOException. Stopping thread.", e);

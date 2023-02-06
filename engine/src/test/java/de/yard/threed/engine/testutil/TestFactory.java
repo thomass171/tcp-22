@@ -1,5 +1,7 @@
 package de.yard.threed.engine.testutil;
 
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.engine.Observer;
@@ -32,13 +34,13 @@ import java.util.Properties;
 public class TestFactory {
 
     public static Platform initPlatformForTest(String[] bundlelist, PlatformFactory platformFactory) {
-        return initPlatformForTest(bundlelist, platformFactory, (InitMethod)null);
+        return initPlatformForTest(bundlelist, platformFactory, (InitMethod)null, Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
     }
 
     /**
      *
      */
-    public static Platform initPlatformForTest(String[] bundlelist, PlatformFactory platformFactory, InitMethod sceneIinitMethod) {
+    public static Platform initPlatformForTest(String[] bundlelist, PlatformFactory platformFactory, InitMethod sceneIinitMethod, Configuration configuration) {
 
         HashMap<String, String> properties = new HashMap<String, String>();
 
@@ -48,7 +50,7 @@ public class TestFactory {
         resetInit();
 
         //7.7.21: Wie "im echten Leben" vor der Platform immer einen SceneRunner anlegen.
-        SceneRunnerForTesting.init(properties, platformFactory, sceneIinitMethod, bundlelist);
+        SceneRunnerForTesting.init(configuration, platformFactory, sceneIinitMethod, bundlelist);
         Platform pl = Platform.getInstance();
 
         return pl;
@@ -57,16 +59,16 @@ public class TestFactory {
     /**
      *
      */
-    public static Platform initPlatformForTest(String[] bundlelist, PlatformFactory platformFactory, HashMap<String, String> properties) {
+    /*6.2.23 use above public static Platform initPlatformForTest(String[] bundlelist, PlatformFactory platformFactory, Configuration configuration) {
 
         resetInit();
 
         //7.7.21: Wie "im echten Leben" vor der Platform immer einen SceneRunner anlegen.
-        SceneRunnerForTesting.init(properties, platformFactory, null, bundlelist);
+        SceneRunnerForTesting.init(configuration, platformFactory, null, bundlelist);
         Platform pl = Platform.getInstance();
 
         return pl;
-    }
+    }*/
 
 
     public static void loadBundleSync(String bundlename) {
@@ -107,6 +109,7 @@ public class TestFactory {
      */
     public static void resetInit() {
         // Try to remove old system properties. Might be difficult to find all, so rely on prefix
+        // 6.2.23 deprecated since using configuration
         Properties properties = System.getProperties();
         for (String p :properties.stringPropertyNames()) {
             if (p.startsWith(SimpleHeadlessPlatform.PROPERTY_PREFIX)) {

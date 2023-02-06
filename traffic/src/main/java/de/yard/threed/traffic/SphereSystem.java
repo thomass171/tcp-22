@@ -59,7 +59,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     Log logger = Platform.getInstance().getLog(SphereSystem.class);
 
     // contains optional tilename and optional vehiclelist
-    public static RequestType USER_REQUEST_SPHERE = new RequestType("USER_REQUEST_SPHERE");
+    public static RequestType USER_REQUEST_SPHERE = RequestType.register(4000, "USER_REQUEST_SPHERE");
 
     public static String TAG = "SphereSystem";
 

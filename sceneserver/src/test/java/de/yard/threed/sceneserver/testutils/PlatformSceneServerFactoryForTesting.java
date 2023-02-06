@@ -1,5 +1,7 @@
 package de.yard.threed.sceneserver.testutils;
 
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
@@ -9,7 +11,7 @@ import java.util.HashMap;
 
 public class PlatformSceneServerFactoryForTesting implements PlatformFactory {
     @Override
-    public PlatformInternals createPlatform(HashMap<String, String> properties) {
-        return PlatformHomeBrew.init(properties,new SimpleEventBusForTesting());
+    public PlatformInternals createPlatform(Configuration configuration) {
+        return PlatformHomeBrew.init(configuration, new SimpleEventBusForTesting());
     }
 }

@@ -3,6 +3,8 @@ package de.yard.threed.maze;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.Ray;
@@ -49,10 +51,12 @@ public class MazeSceneTest {
     public void testSokobanWikipedia() {
         setup("skbn/SokobanWikipedia.txt", true);
 
-        // only the properties file
-        assertEquals(1, Configuration.getDefaultConfiguration().size());
+        // env + test properties + maze properties file
+        assertEquals(3, Platform.getInstance().getConfiguration().size());
 
         assertTrue(SystemState.readyToJoin());
+        MazeVisualizationSystem mazeVisualizationSystem = ((MazeVisualizationSystem) SystemManager.findSystem(MazeVisualizationSystem.TAG));
+        assertNotNull(mazeVisualizationSystem.gridTeleporter);
 
         EcsEntity user = UserSystem.getInitialUser();
         assertNotNull(user);
@@ -159,8 +163,8 @@ public class MazeSceneTest {
     public void test_P_Simple() {
         setup("maze/Maze-P-Simple.txt", false);
 
-        // only the properties file
-        assertEquals(1, Configuration.getDefaultConfiguration().size());
+        // env + test properties + maze properties file
+        assertEquals(3, Platform.getInstance().getConfiguration().size());
 
         assertTrue(SystemState.readyToJoin());
 
@@ -215,8 +219,8 @@ public class MazeSceneTest {
 
         setup("maze/Maze-M-30x20.txt", false);
 
-        // only the properties file
-        assertEquals(1, Configuration.getDefaultConfiguration().size());
+        // env + test properties + maze properties file
+        assertEquals(3, Platform.getInstance().getConfiguration().size());
 
         assertTrue(SystemState.readyToJoin());
 
@@ -250,8 +254,7 @@ public class MazeSceneTest {
      * Needs parameter, so no @Before
      */
     private void setup(String gridname, boolean gridTeleporterEnabled) {
-        Configuration.reset();
-        Configuration.init();
+
         MazeDataProvider.reset();
 
         HashMap<String, String> properties = new HashMap<String, String>();
@@ -260,6 +263,6 @@ public class MazeSceneTest {
         if (gridTeleporterEnabled) {
             properties.put("argv.enableMazeGridTeleporter", "true");
         }
-        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, properties, new String[]{"engine", "data", "maze"});
+        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, Configuration.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "maze"});
     }
 }

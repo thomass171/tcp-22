@@ -45,18 +45,18 @@ public class HomeBrewSceneRunner extends AbstractSceneRunner implements NativeSc
         super(platformInternals);
         logger.info("Building HomeBrewSceneRunner");
         this.sceneMode = sceneMode;
-        if (Configuration.getDefaultConfiguration().getInt("throttle") != null) {
-            renderbrake = Configuration.getDefaultConfiguration().getInt("throttle");
+        if (Platform.getInstance().getConfiguration().getInt("throttle") != null) {
+            renderbrake = Platform.getInstance().getConfiguration().getInt("throttle");
             logger.debug("setting renderbrake to " + renderbrake);
         }
     }
 
-    public static HomeBrewSceneRunner init(HashMap<String, String> properties, HomeBrewRenderer renderer, SceneMode sceneMode) {
+    public static HomeBrewSceneRunner init(Configuration configuration, HomeBrewRenderer renderer, SceneMode sceneMode) {
         if (instance != null) {
             throw new RuntimeException("already inited");
         }
-        // Die Reihenfolge ist wichtig um NPE zu vermeiden
-        PlatformInternals platformInternals = PlatformHomeBrew.init(properties);
+        // order is important. First platform, then runner.
+        PlatformInternals platformInternals = PlatformHomeBrew.init(configuration/*properties*/);
         instance = new HomeBrewSceneRunner(platformInternals, sceneMode);
         ((PlatformHomeBrew) PlatformHomeBrew.getInstance()).renderer = renderer;
         return instance;

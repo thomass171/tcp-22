@@ -122,14 +122,14 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     RandomIntProvider rand = new RandomIntProvider();
     int nextlocationindex = 0;
     protected String vehiclelistname = "GroundServices";
-    /*31.1.22 RequestType REQUEST_RESET = new RequestType("Reset");
-    RequestType REQUEST_HELP = new RequestType("Help");
-    RequestType REQUEST_MENU = new RequestType("Menu");
-    RequestType REQUEST_CYCLE = new RequestType("Cycle");
-    RequestType REQUEST_LOAD = new RequestType("Load");
-    RequestType REQUEST_PLAY = new RequestType("Play");
-    RequestType REQUEST_PLUS = new RequestType("+");
-    RequestType REQUEST_MINUS = new RequestType("-");*/
+    /*31.1.22 RequestType REQUEST_RESET = RequestType.register("Reset");
+    RequestType REQUEST_HELP = RequestType.register("Help");
+    RequestType REQUEST_MENU = RequestType.register("Menu");
+    RequestType REQUEST_CYCLE = RequestType.register("Cycle");
+    RequestType REQUEST_LOAD = RequestType.register("Load");
+    RequestType REQUEST_PLAY = RequestType.register("Play");
+    RequestType REQUEST_PLUS = RequestType.register("+");
+    RequestType REQUEST_MINUS = RequestType.register("-");*/
     protected NearView nearView = null;
     // 17.10.21: per argument oder default EDDK
     String tilename = null;
@@ -219,18 +219,18 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         }*/
 
 
-        String argv_visualizeTrack = (Platform.getInstance()).getSystemProperty("argv.visualizeTrack");
+        String argv_visualizeTrack = Platform.getInstance().getConfiguration().getString("argv.visualizeTrack");
         if (Util.isTrue(argv_visualizeTrack)) {
             visualizeTrack = true;
         }
 
         Boolean b;
-        if ((b = PlatformHelper.getBooleanSystemProperty("argv.enableFPC")) != null) {
+        if ((b = Platform.getInstance().getConfiguration().getBoolean("argv.enableFPC")) != null) {
             //FPC heisst: kein Teleporting, kein Observer, kein initialVehicle,kein Avatar.
             enableFPC = (boolean) b;
         }
 
-        String argv_initialVehicle = (Platform.getInstance()).getSystemProperty("argv.initialVehicle");
+        String argv_initialVehicle = Platform.getInstance().getConfiguration().getString("argv.initialVehicle");
         if (argv_initialVehicle != null) {
             if (enableFPC) {
                 logger.info("Ignoring initialVehicle due to FPC");
@@ -241,19 +241,19 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             }
         }
 
-        String argv_vehiclelistname = (Platform.getInstance()).getSystemProperty("argv.vehiclelist");
+        String argv_vehiclelistname = Platform.getInstance().getConfiguration().getString("argv.vehiclelist");
         if (argv_vehiclelistname != null) {
             vehiclelistname = argv_vehiclelistname;
         }
 
-        if ((b = PlatformHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
+        if ((b = Platform.getInstance().getConfiguration().getBoolean("argv.enableNearView")) != null) {
             enableNearView = (boolean) b;
         }
 
         // Parameter basename gibt es eigentlich nur in 2D. 7.10.21: Aber das wird hier jetzt einach mal als Request sent,
         // wenns nicht relevant oder ungueltig ist, verfaellt es halt. Und ich fuehre auch wieder den Deault EDDK ein.
 
-        tilename = Platform.getInstance().getSystemProperty("argv.basename");
+        tilename = Platform.getInstance().getConfiguration().getString("argv.basename");
 
         if (tilename == null) {
             tilename = getDefaultTilename();
@@ -272,7 +272,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     protected void initHud() {
         //5.10.18: Hud braucht viel Speicher (und damit auch (GC) CPU). Darum optional. Aber per default an.
         //31.3.20: Seit dem Einbau einer deferred Cam bzw. nearview scheint das nicht mehr zu gehen. Offenbar muss man jetzt selber den attach machen.
-        String argv_enableHud = (Platform.getInstance()).getSystemProperty("argv.enableHud");
+        String argv_enableHud = Platform.getInstance().getConfiguration().getString("argv.enableHud");
         if (!Util.isFalse(argv_enableHud)) {
             hud = Hud.buildForCameraAndAttach(getDefaultCamera(), 0);
         }

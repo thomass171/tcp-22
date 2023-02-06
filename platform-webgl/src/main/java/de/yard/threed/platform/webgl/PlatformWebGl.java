@@ -46,9 +46,14 @@ public class PlatformWebGl extends Platform {
     //31.7.21 private WebGlSceneRunner scenerunner = null;
     //6.7.17: Der Simple muesste es hier eigentlich vorerst auch tun.
     private NativeEventBus eventbus = new SimpleEventBus();//new WebGlEventBus();
-    Map<String, String> properties = new HashMap<String, String>();
+    //Map<String, String> properties = new HashMap<String, String>();
     // not the GWT devmode!
     public static boolean isDevmode;
+    private Configuration configuration;
+
+    private PlatformWebGl(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
     /**
      * 5.10.18: Wie in JME umbenannt von getInstance zu init, um die Bedeutung zu verdeutlichen. Braucht Properties, die schon in der Platform
@@ -56,14 +61,10 @@ public class PlatformWebGl extends Platform {
      *
      * @return
      */
-    public static PlatformInternals init/*getInstance*/(HashMap<String, String> props) {
+    public static PlatformInternals init/*getInstance*/(Configuration configuration) {
         if (Platform.instance == null || !(Platform.instance instanceof PlatformWebGl)) {
-            Platform.instance = new PlatformWebGl();
-            if (props != null) {
-                for (String key : props.keySet()) {
-                    ((PlatformWebGl) instance).properties.put(key, props.get(key));
-                }
-            }
+            Platform.instance = new PlatformWebGl(configuration);
+
             // TODO: Als default texture sowas wie void.png o.ae. nehmen. 5.10.18: Hat WebGL sowas nicht?
             //Platform.instance.defaulttexture = JmeTexture.loadFromFile(new BundleResource("FontMap.png"));
             instance.nativeScene = new WebGlScene();
@@ -71,10 +72,10 @@ public class PlatformWebGl extends Platform {
         }
         PlatformInternals platformInternals = new PlatformInternals();
         // resolver order is important. most specific first.
-        String additionalBundle = ((PlatformWebGl) instance).properties.get("argv.ADDITIONALBUNDLE");
+        String additionalBundle = configuration.getString("argv.ADDITIONALBUNDLE");
         if (additionalBundle != null && additionalBundle.contains(" ")) {
             // might be the result of a '+' which is valid in base64
-            additionalBundle = additionalBundle.replace(" ","+");
+            additionalBundle = additionalBundle.replace(" ", "+");
         }
         instance.bundleResolver.addAll(WebGlBundleResolver.buildFromPath(additionalBundle));
         instance.bundleResolver.add(new WebGlBundleResolver());
@@ -398,19 +399,8 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
-    public void setSystemProperty(String key, String value) {
-        properties.put(key, value);
-    }
-
-    @Override
-    public String getSystemProperty(String key) {
-        return properties.get(key);
-    }
-
-    @Override
     public Configuration getConfiguration() {
-        //5.2.23 Hmm
-        throw new RuntimeException("not yet");
+        return configuration;
     }
 
     @Override

@@ -24,7 +24,7 @@ import java.util.List;
 public class BulletSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(BulletSystem.class);
 
-    public static RequestType TRIGGER_REQUEST_FIRE = new RequestType("TRIGGER_REQUEST_FIRE");
+    public static RequestType TRIGGER_REQUEST_FIRE = RequestType.register(2017,"TRIGGER_REQUEST_FIRE");
 
     boolean bulletsystemdebuglog = false;
     private RelocationStrategy relocationStrategy = new HomeRelocationStrategy();

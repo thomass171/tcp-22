@@ -1,6 +1,8 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.core.InitMethod;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.SceneNode;
@@ -12,6 +14,8 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
 
 /**
  * <p>
@@ -35,7 +39,8 @@ public class FlatTerrainSystemTest {
             }
         };
 
-        TestFactory.initPlatformForTest(new String[]{"engine", "traffic"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod);
+        TestFactory.initPlatformForTest(new String[]{"engine", "traffic"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
+                Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
         //16.12.21 AbstractSceneRunner.instance.httpClient = new AirportDataProviderMock();
     }
 
