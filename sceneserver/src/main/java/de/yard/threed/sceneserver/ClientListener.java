@@ -1,6 +1,7 @@
 package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.platform.NativeSocket;
+import de.yard.threed.engine.ecs.DefaultBusConnector;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +26,6 @@ import static de.yard.threed.javanative.JavaUtil.sleepMs;
 public class ClientListener extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(ClientListener.class.getName());
 
-    public static final int DEFAULT_PORT = 5809;
-
     String host;
     int port;
     boolean terminateflag = false;
@@ -41,12 +40,12 @@ public class ClientListener extends Thread {
     }
 
     private ClientListener(String host) {
-        this(host, DEFAULT_PORT);
+        this(host, DefaultBusConnector.DEFAULT_PORT);
     }
 
     public static ClientListener getInstance(String host, int port) {
         if (instance == null) {
-            instance = new ClientListener(host, (port == -1) ? DEFAULT_PORT : port);
+            instance = new ClientListener(host, (port == -1) ? DefaultBusConnector.DEFAULT_PORT : port);
         }
         return instance;
     }

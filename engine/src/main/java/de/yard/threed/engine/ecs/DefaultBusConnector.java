@@ -17,18 +17,20 @@ import java.util.List;
 
 
 /**
- * Connection to a scene server. And back to the client.
+ *
  * <p>
- * Common super class for client and server.
+ * Common super class for connecting a client and server event bus.
  * <p>
- * * 28.12.22: Is it really useful to have this as a dedicated system? Shouldn't the platform just extend the event bus? So no longer a ECS system.
+ * 28.12.22: Is it really useful to have this as a dedicated system? Shouldn't the platform just extend the event bus? So no longer a ECS system.
+ * But still a {@link ServerSystem} and {@link ClientSystem} are used.
+ * Only for sending events/requests. Receiving is done in SceneServerRenderer and ClientBusConnector.
  * <p>
  * Created by thomass on 16.02.21.
  */
-public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
+public abstract class DefaultBusConnector {
     static Log logger = Platform.getInstance().getLog(DefaultBusConnector.class);
 
-    GeneralHandlerMap<String> eventHandler = new GeneralHandlerMap<String>();
+    public static final int DEFAULT_PORT = 5809;
 
     // Events on a scene node level for something like an inspector. Currently not used.
     public static boolean nodeSyncEnabled = false;
@@ -42,22 +44,6 @@ public abstract class DefaultBusConnector/*System extends DefaultEcsSystem*/ {
     public static EventType EVENT_ENTITYSTATE = EventType.register(1008, "EVENT_ENTITYSTATE");
     //public static EventType EVENT_ENTITYMODELCREATED = EventType.register("EVENT_ENTITYMODELCREATED");
     //public static EventType EVENT_ENTITYCHANGED = EventType.register("EVENT_ENTITYCHANGED");
-
-    /*public BusConnectorSystem(RequestType[] requestTypes, EventType[] eventTypes) {
-        super(requestTypes, eventTypes);
-    }*/
-
-    /**
-     * no "updatepergroup"
-     *
-     * @param entity always null
-     * @param group
-     * @param tpf
-     */
-    /*public void update(EcsEntity entity, EcsGroup group, double tpf) {
-
-    }
-*/
 
     /**
      * Send event to network for all clients (or server).

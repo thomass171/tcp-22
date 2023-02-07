@@ -12,15 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Multithreaded und auf die MP Textbloecke ausgelegt.
+ * A wrapper for a network socket for transferring text blocks with a queued (threaded) listener.
  * <p>
  * Not on byte level but UTF-8 text block level with empty line as separator (like mail)
  * <p>
- * Die gelesenenen Daten kommen in eine Queue, aus die dann ein nicht multithreaded thread die Daten abrufen kann.
- * <p>
- * MT in Listener ausgelagert.
+ *
  */
-public class SocketClient /*extends Thread*/ {
+public class SocketClient {
     static Logger logger = Logger.getLogger(SocketClient.class.getName());
 
     Socket socket;
@@ -38,9 +36,8 @@ public class SocketClient /*extends Thread*/ {
     }
 
     /**
-     * connect() might block, so do it MT.
-     * <p>
-     * Should not be done async in run() because of possible race condition when sending data.
+     * connect() might block, so do it async?
+     * Should not be done async because of possible race condition when sending data.
      */
     public void connect() throws IOException {
         logger.debug("Connecting to " + host + ":" + port);
@@ -50,11 +47,6 @@ public class SocketClient /*extends Thread*/ {
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
     }
-
-    /*@Override
-    public void run() {
-        startListen();
-    }*/
 
     public QueuingSocketListener startListen() {
         if (in == null){

@@ -33,7 +33,9 @@ import java.util.List;
  * <p>
  * Just provides a logger and StringHelper. ResourceManager must be added later because it might need the LogFactory.
  * <p>
- * Probably no option as base for JME sein.
+ * The name "headless" is confusing because its the super class for all(some?) Java based platforms.
+ * Or the class hierarchy is confusing? Jme extends it and replaces may things. Maybe a component based approavh is better
+ * for sharing coommon Java elements like {@link JavaSocket}.
  * Because its used for testing in "engine", a simple node tree (incl mesh) is useful indeed.
  * <p>
  * Created on 05.12.18.
@@ -240,6 +242,11 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         // no real input, but can be used for testing
         boolean found = mockedKeyInput.remove(new Integer(keycode));
         return found;
+    }
+
+    @Override
+    public NativeSocket connectToServer(String server, int port) {
+            return JavaSocket.build(server, port);
     }
 }
 

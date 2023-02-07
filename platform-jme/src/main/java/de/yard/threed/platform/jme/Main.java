@@ -26,14 +26,14 @@ public class Main {
     static Log logger;
 
     public static void main(String[] args) {
-        boolean useinspector = false;
+
         HashMap<String, String> properties = Setup.setUp(args);
 
         JmeSceneRunner nsr = JmeSceneRunner.init(Configuration.buildDefaultConfigurationWithEnv(properties));
 
         logger = Platform.getInstance().getLog(Main.class);
         logger.info("Loading JME Client");
-        String scene = System.getProperty("scene");
+        String scene = Platform.getInstance().getConfiguration().getString("scene");
         logger.debug("Parameter:");
         logger.debug("scene=" + scene);
 
@@ -41,25 +41,14 @@ public class Main {
             if (scene == null) {
                 logger.warn("No scene");
             } else {
-                //24.10.18 Scene updater = ScenePool.buildSceneUpdater(scene);
                 Scene updater = (Scene) Class.forName(scene).newInstance();
-                if (useinspector) {
-                    //27.7.21 dafuer brauchen wir mal eine andere Loesung
-                    de.yard.threed.core.Util.nomore();
-                    //EngineInspector ei = new EngineInspector();
-                    //ei.setVisible(true);
-                }
                 nsr.runScene(updater);
-                //   new SceneRunner(new ReferenceScene());
-                //new SceneRunner(new MazeScene());
+
             }
         } catch (Exception t) {
             logger.error("Exception occured:" + t.getMessage() + t.getStackTrace()[0]);
-            // Hier kann man gut einen Breakpint setzen, um einen Stacktrace zu bekommen
-            t.printStackTrace();
-
+            throw new RuntimeException(t);
         }
-
     }
 
 

@@ -18,9 +18,9 @@ import java.util.List;
 
 
 /**
- * Connection to a MP server. And back to the client.
+ * Connection of a server eventbus to clients.
  * <p>
- * Common super class for client and server.
+ *
  * <p>
  * * 28.12.22: Is it really useful to have this as a dedicated system? Shouldn't the platform just extend the event bus? So no longer a ECS system.
  *
@@ -29,26 +29,7 @@ import java.util.List;
 public class SceneServerBusConnector extends DefaultBusConnector {
     static Log logger = Platform.getInstance().getLog(SceneServerBusConnector.class);
 
-    //ServerSocket serverSocket;
-
-    GeneralHandlerMap<String> eventHandler = new GeneralHandlerMap<String>();
-
     public SceneServerBusConnector() {
-    }
-
-    /*public BusConnectorSystem(RequestType[] requestTypes, EventType[] eventTypes) {
-        super(requestTypes, eventTypes);
-    }*/
-
-    /**
-     * no "updatepergroup"
-     *
-     * @param entity always null
-     * @param group
-     * @param tpf
-     */
-    public void update(EcsEntity entity, EcsGroup group, double tpf) {
-
     }
 
     @Override
@@ -71,9 +52,4 @@ public class SceneServerBusConnector extends DefaultBusConnector {
             serverSocket.sendPacket(packet);
         }
     }*/
-
-
-
-
-
 }

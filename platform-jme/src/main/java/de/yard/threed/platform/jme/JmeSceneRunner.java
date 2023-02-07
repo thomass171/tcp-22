@@ -17,7 +17,11 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.engine.SceneMode;
+import de.yard.threed.engine.ecs.ClientBusConnector;
+import de.yard.threed.engine.ecs.DefaultBusConnector;
+import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.Dimension;
 import de.yard.threed.core.platform.NativeSceneRunner;
@@ -95,7 +99,7 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
                 simpleApplication = this;
                 // Es ist wichtig, dass der AssetManager vor dem init() Aufruf der Scene gesetzt ist.
                 JmeResourceManager rm = new JmeResourceManager(assetManager);
-                ((PlatformJme)Platform.getInstance()).postInit(rm);
+                ((PlatformJme) Platform.getInstance()).postInit(rm);
 
                 // Starten mit Standardcamera. Die Camera bleibt aber wohl auch bei Cahe und CameraNode immer dieselbe.
                 // Das Setzen des aspect hier duerfte redundant sein.
@@ -129,10 +133,19 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
                 //JavaSceneRunnerHelper.prepareScene(scene, JmeScene.getInstance(),world);
                 scene.setSceneAndCamera(JmeScene.getInstance(), world/* ((EngineHelper) Platform.getInstance()).getWorld()*/);
 
-                /*BundleLoaderExceptGwt*/
                 SyncBundleLoader.preLoad(scene.getPreInitBundle(), rm, Platform.getInstance().bundleResolver);
 
-                scene.init(SceneMode.forMonolith());
+                // decide scene mode monolith or client/server
+                String server = ((PlatformJme) Platform.getInstance()).getConfiguration().getString("server");
+                if (server == null) {
+                    scene.init(SceneMode.forMonolith());
+                } else {
+                    logger.info("Connecting to server " + server);
+                    NativeSocket socket = Platform.getInstance().connectToServer(server, DefaultBusConnector.DEFAULT_PORT);
+                    clientBusConnector = new ClientBusConnector(socket);
+                    SystemManager.setBusConnector(clientBusConnector);
+                    scene.init(SceneMode.forClient());
+                }
 
                 postInit();
                 // Wenn die Scene sich keine Camera eingerichtet hat, wird jetzt Default FPS einregichtet

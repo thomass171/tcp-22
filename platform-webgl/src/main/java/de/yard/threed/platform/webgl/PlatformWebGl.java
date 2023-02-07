@@ -467,10 +467,10 @@ public class PlatformWebGl extends Platform {
 
     }
 
-   /*MA36 @Override
-    public NativeWebClient getWebClient(String baseUrl) {
-        return null;
-    }*/
+    @Override
+    public NativeSocket connectToServer(String server, int port)  {
+        throw new RuntimeException("not implemented");
+    }
 
     @Override
     public NativeScene getScene() {

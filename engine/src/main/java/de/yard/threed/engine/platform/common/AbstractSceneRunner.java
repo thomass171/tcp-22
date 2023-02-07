@@ -4,6 +4,7 @@ import de.yard.threed.core.BuildResult;
 import de.yard.threed.core.Dimension;
 import de.yard.threed.core.GeneralHandler;
 import de.yard.threed.core.ModelBuildDelegate;
+import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.AsyncHttpResponse;
@@ -19,6 +20,7 @@ import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneAnimationController;
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.ecs.ClientBusConnector;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.loader.InvalidDataException;
 import de.yard.threed.engine.loader.PortableModelBuilder;
@@ -89,6 +91,7 @@ public class AbstractSceneRunner {
     private List<NativeCamera> cameras = new ArrayList<NativeCamera>();
     public NativeHttpClient httpClient = null;
     PlatformInternals platformInternals;
+    public ClientBusConnector clientBusConnector = null;
 
     /**
      * 28.4.20: Warum ist der deperecated. Der scheint jetzt ein vielleicht zeitgemaesser constructor.
@@ -194,6 +197,14 @@ public class AbstractSceneRunner {
         }
 
         processDelegates(loadresult);
+
+        // Is this the best moment to get packets?
+        if (clientBusConnector != null) {
+            Packet packet;
+            while ((packet = clientBusConnector.getPacket()) != null) {
+                SystemManager.publishPacket(packet);
+            }
+        }
 
         // vor den individuellen Updaten die Systems updaten
         SystemManager.update(tpf);

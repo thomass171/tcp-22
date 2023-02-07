@@ -73,7 +73,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
         //21.7.21 jetzt hier
         eventBus = new JAEventBus();
         logfactory = new JALogFactory();
-        this.configuration=configuration;
+        this.configuration = configuration;
     }
 
     /**
@@ -572,7 +572,9 @@ public class PlatformHomeBrew extends DefaultPlatform {
     }
 
     @Override
-    public Configuration getConfiguration() { return configuration; };
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
     @Override
     public NativeEventBus getEventBus() {
@@ -589,6 +591,11 @@ public class PlatformHomeBrew extends DefaultPlatform {
     @Override
     public void abort() {
         Util.notyet();
+    }
+
+    @Override
+    public NativeSocket connectToServer(String server, int port) {
+        return JavaSocket.build(server, port);
     }
 
     @Override

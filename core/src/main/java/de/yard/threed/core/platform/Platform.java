@@ -23,8 +23,6 @@ public abstract class Platform {
 
     protected NativeEventBus eventBus = null;
 
-    public NativeSocket nativeSocket;
-
     //25.4.20 jetzt eins höher. Gab es mal eine Zeit lang nicht, ist aber gut um Logger verwenden zu koennen,
     //die es im Modul gar nicht gibt.
     //16.6.21: Moved here from EnginePlatform
@@ -451,16 +449,11 @@ public abstract class Platform {
     public abstract NativeByteBuffer buildByteBuffer(int size);
 
     /**
-     * Establish a (web)socket connection to a MP Server. This isType no "EventBus", because its peer2peer.
+     * Establish a (web)socket connection to an arbitray server (most likely a scene server). This is no "EventBus", because its peer2peer.
      * <p>
-     * Noch nicht abstract, weils sonst so oft implementiert werden muss. Erstmal Prototyp aus JME.
-     * <p>
-     * Gabs da schon mal einen anderen Ansatz? Find ich aber nicht mehr.
      * 15.2.21
      */
-    public NativeSocket connectToServer() {
-        return (NativeSocket) Util.notyet();
-    }
+    public abstract NativeSocket connectToServer(String server, int port);
 
     /*MA36 ueber runner public abstract void sendHttpRequest(String url, String method, String[] header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate );*/
 

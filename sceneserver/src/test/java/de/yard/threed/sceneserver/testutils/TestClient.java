@@ -8,8 +8,10 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.engine.ecs.ClientBusConnector;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.testutil.EventFilter;
@@ -38,8 +40,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestClient {
     Log logger = Platform.getInstance().getLog(TestClient.class);
-    SocketClient socketClient;
-    QueuingSocketListener listener;
+    //SocketClient socketClient;
+    //QueuingSocketListener listener;
+    ClientBusConnector clientBusConnector;
     public static String USER_NAME0 = "carl";
     public static String USER_NAME1 = "wayne";
     public String username;
@@ -49,14 +52,15 @@ public class TestClient {
 
     public TestClient(String username) {
         this.username = username;
-        socketClient = new SocketClient("localhost", ClientListener.DEFAULT_PORT);
+        //socketClient = new SocketClient("localhost", ClientListener.DEFAULT_PORT);
     }
 
     public void connectAndLogin() throws IOException {
         assertTrue(SystemState.readyToJoin());
-        socketClient.connect();
-        listener = socketClient.startListen();
-
+        NativeSocket socket = Platform.getInstance().connectToServer("localhost", DefaultBusConnector.DEFAULT_PORT);
+        clientBusConnector = new ClientBusConnector(socket);
+        //socketClient.connect();
+        //listener = socketClient.startListen();
         sendRequestToServer(UserSystem.buildLoginRequest(username, "34"));
     }
 
@@ -85,7 +89,8 @@ public class TestClient {
     }
 
     public void sendRequestToServer(Request request) {
-        socketClient.writePacket(SceneServerBusConnector.encodeRequest(request).getData());
+        //socketClient.writePacket(SceneServerBusConnector.encodeRequest(request).getData());
+        clientBusConnector.getSockets(null).get(0).sendPacket(SceneServerBusConnector.encodeRequest(request));
         logger.debug("Sent request " + request);
     }
 
@@ -118,11 +123,13 @@ public class TestClient {
     }
 
     public Packet getPacket() {
-        List<String> packet = listener.getPacket();
-        if (packet == null) {
+        //List<String> packet = listener.getPacket();
+        Packet packet = clientBusConnector.getPacket();
+        /*if (packet == null) {
             return null;
         }
-        return Packet.buildFromBlock(packet);
+        return Packet.buildFromBlock(packet);*/
+        return packet;
     }
 
     public List<Packet> readLatestPackets() {

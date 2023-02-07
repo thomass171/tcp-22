@@ -502,14 +502,6 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
         return Misc.deserialize(b);
     }*/
 
-    public void setSystemProperty(String key, String value) {
-        System.setProperty(key, value);
-    }
-
-    public String getSystemProperty(String key) {
-        return System.getProperty(key);
-    }
-
     @Override
     public NativeEventBus getEventBus() {
         return JAEventBus.getInstance();
@@ -553,28 +545,9 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
         JmeSceneRunner.getInstance().jmecamera.getViewPort().addProcessor(((JmeRenderProcessor) renderProcessor).fpp);
     }
 
-    /*MA36 @Override
-    public NativeWebClient getWebClient(String baseUrl) {
-        return new JavaWebClient(baseUrl);
-    }*/
-
     @Override
-    public NativeSocket connectToServer() {
-
-        if (nativeSocket != null) {
-            logger.warn("already connected!");
-            return null;
-        }
-        SocketClient queuingSocketClient = new SocketClient("localhost", 5809);
-
-
-        try {
-            return new JmeSocket(queuingSocketClient);
-        } catch (IOException e) {
-            logger.error("connect() failed");
-            return null;
-        }
-
+    public NativeSocket connectToServer(String server, int port) {
+        return JavaSocket.build(server, port);
     }
 
     @Override

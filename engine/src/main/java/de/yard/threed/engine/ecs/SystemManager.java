@@ -38,15 +38,6 @@ public class SystemManager {
     private static RequestQueue requestQueue = new RequestQueue();
     private static DefaultBusConnector busConnector = null;
 
-    /* private SystemManager(){ }
-
-    public static SystemManager getInstance(){
-    if (instance==null){
-        instance = new SystemManager();
-    }
-        return instance;
-    }*/
-
     public static void addSystem(EcsSystem system, int priority) {
         systems.add(system);
         // 27.12.16: Hier der init ist doch doof, dann kann er es doch selber sofort machen.

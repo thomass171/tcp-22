@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 /**
  * Setup for Java platforms like JME, but not for Unity and Browser, which have their own setup.
- *
+ * <p>
  * Also for other Java platforms like OpenGL.
  */
 public class Setup {
@@ -68,32 +68,34 @@ public class Setup {
             //properties.put("argv.initialMaze","maze/Area15x10.txt");
             //properties.put("argv.initialMaze","skbn/DavidJoffe.txt:1");
             //properties.put("argv.sceneExtension0",sceneExtension0);
+
+            //properties.put("server", "localhost");
         }
         //properties.put("argv.vehiclelist","GenericRoad");
 
         //13.3.19: Scene doch mal wieder aus Property, um nicht so viele Run Configurations zu haben. Nur, wenn sie
         //nicht schon von aussen gesetzt ist.
-        if (System.getProperty("scene") == null) {
+        //6.3.23 if (System.getProperty("scene") == null) {
 
-            System.setProperty("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
-            //System.setProperty("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
-            System.setProperty("scene", "de.yard.threed.maze.MazeScene");
-            //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
-            //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
+        properties.put("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
+        //System.setProperty("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
+        properties.put("scene", "de.yard.threed.maze.MazeScene");
+        //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
+        //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
 
-            boolean wayland = false;
-            if (wayland) {
-                properties.put("argv.basename", "traffic:tiles/Wayland.xml");
-                properties.put("argv.enableAutomove", "true");
-                System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
-            }
-            boolean demo = false;
-            if (demo) {
-                properties.put("argv.basename", "traffic:tiles/Demo.xml");
-                // automove is enabled in Demo.xml.
-                System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
-            }
+        boolean wayland = false;
+        if (wayland) {
+            properties.put("argv.basename", "traffic:tiles/Wayland.xml");
+            properties.put("argv.enableAutomove", "true");
+            System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
+        boolean demo = false;
+        if (demo) {
+            properties.put("argv.basename", "traffic:tiles/Demo.xml");
+            // automove is enabled in Demo.xml.
+            properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
+        }
+
 
         return properties;
     }

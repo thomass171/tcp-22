@@ -248,4 +248,9 @@ public class DefaultPlatform extends Platform {
     public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed) {
         throw new RuntimeException("no bundle loader implemented");
     }*/
+
+    @Override
+    public  NativeSocket connectToServer(String server, int port) {
+        throw new RuntimeException("not implemented");
+    }
 }
