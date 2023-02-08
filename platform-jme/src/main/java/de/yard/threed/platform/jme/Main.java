@@ -27,9 +27,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        HashMap<String, String> properties = Setup.setUp(args);
-
-        JmeSceneRunner nsr = JmeSceneRunner.init(Configuration.buildDefaultConfigurationWithEnv(properties));
+        JmeSceneRunner nsr = JmeSceneRunner.init(Configuration.buildDefaultConfigurationWithArgsAndEnv(args, Setup.setUp()));
 
         logger = Platform.getInstance().getLog(Main.class);
         logger.info("Loading JME Client");

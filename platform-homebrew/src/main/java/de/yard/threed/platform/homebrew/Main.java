@@ -1,6 +1,5 @@
 package de.yard.threed.platform.homebrew;
 
-import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.core.platform.Log;
@@ -9,12 +8,11 @@ import de.yard.threed.javacommon.Setup;
 
 import java.util.HashMap;
 
+import static de.yard.threed.core.configuration.Configuration.buildDefaultConfigurationWithArgsAndEnv;
+
 
 /**
- * Hauptprogramm fuer Platform Opengl (z.B. Android)
- * <p>
- * Warum gibt es die Scene eigentlich nicht mehr als Property? 28.10.15: Vielleicht wegen der Klasse ScenePool?
- * 22.1.16: Vielleicht weil GWT eine solche Klasse nicht per Reflection instatieeren kann?
+ * Main for platform Homebrew (eg. Android)
  * <p>
  * Created by thomass on 22.01.16.
  */
@@ -22,20 +20,16 @@ public class Main {
     static Log logger;
 
     public static void main(String[] args) {
-        HashMap<String, String> properties = Setup.setUp(args);
-
-        //TODO allgemeingültiges cachedir
-        properties.put("CACHEDIR", "/Users/thomas/Projekte/Granada/ncache");
-        properties.put("BUNDLEDIR", "/Users/thomas/Projekte/Granada/bundles");
+        HashMap<String, String> properties = Setup.setUp();
 
         //10.7.21 NativeSceneRunner nsr = OpenGlSceneRunner.init(properties);
         ;
-        HomeBrewSceneRunner nsr = HomeBrewSceneRunner.init(new ConfigurationByProperties(properties), new OpenGlRenderer(/*PlatformHomeBrew/*OpenGlContext* /.getGlContext()*/), SceneMode.forMonolith());
+        HomeBrewSceneRunner nsr = HomeBrewSceneRunner.init(buildDefaultConfigurationWithArgsAndEnv(args, properties), new OpenGlRenderer(/*PlatformHomeBrew/*OpenGlContext* /.getGlContext()*/), SceneMode.forMonolith());
 
         logger = Platform.getInstance().getLog(Main.class);
 
         logger.info("Loading OpenGL Client");
-        String scene = System.getProperty("scene");
+        String scene = Platform.getInstance().getConfiguration().getString("scene");
         logger.debug("Parameter:");
         logger.debug("scene=" + scene);
 

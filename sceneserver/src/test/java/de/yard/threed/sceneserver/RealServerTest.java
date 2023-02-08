@@ -57,7 +57,7 @@ public class RealServerTest {
             List<String> args = new ArrayList<>();
             args.add("--throttle=100");
             args.add("--initialMaze=" + gridname);
-            args.add("de.yard.threed.maze.MazeScene");
+            args.add("--scene=de.yard.threed.maze.MazeScene");
             serverProcess = TestUtils.execJavaProcess(de.yard.threed.sceneserver.Main.class, new ArrayList(), args);
         }
 

@@ -21,11 +21,16 @@ cd $OWNDIR/../platform-$PLATFORM
 checkrc cd
 
 usage() {
-	echo "$0: [-p <platform>] <sceneclass>"
+	echo "usage: $0 [-p <platform>] <sceneclass>"
 	exit 1
 }
 
-mvn exec:java -Dscene=$1
+if [ "$1" == "" ]
+then
+  usage
+fi
+
+mvn exec:java -Dexec.args="--scene=$1"
 
 exit 0
 

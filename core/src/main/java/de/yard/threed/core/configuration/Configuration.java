@@ -101,10 +101,18 @@ public abstract class Configuration {
      * 6.2.23: Now build a typical default configuration with
      * 1) ByEnv (top prio), eg. for "HOSTDIR", "ADDITIONALBUNDLE"
      * 2) by properties
-     * A ConfigurationByArgs should be added in related main classes with top prio.
+     *
      */
     public static Configuration buildDefaultConfigurationWithEnv(Map<String, String> properties) {
         return new ConfigurationByEnv().addConfiguration(
+                new ConfigurationByProperties(properties), true);
+    }
+
+    /**
+     * A ConfigurationByArgs should be added in related main classes with top prio.
+     */
+    public static Configuration buildDefaultConfigurationWithArgsAndEnv(String[] args, Map<String, String> properties) {
+        return new ConfigurationByArgs(args).addConfiguration(new ConfigurationByEnv(), true).addConfiguration(
                 new ConfigurationByProperties(properties), true);
     }
 }
