@@ -545,7 +545,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         SystemManager.sendEvent(new Event(EventRegistry.EVENT_MAZE_LOADED, new Payload().add("gridname", MazeDataProvider.getGridName())));
 
         //11.4.16 addTestObjekte();
-        logger.debug("load completed. state = " + SystemState.getStateAsString());
+        logger.debug("load of " + MazeDataProvider.getGridName() + " completed. state = " + SystemState.getStateAsString());
     }
 
     private void createBullets(int cnt, int owner) {

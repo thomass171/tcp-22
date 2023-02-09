@@ -63,7 +63,7 @@ public class Setup {
         //properties.put("argv.initialMaze","skbn/DavidJoffe.txt:1");
         //properties.put("argv.sceneExtension0",sceneExtension0);
 
-        //properties.put("server", "localhost");
+        properties.put("server", "localhost");
 
         //properties.put("argv.vehiclelist","GenericRoad");
 

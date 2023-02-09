@@ -40,4 +40,10 @@ public class ClientBusConnector extends DefaultBusConnector {
         return socket.getPacket();
     }
 
+    /**
+     * Just close the socket. No logoff etc.
+     */
+    public void close() {
+        socket.close();
+    }
 }

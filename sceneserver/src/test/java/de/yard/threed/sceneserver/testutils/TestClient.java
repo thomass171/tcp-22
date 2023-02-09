@@ -21,12 +21,9 @@ import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.testutil.TestHelper;
-import de.yard.threed.javanative.QueuingSocketListener;
-import de.yard.threed.javanative.SocketClient;
 import de.yard.threed.maze.EventRegistry;
 import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeUtils;
-import de.yard.threed.sceneserver.ClientListener;
 import de.yard.threed.sceneserver.SceneServer;
 import de.yard.threed.sceneserver.SceneServerBusConnector;
 import org.junit.jupiter.api.Assertions;
@@ -180,6 +177,24 @@ public class TestClient {
         return result;
     }
 
+    public Event waitForEvent(/*SceneServer sceneServer*/ EventType eventType) {
+
+        int counter = 0;
+        do {
+            List<Event> events = findEvents(e -> e.getType().getType() == eventType.getType());
+            if (events.size() > 0) {
+                return events.get(0);
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        } while (counter++ < 5);
+        return null;
+    }
+
     public void assertEventMazeLoaded(String gridName) {
         TestUtils.assertEvent(EventRegistry.EVENT_MAZE_LOADED, allEvents, 1, p -> {
             assertEquals(gridName, p.get("gridname"));
@@ -209,5 +224,12 @@ public class TestClient {
         assertNotNull(rotation, "rotation");
         // rotation taken as is, but seem
         TestUtil.assertQuaternion("rotation", expectedOrientation.getRotation(), rotation);
+    }
+
+    /**
+     * Just close the connection/socket. No logoff etc.
+     */
+    public void disconnect() {
+        clientBusConnector.close();
     }
 }

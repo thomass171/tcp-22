@@ -35,18 +35,33 @@ public class Main {
         logger.debug("Parameter:");
         logger.debug("scene=" + scene);
 
+        // exit is done by JME when ESC is pressed?
+       /* Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("shutdown detected");
+            if (nsr.clientBusConnector != null) {
+                nsr.clientBusConnector.close();
+            }
+           /* try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.exit(0);* /
+        }));*/
+
         try {
             if (scene == null) {
                 logger.warn("No scene");
             } else {
                 Scene updater = (Scene) Class.forName(scene).newInstance();
                 nsr.runScene(updater);
-
             }
         } catch (Exception t) {
+            // probably never reached because other thread is running the app?
             logger.error("Exception occured:" + t.getMessage() + t.getStackTrace()[0]);
             throw new RuntimeException(t);
         }
+        // no exit() here. It will terminate process immediately. But main thread is in ...
     }
 
 

@@ -17,7 +17,6 @@ import java.util.List;
 
 
 /**
- *
  * <p>
  * Common super class for connecting a client and server event bus.
  * <p>
@@ -38,6 +37,7 @@ public abstract class DefaultBusConnector {
     public static EventType EVENT_NODECREATED = EventType.register(1005, "EVENT_NODECREATED");
     public static EventType EVENT_NODEPARENTCHANGED = EventType.register(1006, "EVENT_NODEPARENTCHANGED");
     public static EventType EVENT_NODECHANGED = EventType.register(1007, "EVENT_NODECHANGED");
+    public static EventType EVENT_CONNECTION_CLOSED = EventType.register(1010, "EVENT_CONNECTION_CLOSED");
 
     // Events on entity level appear to be more efficient
     public static boolean entitySyncEnabled = true;
@@ -131,7 +131,10 @@ public abstract class DefaultBusConnector {
         String evt = packet.getValue("event");
         if (evt != null) {
             EventType eventType = EventType.findById(Util.atoi(evt));
-
+            if (eventType == null) {
+                logger.warn("Discarding event due to unknown event type " + evt);
+                return null;
+            }
             Payload payload = Payload.decode(packet);
             return new Event(eventType, payload);
         }

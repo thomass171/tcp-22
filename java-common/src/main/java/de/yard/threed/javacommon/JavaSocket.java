@@ -31,6 +31,11 @@ public class JavaSocket implements NativeSocket {
         return Packet.buildFromBlock(queuingSocketListener.getPacket());
     }
 
+    @Override
+    public void close() {
+        socketClient.close();
+    }
+
     public static JavaSocket build(String server, int port) {
         try {
             SocketClient queuingSocketClient = new SocketClient(server, port);

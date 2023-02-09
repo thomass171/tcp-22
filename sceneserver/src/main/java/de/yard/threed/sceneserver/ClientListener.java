@@ -9,19 +9,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static de.yard.threed.javanative.JavaUtil.sleepMs;
 
 /**
- * Client Listener and Registry.
- *
- * und
- * Konvertierung zwischen ECS Events/Requests und einem per Socket angebundenem Client.
- * <p>
- * Kann nicht ins ClientSystem wegen GWT/C# bzw. listen().
- * <p>
- * Ist ein eigener Thread. Auch weil es mehrere geben kann.(??) Mal schaun, die kommen alle hier rein.
+ * Client Listener and Registry (singleton instance).
+ * Separate thread for listening for connecting clients.
  */
 public class ClientListener extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(ClientListener.class.getName());
@@ -57,16 +52,21 @@ public class ClientListener extends Thread {
         return instance;
     }
 
+    /**
+     * Only for testing.
+     */
     public static void dropInstance() {
         if (instance != null) {
             instance.terminate();
             instance.waitForTerminate();
             instance = null;
         }
-
     }
 
-    /*16.2.21 das geht ja wohl nicht synchronized */
+    /**
+     * Executor of separate thread.
+     * Endless listen for clients.
+     */
     public void run() {
         logger.debug("Starting");
         String s = null;
@@ -96,9 +96,8 @@ public class ClientListener extends Thread {
     }
 
     /**
-     * dropInstance() should be used.
+     * dropInstance() should be used, so this is private for use by dropInstance()
      */
-    /*synchronized*/
     private void terminate() {
 
         logger.debug("Setting terminateflag");
@@ -110,11 +109,6 @@ public class ClientListener extends Thread {
         }
         // closing socket will cause a SocketException in accept();
         IOUtils.closeQuietly(serverSocket);
-       /* try {
-            serverSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
         serverSocket = null;
     }
 
@@ -140,14 +134,31 @@ public class ClientListener extends Thread {
     }
 
     /**
+     * Called each frame for publishing events/requests. But this is not a good location for checking for closed connections, because a close
+     * event should be sent.
+     * <p>
      * Needs optimization.
      */
     public List<NativeSocket> getSockets() {
 
         List<NativeSocket> sockets = new ArrayList<NativeSocket>();
-        for (ClientConnection connection:getClientConnections()){
+        for (ClientConnection connection : getClientConnections()) {
             sockets.add(connection);
         }
         return sockets;
+    }
+
+    public ClientConnection discardClosedConnection() {
+
+        Iterator<ClientConnection> iter = clientConnectionList.iterator();
+        while (iter.hasNext()) {
+            ClientConnection cc = iter.next();
+            if (cc.isClosed()) {
+                logger.debug("Discarding closed connection");
+                clientConnectionList.remove(cc);
+                return cc;
+            }
+        }
+        return null;
     }
 }

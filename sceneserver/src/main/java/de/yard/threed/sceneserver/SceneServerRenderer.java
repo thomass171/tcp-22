@@ -11,6 +11,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.SystemManager;
@@ -189,6 +190,13 @@ public class SceneServerRenderer extends HomeBrewRenderer {
 
     @Override
     protected void collectKeyboardAndMouseEvents(AbstractSceneRunner runner) {
+
+        // for closed connections send a close event, independent from whether the client logged off.
+        ClientConnection cc;
+        while ((cc = ClientListener.getInstance().discardClosedConnection()) != null) {
+            SystemManager.sendEvent(new Event(DefaultBusConnector.EVENT_CONNECTION_CLOSED, new Payload()));
+        }
+
         // instead of keyboard/mouse events get remote events.
 
         // get clients packets and publish before prepareFrame, which distributes the events.

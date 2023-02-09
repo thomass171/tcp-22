@@ -382,7 +382,12 @@ public class SystemManager {
         Request request;
 
         if (DefaultBusConnector.isEvent(packet)) {
-            sendEvent(DefaultBusConnector.decodeEvent(packet));
+            Event evt = DefaultBusConnector.decodeEvent(packet);
+            if (evt != null) {
+                sendEvent(evt);
+            } else {
+                logger.warn("Discarding event");
+            }
         } else if ((request = DefaultBusConnector.decodeRequest(packet)) != null) {
             putRequest(request);
         } else {

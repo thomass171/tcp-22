@@ -1,8 +1,10 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.Event;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.ServerSystem;
@@ -88,7 +90,13 @@ public class MazeSceneTest {
 
         TestUtil.assertPoint("player location", new Point(7, 2), mc.getLocation());
 
+        testClient.disconnect();
+        // should publish connection closed event.
+        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
 
+        //TestUtils.
+        //Event evt = testClient1.waitForEvent(DefaultBusConnector.EVENT_CONNECTION_CLOSED);
+        //assertNotNull(evt);
     }
 
     /**

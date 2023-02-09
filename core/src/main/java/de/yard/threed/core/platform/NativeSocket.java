@@ -18,4 +18,6 @@ public interface NativeSocket {
      * @return
      */
     Packet getPacket();
+
+    void close();
 }

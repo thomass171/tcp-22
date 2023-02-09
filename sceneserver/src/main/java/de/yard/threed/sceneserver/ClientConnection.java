@@ -13,7 +13,7 @@ import java.net.Socket;
 import java.util.List;
 
 /**
- *
+ * QueuingSocketListener runs a separate thread that blocks for reading from a socket.
  */
 public class ClientConnection implements NativeSocket {
     private static final Logger logger = LoggerFactory.getLogger(ClientConnection.class.getName());
@@ -31,64 +31,21 @@ public class ClientConnection implements NativeSocket {
         queuingSocketListener = new QueuingSocketListener(clientSocket);
         queuingSocketListener.start();
 
-        endpoint=new SocketEndpoint(clientSocket);
-    }
-
-    /*public void run() {
-        logger.debug("Client connected: Starting new ClientConnection");
-
-        String s = null;
-        try {
-            while (!terminateflag) {
-
-                //logger.debug("");
-
-                //out = new PrintWriter(clientSocket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                String inputLine;//, outputLine;
-
-                while ((inputLine = in.readLine()) != null) {
-                    logger.debug("inputline=" + inputLine);
-                    //outputLine = "w";
-                    //out.println(outputLine);
-                }
-
-            }
-        } catch (IOException e) {
-            if (terminateflag) {
-                logger.debug("Expected exception due to closed socket due to terminate");
-            } else
-                e.printStackTrace();
-        }
-        IOUtils.closeQuietly(clientSocket);
-        logger.debug("Closing clientConnection");
-    }*/
-
-    /**
-     *
-     */
-    /* synchronized */
-    protected void sendEvent(int var, int value) {
-        logger.debug("sendEvent ");
-        // try {
-        //Keinen neuen writer anlegen, denn den kann man dann nicht schliessen, ohne den socket zu schliessen
-        //PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-        //out.printf("%s:%d=%d:\r\n", IocpConnection.responseheader, var, value);
-        //out.close();
-        logger.debug("Event sent ");
-        /*} catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        endpoint = new SocketEndpoint(clientSocket);
     }
 
     /**
      * TODO sync?
+     *
      * @param packet
      */
     public void writePacket(List<String> packet) {
         endpoint.writePacket(packet);
     }
 
+    /**
+     * Do we need this?
+     */
     public void terminate() {
         logger.debug("Setting terminateflag");
         terminateflag = true;
@@ -115,8 +72,13 @@ public class ClientConnection implements NativeSocket {
         return Packet.buildFromBlock(s);
     }
 
+    @Override
+    public void close() {
+        throw new RuntimeException("not yet");
+    }
+
     public boolean hasPacket() {
-       return queuingSocketListener.hasPacket();
+        return queuingSocketListener.hasPacket();
     }
 
     @Override
@@ -127,6 +89,10 @@ public class ClientConnection implements NativeSocket {
         writePacket(packet.getData());
     }
 
+    public boolean isClosed() {
+        //logger.debug("terminated="+queuingSocketListener.isTerminated());
+        return queuingSocketListener.isTerminated();
+    }
 }
 
 

@@ -1,11 +1,13 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.Event;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.core.testutil.TestFactory;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.BaseEventRegistry;
+import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.ServerSystem;
@@ -107,5 +109,9 @@ public class RealServerTest {
         testClient0.assertEventMazeLoaded("maze/Area15x10.txt");
         testClient1.assertEventMazeLoaded("maze/Area15x10.txt");
 
+        testClient0.disconnect();
+        // testClient1 should get connection closed event. But for now the server socket isn't closed.
+        //Event evt = testClient1.waitForEvent(DefaultBusConnector.EVENT_CONNECTION_CLOSED);
+        //assertNotNull(evt);
     }
 }

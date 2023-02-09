@@ -24,7 +24,7 @@ then
   usage
 fi
 
-mvn exec:java -Dexec.args="--throttle=100 --scene=$1"
+mvn exec:java -Dexec.args="--throttle=400 --scene=$1"
 
 exit 0
 

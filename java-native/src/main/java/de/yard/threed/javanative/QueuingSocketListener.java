@@ -27,12 +27,16 @@ public class QueuingSocketListener extends Thread {
     List<String> lines = new Vector<>();
     List<List<String>> blocks = new Vector<>();
     boolean debuglog = false;
+    volatile private boolean terminated = false;
+    volatile private boolean terminateflag = false;
+    private String id;
 
-    public QueuingSocketListener(BufferedReader in) {
+    public QueuingSocketListener(BufferedReader in, String id) {
 
         //  this.socket = socket;
         // in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.in = in;
+        this.id = id;
     }
 
     public QueuingSocketListener(Socket socket) throws IOException {
@@ -47,12 +51,12 @@ public class QueuingSocketListener extends Thread {
         startListen();
     }
 
+    /**
+     * Blocking call. terminateflag might be ignored until input arrives?
+     */
     private void startListen() {
-        boolean terminateflag = false;
 
         try {
-            //16.2.21 connect();
-
             while (!terminateflag) {
 
                 //logger.debug("");
@@ -79,13 +83,18 @@ public class QueuingSocketListener extends Thread {
             }
         } catch (SocketException e) {
             // regular disconnect?
-            logger.debug("SocketException. Stopping thread (client closed connection?):"+e.getMessage());
-            return;
+            // only log an error if it wasn't intended to terminate
+            if (!terminateflag) {
+                logger.debug(id + ": SocketException. Stopping thread (client closed connection?):" + e.getMessage());
+            }
         } catch (IOException e) {
-            logger.error("IOException. Stopping thread.", e);
-            return;
+            // only log an error if it wasn't intended to terminate
+            if (!terminateflag) {
+                logger.error(id + ": IOException. Stopping thread.", e);
+            }
         }
-
+        terminated = true;
+        logger.debug(id + " terminated=" + terminated);
     }
 
 
@@ -103,7 +112,6 @@ public class QueuingSocketListener extends Thread {
      *
      * @return
      */
-
     public List<String> getPacket() {
         List<String> block = new ArrayList<>();
 
@@ -117,6 +125,15 @@ public class QueuingSocketListener extends Thread {
     }
 
     public boolean hasPacket() {
-        return blocks.size()>0;
+        return blocks.size() > 0;
+    }
+
+    public void terminate() {
+        terminateflag = true;
+    }
+
+    public boolean isTerminated() {
+        //logger.debug(id + " terminated=" + terminated);
+        return terminated;
     }
 }
