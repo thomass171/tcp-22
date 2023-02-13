@@ -9,6 +9,7 @@ import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
@@ -78,7 +79,14 @@ public abstract class DefaultBusConnector {
      */
     public abstract List<NativeSocket> getSockets(String clientId);
 
+
+    public abstract boolean isServer();
+
     public static Event buildEntitiyStateEvent(EcsEntity entity) {
+
+        // Using an abstract buildername instead of bundle/model name apperas to be the more flexibel way, so no
+        // longer bundle/model are part of the payload.
+
         Payload payload = new Payload()
                 .add("entityid", entity.getId())
                 .add("buildername", (entity.getBuilderName() != null) ? entity.getBuilderName() : "");

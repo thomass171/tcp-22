@@ -21,6 +21,7 @@ import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.engine.SceneMode;
 import de.yard.threed.engine.ecs.ClientBusConnector;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
+import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.Dimension;
@@ -135,17 +136,8 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
 
                 SyncBundleLoader.preLoad(scene.getPreInitBundle(), rm, Platform.getInstance().bundleResolver);
 
-                // decide scene mode monolith or client/server
-                String server = ((PlatformJme) Platform.getInstance()).getConfiguration().getString("server");
-                if (server == null) {
-                    scene.init(SceneMode.forMonolith());
-                } else {
-                    logger.info("Connecting to server " + server);
-                    NativeSocket socket = Platform.getInstance().connectToServer(server, DefaultBusConnector.DEFAULT_PORT);
-                    clientBusConnector = new ClientBusConnector(socket);
-                    SystemManager.setBusConnector(clientBusConnector);
-                    scene.init(SceneMode.forClient());
-                }
+                initScene();
+
 
                 postInit();
                 // Wenn die Scene sich keine Camera eingerichtet hat, wird jetzt Default FPS einregichtet

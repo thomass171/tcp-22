@@ -1,5 +1,6 @@
 package de.yard.threed.engine.ecs;
 
+import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.NativeEventBus;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
@@ -9,6 +10,7 @@ import de.yard.threed.engine.util.BooleanMethod;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,11 +42,13 @@ public class EcsTestHelper {
      * bis es keine mehr gibt
      */
     public static void processRequests() {
-        processUntil(()->{return SystemManager.getRequestCount() == 0;});
+        processUntil(() -> {
+            return SystemManager.getRequestCount() == 0;
+        });
 
     }
 
-    public static void processUntil(BooleanMethod booleanMethod){
+    public static void processUntil(BooleanMethod booleanMethod) {
         processUntil(booleanMethod, 1.0, 1000);
     }
 
@@ -65,14 +69,31 @@ public class EcsTestHelper {
     public static List<Event> getEventHistory() {
         NativeEventBus eventbus = Platform.getInstance().getEventBus();
         //tests muessen immer diesen nehmen if (eventbus instanceof SimpleEventBus) {
-           return ((SimpleEventBusForTesting)eventbus).getEventHistory();
+        return ((SimpleEventBusForTesting) eventbus).getEventHistory();
         //}
         //return new ArrayList<Event>();
     }
 
     public static List<Event> getEventsFromHistory(EventType eventType) {
         List<Event> l = getEventHistory();
-        return l.stream().filter(e->e.getType() == eventType).collect(Collectors.toList());
+        return l.stream().filter(e -> e.getType() == eventType).collect(Collectors.toList());
 
+    }
+
+    /**
+     * Request packets are silently ignored
+     */
+    public static List<Event> toEventList(List<Packet> packets) {
+        List<Event> result = new ArrayList<Event>();
+        for (Packet packet : packets) {
+            if (DefaultBusConnector.isEvent(packet)) {
+                Event evt = DefaultBusConnector.decodeEvent(packet);
+                if (evt == null) {
+                    throw new RuntimeException("decode failed");
+                }
+                result.add(evt);
+            }
+        }
+        return result;
     }
 }

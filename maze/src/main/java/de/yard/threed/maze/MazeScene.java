@@ -109,15 +109,8 @@ public class MazeScene extends Scene {
 
         vrInstance = VrInstance.buildFromArguments();
 
-        MazeMovingAndStateSystem movingsystem = MazeMovingAndStateSystem.buildFromArguments();
-        SystemManager.addSystem(movingsystem);
+        MazeSettings st = MazeSettings.init(MazeSettings.MODE_SOKOBAN);
 
-        SystemManager.addSystem(new UserSystem());
-        AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
-        // avatar builder is for player and monster
-        avatarSystem.setAvatarBuilder("avatar", new MazeAvatarBuilder());
-        avatarSystem.setViewTransform(getViewTransform());
-        SystemManager.addSystem(avatarSystem);
 
         InputToRequestSystem inputToRequestSystem = null;
         if (sceneMode.isClient()) {
@@ -150,6 +143,19 @@ public class MazeScene extends Scene {
             inputToRequestSystem.setSegmentRequest(5, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
             inputToRequestSystem.setSegmentRequest(7, RequestRegistry.TRIGGER_REQUEST_FORWARD);
             SystemManager.addSystem(inputToRequestSystem);
+        }
+        if (sceneMode.isServer()) {
+            SystemManager.addSystem(MazeMovingAndStateSystem.buildFromArguments());
+            SystemManager.addSystem(new UserSystem());
+            SystemManager.addSystem(new BulletSystem());
+            SystemManager.addSystem(new BotSystem(sceneMode.isServer() && !sceneMode.isClient()));
+            // AvatarSystem handles login etc., so no need to have it here. Avatar is built just by entity model builder.
+            AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
+            // avatar builder is for player and monster
+            avatarSystem.setAvatarBuilder("avatar", new MazeAvatarBuilder());
+            avatarSystem.setViewTransform(getViewTransform());
+            SystemManager.addSystem(avatarSystem);
+
         }
 
         if (vrInstance != null) {
@@ -197,9 +203,6 @@ public class MazeScene extends Scene {
             }
         }
 
-        SystemManager.addSystem(new BulletSystem());
-        SystemManager.addSystem(new BotSystem(sceneMode.isServer() && !sceneMode.isClient()));
-
         if (sceneMode.isServer() && !sceneMode.isClient()) {
             SystemManager.addSystem(ServerSystem.buildForInitialEventsForClient(new EventType[]{EventRegistry.EVENT_MAZE_LOADED}));
         }
@@ -211,7 +214,8 @@ public class MazeScene extends Scene {
         addLight();
         //31.10.20 backendAdapter=new MazeLocalBackendAdapter();
 
-        if (sceneMode.isServer() && sceneMode.isClient()) {
+        // Send login request in both monolith and client mode
+        if (/*sceneMode.isServer() &&*/ sceneMode.isClient()) {
             // standalone. Handle like a client that connected.
             backendConnected();
         }

@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static de.yard.threed.engine.BaseEventRegistry.BASE_EVENT_ENTITY_CHANGE;
 
 /**
  * Convert an objects transform change to a bus event.
@@ -106,7 +105,7 @@ public class SceneServerRenderer extends HomeBrewRenderer {
     /**
      * Publish entity state.
      */
-    public static void sendEntityState(int id, String bundlename, String modelfile, Vector3 position, Quaternion rotation) {
+    /*public static void sendEntityState(int id, String bundlename, String modelfile, Vector3 position, Quaternion rotation) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("id", Integer.toString(id));
         map.put("bundle", bundlename);
@@ -118,8 +117,7 @@ public class SceneServerRenderer extends HomeBrewRenderer {
         Event event = new Event(BASE_EVENT_ENTITY_CHANGE, new Payload(map));
         SystemManager.sendEvent(event);
         //logger.debug("tranformChange:" + event);
-    }
-
+    }*/
     @Override
     protected void doRender(HomeBrewMesh mesh, Matrix4 projectionmatrix, Matrix4 viewmatrix, List<OpenGlLight> lights) {
         // not needed
@@ -157,12 +155,12 @@ public class SceneServerRenderer extends HomeBrewRenderer {
                 //worldModelMatrix.extractQuaternion()
 
                 // 17.1.23:Shouldn't we publish every entity, independent from having a node(most will have one)?
-                SceneNode node = entity.getSceneNode();
+                /*Now in busconnector SceneNode node = entity.getSceneNode();
                 if (node != null) {
                     Vector3 position = node.getTransform().getPosition();
                     Quaternion rotation = node.getTransform().getRotation();
                     SceneServerRenderer.sendEntityState(entity.getId(), "a", "b", position, rotation);
-                }
+                }*/
             }
         }
     }
@@ -201,12 +199,16 @@ public class SceneServerRenderer extends HomeBrewRenderer {
 
         // get clients packets and publish before prepareFrame, which distributes the events.
         List<ClientConnection> clientConnections = ClientListener.getInstance().getClientConnections();
-        log.debug("Reading packets from {} clients", clientConnections.size());
+        int cnt = 0;
         for (ClientConnection clientConnection : clientConnections) {
             Packet packet;
             while ((packet = clientConnection.getPacket()) != null) {
-                SystemManager.publishPacket(packet);
+                SystemManager.publishPacketFromClient(packet);
+                cnt++;
             }
+        }
+        if (cnt > 0) {
+            log.debug("Read {} packets from {} clients", cnt, clientConnections.size());
         }
     }
 

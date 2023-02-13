@@ -4,7 +4,6 @@ import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.ecs.DefaultBusConnector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +29,11 @@ public class ClientBusConnector extends DefaultBusConnector {
         List<NativeSocket> list = new ArrayList<NativeSocket>();
         list.add(socket);
         return list;
+    }
+
+    @Override
+    public boolean isServer() {
+        return false;
     }
 
     /**

@@ -13,14 +13,17 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeBundleLoader;
 import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.NativeScene;
+import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneAnimationController;
+import de.yard.threed.engine.SceneMode;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.ClientBusConnector;
+import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.loader.InvalidDataException;
 import de.yard.threed.engine.loader.PortableModelBuilder;
@@ -91,7 +94,8 @@ public class AbstractSceneRunner {
     private List<NativeCamera> cameras = new ArrayList<NativeCamera>();
     public NativeHttpClient httpClient = null;
     PlatformInternals platformInternals;
-    public ClientBusConnector clientBusConnector = null;
+    // Only in client mode, null otherwise. Use protected for now even though it might cause C# problems.
+    protected ClientBusConnector clientBusConnector = null;
 
     /**
      * 28.4.20: Warum ist der deperecated. Der scheint jetzt ein vielleicht zeitgemaesser constructor.
@@ -199,11 +203,14 @@ public class AbstractSceneRunner {
         processDelegates(loadresult);
 
         // Is this the best moment to get packets?
+        int cnt = 0;
         if (clientBusConnector != null) {
             Packet packet;
             while ((packet = clientBusConnector.getPacket()) != null) {
-                SystemManager.publishPacket(packet);
+                SystemManager.publishPacketFromServer(packet);
+                cnt++;
             }
+            logger.debug("Read " + cnt + " packets from client bus connector");
         }
 
         // vor den individuellen Updaten die Systems updaten
@@ -249,6 +256,7 @@ public class AbstractSceneRunner {
         // zum Schluss FPS tracken
         trackFps();
         framecount++;
+        SystemManager.reportStatistics();
     }
 
     public boolean keyPressed(int keycode) {
@@ -465,6 +473,10 @@ public class AbstractSceneRunner {
         //bundledelegateresult.clear();
         newJobList.clear();
         completedJobList.getCompletedJobs().clear();
+        if (clientBusConnector != null) {
+            clientBusConnector.close();
+            clientBusConnector = null;
+        }
     }
 
     public long getFrameCount() {
@@ -532,6 +544,32 @@ public class AbstractSceneRunner {
     @Deprecated
     public NativeBundleLoader getBundleLoader() {
         return Platform.getInstance().bundleLoader;
+    }
+
+    /**
+     * Only for testing.
+     */
+    public ClientBusConnector getBusConnector() {
+        return clientBusConnector;
+    }
+
+    /**
+     * Additional approach for having commons in AbstractSceneRunner.
+     * "scene" should hav been set already.
+     */
+    protected void initScene(){
+        // decide scene mode monolith or client/server
+        String server = Platform.getInstance().getConfiguration().getString("server");
+        if (server == null) {
+            ascene.init(SceneMode.forMonolith());
+        } else {
+            logger.info("Connecting to server " + server);
+            NativeSocket socket = Platform.getInstance().connectToServer(server, DefaultBusConnector.DEFAULT_PORT);
+            clientBusConnector = new ClientBusConnector(socket);
+            SystemManager.setBusConnector(clientBusConnector);
+
+            ascene.init(SceneMode.forClient());
+        }
     }
 }
 

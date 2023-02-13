@@ -14,6 +14,7 @@ import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.ecs.ClientBusConnector;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.testutil.EventFilter;
 import de.yard.threed.engine.ecs.ServerSystem;
 import de.yard.threed.engine.ecs.SystemManager;
@@ -43,9 +44,8 @@ public class TestClient {
     public static String USER_NAME0 = "carl";
     public static String USER_NAME1 = "wayne";
     public String username;
-    List<Packet> allPackets = new ArrayList<>();
-    List<Event> allEvents = new ArrayList<>();
     List<Request> allRequests = new ArrayList<>();
+    LoggingSystemTracker systemTracker=new LoggingSystemTracker();
 
     public TestClient(String username) {
         this.username = username;
@@ -134,8 +134,8 @@ public class TestClient {
         Packet packet;
         while ((packet = getPacket()) != null) {
             packets.add(packet);
+            systemTracker.packetReceivedFromServer(packet);
         }
-        allPackets.addAll(packets);
 
         for (Packet p : packets) {
             if (DefaultBusConnector.isEvent(p)) {
@@ -143,7 +143,8 @@ public class TestClient {
                 if (event == null) {
                     Assertions.fail("decode failed");
                 }
-                allEvents.add(event);
+                // Since this is no full client, immediately consider events to be processed.
+                systemTracker.eventProcessed(event);
             } else {
                 Request request = DefaultBusConnector.decodeRequest(p);
                 if (request == null) {
@@ -157,8 +158,8 @@ public class TestClient {
 
     public List<Packet> getAllPackets() {
         readLatestPackets();
-        Assertions.assertEquals(allPackets.size(), allEvents.size());
-        return allPackets;
+        Assertions.assertEquals(systemTracker.getPacketsReceivedFromServer().size(), systemTracker.getEventsProcessed().size());
+        return systemTracker.getPacketsReceivedFromServer();
     }
 
     public EcsEntity getUserEntity() {
@@ -169,7 +170,7 @@ public class TestClient {
 
     public List<Event> findEvents(EventFilter filter) {
         List<Event> result = new ArrayList<Event>();
-        for (Event e : allEvents) {
+        for (Event e : systemTracker.getEventsProcessed()) {
             if (filter == null || filter.matches(e)) {
                 result.add(e);
             }
@@ -196,7 +197,7 @@ public class TestClient {
     }
 
     public void assertEventMazeLoaded(String gridName) {
-        TestUtils.assertEvent(EventRegistry.EVENT_MAZE_LOADED, allEvents, 1, p -> {
+        TestUtils.assertEvent(EventRegistry.EVENT_MAZE_LOADED, systemTracker.getEventsProcessed(), 1, p -> {
             assertEquals(gridName, p.get("gridname"));
         });
         //ServerSystem not available with real server
@@ -210,7 +211,7 @@ public class TestClient {
      * Look for latest event of a specific entity
      */
     public void assertEventEntityState(int entityId, Point expectedLocation, GridOrientation expectedOrientation) {
-        List<Event> entityStateEvents = TestHelper.filterEventList(allEvents, e -> {
+        List<Event> entityStateEvents = TestHelper.filterEventList(systemTracker.getEventsProcessed(), e -> {
             return e.getType().getType() == DefaultBusConnector.EVENT_ENTITYSTATE.getType() &&
                     (Integer) e.getPayload().get("entityid") == entityId;
         });

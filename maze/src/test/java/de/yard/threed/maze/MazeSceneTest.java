@@ -2,8 +2,6 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.Camera;
@@ -19,7 +17,6 @@ import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.maze.testutils.TestUtils;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +46,7 @@ public class MazeSceneTest {
      */
     @Test
     public void testSokobanWikipedia() {
-        setup("skbn/SokobanWikipedia.txt", true);
+        sceneRunner = TestUtils.buildSceneRunnerForMazeScene("skbn/SokobanWikipedia.txt", true, INITIAL_FRAMES);
 
         // env + test properties + maze properties file
         assertEquals(3, Platform.getInstance().getConfiguration().size());
@@ -161,7 +158,7 @@ public class MazeSceneTest {
      */
     @Test
     public void test_P_Simple() {
-        setup("maze/Maze-P-Simple.txt", false);
+        sceneRunner = TestUtils.buildSceneRunnerForMazeScene("maze/Maze-P-Simple.txt", false, INITIAL_FRAMES);
 
         // env + test properties + maze properties file
         assertEquals(3, Platform.getInstance().getConfiguration().size());
@@ -217,7 +214,7 @@ public class MazeSceneTest {
     @Test
     public void testM_30x20() throws Exception {
 
-        setup("maze/Maze-M-30x20.txt", false);
+        sceneRunner = TestUtils.buildSceneRunnerForMazeScene("maze/Maze-M-30x20.txt", false, INITIAL_FRAMES);
 
         // env + test properties + maze properties file
         assertEquals(3, Platform.getInstance().getConfiguration().size());
@@ -248,21 +245,5 @@ public class MazeSceneTest {
         assertEquals(1, MoverComponent.getMoverComponent(bot0).getTeam());
         assertEquals(1, MoverComponent.getMoverComponent(bot1).getTeam());
         assertEquals(1, MoverComponent.getMoverComponent(bot2).getTeam());
-    }
-
-    /**
-     * Needs parameter, so no @Before
-     */
-    private void setup(String gridname, boolean gridTeleporterEnabled) {
-
-        MazeDataProvider.reset();
-
-        HashMap<String, String> properties = new HashMap<String, String>();
-        properties.put("scene", "de.yard.threed.maze.MazeScene");
-        properties.put("argv.initialMaze", gridname);
-        if (gridTeleporterEnabled) {
-            properties.put("argv.enableMazeGridTeleporter", "true");
-        }
-        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, Configuration.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "maze"});
     }
 }

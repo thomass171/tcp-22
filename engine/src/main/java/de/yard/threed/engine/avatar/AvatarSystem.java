@@ -32,7 +32,7 @@ import java.util.List;
 
 public class AvatarSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(AvatarSystem.class);
-
+    public static String TAG = "AvatarSystem";
     boolean avatarsystemdebuglog = true;
 
     //15.5.21 boolean enableNearView = false;
@@ -152,6 +152,11 @@ public class AvatarSystem extends DefaultEcsSystem {
     @Override
     public void process(Event evt) {
         logger.debug("got event " + evt.getType());
+    }
+
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     public static Event buildUserJoinedEvent(EcsEntity userEntity) {

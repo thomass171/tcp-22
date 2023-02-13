@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.List;
 
-import static de.yard.threed.engine.BaseEventRegistry.BASE_EVENT_ENTITY_CHANGE;
+import static de.yard.threed.engine.ecs.DefaultBusConnector.EVENT_ENTITYSTATE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -64,7 +64,7 @@ public class DemoSceneTest {
 
         List<Packet> packets = testClient.readLatestPackets();
         // Movements also should arrive in client
-        TestUtils.assertEventPacket(BASE_EVENT_ENTITY_CHANGE, new Pair[]{
+        TestUtils.assertEventPacket(EVENT_ENTITYSTATE, new Pair[]{
                 new Pair("p_position", "*")
         }, packets,-1);
 

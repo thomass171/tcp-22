@@ -23,6 +23,7 @@ import java.util.List;
  */
 public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     Log logger = Platform.getInstance().getLog(MazeMovingAndStateSystem.class);
+    public static String TAG = "MazeMovingAndStateSystem";
     //MA32 GridState currentstate;
     //nextstate != null isType indicator for ongoing movement.
     //private GridState nextstate;
@@ -61,10 +62,6 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 },
                 new EventType[]{
                         UserSystem.USER_EVENT_LOGGEDIN, UserSystem.USER_EVENT_JOINED});
-
-        //10.4.21: TODO in init(), vorher die Settings aber decouplen
-        //abstractMaze = new SimpleMaze();
-        st = MazeSettings.init(MazeSettings.MODE_SOKOBAN);
     }
 
     public static MazeMovingAndStateSystem buildFromArguments() {
@@ -185,9 +182,9 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         return processSolutionOrUserRequest(currentstate, request);
     }
 
-
-    public MazeSettings getSettings() {
-        return st;
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     /**

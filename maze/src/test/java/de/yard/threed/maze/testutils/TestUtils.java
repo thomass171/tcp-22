@@ -2,6 +2,7 @@ package de.yard.threed.maze.testutils;
 
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.NativeCollision;
 import de.yard.threed.engine.GridTeleporter;
 import de.yard.threed.engine.Ray;
@@ -18,6 +19,7 @@ import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FORWARD;
@@ -184,5 +186,30 @@ public class TestUtils {
 
     public static void assertDirection(Direction expected, Direction actual) {
         assertEquals(expected.toString(), actual.toString());
+    }
+
+    public static SceneRunnerForTesting buildSceneRunnerForMazeScene(String gridname, boolean gridTeleporterEnabled, int initial_frames) {
+
+        HashMap<String, String> properties = new HashMap<String, String>();
+        if (gridTeleporterEnabled) {
+            properties.put("argv.enableMazeGridTeleporter", "true");
+        }
+        return buildSceneRunnerForMazeScene(gridname,properties,initial_frames);
+    }
+
+    /**
+     * Also used in other modules.
+     */
+    public static SceneRunnerForTesting buildSceneRunnerForMazeScene(String gridname,  HashMap<String, String> additionalPproperties, int initial_frames) {
+
+        MazeDataProvider.reset();
+
+        HashMap<String, String> properties = new HashMap<String, String>();
+        properties.put("scene", "de.yard.threed.maze.MazeScene");
+        properties.put("argv.initialMaze", gridname);
+        properties.putAll(additionalPproperties);
+        // buildDefaultConfigurationWithEnv is needed for HOSTDIR
+        SceneRunnerForTesting sceneRunner = SceneRunnerForTesting.setupForScene(initial_frames, Configuration.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "maze"});
+        return sceneRunner;
     }
 }

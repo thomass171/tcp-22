@@ -22,14 +22,14 @@ import java.util.List;
 
 public class BotSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(BotSystem.class);
-
+    public static String TAG = "BotSystem";
     private boolean botsystemdebuglog = true;
     private List<List<StartPosition>> startPositions;
     private IntProvider rand = new RandomIntProvider();
     private boolean serverMode;
 
     /**
-     *
+     * Isn't a bot system always in server?
      */
     public BotSystem(boolean serverMode) {
         super(new String[]{BotComponent.TAG},
@@ -104,6 +104,11 @@ public class BotSystem extends DefaultEcsSystem {
             }
             startPositions = null;
         }
+    }
+
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     public void setIntProvider(IntProvider intProvider) {

@@ -17,7 +17,7 @@ import java.util.List;
 
 public class UserSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(UserSystem.class);
-
+    public static String TAG = "UserSystem";
     public static RequestType USER_REQUEST_LOGIN = RequestType.register(1000,"USER_REQUEST_LOGIN");
     // The logged in user wants to join.
     // The join request creates an avatar for the user entity. Parameter 0 "userEntityId", Parameter 1 "forlogin"
@@ -61,6 +61,11 @@ public class UserSystem extends DefaultEcsSystem {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     public static Request buildLoginRequest(String username, String clientid) {

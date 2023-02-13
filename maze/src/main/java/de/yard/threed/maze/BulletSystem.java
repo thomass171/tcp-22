@@ -23,7 +23,7 @@ import java.util.List;
 
 public class BulletSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(BulletSystem.class);
-
+    public static String TAG = "BulletSystem";
     public static RequestType TRIGGER_REQUEST_FIRE = RequestType.register(2017,"TRIGGER_REQUEST_FIRE");
 
     boolean bulletsystemdebuglog = false;
@@ -94,6 +94,10 @@ public class BulletSystem extends DefaultEcsSystem {
         return false;
     }
 
+    @Override
+    public String getTag() {
+        return TAG;
+    }
 
     public static Request buildFireRequest(int userEntityId, Direction targetDirection) {
         return new Request(TRIGGER_REQUEST_FIRE, new Payload(new Object[]{targetDirection}), userEntityId);

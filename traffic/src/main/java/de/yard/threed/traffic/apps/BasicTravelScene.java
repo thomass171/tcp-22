@@ -2,7 +2,6 @@ package de.yard.threed.traffic.apps;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.platform.PlatformHelper;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;

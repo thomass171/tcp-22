@@ -47,7 +47,7 @@ public class ClientListener extends Thread {
 
     public static ClientListener getInstance() {
         if (instance == null) {
-            throw new RuntimeException("no instance");
+            throw new RuntimeException("no instance of ClientListener");
         }
         return instance;
     }

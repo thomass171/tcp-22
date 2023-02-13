@@ -4,6 +4,7 @@ package de.yard.threed.engine.platform.common;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
+import de.yard.threed.engine.ecs.SystemTracker;
 
 import java.util.*;
 
@@ -19,32 +20,40 @@ public class RequestQueue {
     private Map<RequestType, List<RequestHandler>> requesthandler = new HashMap<RequestType, List<RequestHandler>>();
 
     public void process(DefaultBusConnector busConnector) {
-        // Jeder Request nur einmal.
+
         List<Request> processedrequests = new ArrayList<Request>();
         //during processing new requests might be created (eg. "startFlight"). So clone. iterator doesn't help. TODO improve
         ArrayList<Request> tmpRequests = new ArrayList<Request>();
         tmpRequests.addAll(requests);
         for (Request request : tmpRequests) {
 
-            //for (Iterator<Request> iterator = requests.iterator(); iterator.hasNext(); ) {
-            //Request request = iterator.next();
-            List<RequestHandler> handler = requesthandler.get(request.getType());
-            if (handler != null) {
-                for (RequestHandler ebs : handler) {
-                    if (!processedrequests.contains(request)) {
-                        if (ebs.processRequest(request)) {
-                            processedrequests.add(request);
-                        } else {
-                            request.declined++;
-                        }
-                    }
-                }
-            }
-            if (busConnector != null) {
+            // Put requests only once to the network
+            if (busConnector != null && request.declined == 0) {
                 busConnector.pushRequest(request);
             }
+            if (deliverToHandler(request)) {
+                processedrequests.add(request);
+            } else {
+                request.declined++;
+            }
         }
+        // keep requests not processed for next time
         requests.removeAll(processedrequests);
+    }
+
+    public void processRequestsFromNetwork(List<Request> netRequests) {
+
+        List<Request> processedrequests = new ArrayList<Request>();
+        for (Request request : netRequests) {
+
+            if (deliverToHandler(request)) {
+                processedrequests.add(request);
+            } else {
+                request.declined++;
+            }
+        }
+        // keep requests not processed for next time
+        netRequests.removeAll(processedrequests);
     }
 
     public void addHandler(RequestType evt, RequestHandler system) {
@@ -79,9 +88,32 @@ public class RequestQueue {
 
     /**
      * Only for tests
+     *
      * @return
      */
     public Request getRequest(int i) {
         return requests.get(i);
+    }
+
+    /**
+     * Every Request only once. 10.2.23: Why? Disabled for now
+     *
+     * @param request
+     */
+    private boolean deliverToHandler(Request request) {
+        boolean processed = false;
+        List<RequestHandler> handler = requesthandler.get(request.getType());
+        if (handler != null) {
+            for (RequestHandler ebs : handler) {
+                //if (!processedrequests.contains(request)) {
+                if (ebs.processRequest(request)) {
+                    //processedrequests.add(request);
+                    processed = true;
+                } else {
+                    //request.declined++;
+                }
+            }
+        }
+        return processed;
     }
 }

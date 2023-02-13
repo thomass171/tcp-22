@@ -8,7 +8,7 @@ import de.yard.threed.core.EventType;
  */
 public class BaseEventRegistry {
 
-    public static EventType BASE_EVENT_ENTITY_CREATE = EventType.register(1002, "BASE_EVENT_ENTITY_CREATE");
+    /*public static EventType BASE_EVENT_ENTITY_CREATE = EventType.register(1002, "BASE_EVENT_ENTITY_CREATE");
 
-    public static EventType BASE_EVENT_ENTITY_CHANGE = EventType.register(1003, "BASE_EVENT_ENTITY_CHANGE");
+    public static EventType BASE_EVENT_ENTITY_CHANGE = EventType.register(1003, "BASE_EVENT_ENTITY_CHANGE");*/
 }

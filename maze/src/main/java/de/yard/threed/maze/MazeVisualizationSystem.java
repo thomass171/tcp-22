@@ -47,7 +47,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
     //TODO irgendwie lokal in entity. 9.4.21: view in entity?
     static public MazeView view;
 
-    GridTeleporter gridTeleporter;
+    public GridTeleporter gridTeleporter;
     SceneNode fireTargetMarker;
     // fireMode 1: Use a target marker at a wall to indicate fire target. Fire targets are difficult to display correctly at all walls
     // due to different wall orientations. Not completely implemented.

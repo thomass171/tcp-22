@@ -36,18 +36,19 @@ public class Main {
         logger.debug("scene=" + scene);
 
         // exit is done by JME when ESC is pressed?
-       /* Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("shutdown detected");
-            if (nsr.clientBusConnector != null) {
-                nsr.clientBusConnector.close();
-            }
+            // cleanup also closes busconnector socket
+            nsr.cleanup();
+            System.out.println("socket closed");
+
            /* try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.exit(0);* /
-        }));*/
+            System.exit(0);*/
+        }));
 
         try {
             if (scene == null) {

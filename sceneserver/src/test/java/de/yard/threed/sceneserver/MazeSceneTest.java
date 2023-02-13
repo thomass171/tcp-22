@@ -7,6 +7,7 @@ import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
+import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.ServerSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
@@ -37,8 +38,8 @@ public class MazeSceneTest {
     static final int INITIAL_FRAMES = 10;
 
     SceneServer sceneServer;
-   // TestContext testContext;
-
+    // TestContext testContext;
+    LoggingSystemTracker loggingSystemTracker;
 
     public void setup(String gridname) throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
@@ -46,7 +47,8 @@ public class MazeSceneTest {
         //properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
         properties.put("initialMaze", gridname);
         sceneServer = TestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties, 20);
-
+        loggingSystemTracker = new LoggingSystemTracker();
+        SystemManager.setSystemTracker(loggingSystemTracker);
     }
 
     @Test
@@ -58,7 +60,7 @@ public class MazeSceneTest {
         List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
         assertEquals(2, entities.size(), "number of entities");
         // initial event missed by all clients
-        assertEquals(1,((ServerSystem) SystemManager.findSystem(ServerSystem.TAG)).getSavedEvents().size());
+        assertEquals(1, ((ServerSystem) SystemManager.findSystem(ServerSystem.TAG)).getSavedEvents().size());
 
         //SystemState.state = SystemState.STATE_READY_TO_JOIN;
 
@@ -80,15 +82,20 @@ public class MazeSceneTest {
         assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(userEntity).toString(), "initial orientation");
         assertEquals(new Point(6, 1).toString(), MazeUtils.getMoverposition(userEntity).toString(), "initial location");
 
-        testClient.sendRequestAndWait(sceneServer,new Request(TRIGGER_REQUEST_TURNRIGHT, userEntity.getId()));
-        testClient.sendRequestAndWait(sceneServer,new Request(TRIGGER_REQUEST_FORWARD, userEntity.getId()));
-        testClient.sendRequestAndWait(sceneServer,new Request(TRIGGER_REQUEST_TURNLEFT, userEntity.getId()));
-        testClient.sendRequestAndWait(sceneServer,new Request(TRIGGER_REQUEST_FORWARD, userEntity.getId()));
+        testClient.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_TURNRIGHT, userEntity.getId()));
+        testClient.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_FORWARD, userEntity.getId()));
+        testClient.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_TURNLEFT, userEntity.getId()));
+        testClient.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_FORWARD, userEntity.getId()));
 
         // 30 is not sufficient
         TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
 
         TestUtil.assertPoint("player location", new Point(7, 2), mc.getLocation());
+
+        loggingSystemTracker.tag();
+        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
+        // entity change events go to network directly. So there shouldn't have been any event.
+        assertEquals(0, loggingSystemTracker.getLatestEventsProcessed().size());
 
         testClient.disconnect();
         // should publish connection closed event.
