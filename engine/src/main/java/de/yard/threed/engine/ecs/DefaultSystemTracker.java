@@ -9,17 +9,14 @@ import de.yard.threed.core.Packet;
 public class DefaultSystemTracker implements SystemTracker {
     @Override
     public void eventsSentToClients() {
-
     }
 
     @Override
-    public void packetReceivedFromClient(Packet packet) {
-
+    public void packetReceivedFromNetwork(Packet packet) {
     }
 
     @Override
-    public void packetReceivedFromServer(Packet packet) {
-
+    public void packetSentToNetwork(Packet packet) {
     }
 
     @Override

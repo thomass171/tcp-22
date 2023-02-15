@@ -11,6 +11,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.ClientBusConnector;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsEntity;
@@ -134,7 +135,7 @@ public class TestClient {
         Packet packet;
         while ((packet = getPacket()) != null) {
             packets.add(packet);
-            systemTracker.packetReceivedFromServer(packet);
+            systemTracker.packetReceivedFromNetwork(packet);
         }
 
         for (Packet p : packets) {
@@ -158,8 +159,8 @@ public class TestClient {
 
     public List<Packet> getAllPackets() {
         readLatestPackets();
-        Assertions.assertEquals(systemTracker.getPacketsReceivedFromServer().size(), systemTracker.getEventsProcessed().size());
-        return systemTracker.getPacketsReceivedFromServer();
+        Assertions.assertEquals(systemTracker.getPacketsReceivedFromNetwork().size(), systemTracker.getEventsProcessed().size());
+        return systemTracker.getPacketsReceivedFromNetwork();
     }
 
     public EcsEntity getUserEntity() {
@@ -212,7 +213,7 @@ public class TestClient {
      */
     public void assertEventEntityState(int entityId, Point expectedLocation, GridOrientation expectedOrientation) {
         List<Event> entityStateEvents = TestHelper.filterEventList(systemTracker.getEventsProcessed(), e -> {
-            return e.getType().getType() == DefaultBusConnector.EVENT_ENTITYSTATE.getType() &&
+            return e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType() &&
                     (Integer) e.getPayload().get("entityid") == entityId;
         });
 
@@ -225,6 +226,13 @@ public class TestClient {
         assertNotNull(rotation, "rotation");
         // rotation taken as is, but seem
         TestUtil.assertQuaternion("rotation", expectedOrientation.getRotation(), rotation);
+    }
+
+    /**
+     * Validate all
+     */
+    public void assertAllEventEntityState() {
+        TestUtils.assertAllEventEntityState(systemTracker.getEventsProcessed());
     }
 
     /**

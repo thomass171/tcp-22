@@ -54,6 +54,9 @@ public class RealServer {
 
     /**
      * Lauch a standalone Java process. From "https://lankydan.dev/running-a-java-class-as-a-subprocess".
+     *
+     * By the way of setting the class path, the class path from the IDE is used, so latest changes apply without
+     * running an external maven build.
      */
     public static Process execJavaProcess(Class clazz, List<String> jvmArgs, List<String> args) throws Exception {
 

@@ -26,6 +26,8 @@ import java.util.List;
  * Building the avatar is the step USER_REQUEST_JOIN->USER_EVENT_JOINED.
  * <p>
  * 22.11.21: The name AvatarSystem is confusing. In fact its a player system. And the player just might have an avatar model (body).
+ * 13.02.23: TODO Avatar building should be the result of JOINED, not the process of joining, which should be done in the game logic.
+ * 15.02.23: And observer handling should be decoupled.
  * <p>
  * Created by thomass on 20.11.20.
  */
@@ -179,7 +181,7 @@ public class AvatarSystem extends DefaultEcsSystem {
             // used as marker
             user.addComponent(new AvatarComponent());
         } else {
-            mainNode = user.buildSceneNodeByModelFactory(builderName, modelBuilderRegistry);
+            mainNode = user.buildSceneNodeByModelFactory(builderName, new ModelBuilderRegistry[]{modelBuilderRegistry});
         }
         mainNode.setName("Avatar");
 

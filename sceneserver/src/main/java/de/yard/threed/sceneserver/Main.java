@@ -32,6 +32,7 @@ public class Main {
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Exception: Exiting");
             System.exit(1);
         }
         System.exit(0);

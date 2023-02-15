@@ -4,12 +4,22 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
+import de.yard.threed.core.Payload;
+import de.yard.threed.core.Point;
+import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.testutil.PayloadHook;
 import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.TestHelper;
+import de.yard.threed.maze.Grid;
+import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeDataProvider;
+import de.yard.threed.maze.MazeUtils;
 import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
 import de.yard.threed.sceneserver.ClientConnection;
 import de.yard.threed.sceneserver.ClientListener;
@@ -114,6 +124,7 @@ public class TestUtils {
         TestFactory.resetInit();
         HomeBrewSceneRunner.dropInstance();
         MazeDataProvider.reset();
+        // reset of Grid Instance not needed
 
         SceneServer sceneServer = new SceneServer("subdir", sceneclass, Configuration.buildDefaultConfigurationWithEnv(properties));
         HomeBrewSceneRunner sceneRunner = (HomeBrewSceneRunner) sceneServer.nsr;
@@ -136,5 +147,24 @@ public class TestUtils {
         assertEquals(before + frames, sceneRunner.getFrameCount());
     }
 
-
+    /**
+     * Validate all
+     * Entity change events should be complete. The total number might vary.
+     */
+    public static void assertAllEventEntityState(List<Event> allEvents) {
+        List<Event> eventlist = TestHelper.filterEventList(allEvents, (e) -> e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType());
+        for (Event e : eventlist) {
+            Payload payload = e.getPayload();
+            Integer entityid = (Integer) payload.get("entityid");
+            String buildername = (String) payload.get("buildername");
+            Vector3 position = (Vector3) payload.get("position");
+            Vector3 scale = (Vector3) payload.get("scale");
+            Quaternion rotation = (Quaternion) payload.get("rotation");
+            assertNotNull(entityid, "entityid");
+            assertNotNull(buildername, "buildername:" + e);
+            assertNotNull(position, "position");
+            assertNotNull(rotation, "rotation");
+            assertNotNull(scale, "scale");
+        }
+    }
 }

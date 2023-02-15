@@ -5,6 +5,7 @@ import de.yard.threed.engine.ModelBuilder;
 import de.yard.threed.engine.ModelBuilderRegistry;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,17 @@ public final class EcsEntity {
     public EcsEntity() {
         SystemManager.addEntity(this);
         id = idcounter++;
+    }
+
+    /**
+     * Constructor for client mode only for mirroring entities.
+     */
+    public EcsEntity(int id) {
+        if (AbstractSceneRunner.getInstance().getBusConnector() == null) {
+            throw new RuntimeException("invalid usage outside client mode");
+        }
+        SystemManager.addEntity(this);
+        this.id = id;
     }
 
     public EcsEntity(SceneNode sn) {
@@ -179,13 +191,20 @@ public final class EcsEntity {
      * Model building might be async!
      * Returns the destination node.
      */
-    public SceneNode buildSceneNodeByModelFactory(String builderName, ModelBuilderRegistry modelBuilderRegistry) {
+    public SceneNode buildSceneNodeByModelFactory(String builderName, ModelBuilderRegistry[] modelBuilderRegistries) {
 
         this.scenenode = new SceneNode();
         this.builderName = builderName;
-        ModelBuilder modelBuilder = modelBuilderRegistry.lookupModelBuilder(builderName);
-        modelBuilder.buildModel(scenenode,this);
-        return this.scenenode;
+        for (ModelBuilderRegistry registry : modelBuilderRegistries) {
+            ModelBuilder modelBuilder = registry.lookupModelBuilder(builderName);
+            if (modelBuilder != null) {
+                // potential async build
+                modelBuilder.buildModel(scenenode, this);
+                return this.scenenode;
+            }
+        }
+        logger.warn("No model built. Builder name not registered:" + builderName);
+        return scenenode;
     }
 
     public String getBuilderName() {

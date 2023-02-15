@@ -189,6 +189,8 @@ public class SceneServerRenderer extends HomeBrewRenderer {
     @Override
     protected void collectKeyboardAndMouseEvents(AbstractSceneRunner runner) {
 
+        ClientListener.getInstance().checkLiveness();
+        
         // for closed connections send a close event, independent from whether the client logged off.
         ClientConnection cc;
         while ((cc = ClientListener.getInstance().discardClosedConnection()) != null) {

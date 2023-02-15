@@ -24,6 +24,7 @@ public class EcsHelper {
     }
 
     public static EcsEntity findEntityById(int id) {
+        // TODO optimize by not using a list
         List<EcsEntity> candidates = SystemManager.findEntities((e) -> e.getId() == id);
         if (candidates.size() == 0) {
             return null;

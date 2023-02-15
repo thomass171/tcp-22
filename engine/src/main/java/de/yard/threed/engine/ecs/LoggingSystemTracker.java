@@ -15,8 +15,8 @@ import java.util.Map;
 public class LoggingSystemTracker implements SystemTracker {
 
     private String latestMessage = "";
-    private List<Packet> fromClient = new ArrayList<Packet>();
-    private List<Packet> fromServer = new ArrayList<Packet>();
+    private List<Packet> fromNetwork = new ArrayList<Packet>();
+    private List<Packet> toNetwork = new ArrayList<Packet>();
     private List<Event> eventsProcessed = new ArrayList<Event>();
     private Map<String, Integer> tags = new HashMap<String, Integer>();
 
@@ -26,13 +26,13 @@ public class LoggingSystemTracker implements SystemTracker {
     }
 
     @Override
-    public void packetReceivedFromClient(Packet packet) {
-        fromClient.add(packet);
+    public void packetReceivedFromNetwork(Packet packet) {
+        fromNetwork.add(packet);
     }
 
     @Override
-    public void packetReceivedFromServer(Packet packet) {
-        fromServer.add(packet);
+    public void packetSentToNetwork(Packet packet) {
+        toNetwork.add(packet);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class LoggingSystemTracker implements SystemTracker {
 
     @Override
     public void report() {
-        String msg = "" + fromClient.size() + " packets from client, " + fromServer.size() + " from server";
+        String msg = "" + fromNetwork.size() + " packets from network, " + toNetwork.size() + " to network";
         if (!msg.equals(latestMessage)) {
             Platform.getInstance().getLog(LoggingSystemTracker.class).info(msg);
             latestMessage = msg;
@@ -62,8 +62,11 @@ public class LoggingSystemTracker implements SystemTracker {
         return eventsProcessed;
     }
 
-    public List<Packet> getPacketsReceivedFromServer() {
-        return fromServer;
+    public List<Packet> getPacketsReceivedFromNetwork() {
+        return fromNetwork;
     }
 
+    public List<Packet> getPacketsSentToNetwork() {
+        return toNetwork;
+    }
 }

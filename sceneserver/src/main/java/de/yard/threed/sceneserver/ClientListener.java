@@ -23,8 +23,9 @@ public class ClientListener extends Thread {
 
     String host;
     int port;
-    boolean terminateflag = false;
-    private boolean terminated = false;
+    private volatile boolean terminateflag = false;
+    private volatile boolean terminated = false;
+    private volatile boolean aborted = false;
     java.net.ServerSocket serverSocket;
     List<ClientConnection> clientConnectionList = new ArrayList();
     private static ClientListener instance;
@@ -82,17 +83,23 @@ public class ClientListener extends Thread {
                 clientConnectionList.add(new ClientConnection(clientSocket));
 
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             if (terminateflag) {
                 logger.debug("Expected exception due to closed socket due to terminate");
+                terminated = true;
             } else
                 e.printStackTrace();
+            aborted = true;
         } finally {
-
         }
 
-        logger.info("terminated");
-        terminated = true;
+        if (terminated) {
+            logger.info("terminated");
+        }
+        if (aborted) {
+            logger.info("aborted");
+        }
+        logger.info("Thread ended");
     }
 
     /**
@@ -112,19 +119,15 @@ public class ClientListener extends Thread {
         serverSocket = null;
     }
 
-    public boolean terminated() {
-        return terminated;
-    }
-
     public List<ClientConnection> getClientConnections() {
         return clientConnectionList;
     }
 
-    public void waitForTerminate() {
+    private void waitForTerminate() {
 
         int cnt = 0;
 
-        while (!terminated()) {
+        while (!terminated) {
             sleepMs(100);
             if (cnt++ > 50) {
                 // dont wait more than 5 seconds
@@ -160,5 +163,14 @@ public class ClientListener extends Thread {
             }
         }
         return null;
+    }
+
+    public void checkLiveness() {
+        if (terminated) {
+            throw new RuntimeException("ClientListener terminated");
+        }
+        if (aborted) {
+            throw new RuntimeException("ClientListener aborted");
+        }
     }
 }

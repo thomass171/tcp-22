@@ -10,9 +10,9 @@ public interface SystemTracker {
 
     void eventsSentToClients();
 
-    void packetReceivedFromClient(Packet packet);
+    void packetReceivedFromNetwork(Packet packet);
 
-    void packetReceivedFromServer(Packet packet);
+    void packetSentToNetwork(Packet packet);
 
     /**
      * Not for events from network.

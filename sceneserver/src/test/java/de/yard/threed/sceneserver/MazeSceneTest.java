@@ -19,6 +19,7 @@ import de.yard.threed.maze.MoverComponent;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import de.yard.threed.sceneserver.testutils.TestUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -49,6 +50,12 @@ public class MazeSceneTest {
         sceneServer = TestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties, 20);
         loggingSystemTracker = new LoggingSystemTracker();
         SystemManager.setSystemTracker(loggingSystemTracker);
+    }
+
+    @AfterEach
+    public void tearDown(){
+        ClientListener.dropInstance();
+        // no need to stop server because it is not really running
     }
 
     @Test
@@ -97,7 +104,9 @@ public class MazeSceneTest {
         // entity change events go to network directly. So there shouldn't have been any event.
         assertEquals(0, loggingSystemTracker.getLatestEventsProcessed().size());
 
+        testClient.assertAllEventEntityState();
         testClient.disconnect();
+
         // should publish connection closed event.
         TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
 

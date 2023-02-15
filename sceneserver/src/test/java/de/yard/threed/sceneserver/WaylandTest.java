@@ -6,6 +6,7 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import de.yard.threed.sceneserver.testutils.TestUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +35,12 @@ public class WaylandTest {
         }
 
         sceneServer = TestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES,properties,200);
+    }
+
+    @AfterEach
+    public void tearDown(){
+        ClientListener.dropInstance();
+        // no need to stop server because it is not really running
     }
 
     /**

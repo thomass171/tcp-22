@@ -18,7 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.HashMap;
 import java.util.Map;
 
-import static de.yard.threed.engine.ecs.DefaultBusConnector.EVENT_ENTITYSTATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -55,7 +54,7 @@ public class BusConnectorTest {
         map.put("position", position.toString());
         map.put("rotation", rotation.toString());
         //11.2.23 payload no longer complies to specification, but for the test it is ok
-        Event event = new Event(EVENT_ENTITYSTATE, new Payload(map));
+        Event event = new Event(BaseEventRegistry.EVENT_ENTITYSTATE, new Payload(map));
 
         Packet packet = DefaultBusConnector.encodeEvent(event);
 

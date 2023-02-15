@@ -2,6 +2,7 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
@@ -10,13 +11,13 @@ import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import de.yard.threed.sceneserver.testutils.TestUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.List;
 
-import static de.yard.threed.engine.ecs.DefaultBusConnector.EVENT_ENTITYSTATE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -38,6 +39,12 @@ public class DemoSceneTest {
         properties.put("argv.enableAutomove", "true");
         System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         sceneServer = TestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES, properties, 50);
+    }
+
+    @AfterEach
+    public void tearDown(){
+        ClientListener.dropInstance();
+        // no need to stop server because it is not really running
     }
 
     @Test
@@ -64,7 +71,7 @@ public class DemoSceneTest {
 
         List<Packet> packets = testClient.readLatestPackets();
         // Movements also should arrive in client
-        TestUtils.assertEventPacket(EVENT_ENTITYSTATE, new Pair[]{
+        TestUtils.assertEventPacket(BaseEventRegistry.EVENT_ENTITYSTATE, new Pair[]{
                 new Pair("p_position", "*")
         }, packets,-1);
 

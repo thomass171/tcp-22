@@ -207,7 +207,7 @@ public class MazeScene extends Scene {
             SystemManager.addSystem(ServerSystem.buildForInitialEventsForClient(new EventType[]{EventRegistry.EVENT_MAZE_LOADED}));
         }
         if (!sceneMode.isServer() && sceneMode.isClient()) {
-            SystemManager.addSystem(new ClientSystem());
+            SystemManager.addSystem(new ClientSystem(new ModelBuilderRegistry[]{new MazeAvatarBuilder(),MazeModelFactory.getInstance()}));
         }
 
         MazeDataProvider.init();

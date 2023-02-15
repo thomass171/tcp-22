@@ -42,9 +42,9 @@ public abstract class DefaultBusConnector {
 
     // Events on entity level appear to be more efficient
     public static boolean entitySyncEnabled = true;
-    public static EventType EVENT_ENTITYSTATE = EventType.register(1008, "EVENT_ENTITYSTATE");
     //public static EventType EVENT_ENTITYMODELCREATED = EventType.register("EVENT_ENTITYMODELCREATED");
     //public static EventType EVENT_ENTITYCHANGED = EventType.register("EVENT_ENTITYCHANGED");
+    private static SystemTracker systemTracker = new DefaultSystemTracker();
 
     /**
      * Send event to network for all clients (or server).
@@ -57,18 +57,22 @@ public abstract class DefaultBusConnector {
      * Send event to network (optionally to specific client).
      */
     public void pushEvent(Event evt, String clientId) {
+        Packet packet = encodeEvent(evt);
         for (NativeSocket socket : getSockets(clientId)) {
-            socket.sendPacket(encodeEvent(evt));
+            socket.sendPacket(packet);
         }
+        systemTracker.packetSentToNetwork(packet);
     }
 
     /**
      * Send request to network.
      */
     public void pushRequest(Request request) {
+        Packet packet = encodeRequest(request);
         for (NativeSocket socket : getSockets(null)) {
-            socket.sendPacket(encodeRequest(request));
+            socket.sendPacket(packet);
         }
+        systemTracker.packetSentToNetwork(packet);
     }
 
     /**
@@ -84,19 +88,23 @@ public abstract class DefaultBusConnector {
 
     public static Event buildEntitiyStateEvent(EcsEntity entity) {
 
-        // Using an abstract buildername instead of bundle/model name apperas to be the more flexibel way, so no
+        // Using an abstract buildername instead of bundle/model name appears to be the more flexibel way, so no
         // longer bundle/model are part of the payload.
 
         Payload payload = new Payload()
                 .add("entityid", entity.getId())
                 .add("buildername", (entity.getBuilderName() != null) ? entity.getBuilderName() : "");
-        if (entity.getSceneNode() != null) {
-            Transform transform = entity.getSceneNode().getTransform();
-            payload = payload.add("position", transform.getPosition())
-                    .add("rotation", transform.getRotation())
-                    .add("scale", transform.getScale());
+        if (entity.getSceneNode() == null) {
+            // This might happen during entity creation temporarily, when another system is needed to build the model/scenenode.
+            logger.debug("Skipping entity without scenenode (transform). entity=" + entity);
+            return null;
         }
-        return new Event(EVENT_ENTITYSTATE, payload);
+        Transform transform = entity.getSceneNode().getTransform();
+        payload = payload.add("position", transform.getPosition())
+                .add("rotation", transform.getRotation())
+                .add("scale", transform.getScale());
+
+        return new Event(BaseEventRegistry.EVENT_ENTITYSTATE, payload);
     }
 
     public static Packet encodeRequest(Request request) {
@@ -154,4 +162,9 @@ public abstract class DefaultBusConnector {
         String evt = packet.getValue("event");
         return evt != null;
     }
+
+    public static void setSystemTracker(SystemTracker psystemTracker) {
+        systemTracker = psystemTracker;
+    }
+
 }

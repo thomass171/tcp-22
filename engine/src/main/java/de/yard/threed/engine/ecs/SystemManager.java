@@ -136,7 +136,10 @@ public class SystemManager {
         netEvents.clear();
         if (DefaultBusConnector.entitySyncEnabled && busConnector != null && busConnector.isServer()) {
             for (EcsEntity entity : entities) {
-                busConnector.pushEvent(DefaultBusConnector.buildEntitiyStateEvent(entity));
+                Event entityEvent = DefaultBusConnector.buildEntitiyStateEvent(entity);
+                if (entityEvent != null) {
+                    busConnector.pushEvent(entityEvent);
+                }
             }
         }
 
@@ -239,11 +242,16 @@ public class SystemManager {
         services.clear();
         isinited = false;
         busConnector = null;
+        netEvents.clear();
+        netRequests.clear();
         systemTracker = new DefaultSystemTracker();
     }
 
     public static void setSystemTracker(SystemTracker psystemTracker) {
         systemTracker = psystemTracker;
+        if (busConnector != null) {
+            busConnector.setSystemTracker(psystemTracker);
+        }
     }
 
     public static void reportStatistics() {
@@ -404,12 +412,12 @@ public class SystemManager {
      */
     public static void publishPacketFromClient(Packet packet) {
         publishPacket(packet);
-        systemTracker.packetReceivedFromClient(packet);
+        systemTracker.packetReceivedFromNetwork(packet);
     }
 
     public static void publishPacketFromServer(Packet packet) {
         publishPacket(packet);
-        systemTracker.packetReceivedFromServer(packet);
+        systemTracker.packetReceivedFromNetwork(packet);
     }
 
     private static void publishPacket(Packet packet) {
@@ -442,6 +450,8 @@ public class SystemManager {
 
     public static void setBusConnector(DefaultBusConnector pbusConnector) {
         busConnector = pbusConnector;
+        // keep systemtrack synced. Hopefully this is really intended.
+        busConnector.setSystemTracker(systemTracker);
     }
 
     /**

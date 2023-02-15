@@ -1,10 +1,16 @@
 package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Event;
+import de.yard.threed.core.Payload;
+import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Vector3;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.avatar.AvatarSystem;
+import de.yard.threed.engine.ecs.ClientSystem;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsHelper;
 import de.yard.threed.engine.ecs.EcsTestHelper;
+import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
@@ -69,6 +75,9 @@ public class RealServerRealClientTest {
         assertNull(SystemManager.findSystem(BotSystem.TAG));
         assertNull(SystemManager.findSystem(MazeMovingAndStateSystem.TAG));
         assertNull(SystemManager.findSystem(AvatarSystem.TAG));
+
+        assertNotNull(SystemManager.findSystem(ClientSystem.TAG));
+
         MazeVisualizationSystem mazeVisualizationSystem = ((MazeVisualizationSystem) SystemManager.findSystem(MazeVisualizationSystem.TAG));
         // As of 2022 no longer gridteleporter as default
         assertNull(mazeVisualizationSystem.gridTeleporter);
@@ -78,14 +87,23 @@ public class RealServerRealClientTest {
         sceneRunner.runLimitedFrames(5);
         //systemTracker.
 
-        List<Event> eventlist = EcsTestHelper.toEventList(systemTracker.getPacketsReceivedFromServer());
-        eventlist = TestHelper.filterEventList(eventlist, (e) -> e.getType().getType() != DefaultBusConnector.EVENT_ENTITYSTATE.getType());
+        List<Event> eventlist = EcsTestHelper.toEventList(systemTracker.getPacketsReceivedFromNetwork());
+        eventlist = TestHelper.filterEventList(eventlist, (e) -> e.getType().getType() != BaseEventRegistry.EVENT_ENTITYSTATE.getType());
         // should have MAZE_LOADED, LOGIN and JOINED
         assertEquals(3, eventlist.size());
         assertEquals(EVENT_MAZE_LOADED.getType(), eventlist.get(0).getType().getType());
         assertEquals(USER_EVENT_LOGGEDIN.getType(), eventlist.get(1).getType().getType());
         assertEquals(USER_EVENT_JOINED.getType(), eventlist.get(2).getType().getType());
 
+        // Entity change events should be complete. The total number might vary.
+        TestUtils.assertAllEventEntityState(EcsTestHelper.toEventList(systemTracker.getPacketsReceivedFromNetwork()));
+
+
+        assertEquals(2 + 1, SystemManager.findEntities((EntityFilter) null).size(),
+                "number of entites (2 boxes + player)");
+
+        // only a login request should have been sent
+        assertEquals(1, systemTracker.getPacketsSentToNetwork().size());
 
     }
 }
