@@ -210,4 +210,8 @@ public final class EcsEntity {
     public String getBuilderName() {
         return builderName;
     }
+
+    public int getComponentCount() {
+        return components.size();
+    }
 }

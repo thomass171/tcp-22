@@ -25,7 +25,7 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 public class SceneRunnerForTesting extends AbstractSceneRunner {
     //private HomeBrewRenderer renderer;
 
-    public LoggingSystemTracker systemTracker = new LoggingSystemTracker();
+    private LoggingSystemTracker systemTracker = new LoggingSystemTracker();
 
     /**
      * 2.8.21: Jetzt mit den PlatformInternals
@@ -169,4 +169,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         return sceneRunner;
     }
 
+    public LoggingSystemTracker getSystemTracker() {
+        return systemTracker;
+    }
 }

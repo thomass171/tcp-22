@@ -7,6 +7,7 @@ import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.core.Point;
+import de.yard.threed.engine.ObserverSystem;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
@@ -53,10 +54,15 @@ public class MazeTest {
                 // No visualization to reveal model-view coupling.
                 SystemManager.addSystem(new MazeMovingAndStateSystem());
                 SystemManager.addSystem(new UserSystem());
+
                 AvatarSystem avatarSystem = new AvatarSystem();
                 avatarSystem.setAvatarBuilder("avatar", new MazeAvatarBuilder());
-                avatarSystem.setViewTransform(MazeScene.getViewTransform());
                 SystemManager.addSystem(avatarSystem);
+
+                ObserverSystem observerSystem = new ObserverSystem();
+                observerSystem.setViewTransform(MazeScene.getViewTransform());
+                SystemManager.addSystem(observerSystem);
+
                 SystemManager.addSystem(new BulletSystem());
                 replaySystem = new ReplaySystem();
                 SystemManager.addSystem(replaySystem);

@@ -29,7 +29,7 @@ public abstract class Scene {
     // scene ist nur public, weil es noch unsaubere Referenzen gibt
     public NativeScene scene;
     Log logger = Platform.getInstance().getLog(Scene.class);
-    //9.8.21 deltaTime is property of scene?
+    //9.8.21 deltaTime is property of scene? TODO check and maybe remove
     public double deltaTime;
     // die root node der ganzen Scene. Zeichnet sich dadurch aus, als einizige keinen parent zu haben.
     // Auch für Spiegelung in Unity

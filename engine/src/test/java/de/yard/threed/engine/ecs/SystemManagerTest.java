@@ -1,18 +1,20 @@
 package de.yard.threed.engine.ecs;
 
-import de.yard.threed.core.Degree;
-import de.yard.threed.core.MathUtil;
-import de.yard.threed.core.Vector3;
+import de.yard.threed.core.Packet;
+import de.yard.threed.core.Pair;
+import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtil;
-import de.yard.threed.engine.SegmentedPath;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
+import de.yard.threed.engine.testutil.SocketMock;
 import de.yard.threed.engine.testutil.TestFactory;
-import de.yard.threed.engine.testutil.TestHelper;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -31,6 +33,41 @@ public class SystemManagerTest {
         } catch (Exception e) {
             assertTrue(e.getMessage().contains("duplicate"));
         }
+    }
+
+    /**
+     *
+     */
+    @Test
+    public void testEntityStateEventPublish() {
+        SystemManager.reset();
+
+        LoggingSystemTracker systemTracker = new LoggingSystemTracker();
+        // Only a server send entity states
+        DefaultBusConnector mockedServerBusConnector = new DefaultBusConnector() {
+            @Override
+            public List<NativeSocket> getSockets(String clientId) {
+                return Collections.singletonList(new SocketMock());
+            }
+
+            @Override
+            public boolean isServer() {
+                return true;
+            }
+        };
+        SystemManager.setBusConnector(mockedServerBusConnector);
+        SystemManager.setSystemTracker(systemTracker);
+        EcsEntity entityWithoutSceneNode = new EcsEntity();
+
+        SystemManager.sendEvent(UserSystem.buildLoggedinEvent("a", "clientid", entityWithoutSceneNode.getId()));
+        SystemManager.update(0);
+
+        List<Packet> packets = systemTracker.getPacketsSentToNetwork();
+        assertEquals(2, packets.size());
+        TestUtil.assertEvent("", BaseEventRegistry.EVENT_ENTITYSTATE, new Pair[]{
+                new Pair("entityid", "" + entityWithoutSceneNode.getId()),
+                new Pair("buildername", "*")
+        }, DefaultBusConnector.decodeEvent(packets.get(1)));
     }
 }
 

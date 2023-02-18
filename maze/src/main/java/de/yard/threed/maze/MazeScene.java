@@ -143,6 +143,10 @@ public class MazeScene extends Scene {
             inputToRequestSystem.setSegmentRequest(5, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
             inputToRequestSystem.setSegmentRequest(7, RequestRegistry.TRIGGER_REQUEST_FORWARD);
             SystemManager.addSystem(inputToRequestSystem);
+
+            ObserverSystem observerSystem = new ObserverSystem();
+            observerSystem.setViewTransform(getViewTransform());
+            SystemManager.addSystem(observerSystem);
         }
         if (sceneMode.isServer()) {
             SystemManager.addSystem(MazeMovingAndStateSystem.buildFromArguments());
@@ -153,7 +157,6 @@ public class MazeScene extends Scene {
             AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
             // avatar builder is for player and monster
             avatarSystem.setAvatarBuilder("avatar", new MazeAvatarBuilder());
-            avatarSystem.setViewTransform(getViewTransform());
             SystemManager.addSystem(avatarSystem);
 
         }

@@ -193,4 +193,26 @@ public class TestUtil {
         assertFloat(label, expected.getWidth(), actual.getWidth(), tolerance);
         assertFloat(label, expected.getHeight(), actual.getHeight(), tolerance);
     }
+
+    public static void assertPayload(String label, Pair<String, String>[] expectedProperties, Payload actual) {
+        for (Pair<String, String> p : expectedProperties) {
+            Object value = actual.get(p.getFirst());
+
+            if (value == null) {
+                Assert.fail("property not found:" + p.getFirst());
+            }
+            if (p.getSecond() != null) {
+                if (p.getSecond().equals("*")) {
+                    assertTrue(p.getFirst() + ": value is null", value != null);
+                } else {
+                    assertTrue(p.getFirst() + ":" + value + "!=" + p.getSecond(), value.toString().equals(p.getSecond()));
+                }
+            }
+        }
+    }
+
+    public static void assertEvent(String label, EventType expectedType, Pair<String, String>[] expectedProperties, Event actual) {
+        assertEquals("eventType", expectedType.getType(), actual.getType().getType());
+        assertPayload(label, expectedProperties, actual.getPayload());
+    }
 }

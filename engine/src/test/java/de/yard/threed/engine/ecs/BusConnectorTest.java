@@ -1,4 +1,4 @@
-package de.yard.threed.engine;
+package de.yard.threed.engine.ecs;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Packet;
@@ -8,6 +8,7 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
 import de.yard.threed.core.testutil.TestFactory;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.Request;

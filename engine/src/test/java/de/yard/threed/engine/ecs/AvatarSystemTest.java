@@ -8,6 +8,7 @@ import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.Observer;
+import de.yard.threed.engine.ObserverSystem;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.platform.common.Request;
@@ -40,6 +41,7 @@ public class AvatarSystemTest {
             public void init() {
                 //world = new SceneNode();
                 SystemManager.addSystem(new AvatarSystem());
+                SystemManager.addSystem(new ObserverSystem());
             }
         };
         SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());

@@ -203,7 +203,7 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
 
             @Override
             public void simpleUpdate(float tpf) {
-                //logger.info("simpleUpdate");
+                //logger.info("simpleUpdate. tpf=" + tpf);
 
                 // Das ist so aber noch nicht ganz rund.
                 final JmeScene sc = (JmeScene) scene.scene;

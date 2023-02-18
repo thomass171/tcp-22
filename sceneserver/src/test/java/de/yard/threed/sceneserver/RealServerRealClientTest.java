@@ -62,7 +62,7 @@ public class RealServerRealClientTest {
         HashMap<String, String> additionalProperties = new HashMap<String, String>();
         additionalProperties.put("server", "localhost");
         SceneRunnerForTesting sceneRunner = de.yard.threed.maze.testutils.TestUtils.buildSceneRunnerForMazeScene("skbn/SokobanWikipedia.txt", additionalProperties, 10);
-        LoggingSystemTracker systemTracker = sceneRunner.systemTracker;
+        LoggingSystemTracker systemTracker = sceneRunner.getSystemTracker();
 
         // a client mode scene has a system state? For sending login request?.
         //??assertTrue(SystemState.readyToJoin());
@@ -88,7 +88,7 @@ public class RealServerRealClientTest {
         //systemTracker.
 
         List<Event> eventlist = EcsTestHelper.toEventList(systemTracker.getPacketsReceivedFromNetwork());
-        eventlist = TestHelper.filterEventList(eventlist, (e) -> e.getType().getType() != BaseEventRegistry.EVENT_ENTITYSTATE.getType());
+        eventlist = EcsTestHelper.filterEventList(eventlist, (e) -> e.getType().getType() != BaseEventRegistry.EVENT_ENTITYSTATE.getType());
         // should have MAZE_LOADED, LOGIN and JOINED
         assertEquals(3, eventlist.size());
         assertEquals(EVENT_MAZE_LOADED.getType(), eventlist.get(0).getType().getType());

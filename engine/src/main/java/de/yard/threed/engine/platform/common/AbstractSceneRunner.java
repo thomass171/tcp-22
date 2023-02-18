@@ -37,26 +37,23 @@ import java.util.TreeMap;
 
 
 /**
- * Enthaelt identische Funktionalitäten verschiedener Scenerunner. Mal ein Versuch.
- * Hier ist alles, was in allen Platformen gebraucht wird, aber trotzdem gekapselt sein soll.
+ * Common base functionality of all scene runner. Capsules those parts that are needed in each platform.
  * <p>
- * Delegates wereden hier nach Abschlkuss async/MT ausgefuehrt um das Einbauen der geladenen Model im Hauptthread zu machen (wegen JME).
- * TODO: Das muesste vielleicht in die Engine statt in die Platform
+ * Delegates are processed here (async for the app logic) to have it all in the same thread (JME doesn't like MT).
  * <p/>
- * 9.3.18: Sollte der nur Objekte aus der Platform kennen? 1.10.18: Das waere aber nicht unbedingt praktisch, z.b. wegen GUI. Aber die ist hier doch nicht mehr.
- * 10.10.18: Sollte nicht aus einer Application aufgerufen werden.
- * 28.11.18: Manches hier koennte oder sollte doch vielleicht in class Platform, z.B. scene. Eigentlich gehört doch rein designmaessig alles da rein. Und besser gekapselt ist
- * es hier ja auch nicht. Hmmm. Dann wird Platform wieder hintenrum von der Implementierung verwnedt. Vielleicht bräuchte es sowas wie "PlatformBase" statt RunnerHelper. (Skizze 82).
+ * 10.10.18: Should not be used from an application!
+ * 28.11.18: Not easy to decide what to define here and what in the platform (like scene). There is a nasty dependency cycle of the abstract runner using the platform, using the runner implementation.
+ * Maybe a "PlatformBase" instead of RunnerHelper might help. (Skizze 82).
  * Delegates passen in eine "Base" aber nicht so gut. Die wären dann besser in der Platform aufgehoben.
  * <p>
- * 16.2.21: Waere die Klasse nicht besser abstract?
- * 08.04.21: Die main-loop ist hier nicht, weil z.B. JME gar keine hat.
+ * 16.2.21: Shouldn't the class be abstract?
+ * 08.04.21: No main-loop here, because some platforms like JME have no.
  * <p>
  * Created by thomass on 22.03.16.
  */
 public class AbstractSceneRunner {
     Log logger = Platform.getInstance().getLog(AbstractSceneRunner.class);
-    //23.7.21 jetzt in platform public NativeScene scene;
+    //23.7.21 NativeScene is in platform
     //19.10.18: Superklasse auch hier rein, weils einfach praktisch ist.
     public Scene ascene;
     public ArrayList<Integer> pressedkeys = new ArrayList<Integer>();
@@ -213,7 +210,7 @@ public class AbstractSceneRunner {
             logger.debug("Read " + cnt + " packets from client bus connector");
         }
 
-        // vor den individuellen Updaten die Systems updaten
+        // Update systems before individual update
         SystemManager.update(tpf);
 
         // Die Liste der updater duplizieren, damit im update() welche geadded werden koennen.

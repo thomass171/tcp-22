@@ -94,16 +94,15 @@ public abstract class DefaultBusConnector {
         Payload payload = new Payload()
                 .add("entityid", entity.getId())
                 .add("buildername", (entity.getBuilderName() != null) ? entity.getBuilderName() : "");
-        if (entity.getSceneNode() == null) {
-            // This might happen during entity creation temporarily, when another system is needed to build the model/scenenode.
-            logger.debug("Skipping entity without scenenode (transform). entity=" + entity);
-            return null;
+        // An entity without scene node might happen during entity creation temporarily, when another system is needed to build the model/scenenode.
+        // But it should be sent anyway, because the client might need it, eg. a user entity after login that wants to join.
+        if (entity.getSceneNode() != null) {
+            
+            Transform transform = entity.getSceneNode().getTransform();
+            payload = payload.add("position", transform.getPosition())
+                    .add("rotation", transform.getRotation())
+                    .add("scale", transform.getScale());
         }
-        Transform transform = entity.getSceneNode().getTransform();
-        payload = payload.add("position", transform.getPosition())
-                .add("rotation", transform.getRotation())
-                .add("scale", transform.getScale());
-
         return new Event(BaseEventRegistry.EVENT_ENTITYSTATE, payload);
     }
 

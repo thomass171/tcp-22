@@ -15,6 +15,7 @@ import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.ClientBusConnector;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.testutil.EventFilter;
 import de.yard.threed.engine.ecs.ServerSystem;
@@ -212,7 +213,7 @@ public class TestClient {
      * Look for latest event of a specific entity
      */
     public void assertEventEntityState(int entityId, Point expectedLocation, GridOrientation expectedOrientation) {
-        List<Event> entityStateEvents = TestHelper.filterEventList(systemTracker.getEventsProcessed(), e -> {
+        List<Event> entityStateEvents = EcsTestHelper.filterEventList(systemTracker.getEventsProcessed(), e -> {
             return e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType() &&
                     (Integer) e.getPayload().get("entityid") == entityId;
         });

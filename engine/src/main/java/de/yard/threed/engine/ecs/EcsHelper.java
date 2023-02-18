@@ -24,9 +24,11 @@ public class EcsHelper {
     }
 
     public static EcsEntity findEntityById(int id) {
+        //logger.debug("Looking for entity " + id);
         // TODO optimize by not using a list
         List<EcsEntity> candidates = SystemManager.findEntities((e) -> e.getId() == id);
         if (candidates.size() == 0) {
+            logger.debug("entity " + id + " not found ");
             return null;
         }
         if (candidates.size() > 1) {
