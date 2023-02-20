@@ -13,6 +13,10 @@ public class Main {
     public static void main(String[] args) {
 
         try {
+            //  A dedicated logger. helpful to diff client/server logs in mixed operation like tests from IDE
+            System.out.println("Working Directory = " + System.getProperty("user.dir"));
+
+            System.setProperty("log4j2.configurationFile", System.getProperty("user.dir") + "/src/main/resources/log4j2-server.xml");
 
             for (String arg : args) {
                 System.out.println("arg=" + arg);

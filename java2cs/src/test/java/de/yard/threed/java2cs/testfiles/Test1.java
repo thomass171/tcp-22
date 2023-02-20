@@ -1,7 +1,8 @@
 package de.yard.threed.java2cs.testfiles;
 
-import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +14,7 @@ import java.util.Map;
  * Class comment
  */
 public class Test1 extends Object {
-    Logger logger = Logger.getLogger(Test1.class);
+    Logger logger = LoggerFactory.getLogger(Test1.class);
     public static Object lock1 = null; // static, null -> Swift 1.2 static class variable, nil
     public int x = 5;
     protected float f = 5.0f; // float literal

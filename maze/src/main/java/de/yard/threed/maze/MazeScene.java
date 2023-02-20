@@ -58,6 +58,8 @@ public class MazeScene extends Scene {
         Configuration configuration = Platform.getInstance().getConfiguration();
         configuration.addConfiguration(new ConfigurationByProperties(new BundleResource(BundleRegistry.getBundle("maze"), "maze.properties")), true);
 
+        MazeSettings.init(MazeSettings.MODE_SOKOBAN);
+
         boolean isMP = false;
         if (isMP) {
             //so gehts nicht! init läuft noch

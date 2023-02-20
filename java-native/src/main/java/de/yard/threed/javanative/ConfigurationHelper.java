@@ -7,10 +7,11 @@ import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.CompositeConfiguration;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigurationHelper {
-    static Logger logger = Logger.getLogger(ConfigurationHelper.class.getName());
+    static Logger logger = LoggerFactory.getLogger(ConfigurationHelper.class.getName());
 
     /**
      * If the file cannot be loaded, this is just logged

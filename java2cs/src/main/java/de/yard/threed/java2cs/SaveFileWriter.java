@@ -1,6 +1,7 @@
 package de.yard.threed.java2cs;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,7 +11,7 @@ import java.nio.file.Path;
  * Created by thomass on 29.02.16.
  */
 public class SaveFileWriter {
-    static Logger logger = Logger.getLogger(SaveFileWriter.class);
+    static Logger logger = LoggerFactory.getLogger(SaveFileWriter.class);
 
     public static boolean saveContentToFile(Path destination, byte[] buf,String magic) throws IOException {
         if (Files.exists(destination)) {

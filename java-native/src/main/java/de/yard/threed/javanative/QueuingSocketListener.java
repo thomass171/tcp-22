@@ -1,6 +1,7 @@
 package de.yard.threed.javanative;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,14 +15,14 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * Multithreaded und auf die MP Textbloecke ausgelegt.
+ * Multithreaded and focussing on text blocks used by scene server protocol.
  * <p>
  * Not on byte level but UTF-8 text block level with empty line as separator (like mail)
  * <p>
- * Die gelesenenen Daten kommen in eine Queue, aus die dann ein nicht multithreaded thread die Daten abrufen kann.
+ * Data read are put into a queue, from where it is read by the main thread.
  */
 public class QueuingSocketListener extends Thread {
-    static Logger logger = Logger.getLogger(QueuingSocketListener.class.getName());
+    static Logger logger = LoggerFactory.getLogger(QueuingSocketListener.class.getName());
 
     BufferedReader in;
     List<String> lines = new Vector<>();

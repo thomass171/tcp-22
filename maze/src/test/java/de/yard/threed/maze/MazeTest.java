@@ -74,6 +74,8 @@ public class MazeTest {
             }
         };
 
+        MazeSettings.init(MazeSettings.MODE_SOKOBAN);
+
         TestFactory.initPlatformForTest(new String[]{"engine", "maze", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
                 Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
 

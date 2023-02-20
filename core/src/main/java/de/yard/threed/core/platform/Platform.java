@@ -325,9 +325,10 @@ public abstract class Platform {
      */
     public abstract Configuration getConfiguration();
 
-
-    //private void addSceneNode(String ke)
-
+    /**
+     * 17.2.23: TODO check move of eventbus to systemmanager.
+     * @return
+     */
     public abstract NativeEventBus getEventBus();
 
     /**

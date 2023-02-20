@@ -1,6 +1,7 @@
 package de.yard.threed.javanative;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.util.List;
  * <p>
  */
 public class SocketClient {
-    static Logger logger = Logger.getLogger(SocketClient.class.getName());
+    static Logger logger = LoggerFactory.getLogger(SocketClient.class.getName());
 
     Socket socket;
     BufferedReader in;

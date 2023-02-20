@@ -35,33 +35,29 @@ import java.util.Map;
 
 
 /**
- * 24.4.20: Die Platform fuer eine eigene OpenGL Anbindung. Auch für Testing.
- * Renamed PlatformOpenGL->PlatformHomeBrew, weil OpenGL ja nur eine Option fürs Rendering ist.
+ * 24.4.20: A self implemented platform for example based on native OpenGL. Also for testing and scene serving.
  * <p>
+ * The renderer is just a plugable option. It could be a OpenGL based renderer or even no renderer.
  * <p>
- * Ansonsten ist das hier einfach eine selbstgebaute universelle Game engine. Je nach Verwendung sind einige Komponenten
- * austauschbar, wie
- * - Logging
- * - ResourceManager
- * <p>
- * Ohne Renderer hat man dann eine Headless platform. Diese Platform ist nur fuer desktop Java Umgebungen.
- * Wegen consistency bleibt aber alles asynchron, weil es die Platform ja so vorgibt. Ausnahme evtl. im ResourceManager? Das will gut durchdacht sein.
+ * Without renderer this is a headleass platform like {@link SimpleHeadlessPlatform}, but more complete.
+ * This platform is only for Java desktop environments, no C# nor wegbgl. So no limitation to Java.
+ * For consistency and simplicity everything is in the same thread, but might be async.
+ *
+ * Ausnahme evtl. im ResourceManager? Das will gut durchdacht sein.
  * Besser wäre, wenn es das nicht gibt. Synchrone Aktionen sollten komplett ausserhalb der Platform inkl. ResourceManager liegen.
  * <p>
  * Die ganzen OpenGl Klassen muessten auch umbenannt werden? Zumindest zum Teil; muss halt etwas getrennt werden vom Rendering.
  * <p>
+ * 18.2.23: The idea of a defaulttexture was been removed a long time ago (replaced by wirefram?)
  * <p/>
  * Created by thomass on 20.07.15.
  */
 public class PlatformHomeBrew extends DefaultPlatform {
-    // kann nicht ueber die Factory gebaut werden, weil die gerade noch initialisiert wird
-    static public Log logger = new OpenGlLog();
+    // Set in constructor. Cannot be used before factory is set.
+    private Log logger;
     public NativeResourceReader resourcemanager;
-    //= kein MT, !=0 uber runnerhelper (1=normales MT, 2=test MT mit block und continue;)
-    //21.12.17: jetzt per Asynchelper public static int asyncmode = 0;
-    //public List<Thread> threadlist= new ArrayList<Thread>(0);
-    // 31.10.17: Texturelist zum Testen der wirklich gefundenen/geladenen Textures.
-    public Map<String, NativeTexture> texturemap = new HashMap<String, NativeTexture>();
+    // 31.10.17: Texturelist for really found/loaded textures.
+    public Map<String, NativeTexture> texturemap = new HashMap<>();
     public List<String> texturelist = new ArrayList<String>();
     public String hostdir;
     // Render needs to be here instead of runner because it cannot be looked up in runner due to possibly various runner.
@@ -74,6 +70,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
         eventBus = new JAEventBus();
         logfactory = new JALogFactory();
         this.configuration = configuration;
+        logger = logfactory.getLog(PlatformHomeBrew.class);
     }
 
     /**
@@ -84,16 +81,13 @@ public class PlatformHomeBrew extends DefaultPlatform {
      * @return
      */
     public static PlatformInternals init(Configuration configuration/*HashMap<String, String> properties*/) {
-        //System.out.println("PlatformOpenGL.init");
-        //if (instance == null || !(instance instanceof PlatformOpenGL)) {
         // 6.2.23 Since configuration system properties is deprecated
         /*for (String key : properties.keySet()) {
             //System.out.println("transfer of propery "+key+" to system");
             System.setProperty(key, properties.get(key));
         }*/
-        instance = new PlatformHomeBrew(configuration/*properties*/);
-        //MA36((Platform)instance).resetInit();
-        //defaulttexture wird spaeter "irgendwo" geladen
+        instance = new PlatformHomeBrew(configuration);
+
         ((PlatformHomeBrew) instance).resourcemanager = new DefaultResourceReader();
         PlatformInternals platformInternals = new PlatformInternals();
 
@@ -105,11 +99,11 @@ public class PlatformHomeBrew extends DefaultPlatform {
         instance.bundleResolver.add(new SimpleBundleResolver(((PlatformHomeBrew) instance).hostdir + "/bundles", ((PlatformHomeBrew) instance).resourcemanager));
         instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), ((PlatformHomeBrew) instance).resourcemanager));
         instance.bundleLoader = new AsyncBundleLoader(new DefaultResourceReader());
-        //}
-        instance.nativeScene = new HomeBrewScene();
-        logger.info("PlatformHomeBrew created");
 
-        return platformInternals;// (Platform) instance;
+        instance.nativeScene = new HomeBrewScene();
+        ((PlatformHomeBrew) instance).logger.info("PlatformHomeBrew created. Working Directory = " + System.getProperty("user.dir"));
+
+        return platformInternals;
     }
 
     public static PlatformInternals init(Configuration configuration, NativeEventBus eventBus) {
@@ -131,40 +125,14 @@ public class PlatformHomeBrew extends DefaultPlatform {
     }
 
     /**
-     * Nicht multithreaded, weil auch fuer Tests. Genau deswegen aber opt. doch.
-     * verwendet nicht asyncjob, weil es ja intern ist.
-     * 16.9.17: Ach, dann kann ich auch den Runnerhelper Weg fuer JME nehmen.
-     * 21.12.17: Den regulären Async Weg nehmen. Der Test muss dann den async Helper verwenden.
+     * Not multithreaded, but async by AsyncHelper.
      *
      * @param filename
      */
     @Override
     public void buildNativeModelPlain(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
-        /*21.12.17 if (asyncmode==0) {
-            buildNativeModelInternal(filename,opttexturepath,delegate);
-            return;
-        }*/
 
         AsyncHelper.asyncModelBuild(filename, opttexturepath, options, AbstractSceneRunner.getInstance().invokeLater(delegate));
-        /*if (threadmode==0) {
-            buildNativeModelInternal(filename,delegate);
-            return;
-        }
-        Thread t =new Thread() {
-            @Override
-            public void run() {
-                try {
-                    buildNativeModelInternal(filename,delegate);
-                } catch (Exception e) {
-                    logger.error("Exception in async buildNativeModel thread:",e);
-                }
-            }
-        };
-        if (threadmode==1){
-            t.start();
-        }else{
-            threadlist.add(t);
-        }*/
     }
 
     /*4.8.21 public void /*Bundle* / loadBundle(String bundlename, /*AsyncJobCallback* /BundleLoadDelegate delegate, boolean delayed) {
@@ -196,7 +164,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
     }
 
     /**
-     * Tja. //TODO das ist noch Kopelores
+     * Tja. //TODO Fix this mess (Kokolores).
      */
     @Override
     public NativeSceneNode buildLine(Vector3 from, Vector3 to, Color color) {
@@ -235,15 +203,12 @@ public class PlatformHomeBrew extends DefaultPlatform {
     public NativeByteBuffer buildByteBuffer(int size) {
         SimpleByteBuffer buf = new SimpleByteBuffer(new byte[size]);
         return buf;
-        //return new Vector3Array(buf,0,size);
     }
-
 
     public NativeCamera buildPerspectiveCamera(double fov, double aspect, double near, double far) {
         HomeBrewPerspectiveCamera camera = new HomeBrewPerspectiveCamera(fov, aspect, near, far);
         return camera;
     }
-
 
     @Override
     public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameter, Object/*Effect*/ effect) {
@@ -274,11 +239,6 @@ public class PlatformHomeBrew extends DefaultPlatform {
         if (tex == null) {
             logger.warn("Loading texture " + filename.getFullName() + " failed. Using default");
             return null;
-            /*if (defaulttexture == null) {
-                // TODO: Als default texture sowas wie void.png o.ae. nehmen
-                defaulttexture = OpenGlTexture.loadFromFile(new BundleResource("FontMap.png"), 1);
-            }
-            return defaulttexture;*/
         }
         texturelist.add(filename.getFullName());
         texturemap.put(filename.getFullName(), tex);
@@ -289,7 +249,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
     public NativeTexture buildNativeTexture(BundleResource filename, HashMap<NumericType, NumericValue> parameters) {
         if (filename.bundle == null) {
             logger.error("buildNativeTexture:bundle not set for file " + filename.getFullName());
-            return null;//defaulttexture;
+            return null;
         }
         //String bundlebasedir = BundleRegistry.getBundleBasedir(filename.bundle.name, false);
         String bundlebasedir = BundleResolver.resolveBundle(filename.bundle.name, Platform.instance.bundleResolver).getPath();
@@ -301,22 +261,6 @@ public class PlatformHomeBrew extends DefaultPlatform {
         NativeTexture t = buildNativeTextureOpenGL(resource, parameters);
         return t;
     }
-
-    /*@Override
-    public void executeAsyncJobNurFuerRunnerhelper(final AsyncJob job/*, final NativeContentProvider contentprovider, final int pageno* /) {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    job.execute();
-                    //logger.debug("job completed");
-                    RunnerHelper.getInstance().addCompletedJob(new CompletedJob(job/*, true/*, texture* /));
-                } catch (Exception e) {
-                    RunnerHelper.getInstance().addCompletedJob(new CompletedJob(job, e.getMessage()));
-                }
-            }
-        }.start();
-    }*/
 
     @Override
     public NativeTexture buildNativeTexture(ImageData imagedata, boolean fornormalmap) {
@@ -359,11 +303,6 @@ public class PlatformHomeBrew extends DefaultPlatform {
         return HomeBrewGeometry.buildGeometry(vertices, indices, uvs, normals);
     }
 
-    /*10.7.21@Override
-    public NativeSceneRunner getSceneRunner() {
-        return runner;//19.3.16 OpenGlSceneRunner.getInstance();
-    }*/
-
     @Override
     public Log getLog(Class clazz) {
         //JALog gibt es hier nicht. Über Modul desktop muesste es aber die Logfactory geben. Fuer Tests halt nicht.
@@ -376,12 +315,6 @@ public class PlatformHomeBrew extends DefaultPlatform {
     /*@Override
     public ResourceManager getRessourceManager() {
         return resourcemanager;
-    }*/
-
-    /*@Override
-    public InputStream getInputStream(byte[] bytebuf) {
-        //     return new ByteArrayInputStream(bytebuf);
-        return (InputStream) Util.notyet();
     }*/
 
     /**
@@ -498,18 +431,6 @@ public class PlatformHomeBrew extends DefaultPlatform {
     public NativeRay buildRay(Vector3 origin, Vector3 direction) {
         return new OpenGlRay(origin, direction);
     }
-
-    /*19.4.16@Override
-  @Override
-   public NativeResource buildFile(String path) {
-       return JAFile.buildFile(path);
-   }*/
-
-    /*@Override
-    public boolean exists(NativeResource file) {
-        return new JAFile(file).exists();
-    }*/
-
 
     @Override
     public float getFloat(byte[] buf, int offset) {

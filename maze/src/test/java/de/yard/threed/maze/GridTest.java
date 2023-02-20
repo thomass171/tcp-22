@@ -13,6 +13,7 @@ import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -35,6 +36,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  */
 public class GridTest {
     static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
+
+    @BeforeEach
+    public void setup(){
+        MazeSettings.init(MazeSettings.MODE_SOKOBAN);
+    }
 
     /**
      * +---------+
