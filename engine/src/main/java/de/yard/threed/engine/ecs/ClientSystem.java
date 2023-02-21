@@ -58,11 +58,14 @@ public class ClientSystem extends DefaultEcsSystem {
                 logger.debug("Building entity " + entityid + " with builder '" + buildername + "'");
                 entity = new EcsEntity(entityid);
                 if (buildername != null) {
-                    entity.buildSceneNodeByModelFactory(buildername, modelBuilderRegistries);
+                    if (entity.getSceneNode() == null) {
+                        entity.buildSceneNodeByModelFactory(buildername, modelBuilderRegistries);
+                    }
                 }
             }
             SceneNode sceneNode = entity.getSceneNode();
-            if (sceneNode != null) {
+            if (sceneNode != null && position != null) {
+                // transform data is not sent in the early life phase of an entity. Maybe even never.
                 Transform t = sceneNode.getTransform();
                 t.setPosition(position);
                 t.setRotation(rotation);

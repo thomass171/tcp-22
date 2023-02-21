@@ -69,9 +69,14 @@ public class ObserverSystem extends DefaultEcsSystem {
             int userEntityId = ((Integer) evt.getPayload().get("userentityid"));
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
 
-            boolean forLogin = true;//TODO check purpose
-            if (attachObserver(forLogin, isFirstJoin, userEntity, viewTransform)) {
-                isFirstJoin = false;
+            if (userEntity == null || userEntity.getSceneNode() == null) {
+                logger.warn("cannot attach observer because no user entity with scene node found");
+                //TODO maybe republish
+            } else {
+                boolean forLogin = true;//TODO check purpose
+                if (attachObserver(forLogin, isFirstJoin, userEntity, viewTransform)) {
+                    isFirstJoin = false;
+                }
             }
         }
     }

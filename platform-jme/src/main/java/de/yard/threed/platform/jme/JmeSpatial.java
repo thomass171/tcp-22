@@ -47,8 +47,11 @@ public class JmeSpatial implements /*Native*/NativeTransform {
         this.spatial = s;
         //Die Id nicht immer neu vergeben, denn die muss ja evtl. schon gesetzt sein.
         if (!existing) {
+            //logger.debug("Building new JmeSpatial " + uniqueid);
             spatial.setUserData("uniqueid", uniqueid++);
             //MA17 Platform.getInstance().native2nativeobject3d.put((Integer) spatial.getUserData("uniqueid"), this);
+        } else {
+            //logger.debug("Building existing JmeSpatial " + s.getName());
         }
     }
 
@@ -179,7 +182,7 @@ public class JmeSpatial implements /*Native*/NativeTransform {
     }
 
     /**
-     * No need to adjust layer? layer are handled by viewports in JME.
+     * No need to adjust layer? No, layer are handled by viewports in JME.
      */
     @Override
     public void setParent(NativeTransform/*Object*/ parent) {
@@ -188,13 +191,32 @@ public class JmeSpatial implements /*Native*/NativeTransform {
             // 28.11.18: an root hängen, nicht einfach parentlos lassen. Zumindest fuer Camera/stepcontroller ist das wichtig.
             JmeSceneRunner.getInstance().rootnode.attachChild(spatial);
         } else {
-            if (parent == this){
+            if (parent == this) {
                 //9.3.21: Erkennt aber nicht zuverlaessig Recursion.
                 throw new RuntimeException("self parent");
+            }
+            boolean assertParent = false;
+            if (assertParent) {
+                // 20.2.23: not sure whether this is really useful to prevent a IllegalStateException this way
+                Node jmeParent = (Node) ((JmeSpatial) parent).spatial;
+                getTopParent(jmeParent);
+                logger.debug("setParent " + jmeParent + ":" + jmeParent.getName());
+                if (jmeParent.getParent() == null) {
+                    logger.warn("fixing parent of '" + jmeParent.getName() + "'");
+                    JmeScene.getInstance().getRootNode().attachChild(jmeParent);
+                }
             }
             ((Node) ((JmeSpatial) parent).spatial).attachChild(spatial);
         }
 
+    }
+
+    private Spatial getTopParent(Node n) {
+        if (n.getParent() != null) {
+            logger.debug("parent is " + n.getParent());
+            return getTopParent(n.getParent());
+        }
+        return n;
     }
 
     /*@Override
@@ -404,9 +426,9 @@ public class JmeSpatial implements /*Native*/NativeTransform {
             } else {
                 logger.warn("no camera found for current layer " + currentlayer);
             }
-        }else{
+        } else {
             NativeCamera c = AbstractSceneRunner.getInstance().getCameras().get(0);
-                JmeCamera jmeCamera = (JmeCamera) c;
+            JmeCamera jmeCamera = (JmeCamera) c;
             jmeCamera.getViewPort().detachScene(spatial);
         }
         JmeCamera deferredcamera = JmeCamera.findCameraByLayer(layer);
@@ -451,7 +473,7 @@ public class JmeSpatial implements /*Native*/NativeTransform {
             s = s.getParent();
         } while (layer == null && s != null);
         //logger.debug("getLayer for spatial " + spatial + "found "+  layer);
-        return layer==null?0:layer;
+        return layer == null ? 0 : layer;
     }
 
     public static Integer getLayerOfSpatial(Spatial spatial) {
