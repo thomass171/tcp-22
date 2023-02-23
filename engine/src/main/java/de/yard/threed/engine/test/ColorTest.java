@@ -1,7 +1,7 @@
 package de.yard.threed.engine.test;
 
 import de.yard.threed.core.Color;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
 
 /**
  * Als Platformtest wegen Integerarithmetik.
@@ -12,15 +12,15 @@ public class ColorTest {
     public void testColor() {
         Color col = new Color(0f, 1f, 0f, 1f);
         int argb = col.getARGB();
-        TestUtil.assertInt("", -16711936, argb);
+        RuntimeTestUtil.assertInt("", -16711936, argb);
         col = new Color(0, 0xFF, 0, 0xFF);
         argb = col.getARGB();
-        TestUtil.assertInt("", -16711936, argb);
-        TestUtil.assertInt("", 255, col.getAlphaasInt());
+        RuntimeTestUtil.assertInt("", -16711936, argb);
+        RuntimeTestUtil.assertInt("", 255, col.getAlphaasInt());
         col = new Color(-16711936);
-        TestUtil.assertInt("", 255, col.getAlphaasInt());
-        TestUtil.assertInt("", 0, col.getRasInt());
-        TestUtil.assertInt("", 255, col.getGasInt());
-        TestUtil.assertInt("", 0, col.getBasInt());
+        RuntimeTestUtil.assertInt("", 255, col.getAlphaasInt());
+        RuntimeTestUtil.assertInt("", 0, col.getRasInt());
+        RuntimeTestUtil.assertInt("", 255, col.getGasInt());
+        RuntimeTestUtil.assertInt("", 0, col.getBasInt());
     }
 }

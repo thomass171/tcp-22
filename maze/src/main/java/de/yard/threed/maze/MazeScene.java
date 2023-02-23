@@ -158,7 +158,7 @@ public class MazeScene extends Scene {
             // AvatarSystem handles login etc., so no need to have it here. Avatar is built just by entity model builder.
             AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
             // avatar builder is for player and monster
-            avatarSystem.setAvatarBuilder("avatar", new MazeAvatarBuilder());
+            avatarSystem.setAvatarBuilder(MazeAvatarBuilder.AVATAR_BUILDER, new MazeAvatarBuilder());
             SystemManager.addSystem(avatarSystem);
 
         }
@@ -212,7 +212,7 @@ public class MazeScene extends Scene {
             SystemManager.addSystem(ServerSystem.buildForInitialEventsForClient(new EventType[]{EventRegistry.EVENT_MAZE_LOADED}));
         }
         if (!sceneMode.isServer() && sceneMode.isClient()) {
-            SystemManager.addSystem(new ClientSystem(new ModelBuilderRegistry[]{new MazeAvatarBuilder(),MazeModelFactory.getInstance()}));
+            SystemManager.addSystem(new ClientSystem(new ModelBuilderRegistry[]{new MazeAvatarBuilder(), MazeModelFactory.getInstance()}));
         }
 
         MazeDataProvider.init();

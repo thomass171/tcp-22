@@ -168,7 +168,7 @@ public class SystemManager {
     }
 
     private static void processEvent(Event evt) {
-        logger.debug("processEvent " + evt);
+        //logger.debug("processEvent " + evt);
         List<EcsSystem> handler = eventhandler.get(evt.getType());
         if (handler != null) {
             for (EcsSystem ebs : handler) {

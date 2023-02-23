@@ -9,7 +9,7 @@ import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.sceneserver.testutils.TestClient;
-import de.yard.threed.sceneserver.testutils.TestUtils;
+import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +38,7 @@ public class DemoSceneTest {
         // just to be sure to have automove. automove is already enabled in Demo.xml
         properties.put("argv.enableAutomove", "true");
         System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
-        sceneServer = TestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES, properties, 50);
+        sceneServer = SceneServerTestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES, properties, 50);
     }
 
     @AfterEach
@@ -61,7 +61,7 @@ public class DemoSceneTest {
         testClient.assertConnectAndLogin(sceneServer);
 
         // wait for terrain available to load vehicle
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
+        SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
         List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
         assertEquals(1 + 1, entities.size(), "number of entites (avatar+loc)");
         EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME0.equals(e.getName())).get(0);
@@ -71,14 +71,14 @@ public class DemoSceneTest {
 
         List<Packet> packets = testClient.readLatestPackets();
         // Movements also should arrive in client
-        TestUtils.assertEventPacket(BaseEventRegistry.EVENT_ENTITYSTATE, new Pair[]{
+        SceneServerTestUtils.assertEventPacket(BaseEventRegistry.EVENT_ENTITYSTATE, new Pair[]{
                 new Pair("p_position", "*")
         }, packets,-1);
 
 
         SceneNode locNode = locEntity.getSceneNode();
         double xpos0 = locNode.getTransform().getPosition().getX();
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
+        SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
         double xpos1 = locNode.getTransform().getPosition().getX();
         double xdiff = Math.abs(xpos0 - xpos1);
         log.debug("xdiff={}", xdiff);
@@ -92,7 +92,7 @@ public class DemoSceneTest {
      */
     @Test
     public void testLongRunning() {
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 300);
+        SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 300);
 
     }
 }

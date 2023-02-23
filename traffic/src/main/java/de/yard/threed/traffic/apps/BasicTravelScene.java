@@ -46,7 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static de.yard.threed.core.testutil.TestUtil.assertNotNull;
+import static de.yard.threed.core.testutil.RuntimeTestUtil.assertNotNull;
 
 /**
  * Basic generic scene for traffic scene definitions like "traffic:tiles/Wayland.xml" and "traffic:tiles/Demo.xml".

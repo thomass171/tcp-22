@@ -2,13 +2,13 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.testutil.DeterministicIntProvider;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.engine.util.IntProvider;
-import de.yard.threed.maze.testutils.TestUtils;
+import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,29 +33,29 @@ public class SimpleBotAITest {
         GridMover player = gridState.players.get(0);
         GridMover leftBot = gridState.players.get(1);
         GridMover rightBot = gridState.players.get(2);
-        TestUtil.assertPoint(new Point(3, 2), leftBot.getLocation(), "left bot location");
+        TestUtils.assertPoint(new Point(3, 2), leftBot.getLocation(), "left bot location");
         assertEquals("E", leftBot.getOrientation().getDirectionCode());
-        TestUtil.assertPoint(new Point(4, 2), rightBot.getLocation(), "right bot location");
+        TestUtils.assertPoint(new Point(4, 2), rightBot.getLocation(), "right bot location");
 
         // cannot fire from home, so leave home. No need to update gridstate in between
-        TestUtils.move(rightBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(5, 2));
-        TestUtils.move(rightBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(6, 2));
-        TestUtils.move(leftBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(4, 2));
-        TestUtils.move(leftBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(5, 2));
+        MazeTestUtils.move(rightBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(5, 2));
+        MazeTestUtils.move(rightBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(6, 2));
+        MazeTestUtils.move(leftBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(4, 2));
+        MazeTestUtils.move(leftBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(5, 2));
 
         SimpleBotAI botAI = new SimpleBotAI();
         IntProvider intProvider = new DeterministicIntProvider(new int[]{1,1});
         Request request = botAI.getNextRequest(leftBot, gridState, grid.getMazeLayout(), intProvider);
         // should not fire at own team member but turn
         assertEquals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
-        TestUtils.rotatePlayer(leftBot, false,  new Point(5, 2));
+        MazeTestUtils.rotatePlayer(leftBot, false,  new Point(5, 2));
 
         request = botAI.getNextRequest(leftBot, gridState, grid.getMazeLayout(), intProvider);
         // should now fire player
         assertEquals(BulletSystem.TRIGGER_REQUEST_FIRE.getLabel(), request.getType().getLabel());
 
         // right bot should not solve
-        TestUtils.move(rightBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(7, 2));
+        MazeTestUtils.move(rightBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(7, 2));
         request = botAI.getNextRequest(rightBot, gridState, grid.getMazeLayout(), intProvider);
         assertEquals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
 

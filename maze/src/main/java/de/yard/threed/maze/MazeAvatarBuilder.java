@@ -14,6 +14,8 @@ import de.yard.threed.engine.ecs.EcsEntity;
 
 public class MazeAvatarBuilder implements ModelBuilderRegistry {
 
+    public static String AVATAR_BUILDER = "avatarbuilder";
+
     AvatarABuilder avatarABuilder;
 
     public MazeAvatarBuilder() {
@@ -25,6 +27,9 @@ public class MazeAvatarBuilder implements ModelBuilderRegistry {
 
     @Override
     public ModelBuilder lookupModelBuilder(String key) {
+        if (!AVATAR_BUILDER.equals(key)) {
+            return null;
+        }
         return (destinationNode, entity) -> destinationNode.attach(buildAvatar(entity));
     }
 

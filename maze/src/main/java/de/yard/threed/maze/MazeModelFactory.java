@@ -26,9 +26,11 @@ import de.yard.threed.engine.platform.common.SimpleGeometry;
  */
 public class MazeModelFactory implements ModelBuilderRegistry {
 
+    public static String DIAMOND_BUILDER = "diamondbuilder";
+    public static String BOX_BUILDER = "boxbuilder";
+
     private static Log logger = Platform.getInstance().getLog(MazeModelFactory.class);
 
-    public static String MAZE_MODEL_DIAMOND = "diamond";
     //Der Abstand zwischen den beiden Oberflächen einer Wand
     //float elementdistance = 0.01f;
     // mit groesserer Distance kann man Probleme besser erkennen.
@@ -457,10 +459,13 @@ public class MazeModelFactory implements ModelBuilderRegistry {
 
     @Override
     public ModelBuilder lookupModelBuilder(String key) {
-        if (key.equals(MAZE_MODEL_DIAMOND)) {
+        if (key.equals(DIAMOND_BUILDER)) {
             return (destinationNode, entity) -> destinationNode.attach(buildDiamond());
         }
-        logger.error("No model buuilder found for key" + key);
+        if (key.equals(BOX_BUILDER)) {
+            return (destinationNode, entity) -> destinationNode.attach(buildSokobanBox());
+        }
+        // No need to do a logging here because there might be other builder factories registered.
         return null;
     }
 

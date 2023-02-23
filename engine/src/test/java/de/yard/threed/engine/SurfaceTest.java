@@ -2,10 +2,11 @@ package de.yard.threed.engine;
 
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.Vector2;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
 
-import de.yard.threed.core.testutil.TestUtil;
+
 import org.junit.jupiter.api.Test;
 
 
@@ -28,13 +29,13 @@ public class SurfaceTest {
         segments.add(456d);
         GridSurface surface = new GridSurface(1,segments);
         Vector2 st = surface.calcVertexLocation(0,0);
-        TestUtil.assertST(new Vector2(0, 1), st);
+        TestUtils.assertST(new Vector2(0, 1), st);
          st = surface.calcVertexLocation(0,1);
-        TestUtil.assertST(new Vector2(0, 0), st);
+        TestUtils.assertST(new Vector2(0, 0), st);
          st = surface.calcVertexLocation(1,1);
-        TestUtil.assertST(new Vector2(1, 0), st);
+        TestUtils.assertST(new Vector2(1, 0), st);
          st = surface.calcVertexLocation(1,0);
-        TestUtil.assertST(new Vector2(1, 1), st);
+        TestUtils.assertST(new Vector2(1, 1), st);
 
     }
 

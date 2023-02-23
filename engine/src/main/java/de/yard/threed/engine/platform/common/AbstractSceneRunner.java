@@ -207,7 +207,9 @@ public class AbstractSceneRunner {
                 SystemManager.publishPacketFromServer(packet);
                 cnt++;
             }
-            logger.debug("Read " + cnt + " packets from client bus connector");
+            if (cnt > 0) {
+                logger.debug("Read " + cnt + " packets from client bus connector");
+            }
         }
 
         // Update systems before individual update

@@ -5,9 +5,8 @@ import de.yard.threed.core.Color;
 import de.yard.threed.core.DimensionF;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.gui.FovElement;
-import de.yard.threed.engine.gui.FovElementPlane;
 import de.yard.threed.engine.gui.GuiGrid;
 import de.yard.threed.engine.gui.Icon;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
@@ -39,13 +38,13 @@ public class GuiGridTest {
         // 3 Spalten  und 2 Zeilen. 
         GuiGrid menu = GuiGrid.buildForCamera(camera, 2, 3, 2, GuiGrid.GREEN_SEMITRANSPARENT);
         int p = 0;
-        menu.addButton(new Request(RequestType.register(1010,"Left")), p + 0, 0, Icon.ICON_LEFTARROW);
-        menu.addButton(new Request(RequestType.register(1011,"Up")), p + 1, 1, Icon.ICON_UPARROW);
-        menu.addButton(new Request(RequestType.register(1012,"Right")), p + 2, 0, Icon.ICON_RIGHTARROW);
+        menu.addButton(new Request(RequestType.register(1010, "Left")), p + 0, 0, Icon.ICON_LEFTARROW);
+        menu.addButton(new Request(RequestType.register(1011, "Up")), p + 1, 1, Icon.ICON_UPARROW);
+        menu.addButton(new Request(RequestType.register(1012, "Right")), p + 2, 0, Icon.ICON_RIGHTARROW);
 
-        menu.addButton(new Request(RequestType.register(1013,"Menu")), p + 0, 1, Icon.ICON_VERTICALLINE);
-        menu.addButton(new Request(RequestType.register(1014,"Undo")), p + 1, 0, Icon.IconCharacter(20));
-        menu.addButton(new Request(RequestType.register(1015,"Auto")), p + 2, 1, Icon.ICON_HORIZONTALLINE);
+        menu.addButton(new Request(RequestType.register(1013, "Menu")), p + 0, 1, Icon.ICON_VERTICALLINE);
+        menu.addButton(new Request(RequestType.register(1014, "Undo")), p + 1, 0, Icon.IconCharacter(20));
+        menu.addButton(new Request(RequestType.register(1015, "Auto")), p + 2, 1, Icon.ICON_HORIZONTALLINE);
         //irgendwie nicht richtig testbar.
     }
 
@@ -86,7 +85,7 @@ public class GuiGridTest {
 
         // ref values taken as is
         assertPlanes(controlMenu, near, new DimensionF(5.522847, 4.142135), new DimensionF(0.4, 0.4), new DimensionF(0.4, 0.4));
-        TestUtil.assertVector2("XyTranslation", new Vector2(0,-1.87106), controlMenu.getXyTranslation(controlMenu.getNearPlaneDimension()));
+        TestUtils.assertVector2(new Vector2(0, -1.87106), controlMenu.getXyTranslation(controlMenu.getNearPlaneDimension()), "XyTranslation");
 
         if (useCP) {
             // with ControlPanel, buttons are child of the backplane. The invisble(?) menu is still at z=0! Strange.
@@ -110,15 +109,15 @@ public class GuiGridTest {
 
     private void assertPlanes(GuiGrid menu, double near, DimensionF expectedNearPlaneDimension, DimensionF expectedEffectivePlaneDimension, DimensionF expectedCellDimension) {
 
-        TestUtil.assertDimensionF("nearPlaneDimension", expectedNearPlaneDimension, menu.getNearPlaneDimension(), 0.00001);
+        TestUtils.assertDimensionF(expectedNearPlaneDimension, menu.getNearPlaneDimension(), 0.00001, "nearPlaneDimension");
 
         assertEquals(-(near + GuiGrid.MAIN_Z_OFFSET), menu.getZpos());
         assertEquals(-near - GuiGrid.MAIN_Z_OFFSET + GuiGrid.MAIN_BUTTON_Z_OFFSET, menu.getButtonZpos());
 
         // Effective menu backplane is smaller than near plane, depending on mode.
-        TestUtil.assertDimensionF("backPlaneDimension", expectedEffectivePlaneDimension, menu.getBackPlaneDimension(), 0.00001);
+        TestUtils.assertDimensionF(expectedEffectivePlaneDimension, menu.getBackPlaneDimension(), 0.00001, "backPlaneDimension");
 
-        TestUtil.assertDimensionF("CellDimension", expectedCellDimension, menu.getCellDimension(), 0.00001);
+        TestUtils.assertDimensionF(expectedCellDimension, menu.getCellDimension(), 0.00001, "CellDimension");
     }
 }
 

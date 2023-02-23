@@ -3,8 +3,8 @@ package de.yard.threed.maze;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.core.Point;
 import de.yard.threed.engine.ObserverSystem;
@@ -15,10 +15,10 @@ import de.yard.threed.core.InitMethod;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Request;
-import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import de.yard.threed.maze.testutils.TestUtils;
+import de.yard.threed.maze.testutils.MazeTestUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -56,7 +56,7 @@ public class MazeTest {
                 SystemManager.addSystem(new UserSystem());
 
                 AvatarSystem avatarSystem = new AvatarSystem();
-                avatarSystem.setAvatarBuilder("avatar", new MazeAvatarBuilder());
+                avatarSystem.setAvatarBuilder(MazeAvatarBuilder.AVATAR_BUILDER, new MazeAvatarBuilder());
                 SystemManager.addSystem(avatarSystem);
 
                 ObserverSystem observerSystem = new ObserverSystem();
@@ -128,23 +128,23 @@ public class MazeTest {
 
         EcsEntity player = MazeUtils.getMainPlayer();
         MoverComponent mc = MoverComponent.getMoverComponent(player);
-        TestUtil.assertPoint("player location", new Point(7, 2), mc.getLocation());
+        TestUtils.assertPoint(new Point(7, 2), mc.getLocation(), "player location");
 
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD, userEntityId));
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNLEFT, userEntityId));
         sceneRunner.runLimitedFrames(50);
-        TestUtil.assertPoint("player location", new Point(7, 3), mc.getLocation());
-        TestUtil.assertVector3("player location", MazeUtils.point2Vector3(new Point(7, 3)), player.getSceneNode().getTransform().getPosition());
+        TestUtils.assertPoint(new Point(7, 3), mc.getLocation(), "player location");
+        TestUtils.assertVector3(MazeUtils.point2Vector3(new Point(7, 3)), player.getSceneNode().getTransform().getPosition(), "player location");
 
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_KICK, userEntityId));
         sceneRunner.runLimitedFrames(50);
-        TestUtil.assertPoint("player location", new Point(7, 3), mc.getLocation());
-        TestUtil.assertVector3("player location", MazeUtils.point2Vector3(new Point(7, 3)), player.getSceneNode().getTransform().getPosition());
+        TestUtils.assertPoint(new Point(7, 3), mc.getLocation(), "player location");
+        TestUtils.assertVector3(MazeUtils.point2Vector3(new Point(7, 3)), player.getSceneNode().getTransform().getPosition(), "player location");
 
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_PULL, userEntityId));
         sceneRunner.runLimitedFrames(50);
-        TestUtil.assertPoint("player location", new Point(7, 3), mc.getLocation());
-        TestUtil.assertVector3("player location", MazeUtils.point2Vector3(new Point(7, 3)), player.getSceneNode().getTransform().getPosition());
+        TestUtils.assertPoint(new Point(7, 3), mc.getLocation(), "player location");
+        TestUtils.assertVector3(MazeUtils.point2Vector3(new Point(7, 3)), player.getSceneNode().getTransform().getPosition(), "player location");
 
     }
 
@@ -181,12 +181,12 @@ public class MazeTest {
         MoverComponent mc = MoverComponent.getMoverComponent(player);
         assertNotNull(mc, "player.MoverComponent");
         Point start = new Point(5, 1);
-        TestUtil.assertPoint("start point", start, mc.getLocation());
+        TestUtils.assertPoint(start, mc.getLocation(), "start point");
         // Die Mover liegen alle auf y0!
         Vector3 startLoc = MazeUtils.point2Vector3(new Point(5, 1));
-        TestUtil.assertVector3("xyz start", startLoc, mc.getMovable().getPosition());
+        TestUtils.assertVector3(startLoc, mc.getMovable().getPosition(), "xyz start");
         //da fehlt doch was by y??
-        TestUtil.assertFloat("camera.world.y", 0.6 + 0.75, observerDummy.getTransform().getWorldModelMatrix().extractPosition().getY());
+        Assertions.assertEquals(0.6 + 0.75, observerDummy.getTransform().getWorldModelMatrix().extractPosition().getY(), 0.000001, "camera.world.y");
 
         SystemManager.putRequest(BulletSystem.buildFireRequest(player.getId(), mc.getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
         sceneRunner.runLimitedFrames(1);
@@ -250,7 +250,7 @@ public class MazeTest {
         SystemManager.putRequest(BulletSystem.buildFireRequest(player.getId(), MoverComponent.getMoverComponent(player).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
         sceneRunner.runLimitedFrames(1);
         assertEquals(3, MazeUtils.getBullets(player).size(), "bullets");
-        TestUtils.ecsWalk(sceneRunner, player, true, new Point(6, 5));
+        MazeTestUtils.ecsWalk(sceneRunner, player, true, new Point(6, 5));
 
         // but from regular field is should be possible
         SystemManager.putRequest(BulletSystem.buildFireRequest(player.getId(), MoverComponent.getMoverComponent(player).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
@@ -317,13 +317,13 @@ public class MazeTest {
         assertEquals(3, MazeUtils.getBullets(user0).size(), "bullets");
 
         // Step forward user0 and fire again
-        TestUtils.ecsWalk(sceneRunner, user0, true, new Point(5, 2));
+        MazeTestUtils.ecsWalk(sceneRunner, user0, true, new Point(5, 2));
         SystemManager.putRequest(BulletSystem.buildFireRequest(user0.getId(), MoverComponent.getMoverComponent(user0).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
         sceneRunner.runLimitedFrames(1);
         assertEquals(3 - 1, MazeUtils.getBullets(user0).size(), "bullets");
         assertEquals(3, MazeUtils.getBullets(user1).size(), "bullets");
 
-        List<EcsEntity> flyingBullets = TestUtils.getFlyingBullets();
+        List<EcsEntity> flyingBullets = MazeTestUtils.getFlyingBullets();
         assertEquals(1, flyingBullets.size());
         EcsEntity flyingBullet = flyingBullets.get(0);
         BulletComponent bc = BulletComponent.getBulletComponent(flyingBullet);
@@ -334,13 +334,13 @@ public class MazeTest {
         assertTrue(bc.isOnGround());
 
         // Step forward user1 and pick up the ball.
-        TestUtils.ecsWalk(sceneRunner, user1, true, new Point(5, 4));
+        MazeTestUtils.ecsWalk(sceneRunner, user1, true, new Point(5, 4));
         assertEquals(3 + 1, MazeUtils.getBullets(user1).size(), "bullets");
 
         // Step forward user0
-        TestUtils.ecsWalk(sceneRunner, user0, true, new Point(5, 3));
+        MazeTestUtils.ecsWalk(sceneRunner, user0, true, new Point(5, 3));
         // But shouldn't reach field of user1
-        TestUtils.ecsWalk(sceneRunner, user0, false, new Point(5, 3));
+        MazeTestUtils.ecsWalk(sceneRunner, user0, false, new Point(5, 3));
 
 
     }
@@ -398,17 +398,17 @@ public class MazeTest {
         EcsEntity user0 = users.get(0);
         EcsEntity user1 = users.get(1);
 
-        TestUtils.ecsWalk(TRIGGER_REQUEST_LEFT, sceneRunner, user0, true, new Point(4, 1));
-        TestUtils.ecsWalk(TRIGGER_REQUEST_LEFT, sceneRunner, user0, true, new Point(3, 1));
-        TestUtils.ecsWalk(TRIGGER_REQUEST_FORWARD, sceneRunner, user0, true, new Point(3, 2));
+        MazeTestUtils.ecsWalk(TRIGGER_REQUEST_LEFT, sceneRunner, user0, true, new Point(4, 1));
+        MazeTestUtils.ecsWalk(TRIGGER_REQUEST_LEFT, sceneRunner, user0, true, new Point(3, 1));
+        MazeTestUtils.ecsWalk(TRIGGER_REQUEST_FORWARD, sceneRunner, user0, true, new Point(3, 2));
         assertEquals(3, MazeUtils.getInventory(user0).size(), "inventory (3 bullets)");
 
-        TestUtils.ecsWalk(TRIGGER_REQUEST_FORWARD, sceneRunner, user0, true, new Point(3, 3));
+        MazeTestUtils.ecsWalk(TRIGGER_REQUEST_FORWARD, sceneRunner, user0, true, new Point(3, 3));
         assertEquals(3 + 1, MazeUtils.getInventory(user0).size(), "inventory (3 bullets, 1 diamond)");
 
         GridState currentstate = MazeUtils.buildGridStateFromEcs();
         assertFalse(currentstate.isSolved(Grid.getInstance().getMazeLayout()));
-        TestUtils.ecsWalk(buildRelocate(user0.getId(), new Point(7, 1), GridOrientation.fromDirection("S")), sceneRunner, user0, false, new Point(7, 1));
+        MazeTestUtils.ecsWalk(buildRelocate(user0.getId(), new Point(7, 1), GridOrientation.fromDirection("S")), sceneRunner, user0, false, new Point(7, 1));
         assertEquals(3 + 2, MazeUtils.getInventory(user0).size(), "inventory (3 bullets, 2 diamond)");
         assertEquals(GridOrientation.fromDirection("S").toString(), MazeUtils.getPlayerorientation(user0).toString(), "orientation after teleport (should be SOUTH)");
         assertTrue(currentstate.isSolved(Grid.getInstance().getMazeLayout()));
@@ -533,13 +533,13 @@ public class MazeTest {
 
         // bot must/will leave home field to make firing possible. By default it will wait real time for next move.
 
-        TestUtils.assertPosition(bot0, new Point(1, 3));
+        MazeTestUtils.assertPosition(bot0, new Point(1, 3));
         assertEquals(Direction.E.toString(), MazeUtils.getPlayerorientation(bot0).getDirection().toString(), "bot0 initial orientation");
-        TestUtils.assertPosition(bot1, new Point(2, 3));
+        MazeTestUtils.assertPosition(bot1, new Point(2, 3));
         assertEquals(Direction.E.toString(), MazeUtils.getPlayerorientation(bot1).getDirection().toString(), "bot1 initial orientation");
 
-        DeterministicBotAI dbAI0=new DeterministicBotAI(new Request[]{new Request(TRIGGER_REQUEST_FORWARD)});
-        DeterministicBotAI dbAI1=new DeterministicBotAI(new Request[]{new Request(TRIGGER_REQUEST_FORWARD)});
+        DeterministicBotAI dbAI0 = new DeterministicBotAI(new Request[]{new Request(TRIGGER_REQUEST_FORWARD)});
+        DeterministicBotAI dbAI1 = new DeterministicBotAI(new Request[]{new Request(TRIGGER_REQUEST_FORWARD)});
         BotComponent.getBotComponent(bot0).setBotAI(dbAI0);
         BotComponent.getBotComponent(bot1).setBotAI(dbAI1);
         // bot by default will wait real time for next move.
@@ -548,7 +548,7 @@ public class MazeTest {
         }, 0.1, 100000000);
 
         //TestUtils.assertPosition(bot0, new Point(2, 3));
-        TestUtils.assertPosition(bot1, new Point(3, 3));
+        MazeTestUtils.assertPosition(bot1, new Point(3, 3));
 
 
     }
@@ -596,7 +596,7 @@ public class MazeTest {
         SystemManager.putRequest(UserSystem.buildLoginRequest("u2", ""));
         sceneRunner.runLimitedFrames(5);
         assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
-        TestUtils.assertPosition(user1, new Point(4, 4));
+        MazeTestUtils.assertPosition(user1, new Point(4, 4));
 
         // both user still on their start position and have 3 bullets
         assertEquals(3, MazeUtils.getBullets(user0).size(), "bullets");

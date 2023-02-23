@@ -8,7 +8,7 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
 
 
 /**
@@ -45,13 +45,13 @@ public class Base3DTest {
         // Die Rotationreferenzweret stammen aus JME, sind aber identisch zu ThreeJS.
         // Dann sind Quaternions doch nicht plattformabhängig.
         Quaternion rotation = model.getRotation();
-        TestUtil.assertEquals("x1", 0.20182428f, rotation.getX());
-        TestUtil.assertEquals("y1", 0.18119794f, rotation.getY() );
-        TestUtil.assertEquals("z1", 0.50066054f, rotation.getZ());
-        TestUtil.assertEquals("w1", 0.82205427f, rotation.getW());
+        RuntimeTestUtil.assertEquals("x1", 0.20182428f, rotation.getX());
+        RuntimeTestUtil.assertEquals("y1", 0.18119794f, rotation.getY() );
+        RuntimeTestUtil.assertEquals("z1", 0.50066054f, rotation.getZ());
+        RuntimeTestUtil.assertEquals("w1", 0.82205427f, rotation.getW());
 
         Vector3 v = new Vector3(1, 2, 3).rotate(rotation);
-        TestUtil.assertVector3("rotated", new Vector3(0.43301272f, 1.2795533f, 3.489304f), v);
+        RuntimeTestUtil.assertVector3("rotated", new Vector3(0.43301272f, 1.2795533f, 3.489304f), v);
 
         // Durch setzen der eigenen Rotation sollte alles beim alten bleiben
         model.setRotation(rotation);
@@ -90,13 +90,13 @@ public class Base3DTest {
         // Die Rotationreferenzweret stammen aus JME, sind aber identisch zu ThreeJS.
         // Dann sind Quaternions doch nicht plattformabhängig.
         Quaternion rotation = model.getRotation();
-        TestUtil.assertEquals("x1", 0.20182428f, rotation.getX());
-        TestUtil.assertEquals("y1", 0.18119794f, rotation.getY());
-        TestUtil.assertEquals("z1", 0.50066054f, rotation.getZ());
-        TestUtil.assertEquals("w1", 0.82205427f, rotation.getW());
+        RuntimeTestUtil.assertEquals("x1", 0.20182428f, rotation.getX());
+        RuntimeTestUtil.assertEquals("y1", 0.18119794f, rotation.getY());
+        RuntimeTestUtil.assertEquals("z1", 0.50066054f, rotation.getZ());
+        RuntimeTestUtil.assertEquals("w1", 0.82205427f, rotation.getW());
 
         Vector3 v = new Vector3(1, 2, 3).rotate(rotation);
-        TestUtil.assertVector3("rotated", new Vector3(0.43301272f, 1.2795533f, 3.489304f), v);
+        RuntimeTestUtil.assertVector3("rotated", new Vector3(0.43301272f, 1.2795533f, 3.489304f), v);
 
         // Durch setzen der eigenen Rotation sollte alles beim alten bleiben
         model.setRotation(rotation);
@@ -108,7 +108,7 @@ public class Base3DTest {
         Matrix4 m = model.getLocalModelMatrix();
 
         logger.debug("modelmatrix=" + m.dump("\n"));
-        TestUtil.assertMatrix4(expected, m);
+        RuntimeTestUtil.assertMatrix4(expected, m);
 
     }
 }

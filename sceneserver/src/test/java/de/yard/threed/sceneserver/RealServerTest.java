@@ -7,14 +7,9 @@ import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.maze.EventRegistry;
 import de.yard.threed.sceneserver.testutils.TestClient;
-import de.yard.threed.sceneserver.testutils.TestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import static de.yard.threed.sceneserver.testutils.RealServer.startRealServer;
 import static de.yard.threed.sceneserver.testutils.RealServer.stopRealServer;

@@ -4,13 +4,14 @@ package de.yard.threed.sceneserver.testutils;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.ClientBusConnector;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
@@ -23,7 +24,6 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.Request;
-import de.yard.threed.engine.testutil.TestHelper;
 import de.yard.threed.maze.EventRegistry;
 import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeUtils;
@@ -47,7 +47,7 @@ public class TestClient {
     public static String USER_NAME1 = "wayne";
     public String username;
     List<Request> allRequests = new ArrayList<>();
-    LoggingSystemTracker systemTracker=new LoggingSystemTracker();
+    LoggingSystemTracker systemTracker = new LoggingSystemTracker();
 
     public TestClient(String username) {
         this.username = username;
@@ -72,7 +72,7 @@ public class TestClient {
         //TestUtils.waitForClientPacketAvailableInServer();
 
         if (sceneServer != null) {
-            TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
+            SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
         } else {
             // give server time
             Thread.sleep(2000);
@@ -81,10 +81,10 @@ public class TestClient {
         // possible race condition with movements arriving before login/joined event
         List<Packet> packets = readLatestPackets();
         assertTrue(packets.size() > 0, "packets from server found");
-        TestUtils.assertEventPacket(UserSystem.USER_EVENT_LOGGEDIN, null, packets, 1);
+        SceneServerTestUtils.assertEventPacket(UserSystem.USER_EVENT_LOGGEDIN, null, packets, 1);
 
         // join happened implicitly, so Avatar should exist.
-        TestUtils.assertEventPacket(UserSystem.USER_EVENT_JOINED, null, packets, 1);
+        SceneServerTestUtils.assertEventPacket(UserSystem.USER_EVENT_JOINED, null, packets, 1);
     }
 
     public void sendRequestToServer(Request request) {
@@ -100,24 +100,24 @@ public class TestClient {
      */
     public void sendRequestAndWait(SceneServer sceneServer, Request request) {
         while (MazeUtils.isAnyMoving() != null) {
-            TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 1);
+            SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 1);
         }
 
         sendRequestToServer(request);
 
         do {
-            TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 3);
+            SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 3);
         } while (SystemManager.getRequestCount() > 0);
 
         while (MazeUtils.isAnyMoving() != null) {
-            TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 3);
+            SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 3);
         }
     }
 
     public void assertEventPacket(EventType eventType, int expectedFound) {
         List<Packet> packets = getAllPackets();
         assertTrue(packets.size() > 0, "all packets > 0");
-        TestUtils.assertEventPacket(eventType, null, packets, expectedFound);
+        SceneServerTestUtils.assertEventPacket(eventType, null, packets, expectedFound);
 
     }
 
@@ -199,7 +199,7 @@ public class TestClient {
     }
 
     public void assertEventMazeLoaded(String gridName) {
-        TestUtils.assertEvent(EventRegistry.EVENT_MAZE_LOADED, systemTracker.getEventsProcessed(), 1, p -> {
+        SceneServerTestUtils.assertEvents(EventRegistry.EVENT_MAZE_LOADED, systemTracker.getEventsProcessed(), 1, p -> {
             assertEquals(gridName, p.get("gridname"));
         });
         //ServerSystem not available with real server
@@ -210,8 +210,10 @@ public class TestClient {
     }
 
     /**
-     * Look for latest event of a specific entity
+     * Look for latest event of a specific entity.
+     * Use assertLatestEventEntityState instead.
      */
+    @Deprecated
     public void assertEventEntityState(int entityId, Point expectedLocation, GridOrientation expectedOrientation) {
         List<Event> entityStateEvents = EcsTestHelper.filterEventList(systemTracker.getEventsProcessed(), e -> {
             return e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType() &&
@@ -222,18 +224,44 @@ public class TestClient {
         //assertEquals(gridName, p.get("gridname"));
         Vector3 position = (Vector3) latest.getPayload().get("position");
         assertNotNull(position, "position");
-        TestUtil.assertVector3(MazeUtils.point2Vector3(expectedLocation), position);
+        TestUtils.assertVector3(MazeUtils.point2Vector3(expectedLocation), position);
         Quaternion rotation = (Quaternion) latest.getPayload().get("rotation");
         assertNotNull(rotation, "rotation");
         // rotation taken as is, but seem
-        TestUtil.assertQuaternion("rotation", expectedOrientation.getRotation(), rotation);
+        TestUtils.assertQuaternion(expectedOrientation.getRotation(), rotation, "rotation");
     }
 
     /**
      * Validate all
      */
     public void assertAllEventEntityState() {
-        TestUtils.assertAllEventEntityState(systemTracker.getEventsProcessed());
+        SceneServerTestUtils.assertAllEventEntityState(systemTracker.getEventsProcessed());
+    }
+
+    public void assertLatestEventEntityState(int entityId, Pair<String, String>[] expectedProperties) {
+        List<Event> entityStateEvents = EcsTestHelper.filterEventList(systemTracker.getEventsProcessed(), e ->
+                e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType() &&
+                        (Integer) e.getPayload().get("entityid") == entityId);
+
+        if (entityStateEvents.size() == 0) {
+            logger.error("no events found");
+        }
+        Event latest = entityStateEvents.get(entityStateEvents.size() - 1);
+        TestUtils.assertEvent(BaseEventRegistry.EVENT_ENTITYSTATE, expectedProperties, latest, "");
+    }
+
+    public List<Integer> getKnownEntitiesFromEventEntityState() {
+        List<Integer> result = new ArrayList();
+        EcsTestHelper.filterEventList(systemTracker.getEventsProcessed(), e -> {
+            if (e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType()) {
+                Integer id = (Integer) e.getPayload().get("entityid");
+                if (!result.contains(id)) {
+                    result.add(id);
+                }
+            }
+            return false;
+        });
+        return result;
     }
 
     /**

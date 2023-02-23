@@ -3,9 +3,9 @@ package de.yard.threed.engine;
 import de.yard.threed.core.Dimension;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
-import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.platform.common.Settings;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +21,6 @@ public class ObserverTest {
 
         Observer observer = Observer.buildForCamera(camera);
         observer.fineTune(true);
-        TestUtil.assertVector3(new Vector3(0, Observer.offsetstep, 0), observer.getEffectivePosition());
+        TestUtils.assertVector3(new Vector3(0, Observer.offsetstep, 0), observer.getEffectivePosition());
     }
 }

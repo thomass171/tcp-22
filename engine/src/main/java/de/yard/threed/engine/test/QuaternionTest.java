@@ -3,7 +3,7 @@ package de.yard.threed.engine.test;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
 
 
 
@@ -15,12 +15,12 @@ public class QuaternionTest {
         Quaternion q = new Quaternion(1, 2, 3,4);
         q = q.normalize();
         double norm = q.getX()*q.getX()+q.getY()*q.getY()+q.getZ()*q.getZ()+q.getW()*q.getW();
-        TestUtil.assertEquals("norm", 1, norm);
+        RuntimeTestUtil.assertEquals("norm", 1, norm);
         //Referenzwerte aus JME
-        TestUtil.assertEquals("x", 0.182574f, q.getX());
-        TestUtil.assertEquals("y", 0.36514837f, q.getY());
-        TestUtil.assertEquals("z", 0.5477226f, q.getZ());
-        TestUtil.assertEquals("w", 0.73029673f, q.getW());
+        RuntimeTestUtil.assertEquals("x", 0.182574f, q.getX());
+        RuntimeTestUtil.assertEquals("y", 0.36514837f, q.getY());
+        RuntimeTestUtil.assertEquals("z", 0.5477226f, q.getZ());
+        RuntimeTestUtil.assertEquals("w", 0.73029673f, q.getW());
     }
 
     public void testAngles() {
@@ -28,15 +28,15 @@ public class QuaternionTest {
         Degree yaw = new Degree(0);
         Degree roll = new Degree(0);
         Quaternion q =  Quaternion.buildFromAngles(pitch, yaw, roll);
-        TestUtil.assertEquals("x1", 0, q.getX());
-        TestUtil.assertEquals("y1", 0, q.getY());
-        TestUtil.assertEquals("z1", 0, q.getZ());
-        TestUtil.assertEquals("w1", 1, q.getW());
+        RuntimeTestUtil.assertEquals("x1", 0, q.getX());
+        RuntimeTestUtil.assertEquals("y1", 0, q.getY());
+        RuntimeTestUtil.assertEquals("z1", 0, q.getZ());
+        RuntimeTestUtil.assertEquals("w1", 1, q.getW());
         double[] angles = new double[3];
         q.toAngles(angles);
-        TestUtil.assertEquals("pitch1", 0, (float) Degree.buildFromRadians(angles[0]).getDegree());
-        TestUtil.assertEquals("yaw1", 0, (float) Degree.buildFromRadians(angles[1]).getDegree());
-        TestUtil.assertEquals("roll1", 0, (float) Degree.buildFromRadians(angles[2]).getDegree());
+        RuntimeTestUtil.assertEquals("pitch1", 0, (float) Degree.buildFromRadians(angles[0]).getDegree());
+        RuntimeTestUtil.assertEquals("yaw1", 0, (float) Degree.buildFromRadians(angles[1]).getDegree());
+        RuntimeTestUtil.assertEquals("roll1", 0, (float) Degree.buildFromRadians(angles[2]).getDegree());
 
         pitch = new Degree(30);
         yaw = new Degree(45);
@@ -54,15 +54,15 @@ public class QuaternionTest {
         q.z=0.3604234
         q.w=0.8223631
         */
-        TestUtil.assertEquals("x1", 0.3919f, q.getX());
-        TestUtil.assertEquals("y1", 0.439679f, q.getY());
-        TestUtil.assertEquals("z1", 0.3604234f, q.getZ());
-        TestUtil.assertEquals("w1", 0.72331f, q.getW());
+        RuntimeTestUtil.assertEquals("x1", 0.3919f, q.getX());
+        RuntimeTestUtil.assertEquals("y1", 0.439679f, q.getY());
+        RuntimeTestUtil.assertEquals("z1", 0.3604234f, q.getZ());
+        RuntimeTestUtil.assertEquals("w1", 0.72331f, q.getW());
         angles = new double[3];
         q.toAngles(angles);
-        TestUtil.assertEquals("pitch2", 30, (float) Degree.buildFromRadians(angles[0]).getDegree());
-        TestUtil.assertEquals("yaw2", 45, (float) Degree.buildFromRadians(angles[1]).getDegree());
-        TestUtil.assertEquals("roll2", 60, (float) Degree.buildFromRadians(angles[2]).getDegree());
+        RuntimeTestUtil.assertEquals("pitch2", 30, (float) Degree.buildFromRadians(angles[0]).getDegree());
+        RuntimeTestUtil.assertEquals("yaw2", 45, (float) Degree.buildFromRadians(angles[1]).getDegree());
+        RuntimeTestUtil.assertEquals("roll2", 60, (float) Degree.buildFromRadians(angles[2]).getDegree());
 
     }
 
@@ -94,15 +94,15 @@ public class QuaternionTest {
         // Die Rotation muss 45 Grad um y sein
         double[] angles = new double[3];
         pathrotation.toAngles(angles);
-        TestUtil.assertEquals("x-rot", 0, (float) Degree.buildFromRadians(angles[0]).getDegree());
-        TestUtil.assertEquals("y-rot", 45, (float) Degree.buildFromRadians(angles[1]).getDegree());
-        TestUtil.assertEquals("z-rot", 0, (float) Degree.buildFromRadians(angles[2]).getDegree());
+        RuntimeTestUtil.assertEquals("x-rot", 0, (float) Degree.buildFromRadians(angles[0]).getDegree());
+        RuntimeTestUtil.assertEquals("y-rot", 45, (float) Degree.buildFromRadians(angles[1]).getDegree());
+        RuntimeTestUtil.assertEquals("z-rot", 0, (float) Degree.buildFromRadians(angles[2]).getDegree());
         // Zweite Probe ueber anderen Weg
         Quaternion rot45y =  Quaternion.buildFromAngles(new Degree(0),new Degree(45),new Degree(0));
         rot45y.toAngles(angles);
-        TestUtil.assertEquals("x-rot", 0, (float) Degree.buildFromRadians(angles[0]).getDegree());
-        TestUtil.assertEquals("y-rot", 45, (float) Degree.buildFromRadians(angles[1]).getDegree());
-        TestUtil.assertEquals("z-rot", 0, (float) Degree.buildFromRadians(angles[2]).getDegree());
+        RuntimeTestUtil.assertEquals("x-rot", 0, (float) Degree.buildFromRadians(angles[0]).getDegree());
+        RuntimeTestUtil.assertEquals("y-rot", 45, (float) Degree.buildFromRadians(angles[1]).getDegree());
+        RuntimeTestUtil.assertEquals("z-rot", 0, (float) Degree.buildFromRadians(angles[2]).getDegree());
      //   System.out.println("rot45y=" + rot45y.dump("\n"));
         //28.8.15: Der direkte Vergleich zwischen den Qs scheitert, obwohl beide
         //anscheinend denselben Winkel repraesentieren. Sehr strange.

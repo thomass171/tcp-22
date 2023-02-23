@@ -24,7 +24,8 @@ then
   usage
 fi
 
-mvn exec:java -Dexec.args="--throttle=400 --scene=$1"
+# target frame rate 40
+mvn exec:java -Dexec.args="--throttle=25 --scene=$1"
 
 exit 0
 

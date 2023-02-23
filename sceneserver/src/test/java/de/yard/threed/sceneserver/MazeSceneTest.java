@@ -1,26 +1,22 @@
 package de.yard.threed.sceneserver;
 
-import de.yard.threed.core.Event;
+import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
-import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.testutil.TestUtil;
-import de.yard.threed.engine.ecs.DefaultBusConnector;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.ServerSystem;
 import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.platform.common.Request;
-import de.yard.threed.maze.EventRegistry;
 import de.yard.threed.maze.GridOrientation;
+import de.yard.threed.maze.MazeModelFactory;
 import de.yard.threed.maze.MazeUtils;
 import de.yard.threed.maze.MoverComponent;
 import de.yard.threed.sceneserver.testutils.TestClient;
-import de.yard.threed.sceneserver.testutils.TestUtils;
+import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -44,16 +40,14 @@ public class MazeSceneTest {
 
     public void setup(String gridname) throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
-        //Use a deterministic grid without bot/monster automovement
-        //properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
         properties.put("initialMaze", gridname);
-        sceneServer = TestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties, 20);
+        sceneServer = SceneServerTestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties, 20);
         loggingSystemTracker = new LoggingSystemTracker();
         SystemManager.setSystemTracker(loggingSystemTracker);
     }
 
     @AfterEach
-    public void tearDown(){
+    public void tearDown() {
         ClientListener.dropInstance();
         // no need to stop server because it is not really running
     }
@@ -95,20 +89,27 @@ public class MazeSceneTest {
         testClient.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_FORWARD, userEntity.getId()));
 
         // 30 is not sufficient
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
+        SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
 
-        TestUtil.assertPoint("player location", new Point(7, 2), mc.getLocation());
+        TestUtils.assertPoint(new Point(7, 2), mc.getLocation(), "player location");
 
         loggingSystemTracker.tag();
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
+        SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
         // entity change events go to network directly. So there shouldn't have been any event.
         assertEquals(0, loggingSystemTracker.getLatestEventsProcessed().size());
+
+        // first two should be boxes
+        List<Integer> knownEntityIds = testClient.getKnownEntitiesFromEventEntityState();
+        assertEquals(3, knownEntityIds.size());
+        testClient.assertLatestEventEntityState(knownEntityIds.get(0), new Pair[]{
+                new Pair("buildername", MazeModelFactory.BOX_BUILDER)
+        });
 
         testClient.assertAllEventEntityState();
         testClient.disconnect();
 
         // should publish connection closed event.
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
+        SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
 
         //TestUtils.
         //Event evt = testClient1.waitForEvent(DefaultBusConnector.EVENT_CONNECTION_CLOSED);
@@ -116,6 +117,8 @@ public class MazeSceneTest {
     }
 
     /**
+     * Use a deterministic grid without bot/monster automovement
+     * <p>
      * ###############
      * #     @       #
      * #  #        # #
@@ -145,5 +148,14 @@ public class MazeSceneTest {
         testClient1.assertEventMazeLoaded("maze/Area15x10.txt");
 
         testClient0.assertEventEntityState(testClient0.getUserEntity().getId(), new Point(6, 4), GridOrientation.fromDirection("N"));
+
+        // first two should be diamonds
+        List<Integer> knownEntityIds = testClient1.getKnownEntitiesFromEventEntityState();
+        // 2 player (3 bullets each) + 4 diamonds
+        assertEquals(12, knownEntityIds.size());
+        testClient1.assertLatestEventEntityState(knownEntityIds.get(0), new Pair[]{
+                new Pair("buildername", MazeModelFactory.DIAMOND_BUILDER)
+        });
+
     }
 }

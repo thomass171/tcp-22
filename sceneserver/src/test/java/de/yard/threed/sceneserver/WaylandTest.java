@@ -1,11 +1,10 @@
 package de.yard.threed.sceneserver;
 
-import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.sceneserver.testutils.TestClient;
-import de.yard.threed.sceneserver.testutils.TestUtils;
+import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.HashMap;
 
-import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientConnected;
-import static de.yard.threed.sceneserver.testutils.TestUtils.waitForClientPacketAvailableInServer;
+import static de.yard.threed.sceneserver.testutils.SceneServerTestUtils.waitForClientConnected;
+import static de.yard.threed.sceneserver.testutils.SceneServerTestUtils.waitForClientPacketAvailableInServer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WaylandTest {
@@ -34,7 +33,7 @@ public class WaylandTest {
             System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
 
-        sceneServer = TestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES,properties,200);
+        sceneServer = SceneServerTestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES,properties,200);
     }
 
     @AfterEach
@@ -60,7 +59,7 @@ public class WaylandTest {
         waitForClientConnected();
         waitForClientPacketAvailableInServer();
 
-        TestUtils.runAdditionalFrames(sceneServer.getSceneRunner(),5);
+        SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(),5);
         assertEquals(INITIAL_FRAMES + 5, sceneServer.getSceneRunner().getFrameCount());
 
        /*

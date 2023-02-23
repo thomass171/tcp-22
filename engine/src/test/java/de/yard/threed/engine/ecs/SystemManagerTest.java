@@ -4,7 +4,7 @@ import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.SocketMock;
@@ -64,10 +64,10 @@ public class SystemManagerTest {
 
         List<Packet> packets = systemTracker.getPacketsSentToNetwork();
         assertEquals(2, packets.size());
-        TestUtil.assertEvent("", BaseEventRegistry.EVENT_ENTITYSTATE, new Pair[]{
+        TestUtils.assertEvent( BaseEventRegistry.EVENT_ENTITYSTATE, new Pair[]{
                 new Pair("entityid", "" + entityWithoutSceneNode.getId()),
                 new Pair("buildername", "*")
-        }, DefaultBusConnector.decodeEvent(packets.get(1)));
+        }, DefaultBusConnector.decodeEvent(packets.get(1)),"");
     }
 }
 

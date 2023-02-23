@@ -516,9 +516,10 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         for (Point b : grid.getBoxes()) {
             //EcsEntity box = MazeMovingAndStateSystem.buildSokobanBox(b.getX(), b.getY());
             //static EcsEntity buildSokobanBox(int x, int y) {
-            SceneNode p = MazeModelFactory.getInstance().buildSokobanBox(/*b.getX(), b.getY()*/);
-            EcsEntity box = new EcsEntity(p);
-            MoverComponent mover = new MoverComponent(p.getTransform()/*this*/, false, b, new GridOrientation(), -1);
+            //SceneNode p = MazeModelFactory.getInstance().buildSokobanBox(/*b.getX(), b.getY()*/);
+            EcsEntity box = new EcsEntity();
+            box.buildSceneNodeByModelFactory(MazeModelFactory.BOX_BUILDER, new ModelBuilderRegistry[]{MazeModelFactory.getInstance()});
+            MoverComponent mover = new MoverComponent(box.getSceneNode().getTransform()/*this*/, false, b, new GridOrientation(), -1);
             mover.setLocation(b);
             box.addComponent(mover);
             //return box;
@@ -527,7 +528,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         }
         for (Point b : grid.getDiamonds()) {
             EcsEntity diamond = new EcsEntity();
-            diamond.buildSceneNodeByModelFactory(MazeModelFactory.MAZE_MODEL_DIAMOND, new ModelBuilderRegistry[]{MazeModelFactory.getInstance()});
+            diamond.buildSceneNodeByModelFactory(MazeModelFactory.DIAMOND_BUILDER, new ModelBuilderRegistry[]{MazeModelFactory.getInstance()});
             diamond.setName("diamond");
             Vector3 dp = MazeUtils.point2Vector3(b);
             dp = new Vector3(dp.getX(), 0.8, dp.getZ());

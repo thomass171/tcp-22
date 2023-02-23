@@ -27,7 +27,7 @@ public class ClientListener extends Thread {
     private volatile boolean terminated = false;
     private volatile boolean aborted = false;
     java.net.ServerSocket serverSocket;
-    List<ClientConnection> clientConnectionList = new ArrayList();
+    private List<ClientConnection> clientConnectionList = new ArrayList();
     private static ClientListener instance;
 
     private ClientListener(String host, int port) {
@@ -155,6 +155,7 @@ public class ClientListener extends Thread {
 
         Iterator<ClientConnection> iter = clientConnectionList.iterator();
         while (iter.hasNext()) {
+            // TODO risk of ava.util.ConcurrentModificationException. Occured once
             ClientConnection cc = iter.next();
             if (cc.isClosed()) {
                 logger.debug("Discarding closed connection");

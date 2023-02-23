@@ -11,7 +11,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.*;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
 
 /**
  * Ein Test speziell fuer "echte" Async Funktionalitäten. Kann deshalb nicht in Unittests laufen, sondern
@@ -35,37 +35,37 @@ public class AsyncTest {
         logger.info("test corrupted: Up to 4 reported errors are intended (missing.ac,ControlLight.bin,gltf:nobin,gltf failed) . Check final green or red cube.");
         String BUNDLECORRUPTED = "corrupted";
         BundleRegistry.unregister(BUNDLECORRUPTED);
-        TestUtil.assertNull("", BundleRegistry.getBundle(BUNDLECORRUPTED));
+        RuntimeTestUtil.assertNull("", BundleRegistry.getBundle(BUNDLECORRUPTED));
         AbstractSceneRunner.instance.loadBundle(BUNDLECORRUPTED, (r) -> {
             logger.debug("bundle load completed");
 
             Bundle cb = BundleRegistry.getBundle(BUNDLECORRUPTED);
-            TestUtil.assertNotNull("", cb);
+            RuntimeTestUtil.assertNotNull("", cb);
             BundleResource missing = new BundleResource(cb, "missing.ac");
-            TestUtil.assertTrue("failure", cb.failed(missing));
-            TestUtil.assertFalse("contains", cb.contains(missing));
-            TestUtil.assertFalse("exists", cb.exists(missing));
+            RuntimeTestUtil.assertTrue("failure", cb.failed(missing));
+            RuntimeTestUtil.assertFalse("contains", cb.contains(missing));
+            RuntimeTestUtil.assertFalse("exists", cb.exists(missing));
             BundleResource readme = new BundleResource(cb, "Readme.txt");
-            TestUtil.assertFalse("failure", cb.failed(readme));
-            TestUtil.assertTrue("contains", cb.contains(readme));
-            TestUtil.assertTrue("exists", cb.exists(readme));
+            RuntimeTestUtil.assertFalse("failure", cb.failed(readme));
+            RuntimeTestUtil.assertTrue("contains", cb.contains(readme));
+            RuntimeTestUtil.assertTrue("exists", cb.exists(readme));
             BundleResource controllight = new BundleResource(cb, "ControlLight.gltf");
-            TestUtil.assertFalse("failure", cb.failed(controllight));
-            TestUtil.assertFalse("contains", cb.contains(controllight));
-            TestUtil.assertTrue("exists", cb.exists(controllight));
+            RuntimeTestUtil.assertFalse("failure", cb.failed(controllight));
+            RuntimeTestUtil.assertFalse("contains", cb.contains(controllight));
+            RuntimeTestUtil.assertTrue("exists", cb.exists(controllight));
             BundleResource controllightbin = new BundleResource(cb, "ControlLight.bin");
-            TestUtil.assertFalse("failure", cb.failed(controllightbin));
-            TestUtil.assertFalse("contains", cb.contains(controllightbin));
-            TestUtil.assertTrue("exists", cb.exists(controllightbin));
+            RuntimeTestUtil.assertFalse("failure", cb.failed(controllightbin));
+            RuntimeTestUtil.assertFalse("contains", cb.contains(controllightbin));
+            RuntimeTestUtil.assertTrue("exists", cb.exists(controllightbin));
             EngineHelper.buildNativeModel(controllight, null, (r1) -> {
                 // das fehlende bin muss jetzt aufgefallen sein.
                 logger.debug("model build completed");
-                TestUtil.assertFalse("failure", cb.failed(controllight));
-                TestUtil.assertTrue("contains", cb.contains(controllight));
-                TestUtil.assertTrue("exists", cb.exists(controllight));
-                TestUtil.assertTrue("failure", cb.failed(controllightbin));
-                TestUtil.assertFalse("contains", cb.contains(controllightbin));
-                TestUtil.assertFalse("exists", cb.exists(controllightbin));
+                RuntimeTestUtil.assertFalse("failure", cb.failed(controllight));
+                RuntimeTestUtil.assertTrue("contains", cb.contains(controllight));
+                RuntimeTestUtil.assertTrue("exists", cb.exists(controllight));
+                RuntimeTestUtil.assertTrue("failure", cb.failed(controllightbin));
+                RuntimeTestUtil.assertFalse("contains", cb.contains(controllightbin));
+                RuntimeTestUtil.assertFalse("exists", cb.exists(controllightbin));
                 success = true;
                 //green/red cube sind als Indikator wichtig, nicht die message, denn die kann einfach fehlen bei Fehler.
                 logger.debug("testCorrupted successfully completed.");

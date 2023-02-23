@@ -4,6 +4,7 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.NativeCollision;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.GridTeleporter;
 import de.yard.threed.engine.Ray;
 import de.yard.threed.engine.SceneNode;
@@ -15,8 +16,8 @@ import de.yard.threed.engine.testutil.MockedCollision;
 import de.yard.threed.engine.testutil.MockedRay;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.maze.*;
-import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,12 +26,12 @@ import java.util.List;
 import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FORWARD;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TestUtils {
+public class MazeTestUtils {
 
 
     public static void rotatePlayer(GridMover mc, boolean left, Point expected) {
         mc.rotate(left);
-        TestUtil.assertPoint("current location", expected, mc.getLocation());
+        TestUtils.assertPoint(expected, mc.getLocation(), "current location");
     }
 
    /* public static void rotatePlayer(GridMover mc, boolean left){
@@ -51,7 +52,7 @@ public class TestUtils {
         if (moveResult != null) {
             gm = moveResult.movement;
         }
-        TestUtil.assertPoint("new player location", expected, player.getLocation());
+        TestUtils.assertPoint(expected, player.getLocation(), "new player location");
         return gm;
     }
 
@@ -61,7 +62,7 @@ public class TestUtils {
         if (moveResult != null) {
             gm = moveResult.movement;
         }
-        TestUtil.assertPoint("new player location", expected, player.getLocation());
+        TestUtils.assertPoint(expected, player.getLocation(), "new player location");
         return gm;
     }
 
@@ -69,17 +70,17 @@ public class TestUtils {
     public static GridMovement move(GridMover player, List<GridMover> players, List<GridMover> boxes, GridMovement gridMovement, MazeLayout layout, Point expected, GridMovement expectedGridMovement) {
         GridMovement gm = move(player, players, boxes, gridMovement, layout, expected);
         if (expectedGridMovement != null) {
-            TestUtil.assertNotNull("returned GridMovement", gm);
-            TestUtil.assertEquals("returned GridMovement", expectedGridMovement.toString(), gm.toString());
+            Assertions.assertNotNull(gm, "returned GridMovement");
+            Assertions.assertEquals(expectedGridMovement.toString(), gm.toString(), "returned GridMovement");
         } else {
-            TestUtil.assertNull("returned GridMovement", gm);
+            Assertions.assertNull(gm, "returned GridMovement");
         }
         return gm;
     }
 
     public static void move(GridMover mc, GridMovement gridMovement, GridState gridState, MazeLayout layout, Point expected) {
         mc.move(gridMovement, mc.getOrientation(), gridState, layout);
-        TestUtil.assertPoint("new player location", expected, mc.getLocation());
+        TestUtils.assertPoint(expected, mc.getLocation(), "new player location");
     }
 
     /*public static void walkPlayerByPush(GridMover player, GridMover box, GridState gridState, MazeLayout layout, Point expected) {
@@ -181,7 +182,7 @@ public class TestUtils {
     public static void assertPosition(EcsEntity user, Point point) {
         MoverComponent mc = MoverComponent.getMoverComponent(user);
         assertNotNull(mc, "user1.MoverComponent");
-        TestUtil.assertPoint(" point", point, mc.getLocation());
+        TestUtils.assertPoint(point, mc.getLocation(), " point");
     }
 
     public static void assertDirection(Direction expected, Direction actual) {
@@ -194,13 +195,13 @@ public class TestUtils {
         if (gridTeleporterEnabled) {
             properties.put("argv.enableMazeGridTeleporter", "true");
         }
-        return buildSceneRunnerForMazeScene(gridname,properties,initial_frames);
+        return buildSceneRunnerForMazeScene(gridname, properties, initial_frames);
     }
 
     /**
      * Also used in other modules.
      */
-    public static SceneRunnerForTesting buildSceneRunnerForMazeScene(String gridname,  HashMap<String, String> additionalPproperties, int initial_frames) {
+    public static SceneRunnerForTesting buildSceneRunnerForMazeScene(String gridname, HashMap<String, String> additionalPproperties, int initial_frames) {
 
         MazeDataProvider.reset();
 

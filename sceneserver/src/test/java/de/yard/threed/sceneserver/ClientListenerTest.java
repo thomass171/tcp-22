@@ -4,11 +4,10 @@ package de.yard.threed.sceneserver;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.sceneserver.testutils.PlatformSceneServerFactoryForTesting;
 import de.yard.threed.sceneserver.testutils.TestClient;
-import de.yard.threed.sceneserver.testutils.TestUtils;
+import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +48,7 @@ public class ClientListenerTest {
         TestClient testClient = new TestClient(TestClient.USER_NAME0);
         testClient.connectAndLogin();
 
-        TestUtils.waitForClientConnected();
+        SceneServerTestUtils.waitForClientConnected();
 
         Packet requestLoginPacket = waitForClientPacket(clientListener.getClientConnections().get(0));
         assertNotNull(requestLoginPacket);

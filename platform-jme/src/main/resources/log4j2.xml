@@ -8,7 +8,12 @@
         <RollingFile name="RollingFile" fileName="threed.log" filePattern="threed-%d{MM-dd-yyyy}.log.gz"
                      ignoreExceptions="false" append="false" >
             <PatternLayout pattern="%d{HH:mm:ss,SSS} %-5p %-10.20c{1}: '%m'%n"/>
-            <TimeBasedTriggeringPolicy />
+            <!--<TimeBasedTriggeringPolicy />-->
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="20 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
         </RollingFile>
     </Appenders>
     <Loggers>

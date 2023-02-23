@@ -1,8 +1,6 @@
 package de.yard.threed.graph;
 
-import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.Test;

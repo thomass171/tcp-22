@@ -1,28 +1,22 @@
 package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Event;
-import de.yard.threed.core.Payload;
-import de.yard.threed.core.Quaternion;
-import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.ClientSystem;
-import de.yard.threed.engine.ecs.DefaultBusConnector;
-import de.yard.threed.engine.ecs.EcsHelper;
 import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
-import de.yard.threed.engine.testutil.TestHelper;
 import de.yard.threed.maze.BotSystem;
 import de.yard.threed.maze.BulletSystem;
 import de.yard.threed.maze.MazeMovingAndStateSystem;
 import de.yard.threed.maze.MazeVisualizationSystem;
+import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.sceneserver.testutils.RealServer;
-import de.yard.threed.sceneserver.testutils.TestUtils;
+import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +55,7 @@ public class RealServerRealClientTest {
 
         HashMap<String, String> additionalProperties = new HashMap<String, String>();
         additionalProperties.put("server", "localhost");
-        SceneRunnerForTesting sceneRunner = de.yard.threed.maze.testutils.TestUtils.buildSceneRunnerForMazeScene("skbn/SokobanWikipedia.txt", additionalProperties, 10);
+        SceneRunnerForTesting sceneRunner = MazeTestUtils.buildSceneRunnerForMazeScene("skbn/SokobanWikipedia.txt", additionalProperties, 10);
         LoggingSystemTracker systemTracker = sceneRunner.getSystemTracker();
 
         // a client mode scene has a system state? For sending login request?.
@@ -96,7 +90,7 @@ public class RealServerRealClientTest {
         assertEquals(USER_EVENT_JOINED.getType(), eventlist.get(2).getType().getType());
 
         // Entity change events should be complete. The total number might vary.
-        TestUtils.assertAllEventEntityState(EcsTestHelper.toEventList(systemTracker.getPacketsReceivedFromNetwork()));
+        SceneServerTestUtils.assertAllEventEntityState(EcsTestHelper.toEventList(systemTracker.getPacketsReceivedFromNetwork()));
 
 
         assertEquals(2 + 1, SystemManager.findEntities((EntityFilter) null).size(),

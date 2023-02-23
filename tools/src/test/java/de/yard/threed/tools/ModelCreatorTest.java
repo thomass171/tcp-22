@@ -5,14 +5,9 @@ import de.yard.threed.core.resource.BundleResource;
 
 import de.yard.threed.engine.loader.InvalidDataException;
 import de.yard.threed.engine.loader.LoaderGLTF;
-import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.core.platform.NativeJsonValue;
 import de.yard.threed.core.testutil.Assert;
-import de.yard.threed.core.testutil.TestUtil;
-import de.yard.threed.tools.GltfBuilderResult;
-import de.yard.threed.tools.GltfMemoryBundle;
-import de.yard.threed.tools.ModelCreator;
-import de.yard.threed.tools.ToolsPlatform;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 
@@ -35,7 +30,7 @@ public class ModelCreatorTest {
                 Assert.fail(e.getMessage());
             }
             NativeJsonValue gltf = platform.parseJson(result.gltfstring);
-            TestUtil.assertNotNull("parsedgltf", gltf);
+            Assertions.assertNotNull(gltf, "parsedgltf");
             BundleResource gltfbr = new BundleResource(new GltfMemoryBundle("plane-darkGreen", result.gltfstring, result.bin), "plane-darkGreen.gltf");
             try {
                 LoaderGLTF lf1 = LoaderGLTF.buildLoader(gltfbr, null);

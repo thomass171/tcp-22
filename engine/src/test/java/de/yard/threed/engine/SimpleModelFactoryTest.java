@@ -12,16 +12,16 @@ import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.core.resource.Bundle;
-import de.yard.threed.core.testutil.TestUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
  * Nur fuer Model building, das keine echt platform braucht. Sonst in opengl.
- *
+ * <p>
  * Created by thomass on 02.06.16.
  */
 public class SimpleModelFactoryTest {
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
 
     /**
      * Test vor allem wegen Texturen.
@@ -31,13 +31,13 @@ public class SimpleModelFactoryTest {
     public void testLocomotive() {
         PortableModelList locomotive = VehiclePmlFactory.buildLocomotive();
         Bundle data = BundleRegistry.getBundle("data");
-        int oldcnt =  EngineHelper.getStatistics().texturefailures;
+        int oldcnt = EngineHelper.getStatistics().texturefailures;
         PortableModelBuilder pmb = locomotive.createPortableModelBuilder();
         SceneNode node = pmb.buildModel(data);
-        TestUtil.assertFalse("dummymaterialused",pmb.dummymaterialused);
-        TestUtil.assertEquals("texturefailures",oldcnt, EngineHelper.getStatistics().texturefailures);
+        Assertions.assertFalse(pmb.dummymaterialused, "dummymaterialused");
+        Assertions.assertEquals(oldcnt, EngineHelper.getStatistics().texturefailures, "texturefailures");
         for (PortableMaterial m : locomotive.materials) {
-            TestUtil.assertTrue("shaded", m.shaded);
+            Assertions.assertTrue(m.shaded, "shaded");
         }
     }
 }

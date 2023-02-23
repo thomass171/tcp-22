@@ -7,7 +7,6 @@ import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ModelBuilderRegistry;
 import de.yard.threed.engine.SceneNode;
@@ -29,7 +28,7 @@ import de.yard.threed.engine.platform.common.RequestType;
 public class ClientSystem extends DefaultEcsSystem {
     static Log logger = Platform.getInstance().getLog(ClientSystem.class);
     public static String TAG = "ClientSystem";
-    private boolean clientsystemdebuglog = true;
+    private boolean clientsystemdebuglog = false;
     private ModelBuilderRegistry[] modelBuilderRegistries;
 
     public ClientSystem(ModelBuilderRegistry[] modelBuilderRegistries) {

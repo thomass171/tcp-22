@@ -2,14 +2,14 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.maze.testutils.TestUtils;
+import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestFactory;
 
 import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.core.testutil.Assert;
-import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
  * Created by thomass on 15.11.15.
  */
 public class SokobanTest {
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine","maze"}, new PlatformFactoryHeadless());
+    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
     /*16.4.21 public static final String trivialsokoban =
             "#####\n" +
                     "#   #\n" +
@@ -37,37 +37,37 @@ public class SokobanTest {
     public void testSokobanWikipedia() {
 
         try {
-            Grid grid = Grid.loadByReader(new StringReader(TestUtils.loadGrid("skbn/SokobanWikipedia.txt"))).get(0);
+            Grid grid = Grid.loadByReader(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanWikipedia.txt"))).get(0);
 
             Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null);
-            TestUtil.assertEquals("width", 9, grid.getMaxWidth());
-            TestUtil.assertEquals("height", 6, grid.getHeight());
-            TestUtil.assertEquals("start.x", 6, startPosition.getX());
-            TestUtil.assertEquals("start.y", 1, startPosition.getY());
-            TestUtil.assertTrue("top pillar", grid.hasTopPillar(new Point(0, 0)));
-            TestUtil.assertTrue("top pillar", grid.hasTopPillar(new Point(0, 1)));
-            TestUtil.assertFalse("top pillar", grid.hasTopPillar(new Point(0, 4)));
-            TestUtil.assertFalse("top pillar (1,3)", grid.hasTopPillar(new Point(1, 3)));
-            TestUtil.assertTrue("center pillar", grid.hasCenterPillar(new Point(5, 2)));
-            TestUtil.assertTrue("top pillar", grid.hasTopPillar(new Point(5, 4)));
-            TestUtil.assertFalse("top pillar", grid.hasTopPillar(new Point(7, 3)));
-            TestUtil.assertFalse("top pillar", grid.hasTopPillar(new Point(8, 4)));
-            TestUtil.assertFalse("top pillar 6,4 ", grid.hasTopPillar(new Point(6, 4)));
+            Assertions.assertEquals(9, grid.getMaxWidth(), "width");
+            Assertions.assertEquals(6, grid.getHeight(), "height");
+            Assertions.assertEquals(6, startPosition.getX(), "start.x");
+            Assertions.assertEquals(1, startPosition.getY(), "start.y");
+            Assertions.assertTrue(grid.hasTopPillar(new Point(0, 0)), "top pillar");
+            Assertions.assertTrue(grid.hasTopPillar(new Point(0, 1)), "top pillar");
+            Assertions.assertFalse(grid.hasTopPillar(new Point(0, 4)), "top pillar");
+            Assertions.assertFalse(grid.hasTopPillar(new Point(1, 3)), "top pillar (1,3)");
+            Assertions.assertTrue(grid.hasCenterPillar(new Point(5, 2)), "center pillar");
+            Assertions.assertTrue(grid.hasTopPillar(new Point(5, 4)), "top pillar");
+            Assertions.assertFalse(grid.hasTopPillar(new Point(7, 3)), "top pillar");
+            Assertions.assertFalse(grid.hasTopPillar(new Point(8, 4)), "top pillar");
+            Assertions.assertFalse(grid.hasTopPillar(new Point(6, 4)), "top pillar 6,4 ");
             // right
-            TestUtil.assertTrue("right pillar", grid.hasRightPillar(new Point(0, 0)));
-            TestUtil.assertTrue("right pillar", grid.hasRightPillar(new Point(5, 0)));
-            TestUtil.assertFalse("right pillar", grid.hasRightPillar(new Point(5, 1)));
-            TestUtil.assertFalse("right pillar", grid.hasRightPillar(new Point(5, 2)));
-            TestUtil.assertTrue("right pillar", grid.hasRightPillar(new Point(5, 4)));
+            Assertions.assertTrue(grid.hasRightPillar(new Point(0, 0)), "right pillar");
+            Assertions.assertTrue(grid.hasRightPillar(new Point(5, 0)), "right pillar");
+            Assertions.assertFalse(grid.hasRightPillar(new Point(5, 1)), "right pillar");
+            Assertions.assertFalse(grid.hasRightPillar(new Point(5, 2)), "right pillar");
+            Assertions.assertTrue(grid.hasRightPillar(new Point(5, 4)), "right pillar");
 
             // left
-            TestUtil.assertFalse("left pillar", grid.hasRightPillar(new Point(-1, 0)));
+            Assertions.assertFalse(grid.hasRightPillar(new Point(-1, 0)), "left pillar");
 
             // bottom
-            TestUtil.assertFalse("bottom pillar", grid.hasTopPillar(new Point(0, -1)));
+            Assertions.assertFalse(grid.hasTopPillar(new Point(0, -1)), "bottom pillar");
 
-            TestUtil.assertEquals("", Grid.STRAIGHTWALLMODE_NONE,grid.isVWALL(new Point(0, 0)));
-            TestUtil.assertEquals("", Grid.STRAIGHTWALLMODE_NONE,grid.isHWALL(new Point(0, 0)));
+            Assertions.assertEquals(Grid.STRAIGHTWALLMODE_NONE, grid.isVWALL(new Point(0, 0)));
+            Assertions.assertEquals(Grid.STRAIGHTWALLMODE_NONE, grid.isHWALL(new Point(0, 0)));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -75,7 +75,7 @@ public class SokobanTest {
 
     @Test
     public void testAutosolverTrivial() throws Exception {
-        Grid grid = Grid.loadByReader(new StringReader(TestUtils.loadGrid("skbn/SokobanTrivial.txt"))).get(0);
+        Grid grid = Grid.loadByReader(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanTrivial.txt"))).get(0);
 
         SokobanAutosolver solver = new SokobanAutosolver(grid/*MA32, grid.getState()*/);
         solver.solve();
@@ -87,7 +87,7 @@ public class SokobanTest {
 
     @Test
     public void testAutosolverSimple() throws Exception {
-        Grid grid = Grid.loadByReader(new StringReader(TestUtils.loadGrid("skbn/SokobanSimple.txt"))).get(0);
+        Grid grid = Grid.loadByReader(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanSimple.txt"))).get(0);
 
         SokobanAutosolver solver = new SokobanAutosolver(grid/*MA32, grid.getState()*/);
         solver.solve();

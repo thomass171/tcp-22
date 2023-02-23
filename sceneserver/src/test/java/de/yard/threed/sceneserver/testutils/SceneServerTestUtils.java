@@ -5,29 +5,20 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Payload;
-import de.yard.threed.core.Point;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.testutil.PayloadHook;
 import de.yard.threed.engine.testutil.TestFactory;
-import de.yard.threed.engine.testutil.TestHelper;
-import de.yard.threed.maze.Grid;
-import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeDataProvider;
-import de.yard.threed.maze.MazeUtils;
 import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
 import de.yard.threed.sceneserver.ClientConnection;
 import de.yard.threed.sceneserver.ClientListener;
 import de.yard.threed.sceneserver.SceneServer;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,7 +26,7 @@ import static de.yard.threed.javanative.JavaUtil.sleepMs;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class TestUtils {
+public class SceneServerTestUtils {
 
     public static void waitForClientConnected() {
 
@@ -92,11 +83,11 @@ public class TestUtils {
         }
     }
 
-    public static void assertEvent(EventType expectedEventType, List<Event> events, int expectedCount, PayloadHook payloadHook) {
+    public static void assertEvents(EventType expectedEventType, List<Event> events, int expectedCount, PayloadHook payloadHook) {
         int found = 0;
         for (Event event : events) {
             if (event == null) {
-                Platform.getInstance().getLog(TestUtils.class).warn("event is null");
+                Platform.getInstance().getLog(SceneServerTestUtils.class).warn("event is null");
             }
             if (expectedEventType.getType() == event.getType().getType()) {
                 found++;

@@ -160,6 +160,7 @@ public class AvatarSystem extends DefaultEcsSystem {
 
     /**
      * Build avatar for user. No observer change here.
+     * The avatar is quite independent from the observer.
      */
     private SceneNode buildAvatarForUserEntity(EcsEntity user) {
         logger.debug("Building avatar for player " + user);
