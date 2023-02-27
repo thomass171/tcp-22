@@ -212,6 +212,16 @@ Events and Requests are the main elements for inter system communication. But wh
 For example in client/server mode a "UserSystem" runs on the server not the client. But the client needs to
 send LOGIN requests and might process LoggedIn events. This suggests to decouple event/request registration from specific systems.
 
+## Authentication
+
+Authentication is useful when data is shared across several user.
+
+The hoster of a maze or sceneserver is the adminstrator and defines the 'admin'
+password by properties
+
+* servermanager.admin.password
+* services.admin.password
+
 ## Modules
 
 ### Scene Server
@@ -222,5 +232,18 @@ sophisticated network layer (MQTT?).
 Because there is no need for GWT and C#, there is no limitation in using Java. So logging 
 outside the platform (SL4J) and reflection might be used..
 
+### services
+A SpringBoot applications that provides maze grid CRUD services via HTTP.
+
+### servermanager
+A SpringBoot application that provides scene server control via HTTP, eg.:
+
+* launch a scene server for a specific scene
+
+Start the server manager (and enable DEBUG logging) with
+```
+cd servermanager
+mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.de.yard.threed=DEBUG"
+```
 ## Bundles
 

@@ -43,6 +43,7 @@
         <module>platform-homebrew</module>
         <module>services</module>
         <module>sceneserver</module>
+        <module>servermanager</module>
         <!-- the longest running at the end -->
         <module>platform-webgl</module>
     </modules>

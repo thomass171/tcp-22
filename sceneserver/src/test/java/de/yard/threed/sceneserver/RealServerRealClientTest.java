@@ -10,6 +10,7 @@ import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
+import de.yard.threed.javanative.JavaUtil;
 import de.yard.threed.maze.BotSystem;
 import de.yard.threed.maze.BulletSystem;
 import de.yard.threed.maze.MazeMovingAndStateSystem;
@@ -44,7 +45,7 @@ public class RealServerRealClientTest {
 
     @AfterEach
     public void tearDown() {
-        RealServer.stopRealServer(serverProcess);
+        JavaUtil.stopProcess(serverProcess);
         serverProcess = null;
     }
 

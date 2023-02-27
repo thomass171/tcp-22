@@ -190,7 +190,7 @@ public class SceneServerRenderer extends HomeBrewRenderer {
     protected void collectKeyboardAndMouseEvents(AbstractSceneRunner runner) {
 
         ClientListener.getInstance().checkLiveness();
-        
+
         // for closed connections send a close event, independent from whether the client logged off.
         ClientConnection cc;
         while ((cc = ClientListener.getInstance().discardClosedConnection()) != null) {
@@ -211,6 +211,14 @@ public class SceneServerRenderer extends HomeBrewRenderer {
         }
         if (cnt > 0) {
             log.debug("Read {} packets from {} clients", cnt, clientConnections.size());
+        }
+        if (clientConnections.size() == 0) {
+            // extra wait for saving CPU
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 

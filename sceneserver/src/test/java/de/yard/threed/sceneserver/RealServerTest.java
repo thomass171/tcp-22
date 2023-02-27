@@ -5,6 +5,7 @@ import de.yard.threed.core.testutil.TestFactory;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
+import de.yard.threed.javanative.JavaUtil;
 import de.yard.threed.maze.EventRegistry;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static de.yard.threed.sceneserver.testutils.RealServer.startRealServer;
-import static de.yard.threed.sceneserver.testutils.RealServer.stopRealServer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -50,7 +50,7 @@ public class RealServerTest {
 
     @AfterEach
     public void tearDown() {
-        stopRealServer(serverProcess);
+        JavaUtil.stopProcess(serverProcess);
         serverProcess = null;
     }
 
