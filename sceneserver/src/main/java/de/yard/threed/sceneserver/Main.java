@@ -8,6 +8,7 @@ import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.javanative.SocketClient;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,8 @@ public class Main {
             // args have more prio than env
             Configuration configuration = new ConfigurationByArgs(args).addConfiguration(new ConfigurationByEnv(), true);
             String scene = configuration.getString("scene");
+
+            Server jettyServer = JettyServer.startJettyServer(8091);
 
             HashMap<String, String> properties = new HashMap<String, String>();
             SceneServer sceneServer = new SceneServer(subdir, scene, configuration);

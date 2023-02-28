@@ -15,9 +15,11 @@ import de.yard.threed.engine.testutil.PayloadHook;
 import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.maze.MazeDataProvider;
 import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
+import de.yard.threed.platform.homebrew.PlatformHomeBrew;
 import de.yard.threed.sceneserver.ClientConnection;
 import de.yard.threed.sceneserver.ClientListener;
 import de.yard.threed.sceneserver.SceneServer;
+import de.yard.threed.sceneserver.SceneServerRenderer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -124,6 +126,8 @@ public class SceneServerTestUtils {
         //also maze movement needs some time
         //sceneRunner.renderbrake=200;
         sceneRunner.renderbrake = renderbrake;
+        // but don't save (waste) time during tests
+        ((SceneServerRenderer)((PlatformHomeBrew)Platform.getInstance()).renderer).noClientCpuSaveDelay=0;
 
         sceneRunner.frameLimit = initialFrames;
 

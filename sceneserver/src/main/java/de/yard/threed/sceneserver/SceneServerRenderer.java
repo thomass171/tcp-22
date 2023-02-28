@@ -52,6 +52,9 @@ public class SceneServerRenderer extends HomeBrewRenderer {
         this.syncedObjectsRegistry = syncedObjectsRegistry;
     }*/
 
+    // in milliseconds
+    public int noClientCpuSaveDelay = 1000;
+
     public SceneServerRenderer() {
         glcontext = new GlDummyImpl();
     }
@@ -215,7 +218,7 @@ public class SceneServerRenderer extends HomeBrewRenderer {
         if (clientConnections.size() == 0) {
             // extra wait for saving CPU
             try {
-                Thread.sleep(1000);
+                Thread.sleep(noClientCpuSaveDelay);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

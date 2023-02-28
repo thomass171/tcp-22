@@ -32,6 +32,24 @@
             <!-- provided because its not needed during runtime-->
             <scope>provided</scope>
         </dependency>
+        <!-- embedded jetty for websockets -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>9.4.14.v20181114</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>9.4.14.v20181114</version>
+        </dependency>
+        <!-- httpclient only for testing -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version>
+            <scope>test</scope>
+        </dependency>
         <!-- own project dependencies-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
@@ -58,7 +76,7 @@
             <artifactId>module-traffic</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <!--opengl wegen Renderer-->
+        <!--homebrew for running the scene-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-platform-homebrew</artifactId>
@@ -90,14 +108,14 @@
 
 
     <build>
-         <resources>
+         <!--28.2.23 not needed? <resources>
             <resource>
                 <directory>src/main/java</directory>
                 <includes>
                     <include>**/*.java</include>
                 </includes>
             </resource>
-        </resources>
+        </resources>-->
 
         <plugins>
             <!-- "surefire", "source" and "jar"(for tests.jar) come from parent-->
