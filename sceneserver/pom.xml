@@ -43,6 +43,20 @@
             <artifactId>jetty-servlet</artifactId>
             <version>9.4.14.v20181114</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>javax-websocket-server-impl</artifactId>
+            <version>9.4.14.v20181114</version>
+        </dependency>
+        <!-- client for testing. But not a jetty client to avoid false positives due
+          to the same implementation base. And for compatibility.-->
+        <dependency>
+            <groupId>org.asynchttpclient</groupId>
+            <artifactId>async-http-client</artifactId>
+            <version>2.12.3</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- httpclient only for testing -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

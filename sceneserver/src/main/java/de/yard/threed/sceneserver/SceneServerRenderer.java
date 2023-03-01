@@ -85,13 +85,6 @@ public class SceneServerRenderer extends HomeBrewRenderer {
     @Override
     public void init(Dimension dimension) {
         // nothing to do?
-        // Now ECS isType running. Allow clients to connect (asyn/MT).
-        ClientListener.dropInstance();
-        ClientListener clientListener = ClientListener.getInstance("", -1);
-        clientListener.start();
-        SystemManager.setBusConnector(new SceneServerBusConnector());
-
-
     }
 
     @Override

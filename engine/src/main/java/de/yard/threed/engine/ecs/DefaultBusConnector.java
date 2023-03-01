@@ -30,8 +30,6 @@ import java.util.List;
 public abstract class DefaultBusConnector {
     static Log logger = Platform.getInstance().getLog(DefaultBusConnector.class);
 
-    public static final int DEFAULT_PORT = 5809;
-
     // Events on a scene node level for something like an inspector. Currently not used.
     public static boolean nodeSyncEnabled = false;
     public static EventType EVENT_MODELLOADED = EventType.register(1004, "EVENT_MODELLOADED");

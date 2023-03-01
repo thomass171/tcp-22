@@ -5,6 +5,7 @@ import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneMode;
+import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.javanative.ConfigurationHelper;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
@@ -28,7 +29,7 @@ public class SceneServer {
         //loadConfig(subdir);
 
         //nsr = ServerSceneRunner.init(properties, SceneMode.forServer());
-        nsr = HomeBrewSceneRunner.init(configuration, new SceneServerRenderer(),SceneMode.forServer());
+        nsr = HomeBrewSceneRunner.init(configuration, new SceneServerRenderer(), SceneMode.forServer());
 
         // here reflection can be used.
         try {
@@ -42,7 +43,18 @@ public class SceneServer {
     /**
      * Blocking endless render loop
      */
-    public void runServer() {
+    public void runServer(int port) {
+
+        // Even though the server is currently starting, allow clients to connect (async/MT).
+        // Network events will be queued anyway. Doing initializations here is better then doing
+        // it deep in SceneServerRenderer.init().
+        //28.2.23 ClientListener.dropInstance();
+
+        ClientListener.init("", port);
+        ClientListener clientListener = ClientListener.getInstance();
+        clientListener.start();
+
+        SystemManager.setBusConnector(new SceneServerBusConnector());
         nsr.runScene(updater);
     }
 

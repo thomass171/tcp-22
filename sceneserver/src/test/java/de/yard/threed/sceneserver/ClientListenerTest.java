@@ -31,7 +31,8 @@ public class ClientListenerTest {
         TestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod) null,
                 Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
-        clientListener = ClientListener.getInstance("localhost", -1);
+        ClientListener.init("localhost", Main.DEFAULT_PORT);
+        clientListener = ClientListener.getInstance();
         clientListener.start();
         // race condition. Wait for socket listening
         sleepMs(100);

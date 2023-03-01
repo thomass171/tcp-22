@@ -563,7 +563,7 @@ public class AbstractSceneRunner {
             ascene.init(SceneMode.forMonolith());
         } else {
             logger.info("Connecting to server " + server);
-            NativeSocket socket = Platform.getInstance().connectToServer(server, DefaultBusConnector.DEFAULT_PORT);
+            NativeSocket socket = Platform.getInstance().connectToServer(server, 5890);
             clientBusConnector = new ClientBusConnector(socket);
             SystemManager.setBusConnector(clientBusConnector);
 

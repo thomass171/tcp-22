@@ -18,6 +18,7 @@ import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
 import de.yard.threed.platform.homebrew.PlatformHomeBrew;
 import de.yard.threed.sceneserver.ClientConnection;
 import de.yard.threed.sceneserver.ClientListener;
+import de.yard.threed.sceneserver.Main;
 import de.yard.threed.sceneserver.SceneServer;
 import de.yard.threed.sceneserver.SceneServerRenderer;
 
@@ -131,7 +132,7 @@ public class SceneServerTestUtils {
 
         sceneRunner.frameLimit = initialFrames;
 
-        sceneServer.runServer();
+        sceneServer.runServer(Main.DEFAULT_PORT);
 
         return sceneServer;
     }

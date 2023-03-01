@@ -16,11 +16,18 @@ import java.util.HashMap;
 
 @Slf4j
 public class Main {
+
+    // be careful with changing the default port. Its hardcoded in AbstractSceneRunner currently.
+    public static final int DEFAULT_PORT = 5890;
+
     public static void main(String[] args) {
 
         //Logger logger = LoggerFactory.getLogger(Main.class.getName());
 
         try {
+
+            // basePort is the bus connector port
+            int basePort = DEFAULT_PORT;
             // A dedicated logger; helpful to diff client/server logs in mixed operation like tests from IDE?
             // No, better rely on log4j auto configuration. An absolute path doesn't make things easier.
             // Console output should be sufficient (no file) because of docker.
@@ -38,7 +45,8 @@ public class Main {
             Configuration configuration = new ConfigurationByArgs(args).addConfiguration(new ConfigurationByEnv(), true);
             String scene = configuration.getString("scene");
 
-            Server jettyServer = JettyServer.startJettyServer(8091);
+            // exceptions while starting jetty will be catched/handled by main catch.
+            Server jettyServer = JettyServer.startJettyServer(basePort + 1);
 
             HashMap<String, String> properties = new HashMap<String, String>();
             SceneServer sceneServer = new SceneServer(subdir, scene, configuration);
@@ -47,7 +55,7 @@ public class Main {
                 SystemManager.setSystemTracker(new LoggingSystemTracker());
             }
             // start (blocking) render loop
-            sceneServer.runServer();
+            sceneServer.runServer(DEFAULT_PORT);
 
 
         } catch (Exception e) {

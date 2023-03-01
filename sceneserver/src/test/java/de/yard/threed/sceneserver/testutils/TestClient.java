@@ -27,6 +27,7 @@ import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.maze.EventRegistry;
 import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeUtils;
+import de.yard.threed.sceneserver.Main;
 import de.yard.threed.sceneserver.SceneServer;
 import de.yard.threed.sceneserver.SceneServerBusConnector;
 import org.junit.jupiter.api.Assertions;
@@ -56,7 +57,7 @@ public class TestClient {
 
     public void connectAndLogin() throws IOException {
         assertTrue(SystemState.readyToJoin());
-        NativeSocket socket = Platform.getInstance().connectToServer("localhost", DefaultBusConnector.DEFAULT_PORT);
+        NativeSocket socket = Platform.getInstance().connectToServer("localhost", Main.DEFAULT_PORT);
         clientBusConnector = new ClientBusConnector(socket);
         //socketClient.connect();
         //listener = socketClient.startListen();

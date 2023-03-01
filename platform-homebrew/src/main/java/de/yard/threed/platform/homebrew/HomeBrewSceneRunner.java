@@ -85,8 +85,7 @@ public class HomeBrewSceneRunner extends AbstractSceneRunner implements NativeSc
         Settings scsettings = new Settings();
         scene.initSettings(scsettings);
         dimension = scene.getPreferredDimension();
-        //10.10.18: Wenn es keine Vorgbe gibt, lege ich das fest.
-        //
+        //10.10.18: If not specified, use a default dimension.
         if (dimension == null) {
             dimension = new Dimension(800, 600);
         }

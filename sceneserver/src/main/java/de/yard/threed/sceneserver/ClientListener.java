@@ -35,15 +35,12 @@ public class ClientListener extends Thread {
         this.port = port;
     }
 
-    private ClientListener(String host) {
-        this(host, DefaultBusConnector.DEFAULT_PORT);
-    }
-
-    public static ClientListener getInstance(String host, int port) {
+    public static void init(String host, int port) {
         if (instance == null) {
-            instance = new ClientListener(host, (port == -1) ? DefaultBusConnector.DEFAULT_PORT : port);
+            instance = new ClientListener(host, port);
+        } else {
+            throw new RuntimeException(" ClientListener already inited");
         }
-        return instance;
     }
 
     public static ClientListener getInstance() {
