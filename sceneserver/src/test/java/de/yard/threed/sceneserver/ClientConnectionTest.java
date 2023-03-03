@@ -8,6 +8,8 @@ import de.yard.threed.engine.testutil.TestFactory;
 import de.yard.threed.sceneserver.testutils.PlatformSceneServerFactoryForTesting;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jetty.server.Server;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,18 +20,22 @@ import static de.yard.threed.javanative.JavaUtil.sleepMs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ClientListenerTest {
+@Slf4j
+public class ClientConnectionTest {
 
     ClientListener clientListener;
+    Server jettyServer;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws Exception {
 
         ClientListener.dropInstance();
 
         // System (eg UserSystem) need a platform
         TestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod) null,
                 Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
+
+        jettyServer = JettyServer.startJettyServer(Main.DEFAULT_PORT + 1);
 
         ClientListener.init("localhost", Main.DEFAULT_PORT);
         clientListener = ClientListener.getInstance();
@@ -42,6 +48,14 @@ public class ClientListenerTest {
     public void tearDown() {
 
         ClientListener.dropInstance();
+
+        try {
+            log.debug("Stopping jetty");
+            jettyServer.stop();
+            // need to wait?
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -54,8 +68,26 @@ public class ClientListenerTest {
         Packet requestLoginPacket = waitForClientPacket(clientListener.getClientConnections().get(0));
         assertNotNull(requestLoginPacket);
         assertEquals(1 + 2, requestLoginPacket.getData().size());
+
+        // disconnect not possible without server
+        // testClient.disconnect();
     }
 
+    @Test
+    public void testWebsocketConnect() throws Exception {
+        TestClient testClient = new TestClient(TestClient.USER_NAME0);
+        testClient.connectAndLogin(true);
+
+        SceneServerTestUtils.waitForClientConnected();
+
+        Packet requestLoginPacket = waitForClientPacket(clientListener.getClientConnections().get(0));
+        assertNotNull(requestLoginPacket);
+        // request+user+id?
+        assertEquals(1 + 2, requestLoginPacket.getData().size());
+
+        // disconnect not possible without server
+        // testClient.disconnect();
+    }
 
     private Packet waitForClientPacket(ClientConnection clientConnection) {
 

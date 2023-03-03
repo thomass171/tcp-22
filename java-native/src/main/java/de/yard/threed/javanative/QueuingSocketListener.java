@@ -25,8 +25,7 @@ public class QueuingSocketListener extends Thread {
     static Logger logger = LoggerFactory.getLogger(QueuingSocketListener.class.getName());
 
     BufferedReader in;
-    List<String> lines = new Vector<>();
-    List<List<String>> blocks = new Vector<>();
+    BlockReader blockReader = new BlockReader();
     boolean debuglog = false;
     volatile private boolean terminated = false;
     volatile private boolean terminateflag = false;
@@ -34,17 +33,13 @@ public class QueuingSocketListener extends Thread {
 
     public QueuingSocketListener(BufferedReader in, String id) {
 
-        //  this.socket = socket;
-        // in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.in = in;
         this.id = id;
     }
 
     public QueuingSocketListener(Socket socket) throws IOException {
 
-        //  this.socket = socket;
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
     }
 
     @Override
@@ -70,15 +65,7 @@ public class QueuingSocketListener extends Thread {
                     if (debuglog) {
                         logger.debug("inputline=" + inputLine);
                     }
-                    if (inputLine.length() == 0) {
-                        if (debuglog) {
-                            logger.debug("found block end");
-                        }
-                        blocks.add(lines);
-                        lines = new ArrayList<>();
-                    } else {
-                        lines.add(inputLine);
-                    }
+                    blockReader.add(inputLine);
                 }
 
             }
@@ -98,35 +85,18 @@ public class QueuingSocketListener extends Thread {
         logger.debug(id + " terminated=" + terminated);
     }
 
-
-    /**
-     * blockierendes Lesen.
-     */
-    private String readStringByDelimiter() throws IOException {
-        String line = in.readLine();
-        logger.debug("read line:" + line);
-        return line;
-    }
-
     /**
      * Threadsafe getting of incoming data.
      *
      * @return
      */
     public List<String> getPacket() {
-        List<String> block = new ArrayList<>();
 
-        if (blocks.size() == 0) {
-            return null;
-        }
-        //TODO more than Vector needed to make MT safe?
-        block = blocks.remove(0);
-
-        return block;
+        return blockReader.pull();
     }
 
     public boolean hasPacket() {
-        return blocks.size() > 0;
+        return blockReader.hasBlock();
     }
 
     public void terminate() {

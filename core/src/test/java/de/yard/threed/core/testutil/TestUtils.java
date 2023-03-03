@@ -15,6 +15,9 @@ import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import org.junit.jupiter.api.Assertions;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -194,5 +197,16 @@ public class TestUtils {
     public static void assertEvent(EventType expectedType, Pair<String, String>[] expectedProperties, Event actual, String label) {
         Assertions.assertEquals(expectedType.getType(), actual.getType().getType(), "eventType");
         assertPayload(expectedProperties, actual.getPayload(), label);
+    }
+
+    public static void waitUntil(BooleanSupplier condition, int timeoutMillis) throws Exception {
+        long start = System.currentTimeMillis();
+
+        while (!condition.getAsBoolean()) {
+            if (System.currentTimeMillis() - start > timeoutMillis) {
+                fail(String.format("condition not met within %d millis", timeoutMillis));
+            }
+            Thread.sleep(100);
+        }
     }
 }

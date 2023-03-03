@@ -6,6 +6,7 @@ import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Platform;
@@ -31,6 +32,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SceneServerTestUtils {
 
+    /**
+     * Not for real server!
+     */
     public static void waitForClientConnected() {
 
         int cnt = 0;
@@ -41,22 +45,7 @@ public class SceneServerTestUtils {
             sleepMs(100);
             if (cnt++ > 50) {
                 // dont wait more than 5 seconds
-                throw new RuntimeException("no client connected");
-            }
-        }
-    }
-
-    public static void waitForClientPacketAvailableInServer() {
-
-        int cnt = 0;
-
-        ClientListener clientListener = ClientListener.getInstance();
-        ClientConnection clientConnection = clientListener.getClientConnections().get(0);
-        while (!clientConnection.hasPacket()) {
-            sleepMs(100);
-            if (cnt++ > 50) {
-                // dont wait more than 5 seconds
-                throw new RuntimeException("no packet after 5 seconds. no client connected?");
+               fail("no client connected");
             }
         }
     }

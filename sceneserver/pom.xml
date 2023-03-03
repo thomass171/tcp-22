@@ -56,8 +56,7 @@
             <version>2.12.3</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- httpclient only for testing -->
+        <!-- httpclient only for testing. Cannot use websockets -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>

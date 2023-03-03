@@ -34,8 +34,9 @@ public class Packet {
         return packet;
     }
 
-    public void add(String key, String value) {
+    public Packet add(String key, String value) {
         map.put(key, value);
+        return this;
     }
 
     public List<String> getData() {

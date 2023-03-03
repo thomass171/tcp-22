@@ -13,11 +13,6 @@ public class SocketEndpoint {
     }
 
     public void writePacket(List<String> packet) {
-        for (String s : packet) {
-            out.println(s);
-        }
-        // empty line as delimiter
-        out.println();
+        BlockReader.writePacket(packet, text -> out.println(text));
     }
-
 }

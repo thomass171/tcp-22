@@ -9,6 +9,7 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.javanative.ConfigurationHelper;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
+import org.eclipse.jetty.server.Server;
 
 import java.util.HashMap;
 
@@ -22,6 +23,7 @@ import java.util.HashMap;
 public class SceneServer {
     public /*Native*/ AbstractSceneRunner nsr;
     Scene updater;
+    Server jettyServer;
 
     public SceneServer(String subdir, String sceneName, Configuration configuration) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
 
@@ -43,7 +45,10 @@ public class SceneServer {
     /**
      * Blocking endless render loop
      */
-    public void runServer(int port) {
+    public void runServer(int port) throws Exception {
+
+        // exceptions while starting jetty will be catched/handled by main catch.
+        jettyServer = JettyServer.startJettyServer(port + 1);
 
         // Even though the server is currently starting, allow clients to connect (async/MT).
         // Network events will be queued anyway. Doing initializations here is better then doing
@@ -56,6 +61,17 @@ public class SceneServer {
 
         SystemManager.setBusConnector(new SceneServerBusConnector());
         nsr.runScene(updater);
+    }
+
+    public void stopServer(){
+        try {
+            //log.debug("Stopping jetty");
+            jettyServer.stop();
+            // need to wait?
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ClientListener.dropInstance();
     }
 
     /*private static Configuration loadConfig(String subdir) {

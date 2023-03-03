@@ -43,8 +43,7 @@ public class DemoSceneTest {
 
     @AfterEach
     public void tearDown(){
-        ClientListener.dropInstance();
-        // no need to stop server because it is not really running
+        sceneServer.stopServer();
     }
 
     @Test

@@ -45,17 +45,14 @@ public class Main {
             Configuration configuration = new ConfigurationByArgs(args).addConfiguration(new ConfigurationByEnv(), true);
             String scene = configuration.getString("scene");
 
-            // exceptions while starting jetty will be catched/handled by main catch.
-            Server jettyServer = JettyServer.startJettyServer(basePort + 1);
 
-            HashMap<String, String> properties = new HashMap<String, String>();
             SceneServer sceneServer = new SceneServer(subdir, scene, configuration);
             if (configuration.getString("systemtracker") != null) {
                 // TODO load custom class
                 SystemManager.setSystemTracker(new LoggingSystemTracker());
             }
             // start (blocking) render loop
-            sceneServer.runServer(DEFAULT_PORT);
+            sceneServer.runServer(basePort);
 
 
         } catch (Exception e) {

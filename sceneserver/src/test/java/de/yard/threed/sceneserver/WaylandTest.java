@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import static de.yard.threed.sceneserver.testutils.SceneServerTestUtils.waitForClientConnected;
-import static de.yard.threed.sceneserver.testutils.SceneServerTestUtils.waitForClientPacketAvailableInServer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WaylandTest {
@@ -38,8 +37,7 @@ public class WaylandTest {
 
     @AfterEach
     public void tearDown(){
-        ClientListener.dropInstance();
-        // no need to stop server because it is not really running
+        sceneServer.stopServer();
     }
 
     /**
@@ -57,7 +55,6 @@ public class WaylandTest {
         TestClient testClient = new TestClient("carl");
         testClient.connectAndLogin();
         waitForClientConnected();
-        waitForClientPacketAvailableInServer();
 
         SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(),5);
         assertEquals(INITIAL_FRAMES + 5, sceneServer.getSceneRunner().getFrameCount());

@@ -38,6 +38,7 @@ public class JettyServer {
         // Initialize javax.websocket layer
         ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);
         wscontainer.addEndpoint(ToUpperWebsocket.class);
+        wscontainer.addEndpoint(WebSocketConnectionEndpoint.class);
 
 
         server.start();

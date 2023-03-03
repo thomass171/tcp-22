@@ -77,7 +77,7 @@ public class ClientListener extends Thread {
                 Socket clientSocket = serverSocket.accept();
                 logger.debug("Client connected: ");
 
-                clientConnectionList.add(new ClientConnection(clientSocket));
+                clientConnectionList.add(new ClientConnection(new ServerUnixSocket(clientSocket)));
 
             }
         } catch (Exception e) {
@@ -116,8 +116,16 @@ public class ClientListener extends Thread {
         serverSocket = null;
     }
 
+    /**
+     * TODO sync
+     * @return
+     */
     public List<ClientConnection> getClientConnections() {
         return clientConnectionList;
+    }
+
+    public void addConnection(ClientConnection clientConnection){
+        this.clientConnectionList.add(clientConnection);
     }
 
     private void waitForTerminate() {
@@ -137,13 +145,13 @@ public class ClientListener extends Thread {
      * Called each frame for publishing events/requests. But this is not a good location for checking for closed connections, because a close
      * event should be sent.
      * <p>
-     * Needs optimization.
+     * Needs optimization. TODO and sync
      */
     public List<NativeSocket> getSockets() {
 
         List<NativeSocket> sockets = new ArrayList<NativeSocket>();
         for (ClientConnection connection : getClientConnections()) {
-            sockets.add(connection);
+            sockets.add(connection.getSocket());
         }
         return sockets;
     }

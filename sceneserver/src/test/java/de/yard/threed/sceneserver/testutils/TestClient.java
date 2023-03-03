@@ -56,19 +56,26 @@ public class TestClient {
     }
 
     public void connectAndLogin() throws IOException {
-        assertTrue(SystemState.readyToJoin());
-        NativeSocket socket = Platform.getInstance().connectToServer("localhost", Main.DEFAULT_PORT);
+        connectAndLogin(false);
+    }
+
+    public void connectAndLogin(boolean viaWebsocket) {
+        // why? connect might just fail. assertTrue(SystemState.readyToJoin());
+        NativeSocket socket;
+        if (viaWebsocket) {
+            socket = WSClient.connectToServer("localhost", Main.DEFAULT_PORT + 1);
+        } else {
+            socket = Platform.getInstance().connectToServer("localhost", Main.DEFAULT_PORT);
+        }
         clientBusConnector = new ClientBusConnector(socket);
-        //socketClient.connect();
-        //listener = socketClient.startListen();
         sendRequestToServer(UserSystem.buildLoginRequest(username, "34"));
     }
 
     /**
      * Also for using real server. Then sceneserver will be null.
      */
-    public void assertConnectAndLogin(SceneServer sceneServer) throws Exception {
-        connectAndLogin();
+    public void assertConnectAndLogin(SceneServer sceneServer, boolean viaWebsocket) throws Exception {
+        connectAndLogin(viaWebsocket);
         //TestUtils.waitForClientConnected();
         //TestUtils.waitForClientPacketAvailableInServer();
 
@@ -86,6 +93,10 @@ public class TestClient {
 
         // join happened implicitly, so Avatar should exist.
         SceneServerTestUtils.assertEventPacket(UserSystem.USER_EVENT_JOINED, null, packets, 1);
+    }
+
+    public void assertConnectAndLogin(SceneServer sceneServer) throws Exception {
+        assertConnectAndLogin(sceneServer, false);
     }
 
     public void sendRequestToServer(Request request) {
@@ -267,6 +278,7 @@ public class TestClient {
 
     /**
      * Just close the connection/socket. No logoff etc.
+     * But not reliable in any test case.
      */
     public void disconnect() {
         clientBusConnector.close();

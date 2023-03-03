@@ -14,6 +14,7 @@ public interface NativeSocket {
 
     /**
      * Returns next packet, null if no packet exists.
+     * Should/Must not block.
      *
      * @return
      */

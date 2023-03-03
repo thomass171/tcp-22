@@ -48,12 +48,20 @@ public class MazeSceneTest {
 
     @AfterEach
     public void tearDown() {
-        ClientListener.dropInstance();
-        // no need to stop server because it is not really running
+        sceneServer.stopServer();
     }
 
     @Test
     public void testLaunchSokobanWikipedia() throws Exception {
+        runLaunchSokobanWikipedia(false);
+    }
+
+    @Test
+    public void testLaunchSokobanWikipediaViaWebSocket() throws Exception {
+        runLaunchSokobanWikipedia(true);
+    }
+
+    public void runLaunchSokobanWikipedia(boolean viaWebSocket) throws Exception {
         setup("skbn/SokobanWikipedia.txt");
         log.debug("testLaunchSokobanWikipedia");
         assertEquals(INITIAL_FRAMES, sceneServer.getSceneRunner().getFrameCount());
@@ -67,7 +75,7 @@ public class MazeSceneTest {
 
         TestClient testClient = new TestClient(TestClient.USER_NAME0);
 
-        testClient.assertConnectAndLogin(sceneServer);
+        testClient.assertConnectAndLogin(sceneServer, viaWebSocket);
         // EVENT_MAZE_LOADED should have been resent after login, but only to the new client
         testClient.assertEventMazeLoaded("skbn/SokobanWikipedia.txt");
 

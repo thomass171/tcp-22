@@ -1,6 +1,9 @@
 package de.yard.threed.sceneserver;
 
 
+import de.yard.threed.core.Packet;
+import de.yard.threed.core.platform.NativeSocket;
+import de.yard.threed.sceneserver.testutils.WSClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -20,15 +23,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Slf4j
 public class JettyTest {
     Server jettyServer;
-    int port=8090;
+    int port = 8090;
 
     @BeforeEach
-     public void setup() throws Exception {
-         jettyServer = JettyServer.startJettyServer(port);
+    public void setup() throws Exception {
+        jettyServer = JettyServer.startJettyServer(port);
     }
 
     @AfterEach
-    public void tearDown(){
+    public void tearDown() {
         try {
             log.debug("Stopping jetty");
             jettyServer.stop();
@@ -51,32 +54,36 @@ public class JettyTest {
 
     /**
      * From https://www.baeldung.com/async-http-client-websockets
-     *
-     * @throws Exception
      */
     @Test
-    public void testSocket() throws Exception {
+    public void testToUpperSocket() throws Exception {
         String uri = "ws://localhost:8090/toUpper";
 
-        WebSocketUpgradeHandler.Builder upgradeHandlerBuilder
-                = new WebSocketUpgradeHandler.Builder();
-        WebSocketUpgradeHandler wsHandler = upgradeHandlerBuilder
-                .addWebSocketListener(new WebSocketListener() {
-                    @Override
-                    public void onOpen(WebSocket websocket) {
-                        log.debug("onOpen");
-                    }
+        StringBuffer response = new StringBuffer();
 
-                    @Override
-                    public void onClose(WebSocket websocket, int code, String reason) {
-                        log.debug("onClose");
-                    }
+        WebSocketUpgradeHandler.Builder upgradeHandlerBuilder = new WebSocketUpgradeHandler.Builder();
+        WebSocketUpgradeHandler wsHandler = upgradeHandlerBuilder.addWebSocketListener(new WebSocketListener() {
+            @Override
+            public void onOpen(WebSocket websocket) {
+                log.debug("onOpen");
+            }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        log.debug("onError",t);
-                    }
-                }).build();
+            @Override
+            public void onTextFrame(String payload, boolean finalFragment, int rsv) {
+                log.debug("Got response {}", payload);
+                response.append(payload);
+            }
+
+            @Override
+            public void onClose(WebSocket websocket, int code, String reason) {
+                log.debug("onClose");
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                log.debug("onError", t);
+            }
+        }).build();
 
         WebSocket webSocket = Dsl.asyncHttpClient()
                 .prepareGet(uri/*"ws://localhost:5590/websocket"*/)
@@ -87,9 +94,22 @@ public class JettyTest {
                 .get();
 
         if (webSocket.isOpen()) {
+
             webSocket.sendTextFrame("test message");
             webSocket.sendBinaryFrame(new byte[]{'t', 'e', 's', 't'});
+
+            //TODO waitUntil();
+            Thread.sleep(1000);
         }
+
+        assertEquals("TEST MESSAGE", response.toString());
     }
 
+    @Test
+    public void testWSClient() throws Exception {
+
+        NativeSocket wsSocket = WSClient.connectToServer("localhost", 8090);
+
+        wsSocket.sendPacket(new Packet().add("m", "test message"));
+    }
 }
