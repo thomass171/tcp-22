@@ -6,7 +6,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Shape;
 import de.yard.threed.engine.avatar.VehicleFactory;
 import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
  */
 public class FactoryTest {
     //static Platform platform = TestFactory.initPlatformForTest(false,false,null,true);
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "data"}, new SimpleHeadlessPlatformFactory());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "data"}, new SimpleHeadlessPlatformFactory());
 
     /**
      * gebogenes Gleisstück

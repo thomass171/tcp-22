@@ -7,20 +7,17 @@ import de.yard.threed.core.Pair;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Server;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.testutil.PayloadHook;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.maze.MazeDataProvider;
 import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
 import de.yard.threed.platform.homebrew.PlatformHomeBrew;
-import de.yard.threed.sceneserver.ClientConnection;
 import de.yard.threed.sceneserver.ClientListener;
-import de.yard.threed.sceneserver.Main;
 import de.yard.threed.sceneserver.SceneServer;
 import de.yard.threed.sceneserver.SceneServerRenderer;
 
@@ -106,12 +103,12 @@ public class SceneServerTestUtils {
      */
     public static SceneServer setupServerForScene(String sceneclass, int initialFrames, HashMap<String, String> properties, int renderbrake) throws Exception {
 
-        TestFactory.resetInit();
+        EngineTestFactory.resetInit();
         HomeBrewSceneRunner.dropInstance();
         MazeDataProvider.reset();
         // reset of Grid Instance not needed
 
-        SceneServer sceneServer = new SceneServer("subdir", sceneclass, Configuration.buildDefaultConfigurationWithEnv(properties));
+        SceneServer sceneServer = new SceneServer("subdir", sceneclass, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties));
         HomeBrewSceneRunner sceneRunner = (HomeBrewSceneRunner) sceneServer.nsr;
         //why should we throttle that much? why anyway? Because some movement depends on tpf, which might be too low to detect it.
         //also maze movement needs some time

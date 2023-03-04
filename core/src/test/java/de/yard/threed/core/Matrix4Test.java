@@ -2,7 +2,7 @@ package de.yard.threed.core;
 
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
-import de.yard.threed.core.testutil.TestFactory;
+import de.yard.threed.core.testutil.CoreTestFactory;
 import de.yard.threed.core.testutil.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
  * Date: 26.08.15
  */
 public class Matrix4Test {
-    static Platform platform = TestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
+    static Platform platform = CoreTestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
 
     Matrix4 mat1 = new Matrix4(
             1, 2, 3, 4,

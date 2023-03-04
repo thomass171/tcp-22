@@ -5,7 +5,8 @@ import de.yard.threed.core.ImageData;
 import de.yard.threed.core.ImageFactory;
 import de.yard.threed.core.platform.Platform;
 
-import de.yard.threed.core.testutil.TestFactory;
+import de.yard.threed.core.testutil.CoreTestFactory;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.Test;
  * Created by thomass on 24.05.16.
  */
 public class ImageDataTest {
-    static Platform platform = TestFactory.initPlatformForTest(new SimpleHeadlessPlatformFactory(), null);
+    static Platform platform = CoreTestFactory.initPlatformForTest(new SimpleHeadlessPlatformFactory(), null, new ConfigurationByEnv());
 
 
     @Test

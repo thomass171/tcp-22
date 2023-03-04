@@ -4,7 +4,7 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 
 import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.core.testutil.Assert;
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
  * Created by thomass on 15.11.15.
  */
 public class SokobanTest {
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
     /*16.4.21 public static final String trivialsokoban =
             "#####\n" +
                     "#   #\n" +

@@ -4,11 +4,10 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.SceneMode;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.Setup;
 
 import java.util.HashMap;
-
-import static de.yard.threed.core.configuration.Configuration.buildDefaultConfigurationWithArgsAndEnv;
 
 
 /**
@@ -24,7 +23,7 @@ public class Main {
 
         //10.7.21 NativeSceneRunner nsr = OpenGlSceneRunner.init(properties);
         ;
-        HomeBrewSceneRunner nsr = HomeBrewSceneRunner.init(buildDefaultConfigurationWithArgsAndEnv(args, properties), new OpenGlRenderer(/*PlatformHomeBrew/*OpenGlContext* /.getGlContext()*/), SceneMode.forMonolith());
+        HomeBrewSceneRunner nsr = HomeBrewSceneRunner.init(ConfigurationByEnv.buildDefaultConfigurationWithArgsAndEnv(args, properties), new OpenGlRenderer(/*PlatformHomeBrew/*OpenGlContext* /.getGlContext()*/), SceneMode.forMonolith());
 
         logger = Platform.getInstance().getLog(Main.class);
 

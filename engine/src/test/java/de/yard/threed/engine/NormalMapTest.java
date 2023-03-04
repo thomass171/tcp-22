@@ -9,7 +9,7 @@ import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.imaging.HeightMap;
 import de.yard.threed.engine.imaging.NormalMap;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 
 
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +25,7 @@ import java.util.List;
  * Created by thomass on 17.05.16.
  */
 public class NormalMapTest {
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
 
     static int defaultnormalargb = NormalMap.vector2color(NormalMap.defaultnormal);
     static int rechtsunten45normal = NormalMap.vector2color(new Vector3(1, 1, 1));

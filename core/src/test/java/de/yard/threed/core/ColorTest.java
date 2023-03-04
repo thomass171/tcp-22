@@ -2,13 +2,13 @@ package de.yard.threed.core;
 
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
-import de.yard.threed.core.testutil.TestFactory;
+import de.yard.threed.core.testutil.CoreTestFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class ColorTest {
 
-    static Platform platform = TestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
+    static Platform platform = CoreTestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
 
     @Test
     public void test1() {

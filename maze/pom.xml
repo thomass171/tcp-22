@@ -40,7 +40,7 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <!-- 5.7.21 die Tests brauchen eine implementierte Platform-->
+        <!-- 5.7.21 Tests need an implemented platform (and ConfigurationByEnv for HOSTDIR) -->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-java-common</artifactId>

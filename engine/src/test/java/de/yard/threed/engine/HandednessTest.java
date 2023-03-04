@@ -4,7 +4,7 @@ import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import org.junit.jupiter.api.Test;
 
 
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
  * Date: 12.04.16
  */
 public class HandednessTest {
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
 
 
     // Die RH world Matrix der movingbox (der echte tower ist ohne Rotation.

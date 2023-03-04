@@ -6,7 +6,7 @@ import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
@@ -29,7 +29,7 @@ import static de.yard.threed.core.testutil.Assert.assertEquals;
  */
 public class GraphTest {
     //static Platform platform = TestFactory.initPlatformForTest(false, null, false);
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "data"/*,"data-old","railing"*/}, new SimpleHeadlessPlatformFactory());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "data"/*,"data-old","railing"*/}, new SimpleHeadlessPlatformFactory());
 
     @Test
     public void testSplit() {

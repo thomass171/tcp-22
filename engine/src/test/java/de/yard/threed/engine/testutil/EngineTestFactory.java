@@ -1,40 +1,37 @@
 package de.yard.threed.engine.testutil;
 
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.vr.VrInstance;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.DefaultResourceReader;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.resource.BundleRegistry;
-import de.yard.threed.engine.Scene;
 
 import de.yard.threed.engine.SceneAnimationController;
-import de.yard.threed.engine.World;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.javacommon.SimpleHeadlessPlatform;
-import de.yard.threed.outofbrowser.SimpleBundleResolver;
 import de.yard.threed.outofbrowser.SyncBundleLoader;
 
 import java.util.HashMap;
 import java.util.Properties;
 
 /**
- * Fuer die Initilisierung der Platform zum Test.
+ * Has access to ConfigurationByEnv, other than CoreTestFactory.
  *
  * <p>
  * <p/>
  * Created by thomass on 10.04.15.
  */
-public class TestFactory {
+public class EngineTestFactory {
 
     public static Platform initPlatformForTest(String[] bundlelist, PlatformFactory platformFactory) {
-        return initPlatformForTest(bundlelist, platformFactory, (InitMethod)null, Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        return initPlatformForTest(bundlelist, platformFactory, (InitMethod)null, ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
     }
 
     /**

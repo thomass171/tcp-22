@@ -20,7 +20,7 @@
             <artifactId>module-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <!-- 5.7.21 test dependencies. die Tests brauchen eine implementierte Platform-->
+        <!-- 5.7.21 test dependencies. Tests need an implemented platform (and ConfigurationByEnv for HOSTDIR)-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>

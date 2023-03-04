@@ -2,7 +2,7 @@ package de.yard.threed.core;
 
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
-import de.yard.threed.core.testutil.TestFactory;
+import de.yard.threed.core.testutil.CoreTestFactory;
 import de.yard.threed.core.testutil.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import java.util.List;
  * In scenery gibt es auch noch Tests.
  */
 public class OutlineBuilderTest {
-    static Platform platform = TestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
+    static Platform platform = CoreTestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
 
     /**
      * Skizze 11c

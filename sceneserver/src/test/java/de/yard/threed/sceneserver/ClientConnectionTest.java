@@ -3,8 +3,8 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Packet;
-import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.sceneserver.testutils.PlatformSceneServerFactoryForTesting;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
@@ -32,8 +32,8 @@ public class ClientConnectionTest {
         ClientListener.dropInstance();
 
         // System (eg UserSystem) need a platform
-        TestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod) null,
-                Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        EngineTestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod) null,
+                ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
         jettyServer = JettyServer.startJettyServer(de.yard.threed.core.Server.DEFAULT_BASE_PORT + 1);
 

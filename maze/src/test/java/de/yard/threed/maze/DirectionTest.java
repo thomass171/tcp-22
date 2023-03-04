@@ -3,7 +3,7 @@ package de.yard.threed.maze;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  *
  */
 public class DirectionTest {
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
 
     @Test
     public void testDirection() {

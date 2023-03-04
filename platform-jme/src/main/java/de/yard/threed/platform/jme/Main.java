@@ -5,6 +5,7 @@ import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.Setup;
 
 import org.apache.commons.codec.binary.Base64;
@@ -27,7 +28,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        JmeSceneRunner nsr = JmeSceneRunner.init(Configuration.buildDefaultConfigurationWithArgsAndEnv(args, Setup.setUp()));
+        JmeSceneRunner nsr = JmeSceneRunner.init(ConfigurationByEnv.buildDefaultConfigurationWithArgsAndEnv(args, Setup.setUp()));
 
         logger = Platform.getInstance().getLog(Main.class);
         logger.info("Loading JME Client");

@@ -1,9 +1,10 @@
 package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.testutil.TestFactory;
+import de.yard.threed.core.testutil.CoreTestFactory;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.SystemState;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.javanative.JavaUtil;
 import de.yard.threed.maze.EventRegistry;
@@ -34,7 +35,7 @@ public class RealServerTest {
             serverProcess = startRealServer(gridname);
         }
         // the client also needs a platform (headless or homebrew?,but not scene server)
-        Platform platform = TestFactory.initPlatformForTest(new SimpleHeadlessPlatformFactory(), null);
+        Platform platform = CoreTestFactory.initPlatformForTest(new SimpleHeadlessPlatformFactory(), null, new ConfigurationByEnv());
 //de.yard.threed.engine.testutil.TestFactory.initPlatformForTest( bundles, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()),properties);
         //de.yard.threed.engine.testutil.TestFactory.initPlatformForTest( bundles, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()),properties);
 

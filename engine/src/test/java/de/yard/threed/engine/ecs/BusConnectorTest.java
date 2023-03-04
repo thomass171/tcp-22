@@ -7,12 +7,9 @@ import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
-import de.yard.threed.core.testutil.TestFactory;
+import de.yard.threed.core.testutil.CoreTestFactory;
 import de.yard.threed.engine.BaseEventRegistry;
-import de.yard.threed.engine.ecs.DefaultBusConnector;
-import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.Request;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -26,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * Also for packets
  */
 public class BusConnectorTest {
-    static Platform platform = TestFactory.initPlatformForTest(new PlatformFactoryTestingCore(),null);
+    static Platform platform = CoreTestFactory.initPlatformForTest(new PlatformFactoryTestingCore(),null);
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})

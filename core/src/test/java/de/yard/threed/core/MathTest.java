@@ -2,7 +2,7 @@ package de.yard.threed.core;
 
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
-import de.yard.threed.core.testutil.TestFactory;
+import de.yard.threed.core.testutil.CoreTestFactory;
 import de.yard.threed.core.testutil.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
  * Created by thomass on 29.11.16.
  */
 public class MathTest {
-    static Platform platform = TestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
+    static Platform platform = CoreTestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
 
     @Test
     public void testAngle() {

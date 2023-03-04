@@ -9,7 +9,7 @@ import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 
 import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.engine.testutil.TestHelper;
@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * Created by thomass on 15.07.15.
  */
 public class GridTest {
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
 
     @BeforeEach
     public void setup() {

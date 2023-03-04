@@ -10,7 +10,7 @@ import de.yard.threed.engine.loader.PortableModelList;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.core.resource.Bundle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
  * Created by thomass on 02.06.16.
  */
 public class SimpleModelFactoryTest {
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
 
     /**
      * Test vor allem wegen Texturen.

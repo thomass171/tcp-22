@@ -6,7 +6,7 @@ import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.testutil.DeterministicIntProvider;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.util.IntProvider;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  *
  */
 public class SimpleBotAITest {
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
 
     @Test
     public void testNotFiringSameTeamAndNotSolving() throws Exception {

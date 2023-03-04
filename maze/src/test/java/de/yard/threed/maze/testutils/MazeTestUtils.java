@@ -3,6 +3,7 @@ package de.yard.threed.maze.testutils;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.NativeCollision;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.GridTeleporter;
@@ -15,6 +16,7 @@ import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.testutil.MockedCollision;
 import de.yard.threed.engine.testutil.MockedRay;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.maze.*;
 import de.yard.threed.engine.testutil.TestHelper;
 import org.junit.jupiter.api.Assertions;
@@ -210,7 +212,7 @@ public class MazeTestUtils {
         properties.put("argv.initialMaze", gridname);
         properties.putAll(additionalPproperties);
         // buildDefaultConfigurationWithEnv is needed for HOSTDIR
-        SceneRunnerForTesting sceneRunner = SceneRunnerForTesting.setupForScene(initial_frames, Configuration.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "maze"});
+        SceneRunnerForTesting sceneRunner = SceneRunnerForTesting.setupForScene(initial_frames, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "maze"});
         return sceneRunner;
     }
 }

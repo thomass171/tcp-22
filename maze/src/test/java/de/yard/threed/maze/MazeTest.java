@@ -2,7 +2,6 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.Observer;
@@ -12,10 +11,11 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.core.InitMethod;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.Assertions;
@@ -76,8 +76,8 @@ public class MazeTest {
 
         MazeSettings.init(MazeSettings.MODE_SOKOBAN);
 
-        TestFactory.initPlatformForTest(new String[]{"engine", "maze", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
-                Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
+                ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
         observerDummy = new SceneNode();

@@ -4,7 +4,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 
 
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ import java.util.List;
  * Created by thomass on 13.11.14.
  */
 public class SurfaceTest {
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
 
     @Test
     public void testMostSimpleGridSurface() {

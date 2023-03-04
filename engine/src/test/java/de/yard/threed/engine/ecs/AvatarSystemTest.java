@@ -2,7 +2,6 @@ package de.yard.threed.engine.ecs;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.InitMethod;
-import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
@@ -10,8 +9,9 @@ import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.ObserverSystem;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.avatar.AvatarSystem;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.vr.VrInstance;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ public class AvatarSystemTest {
         };
         SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());
         //platformFactory.enableCamera();
-        TestFactory.initPlatformForTest(new String[]{"engine"}, platformFactory, initMethod, Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        EngineTestFactory.initPlatformForTest(new String[]{"engine"}, platformFactory, initMethod, ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
     }
 
     @Test

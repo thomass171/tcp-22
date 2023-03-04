@@ -74,7 +74,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         // 13.4.17: Die Bundle laden. Ausnahmesweise synchron wegen Test. Doof vor allem bei Einzeltests weil es so lange braucht.
         if (bundlelist != null) {
             for (String bundlename : bundlelist) {
-                TestFactory.loadBundleSync(bundlename);
+                EngineTestFactory.loadBundleSync(bundlename);
             }
         }
 
@@ -162,7 +162,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
     public static SceneRunnerForTesting setupForScene(int initialFrames, Configuration configuration, String[] bundles) {
 
         // Also calls SceneRunnerForTesting.init()
-        TestFactory.initPlatformForTest(bundles, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), null, configuration);
+        EngineTestFactory.initPlatformForTest(bundles, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), null, configuration);
 
         SceneRunnerForTesting sceneRunner = (SceneRunnerForTesting) SceneRunnerForTesting.getInstance();
         sceneRunner.runLimitedFrames(initialFrames);

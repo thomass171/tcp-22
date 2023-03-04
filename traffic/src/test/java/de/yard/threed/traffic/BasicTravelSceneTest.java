@@ -14,6 +14,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.VelocityComponent;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.traffic.apps.BasicTravelScene;
 import de.yard.threed.traffic.testutils.TrafficTestUtils;
 
@@ -127,6 +128,6 @@ public class BasicTravelSceneTest {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         properties.put("argv.basename", tileName);
-        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, Configuration.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "traffic"});
+        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "traffic"});
     }
 }

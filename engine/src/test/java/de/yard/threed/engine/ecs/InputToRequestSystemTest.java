@@ -1,29 +1,21 @@
 package de.yard.threed.engine.ecs;
 
-import de.yard.threed.core.Event;
-import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.configuration.ConfigurationByProperties;
-import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.KeyCode;
-import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.core.InitMethod;
-import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
-import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
-import de.yard.threed.engine.vr.VrInstance;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatform;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -45,8 +37,8 @@ public class InputToRequestSystemTest {
             }
         };
 
-        TestFactory.initPlatformForTest(new String[]{"engine", "engine", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
-                Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        EngineTestFactory.initPlatformForTest(new String[]{"engine", "engine", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
+                ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
         sceneRunner.runLimitedFrames(3);

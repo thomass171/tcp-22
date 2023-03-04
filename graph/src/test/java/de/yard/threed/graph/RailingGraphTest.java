@@ -3,7 +3,7 @@ package de.yard.threed.graph;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtils;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
 
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
  */
 public class RailingGraphTest {
     //static Platform platform = TestFactory.initPlatformForTest(false,false,null,true);
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "data"}, new SimpleHeadlessPlatformFactory());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "data"}, new SimpleHeadlessPlatformFactory());
 
     /**
      * Railing Beispiel 1 mit Extensions

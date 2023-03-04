@@ -8,7 +8,7 @@ import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.SocketMock;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  */
 public class SystemManagerTest {
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
 
     @Test
     public void testProvider() {

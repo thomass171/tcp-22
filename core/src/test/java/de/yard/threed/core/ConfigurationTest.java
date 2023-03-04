@@ -35,7 +35,7 @@ public class ConfigurationTest {
     public void testSampleConfig() {
         Map<String,String> properties = new HashMap<>();
         properties.put("scene","minor");
-        Configuration configuration = Configuration.buildDefaultConfigurationWithArgsAndEnv(args, properties);
+        Configuration configuration = Configuration.buildDefaultConfigurationWithArgs(args, properties);
 
         assertEquals("major", configuration.getString("scene"));
     }

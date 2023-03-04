@@ -2,7 +2,7 @@ package de.yard.threed.traffic;
 
 import de.yard.threed.core.platform.Platform;
 
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.trafficcore.model.Airport;
 import de.yard.threed.trafficcore.model.Runway;
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
  */
 public class JsonTest {
 
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine"}, new SimpleHeadlessPlatformFactory());
+    static Platform platform = EngineTestFactory.initPlatformForTest( new String[] {"engine"}, new SimpleHeadlessPlatformFactory());
 
     @Test
     public void testSampleJson() {
