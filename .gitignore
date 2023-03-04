@@ -19,6 +19,8 @@ logs/
 buildFromScratch.sh
 */target
 target
+sceneserver/build
+
 /platform-jme/jmonkeyengine-3.2.4-stable.tar.gz
 /platform-jme/liblwjgl.dylib
 /platform-jme/libopenal.dylib

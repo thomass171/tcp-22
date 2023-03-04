@@ -2,6 +2,9 @@
 #
 # Launches a scene server.
 #
+# Uses the regular class path by maven, so this is only intended for testing purposes. servermanager should
+# be used to launch a scene server from install dir sceneserver/build/lib
+#
 
 OWNDIR=`dirname $0`
 source $OWNDIR/common.sh || exit 1
