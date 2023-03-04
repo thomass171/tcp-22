@@ -42,7 +42,7 @@ import java.util.Map;
  * Without renderer this is a headleass platform like {@link SimpleHeadlessPlatform}, but more complete.
  * This platform is only for Java desktop environments, no C# nor wegbgl. So no limitation to Java.
  * For consistency and simplicity everything is in the same thread, but might be async.
- *
+ * <p>
  * Ausnahme evtl. im ResourceManager? Das will gut durchdacht sein.
  * Besser wäre, wenn es das nicht gibt. Synchrone Aktionen sollten komplett ausserhalb der Platform inkl. ResourceManager liegen.
  * <p>
@@ -515,8 +515,8 @@ public class PlatformHomeBrew extends DefaultPlatform {
     }
 
     @Override
-    public NativeSocket connectToServer(String server, int port) {
-        return JavaSocket.build(server, port);
+    public NativeSocket connectToServer(Server server) {
+        return JavaSocket.build(server.getHost(), server.getPort());
     }
 
     @Override

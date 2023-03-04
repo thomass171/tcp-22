@@ -546,8 +546,8 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
     }
 
     @Override
-    public NativeSocket connectToServer(String server, int port) {
-        return JavaSocket.build(server, port);
+    public NativeSocket connectToServer(Server server) {
+        return JavaSocket.build(server.getHost(), server.getPort());
     }
 
     @Override

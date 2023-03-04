@@ -204,6 +204,18 @@ Major changes:
 <!-- two similar options ![svg not processed?](docs/Architecture-base.svg)-->
 <img src="docs/Architecture-base.svg" width="100%">
 
+## Design
+
+### Spheres
+A sphere is a limited area of gaming like
+- an airport in flight simulation
+- the solar system in a space simulation
+- a grid in a maze game
+- a lobby for entering a game
+
+The transition from one sphere to the other might be animated, or just showing a 
+screen 'Loading...' or whatever. Spheres are controlled by the SphereSystem.
+
 ## ECS
 An Entity Component System (ECS) is a software architectural pattern that helps organizing software.
 
@@ -245,5 +257,8 @@ Start the server manager (and enable DEBUG logging) with
 cd servermanager
 mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.de.yard.threed=DEBUG"
 ```
+
+The UI is then available on 'http://localhost:8080/servermanager.html'.
+
 ## Bundles
 

@@ -108,7 +108,7 @@ public class JettyTest {
     @Test
     public void testWSClient() throws Exception {
 
-        NativeSocket wsSocket = WSClient.connectToServer("localhost", 8090);
+        NativeSocket wsSocket = WSClient.connectToServer(new de.yard.threed.core.Server("localhost", 8090));
 
         wsSocket.sendPacket(new Packet().add("m", "test message"));
     }

@@ -468,7 +468,7 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
-    public NativeSocket connectToServer(String server, int port)  {
+    public NativeSocket connectToServer(Server server)  {
         throw new RuntimeException("not implemented");
     }
 

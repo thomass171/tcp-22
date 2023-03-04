@@ -6,6 +6,7 @@ import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Server;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
@@ -121,7 +122,7 @@ public class SceneServerTestUtils {
 
         sceneRunner.frameLimit = initialFrames;
 
-        sceneServer.runServer(Main.DEFAULT_PORT);
+        sceneServer.runServer(Server.DEFAULT_BASE_PORT);
 
         return sceneServer;
     }

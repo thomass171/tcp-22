@@ -1,5 +1,6 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.Server;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.configuration.ConfigurationByArgs;
 import de.yard.threed.core.configuration.ConfigurationByEnv;
@@ -8,7 +9,6 @@ import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.javanative.SocketClient;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +17,6 @@ import java.util.HashMap;
 @Slf4j
 public class Main {
 
-    // be careful with changing the default port. Its hardcoded in AbstractSceneRunner currently.
-    public static final int DEFAULT_PORT = 5890;
 
     public static void main(String[] args) {
 
@@ -27,7 +25,7 @@ public class Main {
         try {
 
             // basePort is the bus connector port
-            int basePort = DEFAULT_PORT;
+            int basePort = Server.DEFAULT_BASE_PORT;
             // A dedicated logger; helpful to diff client/server logs in mixed operation like tests from IDE?
             // No, better rely on log4j auto configuration. An absolute path doesn't make things easier.
             // Console output should be sufficient (no file) because of docker.

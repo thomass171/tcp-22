@@ -7,6 +7,7 @@ import de.yard.threed.core.ModelBuildDelegate;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
+import de.yard.threed.core.Server;
 import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.Log;
@@ -556,14 +557,14 @@ public class AbstractSceneRunner {
      * Additional approach for having commons in AbstractSceneRunner.
      * "scene" should hav been set already.
      */
-    protected void initScene(){
+    protected void initScene() {
         // decide scene mode monolith or client/server
         String server = Platform.getInstance().getConfiguration().getString("server");
         if (server == null) {
             ascene.init(SceneMode.forMonolith());
         } else {
             logger.info("Connecting to server " + server);
-            NativeSocket socket = Platform.getInstance().connectToServer(server, 5890);
+            NativeSocket socket = Platform.getInstance().connectToServer(new Server(server));
             clientBusConnector = new ClientBusConnector(socket);
             SystemManager.setBusConnector(clientBusConnector);
 

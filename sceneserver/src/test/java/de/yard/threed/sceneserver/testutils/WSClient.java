@@ -1,5 +1,6 @@
 package de.yard.threed.sceneserver.testutils;
 
+import de.yard.threed.core.Server;
 import de.yard.threed.core.platform.NativeSocket;
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WSClient {
 
-    public static NativeSocket connectToServer(String host, int port)  {
-        String uri = "ws://" + host + ":" + port + "/connect";
+    public static NativeSocket connectToServer(Server server)  {
+        String uri = "ws://" + server.getHost() + ":" + server.getPort()+ "/connect";
 
         // same optimistic(?) exception catching like in  Platform.connectToServer()
         try {

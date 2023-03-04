@@ -35,9 +35,9 @@ public class ClientConnectionTest {
         TestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod) null,
                 Configuration.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
-        jettyServer = JettyServer.startJettyServer(Main.DEFAULT_PORT + 1);
+        jettyServer = JettyServer.startJettyServer(de.yard.threed.core.Server.DEFAULT_BASE_PORT + 1);
 
-        ClientListener.init("localhost", Main.DEFAULT_PORT);
+        ClientListener.init("localhost", de.yard.threed.core.Server.DEFAULT_BASE_PORT);
         clientListener = ClientListener.getInstance();
         clientListener.start();
         // race condition. Wait for socket listening

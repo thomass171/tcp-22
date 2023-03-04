@@ -68,7 +68,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     public SimpleHeadlessPlatform(Configuration configuration) {
-        this(null,configuration);
+        this(null, configuration);
     }
 
     public static PlatformInternals init(Configuration configuration, NativeEventBus eventbus) {
@@ -80,7 +80,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
             //System.out.println("transfer of propery "+key+" to system");
             System.setProperty(PROPERTY_PREFIX + key, properties.get(key));
         }*/
-        instance = new SimpleHeadlessPlatform(eventbus,configuration);
+        instance = new SimpleHeadlessPlatform(eventbus, configuration);
         SimpleHeadlessPlatform shpInstance = (SimpleHeadlessPlatform) instance;
         //MA36 ((SimpleHeadlessPlatform)instance).resetInit();
 
@@ -164,7 +164,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
-    public Configuration getConfiguration() { return configuration; };
+    public Configuration getConfiguration() { return configuration; }
 
     @Override
     public Log getLog(Class clazz) {
@@ -245,8 +245,8 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
-    public NativeSocket connectToServer(String server, int port) {
-            return JavaSocket.build(server, port);
+    public NativeSocket connectToServer(Server server) {
+        return JavaSocket.build(server.getHost(), server.getPort());
     }
 }
 
@@ -255,7 +255,7 @@ class DummySceneNode implements NativeSceneNode {
     static List<NativeSceneNode> sceneNodes = new ArrayList<>();
     NativeTransform transform;
     String name;
-    private static int uniqueId=1000;
+    private static int uniqueId = 1000;
     private int id = uniqueId++;
 
     DummySceneNode() {

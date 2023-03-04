@@ -7,6 +7,7 @@ import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Server;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeSocket;
@@ -63,9 +64,9 @@ public class TestClient {
         // why? connect might just fail. assertTrue(SystemState.readyToJoin());
         NativeSocket socket;
         if (viaWebsocket) {
-            socket = WSClient.connectToServer("localhost", Main.DEFAULT_PORT + 1);
+            socket = WSClient.connectToServer(new Server("localhost", Server.DEFAULT_BASE_PORT + 1));
         } else {
-            socket = Platform.getInstance().connectToServer("localhost", Main.DEFAULT_PORT);
+            socket = Platform.getInstance().connectToServer(new Server("localhost"));
         }
         clientBusConnector = new ClientBusConnector(socket);
         sendRequestToServer(UserSystem.buildLoginRequest(username, "34"));

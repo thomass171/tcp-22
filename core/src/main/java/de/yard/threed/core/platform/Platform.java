@@ -327,6 +327,7 @@ public abstract class Platform {
 
     /**
      * 17.2.23: TODO check move of eventbus to systemmanager.
+     *
      * @return
      */
     public abstract NativeEventBus getEventBus();
@@ -454,7 +455,7 @@ public abstract class Platform {
      * <p>
      * 15.2.21
      */
-    public abstract NativeSocket connectToServer(String server, int port);
+    public abstract NativeSocket connectToServer(Server server);
 
     /*MA36 ueber runner public abstract void sendHttpRequest(String url, String method, String[] header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate );*/
 

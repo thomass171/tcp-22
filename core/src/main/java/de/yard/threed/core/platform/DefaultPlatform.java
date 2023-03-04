@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Default implementation implementing nothing. Sometimes null is returned and sometimes an exception thrown. Not yet clear whats better.
- *
+ * <p>
  * 5.7.21
  */
 public class DefaultPlatform extends Platform {
@@ -163,7 +163,7 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public Configuration getConfiguration() { return null; };
+    public Configuration getConfiguration() { return null; }
 
     @Override
     public NativeEventBus getEventBus() {
@@ -240,7 +240,7 @@ public class DefaultPlatform extends Platform {
     }*/
 
     @Override
-    public  NativeScene getScene() {
+    public NativeScene getScene() {
         throw new RuntimeException("not implemented");
     }
 
@@ -250,7 +250,7 @@ public class DefaultPlatform extends Platform {
     }*/
 
     @Override
-    public  NativeSocket connectToServer(String server, int port) {
+    public NativeSocket connectToServer(Server server) {
         throw new RuntimeException("not implemented");
     }
 }
