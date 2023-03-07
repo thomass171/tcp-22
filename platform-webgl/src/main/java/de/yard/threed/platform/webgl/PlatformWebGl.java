@@ -72,7 +72,7 @@ public class PlatformWebGl extends Platform {
         }
         PlatformInternals platformInternals = new PlatformInternals();
         // resolver order is important. most specific first.
-        String additionalBundle = configuration.getString("argv.ADDITIONALBUNDLE");
+        String additionalBundle = configuration.getString("ADDITIONALBUNDLE");
         if (additionalBundle != null && additionalBundle.contains(" ")) {
             // might be the result of a '+' which is valid in base64
             additionalBundle = additionalBundle.replace(" ", "+");
@@ -469,7 +469,8 @@ public class PlatformWebGl extends Platform {
 
     @Override
     public NativeSocket connectToServer(Server server)  {
-        throw new RuntimeException("not implemented");
+        // websocket port is one higher than base port (unix socket)
+        return WebGlSocket.buildSocket(server.getHost(), server.getPort()+1);
     }
 
     @Override

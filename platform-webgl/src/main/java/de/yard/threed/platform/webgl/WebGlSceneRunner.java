@@ -95,7 +95,7 @@ public class WebGlSceneRunner extends AbstractSceneRunner implements NativeScene
 
         ((WebGlBundleLoader)Platform.getInstance().bundleLoader).preLoad(scene.getPreInitBundle());
 
-        //der Preload läuft jetzt noch 
+        // Preload still running
         sceneRenderer.startRenderLoop();
 
     }

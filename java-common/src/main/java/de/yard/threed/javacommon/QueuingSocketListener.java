@@ -1,18 +1,15 @@
-package de.yard.threed.javanative;
+package de.yard.threed.javacommon;
 
+import de.yard.threed.core.BlockReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Multithreaded and focussing on text blocks used by scene server protocol.

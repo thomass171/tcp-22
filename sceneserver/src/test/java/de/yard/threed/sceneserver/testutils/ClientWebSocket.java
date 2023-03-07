@@ -2,7 +2,7 @@ package de.yard.threed.sceneserver.testutils;
 
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.NativeSocket;
-import de.yard.threed.javanative.BlockReader;
+import de.yard.threed.core.BlockReader;
 import lombok.extern.slf4j.Slf4j;
 import org.asynchttpclient.Dsl;
 import org.asynchttpclient.ws.WebSocket;
@@ -16,12 +16,10 @@ import java.util.concurrent.ExecutionException;
 public class ClientWebSocket implements NativeSocket {
 
     public WebSocket webSocket;
-    private BlockReader blockReader=new BlockReader();
+    private BlockReader blockReader = new BlockReader();
 
     /**
-     *
      * @param uri
-     *
      * @throws ExecutionException
      * @throws InterruptedException
      */
@@ -49,12 +47,12 @@ public class ClientWebSocket implements NativeSocket {
             public void onError(Throwable t) {
 
                 //log.debug("onError", t);
-                log.error("onError: "+ t.getMessage());
+                log.error("onError: " + t.getMessage());
             }
         }).build();
 
         webSocket = Dsl.asyncHttpClient()
-                .prepareGet(uri/*"ws://localhost:5590/websocket"*/)
+                .prepareGet(uri)
                 .addHeader("header_name", "header_value")
                 .addQueryParam("key", "value")
                 .setRequestTimeout(5000)
@@ -74,13 +72,13 @@ public class ClientWebSocket implements NativeSocket {
 
     @Override
     public Packet getPacket() {
-       List<String> s = blockReader.pull();
+        List<String> s = blockReader.pull();
         return Packet.buildFromBlock(s);
     }
 
     @Override
     public void close() {
         webSocket.sendCloseFrame();
-        webSocket=null;
+        webSocket = null;
     }
 }

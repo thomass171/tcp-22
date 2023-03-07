@@ -16,6 +16,7 @@ import de.yard.threed.engine.*;
 
 import de.yard.threed.core.BuildResult;
 import de.yard.threed.core.Dimension;
+import de.yard.threed.engine.ecs.ClientBusConnector;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
@@ -32,11 +33,11 @@ import java.util.List;
  * <p/>
  * 12.06.2015: Der AnimationController duerfte hier in WebGL nicht mehr richtig aufgehoben sein.
  * 12.06.2015: Das hier die ganze Scene reinkommt, dürfte auch nicht gut sein, wird aber noch wegen init() gebraucht.
- *
+ * <p>
  * 05.05.2021: AnimationScheduler is GWTs corresponding of JSs Window.requestAnimationFrame(). But this is not allowed for ThreeJS VR.
  * Instead renderer.setAnimationLoop() needs to be used. (https://threejs.org/docs/index.html#manual/en/introduction/How-to-create-VR-content).
  * So AnimationScheduler is only used for preload and then we switch to setAnimationLoop().
- *
+ * <p>
  * <p/>
  * Date: 14.02.14
  * Time: 16:09
@@ -59,7 +60,7 @@ public class WebGlSceneRenderer implements AnimationController {
     //private Color background = null;
     Scene scene;
     public WebGlRenderer renderer;
-    LoopCallback loopback;
+    PreloadLoopCallback preloadLoopback;
     CanvasPanel canvasPanel;
     //Wenn ThreeJs sowas nicht hat, dann auch nicht versuchen nachzubilden
     //5.5.21 Integer targetframerate = null;
@@ -67,8 +68,8 @@ public class WebGlSceneRenderer implements AnimationController {
     private WebGlSceneRenderer(Scene scene, CanvasPanel canvasPanel, Settings scsettings) {
         boolean vrready = scsettings.vrready != null && scsettings.vrready;
         boolean antialiasing = scsettings.aasamples != null && scsettings.aasamples != 0;
-        boolean vrEnabled = EngineHelper.isEnabled("argv.enableVR");
-        boolean statEnabled = EngineHelper.isEnabled("argv.enableStat");
+        boolean vrEnabled = EngineHelper.isEnabled("enableVR");
+        boolean statEnabled = EngineHelper.isEnabled("enableStat");
 
         logger.debug("Building WebGlSceneRenderer: vrEnabled=" + vrEnabled + ",statEnabled=" + statEnabled);
         renderer = WebGlRenderer.buildRenderer(AbstractSceneRunner.getInstance().dimension, vrready, antialiasing, vrEnabled, statEnabled);
@@ -111,7 +112,7 @@ public class WebGlSceneRenderer implements AnimationController {
     /**
      * Einen Looback einrichten, der immer wieder zum Rendern aufgerufen wird.
      * Die Camera gibt es erst nach dem Init.
-     *
+     * <p>
      * Only called once as a trigger for the loopback.
      */
     public void startRenderLoop() {
@@ -121,19 +122,21 @@ public class WebGlSceneRenderer implements AnimationController {
         }
 
         // Anlegen geht erst jetzt, weil jetzt erst die Camra da ist
-        loopback = new LoopCallback(renderer, scene, null, AbstractSceneRunner.getInstance().getCameras(),((WebGlBundleLoader)Platform.getInstance().bundleLoader));
+        // Wait for preload to be complete. Will start render loop than.
+        preloadLoopback = new PreloadLoopCallback(renderer, scene, null, AbstractSceneRunner.getInstance().getCameras(), ((WebGlBundleLoader) Platform.getInstance().bundleLoader));
 
         AnimationScheduler animationScheduler = AnimationScheduler.get();
-        animationScheduler.requestAnimationFrame(loopback);
+        animationScheduler.requestAnimationFrame(preloadLoopback);
     }
 
     /**
-     * Der Preload ist jetzt durch.
+     * Preload now has finished (but no websocket yet).
      */
     void init() {
         logger.debug("init started");
 
-        scene.init(SceneMode.forMonolith());
+        // initScene() might open a websocket
+        AbstractSceneRunner.getInstance().initScene();
         AbstractSceneRunner.getInstance().postInit();
 
         canvasPanel.addMouseMoveHandler(mouseMoveEvent -> {
@@ -261,7 +264,7 @@ public class WebGlSceneRenderer implements AnimationController {
      * 1) Controllerevents gesammelt
      * 2) Updater aufgerufen
      * 3) Szene neu gerendered
-     *
+     * <p>
      * 5.5.21: Called via native JS now. No longer parameter to make it easy.
      */
     private void updateRender(/*5.5.21 CanvasPanel cp, List<NativeCamera> cameras*/) {
@@ -269,7 +272,7 @@ public class WebGlSceneRenderer implements AnimationController {
 
         //5.5.21 Was in loopback only before changing loopback
         //WebGlResourceManager.getInstance().checkBundleCompleted();
-        ((WebGlBundleLoader)Platform.getInstance().bundleLoader).checkBundleCompleted();
+        ((WebGlBundleLoader) Platform.getInstance().bundleLoader).checkBundleCompleted();
 
         List<NativeCamera> cameras = AbstractSceneRunner.getInstance().getCameras();
         // erst Scene oder erst camera?
@@ -373,44 +376,45 @@ public class WebGlSceneRenderer implements AnimationController {
     }
 
     /**
-     * Endlosschleife
-     * Bei Pause wird einfach kein NachfolgeFrame mehr angelegt und
-     * die Schleife laeuft aus. 5.5.21: pause gabs doch nie richtig.
-     * 5.5.21: Wird nur noch fuer Preload verwendet. Danach "renderer.setAnimationLoop()"
-     * Und der Timer kommt auch raus. Das unterläuft nur das ThreeJs Konzept.
-     * <p/>
+     * Callback loop while preloading. Triggers itself while preload is running.
+     * There is no longer a timer here because this undermines the concept of ThreeJs (and others?).
+     * There is and never really was a "pause" here.
+     * After preload ConnectLoopCallback and than "renderer.setAnimationLoop()" is triggered.
      */
-
-    class LoopCallback implements AnimationScheduler.AnimationCallback {
+    class PreloadLoopCallback implements AnimationScheduler.AnimationCallback {
         Scene scene;
         WebGlRenderer renderer;
         List<NativeCamera> cameras;
         CanvasPanel canvaspanel;
-        Log logger = Platform.getInstance().getLog(LoopCallback.class);
+        Log logger = Platform.getInstance().getLog(PreloadLoopCallback.class);
         int cnt = 0;
         WebGlBundleLoader bundleLoader;
 
-        LoopCallback(WebGlRenderer renderer, Scene scene, CanvasPanel canvaspanel, List<NativeCamera> cameras, WebGlBundleLoader bundleLoader) {
+        PreloadLoopCallback(WebGlRenderer renderer, Scene scene, CanvasPanel canvaspanel, List<NativeCamera> cameras, WebGlBundleLoader bundleLoader) {
             this.renderer = renderer;
             this.scene = scene;
             this.cameras = cameras;
             this.canvaspanel = canvaspanel;
-            this.bundleLoader=bundleLoader;
+            this.bundleLoader = bundleLoader;
         }
 
         @Override
         public void execute(double xxv) {
+
+            logger.debug("PreloadLoopCallback execute");
+
             //5.5.21 boolean usetimer = true;
             bundleLoader.checkBundleCompleted();
             if (preloaded) {
                 if (!inited) {
+                    // init() will (optionally open a websocket)
                     init();
                 }
                 // don't continue using AnimationScheduler but switch to ThreeJs animationloop
-                // updateRender(canvaspanel, cameras);
-                logger.info("Switch to ...");
-                renderer.activeAnimationLoop();
-                // don't continue. Just return without requesting next frame.
+                // 7.3.23 now switch to websocket loopback.
+                logger.info("Switch to ConnectLoopCallback");
+                AnimationScheduler.get().requestAnimationFrame(new ConnectLoopCallback(renderer, scene, canvaspanel, cameras, bundleLoader));
+                // don't retrigger PreloadLoopCallback. Just return without requesting next frame.
                 return;
             } else {
                 logger.info("still preloading " + bundleLoader.currentlyloading.size());
@@ -434,31 +438,55 @@ public class WebGlSceneRenderer implements AnimationController {
                     //paused = true;
                 }
             }
-            //if (!paused) {
-                // Time isType GWT equivalent of JS setTimeout
-                // Timer hat keine erkennbaren Vorteile, auch kein zügigeres Logging. Darum erstmal nicht weiter nutzen. 
-                // 16.1.18: Aber fuer targetframerate. Deswegen jetzt mit Timer.
-                /*5.5.21 if (usetimer) {
-                    Timer t = new Timer() {
-                        @Override
-                        public void run() {
-                            execute(0);
-                        }
-                    };
+            //The recommended way, but no for VR. 7.3.23: Hmm: what does that mean? What is special about VR here.
+            AnimationScheduler animationScheduler = AnimationScheduler.get();
+            animationScheduler.requestAnimationFrame(this);
+        }
+    }
 
-                    // Schedule the timer to run .
-                    //logger.debug("Scheduling timer");
-                    if (targetframerate == null) {
-                        t.schedule(0);
-                    } else {
-                        t.schedule(1000 / targetframerate);
-                    }
-                } else {*/
-                    //The recommended way, but no for VR
-                    AnimationScheduler animationScheduler = AnimationScheduler.get();
-                    animationScheduler.requestAnimationFrame(this);
+    /**
+     * Callback loop while waiting for websocket connect (optionally). Triggers itself while websocket is not connected.
+     * After connect or when there is no connection "renderer.setAnimationLoop()" is triggered.
+     */
+    class ConnectLoopCallback implements AnimationScheduler.AnimationCallback {
+        Scene scene;
+        WebGlRenderer renderer;
+        List<NativeCamera> cameras;
+        CanvasPanel canvaspanel;
+        Log logger = Platform.getInstance().getLog(ConnectLoopCallback.class);
+        int cnt = 0;
+        WebGlBundleLoader bundleLoader;
 
+        ConnectLoopCallback(WebGlRenderer renderer, Scene scene, CanvasPanel canvaspanel, List<NativeCamera> cameras, WebGlBundleLoader bundleLoader) {
+            this.renderer = renderer;
+            this.scene = scene;
+            this.cameras = cameras;
+            this.canvaspanel = canvaspanel;
+            this.bundleLoader = bundleLoader;
+        }
 
+        @Override
+        public void execute(double xxv) {
+
+            logger.debug("ConnectLoopCallback execute");
+
+            // wait for socket. preload and init() are done here.
+            if (AbstractSceneRunner.getInstance().getBusConnector() != null) {
+                ClientBusConnector cbc = AbstractSceneRunner.getInstance().getBusConnector();
+                WebGlSocket socket = (WebGlSocket) cbc.getSockets(null).get(0);
+                logger.debug("check socket");
+                if (socket.isPending()) {
+                    logger.debug("Waiting for socket to connect");
+                    AnimationScheduler.get().requestAnimationFrame(this);
+                    return;
+                }
+            }
+
+            // don't continue using AnimationScheduler but switch to ThreeJs animationloop
+            // updateRender(canvaspanel, cameras);
+            logger.info("Switch to ThreeJs animationloop");
+            renderer.activeAnimationLoop();
+            // don't trigger myself any more. Just return without requesting next frame.
         }
     }
 

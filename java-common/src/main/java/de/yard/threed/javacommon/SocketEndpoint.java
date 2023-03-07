@@ -1,4 +1,6 @@
-package de.yard.threed.javanative;
+package de.yard.threed.javacommon;
+
+import de.yard.threed.core.BlockReader;
 
 import java.io.IOException;
 import java.io.PrintWriter;

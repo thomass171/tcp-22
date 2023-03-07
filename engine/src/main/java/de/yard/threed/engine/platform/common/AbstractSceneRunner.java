@@ -555,9 +555,10 @@ public class AbstractSceneRunner {
 
     /**
      * Additional approach for having commons in AbstractSceneRunner.
-     * "scene" should hav been set already.
+     * "scene" should have been set already.
+     * platform-webgl needs it public.
      */
-    protected void initScene() {
+    public void initScene() {
         // decide scene mode monolith or client/server
         String server = Platform.getInstance().getConfiguration().getString("server");
         if (server == null) {

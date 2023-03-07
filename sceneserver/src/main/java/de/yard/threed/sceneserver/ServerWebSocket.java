@@ -2,7 +2,7 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.NativeSocket;
-import de.yard.threed.javanative.BlockReader;
+import de.yard.threed.core.BlockReader;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -10,6 +10,9 @@ import javax.websocket.RemoteEndpoint;
 import javax.websocket.Session;
 import java.util.List;
 
+/**
+ * Websocket endpoint in the server.
+ */
 @Slf4j
 public class ServerWebSocket implements NativeSocket {
 
@@ -17,8 +20,6 @@ public class ServerWebSocket implements NativeSocket {
     BlockReader blockReader = new BlockReader();
 
     /**
-     *
-     *
      * @param session
      */
     public ServerWebSocket(Session session) {
@@ -40,11 +41,16 @@ public class ServerWebSocket implements NativeSocket {
         return blockReader.hasBlock();
     }
 
+    /**
+     * Returns null if no packet is available.
+     */
     public Packet getPacket() {
         //log.debug("getPacket");
         List<String> s = blockReader.pull();
         Packet packet = Packet.buildFromBlock(s);
-        log.debug("Got packet " + packet);
+        if (packet != null) {
+            log.debug("Got packet " + packet);
+        }
         return packet;
     }
 

@@ -1,7 +1,7 @@
-package de.yard.threed.javanative;
+package de.yard.threed.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +11,9 @@ import java.util.Vector;
  * Accept text lines line by line and build a block after empty lines.
  */
 public class BlockReader {
-    static Logger logger = LoggerFactory.getLogger(BlockReader.class.getName());
+    static Log logger = Platform.getInstance().getLog(BlockReader.class);
 
+    // Vector is synced
     List<List<String>> blocks = new Vector<>();
     List<String> lines = new Vector<>();
     private boolean debuglog = false;
@@ -36,6 +37,9 @@ public class BlockReader {
         return blocks.size() > 0;
     }
 
+    /**
+     * Returns null if no block is available.
+     */
     public List<String> pull() {
         if (blocks.size() == 0) {
             return null;
@@ -46,6 +50,11 @@ public class BlockReader {
         return block;
     }
 
+    /**
+     * TODO move to Packet?
+     * @param packet
+     * @param linePrinter
+     */
     public static void writePacket(List<String> packet, LinePrinter linePrinter) {
         for (String s : packet) {
             linePrinter.println(s);

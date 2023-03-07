@@ -43,7 +43,9 @@ public class Main implements EntryPoint {
         PlatformWebGl.isDevmode = false;
         for (String arg : args.keySet()) {
             String value = Window.Location.getParameter(arg);
-            properties.put("argv." + arg, value);
+            //6.3.23: Breaking change! No longer use prefix "argv"
+            //properties.put("argv." + arg, value);
+            properties.put(arg, value);
             if (arg.equalsIgnoreCase("devmode")) {
                 // too early to use Util.isTrue(value) due to logger
                 PlatformWebGl.isDevmode = value.equals("1") || value.equalsIgnoreCase("true");
@@ -66,7 +68,7 @@ public class Main implements EntryPoint {
 
         logger.info("Loading GWT Client from " + href + ", devmode=" + Platform.getInstance().isDevmode());
 
-        String scene = properties.get("argv.scene");//com.google.gwt.user.client.Window.Location.getParameter("scene");
+        String scene = properties.get("scene");//com.google.gwt.user.client.Window.Location.getParameter("scene");
         logger.debug("scene=" + scene);
         logger.debug("getHostPageBaseURL=" + GWT.getHostPageBaseURL());
         logger.debug("getModuleBaseURL=" + GWT.getModuleBaseURL());

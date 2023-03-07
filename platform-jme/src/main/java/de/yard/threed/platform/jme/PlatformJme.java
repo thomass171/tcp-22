@@ -1,6 +1,5 @@
 package de.yard.threed.platform.jme;
 
-import com.google.gson.GsonBuilder;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -14,7 +13,6 @@ import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
-import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.platform.PlatformInternals;
@@ -26,8 +24,6 @@ import de.yard.threed.engine.geometry.ShapeGeometry;
 
 import de.yard.threed.core.buffer.SimpleByteBuffer;
 import de.yard.threed.javacommon.JALog;
-import de.yard.threed.javanative.JsonUtil;
-import de.yard.threed.javanative.SocketClient;
 
 
 import de.yard.threed.engine.platform.common.*;
@@ -44,7 +40,6 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;

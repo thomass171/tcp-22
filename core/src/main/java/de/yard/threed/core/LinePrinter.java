@@ -1,4 +1,4 @@
-package de.yard.threed.javanative;
+package de.yard.threed.core;
 
 @FunctionalInterface
 public interface LinePrinter {

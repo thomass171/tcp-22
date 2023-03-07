@@ -434,7 +434,7 @@ public class SystemManager {
         } else if ((request = DefaultBusConnector.decodeRequest(packet)) != null) {
             netRequests.add(request);
         } else {
-            logger.error("unsupported packet");
+            logger.error("unsupported packet (just a newline?): " + packet);
         }
     }
 

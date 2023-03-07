@@ -3,8 +3,6 @@ package de.yard.threed.javacommon;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.javanative.QueuingSocketListener;
-import de.yard.threed.javanative.SocketClient;
 
 import java.io.IOException;
 

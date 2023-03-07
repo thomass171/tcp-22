@@ -74,4 +74,16 @@ public class Packet {
         // no payload? Hmm
         return false;
     }
+
+    @Override
+    public String toString() {
+        String s = "";
+        for (String key : map.keySet()) {
+            if (s.length() > 0) {
+                s += ",";
+            }
+            s += key + "=" + map.get(key);
+        }
+        return s;
+    }
 }

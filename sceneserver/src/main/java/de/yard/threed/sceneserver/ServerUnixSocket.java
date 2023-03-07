@@ -2,9 +2,9 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.NativeSocket;
-import de.yard.threed.javanative.BlockReader;
-import de.yard.threed.javanative.QueuingSocketListener;
-import de.yard.threed.javanative.SocketEndpoint;
+import de.yard.threed.core.BlockReader;
+import de.yard.threed.javacommon.QueuingSocketListener;
+import de.yard.threed.javacommon.SocketEndpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
