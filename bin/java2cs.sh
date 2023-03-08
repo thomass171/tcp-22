@@ -11,8 +11,10 @@ source $OWNDIR/common.sh || exit 1
 
 #set -x
 
-CLASSPATH=$CLASSPATH:$MR/org/slf4j/slf4j-log4j12/1.5.6/slf4j-log4j12-1.5.6.jar
-CLASSPATH=$CLASSPATH:$MR/org/slf4j/slf4j-api/1.5.6/slf4j-api-1.5.6.jar
+CLASSPATH=$CLASSPATH:$MR/org/apache/logging/log4j/log4j-api/2.17.2/log4j-api-2.17.2.jar
+CLASSPATH=$CLASSPATH:$MR/org/apache/logging/log4j/log4j-core/2.17.2/log4j-core-2.17.2.jar
+CLASSPATH=$CLASSPATH:$MR/org/apache/logging/log4j/log4j-slf4j-impl/2.17.2/log4j-slf4j-impl-2.17.2.jar
+CLASSPATH=$CLASSPATH:$MR/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar
 CLASSPATH=$CLASSPATH:$MR/org/antlr/antlr4-runtime/4.5.2/antlr4-runtime-4.5.2.jar
 
 CLASSPATH=$CLASSPATH:$MR/de/yard/tcp-22/module-java2cs/$VERSION/module-java2cs-$VERSION.jar

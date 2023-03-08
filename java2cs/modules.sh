@@ -29,7 +29,6 @@ MODULE_FILES[engine]="
 	de/yard/threed/engine/apps/vr
 	de/yard/threed/engine/ecs
 	de/yard/threed/engine/graph
-	de/yard/threed/engine/mp
 	de/yard/threed/engine/avatar
 	de/yard/threed/engine/gui
 	de/yard/threed/engine/geometry
