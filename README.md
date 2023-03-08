@@ -196,6 +196,9 @@ Major changes:
 ## 2022-12
 Major changes:
   * VR moving in mazes by controller stick instead of using teleport location marker.
+## 2023-03
+  * fix for parameter "offsetVR" passing in browser
+  * preparation for multi player scene server.
 
 # Technical Details
 
