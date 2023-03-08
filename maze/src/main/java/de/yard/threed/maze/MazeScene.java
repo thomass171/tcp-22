@@ -199,7 +199,7 @@ public class MazeScene extends Scene {
                 inventorySystem.addInventory(new MazeHudInventory(deferredcameraForInventory, getDimension()));
 
                 // Optional (test)Hud that shows VR control panel via deferred camera as HUD
-                if (EngineHelper.isEnabled("argv.enableHud")) {
+                if (EngineHelper.isEnabled("enableHud")) {
                     ControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
                     leftControllerPanel.getTransform().setPosition(new Vector3(0.4, 0.8, -2));
                     deferredcameraForInventory.getCarrier().attach(leftControllerPanel);

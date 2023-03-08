@@ -34,9 +34,9 @@ public class DemoSceneTest {
     @BeforeEach
     public void setup() throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
-        properties.put("argv.basename", "traffic:tiles/Demo.xml");
+        properties.put("basename", "traffic:tiles/Demo.xml");
         // just to be sure to have automove. automove is already enabled in Demo.xml
-        properties.put("argv.enableAutomove", "true");
+        properties.put("enableAutomove", "true");
         System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         sceneServer = SceneServerTestUtils.setupServerForScene("de.yard.threed.traffic.apps.BasicTravelScene", INITIAL_FRAMES, properties, 50);
     }

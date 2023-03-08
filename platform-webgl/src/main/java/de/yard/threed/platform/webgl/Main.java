@@ -44,7 +44,6 @@ public class Main implements EntryPoint {
         for (String arg : args.keySet()) {
             String value = Window.Location.getParameter(arg);
             //6.3.23: Breaking change! No longer use prefix "argv"
-            //properties.put("argv." + arg, value);
             properties.put(arg, value);
             if (arg.equalsIgnoreCase("devmode")) {
                 // too early to use Util.isTrue(value) due to logger

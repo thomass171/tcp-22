@@ -38,7 +38,7 @@ public class Observer implements SimpleTransform {
     private Observer(Transform observer) {
         this.observer = observer;
 
-     /*   if (EngineHelper.isEnabled("argv.enableVR")) {
+     /*   if (EngineHelper.isEnabled("enableVR")) {
             vrEnabled = true;
         }*/
     }

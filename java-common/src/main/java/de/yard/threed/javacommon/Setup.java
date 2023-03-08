@@ -28,18 +28,18 @@ public class Setup {
     public static HashMap<String, String> setUp() {
         HashMap<String, String> properties = new HashMap<String, String>();
 
-        properties.put("argv.enableUsermode", "false");
-        properties.put("argv.visualizeTrack", "true");
+        properties.put("enableUsermode", "false");
+        properties.put("visualizeTrack", "true");
         // VR control panel visible for debugging 25.1.23:TODO check count values not visible?
-        properties.put("argv.enableHud", "true");
+        properties.put("enableHud", "true");
 
         // emulateVR for testing VR panel outside VR via mouse move/click (mouseclick is right trigger, shift pressed for left trigger)
         // After fix of webxr floor handling yoffsetVR can have a 'real' height (above avatar).
         boolean emulateVR = false;
         if (emulateVR) {
-            properties.put("argv.emulateVR", "true");
+            properties.put("emulateVR", "true");
             // 1.3 is only good for maze, VrScene needs less (eg 0.3), or better 0 like BasicTravelScene. App does the rest.
-            properties.put("argv.offsetVR", "0,0,0");
+            properties.put("offsetVR", "0,0,0");
         }
 
         //properties.put("argv.initialVehicle", "c172p");
@@ -55,8 +55,8 @@ public class Setup {
         //properties.put("argv.enableFPC", "true");
         //18.11.19: NearView geht in VR eh nicht, darum damit üblicherweise auch sonst nicht arbeiten.
         //properties.put("argv.enableNearView", "true");
-        properties.put("argv.initialMaze", "skbn/SokobanWikipedia.txt");
-        //properties.put("argv.initialMaze", "maze/Maze-P-Simple.txt");
+        properties.put("initialMaze", "skbn/SokobanWikipedia.txt");
+        properties.put("initialMaze", "maze/Maze-P-Simple.txt");
         //properties.put("argv.initialMaze", "maze/Maze-P-60x20.txt");
         //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");
         //properties.put("argv.initialMaze","maze/Area15x10.txt");
@@ -79,13 +79,13 @@ public class Setup {
 
         boolean wayland = false;
         if (wayland) {
-            properties.put("argv.basename", "traffic:tiles/Wayland.xml");
-            properties.put("argv.enableAutomove", "true");
+            properties.put("basename", "traffic:tiles/Wayland.xml");
+            properties.put("enableAutomove", "true");
             System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
         boolean demo = false;
         if (demo) {
-            properties.put("argv.basename", "traffic:tiles/Demo.xml");
+            properties.put("basename", "traffic:tiles/Demo.xml");
             // automove is enabled in Demo.xml.
             properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }

@@ -127,7 +127,7 @@ public class BasicTravelSceneTest {
     private void setup(String tileName) throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
-        properties.put("argv.basename", tileName);
+        properties.put("basename", tileName);
         sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "traffic"});
     }
 }

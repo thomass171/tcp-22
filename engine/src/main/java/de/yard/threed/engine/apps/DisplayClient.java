@@ -120,7 +120,7 @@ public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
     }
 
     protected void processArguments() {
-        if (EngineHelper.isEnabled("argv.enableNearView")) {
+        if (EngineHelper.isEnabled("enableNearView")) {
 
         }
     }

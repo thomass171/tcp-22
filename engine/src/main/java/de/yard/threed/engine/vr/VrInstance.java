@@ -73,7 +73,7 @@ public class VrInstance {
 
         boolean emulated = false;
         // For testing VR panel outside VR
-        if (EngineHelper.isEnabled("argv.emulateVR")) {
+        if (EngineHelper.isEnabled("emulateVR")) {
             emulated = true;
         } else {
             if (!isEnabled()) {
@@ -82,13 +82,13 @@ public class VrInstance {
         }
 
         Vector3 val = new Vector3();
-        String s_offsetVR = Platform.getInstance().getConfiguration().getString("argv.offsetVR");
+        String s_offsetVR = Platform.getInstance().getConfiguration().getString("offsetVR");
         if (s_offsetVR != null) {
             val = Util.parseVector3(s_offsetVR);
         }
         instance = new VrInstance(emulated ? MODE_EMULATED : MODE_OBSERVER, val);
 
-        String cpposrot = (Platform.getInstance()).getConfiguration().getString("argv.vr-controlpanel-posrot");
+        String cpposrot = (Platform.getInstance()).getConfiguration().getString("vr-controlpanel-posrot");
         if (cpposrot != null) {
 
             if ((instance.cpTransform = LocalTransform.buildFromConfig(cpposrot)) == null) {
@@ -140,7 +140,7 @@ public class VrInstance {
     }
 
     public static boolean isEnabled() {
-        return EngineHelper.isEnabled("argv.enableVR");
+        return EngineHelper.isEnabled("enableVR");
     }
 
     /**

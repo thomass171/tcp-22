@@ -65,7 +65,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         super(new String[]{}, new RequestType[]{}, new EventType[]{EventRegistry.EVENT_MAZE_LOADED});
 
         Boolean b;
-        if ((b = Platform.getInstance().getConfiguration().getBoolean("argv.enableMazeGridTeleporter")) != null) {
+        if ((b = Platform.getInstance().getConfiguration().getBoolean("enableMazeGridTeleporter")) != null) {
             gridTeleporterEnabled = (boolean) b;
         }
     }

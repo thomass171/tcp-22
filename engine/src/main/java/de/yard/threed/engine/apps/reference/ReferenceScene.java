@@ -119,7 +119,7 @@ public class ReferenceScene extends Scene {
         logger.debug("init ReferenceScene");
         databundle = BundleRegistry.getBundle("data");
 
-        if (EngineHelper.isEnabled("argv.enableVR")) {
+        if (EngineHelper.isEnabled("enableVR")) {
             vrEnabled = true;
             usedeferred = false;
         }

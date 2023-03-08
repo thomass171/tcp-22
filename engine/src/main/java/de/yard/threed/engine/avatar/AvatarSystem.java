@@ -61,7 +61,7 @@ public class AvatarSystem extends DefaultEcsSystem {
         boolean enableNearView = false;
 
         Boolean b;
-        if ((b = Platform.getInstance().getConfiguration().getBoolean("argv.enableNearView")) != null) {
+        if ((b = Platform.getInstance().getConfiguration().getBoolean("enableNearView")) != null) {
             enableNearView = (boolean) b;
         }
         return new AvatarSystem(false);

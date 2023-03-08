@@ -103,7 +103,6 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         /*Engine*/
         PlatformInternals pl = /*(EngineHelper)*/ platformFactory.createPlatform(configuration);
         Scene scene = null;
-        // better to use "argv.scene"?? Hmm, unclear.
         //6.2.23 still used? Yes.
         if (configuration.getString("scene") != null) {
             try {

@@ -195,7 +195,7 @@ public class MazeTestUtils {
 
         HashMap<String, String> properties = new HashMap<String, String>();
         if (gridTeleporterEnabled) {
-            properties.put("argv.enableMazeGridTeleporter", "true");
+            properties.put("enableMazeGridTeleporter", "true");
         }
         return buildSceneRunnerForMazeScene(gridname, properties, initial_frames);
     }
@@ -209,7 +209,7 @@ public class MazeTestUtils {
 
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.maze.MazeScene");
-        properties.put("argv.initialMaze", gridname);
+        properties.put("initialMaze", gridname);
         properties.putAll(additionalPproperties);
         // buildDefaultConfigurationWithEnv is needed for HOSTDIR
         SceneRunnerForTesting sceneRunner = SceneRunnerForTesting.setupForScene(initial_frames, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "maze"});

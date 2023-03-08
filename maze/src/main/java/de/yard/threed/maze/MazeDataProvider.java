@@ -53,10 +53,7 @@ public class MazeDataProvider implements DataProvider {
 
     public static void init() {
         Configuration configuration = Platform.getInstance().getConfiguration();
-        String initialMaze = configuration.getString("argv.initialMaze");
-        if (initialMaze == null) {
-            initialMaze = configuration.getString("initialMaze");
-        }
+        String initialMaze = configuration.getString("initialMaze");
         init(initialMaze);
     }
 

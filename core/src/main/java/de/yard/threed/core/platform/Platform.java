@@ -318,7 +318,6 @@ public abstract class Platform {
      * werden koennten (CAHCEDIR). Darum zusätzlich Props beim init der Platform reingeben. Den setter brauchts trotzdem,
      * weil manche Properties nachher abhängig von der Platform gesetztw erden (z.B. Unity handheld).
      * <p>
-     * 16.7.18: Parameter aus der command line sind mit dem prefix "argv." eingetragen, z.B. basename bei viewScenery.
      * 5.2.23: What is the latest design for properties/configuration? These methods? Or configuration? Or both?
      * It seems to switch to configuration that is supplied by
      * the platform to be more future ready.

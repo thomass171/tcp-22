@@ -27,8 +27,8 @@ public class WaylandTest {
         HashMap<String, String> properties = new HashMap<String, String>();
         boolean wayland=true;
         if (wayland) {
-            properties.put("argv.basename", "traffic:tiles/Wayland.xml");
-            properties.put("argv.enableAutomove", "true");
+            properties.put("basename", "traffic:tiles/Wayland.xml");
+            properties.put("enableAutomove", "true");
             System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
 

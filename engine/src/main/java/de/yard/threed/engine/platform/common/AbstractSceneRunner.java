@@ -428,7 +428,7 @@ public class AbstractSceneRunner {
     public void postInit() {
 
         String sceneExtension0;
-        if ((sceneExtension0 = Platform.getInstance().getConfiguration().getString("argv.sceneExtension0")) != null) {
+        if ((sceneExtension0 = Platform.getInstance().getConfiguration().getString("sceneExtension0")) != null) {
             SceneLoader sceneLoader = null;
             try {
                 sceneLoader = new SceneLoader(sceneExtension0, "");
