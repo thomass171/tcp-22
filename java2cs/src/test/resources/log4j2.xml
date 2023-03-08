@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <!-- console output is sufficient for tests -->
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss,SSS} %-5p %-10.20c{1}: '%m'%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <!-- avoid duplicate messages by setting additivity-->
+        <Logger name="de.yard" level="debug" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Root level="warn">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

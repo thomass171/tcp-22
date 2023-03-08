@@ -43,8 +43,8 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     //a menu is attached to some node. Well, in principle both should be ready for nearView/cameraRelated and scene located.
     //Even though its quite the same, a control menu is intended to be displayed all the time, while a menu is toggled for
     // a short time and quickly closed again. And a menu can be shown in addition to a control menu.
-    public static RequestType USER_REQUEST_MENU = new RequestType("USER_REQUEST_MENU");
-    public static RequestType USER_REQUEST_CONTROLMENU = new RequestType("USER_REQUEST_CONTROLMENU");
+    public static RequestType USER_REQUEST_MENU = RequestType.register(1006, "USER_REQUEST_MENU");
+    public static RequestType USER_REQUEST_CONTROLMENU = RequestType.register(1007, "USER_REQUEST_CONTROLMENU");
 
     boolean keytorequestsystemdebuglog = true;
     private Menu menu = null;
@@ -77,7 +77,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         segmentRequests.put(1, USER_REQUEST_CONTROLMENU);
 
         // For testing VR panel outside VR
-        if (EngineHelper.isEnabled("argv.emulateVR")) {
+        if (EngineHelper.isEnabled("emulateVR")) {
             emulateLeftVrControllerByMouse();
         }
     }
@@ -127,7 +127,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         //26.10.18: 'T' statt P, damit P fuer Pause ist.
         if (Input.GetKeyDown(KeyCode.T)) {
             IntHolder option = new IntHolder(0);
-            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(option));
+            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{option}));
             if (Input.GetKey(KeyCode.Shift)) {
                 //cyclePosition(tc, (false));
                 option.setValue(1);

@@ -32,7 +32,7 @@ public class ControlMenu implements ControlMenuBuilder {
             InputToRequestSystem.sendRequestWithId(new Request(RequestRegistry.TRIGGER_REQUEST_BACK));
         });
         // 20.4.21: No longer a open main menu item, but close control menu
-        //controlmenu.addButton(/*new Request(new RequestType("Menu")),*/ 3, 0, 1, Icon.ICON_MENU, () -> {
+        //controlmenu.addButton(/*new Request(RequestType.register("Menu")),*/ 3, 0, 1, Icon.ICON_MENU, () -> {
         controlmenu.addButton(3, 0, 1, Icon.ICON_CLOSE, () -> {
             //openCloseMenu();
             InputToRequestSystem.sendRequestWithId(new Request(InputToRequestSystem.USER_REQUEST_CONTROLMENU));

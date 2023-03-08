@@ -3,7 +3,7 @@ package de.yard.threed.engine.test;
 import de.yard.threed.core.platform.*;
 
 import de.yard.threed.core.XmlException;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
 
 import java.util.HashMap;
 
@@ -33,19 +33,19 @@ public class XmlTest {
             // find the sender's display name in an attribute of the <from> tag
             NativeNode fromNode = messageDom.getElementsByTagName("from").getItem(0);
             String from = ((NativeElement) fromNode).getAttribute("displayName");
-            TestUtil.assertEquals("from", "Joyce", from);
+            RuntimeTestUtil.assertEquals("from", "Joyce", from);
             NativeAttributeList fromattrlist = ((NativeElement) fromNode).getAttributes();
-            TestUtil.assertEquals("fromattrlist.size", 2, fromattrlist.getLength());
+            RuntimeTestUtil.assertEquals("fromattrlist.size", 2, fromattrlist.getLength());
             // Die Reihenfolge der Attribute ist nicht definiert!
             HashMap<String,String> attr = new HashMap<String,String>();
             for (int i=0;i<fromattrlist.getLength();i++){
                 attr.put(fromattrlist.getItem(i).getNodeName(),fromattrlist.getItem(i).getNodeValue());
             }
             //TestUtil.assertEquals("from.displayname", "displayName", adisplayName);
-            TestUtil.assertEquals("from.displayname", "Joyce", attr.get("displayName"));
+            RuntimeTestUtil.assertEquals("from.displayname", "Joyce", attr.get("displayName"));
             //TestUtil.assertEquals("from.address", "address", fromattrlist.getItem(1).getNodeName());
-            TestUtil.assertEquals("from.address", "joyce@website.com", attr.get("address"));
-            TestUtil.assertEquals("from.address", "joyce@website.com", fromattrlist.getNamedItem("address").getNodeValue());
+            RuntimeTestUtil.assertEquals("from.address", "joyce@website.com", attr.get("address"));
+            RuntimeTestUtil.assertEquals("from.address", "joyce@website.com", fromattrlist.getNamedItem("address").getNodeValue());
             
             // get the subject using Node's getNodeValue() function
             String subject = messageDom.getElementsByTagName("subject").getItem(0).getFirstChild().getNodeValue();
@@ -53,9 +53,9 @@ public class XmlTest {
             // get the message body by explicitly casting to a Text node
             NativeText bodyNode = (NativeText) messageDom.getElementsByTagName("body").getItem(0).getFirstChild();
             String body = bodyNode.getData();
-            TestUtil.assertEquals("body", "I'll pick you up at the airport at 8:30.  See you then!", body);
+            RuntimeTestUtil.assertEquals("body", "I'll pick you up at the airport at 8:30.  See you then!", body);
 
-            TestUtil.assertNull ("non existing attribute should return null", ((NativeElement) fromNode).getAttribute("xxx"));
+            RuntimeTestUtil.assertNull ("non existing attribute should return null", ((NativeElement) fromNode).getAttribute("xxx"));
         } catch (XmlException e) {
             throw new RuntimeException(e);
         }

@@ -3,25 +3,29 @@ package de.yard.threed.engine.testutil;
 //import de.yard.threed.platform.HomeBrewRenderer;
 
 import de.yard.threed.core.InitMethod;
-import de.yard.threed.core.Util;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.Scene;
+import de.yard.threed.engine.SceneMode;
 import de.yard.threed.engine.World;
+import de.yard.threed.engine.ecs.LoggingSystemTracker;
+import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
-import java.util.HashMap;
-
-//23.2.21: brauch ich nicht mehr. Doch, ach das ist krude.
-//Obwohl, fuer Tests ohne vollstaendigen SceneRunner, Hmm vielleicht doch.
-//MA36: Den HomeBrewRenderer gibts hier jetzt nicht mehr.
-/*@Deprecated*/
+/**
+ * A scene runner for tests. Needed because tests are not related to any platform and the homebrew scene runner
+ * is not available here. And SimpleHeadless has no scene runner.
+ * Anyway, its somehow weird because logically its a copy of runner like JME and webgl.
+ */
 public class SceneRunnerForTesting extends AbstractSceneRunner {
     //private HomeBrewRenderer renderer;
+
+    private LoggingSystemTracker systemTracker = new LoggingSystemTracker();
 
     /**
      * 2.8.21: Jetzt mit den PlatformInternals
@@ -32,7 +36,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         if (scene == null) {
             scene = new Scene() {
                 @Override
-                public void init(boolean forServer) {
+                public void init(SceneMode sceneMode) {
                     if (sceneIinitMethod != null) {
                         sceneIinitMethod.init();
                     }
@@ -70,38 +74,39 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         // 13.4.17: Die Bundle laden. Ausnahmesweise synchron wegen Test. Doof vor allem bei Einzeltests weil es so lange braucht.
         if (bundlelist != null) {
             for (String bundlename : bundlelist) {
-                TestFactory.loadBundleSync(bundlename);
+                EngineTestFactory.loadBundleSync(bundlename);
             }
         }
 
         // 10.4.21: MannMannMann: das ist hier jetzt so reingefriemelt.
         TestHelper.cleanupAsync();
 
+        // For better analyzing use a more verbose system tracker for now
+        SystemManager.setSystemTracker(systemTracker);
+
         //27.3.20 dann doch vorher auch den Sceneinit fuer ein paar Systems
-        scene.init(false);
+        initScene();
         // 9.1.17: Der Vollstaendigkeithalber auch der postinit
         postInit();
     }
 
     /**
-     * Ein Init wie in anderen SceneRunnern auch.
+     * A init like in other scene runner.
      * 7.7.21
-     *
-     * @return
      */
-    public static SceneRunnerForTesting init(HashMap<String, String> properties, PlatformFactory platformFactory, InitMethod sceneIinitMethod, String[] bundlelist) {
+    public static SceneRunnerForTesting init(Configuration configuration, PlatformFactory platformFactory, InitMethod sceneIinitMethod, String[] bundlelist) {
         if (instance != null) {
             throw new RuntimeException("already inited");
         }
         //5.12.18: Mal ohne OpenGL sondern spezieller TestPlatform. Geht aber nicht bei Tests die z.B. nodes brauchen (z.B. world)
         //MA36 jetzt muesste/soll aber Platform gehen.
         /*Engine*/
-        PlatformInternals pl = /*(EngineHelper)*/ platformFactory.createPlatform(properties);
+        PlatformInternals pl = /*(EngineHelper)*/ platformFactory.createPlatform(configuration);
         Scene scene = null;
-        // better to use "argv.scene"?? Hmm, unclear.
-        if (properties.containsKey("scene")) {
+        //6.2.23 still used? Yes.
+        if (configuration.getString("scene") != null) {
             try {
-                scene = (Scene) Class.forName(properties.get("scene")).newInstance();
+                scene = (Scene) Class.forName(configuration.getString("scene")).newInstance();
             } catch (Exception e) {
                 //TODO log
             }
@@ -122,7 +127,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
 
     public void runLimitedFrames(int frameCount) {
         // tpf 0 ist unguenstig, dann bewegt sich nichts.
-        runLimitedFrames(frameCount,0.1);
+        runLimitedFrames(frameCount, 0.1);
     }
 
     /**
@@ -152,15 +157,18 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
     /**
      * Setup scene like it is done in main and render "initialFrames" frames.
      * Scene name is taken from properties.
-     *
      */
-    public static SceneRunnerForTesting setupForScene(int initialFrames, HashMap<String, String> properties, String[] bundles)  {
+    public static SceneRunnerForTesting setupForScene(int initialFrames, Configuration configuration, String[] bundles) {
 
-        TestFactory.initPlatformForTest( bundles, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()),properties);
+        // Also calls SceneRunnerForTesting.init()
+        EngineTestFactory.initPlatformForTest(bundles, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), null, configuration);
 
-        SceneRunnerForTesting sceneRunner =  (SceneRunnerForTesting) SceneRunnerForTesting.getInstance();
+        SceneRunnerForTesting sceneRunner = (SceneRunnerForTesting) SceneRunnerForTesting.getInstance();
         sceneRunner.runLimitedFrames(initialFrames);
         return sceneRunner;
     }
 
+    public LoggingSystemTracker getSystemTracker() {
+        return systemTracker;
+    }
 }

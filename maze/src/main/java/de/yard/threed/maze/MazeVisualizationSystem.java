@@ -2,7 +2,6 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
-import de.yard.threed.core.Payload;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
@@ -44,11 +43,11 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
     private static Log logger = Platform.getInstance().getLog(MazeVisualizationSystem.class);
 
     boolean mazevisualizationsystemdebuglog = true;
-
+    public static String TAG = "MazeVisualizationSystem";
     //TODO irgendwie lokal in entity. 9.4.21: view in entity?
     static public MazeView view;
 
-    GridTeleporter gridTeleporter;
+    public GridTeleporter gridTeleporter;
     SceneNode fireTargetMarker;
     // fireMode 1: Use a target marker at a wall to indicate fire target. Fire targets are difficult to display correctly at all walls
     // due to different wall orientations. Not completely implemented.
@@ -66,7 +65,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         super(new String[]{}, new RequestType[]{}, new EventType[]{EventRegistry.EVENT_MAZE_LOADED});
 
         Boolean b;
-        if ((b = PlatformHelper.getBooleanSystemProperty("argv.enableMazeGridTeleporter")) != null) {
+        if ((b = Platform.getInstance().getConfiguration().getBoolean("enableMazeGridTeleporter")) != null) {
             gridTeleporterEnabled = (boolean) b;
         }
     }
@@ -79,7 +78,9 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
 
         if (evt.getType().equals(EventRegistry.EVENT_MAZE_LOADED)) {
             //wird scheitern, wenn noch kein Login und damit kein Ray.
-            createView((Grid) evt.getPayloadByIndex(0));
+            // gridname is not really needed currently to load the grid from the data provider
+            Grid grid = MazeDataProvider.getGrid();
+            createView(grid);
 
             // VR und zum Testen
             if (MazeScene.vrInstance != null) {
@@ -289,6 +290,11 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         gridTeleporterEnabled = enabled;
     }
 
+    @Override
+    public String getTag() {
+        return TAG;
+    }
+
     private List<SceneNode> getHitWalls() {
         return null;
     }
@@ -327,7 +333,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         logger.debug("visualizing maze terrain");
         view = new MazeView();
 
-        Configuration configuration = Configuration.getDefaultConfiguration();
+        Configuration configuration = Platform.getInstance().getConfiguration();
         String terrainbuilder = configuration.getString("maze.visualization", "");
         if (terrainbuilder.equals("traditional")) {
             view.terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());

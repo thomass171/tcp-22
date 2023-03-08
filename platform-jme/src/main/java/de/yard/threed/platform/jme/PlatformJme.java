@@ -1,6 +1,5 @@
 package de.yard.threed.platform.jme;
 
-import com.google.gson.GsonBuilder;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
@@ -9,11 +8,11 @@ import com.jme3.post.ssao.SSAOFilter;
 import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
-import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.platform.PlatformInternals;
@@ -25,8 +24,6 @@ import de.yard.threed.engine.geometry.ShapeGeometry;
 
 import de.yard.threed.core.buffer.SimpleByteBuffer;
 import de.yard.threed.javacommon.JALog;
-import de.yard.threed.javanative.JsonUtil;
-import de.yard.threed.javanative.SocketClient;
 
 
 import de.yard.threed.engine.platform.common.*;
@@ -43,7 +40,6 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +47,8 @@ import java.util.List;
 
 
 /**
- * 5.7.21: Jetzt mal als Erweiterung der SimpleHeadlessPlatform
+ * 5.7.21: Jetzt mal als Erweiterung der SimpleHeadlessPlatform.
+ * 25.1.23: Why? This doesn't really make sense.
  * <p>
  * Created by thomass on 20.04.15.
  */
@@ -59,6 +56,11 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
     // kann nicht ueber die Factory gebaut werden, weil die gerade noch initialisiert wird
     Log logger = new JALog(/*LogFactory.getLog(*/PlatformJme.class);
     JmeResourceManager jmeResourceManager;
+
+    private PlatformJme(Configuration configuration) {
+        super(null, configuration);
+        this.configuration = configuration;
+    }
 
     /**
      * 16.11.16: Umbenannt von getInstance zu init, um die Bedeutung zu verdeutlichen. Braucht Properties, die schon in der Platform
@@ -69,14 +71,14 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
      *
      * @return
      */
-    public static PlatformInternals init(HashMap<String, String> properties) {
+    public static PlatformInternals init(Configuration configuration) {
         //if (EngineHelper.instance == null || !(EngineHelper.instance instanceof PlatformJme)) {
-        if (properties != null) {
+        /*if (properties != null) {
             for (String key : properties.keySet()) {
                 System.setProperty(key, properties.get(key));
             }
-        }
-        instance = new PlatformJme();
+        }*/
+        instance = new PlatformJme(configuration);
         //  Als default texture sowas wie void.png o.ae. nehmen
         //((EngineHelper)EngineHelper.instance).defaulttexture = JmeTexture.loadFromFile(new BundleResource("FontMap.png"));
         //}
@@ -85,7 +87,7 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
         PlatformInternals platformInternals = new PlatformInternals();
         DefaultResourceReader resourceReader = new DefaultResourceReader();
         instance.bundleResolver.add(new SimpleBundleResolver(((PlatformJme) instance).hostdir + "/bundles", resourceReader));
-        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(SimpleHeadlessPlatform.getProperty("ADDITIONALBUNDLE"), resourceReader));
+        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
         return platformInternals/*instance*/;
     }
 
@@ -495,14 +497,6 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
         return Misc.deserialize(b);
     }*/
 
-    public void setSystemProperty(String key, String value) {
-        System.setProperty(key, value);
-    }
-
-    public String getSystemProperty(String key) {
-        return System.getProperty(key);
-    }
-
     @Override
     public NativeEventBus getEventBus() {
         return JAEventBus.getInstance();
@@ -546,28 +540,9 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
         JmeSceneRunner.getInstance().jmecamera.getViewPort().addProcessor(((JmeRenderProcessor) renderProcessor).fpp);
     }
 
-    /*MA36 @Override
-    public NativeWebClient getWebClient(String baseUrl) {
-        return new JavaWebClient(baseUrl);
-    }*/
-
     @Override
-    public NativeSocket connectToServer() {
-
-        if (nativeSocket != null) {
-            logger.warn("already connected!");
-            return null;
-        }
-        SocketClient queuingSocketClient = new SocketClient("localhost", 5809);
-
-
-        try {
-            return new JmeSocket(queuingSocketClient);
-        } catch (IOException e) {
-            logger.error("connect() failed");
-            return null;
-        }
-
+    public NativeSocket connectToServer(Server server) {
+        return JavaSocket.build(server.getHost(), server.getPort());
     }
 
     @Override

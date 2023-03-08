@@ -3,8 +3,9 @@ using System;
 using java.lang;
 namespace de.yard.threed.java2cs.testfiles {
 
-using org.apache.log4j;// import org.apache.log4j.Logger;
 using org.junit.jupiter.api;// import org.junit.jupiter.api.Test;
+using org.slf4j;// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 
 using java.util;// import java.util.ArrayList;
 // import java.util.HashMap;
@@ -16,7 +17,7 @@ using java.util;// import java.util.ArrayList;
  * Class comment
  */
 public class Test1  :  Object {
-    public Logger logger = Logger.getLogger(typeof(Test1));
+    public Logger logger = LoggerFactory.getLogger(typeof(Test1));
     public static Object lock1 = null; // static, null -> Swift 1.2 static class variable, nil
     public int x = 5;
     protected float f = 5.0f; // float literal

@@ -1,7 +1,7 @@
 package de.yard.threed.graph;
 
 
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.TestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,13 +25,13 @@ public class GraphTestUtil {
     }
 
     public static void assertEdge(String label, GraphEdge expected, GraphEdge actual) {
-        assertEquals( expected.getName(), actual.getName(),label + ":edge.name");
+        assertEquals(expected.getName(), actual.getName(), label + ":edge.name");
         if (expected.getArc() != null) {
             assertNotNull(actual.getArc());
-            TestUtil.assertVector3(label + ":edge.arc.center", expected.getArc().getCenter(), actual.getArc().getCenter());
+            TestUtils.assertVector3(expected.getArc().getCenter(), actual.getArc().getCenter(), label + ":edge.arc.center");
             assertEquals(expected.getArc().getBeta(), actual.getArc().getBeta(), 0.001, label + ":edge.arc.beta");
             assertEquals(expected.getArc().getRadius(), actual.getArc().getRadius(), 0.001, label + ":edge.arc.radius");
-            TestUtil.assertVector3(label + ":edge.arc.ex", expected.getArc().getEx(), actual.getArc().getEx());
+            TestUtils.assertVector3(expected.getArc().getEx(), actual.getArc().getEx(), label + ":edge.arc.ex");
         } else {
             assertNull(actual.getArc());
         }

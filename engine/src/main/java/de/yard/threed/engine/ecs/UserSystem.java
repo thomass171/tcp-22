@@ -17,19 +17,19 @@ import java.util.List;
 
 public class UserSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(UserSystem.class);
-
-    public static RequestType USER_REQUEST_LOGIN = new RequestType("USER_REQUEST_LOGIN");
+    public static String TAG = "UserSystem";
+    public static RequestType USER_REQUEST_LOGIN = RequestType.register(1000,"USER_REQUEST_LOGIN");
     // The logged in user wants to join.
     // The join request creates an avatar for the user entity. Parameter 0 "userEntityId", Parameter 1 "forlogin"
-    public static RequestType USER_REQUEST_JOIN = new RequestType("USER_REQUEST_JOIN");
+    public static RequestType USER_REQUEST_JOIN = RequestType.register(1001,"USER_REQUEST_JOIN");
 
-    public static EventType USER_EVENT_LOGGEDIN = new EventType("USER_EVENT_LOGGEDIN");
-    // payload ist entity id
-    public static EventType USER_EVENT_JOINED = new EventType("USER_EVENT_JOINED");
+    public static EventType USER_EVENT_LOGGEDIN = EventType.register(1000, "USER_EVENT_LOGGEDIN");
+    // payload is entity id
+    public static EventType USER_EVENT_JOINED = EventType.register(1001, "USER_EVENT_JOINED");
 
     //MA31 aus RequestRegistry nach hier verschoben. Ob automove allerdings hier so passt? Mal sehen.
-    public static RequestType USER_REQUEST_TELEPORT = new RequestType("USER_REQUEST_TELEPORT");
-    public static RequestType USER_REQUEST_AUTOMOVE = new RequestType("USER_REQUEST_AUTOMOVE");
+    public static RequestType USER_REQUEST_TELEPORT = RequestType.register(1002,"USER_REQUEST_TELEPORT");
+    public static RequestType USER_REQUEST_AUTOMOVE = RequestType.register(1003,"USER_REQUEST_AUTOMOVE");
 
     boolean usersystemdebuglog = true;
 
@@ -45,7 +45,7 @@ public class UserSystem extends DefaultEcsSystem {
     @Override
     public boolean processRequest(Request request) {
         if (usersystemdebuglog) {
-            logger.debug("got request " + request.getType());
+            logger.debug("got request " + request);
         }
         if (request.getType().equals(USER_REQUEST_LOGIN) && SystemState.readyToJoin()) {
             String username = (String) request.getPayloadByIndex(0);
@@ -61,6 +61,11 @@ public class UserSystem extends DefaultEcsSystem {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     public static Request buildLoginRequest(String username, String clientid) {

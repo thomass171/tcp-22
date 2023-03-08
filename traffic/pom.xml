@@ -14,7 +14,7 @@
 
     <dependencies>
         <!-- junit comes from parent -->
-        <!-- jetzt die eigenen Projektabhaengigkeiten-->
+        <!-- own project dependencies-->
 
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
@@ -36,7 +36,14 @@
             <artifactId>module-graph</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+        <!-- tests -->
         <!-- 23.12.17: auch die core tests, eg. for TestFactory-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.20</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-engine</artifactId>
@@ -51,7 +58,7 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <!-- 5.7.21 die Tests brauchen eine implementierte Platform-->
+        <!-- 5.7.21 Tests need an implemented platform (and ConfigurationByEnv for HOSTDIR)-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-java-common</artifactId>
@@ -74,6 +81,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>

@@ -1,6 +1,7 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.Quaternion;
 
 /**
  * 10.4.21: Teilweise Redundanz zu Direction merged.
@@ -103,6 +104,23 @@ public class GridOrientation {
                 return "S";
             case 3:
                 return "W";
+        }
+        return null;
+    }
+
+    /**
+     * Probaly only useful for testing
+     */
+    public Quaternion getRotation() {
+        switch (dir) {
+            case 0:
+                return Quaternion.buildRotationY(new Degree(0));
+            case 1:
+                return Quaternion.buildRotationY(new Degree(-90));
+            case 2:
+                return Quaternion.buildRotationY(new Degree(180));
+            case 3:
+                return Quaternion.buildRotationY(new Degree(90));
         }
         return null;
     }

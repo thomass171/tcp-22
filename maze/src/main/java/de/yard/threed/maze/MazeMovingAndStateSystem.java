@@ -23,6 +23,7 @@ import java.util.List;
  */
 public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     Log logger = Platform.getInstance().getLog(MazeMovingAndStateSystem.class);
+    public static String TAG = "MazeMovingAndStateSystem";
     //MA32 GridState currentstate;
     //nextstate != null isType indicator for ongoing movement.
     //private GridState nextstate;
@@ -42,7 +43,6 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     protected MazeSettings st;
 
     private Hud helphud = null;
-    String initialMaze = null;
     List<Point> usedLaunchPositions = new ArrayList<Point>();
 
     public MazeMovingAndStateSystem() {
@@ -62,44 +62,17 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 },
                 new EventType[]{
                         UserSystem.USER_EVENT_LOGGEDIN, UserSystem.USER_EVENT_JOINED});
-
-        //10.4.21: TODO in init(), vorher die Settings aber decouplen
-        //abstractMaze = new SimpleMaze();
-        st = MazeSettings.init(MazeSettings.MODE_SOKOBAN);
-    }
-
-    public MazeMovingAndStateSystem(String initialMaze) {
-        this();
-        this.initialMaze = initialMaze;
     }
 
     public static MazeMovingAndStateSystem buildFromArguments() {
-        String argv_initialMaze = ((Platform) Platform.getInstance()).getSystemProperty("argv.initialMaze");
-        return new MazeMovingAndStateSystem(argv_initialMaze);
+        return new MazeMovingAndStateSystem();
     }
 
     @Override
     public void init() {
 
-        // only for system init
-        if (initialMaze == null) {
-            initialMaze = "skbn/SokobanWikipedia.txt";
-        }
-        String fileContent;
-        String title;
-        if (StringUtils.startsWith(initialMaze, "##")) {
-            // directly grid definition
-            fileContent = initialMaze;
-            title = "on-the-fly";
-        } else {
-            String name = StringUtils.substringBeforeLast(initialMaze, ".");
-            name = StringUtils.substringAfterLast(name, "/");
-            String filename = StringUtils.substringBeforeLast(initialMaze, ":");
-            fileContent = MazeUtils.readMazefile(filename/*, name*/);
 
-            title = StringUtils.substringAfterLast(initialMaze, ":");
-        }
-        loadLevel(fileContent, title);
+        loadLevel();
         //10.11.20 ob der hier gut ist, muss sich noch zeigen.
         MoveRecorder.init(/*movingsystem.* /currentstate*/);
 
@@ -209,9 +182,9 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         return processSolutionOrUserRequest(currentstate, request);
     }
 
-
-    public MazeSettings getSettings() {
-        return st;
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     /**
@@ -280,7 +253,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             // Init player (entity already created) and publish "new player". But not before maze was loaded.
             // 1.4.21: Avatar was build by AvatarSystem (and attached to world and previously created user entity).
 
-            EcsEntity playerEntity = (EcsEntity) evt.getPayloadByIndex(0);
+            Integer playerEntityId = (Integer) evt.getPayload().get("userentityid");
+            EcsEntity playerEntity = EcsHelper.findEntityById(playerEntityId);
             MazeLayout layout = Grid.getInstance().getMazeLayout();
             Point launchPosition = layout.getNextLaunchPosition(usedLaunchPositions);
 
@@ -297,7 +271,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
      * Join a new player.
      */
     private void joinPlayer(EcsEntity playerEntity, Point launchPosition, int team) {
-        logger.debug("New player joins: " + playerEntity + "for team "+ team);
+        logger.debug("New player joins: " + playerEntity + "for team " + team);
         //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
         //ist.
         // 14.2.22: More consistent approach. Independent from VR mode have a avatar and observer independent from each other, but
@@ -529,20 +503,12 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
      * There is no level reload, so no need to get rid of old one.
      * TODO Fehlerbehandlung
      */
-    private void loadLevel(String fileContent, String name) {
+    private void loadLevel() {
         logger.debug("loadLevel ");
 
-        Grid grid;
-        try {
-            List<Grid> grids = Grid.loadByReader(new StringReader(fileContent));
-            if (grids.size() > 1 && name != null) {
-                grid = Grid.findByTitle(grids, name);
-            } else {
-                grid = grids.get(0);
-            }
-
-        } catch (InvalidMazeException e) {
-            logger.error("load error: InvalidMazeException:" + e.getMessage());
+        Grid grid = MazeDataProvider.getGrid();
+        if (grid == null) {
+            logger.error("load error: no grid");
             return;
         }
         Grid.setInstance(grid);
@@ -550,9 +516,10 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         for (Point b : grid.getBoxes()) {
             //EcsEntity box = MazeMovingAndStateSystem.buildSokobanBox(b.getX(), b.getY());
             //static EcsEntity buildSokobanBox(int x, int y) {
-            SceneNode p = MazeModelBuilder.buildSokobanBox(/*b.getX(), b.getY()*/);
-            EcsEntity box = new EcsEntity(p);
-            MoverComponent mover = new MoverComponent(p.getTransform()/*this*/, false, b, new GridOrientation(), -1);
+            //SceneNode p = MazeModelFactory.getInstance().buildSokobanBox(/*b.getX(), b.getY()*/);
+            EcsEntity box = new EcsEntity();
+            box.buildSceneNodeByModelFactory(MazeModelFactory.BOX_BUILDER, new ModelBuilderRegistry[]{MazeModelFactory.getInstance()});
+            MoverComponent mover = new MoverComponent(box.getSceneNode().getTransform()/*this*/, false, b, new GridOrientation(), -1);
             mover.setLocation(b);
             box.addComponent(mover);
             //return box;
@@ -560,11 +527,12 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             Scene.getCurrent().addToWorld(box.scenenode);
         }
         for (Point b : grid.getDiamonds()) {
-            SceneNode p = MazeModelBuilder.buildDiamond();
-            EcsEntity diamond = new EcsEntity(p);
+            EcsEntity diamond = new EcsEntity();
+            diamond.buildSceneNodeByModelFactory(MazeModelFactory.DIAMOND_BUILDER, new ModelBuilderRegistry[]{MazeModelFactory.getInstance()});
+            diamond.setName("diamond");
             Vector3 dp = MazeUtils.point2Vector3(b);
             dp = new Vector3(dp.getX(), 0.8, dp.getZ());
-            p.getTransform().setPosition(dp);
+            diamond.getSceneNode().getTransform().setPosition(dp);
             // no diamond owner initially
             diamond.addComponent(new DiamondComponent(b));
             Scene.getCurrent().addToWorld(diamond.scenenode);
@@ -572,16 +540,16 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         // 20.12.22: Bullets for player are created at join time. Since bots are just a kind of multiplayer, the same applies to bots.
 
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
-        SystemManager.sendEvent(new Event(EventRegistry.EVENT_MAZE_LOADED, new Payload(grid)));
+        SystemManager.sendEvent(new Event(EventRegistry.EVENT_MAZE_LOADED, new Payload().add("gridname", MazeDataProvider.getGridName())));
 
         //11.4.16 addTestObjekte();
-        logger.debug("load completed");
+        logger.debug("load of " + MazeDataProvider.getGridName() + " completed. state = " + SystemState.getStateAsString());
     }
 
     private void createBullets(int cnt, int owner) {
-        logger.debug("create "+cnt+" Bullets for "+owner);
+        logger.debug("create " + cnt + " Bullets for " + owner);
         for (int i = 0; i < cnt; i++) {
-            SceneNode ball = MazeModelBuilder.buildSimpleBall(0.3, MazeSettings.bulletColor);
+            SceneNode ball = MazeModelFactory.getInstance().buildSimpleBall(0.3, MazeSettings.bulletColor);
             EcsEntity e = new EcsEntity(ball);
             BulletComponent bulletComponent = new BulletComponent(owner);
             e.addComponent(bulletComponent);

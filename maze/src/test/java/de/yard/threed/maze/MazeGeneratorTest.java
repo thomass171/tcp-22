@@ -5,7 +5,7 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.testutil.DeterministicIntProvider;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.util.IntProvider;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MazeGeneratorTest {
 
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()));
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()));
 
     @Test
     public void test6x5() throws InvalidMazeException {

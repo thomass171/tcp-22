@@ -16,9 +16,9 @@ import de.yard.threed.engine.platform.common.RequestType;
  * <p>
  * 26.11.19: Deprecated, weil es friemelig/konfus ist und mit MenuCycler vielleicht eine gute Alternative besteht. Und in VR
  * sollte es eh eine Art Panel (z.B: CDU) geben.
- *
+ * <p>
  * 7.2.22: But the basic idea is still valid. Maybe move it to something similar to SpinnerControlPanel.
- *
+ * <p>
  * Created on 23.11.18.
  */
 @Deprecated
@@ -31,8 +31,8 @@ public class BrowseMenu {
     //row0 ist up button, row6 down
     static int rows = 7;
     GridButton[] buttons = new GridButton[rows - 2];
-    RequestType REQUEST_UP = new RequestType("up");
-    RequestType REQUEST_DOWN = new RequestType("down");
+    RequestType REQUEST_UP = RequestType.register(1004, "up");
+    RequestType REQUEST_DOWN = RequestType.register(1005, "down");
     DimensionF dimension;
     double zpos, buttonzpos;
 
@@ -105,6 +105,6 @@ public class BrowseMenu {
     }*/
 
     public boolean checkForButtonByRay(Ray ray) {
-       return grid.checkForClickedArea(ray);
+        return grid.checkForClickedArea(ray);
     }
 }

@@ -1,6 +1,8 @@
 package de.yard.threed.engine.ecs;
 
 /**
+ * A state of a game for example.
+ * <p>
  * 18.11.21: Should be a system?
  */
 public class SystemState {
@@ -15,5 +17,19 @@ public class SystemState {
 
     public static boolean isOver() {
         return state == STATE_OVER;
+    }
+
+    public static int getState() {
+        return state;
+    }
+
+    public static String getStateAsString() {
+        if (state == STATE_READY_TO_JOIN) {
+            return "STATE_READY_TO_JOIN";
+        }
+        if (state == STATE_OVER) {
+            return "STATE_OVER";
+        }
+        return "unknown state";
     }
 }

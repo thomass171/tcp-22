@@ -14,7 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Aus http://www.richardlord.net/blog/what-is-an-entity-framework
+ * From http://www.richardlord.net/blog/what-is-an-entity-framework.
+ * <p>
+ * Singleton by making all elements static.
+ *
  * <p>
  * Created by thomass on 28.11.16.
  */
@@ -23,7 +26,7 @@ public class SystemManager {
 
     private static List<EcsSystem> systems = new ArrayList<EcsSystem>();
     private static List<EcsEntity> entities = new ArrayList<EcsEntity>();
-    private static SystemManager instance = null;
+    //3.1.23 private static SystemManager instance = null;
     //1.8.17: Es kann aber mehrere Listener fuer ein Event geben
     private static Map<EventType, List<EcsSystem>> eventhandler = new HashMap<EventType, List<EcsSystem>>();
     public static boolean isinited = false;
@@ -33,15 +36,10 @@ public class SystemManager {
     private static Map<String, EcsService> services = new HashMap<String, EcsService>();
     //11.10.19: Die Requests sollten auch ueber den EventBus gehen. TODO ja, 20.3.20. 12.10.21: Aber Requests haben Handler.Hmm.
     private static RequestQueue requestQueue = new RequestQueue();
-
-    /* private SystemManager(){ }
-
-    public static SystemManager getInstance(){
-    if (instance==null){
-        instance = new SystemManager();
-    }
-        return instance;
-    }*/
+    private static DefaultBusConnector busConnector = null;
+    private static List<Event> netEvents = new ArrayList<Event>();
+    private static List<Request> netRequests = new ArrayList<Request>();
+    private static SystemTracker systemTracker = new DefaultSystemTracker();
 
     public static void addSystem(EcsSystem system, int priority) {
         systems.add(system);
@@ -103,7 +101,6 @@ public class SystemManager {
 
     }
 
-
     public static void addSystem(EcsSystem system) {
         addSystem(system, 0);
     }
@@ -117,19 +114,35 @@ public class SystemManager {
         if (paused) {
             return;
         }
-        // 21.3.19: Requests einfach mal vor den Events.
-        requestQueue.process();
+        // 21.3.19: Requests are processed before events without any special reason. And published to the net.
+        requestQueue.process(busConnector);
+        // Requests received from net. Requests not processed stay in the list.
+        requestQueue.processRequestsFromNetwork(netRequests);
 
         NativeEventBus eb = Platform.getInstance().getEventBus();
         Event evt;
+        //logger.debug("update: processing " + eb.getEventCount() + " events");
         while ((evt = eb.poll(0)) != null) {
-            List<EcsSystem> handler = eventhandler.get(evt.getType());
-            if (handler != null) {
-                for (EcsSystem ebs : handler) {
-                    ebs.process(evt);
+            processEvent(evt);
+            if (busConnector != null) {
+                // client server ping pong is avoided by not putting network events into the local bus
+                busConnector.pushEvent(evt);
+            }
+            systemTracker.eventProcessed(evt);
+        }
+        for (Event et : netEvents) {
+            processEvent(et);
+        }
+        netEvents.clear();
+        if (DefaultBusConnector.entitySyncEnabled && busConnector != null && busConnector.isServer()) {
+            for (EcsEntity entity : entities) {
+                Event entityEvent = DefaultBusConnector.buildEntitiyStateEvent(entity);
+                if (entityEvent != null) {
+                    busConnector.pushEvent(entityEvent);
                 }
             }
         }
+
         for (EcsSystem system : systems) {
             //if (system instanceof UpdateBasedEcsSystem) {
             //   UpdateBasedEcsSystem ubs = (UpdateBasedEcsSystem) system;
@@ -154,6 +167,15 @@ public class SystemManager {
         }
     }
 
+    private static void processEvent(Event evt) {
+        //logger.debug("processEvent " + evt);
+        List<EcsSystem> handler = eventhandler.get(evt.getType());
+        if (handler != null) {
+            for (EcsSystem ebs : handler) {
+                ebs.process(evt);
+            }
+        }
+    }
     /**
      * Group of components related to system.
      * Hängt vom System ab, bzw. davon wie es arbeitet.
@@ -219,6 +241,21 @@ public class SystemManager {
         dataprovider.clear();
         services.clear();
         isinited = false;
+        busConnector = null;
+        netEvents.clear();
+        netRequests.clear();
+        systemTracker = new DefaultSystemTracker();
+    }
+
+    public static void setSystemTracker(SystemTracker psystemTracker) {
+        systemTracker = psystemTracker;
+        if (busConnector != null) {
+            busConnector.setSystemTracker(psystemTracker);
+        }
+    }
+
+    public static void reportStatistics() {
+        systemTracker.report();
     }
 
 
@@ -229,6 +266,14 @@ public class SystemManager {
 
     public static void sendEvent(Event evt) {
         Platform.getInstance().getEventBus().publish(new Event(evt.getType(), evt.payload));
+    }
+
+    public static void sendEventToClient(Event evt, String clientId) {
+        if (busConnector == null) {
+            logger.warn("No bus connector");
+            return;
+        }
+        busConnector.pushEvent(evt, clientId);
     }
 
     /**
@@ -282,7 +327,7 @@ public class SystemManager {
      * @return
      */
     public static List<EcsEntity> findEntities(EntityFilter filter) {
-        return EcsEntity.filterList(entities, filter);
+        return EcsHelper.filterList(entities, filter);
     }
 
     public static void processEntityGroups(String groupid, EcsGroupHandler ecsGroupHandler) {
@@ -362,16 +407,34 @@ public class SystemManager {
         return requestQueue.getRequest(i);
     }
 
-    public static void publishPacket(Packet packet) {
+    /**
+     * Publish packet from network to local bus.
+     */
+    public static void publishPacketFromClient(Packet packet) {
+        publishPacket(packet);
+        systemTracker.packetReceivedFromNetwork(packet);
+    }
 
-        String evt = packet.getValue("event");
-        if (evt == null) {
-            logger.error("no event in packet");
-            return;
-        }
-        if (evt.equals(UserSystem.USER_REQUEST_LOGIN.getLabel())) {
-//Event evt=new Event(E)
-            SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
+    public static void publishPacketFromServer(Packet packet) {
+        publishPacket(packet);
+        systemTracker.packetReceivedFromNetwork(packet);
+    }
+
+    private static void publishPacket(Packet packet) {
+
+        Request request;
+
+        if (DefaultBusConnector.isEvent(packet)) {
+            Event evt = DefaultBusConnector.decodeEvent(packet);
+            if (evt != null) {
+                netEvents.add(evt);
+            } else {
+                logger.warn("Discarding event");
+            }
+        } else if ((request = DefaultBusConnector.decodeRequest(packet)) != null) {
+            netRequests.add(request);
+        } else {
+            logger.error("unsupported packet (just a newline?): " + packet);
         }
     }
 
@@ -382,5 +445,20 @@ public class SystemManager {
             }
         }
         return null;
+    }
+
+
+    public static void setBusConnector(DefaultBusConnector pbusConnector) {
+        busConnector = pbusConnector;
+        // keep systemtrack synced. Hopefully this is really intended.
+        busConnector.setSystemTracker(systemTracker);
+    }
+
+    /**
+     * 13.1.23: ugly workround needed for Requestqueue.
+     */
+    @Deprecated
+    public static DefaultBusConnector getBusConnector() {
+        return busConnector;
     }
 }

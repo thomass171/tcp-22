@@ -2,7 +2,6 @@ package de.yard.threed.traffic.apps;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.platform.PlatformHelper;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
@@ -47,7 +46,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static de.yard.threed.core.testutil.RuntimeTestUtil.assertNotNull;
+
 /**
+ * Basic generic scene for traffic scene definitions like "traffic:tiles/Wayland.xml" and "traffic:tiles/Demo.xml".
+ * <p>
  * MA37: Entwicklung zu einer BasicTravelScene.
  * <p>
  * Konsolidierung von (Flat)TravelScene (früher OsmSceneryScene und GroundServicesScene) und RailingScene
@@ -82,7 +85,7 @@ import java.util.Map;
  * (H)elp. Brauchts vielleicht nicht mehr seit Toggle/Browsemenü?
  * (L)oad vehicle. Das naechste aus der Config das noch nicht geladen wurde. Sollte erst nicht mehr dabei sein und wird im UserMode nicht unbedingt gebraucht.
  * Seit controlmenu weg ist aber ganz praktisch.
- * (E) run tests. internal.
+ * (V) run tests. internal.
  * (CursorTasten) für View Left/Right/Up/Down, ohne vorher F drücken zu müssen. Geht über ObserverSystem.
  * (X/Y/Z) für tuning der Avatarposition
  * <p>
@@ -90,8 +93,8 @@ import java.util.Map;
  * <p>
  * Start Sequence:
  * - Splash screen und "Loading" (transparent) mit progress. In the background scenery isType loading.
- * - Vehicle isType loaded by argument "initialVehicle".
- * - When vehicle isType available fadeout, teleport, fadein.
+ * - Vehicle is loaded by argument "initialVehicle".
+ * - When vehicle is available fadeout, teleport, fadein.
  * - "Click for Start" Button. Das ist dann quasi der 's' Key.
  * <p>
  * <p>
@@ -118,24 +121,25 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     RandomIntProvider rand = new RandomIntProvider();
     int nextlocationindex = 0;
     protected String vehiclelistname = "GroundServices";
-    /*31.1.22 RequestType REQUEST_RESET = new RequestType("Reset");
-    RequestType REQUEST_HELP = new RequestType("Help");
-    RequestType REQUEST_MENU = new RequestType("Menu");
-    RequestType REQUEST_CYCLE = new RequestType("Cycle");
-    RequestType REQUEST_LOAD = new RequestType("Load");
-    RequestType REQUEST_PLAY = new RequestType("Play");
-    RequestType REQUEST_PLUS = new RequestType("+");
-    RequestType REQUEST_MINUS = new RequestType("-");*/
+    /*31.1.22 RequestType REQUEST_RESET = RequestType.register("Reset");
+    RequestType REQUEST_HELP = RequestType.register("Help");
+    RequestType REQUEST_MENU = RequestType.register("Menu");
+    RequestType REQUEST_CYCLE = RequestType.register("Cycle");
+    RequestType REQUEST_LOAD = RequestType.register("Load");
+    RequestType REQUEST_PLAY = RequestType.register("Play");
+    RequestType REQUEST_PLUS = RequestType.register("+");
+    RequestType REQUEST_MINUS = RequestType.register("-");*/
     protected NearView nearView = null;
     // 17.10.21: per argument oder default EDDK
     String tilename = null;
     VrInstance vrInstance;
     Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
     ControlPanel leftControllerPanel = null;
+    public static String DEFAULT_USER_NAME = "Freds account name";
 
     @Override
-    public void init(boolean forServer) {
-        logger.debug("init BasicTravelScene");
+    public void init(SceneMode sceneMode) {
+        logger.debug("init BasicTravelScene with scene mode " + sceneMode.getMode());
         processArguments();
 
         vrInstance = VrInstance.buildFromArguments();
@@ -158,7 +162,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             SystemManager.addSystem(new ObserverSystem(), 0);
         }
         SystemManager.addSystem(new UserSystem());
-        SystemManager.addSystem(new AvatarSystem(!forServer), 0);
+        SystemManager.addSystem(new AvatarSystem(sceneMode.isClient()), 0);
 
         //visualizeTrack soll auch im usermode verfuegbar sein.
         /*if (visualizeTrack) {
@@ -171,14 +175,14 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         // Observer concept: Den Observer kann es direkt noch vor login/join geben. Er zeigt dann z.B. einen Overview.
         // Bei login/join kann er dann an den Avatar? Auch für VR? (MA35) Oder nie? Oder unabhaengig/doppelt?
         // server has no camera.
-        if (!forServer) {
+        if (sceneMode.isClient()) {
             Observer.buildForDefaultCamera();
         }
 
         commoninit();
 
         customInit();
-        postInit();
+        postInit(sceneMode);
     }
 
     public SceneConfig getSceneConfig() {
@@ -207,48 +211,48 @@ public class BasicTravelScene extends Scene implements RequestHandler {
 
 
     protected void processArguments() {
-       /*21.3.19  String argv_enableusermode = ((Platform) Platform.getInstance()).getSystemProperty("argv.enableUsermode");
+       /*21.3.19  String argv_enableusermode = ((Platform) Platform.getInstance()).getSystemProperty("enableUsermode");
         //argv_enableusermode="1";
         if (!Util.isFalse(argv_enableusermode)) {
             usermode = new Usermode();
         }*/
 
 
-        String argv_visualizeTrack = (Platform.getInstance()).getSystemProperty("argv.visualizeTrack");
+        String argv_visualizeTrack = Platform.getInstance().getConfiguration().getString("visualizeTrack");
         if (Util.isTrue(argv_visualizeTrack)) {
             visualizeTrack = true;
         }
 
         Boolean b;
-        if ((b = PlatformHelper.getBooleanSystemProperty("argv.enableFPC")) != null) {
+        if ((b = Platform.getInstance().getConfiguration().getBoolean("enableFPC")) != null) {
             //FPC heisst: kein Teleporting, kein Observer, kein initialVehicle,kein Avatar.
             enableFPC = (boolean) b;
         }
 
-        String argv_initialVehicle = (Platform.getInstance()).getSystemProperty("argv.initialVehicle");
+        String argv_initialVehicle = Platform.getInstance().getConfiguration().getString("initialVehicle");
         if (argv_initialVehicle != null) {
             if (enableFPC) {
                 logger.info("Ignoring initialVehicle due to FPC");
             } else {
                 Request request;
-                request = new Request(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE, new Payload(argv_initialVehicle));
+                request = new Request(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE, new Payload(new Object[]{argv_initialVehicle}));
                 requestQueue.addRequest(request);
             }
         }
 
-        String argv_vehiclelistname = (Platform.getInstance()).getSystemProperty("argv.vehiclelist");
+        String argv_vehiclelistname = Platform.getInstance().getConfiguration().getString("vehiclelist");
         if (argv_vehiclelistname != null) {
             vehiclelistname = argv_vehiclelistname;
         }
 
-        if ((b = PlatformHelper.getBooleanSystemProperty("argv.enableNearView")) != null) {
+        if ((b = Platform.getInstance().getConfiguration().getBoolean("enableNearView")) != null) {
             enableNearView = (boolean) b;
         }
 
         // Parameter basename gibt es eigentlich nur in 2D. 7.10.21: Aber das wird hier jetzt einach mal als Request sent,
         // wenns nicht relevant oder ungueltig ist, verfaellt es halt. Und ich fuehre auch wieder den Deault EDDK ein.
 
-        tilename = Platform.getInstance().getSystemProperty("argv.basename");
+        tilename = Platform.getInstance().getConfiguration().getString("basename");
 
         if (tilename == null) {
             tilename = getDefaultTilename();
@@ -267,7 +271,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     protected void initHud() {
         //5.10.18: Hud braucht viel Speicher (und damit auch (GC) CPU). Darum optional. Aber per default an.
         //31.3.20: Seit dem Einbau einer deferred Cam bzw. nearview scheint das nicht mehr zu gehen. Offenbar muss man jetzt selber den attach machen.
-        String argv_enableHud = (Platform.getInstance()).getSystemProperty("argv.enableHud");
+        String argv_enableHud = Platform.getInstance().getConfiguration().getString("enableHud");
         if (!Util.isFalse(argv_enableHud)) {
             hud = Hud.buildForCameraAndAttach(getDefaultCamera(), 0);
         }
@@ -296,7 +300,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         });
         buttonDelegates.put("teleport", () -> {
             IntHolder option = new IntHolder(0);
-            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(option));
+            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{option}));
             SystemManager.putRequest(request);
         });
 
@@ -352,7 +356,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         return new MenuItem[]{
                 new MenuItem("teleport", () -> {
                     IntHolder option = new IntHolder(0);
-                    Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(option));
+                    Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{option}));
                     SystemManager.putRequest(request);
                 })
         };
@@ -390,7 +394,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         return new String[]{"engine", "data", "traffic"};
     }
 
-    private void postInit() {
+    private void postInit(SceneMode sceneMode) {
         //27.10.21 War sonst früher
         //8.12.21 addLight();
 
@@ -415,9 +419,10 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         //Sphere laden. Von da wird dann das alte "sendInitialEvents" gemacht.
         SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE, new Payload(tilename/*17.10.21 TrafficWorld2D.basename*/, getVehicleList())));
 
-        // Avatar anlegen (via login)
-        SystemManager.putRequest(UserSystem.buildLoginRequest("Freds account name", ""));
-
+        // create player/Avatar (via login)
+        if (sceneMode.isClient()) {
+            SystemManager.putRequest(UserSystem.buildLoginRequest(DEFAULT_USER_NAME, ""));
+        }
         // 24.1.22: State ready to join now needed for 'login'
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
         //sendInitialEvents(initialPosition);
@@ -504,7 +509,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             runTests();
         }
 
-        requestQueue.process();
+        requestQueue.process(SystemManager.getBusConnector());
 
         //for x/y/z. Only in debug mode (MazeSettings.getSettings().debug)? Better location??
         if (Observer.getInstance() != null) {
@@ -707,6 +712,9 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     }
 
     protected void runTests() {
+        logger.debug("Running tests");
+        // When there was a user starting tests there should also be an observer.
+        assertNotNull("observer", Observer.getInstance());
     }
 
     public RoundBodyCalculations getRbcp() {

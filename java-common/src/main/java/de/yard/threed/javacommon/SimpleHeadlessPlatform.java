@@ -2,6 +2,7 @@ package de.yard.threed.javacommon;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
@@ -25,21 +26,17 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Simple Platform implementation eg. for unit tests.
+ * Simple Platform implementation eg. for unit tests. This is less than a full platform and PlatformHomeBrew without renderer but more
+ * than DefaultPlatform. However clear difference is not yet defined.
+ * Therefore it resides in java-common. Not for C#.
+ * Has no renderer (headless!).
  * <p>
- * Just provides a logger. ResourceManager must be added later because it might need the LogFactory.#
- * 4.4.19: Aber auch ein StringHelper.
- * Nichts fuer C#.
+ * Just provides a logger and StringHelper. ResourceManager must be added later because it might need the LogFactory.
  * <p>
- * Wie ist denn die Abgrenzung zu PlatformHomeBrew?
- * 10.9.20: Ist headless nicht einfach PlatformHomeBrew ohne Renderer? 30.6.21: Ja, so duerfte es ein.
- * 5.7.21: Nicht so ganz. PlatformHomeBrew verwendet ja die ganzen OpneGL NAtive Implemetierungen. SimpleHeadlessPlatform muss etwas dazwischen sein.
- * Mehr als core-Platform und DefaultPlatform, aber weniger als eine full platform (Abgrenzung weiter unklar).
- * Und sinnvoll ist sie nur zum Testen oder als Ersatz fuer core?
- * Aber es muss ja wirklich etwas (Java basiert) implementiert werden, z.B. Logging.
- * Darum kommt sie mal regulaer nach java-common. Das koennte auch die Basis fur JME sein (??).
- * Weils zum Testen in "engine" verwendet wird, ist ein rudimentaerer NodeTree (mit Mesh) tatsaechlich hilfreich.
- * <p>
+ * The name "headless" is confusing because its the super class for all(some?) Java based platforms.
+ * Or the class hierarchy is confusing? Jme extends it and replaces may things. Maybe a component based approavh is better
+ * for sharing coommon Java elements like {@link JavaSocket}.
+ * Because its used for testing in "engine", a simple node tree (incl mesh) is useful indeed.
  * <p>
  * Created on 05.12.18.
  */
@@ -48,11 +45,12 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     static Log logger = new JALog(/*LogFactory.getLog(*/SimpleHeadlessPlatform.class);
     public static String PROPERTY_PREFIX = "tcp22.";
     public static List<Integer> mockedKeyInput = new ArrayList<Integer>();
+    protected Configuration configuration;
 
     /**
      * Needs access from extending classes.
      */
-    public SimpleHeadlessPlatform(NativeEventBus optionalEventbus) {
+    public SimpleHeadlessPlatform(NativeEventBus optionalEventbus, Configuration configuration) {
 
         if (optionalEventbus == null) {
             eventBus = new JAEventBus();
@@ -61,27 +59,28 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         }
         logfactory = new JALogFactory();
         nativeScene = new DummyScene();
+        this.configuration = configuration;
 
-        hostdir = getProperty("HOSTDIR");
+        hostdir = configuration.getString("HOSTDIR");
         if (hostdir == null) {
             throw new RuntimeException("HOSTDIR not set");
         }
     }
 
-    public SimpleHeadlessPlatform() {
-        this(null);
+    public SimpleHeadlessPlatform(Configuration configuration) {
+        this(null, configuration);
     }
 
-    public static PlatformInternals init(HashMap<String, String> properties, NativeEventBus eventbus) {
+    public static PlatformInternals init(Configuration configuration, NativeEventBus eventbus) {
         //System.out.println("PlatformOpenGL.init");
 
         DummySceneNode.sceneNodes.clear();
 
-        for (String key : properties.keySet()) {
+        /*for (String key : properties.keySet()) {
             //System.out.println("transfer of propery "+key+" to system");
             System.setProperty(PROPERTY_PREFIX + key, properties.get(key));
-        }
-        instance = new SimpleHeadlessPlatform(eventbus);
+        }*/
+        instance = new SimpleHeadlessPlatform(eventbus, configuration);
         SimpleHeadlessPlatform shpInstance = (SimpleHeadlessPlatform) instance;
         //MA36 ((SimpleHeadlessPlatform)instance).resetInit();
 
@@ -89,23 +88,15 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         PlatformInternals platformInternals = new PlatformInternals();
         DefaultResourceReader resourceReader = new DefaultResourceReader();
         instance.bundleResolver.add(new SimpleBundleResolver(shpInstance.hostdir + "/bundles", resourceReader));
-        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(SimpleHeadlessPlatform.getProperty("ADDITIONALBUNDLE"), resourceReader));
+        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
         instance.bundleLoader = new AsyncBundleLoader(resourceReader);
 
         logger.info("SimpleHeadlessPlatform created");
         return /*MA36 (EnginePlatform)* /instance*/platformInternals;
     }
 
-    public static PlatformInternals init(HashMap<String, String> properties) {
-        return init(properties, null);
-    }
-
-    public static String getProperty(String name) {
-        String prop = System.getProperty(name);
-        if (prop == null) {
-            prop = System.getenv(name);
-        }
-        return prop;
+    public static PlatformInternals init(Configuration configuration) {
+        return init(configuration, null);
     }
 
     @Override
@@ -173,14 +164,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
-    public void setSystemProperty(String key, String value) {
-        System.setProperty(PROPERTY_PREFIX + key, value);
-    }
-
-    @Override
-    public String getSystemProperty(String key) {
-        return System.getProperty(PROPERTY_PREFIX + key);
-    }
+    public Configuration getConfiguration() { return configuration; }
 
     @Override
     public Log getLog(Class clazz) {
@@ -259,6 +243,11 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         boolean found = mockedKeyInput.remove(new Integer(keycode));
         return found;
     }
+
+    @Override
+    public NativeSocket connectToServer(Server server) {
+        return JavaSocket.build(server.getHost(), server.getPort());
+    }
 }
 
 class DummySceneNode implements NativeSceneNode {
@@ -266,7 +255,7 @@ class DummySceneNode implements NativeSceneNode {
     static List<NativeSceneNode> sceneNodes = new ArrayList<>();
     NativeTransform transform;
     String name;
-    private static int uniqueId=1000;
+    private static int uniqueId = 1000;
     private int id = uniqueId++;
 
     DummySceneNode() {

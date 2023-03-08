@@ -1,8 +1,11 @@
 package de.yard.threed.platform.jme;
 
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.Setup;
 
 import org.apache.commons.codec.binary.Base64;
@@ -24,45 +27,43 @@ public class Main {
     static Log logger;
 
     public static void main(String[] args) {
-        boolean useinspector = false;
-        HashMap<String, String> properties = Setup.setUp(args);
 
-        JmeSceneRunner nsr = JmeSceneRunner.init(properties);
+        JmeSceneRunner nsr = JmeSceneRunner.init(ConfigurationByEnv.buildDefaultConfigurationWithArgsAndEnv(args, Setup.setUp()));
 
         logger = Platform.getInstance().getLog(Main.class);
         logger.info("Loading JME Client");
-        String scene = System.getProperty("scene");
+        String scene = Platform.getInstance().getConfiguration().getString("scene");
         logger.debug("Parameter:");
         logger.debug("scene=" + scene);
 
+        // exit is done by JME when ESC is pressed?
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("shutdown detected");
+            // cleanup also closes busconnector socket
+            nsr.cleanup();
+            System.out.println("socket closed");
+
+           /* try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.exit(0);*/
+        }));
 
         try {
             if (scene == null) {
-                //Scene updater = new LightedRotatingCube();
-                //updater = new MazeScene();
-                // updater = new ShowroomScene();
-                //6.6. TODO new SceneViewer(updater);
-                logger.warn("Not yet available in JME");
+                logger.warn("No scene");
             } else {
-                //24.10.18 Scene updater = ScenePool.buildSceneUpdater(scene);
                 Scene updater = (Scene) Class.forName(scene).newInstance();
-                if (useinspector) {
-                    //27.7.21 dafuer brauchen wir mal eine andere Loesung
-                    de.yard.threed.core.Util.nomore();
-                    //EngineInspector ei = new EngineInspector();
-                    //ei.setVisible(true);
-                }
                 nsr.runScene(updater);
-                //   new SceneRunner(new ReferenceScene());
-                //new SceneRunner(new MazeScene());
             }
         } catch (Exception t) {
+            // probably never reached because other thread is running the app?
             logger.error("Exception occured:" + t.getMessage() + t.getStackTrace()[0]);
-            // Hier kann man gut einen Breakpint setzen, um einen Stacktrace zu bekommen
-            t.printStackTrace();
-
+            throw new RuntimeException(t);
         }
-
+        // no exit() here. It will terminate process immediately. But main thread is in ...
     }
 
 

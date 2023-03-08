@@ -1,31 +1,42 @@
 package de.yard.threed.engine;
 
+import de.yard.threed.core.Event;
+import de.yard.threed.core.EventType;
+import de.yard.threed.core.LocalTransform;
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
+import de.yard.threed.engine.ecs.EcsHelper;
+import de.yard.threed.engine.ecs.UserSystem;
+import de.yard.threed.engine.platform.common.RequestType;
+import de.yard.threed.engine.vr.VrInstance;
 
 /**
- * Steuerung des Viewpoint bzw. View direction. Aber keine Bewegung.
+ * System for
+ * 1) cursor key view direction changing of an entity with a {@link ObserverComponent}. Typically used in travelling but not in maze.
+ * But not for x/y/z adjusting, which is done in {@link Observer}.
+ * 2) attach the observer after joining (was in AvatarSystem before)
+ * <p>
+ * Not for teleporting, movement or viewports, which is something different.
  * <p>
  * Created by thomass on 16.09.16.
  */
-
 public class ObserverSystem extends DefaultEcsSystem {
-
+    private static Log logger = Platform.getInstance().getLog(ObserverSystem.class);
     public static String TAG = "ObserverSystem";
-
-    public ObserverSystem() {
-        super(new String[]{"ObserverComponent"});
-    }
+    // workaround for attaching the observer only once to the main/first player, but not to further bots.
+    private boolean isFirstJoin = true;
+    private boolean observersystemdebuglog = true;
+    private LocalTransform viewTransform;
 
     /**
-     * Die initiale Position auch darstellen.
      *
-     * @param group
      */
-    @Override
-    public void init(EcsGroup group) {
-
+    public ObserverSystem() {
+        super(new String[]{"ObserverComponent"}, new RequestType[]{}, new EventType[]{UserSystem.USER_EVENT_JOINED});
     }
 
     @Override
@@ -50,23 +61,62 @@ public class ObserverSystem extends DefaultEcsSystem {
     }
 
     @Override
+    public void process(Event evt) {
+        if (observersystemdebuglog) {
+            logger.debug("got event " + evt.getType());
+        }
+        if (evt.getType().equals(UserSystem.USER_EVENT_JOINED)) {
+            int userEntityId = ((Integer) evt.getPayload().get("userentityid"));
+            EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
+
+            if (userEntity == null || userEntity.getSceneNode() == null) {
+                logger.warn("cannot attach observer because no user entity with scene node found");
+                //TODO maybe republish
+            } else {
+                boolean forLogin = true;//TODO check purpose
+                if (attachObserver(forLogin, isFirstJoin, userEntity, viewTransform)) {
+                    isFirstJoin = false;
+                }
+            }
+        }
+    }
+
+    @Override
     public String getTag() {
         return TAG;
     }
 
-    /*MA31 dependency zu graph und gehört hier dann doch nicht hin public static EcsGroup matches(List<EcsComponent> components) {
-        EcsGroup grp = new EcsGroup();
-        for (EcsComponent c : components) {
-            if (c instanceof VelocityComponent) {
-                grp.add(c);
+    public void setViewTransform(LocalTransform viewTransform) {
+        this.viewTransform = viewTransform;
+    }
+
+    /**
+     * A user joined.
+     * Moved here from AvatarSystem.
+     */
+    private static boolean attachObserver(boolean forLogin, boolean isFirstJoin, EcsEntity userEntity, LocalTransform viewTransform) {
+        // Attach the oberver to the avatar. Is the connection to observer good located here?
+        // 19.11.21: Should be independant from ObserverComponent? Probably. If there is an oberver, attach it to avatar
+        // This is also reached for bot and MP joining.
+        // 14.2.22 Attach observer independent from VR. But only to the first player (for now)
+        if ((boolean) forLogin && Observer.getInstance() != null && isFirstJoin) {
+            SceneNode avatarNode = userEntity.getSceneNode();
+            logger.debug("Attaching oberserver " + Observer.getInstance().getTransform() + " to avatar " + avatarNode.getTransform());
+            Observer.getInstance().getTransform().setParent(avatarNode.getTransform());
+
+            // In non VR the position might need to be raised to head height and view direction slightly down. (eg in maze)
+            if (viewTransform != null && VrInstance.getInstance() == null) {
+
+                // MazeScene.rayy now is covered by avatarbuilder
+                //LocalTransform viewTransform = avatarBuilder.getViewTransform();
+                Observer.getInstance().initFineTune(viewTransform/*getSettings().getViewpoint()*/.position/*.add(new Vector3(0, MazeScene.rayy, 0))*/);
+                // Rotation for looking slightly down.
+                Observer.getInstance().getTransform().setRotation(viewTransform/*getSettings().getViewpoint()*/.rotation);
             }
-            if (c instanceof GraphMovingComponent) {
-                grp.add(c);
-            }
+            //isFirstJoin = false;
+            return true;
         }
-        if (grp.cl.size() == 2) {
-            return grp;
-        }
-        return null;
-    }*/
+        return false;//isFirstJoin;
+    }
+
 }

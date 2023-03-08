@@ -19,6 +19,7 @@ import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.ModelFactory;
 import de.yard.threed.engine.Scene;
+import de.yard.threed.engine.SceneMode;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.avatar.AvatarPmlFactory;
 import de.yard.threed.engine.avatar.VehiclePmlFactory;
@@ -75,7 +76,7 @@ public class ModelPreviewScene extends Scene {
     }
 
     @Override
-    public void init(boolean forServer) {
+    public void init(SceneMode sceneMode) {
         modellist = getModelList();
 
         addLight();

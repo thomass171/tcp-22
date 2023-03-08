@@ -2,6 +2,7 @@ package de.yard.threed.core.platform;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
@@ -21,8 +22,6 @@ import java.util.List;
 public abstract class Platform {
 
     protected NativeEventBus eventBus = null;
-
-    public NativeSocket nativeSocket;
 
     //25.4.20 jetzt eins höher. Gab es mal eine Zeit lang nicht, ist aber gut um Logger verwenden zu koennen,
     //die es im Modul gar nicht gibt.
@@ -319,15 +318,17 @@ public abstract class Platform {
      * werden koennten (CAHCEDIR). Darum zusätzlich Props beim init der Platform reingeben. Den setter brauchts trotzdem,
      * weil manche Properties nachher abhängig von der Platform gesetztw erden (z.B. Unity handheld).
      * <p>
-     * 16.7.18: Parameter aus der command line sind mit dem prefix "argv." eingetragen, z.B. basename bei viewScenery.
+     * 5.2.23: What is the latest design for properties/configuration? These methods? Or configuration? Or both?
+     * It seems to switch to configuration that is supplied by
+     * the platform to be more future ready.
      */
-    public abstract void setSystemProperty(String key, String value);
+    public abstract Configuration getConfiguration();
 
-    public abstract String getSystemProperty(String key);
-
-
-    //private void addSceneNode(String ke)
-
+    /**
+     * 17.2.23: TODO check move of eventbus to systemmanager.
+     *
+     * @return
+     */
     public abstract NativeEventBus getEventBus();
 
     /**
@@ -449,16 +450,11 @@ public abstract class Platform {
     public abstract NativeByteBuffer buildByteBuffer(int size);
 
     /**
-     * Establish a (web)socket connection to a MP Server. This isType no "EventBus", because its peer2peer.
+     * Establish a (web)socket connection to an arbitray server (most likely a scene server). This is no "EventBus", because its peer2peer.
      * <p>
-     * Noch nicht abstract, weils sonst so oft implementiert werden muss. Erstmal Prototyp aus JME.
-     * <p>
-     * Gabs da schon mal einen anderen Ansatz? Find ich aber nicht mehr.
      * 15.2.21
      */
-    public NativeSocket connectToServer() {
-        return (NativeSocket) Util.notyet();
-    }
+    public abstract NativeSocket connectToServer(Server server);
 
     /*MA36 ueber runner public abstract void sendHttpRequest(String url, String method, String[] header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate );*/
 

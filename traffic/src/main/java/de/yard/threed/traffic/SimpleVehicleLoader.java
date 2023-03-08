@@ -6,19 +6,13 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
-import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.core.resource.ResourcePath;
-import de.yard.threed.core.testutil.TestUtil;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
 import de.yard.threed.traffic.config.VehicleConfig;
 import de.yard.threed.trafficcore.model.Vehicle;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 10.11.21: For non XML model

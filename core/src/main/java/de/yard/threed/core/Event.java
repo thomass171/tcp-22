@@ -3,13 +3,13 @@ package de.yard.threed.core;
 import java.util.Map;
 
 /**
- * Is in platform for future queued platform connections. 
- * 
+ * Is in platform for future queued platform connections.
+ * <p>
  * Created by thomass on 31.08.16.
  */
 public class Event {
-    public  Payload payload;
-    private  EventType eventtype;
+    public Payload payload;
+    private EventType eventtype;
 
     public Event(EventType eventtype, Payload payload) {
         this.eventtype = eventtype;
@@ -25,18 +25,19 @@ public class Event {
     }
 
     @Override
-    public String toString(){
-        return eventtype.toString()+",payload="+payload.toString();
+    public String toString() {
+        return eventtype.toString() + ",payload=" + ((payload == null) ? "null" : payload.toString());
     }
 
     /**
      * Basiert auf der Annahme, dass PAyload ein Array ist.
+     *
      * @param index
      * @return
      */
     public Object getPayloadByIndex(int index) {
 
-        if (payload==null){
+        if (payload == null) {
             return null;
         }
         return (payload.o)[index];
@@ -44,14 +45,15 @@ public class Event {
 
     /**
      * Basiert auf der Annahme, dass PAyload eine key/value map ist.
+     *
      * @return
      */
-    public Map<String,String> getPayloadAsMap() {
+    public Map<String, String> getPayloadAsMap() {
 
-        if (payload==null){
+        if (payload == null) {
             return null;
         }
-        return (Map<String,String> ) payload.o[0];
+        return (Map<String, String>) payload.o[0];
     }
 
     public boolean isType(EventType eventType) {

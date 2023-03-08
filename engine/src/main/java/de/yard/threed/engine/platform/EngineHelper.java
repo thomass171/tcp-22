@@ -119,7 +119,7 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
 
     public static boolean isEnabled(String property) {
         Boolean b;
-        if ((b = PlatformHelper.getBooleanSystemProperty(property)) != null && (boolean) b) {
+        if ((b = Platform.getInstance().getConfiguration().getBoolean(property)) != null && (boolean) b) {
             return true;
         }
         return false;

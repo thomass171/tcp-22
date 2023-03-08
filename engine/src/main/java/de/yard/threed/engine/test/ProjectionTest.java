@@ -3,7 +3,7 @@ package de.yard.threed.engine.test;
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.platform.common.RayHelper;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
 
 
 /**
@@ -26,7 +26,7 @@ public class ProjectionTest {
 
         Vector3 mousevector = new Vector3(0,0,0.5f);
         Vector3 unprojectedmouseVector = (RayHelper.project(mousevector,unprojectmatrix));
-        TestUtil.assertVector3("unprojectedmouseVector", new Vector3(0, 4.8344f, 10.6362f), unprojectedmouseVector);
+        RuntimeTestUtil.assertVector3("unprojectedmouseVector", new Vector3(0, 4.8344f, 10.6362f), unprojectedmouseVector);
 
         /*Ray raycaster = buildPickingRay(400,3002,camera);
         logger.debug("maze direction=" + dumpVector3(raycaster.maze.direction));

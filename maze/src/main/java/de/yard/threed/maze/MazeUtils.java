@@ -6,6 +6,7 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EcsHelper;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleData;
@@ -211,17 +212,17 @@ public class MazeUtils {
 
     public static List<EcsEntity> getBullets(EcsEntity player) {
         List<EcsEntity> inventory = getInventory(player);
-        return EcsEntity.filterList(inventory, e -> e.getComponent(BulletComponent.TAG) != null);
+        return EcsHelper.filterList(inventory, e -> e.getComponent(BulletComponent.TAG) != null);
     }
 
     public static List<EcsEntity> getDiamonds(EcsEntity player) {
         List<EcsEntity> inventory = getInventory(player);
-        return EcsEntity.filterList(inventory, e -> e.getComponent(DiamondComponent.TAG) != null);
+        return EcsHelper.filterList(inventory, e -> e.getComponent(DiamondComponent.TAG) != null);
     }
 
     public static List<EcsEntity> getDiamonds(int player) {
         List<EcsEntity> inventory = getInventory(player);
-        return EcsEntity.filterList(inventory, e -> e.getComponent(DiamondComponent.TAG) != null);
+        return EcsHelper.filterList(inventory, e -> e.getComponent(DiamondComponent.TAG) != null);
     }
 
     public static String readMazefile(String filename/*, String levelname*/) {

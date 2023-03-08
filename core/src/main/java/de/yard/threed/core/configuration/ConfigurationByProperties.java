@@ -7,6 +7,9 @@ import de.yard.threed.core.resource.BundleResource;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * configuration from a properties file in a bundle or a properties list.
+ */
 public class ConfigurationByProperties extends Configuration {
 
     private Map<String, String> properties = new HashMap<String, String>();
@@ -20,6 +23,10 @@ public class ConfigurationByProperties extends Configuration {
                 properties.put(parts[0], parts[1]);
             }
         }
+    }
+
+    public ConfigurationByProperties(Map<String, String> properties) {
+        this.properties.putAll(properties);
     }
 
     @Override

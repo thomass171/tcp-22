@@ -1,8 +1,13 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.Util;
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.engine.apps.WoodenToyFactory;
+import de.yard.threed.engine.avatar.AvatarPmlFactory;
 import de.yard.threed.engine.geometry.Primitives;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.core.Vector2;
@@ -11,12 +16,21 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.gui.Icon;
 import de.yard.threed.engine.imaging.NormalMap;
 import de.yard.threed.core.Color;
+import de.yard.threed.engine.loader.PortableMaterial;
+import de.yard.threed.engine.loader.PortableModelDefinition;
+import de.yard.threed.engine.loader.PortableModelList;
 import de.yard.threed.engine.platform.common.SimpleGeometry;
 
 /**
  * Created by thomass on 06.03.17.
  */
-public class MazeModelFactory {
+public class MazeModelFactory implements ModelBuilderRegistry {
+
+    public static String DIAMOND_BUILDER = "diamondbuilder";
+    public static String BOX_BUILDER = "boxbuilder";
+
+    private static Log logger = Platform.getInstance().getLog(MazeModelFactory.class);
+
     //Der Abstand zwischen den beiden Oberflächen einer Wand
     //float elementdistance = 0.01f;
     // mit groesserer Distance kann man Probleme besser erkennen.
@@ -31,9 +45,23 @@ public class MazeModelFactory {
 
     // 1.6.21: Die Wall Geometries nicht mehr per Shape und CustomGeometry bauen, sondern per Primitives. Das macht das ganze vielleicht etwas einfacher.
     public static boolean simpleGeo = true;
+    private static MazeModelFactory instance = null;
 
-    public MazeModelFactory() {
+    private Texture walltexture;
+    private Texture[] wallnormalmap;
+    private Material pillarmaterial, groundmaterial;
+    private ShapeGeometry sokobanboxgeo;
+    private Material sokobanboxmaterial;
 
+    private MazeModelFactory() {
+        buildBasics();
+    }
+
+    public static MazeModelFactory getInstance() {
+        if (instance == null) {
+            instance = new MazeModelFactory();
+        }
+        return instance;
     }
 
     /**
@@ -159,8 +187,8 @@ public class MazeModelFactory {
 
         double iwidth = width - elementdistance;
 
-        addInnerCorner(model, iwidth,true,true);
-        addInnerCorner(model, iwidth,false,true);
+        addInnerCorner(model, iwidth, true, true);
+        addInnerCorner(model, iwidth, false, true);
 
         return SceneNode.buildSceneNode(model, new Vector3(0, PILLARHEIGHT / 2, 0), new Quaternion()/*Quaternion.buildRotationX(new Degree(-90))*/);
     }
@@ -168,7 +196,7 @@ public class MazeModelFactory {
     /**
      * 2 inneneckteile
      */
-    public void addInnerCorner(SceneNode model, double iwidth,boolean left,boolean bottom) {
+    public void addInnerCorner(SceneNode model, double iwidth, boolean left, boolean bottom) {
         double e2 = elementdistance / 2;
 
         SceneNode element;
@@ -182,7 +210,7 @@ public class MazeModelFactory {
                 element.getTransform().setPosition(new Vector3(-e2, 0, iwidth / 4 + e2));
                 element.getTransform().setRotation(Quaternion.buildRotationY(new Degree(-90)));
                 model.attach(element);
-            }else{
+            } else {
                 element = buildPlaneForWall(iwidth / 2, 0, 0.5);//buildSingleWallPlane(width, false, corner, new Degree(180));
                 element.getTransform().setPosition(new Vector3(-iwidth / 4 - e2, 0, -e2));
                 element.getTransform().setRotation(Quaternion.buildRotationY(new Degree(180)));
@@ -192,8 +220,8 @@ public class MazeModelFactory {
                 element.getTransform().setRotation(Quaternion.buildRotationY(new Degree(-90)));
                 model.attach(element);
             }
-        }else{
-            if (bottom){
+        } else {
+            if (bottom) {
                 element = buildPlaneForWall(iwidth / 2, 0, 0.5);//buildSingleWallPlane(width, false, corner, new Degree(180));
                 element.getTransform().setPosition(new Vector3(iwidth / 4 + e2, 0, e2));
                 model.attach(element);
@@ -201,7 +229,7 @@ public class MazeModelFactory {
                 element.getTransform().setPosition(new Vector3(e2, 0, iwidth / 4 + e2));
                 element.getTransform().setRotation(Quaternion.buildRotationY(new Degree(90)));
                 model.attach(element);
-            }else{
+            } else {
                 element = buildPlaneForWall(iwidth / 2, 0, 0.5);//buildSingleWallPlane(width, false, corner, new Degree(180));
                 element.getTransform().setPosition(new Vector3(iwidth / 4 + e2, 0, -e2));
                 element.getTransform().setRotation(Quaternion.buildRotationY(new Degree(180)));
@@ -224,10 +252,10 @@ public class MazeModelFactory {
         SceneNode model = new SceneNode();
         double iwidth = width - elementdistance;
 
-        addInnerCorner(model, iwidth,true,true);
-        addInnerCorner(model, iwidth,false,true);
-        addInnerCorner(model, iwidth,true,false);
-        addInnerCorner(model, iwidth,false,false);
+        addInnerCorner(model, iwidth, true, true);
+        addInnerCorner(model, iwidth, false, true);
+        addInnerCorner(model, iwidth, true, false);
+        addInnerCorner(model, iwidth, false, false);
 
         return SceneNode.buildSceneNode(model, new Vector3(0, PILLARHEIGHT / 2, 0), new Quaternion());
     }
@@ -240,11 +268,11 @@ public class MazeModelFactory {
     private SceneNode buildPlaneForWall(double width, double u0, double u1/*, boolean top, boolean corner, Degree bottomrotation*/) {
 
         Material mat;
-        if (MazeSettings.getSettings().wallnormalmap != null) {
-            int index = MazeScene.rand.nextInt() % MazeSettings.getSettings().wallnormalmap.length;
-            mat = Material.buildPhongMaterialWithNormalMap(MazeSettings.getSettings().walltexture, MazeSettings.getSettings().wallnormalmap[index]);
+        if (wallnormalmap != null) {
+            int index = MazeScene.rand.nextInt() % wallnormalmap.length;
+            mat = Material.buildPhongMaterialWithNormalMap(walltexture, wallnormalmap[index]);
         } else {
-            mat = Material.buildLambertMaterial(MazeSettings.getSettings().walltexture);
+            mat = Material.buildLambertMaterial(walltexture);
         }
         //MeshLambertMaterial mat = new MeshLambertMaterial(new Color(0, 0xCC, 0xCC));
         //mat = Material.buildLambertMaterial(MazeSettings.getSettings().walltexture);
@@ -290,7 +318,7 @@ public class MazeModelFactory {
         ShapeGeometry wallgeo = new ShapeGeometry(shape, PILLARHEIGHT, 1, UvMap1.leftRotatedTexture);
 
         Material mat;
-        mat = Material.buildLambertMaterial(MazeSettings.getSettings().walltexture);
+        mat = Material.buildLambertMaterial(walltexture);
         //MeshLambertMaterial mat = new MeshLambertMaterial(new Color(0, 0xCC, 0xCC));
         Mesh element = new Mesh(wallgeo, mat);
 
@@ -332,14 +360,17 @@ public class MazeModelFactory {
         return shape;
     }
 
-    public static SceneNode buildPillar() {
-        return buildPillar(MazeSettings.getSettings().pillarmaterial);
+    public SceneNode buildPillar() {
+        return buildPillar(pillarmaterial);
     }
 
-    public static SceneNode buildPillar(Color color) {
+    public SceneNode buildPillar(Color color) {
         return buildPillar(Material.buildBasicMaterial(color));
     }
 
+    public Material getGroundmaterial() {
+        return groundmaterial;
+    }
 
     /**
      * Das Center des Boden des Pillar kommt an pos.
@@ -362,11 +393,11 @@ public class MazeModelFactory {
     /**
      * Eine einzelne Bodenkachel erstellen. Bekommt aussen rum eine Normal Map zum abrunden.
      */
-    public static SceneNode buildGroundElement() {
+    public SceneNode buildGroundElement() {
         SimpleGeometry plane = Primitives.buildPlaneGeometry(MazeDimensions.GRIDSEGMENTSIZE, MazeDimensions.GRIDSEGMENTSIZE, 1, 1);
         //17.6.21: Der init gehoert doch hier nun wirklich nicht hin
         MazeSettings.init(MazeSettings./*17.6.21 MODE_MAZE*/THEME_WOOD);
-        SceneNode mesh = new SceneNode(new Mesh(new GenericGeometry(plane), MazeSettings.getSettings().groundmaterial));
+        SceneNode mesh = new SceneNode(new Mesh(new GenericGeometry(plane), groundmaterial));
         return mesh;
     }
 
@@ -384,5 +415,136 @@ public class MazeModelFactory {
         marker.getTransform().rotateY(new Degree(0));
         return marker;
     }
+
+    public SceneNode buildSokobanBox(/*int x, int y*/) {
+        //mover = new Mover(this.object3d);
+
+        SceneNode container = new SceneNode();
+        SceneNode mesh = new SceneNode(new Mesh(sokobanboxgeo, sokobanboxmaterial));
+        // Das Mesh halb nach oben
+        mesh.getTransform().setPosition(new Vector3(0, MazeSettings.getSettings().sokobanboxsize / 2, 0));
+        // Und das ganze Model auf dir Gridposition
+        //Vector3 pos = MazeDimensions.getWorldElementCoordinates(x, y);
+        //24.4.21  getTransform().setPosition(pos);
+        container.attach(mesh);
+        return container;
+
+    }
+
+    public SceneNode buildSimpleBody(float height, float diameter, Color color) {
+        Geometry cuboid = Geometry.buildCube(diameter, height, diameter);
+        Mesh m = new Mesh(cuboid, Material.buildBasicMaterial(color));
+        return new SceneNode(m);
+    }
+
+    public SceneNode buildDiamond() {
+        double size = MazeSettings.getSettings().sokobanboxsize / 2;
+        Geometry cuboid = Geometry.buildCube(size, size, size);
+        // Not too much transparency (0xCC)
+        Mesh m = new Mesh(cuboid, Material.buildBasicMaterial(MazeSettings.diamondColor.transparency(0xCC), true));
+        SceneNode diamond = new SceneNode(m);
+        diamond.getTransform().setRotation(Quaternion.buildFromAngles(new Degree(45), new Degree(45), new Degree(45)));
+        return new SceneNode(diamond);
+    }
+
+    public SceneNode buildSimpleBall(double radius, Color color/*, Point position*/) {
+        SimpleGeometry sphere = Primitives.buildSphereGeometry(radius, 32, 32);
+        Mesh m = new Mesh(sphere, Material.buildBasicMaterial(color));
+        SceneNode ball = new SceneNode(m);
+        ball.setName("bullet");
+        //ball.getTransform().setPosition(MazeUtils.point2Vector3(position).add(new Vector3(0, 1.25, 0)));
+        Scene.getCurrent().addToWorld(ball);
+        return ball;
+    }
+
+    @Override
+    public ModelBuilder lookupModelBuilder(String key) {
+        if (key.equals(DIAMOND_BUILDER)) {
+            return (destinationNode, entity) -> destinationNode.attach(buildDiamond());
+        }
+        if (key.equals(BOX_BUILDER)) {
+            return (destinationNode, entity) -> destinationNode.attach(buildSokobanBox());
+        }
+        // No need to do a logging here because there might be other builder factories registered.
+        return null;
+    }
+
+    /**
+     * Just a sphere. Has no elevation above anything, so needs to be raised.
+     *
+     * @return
+     */
+    public SceneNode buildMonster() {
+
+        double headRadius = 0.20;
+
+        PortableMaterial faceMaterial = new PortableMaterial("faceMaterial", "maze:textures/Face-Monster.png");
+
+        PortableModelDefinition head = AvatarPmlFactory.buildHead(headRadius, "faceMaterial");
+
+        PortableModelList pml = new PortableModelList(null);
+        pml.addModel(head);
+        pml.addMaterial(faceMaterial);
+
+        SceneNode model = pml.createPortableModelBuilder().buildModel(null, null);
+        model.setName("Monster");
+        return new SceneNode(model);
+    }
+
+    private void buildBasics() {
+
+        MazeSettings settings = MazeSettings.getSettings();
+        switch (settings.getTheme()) {
+            case MazeSettings.THEME_DRAFT:
+                Util.nomore();
+                /*14.6.21 unauusgegoren
+                walltexture =buildTexture ("images/BrickLargeBare0001_1_M.jpg");
+                pillarmaterial = Material.buildLambertMaterial(buildTexture("images/WoodPlanksDirty0085_M.jpg"));
+                UvMap1 uvmap = new ProportionalUvMap(new Vector2(0, 1f / 3f), new Vector2(0.5f, 2f / 3f));
+                List<UvMap1> uvmaps = new ArrayList<UvMap1>();
+                for (int i = 0; i < 6; i++) {
+                    uvmaps.add(uvmap);
+                }
+                sokobanboxgeo = ShapeGeometry.buildBox(sokobanboxsize, sokobanboxsize, sokobanboxsize, uvmaps);
+                sokobanboxmaterial = Material.buildLambertMaterial(buildTexture("images/texturedcube-atlas.jpg"));
+                groundmaterial = Material.buildPhongMaterialWithNormalMap(buildTexture("images/FloorsMedieval0034_6_M.jpg"),
+                        Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));*/
+                break;
+            case MazeSettings.THEME_WOOD:
+                walltexture = buildTexture("textures/gimp/wood/BucheHell.png");
+                pillarmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheDunkel.png"));
+                sokobanboxgeo = ShapeGeometry.buildBox(settings.sokobanboxsize, settings.sokobanboxsize, settings.sokobanboxsize, null);
+                sokobanboxmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheMedium.png"));
+                //22.3.17: Wandmaterial auch fuer Boden statt Ground.png
+                groundmaterial = Material.buildPhongMaterialWithNormalMap(buildTexture("textures/gimp/wood/BucheHell.png"),
+                        Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));
+                //wallnormalmap = buildTexture("textures/gimp/SampleWallNormalMapByPetry.png"));
+                //Ein paar anlegen, damit nicht alle gleich aussehen. Die werden durch randon alle unterschiedlich
+                wallnormalmap = new Texture[5];
+                wallnormalmap[0] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                wallnormalmap[1] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                wallnormalmap[2] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                wallnormalmap[3] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                wallnormalmap[4] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                break;
+            case MazeSettings.THEME_REALWOOD:
+                walltexture = buildTexture("textures/gimp/wood/BucheHell.png");
+                pillarmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheDunkel.png"));
+                sokobanboxgeo = ShapeGeometry.buildBox(settings.sokobanboxsize, settings.sokobanboxsize, settings.sokobanboxsize, null);
+                sokobanboxmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheMedium.png"));
+                //22.3.17: Wandmaterial auch fuer Boden statt Ground.png
+                groundmaterial = Material.buildPhongMaterialWithNormalMap(buildTexture("textures/gimp/wood/BucheHell.png"),
+                        Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));
+                wallnormalmap = null;
+                walltexture = buildTexture("textures/realwood/Wall.png");
+
+                break;
+        }
+    }
+
+    private Texture buildTexture(String s) {
+        return Texture.buildBundleTexture("data", s);
+    }
+
 }
 

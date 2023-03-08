@@ -1,5 +1,6 @@
 package de.yard.threed.javacommon;
 
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.NativeEventBus;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformFactory;
@@ -23,7 +24,7 @@ public class SimpleHeadlessPlatformFactory implements PlatformFactory {
     }
 
     @Override
-    public PlatformInternals createPlatform(HashMap<String, String> properties) {
-        return SimpleHeadlessPlatform.init(properties, optionalEventbus);
+    public PlatformInternals createPlatform(Configuration configuration) {
+        return SimpleHeadlessPlatform.init(configuration, optionalEventbus);
     }
 }

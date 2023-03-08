@@ -1,14 +1,19 @@
 package de.yard.threed.engine.ecs;
 
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.ModelBuilder;
+import de.yard.threed.engine.ModelBuilderRegistry;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * An ECS entity.
+ * <p>
  * Ableitung von SceneNode oder Attribute ScenenNode. Erster Ansatz als Ableitung von SceneNode. Koennte final sein, weil
  * Entities nur ComponentAggregationen sein sollen.
  * Gerade die Aggregation spricht aber doch gegen Ableitung. Also erstmal nicht.
@@ -35,10 +40,22 @@ public final class EcsEntity {
     //22.10.19:Kann das nicht in die VehicleComponent?Nee,weg.
     //26.10.19public SceneNode basenode;
     private EcsSystem lockowner;
+    private String builderName;
 
     public EcsEntity() {
         SystemManager.addEntity(this);
         id = idcounter++;
+    }
+
+    /**
+     * Constructor for client mode only for mirroring entities.
+     */
+    public EcsEntity(int id) {
+        if (AbstractSceneRunner.getInstance().getBusConnector() == null) {
+            throw new RuntimeException("invalid usage outside client mode");
+        }
+        SystemManager.addEntity(this);
+        this.id = id;
     }
 
     public EcsEntity(SceneNode sn) {
@@ -79,8 +96,8 @@ public final class EcsEntity {
         }
         if (groupid == null) {
             if (!wranlogged) {
-                //12.4.17: manchmal zu haeufig
-                logger.warn("groupid isType null in entity " + name);
+                //12.4.17: sometimes too often. 1.2.23 don't log at all. Its valid and quite common to have no groupid
+                //logger.warn("groupid is null in entity " + name);
                 wranlogged = true;
             }
         }
@@ -170,17 +187,31 @@ public final class EcsEntity {
     }
 
     /**
-     * 30.4.21: Kann man immer brauchen.
+     * Important for client/server to publish the model information and to recreate an entity in the client.
+     * Model building might be async!
+     * Returns the destination node.
      */
-    public static List<EcsEntity> filterList(List<EcsEntity> list, EntityFilter filter) {
+    public SceneNode buildSceneNodeByModelFactory(String builderName, ModelBuilderRegistry[] modelBuilderRegistries) {
 
-        List<EcsEntity> result = new ArrayList<EcsEntity>();
-        for (EcsEntity e : list) {
-            if (filter == null || filter.matches(e)) {
-                result.add(e);
+        this.scenenode = new SceneNode();
+        this.builderName = builderName;
+        for (ModelBuilderRegistry registry : modelBuilderRegistries) {
+            ModelBuilder modelBuilder = registry.lookupModelBuilder(builderName);
+            if (modelBuilder != null) {
+                // potential async build
+                modelBuilder.buildModel(scenenode, this);
+                return this.scenenode;
             }
         }
-        return result;
+        logger.warn("No model built. Builder name not registered:" + builderName);
+        return scenenode;
+    }
 
+    public String getBuilderName() {
+        return builderName;
+    }
+
+    public int getComponentCount() {
+        return components.size();
     }
 }

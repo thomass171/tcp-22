@@ -1,4 +1,4 @@
-Comment=Also for testing all possible 3D wall model types
+Comment=Two team grid. Also for testing all possible 3D wall model types
 ###############
 #     @       #
 #  #        # #

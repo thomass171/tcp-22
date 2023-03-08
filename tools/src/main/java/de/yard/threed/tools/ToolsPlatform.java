@@ -109,11 +109,6 @@ public class ToolsPlatform extends DefaultPlatform {
     public double getDouble(byte[] buf, int offset) {
         return Util.getDouble(buf, offset);
     }
-    
-    @Override
-    public String getSystemProperty(String key) {
-        return properties.get(key);
-    }
 
     @Override
     public NativeStringHelper buildStringHelper() {

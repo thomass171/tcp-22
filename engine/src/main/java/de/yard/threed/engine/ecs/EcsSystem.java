@@ -83,13 +83,13 @@ public abstract class EcsSystem implements RequestHandler {
      * Die sind einfach nicht immer disjukt (z.B:PropertComponent). Aber entity steht dafuer auch schon in der group.
      *
      * @param group
-     * @param tpf
+     * @param tpf the time from the last frame in seconds
      * @return
      */
     public abstract void update(EcsEntity entity, EcsGroup group, double tpf);
 
     /**
-     * Events, fuer das dieses System zustaendig ist. null, wenn fuer keins.
+     * Events this system subscribed. null, if no.
      */
     public EventType[] getEventType() {
         return eventtype;

@@ -1,38 +1,40 @@
 package de.yard.threed.core;
 
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
 
-
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Klassifierung von verschiedenen Events. Heisst nicht "id", weil das zu sehr auf ein konkretes Event hindeutet.
+ * Classification of events and registry of all available event types.
  * <p>
- * Das ist auch die zentrale Registratur fuer verfuegbare Eventtypen.
- * 7.5.19: Es gibt aber noch die neuere {@link EventRegistry}. Viele EventTypes werden wird nur noch deprecated verwendet.
+ * 7.5.19: There is also a {@link EventRegistry}.
+ * Range of types:
+ * 1000-1999 engine
+ * 2000-2999 maze
+ * 3000-3999 graph
+ * 4000-4999 traffic
  *
  * <p>
  * Created by thomass on 27.12.16.
  */
 public class EventType {
+    static Log logger = Platform.getInstance().getLog(EventType.class);
     public int type;
     String label = "";
-    // 477 willkuerlich
-    private static int uniquetype = 477;
-    public static EventType MODELLOAD = new EventType();
-    //Fuer FG model zu kompley aufzudroeseln public static EventType XMLMODELLOADED = new EventType();
-    // Das Model ist dann DVK konform direkt auch in der Scene.
-    public static EventType MODELLOADED = new EventType();
-    public static EventType EVENT_NODECREATED = new EventType();
-    public static EventType EVENT_NODEPARENTCHANGED = new EventType();
-    public static EventType EVENT_NODECHANGED = new EventType();
-    public static EventType EVENT_MATLIBCREATED = new EventType();
+    private static Map<Integer, EventType> registry = new HashMap<Integer, EventType>();
 
-
-    public EventType() {
-        this.type = uniquetype++;
+    private EventType(int uniquetype) {
+        this.type = uniquetype;
+        if (registry.containsKey(uniquetype)) {
+            throw new RuntimeException("Duplicate event id type " + uniquetype);
+        }
+        registry.put(this.type, this);
     }
 
-    public EventType(String label) {
-        this();
+    private EventType(int uniquetype, String label) {
+        this(uniquetype);
         this.label = label;
     }
 
@@ -49,8 +51,27 @@ public class EventType {
         return label;
     }
 
+    public static EventType findById(int type) {
+        EventType requestType = registry.get(type);
+        if (requestType == null) {
+            logger.warn("EventType not found:" + type);
+        }
+        return requestType;
+    }
+
+    public static EventType register(int type, String label) {
+        EventType eventType = registry.get(type);
+        if (eventType == null) {
+            return new EventType(type, label);
+        }
+        if (!eventType.getLabel().equals(label)) {
+            throw new RuntimeException("inconsistent EventType");
+        }
+        return eventType;
+    }
+
     @Override
     public String toString() {
-        return "" + type+"("+label+")";
+        return "" + type + "(" + label + ")";
     }
 }

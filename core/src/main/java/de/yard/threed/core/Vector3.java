@@ -190,25 +190,19 @@ public class Vector3 implements Dumpable {
         return s;
     }
 
-
+    /**
+     * For human readability
+     */
     @Override
     public String toString() {
-        //28.8.16:Lesbarkeit verbessert
-        //return "x=" + getX() + ",y=" + getY() + ",z=" + getZ();
         return "(" + getX() + "," + getY() + "," + getZ() + ")";
     }
 
-    public static Vector3 parseString(String data) {
-        String[] s;
-        if (StringUtils.contains(data, ",")) {
-            s = StringUtils.split(data, ",");
-        } else {
-            s = StringUtils.split(data, " ");
-        }
-        if (s.length != 3) {
-            //logger.error("parseString: invalid vector3 data");
-        }
-        return new Vector3(Util.parseFloat(s[0]), Util.parseFloat(s[1]), Util.parseFloat(s[2]));
+    /**
+     * For machine readability
+     */
+    public String toSimpleString() {
+        return "" + getX() + "," + getY() + "," + getZ();
     }
 
     /**

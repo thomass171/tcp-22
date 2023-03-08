@@ -4,7 +4,8 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +23,7 @@ import static java.nio.file.FileVisitResult.CONTINUE;
  * Based on Pat Niemeyers Java to Swift converter (https://github.com/patniemeyer/j2swift)
  */
 public class J2CS {
-    Logger logger = Logger.getLogger(J2CS.class);
+    Logger logger = LoggerFactory.getLogger(J2CS.class);
     public static final String CSMAGIC = "/*generated*/\n";
     public static final String NASALMAGIC = "#generated\n";
     int errorcnt = 0;

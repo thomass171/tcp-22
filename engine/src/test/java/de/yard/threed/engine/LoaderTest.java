@@ -4,7 +4,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.apps.ModelSamples;
 import de.yard.threed.engine.loader.*;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.platform.common.FaceList;
 import de.yard.threed.engine.platform.common.FaceN;
 import de.yard.threed.engine.platform.common.SimpleGeometry;
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
  */
 public class LoaderTest {
     //6.7.21 static EngineHelper platform = TestFactory.initPlatformForTest(false,false,null,true);
-    static Platform platform = TestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
 
 
     @Test

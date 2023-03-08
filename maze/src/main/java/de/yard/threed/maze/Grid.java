@@ -54,6 +54,11 @@ public class Grid {
         return reader.readGrid(ins);
     }
 
+    /**
+     * 15.2.23 TODO should be no static singleton
+     * @return
+     */
+    @Deprecated
     public static Grid getInstance() {
         return instance;
     }

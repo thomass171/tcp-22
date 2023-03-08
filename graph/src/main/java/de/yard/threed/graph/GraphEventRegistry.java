@@ -17,17 +17,17 @@ public class GraphEventRegistry {
      * dann für ein Movement verwendet.
      * Für z.B. Visualisierung.
      */
-    public static EventType GRAPH_EVENT_PATHCREATED = new EventType("GRAPH_EVENT_PATHCREATED");
+    public static EventType GRAPH_EVENT_PATHCREATED = EventType.register(3000,"GRAPH_EVENT_PATHCREATED");
 
     /**
      * Ein Path wurde abgefahren und ist damit obsolet.
      * (graph,path,vehicle)
      */
-    public static EventType GRAPH_EVENT_PATHCOMPLETED = new EventType("GRAPH_EVENT_PATHCOMPLETED");
+    public static EventType GRAPH_EVENT_PATHCOMPLETED = EventType.register(3001,"GRAPH_EVENT_PATHCOMPLETED");
 
     /**
      * Payload ist layernummer. TODO der graph muss da auch rein.
      */
-    public static EventType GRAPH_EVENT_LAYERCREATED = new EventType("GRAPH_EVENT_LAYERCREATED");
-    public static EventType GRAPH_EVENT_LAYERREMOVED = new EventType("GRAPH_EVENT_LAYERREMOVED");
+    public static EventType GRAPH_EVENT_LAYERCREATED = EventType.register(3002,"GRAPH_EVENT_LAYERCREATED");
+    public static EventType GRAPH_EVENT_LAYERREMOVED = EventType.register(3003,"GRAPH_EVENT_LAYERREMOVED");
 }

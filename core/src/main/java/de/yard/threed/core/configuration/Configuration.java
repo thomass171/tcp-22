@@ -4,19 +4,25 @@ import de.yard.threed.core.Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class Configuration {
+/**
+ * Intended to replace properties map platform init?
+ * 6.2.23: No longer needed as singleton since provided by platform. Instantiated now by some extending class.
+ */
+public abstract class Configuration {
 
     List<Configuration> configurationList = new ArrayList<Configuration>();
-    static Configuration defaultConfiguration = null;
 
-    public String getPropertyString(String property) {
-        return null;
-    }
+    public abstract String getPropertyString(String property);
 
     public String getString(String property) {
+
+        String s;
+        if ((s = getPropertyString(property)) != null) {
+            return s;
+        }
         for (Configuration configuration : configurationList) {
-            String s;
             if ((s = configuration.getPropertyString(property)) != null) {
                 return s;
             }
@@ -71,33 +77,26 @@ public class Configuration {
         return new Double(Util.parseDouble(s));
     }
 
-    public void addConfiguration(Configuration configuration, boolean after) {
+    public Configuration addConfiguration(Configuration configuration, boolean after) {
         if (after) {
             configurationList.add(configuration);
         } else {
             configurationList.add(0, configuration);
         }
+        return this;
     }
 
+    /**
+     * Also count myself.
+     *
+     * @return
+     */
     public int size() {
-        return configurationList.size();
+        return 1 + configurationList.size();
     }
 
-    /**
-     * The default configuration is always a command line configuration initially.
-     */
-    public static Configuration getDefaultConfiguration() {
-        if (defaultConfiguration == null) {
-            defaultConfiguration = new Configuration();
-            defaultConfiguration.addConfiguration(new ConfigurationByArgs(), false);
-        }
-        return defaultConfiguration;
-    }
-
-    /**
-     * Needed for testing.
-     */
-    public static void reset() {
-        defaultConfiguration = null;
+    public static Configuration buildDefaultConfigurationWithArgs(String[] args, Map<String, String> properties) {
+        return new ConfigurationByArgs(args).addConfiguration(
+                new ConfigurationByProperties(properties), true);
     }
 }

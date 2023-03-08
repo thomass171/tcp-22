@@ -14,7 +14,7 @@
 
     <dependencies>
         <!-- junit comes from parent -->
-        <!-- jetzt die eigenen Projektabhaengigkeiten-->
+        <!-- own project dependencies-->
         <!-- aber nicht abhaengig von engine! -->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
@@ -30,6 +30,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>

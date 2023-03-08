@@ -2,11 +2,11 @@ package de.yard.threed.traffic;
 
 import de.yard.threed.core.platform.Platform;
 
-import de.yard.threed.core.testutil.TestUtil;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.trafficcore.model.Airport;
 import de.yard.threed.trafficcore.model.Runway;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
  */
 public class JsonTest {
 
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine"}, new SimpleHeadlessPlatformFactory());
+    static Platform platform = EngineTestFactory.initPlatformForTest( new String[] {"engine"}, new SimpleHeadlessPlatformFactory());
 
     @Test
     public void testSampleJson() {
@@ -29,9 +29,9 @@ public class JsonTest {
         platform.getLog(JsonTest.class).debug("json=" + json);
         Airport ap = JsonUtil.toAirport(json);
 
-        TestUtil.assertEquals("icao", airport.getIcao(), ap.getIcao());
-        TestUtil.assertEquals("Runways().length", 2, ap.getRunways().length);
-        TestUtil.assertEquals("fromLat", airport.getRunways()[1].fromLat, ap.getRunways()[1].fromLat);
+        Assertions.assertEquals( airport.getIcao(), ap.getIcao(),"icao");
+        Assertions.assertEquals( 2, ap.getRunways().length,"Runways().length");
+        Assertions.assertEquals( airport.getRunways()[1].fromLat, ap.getRunways()[1].fromLat,"fromLat");
 
     }
 

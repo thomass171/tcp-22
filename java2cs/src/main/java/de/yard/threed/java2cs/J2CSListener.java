@@ -5,7 +5,8 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ import java.util.Map;
  *
  */
 public class J2CSListener extends Java8BaseListener {
-    Logger logger = Logger.getLogger(J2CSListener.class);
+    Logger logger = LoggerFactory.getLogger(J2CSListener.class);
     CommonTokenStream tokens;
     TokenStreamRewriter rewriter;
     boolean cs = true;

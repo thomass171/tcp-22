@@ -111,6 +111,14 @@ sh bin/launchScene.sh de.yard.threed.engine.apps.reference.ReferenceScene
 ```
 ![](docs/JMonkeyEnginePreview.png)
 
+## HomeBrew
+
+Start a scene by the wrapper script launchScene.sh, eg.:
+
+```
+sh bin/launchScene.sh -p homebrew de.yard.threed.engine.apps.reference.ReferenceScene
+```
+
 ## Settings
 
 The following properties are evaluated from the environment or system properties.
@@ -119,14 +127,30 @@ ADDITIONALBUNDLE
 
 This is a colon separated list of bundle locations, eg. filesystem paths or web URLs.
 
+## Properties
+(what is the difference to 'Settings'?)
+
+### Generic
+
+### Use Case Maze
+
+### Use Case Traffic
+| Property       | Purpose                                                                          |
+|----------------|----------------------------------------------------------------------------------|
+| enableAutomove | Start vehicle immediately after scene start without the need for a start request |
+|    |                                                                                  |
+
 # Development
-The most convenient way is to develop for a Java platform like JME initially and later test it on other platforms
+The most convenient way is to develop for a Java platform like JME (or homebrew) initially and later test it on other platforms
 like ThreeJs and Unity. Thats because the other platforms need converting which reduces
 roundtrip time.
 
 In your IDE you might create a launch configuration like the following.
 
 ![](docs/IDErunConfiguration.png)
+
+For running Java 3D software native libraries like 'lwjgl' are required.
+These are typically located in the current working directory or via LD_LIBRARY_PATH.
 
 ## Build your own scene
 The best starting point is to use class [ReferenceScene](engine/src/main/java/de/yard/threed/engine/apps/reference/ReferenceScene.java) and modify it for your needs.
@@ -172,11 +196,72 @@ Major changes:
 ## 2022-12
 Major changes:
   * VR moving in mazes by controller stick instead of using teleport location marker.
+## 2023-03
+  * fix for parameter "offsetVR" passing in browser
+  * preparation for multi player scene server.
+
 # Technical Details
 
 ## Architecture
 
+<!-- two similar options ![svg not processed?](docs/Architecture-base.svg)-->
+<img src="docs/Architecture-base.svg" width="100%">
+
+## Design
+
+### Spheres
+A sphere is a limited area of gaming like
+- an airport in flight simulation
+- the solar system in a space simulation
+- a grid in a maze game
+- a lobby for entering a game
+
+The transition from one sphere to the other might be animated, or just showing a 
+screen 'Loading...' or whatever. Spheres are controlled by the SphereSystem.
+
+## ECS
+An Entity Component System (ECS) is a software architectural pattern that helps organizing software.
+
+Events and Requests are the main elements for inter system communication. But where to register these?
+
+For example in client/server mode a "UserSystem" runs on the server not the client. But the client needs to
+send LOGIN requests and might process LoggedIn events. This suggests to decouple event/request registration from specific systems.
+
+## Authentication
+
+Authentication is useful when data is shared across several user.
+
+The hoster of a maze or sceneserver is the adminstrator and defines the 'admin'
+password by properties
+
+* servermanager.admin.password
+* services.admin.password
+
 ## Modules
+
+### Scene Server
+A simple Java network server, no GWT, no C#. Uses a headless platform. Might also be a Web server (Jetty,
+Tomcat, SpringBoot), but for now its just using plain (web)socket communication. This might be replaced later by a more
+sophisticated network layer (MQTT?).
+
+Because there is no need for GWT and C#, there is no limitation in using Java. So logging 
+outside the platform (SL4J) and reflection might be used..
+
+### services
+A SpringBoot applications that provides maze grid CRUD services via HTTP.
+
+### servermanager
+A SpringBoot application that provides scene server control via HTTP, eg.:
+
+* launch a scene server for a specific scene
+
+Start the server manager (and enable DEBUG logging) with
+```
+cd servermanager
+mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.de.yard.threed=DEBUG"
+```
+
+The UI is then available on 'http://localhost:8080/servermanager.html'.
 
 ## Bundles
 

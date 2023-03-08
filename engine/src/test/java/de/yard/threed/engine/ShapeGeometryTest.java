@@ -11,7 +11,7 @@ import de.yard.threed.engine.platform.common.Face;
 import de.yard.threed.engine.platform.common.Face3;
 import de.yard.threed.engine.platform.common.Face3List;
 import de.yard.threed.engine.platform.common.FaceN;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 
 
 import de.yard.threed.engine.geometry.GeometryHelper;
@@ -28,7 +28,7 @@ import java.util.List;
  * Date: 09.06.14
  */
 public class ShapeGeometryTest {
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
 
     /**
      * Punktfolge im Rectangle, aus dem Cuboid extruhiert wurde.

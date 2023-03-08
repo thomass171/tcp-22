@@ -8,7 +8,10 @@ do
   CLASSPATH=$CLASSPATH:$MR/de/yard/tcp-22/module-$module/$VERSION/module-$module-$VERSION.jar
 done
 
-CLASSPATH=$CLASSPATH:$MR/log4j/log4j/1.2.12/log4j-1.2.12.jar
+CLASSPATH=$CLASSPATH:$MR/org/apache/logging/log4j/log4j-api/2.17.2/log4j-api-2.17.2.jar
+CLASSPATH=$CLASSPATH:$MR/org/apache/logging/log4j/log4j-core/2.17.2/log4j-core-2.17.2.jar
+CLASSPATH=$CLASSPATH:$MR/org/apache/logging/log4j/log4j-slf4j-impl/2.17.2/log4j-slf4j-impl-2.17.2.jar
+CLASSPATH=$CLASSPATH:$MR/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar
 CLASSPATH=$CLASSPATH:$MR/com/google/code/gson/gson/2.8.2/gson-2.8.2.jar
 CLASSPATH=$CLASSPATH:$MR/commons-cli/commons-cli/1.3.1/commons-cli-1.3.1.jar
 CLASSPATH=$CLASSPATH:$MR/commons-logging/commons-logging/1.2/commons-logging-1.2.jar

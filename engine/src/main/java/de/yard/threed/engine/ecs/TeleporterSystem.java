@@ -29,7 +29,7 @@ public class TeleporterSystem extends DefaultEcsSystem {
     //ein Request muss im update() gemacht werden, weils nur das die TCs gibt.
     IntHolder pendingRequest = null;
 
-    public static EventType EVENT_POSITIONCHANGED = new EventType("EVENT_POSITIONCHANGED");
+    public static EventType EVENT_POSITIONCHANGED = EventType.register(1009, "EVENT_POSITIONCHANGED");
 
     public TeleporterSystem() {
         super(new String[]{"TeleportComponent"},
@@ -189,7 +189,7 @@ public class TeleporterSystem extends DefaultEcsSystem {
         }
         //logger.debug("distance to (0,0,0) isType " + Vector3.getDistance(posrot.position, new Vector3()));
         // Neue Position publishen (fuer Scenery)
-        SystemManager.sendEvent(new Event(EVENT_POSITIONCHANGED, new Payload(posrot)));
+        SystemManager.sendEvent(new Event(EVENT_POSITIONCHANGED, new Payload(new Object[]{posrot})));
 
         return posrot;
     }

@@ -2,6 +2,7 @@ package de.yard.threed.core.platform;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourcePath;
@@ -12,7 +13,7 @@ import java.util.List;
 
 /**
  * Default implementation implementing nothing. Sometimes null is returned and sometimes an exception thrown. Not yet clear whats better.
- *
+ * <p>
  * 5.7.21
  */
 public class DefaultPlatform extends Platform {
@@ -162,14 +163,7 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public void setSystemProperty(String key, String value) {
-
-    }
-
-    @Override
-    public String getSystemProperty(String key) {
-        return null;
-    }
+    public Configuration getConfiguration() { return null; }
 
     @Override
     public NativeEventBus getEventBus() {
@@ -246,7 +240,7 @@ public class DefaultPlatform extends Platform {
     }*/
 
     @Override
-    public  NativeScene getScene() {
+    public NativeScene getScene() {
         throw new RuntimeException("not implemented");
     }
 
@@ -254,4 +248,9 @@ public class DefaultPlatform extends Platform {
     public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed) {
         throw new RuntimeException("no bundle loader implemented");
     }*/
+
+    @Override
+    public NativeSocket connectToServer(Server server) {
+        throw new RuntimeException("not implemented");
+    }
 }

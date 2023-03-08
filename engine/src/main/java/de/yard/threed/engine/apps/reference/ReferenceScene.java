@@ -22,7 +22,7 @@ import java.util.List;
 import de.yard.threed.engine.test.AsyncTest;
 import de.yard.threed.engine.test.MainTest;
 import de.yard.threed.core.testutil.Assert;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
 
 /**
  * Fuer die Reference Scene.
@@ -99,8 +99,8 @@ public class ReferenceScene extends Scene {
     int HIDDENCUBELAYER = 9;//1 << 8;
     SceneNode lightNode;
     int shading = NumericValue.SMOOTH;
-    RequestType REQUEST_CLOSE = new RequestType("close");
-    RequestType REQUEST_CYCLE = new RequestType("cycle");
+    RequestType REQUEST_CLOSE = RequestType.register(1008,"close");
+    RequestType REQUEST_CYCLE = RequestType.register(1009,"cycle");
     // Outside VR inventory is in HIDDENCUBELAYER of derredcamera
     ControlPanel inventory;
     ControlPanel controlPanel;
@@ -115,11 +115,11 @@ public class ReferenceScene extends Scene {
     double DEFERRED_CAMERA_FAR = 15.0;
 
     @Override
-    public void init(boolean forServer) {
+    public void init(SceneMode sceneMode) {
         logger.debug("init ReferenceScene");
         databundle = BundleRegistry.getBundle("data");
 
-        if (EngineHelper.isEnabled("argv.enableVR")) {
+        if (EngineHelper.isEnabled("enableVR")) {
             vrEnabled = true;
             usedeferred = false;
         }
@@ -946,7 +946,7 @@ class ReferenceTests {
         if (distance > 0.1f) {
             Assert.fail("test failed: expecteddirection deviation =" + distance);
         }
-        TestUtil.assertVector3("ray origin", new Vector3(0, 5, 11), ray.getOrigin());
+        RuntimeTestUtil.assertVector3("ray origin", new Vector3(0, 5, 11), ray.getOrigin());
 
         // Ein Ray etwas schraeg nach rechts unten (die Referenzwerte beziehen sich auf dim 800x600)
         ray = camera.buildPickingRay(camera.getCarrier().getTransform(), new Point(dim.width / 2 + 90, dim.height / 2 + 40)/*, dim*/);
@@ -968,19 +968,19 @@ class ReferenceTests {
         for (NativeCollision nc : intersections) {
             logger.debug("Hit " + nc.getSceneNode().getName());
         }
-        TestUtil.assertTrue("controlMenu ray intersections", intersections.size() >= 3);
+        RuntimeTestUtil.assertTrue("controlMenu ray intersections", intersections.size() >= 3);
     }
 
     public static void mvpTest(Camera camera, Dimension screensize, boolean usedeferred) {
         logger.info("mvpTest");
-        TestUtil.assertVector3("default camera position (carrier)", new Vector3(0, 5, 11), camera.getCarrierPosition());
+        RuntimeTestUtil.assertVector3("default camera position (carrier)", new Vector3(0, 5, 11), camera.getCarrierPosition());
 
         // Die Referenzwerte hängen von den camra Einstellungen (z.B. aspect) ab und muessen deshalb berechnet werden.
         Matrix4 projectionmatrixexpected = Camera.createPerspectiveProjection(camera.getFov(), camera.getAspect(), camera.getNear(), camera.getFar());
         Matrix4 pm = camera.getProjectionMatrix();
         logger.debug("projection matrix=\n" + pm.dump("\n"));
         //24.9.19: Der Test scheitert, wenn das Fenster nicht 4:3 ist (800x600), z.B. in WebGL.
-        TestUtil.assertMatrix4(projectionmatrixexpected, pm);
+        RuntimeTestUtil.assertMatrix4(projectionmatrixexpected, pm);
 
         // Die Referenzwerte stammen aus ThreeJS (default camera position)
         Matrix4 viewmatrixexpected = new Matrix4(
@@ -990,7 +990,7 @@ class ReferenceTests {
                 0, 0, 0, 1);
         Matrix4 vm = camera.getViewMatrix();
         logger.debug("viewer matrix=\n" + vm.dump("\n"));
-        TestUtil.assertMatrix4(viewmatrixexpected, camera.getViewMatrix());
+        RuntimeTestUtil.assertMatrix4(viewmatrixexpected, camera.getViewMatrix());
 
         Quaternion expectedcamrot = new Quaternion(-0.212f, 0, 0, 0.977f);
         Matrix4 rm;
@@ -1007,18 +1007,18 @@ class ReferenceTests {
         double[] angles = new double[3];
         camrot.toAngles(angles);
         logger.debug("camrot angles=" + angles[0] + " " + angles[1] + " " + angles[2]);
-        TestUtil.assertEquals("aspect", (double) screensize.width / screensize.height, camera.getAspect());
-        TestUtil.assertEquals("fov", Settings.defaultfov, camera.getFov());
-        TestUtil.assertEquals("far", 50/*Settings.defaultfar*/, camera.getFar());
-        TestUtil.assertEquals("near", Settings.defaultnear, camera.getNear());
+        RuntimeTestUtil.assertEquals("aspect", (double) screensize.width / screensize.height, camera.getAspect());
+        RuntimeTestUtil.assertEquals("fov", Settings.defaultfov, camera.getFov());
+        RuntimeTestUtil.assertEquals("far", 50/*Settings.defaultfar*/, camera.getFar());
+        RuntimeTestUtil.assertEquals("near", Settings.defaultnear, camera.getNear());
         Matrix4 cameraworldmatrix = camera.getWorldModelMatrix();
-        TestUtil.assertVector3("extracted camera position scale", new Vector3(0, 5, 11), cameraworldmatrix.extractPosition());
-        TestUtil.assertEquals("camera.name", "Main Camera", camera.getName());
-        TestUtil.assertEquals("camera.carrier.name", "Main Camera Carrier", camera.getCarrier().getName());
-        TestUtil.assertNotNull("camera.parent", camera.getCarrier().getParent());
-        TestUtil.assertEquals("camera.parent.name", "World", camera.getCarrier().getParent().getName());
+        RuntimeTestUtil.assertVector3("extracted camera position scale", new Vector3(0, 5, 11), cameraworldmatrix.extractPosition());
+        RuntimeTestUtil.assertEquals("camera.name", "Main Camera", camera.getName());
+        RuntimeTestUtil.assertEquals("camera.carrier.name", "Main Camera Carrier", camera.getCarrier().getName());
+        RuntimeTestUtil.assertNotNull("camera.parent", camera.getCarrier().getParent());
+        RuntimeTestUtil.assertEquals("camera.parent.name", "World", camera.getCarrier().getParent().getName());
         //Wieso 2? Evtl. wegen GUI?. 7.10.19: Die default und die vom HUD (Layer 1 deferred). Und die xplizite deferred (layer 2) dazu.
-        TestUtil.assertEquals("cameras", 2 + ((usedeferred) ? 1 : 0), AbstractSceneRunner.instance.getCameras().size());
+        RuntimeTestUtil.assertEquals("cameras", 2 + ((usedeferred) ? 1 : 0), AbstractSceneRunner.instance.getCameras().size());
 
         if (usedeferred) {
             List<Transform> camchildren = camera.getCarrier().getTransform().getChildren();
@@ -1035,21 +1035,21 @@ class ReferenceTests {
             // CameraNode mitzaehlen (und Unity seine Camera). Die Camera selber ist ja kein Child, sondern Component.
             // 11.11.19: Also bleiben Hud und deferred-camera Carrier, obwohl es wieder fraglich erscheint, das main camera nicht dabei ist.
             // Ich glaube, ich nehme die MainCam wieder auf (2->3). 15.11.19: Doch wieder nicht, in WebGl führt dazu Kruecken.
-            TestUtil.assertEquals("camera children", 2, camchildren.size());
+            RuntimeTestUtil.assertEquals("camera children", 2, camchildren.size());
             SceneNode hudcarrier = FovElement.getDeferredCamera(null).getCarrier();
             // am Hud-carrier sind Hud,control//button und?? Hat der mal die Camera mitgezaehlt? Ich komm nur noch auf 2. 11.11.19: Wieder 3 durch mitzaehlen Camera
             List<Transform> hudcarrierchildren = hudcarrier.getTransform().getChildren();
             for (int i = 0; i < hudcarrierchildren.size(); i++) {
                 logger.debug("hudcarrierchildren child " + i + ":" + hudcarrierchildren.get(i).getSceneNode().getName());
             }
-            TestUtil.assertEquals("hud carrier children", 2/*7.10.19 3*/, hudcarrier.getTransform().getChildren().size());
+            RuntimeTestUtil.assertEquals("hud carrier children", 2/*7.10.19 3*/, hudcarrier.getTransform().getChildren().size());
 
-            TestUtil.assertNotNull("getSecond carrier", secondcarrier);
-            TestUtil.assertVector3("getSecond camera position", new Vector3(0, 0, 0), secondcarrier.getTransform().getPosition());
-            TestUtil.assertQuaternion("getSecond camera rotation", new Quaternion(), secondcarrier.getTransform().getRotation());
+            RuntimeTestUtil.assertNotNull("getSecond carrier", secondcarrier);
+            RuntimeTestUtil.assertVector3("getSecond camera position", new Vector3(0, 0, 0), secondcarrier.getTransform().getPosition());
+            RuntimeTestUtil.assertQuaternion("getSecond camera rotation", new Quaternion(), secondcarrier.getTransform().getRotation());
             Camera scam = secondcarrier.getCamera();
-            TestUtil.assertNotNull("getSecond carriers camera not set", scam);
-            TestUtil.assertEquals("deferred camera name", "deferred-camera", scam.getName());
+            RuntimeTestUtil.assertNotNull("getSecond carriers camera not set", scam);
+            RuntimeTestUtil.assertEquals("deferred camera name", "deferred-camera", scam.getName());
             logger.debug("deferred asserted");
         }
     }
@@ -1084,10 +1084,10 @@ class ReferenceTests {
                 0, 0.5f, 0, 0.75f,
                 0, 0, 0.5f, 0,
                 0, 0, 0, 1);
-        TestUtil.assertMatrix4(modelexpected, currentmodel);
+        RuntimeTestUtil.assertMatrix4(modelexpected, currentmodel);
 
         Vector3 scale = currentmodel.extractScale();
-        TestUtil.assertVector3("movebox scale", new Vector3(0.5f, 0.5f, 0.5f), scale);
+        RuntimeTestUtil.assertVector3("movebox scale", new Vector3(0.5f, 0.5f, 0.5f), scale);
 
         // Die movebox hat ja keine eigene Rotation
         Matrix3 rotation = currentmodel.extractRotation();
@@ -1095,10 +1095,10 @@ class ReferenceTests {
                 1, 0, 0,
                 0, 1, 0,
                 0, 0, 1);
-        TestUtil.assertMatrix3("movebox rotation", rotationexpected, rotation);
+        RuntimeTestUtil.assertMatrix3("movebox rotation", rotationexpected, rotation);
         Quaternion rot = currentmodel.extractQuaternion();
         Quaternion rotexpected = new Quaternion(0, 0, 0, 1);
-        TestUtil.assertQuaternion("movebox rot", rotexpected, rot);
+        RuntimeTestUtil.assertQuaternion("movebox rot", rotexpected, rot);
     }
 
     public static void testIntersect(ArrayList<SceneNode> towerrechts, SceneNode movingbox) {
@@ -1145,7 +1145,7 @@ class ReferenceTests {
             if (isWebGl()) {
                 pindex = 0;
             }
-            TestUtil.assertVector3("movingbox.intersect", new Vector3(3.9f, 1.25f, -2.95f), (intersects.get(pindex).getPoint()), 0.5f);
+            RuntimeTestUtil.assertVector3("movingbox.intersect", new Vector3(3.9f, 1.25f, -2.95f), (intersects.get(pindex).getPoint()), 0.5f);
         }
 
         // Und jetzt einer von ganz weit weg, der die rote Box im Center treffen muesste.
@@ -1159,7 +1159,7 @@ class ReferenceTests {
         if (intersects.size() == 0) {
             Assert.fail("no red box intersection found(2)");
         }
-        TestUtil.assertEquals("name", "rechts 0", intersects.get(0).getSceneNode().getName());
+        RuntimeTestUtil.assertEquals("name", "rechts 0", intersects.get(0).getSceneNode().getName());
         logger.debug("redbox.intersect=" + (intersects.get(0).getPoint()).dump(" "));
         intersects = raycasterredbox.getIntersections();
         //liefert 1 oder 2 (Ground doch vielleicht auch?)
@@ -1194,7 +1194,7 @@ class ReferenceTests {
                 0, 0.25f, 0, 1.125f,
                 0, 0, 0.25f, -3,
                 0, 0, 0, 1);
-        TestUtil.assertMatrix4(expectedmboxworldmatrix, mboxworldmatrix);
+        RuntimeTestUtil.assertMatrix4(expectedmboxworldmatrix, mboxworldmatrix);
 
         // Die Referenzwerte stammen aus ThreeJS(?) 
         Matrix4 cameraworldmatrix = rs.getMainCamera().getWorldModelMatrix();
@@ -1204,7 +1204,7 @@ class ReferenceTests {
                 0, 0.25f, 0, 1.65f,
                 -0.25f, 0, 0, -3,
                 0, 0, 0, 1);
-        TestUtil.assertMatrix4(expectedcameraworldmatrix, cameraworldmatrix);
+        RuntimeTestUtil.assertMatrix4(expectedcameraworldmatrix, cameraworldmatrix);
 
         // Die Referenzwerte stammen aus ThreeJS 
         Matrix4 viewmatrixexpected = new Matrix4(
@@ -1214,24 +1214,24 @@ class ReferenceTests {
                 0, 0, 0, 1);
         Matrix4 vm = rs.getMainCamera().getViewMatrix();
         logger.debug("viewer matrix moving box=" + vm.dump("\n"));
-        TestUtil.assertMatrix4(viewmatrixexpected, vm);
+        RuntimeTestUtil.assertMatrix4(viewmatrixexpected, vm);
 
-        TestUtil.assertEquals("camera.name", "Main Camera", rs.getMainCamera().getName());
-        TestUtil.assertEquals("camera.parent.name", "Main Camera Carrier", rs.getMainCamera().getCarrier().getName());
-        TestUtil.assertEquals("camera.parent.name", "rechts 2", rs.getMainCamera().getCarrier().getParent().getName());
+        RuntimeTestUtil.assertEquals("camera.name", "Main Camera", rs.getMainCamera().getName());
+        RuntimeTestUtil.assertEquals("camera.parent.name", "Main Camera Carrier", rs.getMainCamera().getCarrier().getName());
+        RuntimeTestUtil.assertEquals("camera.parent.name", "rechts 2", rs.getMainCamera().getCarrier().getParent().getName());
 
         // zurueck auf Anfang
         rs.controller.stepTo(rs.controller.viewpointList.size() - 1);
 
         //4.11.19 auch mal setMesh hier testen
         Mesh earthmesh = rs.earth.getMesh();
-        TestUtil.assertNotNull("earth.mesh", earthmesh);
+        RuntimeTestUtil.assertNotNull("earth.mesh", earthmesh);
         rs.earth.setMesh(earthmesh);
         //12.11.19: und auch getLayer()
         int layer = rs.hiddencube.getTransform().getLayer();
-        TestUtil.assertEquals("hiddencube.layer", rs.HIDDENCUBELAYER, layer);
+        RuntimeTestUtil.assertEquals("hiddencube.layer", rs.HIDDENCUBELAYER, layer);
         layer = rs.deferredcamera.getLayer();
-        TestUtil.assertEquals("deferredcamera.layer", rs.HIDDENCUBELAYER, layer);
+        RuntimeTestUtil.assertEquals("deferredcamera.layer", rs.HIDDENCUBELAYER, layer);
     }
 
     public static void testRayFromFarAway(Dimension dim, ReferenceScene rs) {
@@ -1245,14 +1245,14 @@ class ReferenceTests {
         Vector3 camposition = rs.getMainCamera().getCarrierPosition();
         // bin ich ueberhaupt richtig
         logger.debug("camposition=" + camposition);
-        TestUtil.assertVector3("", new Vector3(50000, 30000, 20000), camposition);
+        RuntimeTestUtil.assertVector3("", new Vector3(50000, 30000, 20000), camposition);
         Vector3 camworldposition = rs.getMainCamera().getWorldModelMatrix().transform(camposition);
         //22.3.18: Keine Ahnung warum die worldmodel matrix anders ist
         logger.debug("camworldposition=" + camworldposition);
-        TestUtil.assertVector3("", new Vector3(71236f, 65941, -25357), camworldposition, 0.5f);
+        RuntimeTestUtil.assertVector3("", new Vector3(71236f, 65941, -25357), camworldposition, 0.5f);
         //TODO und wsarum komme ich nicht nach 0,0,0? Und Riesentoleranz fuer ThreeJS? Aber alle Platformen sind sich da einig.
         Vector3 target = camworldposition.add(pickingray.getDirection().multiply(camworldposition.length()));
-        TestUtil.assertVector3("target", new Vector3(-10758, 18599, -58545), target, 2000f);
+        RuntimeTestUtil.assertVector3("target", new Vector3(-10758, 18599, -58545), target, 2000f);
         // zurueck auf Anfang
         logger.debug("Stepping back");
         // TODO 8.22 mving a carrier
@@ -1272,7 +1272,7 @@ class ReferenceTests {
                 0, 0, 1, 0,
                 -1, 0, 0, 3,
                 0, 0, 0, 1);
-        TestUtil.assertMatrix4(expectedpyramidworldmatrix, pyramidworldmatrix);
+        RuntimeTestUtil.assertMatrix4(expectedpyramidworldmatrix, pyramidworldmatrix);
 
         // Die local Matrix ist gleich der world matrix.
         Matrix4 pyramidlocalmatrix = (pyramideblf.getTransform().getLocalModelMatrix());
@@ -1282,12 +1282,12 @@ class ReferenceTests {
                 0, 0, 1, 0,
                 -1, 0, 0, 3,
                 0, 0, 0, 1);
-        TestUtil.assertMatrix4(expectedpyramidlocalmatrix, pyramidlocalmatrix);
+        RuntimeTestUtil.assertMatrix4(expectedpyramidlocalmatrix, pyramidlocalmatrix);
 
         Quaternion pyramidrotation = pyramideblf.getTransform().getRotation();
         logger.debug("pyramid rotation=\n" + pyramidrotation.dump(" "));
         Quaternion expectedrotation = new Quaternion(-0.5f, 0.5f, 0.5f, 0.5f);
-        TestUtil.assertQuaternion("pyramidrotation", expectedrotation, pyramidrotation);
+        RuntimeTestUtil.assertQuaternion("pyramidrotation", expectedrotation, pyramidrotation);
     }
 
     public static boolean isUnity() {
@@ -1303,18 +1303,18 @@ class ReferenceTests {
     public static void testFind(ReferenceScene rs, SceneNode movebox) {
         logger.info("testFind");
         SceneNode mb = new SceneNode(Platform.getInstance().findSceneNodeByName(ReferenceScene.MOVEBOXNAME).get(0));
-        TestUtil.assertNotNull("find movebox", mb);
+        RuntimeTestUtil.assertNotNull("find movebox", mb);
     }
 
     public static void testGetParent(ReferenceScene referenceScene, SceneNode movingbox) {
         logger.info("testGetParent");
         SceneNode parent = movingbox.getTransform().getParent().getSceneNode();
         parent = parent.getTransform().getParent().getSceneNode();
-        TestUtil.assertEquals("parent name", "rechts 0", parent.getName());
+        RuntimeTestUtil.assertEquals("parent name", "rechts 0", parent.getName());
         parent = parent.getTransform().getParent().getSceneNode();
-        TestUtil.assertEquals("parent name", "World", parent.getName());
+        RuntimeTestUtil.assertEquals("parent name", "World", parent.getName());
         Transform tparent = parent.getTransform().getParent();
-        TestUtil.assertNull("world parent", tparent);
+        RuntimeTestUtil.assertNull("world parent", tparent);
     }
 
     /**
@@ -1327,7 +1327,7 @@ class ReferenceTests {
         // Einfach erstmal etwas suchen, was es nicht gibt). Vorher einen Dump.
         String graph = ReferenceScene.dumpSceneGraph();
         logger.debug("\n" + graph);
-        TestUtil.assertTrue("World", StringUtils.startsWith(graph, "World"));
+        RuntimeTestUtil.assertTrue("World", StringUtils.startsWith(graph, "World"));
         for (SceneNode n : referenceScene.towerrechts) {
             n.findNodeByName("xxxccvv", true);
         }
@@ -1336,22 +1336,22 @@ class ReferenceTests {
         }
 
         List<NativeSceneNode> nodes = SceneNode.findByName("models/loc.gltf");
-        TestUtil.assertEquals("number loc", 1, nodes.size());
+        RuntimeTestUtil.assertEquals("number loc", 1, nodes.size());
         // children are two level below
         NativeSceneNode childNode = nodes.get(0).getTransform().getChildren().get(0).getSceneNode();
         childNode = childNode.getTransform().getChildren().get(0).getSceneNode();
-        TestUtil.assertEquals("number loc children", 8, childNode.getTransform().getChildren().size());
+        RuntimeTestUtil.assertEquals("number loc children", 8, childNode.getTransform().getChildren().size());
 
         SceneNode rechts1 = new SceneNode(referenceScene.towerrechts.get(0).findNodeByName("rechts 1", true).get(0));
-        TestUtil.assertNotNull("", rechts1);
-        TestUtil.assertNotNull("", rechts1.getTransform().getParent());
+        RuntimeTestUtil.assertNotNull("", rechts1);
+        RuntimeTestUtil.assertNotNull("", rechts1.getTransform().getParent());
         // wenn das mesh und name in der Original Node enthalten ist, muss es auch in der find Instanz sein.
-        TestUtil.assertNotNull("mesh", referenceScene.towerrechts.get(1).getMesh());
-        TestUtil.assertEquals("name", "rechts 1", referenceScene.towerrechts.get(1).getName());
-        TestUtil.assertEquals("children rechts 1", 1, referenceScene.towerrechts.get(1).getTransform().getChildren().size());
-        TestUtil.assertNotNull("mesh", rechts1.getMesh());
-        TestUtil.assertEquals("name", "rechts 1", rechts1.getName());
-        TestUtil.assertEquals("children", 1, rechts1.getTransform().getChildren().size());
+        RuntimeTestUtil.assertNotNull("mesh", referenceScene.towerrechts.get(1).getMesh());
+        RuntimeTestUtil.assertEquals("name", "rechts 1", referenceScene.towerrechts.get(1).getName());
+        RuntimeTestUtil.assertEquals("children rechts 1", 1, referenceScene.towerrechts.get(1).getTransform().getChildren().size());
+        RuntimeTestUtil.assertNotNull("mesh", rechts1.getMesh());
+        RuntimeTestUtil.assertEquals("name", "rechts 1", rechts1.getName());
+        RuntimeTestUtil.assertEquals("children", 1, rechts1.getTransform().getChildren().size());
 
     }
 
@@ -1368,29 +1368,29 @@ class ReferenceTests {
         logger.debug("parsing " + jsonString);
         NativeJsonValue parsed = Platform.getInstance().parseJson(jsonString);
         NativeJsonObject o = parsed.isObject();
-        TestUtil.assertNotNull("json.isObject", o);
+        RuntimeTestUtil.assertNotNull("json.isObject", o);
         logger.debug("parsed a:" + parsed.isObject().get("a").isString().stringValue());
         logger.debug("parsed c:" + parsed.isObject().get("c").isString().stringValue());
-        TestUtil.assertEquals("property a", "b", parsed.isObject().get("a").isString().stringValue());
-        TestUtil.assertEquals("property c", "\"d", parsed.isObject().get("c").isString().stringValue());
+        RuntimeTestUtil.assertEquals("property a", "b", parsed.isObject().get("a").isString().stringValue());
+        RuntimeTestUtil.assertEquals("property c", "\"d", parsed.isObject().get("c").isString().stringValue());
     }
 
     public static void testLayer(ReferenceScene rs) {
         logger.info("testLayer");
-        TestUtil.assertEquals("hiddencube.layer", rs.HIDDENCUBELAYER, rs.hiddencube.getTransform().getLayer());
-        TestUtil.assertEquals("hiddencube.child.layer", rs.HIDDENCUBELAYER, rs.hiddencube.getTransform().getChild(0).getLayer());
-        TestUtil.assertEquals("deferredcamera.layer", rs.HIDDENCUBELAYER, rs.deferredcamera.getLayer());
-        TestUtil.assertEquals("deferredcamera.carrier.layer", rs.HIDDENCUBELAYER, rs.deferredcamera.getCarrier().getTransform().getLayer());
+        RuntimeTestUtil.assertEquals("hiddencube.layer", rs.HIDDENCUBELAYER, rs.hiddencube.getTransform().getLayer());
+        RuntimeTestUtil.assertEquals("hiddencube.child.layer", rs.HIDDENCUBELAYER, rs.hiddencube.getTransform().getChild(0).getLayer());
+        RuntimeTestUtil.assertEquals("deferredcamera.layer", rs.HIDDENCUBELAYER, rs.deferredcamera.getLayer());
+        RuntimeTestUtil.assertEquals("deferredcamera.carrier.layer", rs.HIDDENCUBELAYER, rs.deferredcamera.getCarrier().getTransform().getLayer());
         Camera fovCamera = FovElement.getDeferredCamera(null);
-        TestUtil.assertEquals("fovCamera.layer", 1, fovCamera.getLayer());
-        TestUtil.assertEquals("fovCamera.carrier.layer", 1, fovCamera.getCarrier().getTransform().getLayer());
+        RuntimeTestUtil.assertEquals("fovCamera.layer", 1, fovCamera.getLayer());
+        RuntimeTestUtil.assertEquals("fovCamera.carrier.layer", 1, fovCamera.getCarrier().getTransform().getLayer());
         // inventory child 0 is the text "1884"
         Transform area1884transform = rs.inventory.getTransform().getChild(0);
-        TestUtil.assertEquals("inventory.layer", rs.HIDDENCUBELAYER, rs.inventory.getTransform().getLayer());
-        TestUtil.assertEquals("inventory.child.layer", rs.HIDDENCUBELAYER, area1884transform.getLayer());
-        TestUtil.assertEquals("inventory.area1884.name", "area1884", area1884transform.getSceneNode().getName());
-        TestUtil.assertEquals("inventory.z", -4.1, rs.inventory.getTransform().getPosition().getZ());
-        TestUtil.assertEquals("inventory.child.z", 0.001, area1884transform.getPosition().getZ());
+        RuntimeTestUtil.assertEquals("inventory.layer", rs.HIDDENCUBELAYER, rs.inventory.getTransform().getLayer());
+        RuntimeTestUtil.assertEquals("inventory.child.layer", rs.HIDDENCUBELAYER, area1884transform.getLayer());
+        RuntimeTestUtil.assertEquals("inventory.area1884.name", "area1884", area1884transform.getSceneNode().getName());
+        RuntimeTestUtil.assertEquals("inventory.z", -4.1, rs.inventory.getTransform().getPosition().getZ());
+        RuntimeTestUtil.assertEquals("inventory.child.z", 0.001, area1884transform.getPosition().getZ());
         // difficult to calculate world expected reference value
         // TestUtil.assertEquals("inventory.child.world.z", rs.INITIAL_CAMERA_POSITION.getZ() - 4.0 + 0.01, rs.inventory.getTransform().getChild(0).getWorldModelMatrix().extractPosition().getZ());
         SceneNode area1884 = new SceneNode(SceneNode.findByName("area1884").get(0));
@@ -1407,10 +1407,10 @@ class ReferenceTests {
         for (Transform child : carrierTransform.getChildren()) {
             logger.debug("fov camera child: " + child.getSceneNode().getName());
         }
-        TestUtil.assertEquals("FOV camera.children.count", expectedChildren.length, cameraOfSecondMenu.getCarrier().getTransform().getChildCount());
+        RuntimeTestUtil.assertEquals("FOV camera.children.count", expectedChildren.length, cameraOfSecondMenu.getCarrier().getTransform().getChildCount());
         // 'Hud" and "controlMenu" are always attached to the FOV camera.
-        TestUtil.assertEquals("FOV camera.hud", "Hud", carrierTransform.getChild(0).getSceneNode().getName());
-        TestUtil.assertEquals("FOV camera.controlmenu", "ControlIcon", carrierTransform.getChild(1).getSceneNode().getName());
+        RuntimeTestUtil.assertEquals("FOV camera.hud", "Hud", carrierTransform.getChild(0).getSceneNode().getName());
+        RuntimeTestUtil.assertEquals("FOV camera.controlmenu", "ControlIcon", carrierTransform.getChild(1).getSceneNode().getName());
     }
 }
 

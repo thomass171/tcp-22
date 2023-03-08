@@ -59,7 +59,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     Log logger = Platform.getInstance().getLog(SphereSystem.class);
 
     // contains optional tilename and optional vehiclelist
-    public static RequestType USER_REQUEST_SPHERE = new RequestType("USER_REQUEST_SPHERE");
+    public static RequestType USER_REQUEST_SPHERE = RequestType.register(4000, "USER_REQUEST_SPHERE");
 
     public static String TAG = "SphereSystem";
 
@@ -172,7 +172,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                             Color color = Color.parseString(XmlHelper.getStringAttribute(nn, "color"));
                             String direction = XmlHelper.getStringAttribute(nn, "direction");
                             if (direction != null) {
-                                lds[index] = new LightDefinition(color, Vector3.parseString(direction));
+                                lds[index] = new LightDefinition(color, Util.parseVector3(direction));
                             } else {
                                 lds[index] = new LightDefinition(color, null);
                             }

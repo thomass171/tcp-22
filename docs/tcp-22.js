@@ -23,7 +23,7 @@ function addPanel(label, contentProvider, optionalElement) {
 function launchReferenceScene(vr,nearview,hud) {
 
     var args = new Map();
-    addCommonArgs(args);
+    addCommonArgs(args, "");
     args.set("enableVR",vr);
     args.set("enableHud",hud);
     args.set("enableNearView",nearview);
@@ -33,7 +33,7 @@ function launchReferenceScene(vr,nearview,hud) {
 function launchMazeScene(vr,boxname) {
 
     var args = new Map();
-    addCommonArgs(args);
+    addCommonArgs(args, "");
     args.set("initialMaze",$("#" + boxname).val());
     args.set("enableVR",vr);
     launchScene("MazeScene",args);
@@ -41,7 +41,7 @@ function launchMazeScene(vr,boxname) {
 
 function launchVrScene() {
     var args = new Map();
-    addCommonArgs(args);
+    addCommonArgs(args, "");
     args.set("enableVR","true");
     launchScene("VrScene",args);
 }
@@ -57,6 +57,7 @@ function launchTrafficScene(vr) {
 
 function addCommonArgs(args, prefix) {
     args.set("vr-controlpanel-posrot",$("#inp_ctrlPanel").val());
+    // there are two different fields for offsetvr
     args.set("offsetVR",$("#inp_" + prefix + "offsetVR").val());
     args.set("devmode",$("#chk_devMode").prop("checked"));
 }

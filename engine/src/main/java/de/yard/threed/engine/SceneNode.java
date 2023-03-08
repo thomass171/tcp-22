@@ -2,6 +2,7 @@ package de.yard.threed.engine;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.*;
+import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.platform.*;
 
 import java.util.ArrayList;
@@ -10,77 +11,61 @@ import java.util.List;
 /**
  * Date: 21.05.14
  * <p/>
- * 30.1.15: Umbenannt von Container nach Model. Das scheint ganz gut zu passen.
- * 26.1.16: Warum war das denn von Base3D abgeleitet. Dann hat es doch z.B. keinen Parent
- * 15.6.16: Umbenannt von Model nach SceneNode. Entspricht einem GameObject in Unity und Entiy in ECS (26.1.17: Entity wohl nicht).
- * 16.9.16: Nichr mehr von Object3D ableitet, sondern das als Component. Sollte vielleicht SceneEntity, Gameobject oder SceneElement heissen.
+ * 15.6.16: Once was named "Container" and "Model", now its "SceneNode". Like a GameObject in Unity, but not an ECS entiy.
+ * 16.9.16: Not extending Object3D any longer. Now a component container for components like Transform etc.
+ * Optional names are SceneEntity, Gameobject or SceneElement.
  */
-public class SceneNode /*extends Object3D*/ {
+public class SceneNode {
     public NativeSceneNode nativescenenode;
     static Log logger = Platform.getInstance().getLog(SceneNode.class);
 
     /**
-     * Hier muss ein leeres Objekt als Container angelegt werden.
+     * An empty SceneNode without any component.
      */
     public SceneNode() {
-        nativescenenode/*object3d*/ = ( /*Engine*/Platform.getInstance()).buildModel();
-        //object3d = new Transform(nativescenenode.getTransform());
-        /*((EngineHelper) Engine*/Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODECREATED, new Payload(this)));
+        nativescenenode = Platform.getInstance().buildModel();
+        if (DefaultBusConnector.nodeSyncEnabled) {
+            Platform.getInstance().getEventBus().publish(new Event(DefaultBusConnector.EVENT_NODECREATED, new Payload(new Object[]{this})));
+        }
     }
 
-    public SceneNode(String name){
+    public SceneNode(String name) {
         this();
         setName(name);
     }
 
     /**
-     * 30.11.15: Dieser CVosntructor ist private, weil unklar ist, ob seine
-     * Verwendung von ausserhalbt guenstig ist.
-     * 26.1.16: Jetzt public wegen getParent in Model.
+     * Wrapper constructor for an existing SceneNode.
      */
-    public SceneNode(/*NativeBase3D*/NativeSceneNode nativebase3d) {
-        /*object3d*/
+    public SceneNode(NativeSceneNode nativebase3d) {
         nativescenenode = nativebase3d;
-        //object3d = new Transform(nativescenenode.getTransform());
     }
 
     /**
-     * Ein Constructor wegen Convenience.
-     *
-     * @param mesh
+     * Constructor for convenience.
      */
     public SceneNode(Mesh mesh) {
         this();
         //logger.debug("model built");
         setMesh(mesh);
-        //((NativeModel)object3d).add(mesh);
-        //logger.debug("mesh added");
-
     }
 
     /**
-     * Convenience fuer Parent.
-     *
-     * @param child
+     * Convenience for parent.
      */
     public SceneNode(SceneNode child) {
         this();
-        // Der Name als Defaultname für diese Node
+        // Just a default name for this node
         setName("ParentNode");
         attach(child);
     }
 
     /**
-     * Eine Zwischennode zur Transformation einziehen. Um mögliches Ueberschreiben sowohl in der aktuellen wir der neuen zu vermeiden,
-     * werden eigentlich sogar zwei zusaetzliche erzeugt.
-     * static Factorymethode weil es nicht/schlecht als Constructor geht.
-     *
-     * @param rotation
-     * @return
+     * Build with intermediate node for transformation decoupling.
      */
     public static SceneNode buildSceneNode(SceneNode child, Vector3 position, Quaternion rotation) {
         SceneNode newnode = new SceneNode(child);
-        // Der Name als Defaultname für diese Node
+        // Just the default name for this node
         newnode.setName("TransformNode");
         if (rotation != null) {
             newnode.getTransform().setRotation(rotation);
@@ -91,33 +76,17 @@ public class SceneNode /*extends Object3D*/ {
         return new SceneNode(newnode);
     }
 
-
-
-
     /**
-     * Eine Conveniencemethode, weil
-     * Stattdessen? Ich glaube, setParent.
+     * For convenience. In principle (analog Unity) just setting the parent.
+     * Node is detached from current parent, however, there is no explicit detach().
      *
-     * @param n
-     */
-    /*@Deprecated
-    public void add(SceneNode n) {
-        n.object3d.setParent(object3d);
-        Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODEPARENTCHANGED, n));
-    }*/
-
-    /**
-     * Eine Conveniencemethode. Im Prinzip (analog Unity) nur der parent set.
-     * Das hat aber nichts damit zu tun, dass SceneNode keinen add mehr haben soll.
-     * Die Node wird bei einem evtl. existierenden Parent detached.
-     * Einen expliziten detach gibt es aber trotzdem nicht.
-     *
-     * @param n
      */
     public void attach(SceneNode n) {
         n.nativescenenode.getTransform().setParent(nativescenenode.getTransform());
 
-        Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODEPARENTCHANGED, new Payload(n)));
+        if (DefaultBusConnector.nodeSyncEnabled) {
+            Platform.getInstance().getEventBus().publish(new Event(DefaultBusConnector.EVENT_NODEPARENTCHANGED, new Payload(new Object[]{n})));
+        }
     }
 
     /**
@@ -129,26 +98,13 @@ public class SceneNode /*extends Object3D*/ {
         nativescenenode = null;
     }
 
-    /*public SceneNode find(String name) {
-        NativeObject3D n = ((NativeSceneNode) object3d).find(name);
-        if (n != null) {
-            return new SceneNode(n);
-        }
-        return null;
-    }*/
-
-   /* public void add(Mesh o) {
-        ((NativeSceneNode) object3d).setMesh((NativeMesh) o.nativemesh);
-
-    }*/
-
     public void setMesh(Mesh o) {
-        nativescenenode/* ((NativeSceneNode) ob.object3d)*/.setMesh(o.nativemesh);
+        nativescenenode.setMesh(o.nativemesh);
 
     }
 
     public Mesh getMesh() {
-        NativeMesh m = nativescenenode/*((NativeSceneNode) ob.object3d)*/.getMesh();
+        NativeMesh m = nativescenenode.getMesh();
         if (m == null) {
             // when node has no mesh
             return null;
@@ -172,27 +128,13 @@ public class SceneNode /*extends Object3D*/ {
         }
         return new SceneNode(n.get(0));
     }
-    
-    /*public void addCamera(Camera o) {
-        // 10.6.15: Ob das so geht??
-       ((NativeModel) object3d).addCamera(o.getNativeCamera());
-
-    }*/
-
-    /*26.1.16 public Model getParent() {
-        return new Model(((NativeModel)object3d).getParent());
-    }*/
-
-
-    /*MA17public int getUniqueId() {
-        return nativescenenode.getUniqueId();
-    }*/
 
     public void setName(String name) {
         nativescenenode.setName(name);
-        Platform.getInstance().getEventBus().publish(new Event(EventType.EVENT_NODECHANGED, new Payload(this)));
+        if (DefaultBusConnector.nodeSyncEnabled) {
+            Platform.getInstance().getEventBus().publish(new Event(DefaultBusConnector.EVENT_NODECHANGED, new Payload(new Object[]{this})));
+        }
     }
-
 
     public String getName() {
         return nativescenenode.getName();
@@ -203,8 +145,8 @@ public class SceneNode /*extends Object3D*/ {
     }
 
     /**
-     * Relativ im Tree (recursive) bzw nur auf dieser Ebene. Aber immer nur unterhalb von hier.
-     * 3.1.18: Auch this pruefen.
+     * Relative in Tree (recursive) or just on this level. But only below, never above.
+     * 3.1.18: Also check 'this'.
      *
      * @param name
      * @return
@@ -224,7 +166,7 @@ public class SceneNode /*extends Object3D*/ {
      * @param s
      */
     public static void removeSceneNodeByName(String s) {
-        List<NativeSceneNode> nl = ( Platform.getInstance()).findSceneNodeByName(s);
+        List<NativeSceneNode> nl = (Platform.getInstance()).findSceneNodeByName(s);
         if (nl.size() > 0) {
             SceneNode n = new SceneNode(nl.get(0));
             if (n == null) {
@@ -233,11 +175,10 @@ public class SceneNode /*extends Object3D*/ {
                 SceneNode.removeSceneNode(n);
             }
         }
-
     }
 
     /**
-     * Light ist genauso wie Mesh eine Component einer Node.
+     * Light is a component like mesh.
      */
     public void setLight(Light light) {
         nativescenenode.setLight(light.nativelight);
@@ -278,9 +219,6 @@ public class SceneNode /*extends Object3D*/ {
         }
 
         String s = indent + getName() + detailstring + "\n";
-        //for (int i = 0; i < nativescenenode.getTransform().getChildCount(); i++) {
-        //    s += new SceneNode(nativescenenode.getTransform().getChild(i).getSceneNode()).dump(indent + "  ");
-        //}
         for (NativeTransform n : nativescenenode.getTransform().getChildren()) {
             s += new SceneNode(n.getSceneNode()).dump(indent + "  ", details);
         }
@@ -302,10 +240,6 @@ public class SceneNode /*extends Object3D*/ {
         return p;
     }
 
-
-    /*public static Mesh buildLineMesh(GenericGeometry xg, Material mat) {
-        return new Mesh(xg,mat,false,false,true);
-    }*/
     public static SceneNode buildLineMesh(Vector3 from, Vector3 to, Color color) {
         return new SceneNode(Platform.getInstance().buildLine(from, to, color));
     }
@@ -315,7 +249,7 @@ public class SceneNode /*extends Object3D*/ {
      */
     @Deprecated
     public List<NativeCollision> getHits(Point mouselocation, Camera camera) {
-        Ray pickingray = camera.buildPickingRay(camera.getCarrier().getTransform(),mouselocation);
+        Ray pickingray = camera.buildPickingRay(camera.getCarrier().getTransform(), mouselocation);
         List<NativeCollision> intersects = pickingray.getIntersections(this, true);
         return intersects;
     }
@@ -333,8 +267,6 @@ public class SceneNode /*extends Object3D*/ {
         return parent.getSceneNode();
     }
 
-
-
     public Camera getCamera() {
         NativeCamera cam = nativescenenode.getCamera();
         if (cam == null) {
@@ -342,6 +274,4 @@ public class SceneNode /*extends Object3D*/ {
         }
         return new Camera(cam);
     }
-
-
 }

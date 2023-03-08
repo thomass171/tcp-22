@@ -1,5 +1,6 @@
 package de.yard.threed.engine.testutil;
 
+import de.yard.threed.core.Event;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleLoadDelegate;
@@ -115,45 +116,4 @@ public class TestHelper {
         }
         return textBuilder.toString();
     }
-
-    /*12.2.16: jetzt in Platform public static InputStream getFileStream(String ressource) throws FileNotFoundException {
-        final java.io.InputStream ins = new FileInputStream(ressource);//ClassLoader.getFileStream(ressource);
-        return new InputStream() {
-            @Override
-            public int read() {
-                try {
-                    return ins.read();
-                } catch (IOException e) {
-                    throw new RuntimeException("io", e);
-                }
-            }
-
-            @Override
-            public void read(byte[] buf, int size) {
-                try {
-                    ins.read(buf, 0, size);
-                } catch (IOException e) {
-                    throw new RuntimeException("io", e);
-                }
-
-            }
-        };
-
-    }
-
-    public static byte[] readFileStream(final InputStream ins) {
-        byte[] bytebuf;
-        try {
-
-            bytebuf = IOUtils.toByteArray(new java.io.InputStream() {
-                @Override
-                public int read() throws IOException {
-                    return ins.read();
-                }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException("io", e);
-        }
-        return bytebuf;
-    }*/
 }

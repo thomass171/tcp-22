@@ -5,7 +5,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.loader.PortableModelList;
 
-public class AvatarABuilder implements AvatarBuilder {
+public class AvatarABuilder {
 
     private int colorIndex = -1;
     String[] avatarColors = new String[]{"darkgreen", "red"};
@@ -15,7 +15,6 @@ public class AvatarABuilder implements AvatarBuilder {
         this.offset = offset;
     }
 
-    @Override
     public SceneNode buildAvatar(EcsEntity player) {
         PortableModelList pml = AvatarPmlFactory.buildAvatarA(nextColor());
         SceneNode model = pml.createPortableModelBuilder().buildModel(null, null);

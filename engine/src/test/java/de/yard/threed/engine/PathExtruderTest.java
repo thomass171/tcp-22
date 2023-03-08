@@ -3,9 +3,11 @@ package de.yard.threed.engine;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.engine.testutil.EngineTestFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 
@@ -13,7 +15,7 @@ import org.junit.jupiter.api.Test;
  * Created by thomass on 07.04.15.
  */
 public class PathExtruderTest {
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
 
     /**
      * Der Radius des Extrusionkreises dürfte für die Extrusion doch keine Rolle spielen. Oder doch,
@@ -33,7 +35,7 @@ public class PathExtruderTest {
         PathExtruder pathextruder = new PathExtruder(path);
         // Der ist ja nicht ganz geschlossen
         // 02.12.16: closed geo gibts nicht mehr. Darum doch geschlossen
-        TestUtil.assertEquals("length", (float) ((float) (segments/*-1*/)/segments * 2 *radius * Math.PI), path.getLength());
+        Assertions.assertEquals((float) ((float) (segments/*-1*/)/segments * 2 *radius * Math.PI), path.getLength(), 0.0001,"length");
         Vector2 p = new Vector2(3,0);
         Vector3 v;
         //v = pathextruder.transformPoint(p,0);
@@ -43,9 +45,9 @@ public class PathExtruderTest {
         // Nach hinten
         v = pathextruder.transformPoint(p, (float) (radius*Math.PI/2));
         System.out.println("v="+v.dump(""));
-        TestUtil.assertVector3(new Vector3(0, 0, -0.5f), v);
+        TestUtils.assertVector3(new Vector3(0, 0, -0.5f), v);
         v = pathextruder.transformPoint(p,(float) (radius*Math.PI));
-        TestUtil.assertVector3(new Vector3(-0.5f, 0, 0), v);
+        RuntimeTestUtil.assertVector3(new Vector3(-0.5f, 0, 0), v);
 
         //TODO noch weiter testen
 

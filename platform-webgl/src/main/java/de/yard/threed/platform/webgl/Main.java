@@ -3,6 +3,8 @@ package de.yard.threed.platform.webgl;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.resource.BundleRegistry;
@@ -41,7 +43,8 @@ public class Main implements EntryPoint {
         PlatformWebGl.isDevmode = false;
         for (String arg : args.keySet()) {
             String value = Window.Location.getParameter(arg);
-            properties.put("argv." + arg, value);
+            //6.3.23: Breaking change! No longer use prefix "argv"
+            properties.put(arg, value);
             if (arg.equalsIgnoreCase("devmode")) {
                 // too early to use Util.isTrue(value) due to logger
                 PlatformWebGl.isDevmode = value.equals("1") || value.equalsIgnoreCase("true");
@@ -59,19 +62,20 @@ public class Main implements EntryPoint {
             setDevmode();
         }
         // devmode should be set before init.
-        PlatformInternals platformInternals = PlatformWebGl.init(properties);
+        PlatformInternals platformInternals = PlatformWebGl.init(new ConfigurationByProperties(properties));
         Log logger = Platform.getInstance().getLog(Main.class);
 
         logger.info("Loading GWT Client from " + href + ", devmode=" + Platform.getInstance().isDevmode());
 
-        String scene = properties.get("argv.scene");//com.google.gwt.user.client.Window.Location.getParameter("scene");
+        String scene = properties.get("scene");//com.google.gwt.user.client.Window.Location.getParameter("scene");
         logger.debug("scene=" + scene);
         logger.debug("getHostPageBaseURL=" + GWT.getHostPageBaseURL());
         logger.debug("getModuleBaseURL=" + GWT.getModuleBaseURL());
         logger.debug("getModuleName=" + GWT.getModuleName());
         logger.debug("getModuleBaseForStaticFiles=" + GWT.getModuleBaseForStaticFiles());
+        //5.2.23 TODO refactor configuration
         Config.initFromArguments();
-        
+
         /*GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
             @Override
             public void onUncaughtException(Throwable throwable) {

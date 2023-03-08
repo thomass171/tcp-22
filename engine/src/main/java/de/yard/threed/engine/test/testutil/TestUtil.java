@@ -4,6 +4,7 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.core.Vector3Array;
 import de.yard.threed.core.Color;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
 import de.yard.threed.engine.platform.common.Face3;
 import de.yard.threed.engine.platform.common.FaceN;
 
@@ -11,7 +12,7 @@ import de.yard.threed.engine.platform.common.FaceN;
 /**
  * Date: 04.06.14
  */
-public class TestUtil extends de.yard.threed.core.testutil.TestUtil {
+public class TestUtil extends RuntimeTestUtil {
 
     public static void assertFace3(String msg, int[] expected, Face3 actual) {
         assertEquals(msg + ".a", expected[0], actual.index0);

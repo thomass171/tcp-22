@@ -10,17 +10,17 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ViewPoint;
 import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Request;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
 import de.yard.threed.traffic.config.SceneConfig;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static de.yard.threed.traffic.SphereSystem.USER_REQUEST_SPHERE;
@@ -155,7 +155,8 @@ public class SphereSystemTest {
             }
         };
 
-        TestFactory.initPlatformForTest(new String[]{"engine", "traffic"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod);
+        EngineTestFactory.initPlatformForTest(new String[]{"engine", "traffic"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
+                ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
         //16.12.21 AbstractSceneRunner.instance.httpClient = new AirportDataProviderMock();
     }
 }

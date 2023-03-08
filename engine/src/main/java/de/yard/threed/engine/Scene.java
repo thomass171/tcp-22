@@ -29,7 +29,7 @@ public abstract class Scene {
     // scene ist nur public, weil es noch unsaubere Referenzen gibt
     public NativeScene scene;
     Log logger = Platform.getInstance().getLog(Scene.class);
-    //9.8.21 deltaTime is property of scene?
+    //9.8.21 deltaTime is property of scene? TODO check and maybe remove
     public double deltaTime;
     // die root node der ganzen Scene. Zeichnet sich dadurch aus, als einizige keinen parent zu haben.
     // Auch für Spiegelung in Unity
@@ -59,9 +59,9 @@ public abstract class Scene {
      * Ist nicht reset aehnlich, oder?
      * 20.11.15: Darf man denn schon vorher Platformfunktionen aufrufen, z.B. in der Variableninitialisierung der Scene?
      * Doch wohl eher nicht. Dann muss das unterbunden werden.
-     * 18.11.21: Flag forServer
+     * 18.11.21: Parameter for defining run mode (eg. for Server). Is called exactly once!
      */
-    public abstract void init(boolean forServer);
+    public abstract void init(SceneMode sceneMode);
 
     /**
      * Wird vor dem init() aufgerufen. Muss von der Scene überschrieben werden.

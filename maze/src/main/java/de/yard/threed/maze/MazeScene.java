@@ -10,8 +10,9 @@ import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.avatar.AvatarSystem;
-import de.yard.threed.engine.avatar.AvatarABuilder;
+import de.yard.threed.engine.ecs.ClientSystem;
 import de.yard.threed.engine.ecs.InputToRequestSystem;
+import de.yard.threed.engine.ecs.ServerSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.gui.ButtonDelegate;
@@ -39,7 +40,6 @@ public class MazeScene extends Scene {
     //10.11.20 replaced by loaded event boolean gamestarted = false;
 
     static IntProvider rand = new RandomIntProvider();
-    Camera deferredcameraForInventory;
     static int HUDLAYER = 9;
     // in VR 0, sonst die übliche bekannte Höhe. Ohne VR war das immer 0.6 unter diesem Namen
     //Ray Oberkante zum Test genau auf Pillaroberkante mit rayy = Pillar.HEIGHT - 0.15f
@@ -51,12 +51,14 @@ public class MazeScene extends Scene {
     }
 
     @Override
-    public void init(boolean forServer) {
+    public void init(SceneMode sceneMode) {
         logger.info("init MazeScene");
 
         // command line arguments are handled in system builder
-        Configuration configuration = Configuration.getDefaultConfiguration();
+        Configuration configuration = Platform.getInstance().getConfiguration();
         configuration.addConfiguration(new ConfigurationByProperties(new BundleResource(BundleRegistry.getBundle("maze"), "maze.properties")), true);
+
+        MazeSettings.init(MazeSettings.MODE_SOKOBAN);
 
         boolean isMP = false;
         if (isMP) {
@@ -104,48 +106,62 @@ public class MazeScene extends Scene {
 
         });
         buttonDelegates.put("pull", () -> {
-            InputToRequestSystem.sendRequestWithId(new Request(RequestRegistry.TRIGGER_REQUEST_PULL, new Payload("")));
+            InputToRequestSystem.sendRequestWithId(new Request(RequestRegistry.TRIGGER_REQUEST_PULL, new Payload(new Object[]{""})));
         });
 
         vrInstance = VrInstance.buildFromArguments();
 
-        MazeMovingAndStateSystem movingsystem = MazeMovingAndStateSystem.buildFromArguments();
-        SystemManager.addSystem(movingsystem);
+        MazeSettings st = MazeSettings.init(MazeSettings.MODE_SOKOBAN);
 
-        SystemManager.addSystem(new UserSystem());
-        AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
-        avatarSystem.setAvatarBuilder(new MazeAvatarBuilder());
-        avatarSystem.setViewTransform(getViewTransform());
-        SystemManager.addSystem(avatarSystem);
-        SystemManager.addSystem(new MazeVisualizationSystem());
-        //16.4.21: Kein main menu mehr. Level change geht einfach über Neustart. Dafuer das control menu togglen.
-        InputToRequestSystem inputToRequestSystem = new InputToRequestSystem(/*new MainMenu(getMainCamera())*/);
-        //'M' nur Provisorium? Och wieso? Man kann KEys immer als Fallback haben.
-        //inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
-        inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_CONTROLMENU);
-        inputToRequestSystem.addKeyMapping(KeyCode.W, RequestRegistry.TRIGGER_REQUEST_FORWARD);
-        inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, RequestRegistry.TRIGGER_REQUEST_FORWARD);
 
-        inputToRequestSystem.addKeyMapping(KeyCode.S, RequestRegistry.TRIGGER_REQUEST_BACK);
-        inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, RequestRegistry.TRIGGER_REQUEST_BACK);
+        InputToRequestSystem inputToRequestSystem = null;
+        if (sceneMode.isClient()) {
+            SystemManager.addSystem(new MazeVisualizationSystem());
+            //16.4.21: Kein main menu mehr. Level change geht einfach über Neustart. Dafuer das control menu togglen.
+            inputToRequestSystem = new InputToRequestSystem(/*new MainMenu(getMainCamera())*/);
+            //'M' nur Provisorium? Och wieso? Man kann KEys immer als Fallback haben.
+            //inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
+            inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_CONTROLMENU);
+            inputToRequestSystem.addKeyMapping(KeyCode.W, RequestRegistry.TRIGGER_REQUEST_FORWARD);
+            inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, RequestRegistry.TRIGGER_REQUEST_FORWARD);
 
-        inputToRequestSystem.addKeyMapping(KeyCode.LeftArrow, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
-        inputToRequestSystem.addKeyMapping(KeyCode.RightArrow, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+            inputToRequestSystem.addKeyMapping(KeyCode.S, RequestRegistry.TRIGGER_REQUEST_BACK);
+            inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, RequestRegistry.TRIGGER_REQUEST_BACK);
 
-        inputToRequestSystem.addKeyMapping(KeyCode.U, RequestRegistry.TRIGGER_REQUEST_UNDO);
-        inputToRequestSystem.addKeyMapping(KeyCode.V, RequestRegistry.TRIGGER_REQUEST_VALIDATE);
-        inputToRequestSystem.addKeyMapping(KeyCode.H, RequestRegistry.TRIGGER_REQUEST_HELP);
-        inputToRequestSystem.addKeyMapping(KeyCode.R, RequestRegistry.TRIGGER_REQUEST_RESET);
-        inputToRequestSystem.addKeyMapping(KeyCode.K, RequestRegistry.TRIGGER_REQUEST_KICK);
-        inputToRequestSystem.addKeyMapping(KeyCode.Space, BulletSystem.TRIGGER_REQUEST_FIRE);
+            inputToRequestSystem.addKeyMapping(KeyCode.LeftArrow, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
+            inputToRequestSystem.addKeyMapping(KeyCode.RightArrow, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
 
-        inputToRequestSystem.setSegmentRequest(0, RequestRegistry.TRIGGER_REQUEST_LEFT);
-        inputToRequestSystem.setSegmentRequest(2, RequestRegistry.TRIGGER_REQUEST_RIGHT);
-        inputToRequestSystem.setSegmentRequest(3, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
-        inputToRequestSystem.setSegmentRequest(4, BulletSystem.TRIGGER_REQUEST_FIRE);
-        inputToRequestSystem.setSegmentRequest(5, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
-        inputToRequestSystem.setSegmentRequest(7, RequestRegistry.TRIGGER_REQUEST_FORWARD);
+            inputToRequestSystem.addKeyMapping(KeyCode.U, RequestRegistry.TRIGGER_REQUEST_UNDO);
+            inputToRequestSystem.addKeyMapping(KeyCode.V, RequestRegistry.TRIGGER_REQUEST_VALIDATE);
+            inputToRequestSystem.addKeyMapping(KeyCode.H, RequestRegistry.TRIGGER_REQUEST_HELP);
+            inputToRequestSystem.addKeyMapping(KeyCode.R, RequestRegistry.TRIGGER_REQUEST_RESET);
+            inputToRequestSystem.addKeyMapping(KeyCode.K, RequestRegistry.TRIGGER_REQUEST_KICK);
+            inputToRequestSystem.addKeyMapping(KeyCode.Space, BulletSystem.TRIGGER_REQUEST_FIRE);
 
+            inputToRequestSystem.setSegmentRequest(0, RequestRegistry.TRIGGER_REQUEST_LEFT);
+            inputToRequestSystem.setSegmentRequest(2, RequestRegistry.TRIGGER_REQUEST_RIGHT);
+            inputToRequestSystem.setSegmentRequest(3, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
+            inputToRequestSystem.setSegmentRequest(4, BulletSystem.TRIGGER_REQUEST_FIRE);
+            inputToRequestSystem.setSegmentRequest(5, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+            inputToRequestSystem.setSegmentRequest(7, RequestRegistry.TRIGGER_REQUEST_FORWARD);
+            SystemManager.addSystem(inputToRequestSystem);
+
+            ObserverSystem observerSystem = new ObserverSystem();
+            observerSystem.setViewTransform(getViewTransform());
+            SystemManager.addSystem(observerSystem);
+        }
+        if (sceneMode.isServer()) {
+            SystemManager.addSystem(MazeMovingAndStateSystem.buildFromArguments());
+            SystemManager.addSystem(new UserSystem());
+            SystemManager.addSystem(new BulletSystem());
+            SystemManager.addSystem(new BotSystem(sceneMode.isServer() && !sceneMode.isClient()));
+            // AvatarSystem handles login etc., so no need to have it here. Avatar is built just by entity model builder.
+            AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
+            // avatar builder is for player and monster
+            avatarSystem.setAvatarBuilder(MazeAvatarBuilder.AVATAR_BUILDER, new MazeAvatarBuilder());
+            SystemManager.addSystem(avatarSystem);
+
+        }
 
         if (vrInstance != null) {
             // Even in VR the observer will be attached to avatar later
@@ -172,44 +188,48 @@ public class MazeScene extends Scene {
             inventorySystem.addInventory(leftControllerPanel);
             SystemManager.addSystem(inventorySystem);
         } else {
-            inputToRequestSystem.setControlMenuBuilder(new ControlMenu());
-
-            deferredcameraForInventory = Camera.createAttachedDeferredCamera(getMainCamera(), HUDLAYER, 1.0,10.0);
-            deferredcameraForInventory.setName("deferred-camera");
+            // regular display, non VR
             InventorySystem inventorySystem = new InventorySystem();
-            inventorySystem.addInventory(new MazeHudInventory(deferredcameraForInventory, getDimension()));
             SystemManager.addSystem(inventorySystem);
 
-            // Optional (test)Hud that shows VR control panel via deferred camera as HUD
-            if (EngineHelper.isEnabled("argv.enableHud")) {
-                ControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
-                leftControllerPanel.getTransform().setPosition(new Vector3(0.4, 0.8, -2));
-                deferredcameraForInventory.getCarrier().attach(leftControllerPanel);
-                inputToRequestSystem.addControlPanel(leftControllerPanel);
+            if (sceneMode.isClient()) {
+                inputToRequestSystem.setControlMenuBuilder(new ControlMenu());
+                Camera deferredcameraForInventory = Camera.createAttachedDeferredCamera(getMainCamera(), HUDLAYER, 1.0, 10.0);
+                deferredcameraForInventory.setName("deferred-camera");
+                inventorySystem.addInventory(new MazeHudInventory(deferredcameraForInventory, getDimension()));
 
+                // Optional (test)Hud that shows VR control panel via deferred camera as HUD
+                if (EngineHelper.isEnabled("enableHud")) {
+                    ControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
+                    leftControllerPanel.getTransform().setPosition(new Vector3(0.4, 0.8, -2));
+                    deferredcameraForInventory.getCarrier().attach(leftControllerPanel);
+                    inputToRequestSystem.addControlPanel(leftControllerPanel);
+                }
             }
         }
 
-        SystemManager.addSystem(inputToRequestSystem);
-        SystemManager.addSystem(new BulletSystem());
-        SystemManager.addSystem(new BotSystem());
+        if (sceneMode.isServer() && !sceneMode.isClient()) {
+            SystemManager.addSystem(ServerSystem.buildForInitialEventsForClient(new EventType[]{EventRegistry.EVENT_MAZE_LOADED}));
+        }
+        if (!sceneMode.isServer() && sceneMode.isClient()) {
+            SystemManager.addSystem(new ClientSystem(new ModelBuilderRegistry[]{new MazeAvatarBuilder(), MazeModelFactory.getInstance()}));
+        }
 
+        MazeDataProvider.init();
+        addLight();
         //31.10.20 backendAdapter=new MazeLocalBackendAdapter();
-        commonInit();
+
+        // Send login request in both monolith and client mode
+        if (/*sceneMode.isServer() &&*/ sceneMode.isClient()) {
+            // standalone. Handle like a client that connected.
+            backendConnected();
+        }
     }
 
     @Override
     public void backendConnected() {
-        commonInit();
-    }
-
-    private void commonInit() {
-
-        addLight();
-
         // last init statement. Queue login request for main user
         SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
-
     }
 
     @Override
@@ -290,7 +310,9 @@ public class MazeScene extends Scene {
     @Override
     public void update() {
         //for x/y/z. Only in debug mode (MazeSettings.getSettings().debug)? Better location??
-        Observer.getInstance().update();
+        if (Observer.getInstance() != null) {
+            Observer.getInstance().update();
+        }
     }
 
     /**

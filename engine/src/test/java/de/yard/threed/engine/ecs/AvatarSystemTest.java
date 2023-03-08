@@ -2,23 +2,26 @@ package de.yard.threed.engine.ecs;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.InitMethod;
-import de.yard.threed.core.Payload;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.Observer;
+import de.yard.threed.engine.ObserverSystem;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.avatar.AvatarSystem;
-import de.yard.threed.engine.platform.common.Request;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.vr.VrInstance;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static de.yard.threed.core.testutil.TestUtil.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * <p>
@@ -36,44 +39,47 @@ public class AvatarSystemTest {
             public void init() {
                 //world = new SceneNode();
                 SystemManager.addSystem(new AvatarSystem());
+                SystemManager.addSystem(new ObserverSystem());
             }
         };
         SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());
         //platformFactory.enableCamera();
-        TestFactory.initPlatformForTest(new String[]{"engine"}, platformFactory, initMethod);
+        EngineTestFactory.initPlatformForTest(new String[]{"engine"}, platformFactory, initMethod, ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
     }
 
     @Test
     public void testSimpleNonVR() throws Exception {
 
         Observer.buildForDefaultCamera();
-        assertNotNull("observer", Observer.getInstance());
+        assertNotNull(Observer.getInstance(), "observer");
 
         startSimpleTest();
 
-        assertNotNull("observer", Observer.getInstance());
+        assertNotNull(Observer.getInstance(), "observer");
         // Should be assigned to avatar
         Transform observerParent = Observer.getInstance().getTransform().getParent();
-        assertNotNull("observerParent", observerParent);
+        assertNotNull(observerParent, "observerParent");
     }
 
     @Test
     public void testSimpleVR() throws Exception {
 
-        Platform.getInstance().setSystemProperty("argv.enableVR", "true");
+        Map<String, String> properties = new HashMap<>();
+        properties.put("enableVR", "true");
+        Platform.getInstance().getConfiguration().addConfiguration(new ConfigurationByProperties(properties), true);
         VrInstance.buildFromArguments();
-        assertNotNull("VrInstance", VrInstance.getInstance());
+        assertNotNull(VrInstance.getInstance(), "VrInstance");
 
         Observer.buildForDefaultCamera();
-        assertNotNull("observer", Observer.getInstance());
+        assertNotNull(Observer.getInstance(), "observer");
 
         startSimpleTest();
 
-        assertNotNull("observer", Observer.getInstance());
+        assertNotNull(Observer.getInstance(), "observer");
         // Should NOT be assigned to avatar in VR
         Transform observerParent = Observer.getInstance().getTransform().getParent();
         // 16.2.22: Now also in VR observer is attached to avatar
-        assertNotNull("observerParent", observerParent);
+        assertNotNull(observerParent, "observerParent");
     }
 
     private void startSimpleTest() {
@@ -90,13 +96,14 @@ public class AvatarSystemTest {
         List<Event> joinEvents = EcsTestHelper.getEventsFromHistory(UserSystem.USER_EVENT_JOINED);
         assertEquals(1, joinEvents.size());
         Event joinEvent = joinEvents.get(0);
-        EcsEntity playerEntity = (EcsEntity) joinEvent.getPayloadByIndex(0);
-        assertNotNull("player", playerEntity);
+        int playerEntityId = (Integer) joinEvent.getPayload().get("userentityid");
+        EcsEntity playerEntity = EcsHelper.findEntityById(playerEntityId);
+        assertNotNull(playerEntity, "player");
         assertNotNull("Player", playerEntity.getName());
         assertEquals(testUserName, playerEntity.getName());
 
-        playerEntity = SystemManager.findEntities(e->testUserName.equals(e.getName())).get(0);
-        assertNotNull("player", playerEntity);
+        playerEntity = SystemManager.findEntities(e -> testUserName.equals(e.getName())).get(0);
+        assertNotNull(playerEntity, "player");
         assertNotNull("Player", playerEntity.getName());
         assertEquals(testUserName, playerEntity.getName());
     }

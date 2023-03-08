@@ -23,7 +23,7 @@ import de.yard.threed.engine.geometry.SmoothingMap;
 
 import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.testutil.TestFactory;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.test.testutil.TestUtil;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +36,7 @@ import java.util.List;
  * Created by thomass on 08.02.16.
  */
 public class GeometryHelperTest {
-    static Platform platform = TestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
 
     /**
      * Skizze 19 (so ähnlich)

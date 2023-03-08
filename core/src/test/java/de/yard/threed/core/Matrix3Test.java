@@ -1,9 +1,7 @@
 package de.yard.threed.core;
 
-import de.yard.threed.core.Matrix3;
-import de.yard.threed.core.Vector2;
 import de.yard.threed.core.testutil.Assert;
-import de.yard.threed.core.testutil.TestUtil;
+import de.yard.threed.core.testutil.TestUtils;
 import org.junit.jupiter.api.Test;
 
 
@@ -12,14 +10,14 @@ import org.junit.jupiter.api.Test;
  */
 public class Matrix3Test {
     Matrix3 mat1 = new Matrix3(
-            1, 2,3,
-            5, 6,7,
-            8,9,0);
+            1, 2, 3,
+            5, 6, 7,
+            8, 9, 0);
 
     Matrix3 mat2 = new Matrix3(
-            5, 4,2,
-            3, 7,1,
-            8,0,1);
+            5, 4, 2,
+            3, 7, 1,
+            8, 0, 1);
 
 
     /**
@@ -52,17 +50,17 @@ public class Matrix3Test {
         Vector2 direction = new Vector2(0, -1);
         direction = tm.transform(direction);
         //System.out.println("transformed direction=" + direction);
-        TestUtil.assertVector2("", new Vector2(10, -1), direction);
+        TestUtils.assertVector2(new Vector2(10, -1), direction, "");
     }
 
     @Test
     public void testRotation() {
-        Matrix3 tm = Matrix3.buildRotationMatrix((float) (Math.PI/2)/*new Degree(90)*/);
+        Matrix3 tm = Matrix3.buildRotationMatrix((float) (Math.PI / 2)/*new Degree(90)*/);
 
         Vector2 v = new Vector2(0, 2);
         v = tm.transform(v);
         //System.out.println("transformed direction=" + v);
-        TestUtil.assertVector2("", new Vector2(-2, 0), v);
+        TestUtils.assertVector2(new Vector2(-2, 0), v, "");
     }
 
 

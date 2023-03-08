@@ -19,6 +19,12 @@
             <version>5.8.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <modules>
@@ -34,7 +40,10 @@
         <module>tools</module>
         <module>java2cs</module>
         <module>platform-jme</module>
+        <module>platform-homebrew</module>
         <module>services</module>
+        <module>sceneserver</module>
+        <module>servermanager</module>
         <!-- the longest running at the end -->
         <module>platform-webgl</module>
     </modules>

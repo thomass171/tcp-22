@@ -2,6 +2,8 @@ package de.yard.threed.traffic;
 
 
 import de.yard.threed.core.Event;
+import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.EntityFilter;
@@ -12,8 +14,11 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.VelocityComponent;
+import de.yard.threed.javacommon.ConfigurationByEnv;
+import de.yard.threed.traffic.apps.BasicTravelScene;
 import de.yard.threed.traffic.testutils.TrafficTestUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -32,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>
  * Created by thomass on 29.11.21.
  */
+@Slf4j
 public class BasicTravelSceneTest {
 
     SceneNode world;
@@ -100,6 +106,19 @@ public class BasicTravelSceneTest {
         assertEquals(1 + 2, tc.getPointCount(), "teleport destinations");
         // should start at externel overview point. For now its in vehicle.
         assertEquals(2, tc.getIndex(), "teleport index");
+
+        EcsEntity userEntity = SystemManager.findEntities(e -> BasicTravelScene.DEFAULT_USER_NAME.equals(e.getName())).get(0);
+        assertNotNull(userEntity, "user entity");
+        EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
+        assertNotNull(locEntity, "loc entity");
+
+        SceneNode locNode = locEntity.getSceneNode();
+        double xpos0 = locNode.getTransform().getPosition().getX();
+        sceneRunner.runLimitedFrames(50);
+        double xpos1 = locNode.getTransform().getPosition().getX();
+        double xdiff = Math.abs(xpos0 - xpos1);
+        log.debug("xdiff={}", xdiff);
+        assertTrue(xdiff > 3.0);
     }
 
     /**
@@ -108,7 +127,7 @@ public class BasicTravelSceneTest {
     private void setup(String tileName) throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
-        properties.put("argv.basename", tileName);
-        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, properties, new String[]{"engine", "data", "traffic"});
+        properties.put("basename", tileName);
+        sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "traffic"});
     }
 }
