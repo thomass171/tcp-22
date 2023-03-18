@@ -41,14 +41,23 @@ public class MazeRepositoryTest {
         Maze maze1 = new Maze();
         maze1.setName("name");
         maze1.setGrid("aa");
+        maze1.setSecret("sec");
         maze1.setDescription("bb");
+        maze1.setType("P");
         maze1.setCreatedAt(ZonedDateTime.now());
         maze1.setCreatedBy("me");
         maze1.setModifiedAt(ZonedDateTime.now());
         maze1.setModifiedBy("you");
 
-        mazeRepository.save(maze1);
+        maze1 = mazeRepository.save(maze1);
 
         assertEquals(1,buildList(mazeRepository.findAll()).size());
+
+        Maze foundMaze = mazeRepository.findById(maze1.getId()).get();
+        assertEquals("name",foundMaze.getName());
+        assertEquals("aa",foundMaze.getGrid());
+        assertEquals("sec",foundMaze.getSecret());
+        assertEquals("bb",foundMaze.getDescription());
+        assertEquals("P",foundMaze.getType());
     }
 }

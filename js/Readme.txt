@@ -1,0 +1,1 @@
+This is the location for master JS files. Other locations are just copies of the files here.

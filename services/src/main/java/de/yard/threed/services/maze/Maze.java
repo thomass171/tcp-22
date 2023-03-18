@@ -27,8 +27,14 @@ public class Maze {
     @Column(name="grid", nullable = false)
     private String grid;
 
+    @Column(name="secret")
+    private String secret;
+
     @Column(name="description", nullable = false)
     private String description;
+
+    @Column(name="type")
+    private String type;
 
     @Column(name="created_at",nullable = false)
     private ZonedDateTime createdAt;

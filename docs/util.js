@@ -1,5 +1,5 @@
 /**
- * This is just the util.js for the main html page. The 'real' util.js resides in services/.../public
+ * The master version of util.js reside in $HOME/js
  */
 var uniqueid = 1;
 
@@ -18,7 +18,19 @@ function createDiv(content, optclass = "") {
     return {html: html, id: id};
 }
 
-/*function createTable(header, optclass = "") {
+function createClickableDiv(content, onclickCode, optclass = "") {
+    var id = "div_" + getUniqueId();
+    var html = '<div class=" ' + optclass + '" ';
+    html += 'id="' + id + '" ';
+    html += 'onclick="' + onclickCode + '" ';
+    html += ">";
+    html += content;
+    html += '</div>';
+
+    return {html: html, id: id};
+}
+
+function createTable(header, optclass = "") {
     var id = "table_" + getUniqueId();
     var bodyid = "body_" + getUniqueId();
     var html = '<table class=" ' + optclass + '" ';
@@ -32,18 +44,18 @@ function createDiv(content, optclass = "") {
     html += '</table>';
 
     return {html: html, id: id, bodyid: bodyid};
-}*/
+}
 
-/*function addTableRow(bodyid, optclass) {
-
+function addTableRow(bodyid, optclass) {
+    //console.log("Adding row to body", bodyid);
     var row_id = "table_row_" + getUniqueId();
     var row = "<tr id='" + row_id + "' class=' " + optclass + " '>"
     row += "</tr>";
     $("#" + bodyid).append(row);
     return row_id;
-}*/
+}
 
-/*function addTableCol(content,rowid, optclass) {
+function addTableCol(content,rowid, optclass) {
 
     var col_id = "table_col_" + getUniqueId();
     var col = "<td id='" + col_id + "' class=' " + optclass + " '>"
@@ -51,9 +63,13 @@ function createDiv(content, optclass = "") {
     col += "</td>";
     $("#" + rowid).append(col);
     return col_id;
-}*/
+}
 
-/*function createSelectBoxForMapOrArray(mapOrArray, addEmpty, optclass = "") {
+function removeTableRows(tableid) {
+    $("#" + tableid).find("tbody").empty();
+}
+
+function createSelectBoxForMapOrArray(mapOrArray, addEmpty, optclass = "") {
     var id = "sb_" + getUniqueId();
     var html = '<select class="' + optclass + '  "';
     html += 'id="' + id + '">';
@@ -73,9 +89,9 @@ function createDiv(content, optclass = "") {
     }
     html += '</select>';
     return {html: html, id: id};
-}*/
+}
 
-/*function createInput(optclass = "") {
+function createInput(optclass = "") {
     var id = "input_" + getUniqueId();
     var html = '<input class=" ' + optclass + '" ';
     html += 'id="' + id + '" ';
@@ -84,18 +100,18 @@ function createDiv(content, optclass = "") {
 
     //console.log(html);
     return {html: html, id: id};
-}*/
+}
 
-/*function createCheckbox(optclass = "") {
+function createCheckbox(optclass = "") {
     var id = "checkbox_" + getUniqueId();
     var html = '<input type="checkbox" class=" ' + optclass + '" ';
     html += 'id="' + id + '" ';
     html += ">";
     html += '</input>';
     return {html: html, id: id};
-}*/
+}
 
-/*function createButton(content, optclass = "") {
+function createButton(content, optclass = "") {
     var id = "btn_" + getUniqueId();
     var html = '<button class=" ' + optclass + '" ';
 
@@ -105,7 +121,16 @@ function createDiv(content, optclass = "") {
 
     // console.log(html);
     return {html: html, id: id};
-}*/
+}
+
+function addListItem(listid, content, optclass) {
+    var item_id = "list_item_" + getUniqueId();
+    var item = "<li id='" + item_id + "' class=' " + optclass + " '>"
+    item += content;
+    item += "</li>";
+    $("#" + listid).append(item);
+    return item_id;
+}
 
 function launchScene(scenename,args) {
 
@@ -121,4 +146,3 @@ function launchScene(scenename,args) {
 
     var win = window.open(url, '_blank');
 }
-

@@ -8,6 +8,7 @@ create table maze (
     grid varchar not null,
     secret varchar,
     description varchar not null,
+    type varchar,
     created_at timestamp with time zone not null,
     created_by varchar(30) not null,
     modified_at timestamp with time zone not null,

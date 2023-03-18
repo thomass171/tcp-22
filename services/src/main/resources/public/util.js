@@ -1,4 +1,6 @@
-
+/**
+ * The master version of util.js reside in $HOME/js
+ */
 var uniqueid = 1;
 
 function getUniqueId() {
@@ -63,6 +65,10 @@ function addTableCol(content,rowid, optclass) {
     return col_id;
 }
 
+function removeTableRows(tableid) {
+    $("#" + tableid).find("tbody").empty();
+}
+
 function createSelectBoxForMapOrArray(mapOrArray, addEmpty, optclass = "") {
     var id = "sb_" + getUniqueId();
     var html = '<select class="' + optclass + '  "';
@@ -124,4 +130,19 @@ function addListItem(listid, content, optclass) {
     item += "</li>";
     $("#" + listid).append(item);
     return item_id;
+}
+
+function launchScene(scenename,args) {
+
+    const params = new URLSearchParams()
+
+    var url = host + "/webgl.html?scene="+scenename;
+
+    args.forEach(function (value, key) {
+        //console.log(`${key}: ${value}`);
+        //html += '<option value="' + key + '">' + value + '</option>\n';
+        url += "&" + key + "=" + value;
+    });
+
+    var win = window.open(url, '_blank');
 }
