@@ -30,14 +30,7 @@ function launchReferenceScene(vr,nearview,hud) {
     launchScene("ReferenceScene",args);
 }
 
-function launchMazeScene(vr,boxname) {
 
-    var args = new Map();
-    addCommonArgs(args, "");
-    args.set("initialMaze",$("#" + boxname).val());
-    args.set("enableVR",vr);
-    launchScene("MazeScene",args);
-}
 
 function launchVrScene() {
     var args = new Map();
@@ -55,12 +48,7 @@ function launchTrafficScene(vr) {
     launchScene("BasicTravelScene",args);
 }
 
-function addCommonArgs(args, prefix) {
-    args.set("vr-controlpanel-posrot",$("#inp_ctrlPanel").val());
-    // there are two different fields for offsetvr
-    args.set("offsetVR",$("#inp_" + prefix + "offsetVR").val());
-    args.set("devmode",$("#chk_devMode").prop("checked"));
-}
+
 
 function toggleAccordion(id) {
     var x = document.getElementById(id);

@@ -96,7 +96,7 @@ public class ServerManagerService {
 
         Process serverProcess;
 
-        System.out.println("Working Directory = " + System.getProperty("user.dir"));
+        log.debug("Working Directory = " + System.getProperty("user.dir"));
 
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("initialMaze", gridname);
@@ -106,6 +106,7 @@ public class ServerManagerService {
         args.add("--initialMaze=" + gridname);
         args.add("--scene=" + scenename);
 //        Class clazz = Class.forName(servermanagerChildMainClass);
+        log.debug("servermanagerLib={}", servermanagerLib);
         String classPath = System.getProperty("user.dir") + "/" + servermanagerLib + "/*";
         log.debug("setting classPath={}", classPath);
 

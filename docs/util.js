@@ -1,5 +1,5 @@
 /**
- * The master version of util.js reside in $HOME/js
+ * The master version of util.js reside in maze-games/js
  */
 var uniqueid = 1;
 
@@ -132,17 +132,4 @@ function addListItem(listid, content, optclass) {
     return item_id;
 }
 
-function launchScene(scenename,args) {
 
-    const params = new URLSearchParams()
-
-    var url = host + "/webgl.html?scene="+scenename;
-
-    args.forEach(function (value, key) {
-        //console.log(`${key}: ${value}`);
-        //html += '<option value="' + key + '">' + value + '</option>\n';
-        url += "&" + key + "=" + value;
-    });
-
-    var win = window.open(url, '_blank');
-}
