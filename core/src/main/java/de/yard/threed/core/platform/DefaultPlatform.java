@@ -235,9 +235,10 @@ public class DefaultPlatform extends Platform {
         return null;
     }
 
-    /*MA36 ueber runner public void sendHttpRequest(String url, String method, String[] header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate ){
+    @Override
+    public void httpGet(String url, List<Pair<String,String>> params, List<Pair<String,String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
         throw new RuntimeException(("not implemented"));
-    }*/
+    }
 
     @Override
     public NativeScene getScene() {

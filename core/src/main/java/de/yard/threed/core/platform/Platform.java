@@ -36,6 +36,10 @@ public abstract class Platform {
 
     protected static Platform instance;
 
+    // Added to have Scenerunner available in all platforms (like SimpleHeadlessPlatform)
+    // Might help to hide AbstractSceneRunner.getInstance() to apps.
+    public NativeSceneRunner sceneRunner;
+
     public static Platform getInstance() {
         return instance;
     }
@@ -253,9 +257,8 @@ public abstract class Platform {
     //public abstract boolean exists(NativeResource file);
 
     /**
-     * Der SceneRunner ist Singleton. Er wird beim ersten Aufruf angelegt.
-     *
-     * @return
+     * SceneRunner is a singleton. It is created initially when starting a scene.
+     * 28.3.23: getter maybe not needed
      */
     /*10.7.21 public abstract NativeSceneRunner getSceneRunner();*/
     public abstract NativeCanvas buildNativeCanvas(int width, int height);
@@ -456,7 +459,10 @@ public abstract class Platform {
      */
     public abstract NativeSocket connectToServer(Server server);
 
-    /*MA36 ueber runner public abstract void sendHttpRequest(String url, String method, String[] header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate );*/
+    /**
+     * "response" will be null in case of network error (ie. no network connection and thus no response)
+     */
+    public abstract void httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate);
 
     /**
      * 23.7.21: NativeScene should be created initially in platform instead of Scenerunner

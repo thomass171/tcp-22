@@ -15,7 +15,7 @@ import java.util.List;
 
 
 /**
- * Steuert die Bewegung und damit auch den "GridState".
+ * Controls movement and the "GridState".
  * <p>
  * Connection between an {@link MazeLevel} and state handling via ECS.
  * <p>
@@ -24,11 +24,7 @@ import java.util.List;
 public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     Log logger = Platform.getInstance().getLog(MazeMovingAndStateSystem.class);
     public static String TAG = "MazeMovingAndStateSystem";
-    //MA32 GridState currentstate;
-    //nextstate != null isType indicator for ongoing movement.
-    //private GridState nextstate;
-    //MazeLayout layout;
-    //10.11.20 private MazeView view;
+
     // Alle Events queuen, weil sie evtl. unpassend (z.B. während Movement) kommen. Einfach ignorieren
     // ist riskant, weil sie auch fuer Replay, etc kommen können, wo jedes Event wichtig ist.
     // 30.10.20: Gibt es das nicht uebergreifend? Genau, dass ist doch ein Asbachkonzept.
@@ -71,7 +67,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     @Override
     public void init() {
 
-
+        // 23.3.23 Load grid async
+        //Platform.getInstance().
         loadLevel();
         //10.11.20 ob der hier gut ist, muss sich noch zeigen.
         MoveRecorder.init(/*movingsystem.* /currentstate*/);

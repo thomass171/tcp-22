@@ -120,12 +120,10 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
         AsyncHelper.asyncModelBuild(filename, opttexturepath, options, delegateid);
     }
 
-
-
-    /*MA36 ueber runner @Override
-    public void sendHttpRequest(String url, String method, String[] header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate ) {
-        httpClient.sendHttpRequest(url,method,header,asyncJobDelegate);
-    }*/
+    @Override
+    public void httpGet(String url, List<Pair<String,String>> params, List<Pair<String,String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
+        throw new RuntimeException(("not implemented"));
+    }
 
     @Override
     public List<NativeSceneNode> findSceneNodeByName(String name) {

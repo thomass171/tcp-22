@@ -9,11 +9,14 @@ import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Server;
 import de.yard.threed.core.platform.AsyncHttpResponse;
+import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeBundleLoader;
 import de.yard.threed.core.platform.NativeCamera;
+import de.yard.threed.core.platform.NativeFuture;
 import de.yard.threed.core.platform.NativeScene;
+import de.yard.threed.core.platform.NativeSceneRunner;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformInternals;
@@ -49,10 +52,11 @@ import java.util.TreeMap;
  * <p>
  * 16.2.21: Shouldn't the class be abstract?
  * 08.04.21: No main-loop here, because some platforms like JME have no.
+ * 26.03.23: Now implements interface from core to have Scenerunner available in all platforms (like SimpleHeadlessPlatform)
  * <p>
  * Created by thomass on 22.03.16.
  */
-public class AbstractSceneRunner {
+public class AbstractSceneRunner implements NativeSceneRunner {
     Log logger = Platform.getInstance().getLog(AbstractSceneRunner.class);
     //23.7.21 NativeScene is in platform
     //19.10.18: Superklasse auch hier rein, weils einfach praktisch ist.
@@ -82,6 +86,8 @@ public class AbstractSceneRunner {
     TreeMap<Integer, BundleLoadDelegate> bundledelegates = new TreeMap<Integer, BundleLoadDelegate>();
     //20.5.20: Und noch eine Lösung fur invokeLater. <AsyncHttpResponse> wegen C#. Driss.
     public List<AsyncInvoked<AsyncHttpResponse>> invokedLater = new ArrayList<AsyncInvoked<AsyncHttpResponse>>();
+    //23.3.23: And one more solution for real MTs Futures
+    public List<Pair<NativeFuture,AsyncJobDelegate>> futures = new ArrayList<>();
     //2.8.21 public TreeMap<Integer, Bundle> bundledelegateresult = new TreeMap<Integer, Bundle>();
     // ResourceManager hier, damit er nicht mehr über die Platform zugreifbar ist (wegen Architektur)
     //5.8.21 private ResourceManager resourceManager = null;
@@ -165,7 +171,7 @@ public class AbstractSceneRunner {
     /**
      * Statt ueber platform
      * 10.7.21
-     *
+     * See Platform.httpget()!
      * @return
      */
     public NativeHttpClient getHttpClient() {
@@ -337,7 +343,8 @@ public class AbstractSceneRunner {
 
     private void processCompletedJobs() {
         // Die gelieferte Liste ist threadsafe. Neu endende noch laufende Jobs kommen da nicht mehr rein.
-        // D.h., die Liste kann hier "in Ruhe" durchgegangen und verarbeitet und danch verworfen werden. 
+        // D.h., die Liste kann hier "in Ruhe" durchgegangen und verarbeitet und danch verworfen werden.
+        // 23.3.23 Is this still true with real MT async http client?
         List<CompletedJob> ascyncallbacklist = completedJobList.getCompletedJobs();
         while (ascyncallbacklist.size() > 0) {
             CompletedJob ac = ascyncallbacklist.get(0);
@@ -461,6 +468,10 @@ public class AbstractSceneRunner {
 
     public void invokeLater(AsyncInvoked<AsyncHttpResponse> asyncInvoked) {
         invokedLater.add(asyncInvoked);
+    }
+
+    public  <T,D> void addFuture  (NativeFuture<T> future, AsyncJobDelegate<D> asyncJobDelegate) {
+        futures.add(new Pair(future,asyncJobDelegate));
     }
 
     /**

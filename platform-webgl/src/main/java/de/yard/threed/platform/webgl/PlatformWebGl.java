@@ -138,15 +138,15 @@ public class PlatformWebGl extends Platform {
         AsyncHelper.asyncModelBuild(file, opttexturepath, options, delegateid);
     }
 
-    /*MA36 jetzt im SceneRunner
+    /*MA36 now in SceneRunner
     public void loadBundle(String bundlename, BundleLoadDelegate delegate, boolean delayed) {
         WebGlResourceManager.getInstance().loadBundlePlatformInternal(bundlename, delegate, delayed);
     }*/
 
-    /*@Override
-    public void sendHttpRequest(String url, String method, String[] header, AsyncJobDelegate asyncJobDelegate) {
-         WebGlResourceManager.getInstance().sendHttpRequest(url, method, header, asyncJobDelegate);
-    }*/
+    @Override
+    public void httpGet(String url, List<Pair<String,String>> params, List<Pair<String,String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
+        throw new RuntimeException(("not implemented"));
+    }
 
     @Override
     public List<NativeSceneNode> findSceneNodeByName(String name) {
@@ -468,9 +468,9 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
-    public NativeSocket connectToServer(Server server)  {
+    public NativeSocket connectToServer(Server server) {
         // websocket port is one higher than base port (unix socket)
-        return WebGlSocket.buildSocket(server.getHost(), server.getPort()+1);
+        return WebGlSocket.buildSocket(server.getHost(), server.getPort() + 1);
     }
 
     @Override
@@ -509,12 +509,12 @@ public class PlatformWebGl extends Platform {
                         }
                         Uint8Array array = TypedArrays.createUint8Array(buffer);
 
-                        loadlistener.completed(new AsyncHttpResponse(0, xhr.getResponseText()));
+                        loadlistener.completed(new AsyncHttpResponse(0, HttpHelper.buildHeaderList(), xhr.getResponseText()));
 
 
                     } else {
                         //logger.error("XHR Status code " + xhr.getStatus() + " for resource with url " + url);
-                        loadlistener.completed(new AsyncHttpResponse(xhr.getStatus(), ""));
+                        loadlistener.completed(new AsyncHttpResponse(xhr.getStatus(), HttpHelper.buildHeaderList(), ""));
                     }
                 }
             }

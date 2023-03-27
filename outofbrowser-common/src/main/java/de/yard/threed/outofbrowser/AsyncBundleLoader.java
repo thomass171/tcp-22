@@ -48,7 +48,7 @@ public class AsyncBundleLoader implements NativeBundleLoader {
     }
 
     /**
-     * public fuer Tests
+     * public for tests
      */
     @Override
     public List<Pair<BundleLoadDelegate, Bundle>> processAsync() {

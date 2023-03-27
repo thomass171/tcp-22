@@ -36,9 +36,6 @@ public class MazeScene extends Scene {
     Light light;
     public static final int WIDTH = 800;
     public static final int HEIGHT = 600;
-    //10.11.20 replaced by loaded event boolean loadcompleted = false;
-    //10.11.20 replaced by loaded event boolean gamestarted = false;
-
     static IntProvider rand = new RandomIntProvider();
     static int HUDLAYER = 9;
     // in VR 0, sonst die übliche bekannte Höhe. Ohne VR war das immer 0.6 unter diesem Namen
@@ -60,22 +57,8 @@ public class MazeScene extends Scene {
 
         MazeSettings.init(MazeSettings.MODE_SOKOBAN);
 
-        boolean isMP = false;
-        if (isMP) {
-            //so gehts nicht! init läuft noch
-            //Platform.getInstance().
-        } else {
-
-        }
-
-
-        if (false) {
-            //secondray = new Player(Color.GREEN);
-            //add(secondray);
-        }
-
-        // Den Observer kann es direkt noch vor login/join geben. Er zeigt dann z.B. einen Overview.
-        // Bei login/join kann er dann an den Avatar? Auch für VR? (MA35) Oder nie? Oder unabhaengig/doppelt?
+        // Observer can exist before login/join for showing eg. an overview.
+        // After login/join it might be attched to an avatar? Also for VR? (MA35).
         Observer observer = Observer.buildForDefaultCamera();
 
         buttonDelegates.put("reset", () -> {
@@ -172,17 +155,9 @@ public class MazeScene extends Scene {
             rayy = 0;
 
             MazeVrControlPanel leftControllerPanel = new MazeVrControlPanel(buttonDelegates);
-            /*LocalTransform lt = vrInstance.getCpTransform();
-            if (lt != null) {
-                //leftControllerPanel.getTransform().setPosition(new Vector3(-0.5, 1.5, -2.5));
-                //200,90,0 are good rotations
-                leftControllerPanel.getTransform().setPosition(lt.position);
-                leftControllerPanel.getTransform().setRotation(lt.rotation);
-                leftControllerPanel.getTransform().setScale(new Vector3(0.4, 0.4, 0.4));
-            }
-            vrInstance.getController(0).attach(leftControllerPanel);*/
+            // position and rotation of VR controlpanel is controlled by property ...
             inputToRequestSystem.addControlPanel(leftControllerPanel);
-            vrInstance.attachControlPanelToController(vrInstance.getController(0), leftControllerPanel);//.attachControlPanel(leftControllerPanel);
+            vrInstance.attachControlPanelToController(vrInstance.getController(0), leftControllerPanel);
 
             InventorySystem inventorySystem = new InventorySystem();
             inventorySystem.addInventory(leftControllerPanel);
@@ -215,21 +190,15 @@ public class MazeScene extends Scene {
             SystemManager.addSystem(new ClientSystem(new ModelBuilderRegistry[]{new MazeAvatarBuilder(), MazeModelFactory.getInstance()}));
         }
 
+        // grid loading might be aync!
         MazeDataProvider.init();
         addLight();
-        //31.10.20 backendAdapter=new MazeLocalBackendAdapter();
 
         // Send login request in both monolith and client mode
-        if (/*sceneMode.isServer() &&*/ sceneMode.isClient()) {
-            // standalone. Handle like a client that connected.
-            backendConnected();
+        if (sceneMode.isClient()) {
+            // last init statement. Queue login request for main user
+            SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
         }
-    }
-
-    @Override
-    public void backendConnected() {
-        // last init statement. Queue login request for main user
-        SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
     }
 
     @Override
@@ -247,10 +216,9 @@ public class MazeScene extends Scene {
     }
 
     /**
-     * Portrait wegen Smartphone. Ist aber nur für Dev interessant. Ansonsten soll das Gerät oder Nutzer
-     * die Größe festlegen.
+     * Portrait for Smartphone. But only interesting for dev. Otherwise the user should decide.
+     * 23.3.23 Seems to be quite nonsens.
      *
-     * @return
      */
     @Override
     public Dimension getPreferredDimension() {

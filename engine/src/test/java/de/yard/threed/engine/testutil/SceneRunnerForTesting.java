@@ -112,7 +112,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
             }
         }
         instance = new SceneRunnerForTesting(pl, sceneIinitMethod, bundlelist, scene);
-
+        Platform.getInstance().sceneRunner = instance;
         return (SceneRunnerForTesting) instance;
     }
 

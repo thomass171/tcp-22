@@ -39,8 +39,20 @@
             <artifactId>gson</artifactId>
             <version>2.8.2</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5 -->
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.2.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5-fluent -->
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5-fluent</artifactId>
+            <version>5.2.1</version>
+        </dependency>
 
-        <!-- now the own project dependencies -->
+        <!-- now the own project dependencies. Does/Must not depend on engine! -->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>

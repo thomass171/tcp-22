@@ -234,15 +234,6 @@ public abstract class Scene {
     }
 
     /**
-     * Give it a try. Called instead(!) of init()?
-     * <p>
-     * 27.9.20
-     */
-    public void backendConnected() {
-
-    }
-
-    /**
      * Instead of SceneUpdater interface
      */
     public abstract void update() ;

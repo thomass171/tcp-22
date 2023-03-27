@@ -1,11 +1,14 @@
 package de.yard.threed.engine.platform.common;
 
 import de.yard.threed.core.BuildResult;
+import de.yard.threed.core.Pair;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.platform.AsyncHttpResponse;
+import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.NativeBundleLoader;
+import de.yard.threed.core.platform.NativeFuture;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.*;
 import de.yard.threed.core.platform.Log;
@@ -15,6 +18,8 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.loader.LoaderGLTF;
 import de.yard.threed.engine.loader.PortableModelList;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -81,7 +86,7 @@ public class AsyncHelper {
             ModelBuildData data = modelbuildvalues.get(i);
             BundleResource modelresource = data.value;
             ResourcePath opttexturepath = data.opttexturepath;
-            BuildResult r = attemptModelLoad(/*rm,*/ modelresource, opttexturepath, data.loaderoptions, data.delegateid,bundleLoader);
+            BuildResult r = attemptModelLoad(/*rm,*/ modelresource, opttexturepath, data.loaderoptions, data.delegateid, bundleLoader);
             if (r != null) {
                 // MT sicher machen? ist aber eigentlich nicht MT.
                 AbstractSceneRunner.getInstance().delegateresult.put(data.delegateid, r);
@@ -128,6 +133,17 @@ public class AsyncHelper {
             asyncInvoked.run();
         }
         AbstractSceneRunner.getInstance().invokedLater.clear();
+
+        //TODO make whole block  MT safe
+        List<Pair<NativeFuture, AsyncJobDelegate>> remainingFutures = new ArrayList<>();
+        for (Pair<NativeFuture, AsyncJobDelegate> p : AbstractSceneRunner.getInstance().futures) {
+            if (p.getFirst().isDone()) {
+                p.getSecond().completed(p.getFirst().get());
+            } else {
+                remainingFutures.add(p);
+            }
+        }
+        AbstractSceneRunner.getInstance().futures = remainingFutures;
     }
 
     /**
@@ -157,7 +173,7 @@ public class AsyncHelper {
             if (Config.isAsyncdebuglog()) {
                 logger.debug(file.getName() + " not found in bundle " + file.bundle.name);
             }
-            if (delayedContentload(/*rm,*/ file,bundleLoader)) {
+            if (delayedContentload(/*rm,*/ file, bundleLoader)) {
                 return new BuildResult("failure");
             }
             return null;
@@ -175,7 +191,7 @@ public class AsyncHelper {
                     logger.debug("binres " + binres.getName() + " not found in bundle " + file.bundle.name);
                 }
                 // Content evtl. async nachladen
-                if (delayedContentload(/*rm,*/ binres,bundleLoader)) {
+                if (delayedContentload(/*rm,*/ binres, bundleLoader)) {
                     return new BuildResult("failure");
                 }
                 return null;

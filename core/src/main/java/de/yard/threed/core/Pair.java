@@ -1,7 +1,7 @@
 package de.yard.threed.core;
 
 /**
- * C# hat auch so eine Klasse.
+ * C# also has such a class.
  * 
  * Created by thomass on 08.08.16.
  */

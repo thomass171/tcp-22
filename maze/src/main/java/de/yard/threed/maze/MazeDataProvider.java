@@ -1,8 +1,11 @@
 package de.yard.threed.maze;
 
+import de.yard.threed.core.JsonHelper;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.NativeJsonObject;
+import de.yard.threed.core.platform.NativeJsonValue;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.DataProvider;
 import de.yard.threed.engine.ecs.SystemManager;
@@ -12,43 +15,22 @@ import java.util.List;
 
 /**
  * Provide the current maze grid to anybody who is interested.
- * No need to have a singleton because its statelesse. But a singleton makes it more clear..
+ * No need to have a singleton because its stateless. But a singleton makes it more clear.
  */
 public class MazeDataProvider implements DataProvider {
 
-    private Log logger = Platform.getInstance().getLog(MazeDataProvider.class);
-
     public static String PROVIDER_NAME = "grid";
     private static MazeDataProvider instance = null;
-    //private String initialMaze;
     Grid grid;
+    // The grid name might be a filename, but not necessarily. So its just a name.
     String gridName;
 
-    private MazeDataProvider(String initialMaze) {
+    private MazeDataProvider(String gridName, Grid grid) {
 
-        logger.debug("Building for initialMaze " + initialMaze);
-        // only for system init
-        if (initialMaze == null) {
-            initialMaze = "skbn/SokobanWikipedia.txt";
-        }
+        getLogger().debug("Building for maze " + gridName);
 
-        String fileContent;
-        String title;
-        if (StringUtils.startsWith(initialMaze, "##")) {
-            // directly grid definition
-            fileContent = initialMaze;
-            title = "on-the-fly";
-        } else {
-            String name = StringUtils.substringBeforeLast(initialMaze, ".");
-            name = StringUtils.substringAfterLast(name, "/");
-            String filename = StringUtils.substringBeforeLast(initialMaze, ":");
-            fileContent = MazeUtils.readMazefile(filename/*, name*/);
-
-            title = StringUtils.substringAfterLast(initialMaze, ":");
-        }
-        //loadLevel(fileContent, title);
-        loadGrids(fileContent, title);
-        gridName = initialMaze;
+        this.gridName = gridName;
+        this.grid = grid;
     }
 
     public static void init() {
@@ -57,14 +39,54 @@ public class MazeDataProvider implements DataProvider {
         init(initialMaze);
     }
 
+    /**
+     * Might be async/deferred in case of remote grids.
+     */
     public static void init(String initialMaze) {
         if (instance != null) {
             throw new RuntimeException("already inited");
         }
-        instance = new MazeDataProvider(initialMaze);
+        // only for system init
+        if (initialMaze == null) {
+            initialMaze = "skbn/SokobanWikipedia.txt";
+        }
 
+        if (StringUtils.startsWith(initialMaze, "http")) {
 
-        SystemManager.putDataProvider(PROVIDER_NAME, instance);
+            Platform.getInstance().httpGet(initialMaze, null, null, response -> {
+                getLogger().debug("Got http response " + response);
+                if (response != null && response.getStatus() == 0) {
+                    NativeJsonValue json = Platform.getInstance().parseJson(response.responseText);
+                    NativeJsonObject mazeObject = json.isObject();
+                    Grid grid = loadGrids(JsonHelper.getString(mazeObject, "grid"), null);
+                    instance = new MazeDataProvider(JsonHelper.getString(mazeObject, "name"), grid);
+                    SystemManager.putDataProvider(PROVIDER_NAME, instance);
+                } else {
+                    //TODO further error handling?
+                    getLogger().error("Unexpected response " + response);
+                }
+            });
+        } else {
+            String fileContent;
+            String title;
+            if (StringUtils.startsWith(initialMaze, "##")) {
+                // directly grid definition
+                fileContent = initialMaze;
+                title = "on-the-fly";
+            } else {
+                String name = StringUtils.substringBeforeLast(initialMaze, ".");
+                name = StringUtils.substringAfterLast(name, "/");
+                String filename = StringUtils.substringBeforeLast(initialMaze, ":");
+                fileContent = MazeUtils.readMazefile(filename/*, name*/);
+
+                title = StringUtils.substringAfterLast(initialMaze, ":");
+            }
+            //loadLevel(fileContent, title);
+            Grid grid = loadGrids(fileContent, title);
+
+            instance = new MazeDataProvider(initialMaze, grid);
+            SystemManager.putDataProvider(PROVIDER_NAME, instance);
+        }
     }
 
     public static MazeDataProvider getInstance() {
@@ -101,10 +123,11 @@ public class MazeDataProvider implements DataProvider {
 
     /**
      * The file(content) might contain more than one grid.
+     * If 'gridName' is null, the first is returned.
      */
-    void loadGrids(String fileContent, String gridName) {
+    private static Grid loadGrids(String fileContent, String gridName) {
 
-
+        Grid grid;
         try {
             List<Grid> grids = Grid.loadByReader(new StringReader(fileContent));
             if (grids.size() > 1 && gridName != null) {
@@ -114,8 +137,13 @@ public class MazeDataProvider implements DataProvider {
             }
 
         } catch (InvalidMazeException e) {
-            logger.error("load error: InvalidMazeException:" + e.getMessage());
-            return;
+            getLogger().error("load error: InvalidMazeException:" + e.getMessage());
+            return null;
         }
+        return grid;
+    }
+
+    private static Log getLogger() {
+        return Platform.getInstance().getLog(MazeDataProvider.class);
     }
 }

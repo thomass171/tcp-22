@@ -164,7 +164,9 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
-    public Configuration getConfiguration() { return configuration; }
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
     @Override
     public Log getLog(Class clazz) {
@@ -217,10 +219,12 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         return buf;
     }
 
-    /*MA36 ueber runner @Override
-    public void sendHttpRequest(String url, String method, String[] header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate ) {
-        httpClient.sendHttpRequest(url,method,header,asyncJobDelegate);
-    }*/
+    @Override
+    public void httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
+
+        NativeFuture<AsyncHttpResponse> future = JavaWebClient.httpGet(url, params, header, asyncJobDelegate);
+        sceneRunner.addFuture(future, asyncJobDelegate);
+    }
 
     @Override
     public NativeScene getScene() {
