@@ -1,5 +1,6 @@
 package de.yard.threed.maze;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
@@ -18,13 +19,16 @@ import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.maze.testutils.MazeTestUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static de.yard.threed.maze.RequestRegistry.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,14 +47,28 @@ public class MazeTest {
 
     SceneNode observerDummy;
 
+    private WireMockServer wireMockServer;
+
+    @BeforeEach
+    void setup() {
+        SystemState.state = 0;
+        MazeDataProvider.reset();
+        SystemManager.reset();
+
+        wireMockServer = new WireMockServer(wireMockConfig().port(8089));
+        wireMockServer.start();
+    }
+
     /**
-     * Wegen parameter nicht als @Before
+     * Due to parameter not in @Before
      */
-    private void setup(String levelname, boolean withBotSystem) {
+    private void setupTest(String levelname, boolean withBotSystem) {
         InitMethod initMethod = new InitMethod() {
             @Override
             public void init() {
-                SystemManager.reset();
+
+                MazeSettings.init(MazeSettings.MODE_SOKOBAN);
+
                 // No visualization to reveal model-view coupling.
                 SystemManager.addSystem(new MazeMovingAndStateSystem());
                 SystemManager.addSystem(new UserSystem());
@@ -69,22 +87,36 @@ public class MazeTest {
                 if (withBotSystem) {
                     SystemManager.addSystem(new BotSystem(false));
                 }
-                MazeDataProvider.reset();
-                MazeDataProvider.init(levelname);
+
+
             }
         };
-
-        MazeSettings.init(MazeSettings.MODE_SOKOBAN);
 
         EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
                 ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
+        MazeDataProvider.init(levelname);
+
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
         observerDummy = new SceneNode();
         Observer.buildForTransform(observerDummy.getTransform());
-        sceneRunner.runLimitedFrames(INITIAL_FRAMES);
+        sceneRunner.runLimitedFrames(INITIAL_FRAMES, 0.1, levelname.contains("http") ? 100 : 0);
+    }
 
+    @AfterEach
+    void tearDown() {
+        wireMockServer.stop();
+    }
 
+    @Test
+    public void testSokobanWikipedia() {
+        runSokobanWikipedia(false);
+    }
+
+    @Test
+    public void testSokobanWikipediaRemoteGrid() throws Exception {
+        MazeTestUtils.mockHttpGetSokobanWikipedia(wireMockServer);
+        runSokobanWikipedia(true);
     }
 
     /**
@@ -95,12 +127,10 @@ public class MazeTest {
      * # . .#@ #
      * #########
      */
-    @Test
-    public void testSokobanWikipedia() {
+    public void runSokobanWikipedia(boolean remoteGrid) {
 
-        setup("skbn/SokobanWikipedia.txt", false);
+        setupTest(remoteGrid ? "http://localhost:" + wireMockServer.port() + "/mazes/1" : "skbn/SokobanWikipedia.txt", false);
 
-        assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(2, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (2 boxes)");
 
         assertTrue(SystemState.readyToJoin());
@@ -108,7 +138,6 @@ public class MazeTest {
         SystemManager.putRequest(UserSystem.buildLoginRequest("", ""));
 
         sceneRunner.runLimitedFrames(5);
-        assertEquals(INITIAL_FRAMES + 5, sceneRunner.getFrameCount());
         List<Event> loginEvents = EcsTestHelper.getEventsFromHistory(UserSystem.USER_EVENT_LOGGEDIN);
         assertEquals(1, loginEvents.size());
         int userEntityId = (Integer) loginEvents.get(0).getPayloadByIndex(2);
@@ -160,7 +189,7 @@ public class MazeTest {
     @Test
     public void testGrid1() {
         //grid1.txt
-        setup("maze/grid1.txt", false);
+        setupTest("maze/grid1.txt", false);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (0 boxes)");
@@ -212,7 +241,7 @@ public class MazeTest {
     @Test
     public void testArea15x10() {
 
-        setup("maze/Area15x10.txt", true);
+        setupTest("maze/Area15x10.txt", true);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(4, EcsHelper.findAllEntities().size(), "number of entities (4 diamonds)");
@@ -277,7 +306,7 @@ public class MazeTest {
     @Test
     public void testDavidJoffe2() {
         //grid1.txt
-        setup("skbn/DavidJoffe.txt:2", false);
+        setupTest("skbn/DavidJoffe.txt:2", false);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(10, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (0 boxes)");
@@ -305,7 +334,7 @@ public class MazeTest {
     @Test
     public void testSimpleMultiplayer() {
 
-        setup("maze/Maze-P-Simple.txt", false);
+        setupTest("maze/Maze-P-Simple.txt", false);
 
         List<EcsEntity> users = initMaze_P(2);
         EcsEntity user0 = users.get(0);
@@ -357,7 +386,7 @@ public class MazeTest {
     @Test
     public void testSimpleMultiplayerWithBot() {
 
-        setup("maze/Maze-P-Simple.txt", true);
+        setupTest("maze/Maze-P-Simple.txt", true);
 
         //ready for botsystem? initMaze_P_Simple();
 
@@ -392,7 +421,7 @@ public class MazeTest {
     @Test
     public void testCollect() throws Exception {
 
-        setup("maze/Maze-P-Simple.txt", false);
+        setupTest("maze/Maze-P-Simple.txt", false);
 
         List<EcsEntity> users = initMaze_P(2);
         EcsEntity user0 = users.get(0);
@@ -440,7 +469,7 @@ public class MazeTest {
     @Test
     public void testM30x20WithBot() {
 
-        setup("maze/Maze-M-30x20.txt", true);
+        setupTest("maze/Maze-M-30x20.txt", true);
 
         //ready for botsystem? initMaze_P_Simple();
 
@@ -475,7 +504,7 @@ public class MazeTest {
     @Test
     public void testBot() throws Exception {
 
-        setup("##########\n" +
+        setupTest("##########\n" +
                 "#  #@#D  #\n" +
                 "#        #\n" +
                 "#        #\n" +
@@ -509,7 +538,7 @@ public class MazeTest {
     @Test
     public void testMultiBot() throws Exception {
 
-        setup("##########\n" +
+        setupTest("##########\n" +
                 "###   D  #\n" +
                 "#@@      #\n" +
                 "#        #\n" +

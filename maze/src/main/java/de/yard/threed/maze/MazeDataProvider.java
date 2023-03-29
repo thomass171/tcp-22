@@ -55,15 +55,15 @@ public class MazeDataProvider implements DataProvider {
 
             Platform.getInstance().httpGet(initialMaze, null, null, response -> {
                 getLogger().debug("Got http response " + response);
-                if (response != null && response.getStatus() == 0) {
+                if (response.getStatus() == 0) {
                     NativeJsonValue json = Platform.getInstance().parseJson(response.responseText);
                     NativeJsonObject mazeObject = json.isObject();
                     Grid grid = loadGrids(JsonHelper.getString(mazeObject, "grid"), null);
                     instance = new MazeDataProvider(JsonHelper.getString(mazeObject, "name"), grid);
                     SystemManager.putDataProvider(PROVIDER_NAME, instance);
                 } else {
-                    //TODO further error handling?
                     getLogger().error("Unexpected response " + response);
+                    //TODO inform request?
                 }
             });
         } else {
@@ -102,11 +102,17 @@ public class MazeDataProvider implements DataProvider {
 
     public static Grid getGrid() {
         DataProvider dataProvider = SystemManager.getDataProvider(MazeDataProvider.PROVIDER_NAME);
+        if (dataProvider == null) {
+            return null;
+        }
         return (Grid) dataProvider.getData(new Object[]{"grid"});
     }
 
     public static String getGridName() {
         DataProvider dataProvider = SystemManager.getDataProvider(MazeDataProvider.PROVIDER_NAME);
+        if (dataProvider == null) {
+            return null;
+        }
         return (String) dataProvider.getData(new Object[]{"gridname"});
     }
 

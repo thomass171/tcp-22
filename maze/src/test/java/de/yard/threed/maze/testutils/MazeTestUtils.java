@@ -1,5 +1,6 @@
 package de.yard.threed.maze.testutils;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
@@ -11,6 +12,7 @@ import de.yard.threed.engine.Ray;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.testutil.MockedCollision;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FORWARD;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -205,7 +208,9 @@ public class MazeTestUtils {
      */
     public static SceneRunnerForTesting buildSceneRunnerForMazeScene(String gridname, HashMap<String, String> additionalPproperties, int initial_frames) {
 
+        SystemState.state = 0;
         MazeDataProvider.reset();
+        SystemManager.reset();
 
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.maze.MazeScene");
@@ -214,5 +219,38 @@ public class MazeTestUtils {
         // buildDefaultConfigurationWithEnv is needed for HOSTDIR
         SceneRunnerForTesting sceneRunner = SceneRunnerForTesting.setupForScene(initial_frames, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "maze"});
         return sceneRunner;
+    }
+
+    public static void mockHttpGetSokobanWikipedia(WireMockServer wireMockServer) throws Exception {
+
+        String responseBody = "{\n" +
+                "  \"name\" : \"Sokoban Wikipedia\",\n" +
+                "  \"grid\" : \"  ####\n###  ####\n#     $ #\n# #  #$ #\n# . .#@ #\n#########\",\n" +
+                "  \"secret\" : null,\n" +
+                "  \"description\" : \"The example from Wikipedia\",\n" +
+                "  \"type\" : \"S\",\n" +
+                "  \"createdAt\" : \"2023-03-18T17:16:58.609591+01:00\",\n" +
+                "  \"createdBy\" : \"admin\",\n" +
+                "  \"modifiedAt\" : \"2023-03-18T17:16:58.609591+01:00\",\n" +
+                "  \"modifiedBy\" : \"admin\",\n" +
+                "  \"_links\" : {\n" +
+                "    \"self\" : {\n" +
+                "      \"href\" : \"http://ubuntu-server.udehlavj1efjeuqv.myfritz.net/mazes/1\"\n" +
+                "    },\n" +
+                "    \"maze\" : {\n" +
+                "      \"href\" : \"http://ubuntu-server.udehlavj1efjeuqv.myfritz.net/mazes/1\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        String url = "http://localhost:" + wireMockServer.port() + "/mazes/1";
+
+        wireMockServer.stubFor(get(urlEqualTo("/mazes/1"))
+                //.withHeader("Accept", matching("text/.*"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/hal+json")
+                        .withBody(responseBody)));
+
     }
 }

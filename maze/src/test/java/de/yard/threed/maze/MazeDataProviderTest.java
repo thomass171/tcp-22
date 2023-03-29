@@ -8,6 +8,7 @@ import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
+import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,34 +58,9 @@ public class MazeDataProviderTest {
         SystemManager.reset();
         MazeDataProvider.reset();
 
-        String responseBody = "{\n" +
-                "  \"name\" : \"Sokoban Wikipedia\",\n" +
-                "  \"grid\" : \"  ####\n###  ####\n#     $ #\n# #  #$ #\n# . .#@ #\n#########\",\n" +
-                "  \"secret\" : null,\n" +
-                "  \"description\" : \"The example from Wikipedia\",\n" +
-                "  \"type\" : \"S\",\n" +
-                "  \"createdAt\" : \"2023-03-18T17:16:58.609591+01:00\",\n" +
-                "  \"createdBy\" : \"admin\",\n" +
-                "  \"modifiedAt\" : \"2023-03-18T17:16:58.609591+01:00\",\n" +
-                "  \"modifiedBy\" : \"admin\",\n" +
-                "  \"_links\" : {\n" +
-                "    \"self\" : {\n" +
-                "      \"href\" : \"http://ubuntu-server.udehlavj1efjeuqv.myfritz.net/mazes/1\"\n" +
-                "    },\n" +
-                "    \"maze\" : {\n" +
-                "      \"href\" : \"http://ubuntu-server.udehlavj1efjeuqv.myfritz.net/mazes/1\"\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        MazeTestUtils.mockHttpGetSokobanWikipedia(wireMockServer);
 
         String url = "http://localhost:" + wireMockServer.port() + "/mazes/1";
-
-        wireMockServer.stubFor(get(urlEqualTo("/mazes/1"))
-                //.withHeader("Accept", matching("text/.*"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/hal+json")
-                        .withBody(responseBody)));
 
         MazeDataProvider.init(url);
 

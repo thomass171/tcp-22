@@ -66,15 +66,19 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
     @Override
     public void init() {
+    }
 
-        // 23.3.23 Load grid async
-        //Platform.getInstance().
-        loadLevel();
-        //10.11.20 ob der hier gut ist, muss sich noch zeigen.
-        MoveRecorder.init(/*movingsystem.* /currentstate*/);
+    public void frameinit() {
 
-        // 10.4.21: richtige Stelle?
-        SystemState.state = SystemState.STATE_READY_TO_JOIN;
+        // Wait for grid to be available. Might be loaded async.
+        if (SystemState.state == 0 && MazeDataProvider.getGrid() != null) {
+
+            loadLevel();
+            //10.11.20 ob der hier gut ist, muss sich noch zeigen.
+            MoveRecorder.init(/*movingsystem.* /currentstate*/);
+
+            SystemState.state = SystemState.STATE_READY_TO_JOIN;
+        }
     }
 
     /**

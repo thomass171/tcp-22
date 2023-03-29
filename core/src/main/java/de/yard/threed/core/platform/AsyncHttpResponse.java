@@ -12,12 +12,17 @@ public class AsyncHttpResponse {
     public String responseText;
     int status;
 
-    public AsyncHttpResponse(int status, List<Pair<String,String>> responseHeader, String responseText) {
+    public AsyncHttpResponse(int status, List<Pair<String, String>> responseHeader, String responseText) {
         this.status = status;
         this.responseText = responseText;
     }
 
     public int getStatus() {
         return status;
+    }
+
+    @Override
+    public String toString() {
+        return "status=" + status + ",body=" + responseText;
     }
 }

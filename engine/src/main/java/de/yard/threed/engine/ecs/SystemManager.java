@@ -22,7 +22,6 @@ import java.util.Map;
  * Created by thomass on 28.11.16.
  */
 public class SystemManager {
-    static Log logger = Platform.getInstance().getLog(SystemManager.class);
 
     private static List<EcsSystem> systems = new ArrayList<EcsSystem>();
     private static List<EcsEntity> entities = new ArrayList<EcsEntity>();
@@ -73,7 +72,7 @@ public class SystemManager {
             //27.3.20 nur mal um das klarzumachen
             throw new RuntimeException("already inited");
         }
-        logger.info("init " + systems.size() + " systems and " + entities.size() + " entities");
+        getLogger().info("init " + systems.size() + " systems and " + entities.size() + " entities");
         // systems inits might create entities
         for (EcsSystem system : systems) {
             //16.4.21: New explicit call for system init. Passing null group isType confusing. TODO remove group null call
@@ -121,7 +120,7 @@ public class SystemManager {
 
         NativeEventBus eb = Platform.getInstance().getEventBus();
         Event evt;
-        //logger.debug("update: processing " + eb.getEventCount() + " events");
+        //getLogger().debug("update: processing " + eb.getEventCount() + " events");
         while ((evt = eb.poll(0)) != null) {
             processEvent(evt);
             if (busConnector != null) {
@@ -168,7 +167,7 @@ public class SystemManager {
     }
 
     private static void processEvent(Event evt) {
-        //logger.debug("processEvent " + evt);
+        //getLogger().debug("processEvent " + evt);
         List<EcsSystem> handler = eventhandler.get(evt.getType());
         if (handler != null) {
             for (EcsSystem ebs : handler) {
@@ -270,7 +269,7 @@ public class SystemManager {
 
     public static void sendEventToClient(Event evt, String clientId) {
         if (busConnector == null) {
-            logger.warn("No bus connector");
+            getLogger().warn("No bus connector");
             return;
         }
         busConnector.pushEvent(evt, clientId);
@@ -282,7 +281,7 @@ public class SystemManager {
      * @param request
      */
     public static void putRequest(Request request) {
-        logger.debug("putRequest " + request);
+        getLogger().debug("putRequest " + request);
         requestQueue.addRequest(request);
     }
 
@@ -364,7 +363,7 @@ public class SystemManager {
     public static DataProvider getDataProvider(String name) {
         DataProvider dp = dataprovider.get(name);
         if (dp == null) {
-            logger.warn("no data provider for '" + name + "'");
+            getLogger().warn("no data provider for '" + name + "'");
         }
         return dp;
     }
@@ -384,7 +383,7 @@ public class SystemManager {
     public static EcsService getService(String name) {
         EcsService dp = services.get(name);
         if (dp == null) {
-            logger.warn("no service for '" + name + "'");
+            getLogger().warn("no service for '" + name + "'");
         }
         return dp;
     }
@@ -429,12 +428,12 @@ public class SystemManager {
             if (evt != null) {
                 netEvents.add(evt);
             } else {
-                logger.warn("Discarding event");
+                getLogger().warn("Discarding event");
             }
         } else if ((request = DefaultBusConnector.decodeRequest(packet)) != null) {
             netRequests.add(request);
         } else {
-            logger.error("unsupported packet (just a newline?): " + packet);
+            getLogger().error("unsupported packet (just a newline?): " + packet);
         }
     }
 
@@ -460,5 +459,9 @@ public class SystemManager {
     @Deprecated
     public static DefaultBusConnector getBusConnector() {
         return busConnector;
+    }
+
+    private static Log getLogger(){
+        return Platform.getInstance().getLog(SystemManager.class);
     }
 }

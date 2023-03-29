@@ -113,9 +113,10 @@ public class EngineTestFactory {
                 System.clearProperty(p);
             }
         }
+        SystemManager.reset();
         if (Platform.getInstance() != null) {
+            // the following need the looger
             BundleRegistry.clear();
-            SystemManager.reset();
             Observer.reset();
             VrInstance.reset();
         }

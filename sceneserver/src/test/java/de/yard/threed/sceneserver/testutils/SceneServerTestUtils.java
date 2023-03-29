@@ -11,6 +11,7 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.EcsTestHelper;
+import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.testutil.PayloadHook;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.ConfigurationByEnv;
@@ -107,6 +108,8 @@ public class SceneServerTestUtils {
         HomeBrewSceneRunner.dropInstance();
         MazeDataProvider.reset();
         // reset of Grid Instance not needed
+        SystemState.state = 0;
+
 
         SceneServer sceneServer = new SceneServer("subdir", sceneclass, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties));
         HomeBrewSceneRunner sceneRunner = (HomeBrewSceneRunner) sceneServer.nsr;

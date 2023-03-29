@@ -4,6 +4,7 @@ import de.yard.threed.core.Pair;
 import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.NativeFuture;
+import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.client5.http.fluent.Content;
 import org.apache.hc.client5.http.fluent.Request;
 
@@ -26,9 +27,15 @@ public class JavaWebClient {
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         Future<AsyncHttpResponse> future = executor.submit(() -> {
-            Content content = Request.get(url).execute().returnContent();
-            String s = content.asString(StandardCharsets.UTF_8);
-            return new AsyncHttpResponse(0, null, s);
+            try {
+                Content content = Request.get(url).execute().returnContent();
+                String s = content.asString(StandardCharsets.UTF_8);
+                return new AsyncHttpResponse(0, null, s);
+            } catch (HttpResponseException e) {
+                return new AsyncHttpResponse(e.getStatusCode(), null, null);
+            } catch (Exception e) {
+                return new AsyncHttpResponse(-1, null, null);
+            }
         });
 
         return new JavaFuture(future);

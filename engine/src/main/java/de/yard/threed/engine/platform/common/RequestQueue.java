@@ -4,7 +4,6 @@ package de.yard.threed.engine.platform.common;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
-import de.yard.threed.engine.ecs.SystemTracker;
 
 import java.util.*;
 
@@ -14,7 +13,6 @@ import java.util.*;
  * 21.3.19
  */
 public class RequestQueue {
-    static Log logger = Platform.getInstance().getLog(RequestQueue.class);
 
     private List<Request> requests = new ArrayList<Request>();
     private Map<RequestType, List<RequestHandler>> requesthandler = new HashMap<RequestType, List<RequestHandler>>();
@@ -67,7 +65,7 @@ public class RequestQueue {
 
     public void addRequest(Request request) {
         if (request == null) {
-            logger.warn("Ignoring null request");
+            getLogger().warn("Ignoring null request");
             return;
         }
         requests.add(request);
@@ -115,5 +113,9 @@ public class RequestQueue {
             }
         }
         return processed;
+    }
+
+    private static Log getLogger(){
+        return Platform.getInstance().getLog(RequestQueue.class);
     }
 }

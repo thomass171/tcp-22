@@ -17,6 +17,8 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
+import static de.yard.threed.javanative.JavaUtil.sleepMs;
+
 /**
  * A scene runner for tests. Needed because tests are not related to any platform and the homebrew scene runner
  * is not available here. And SimpleHeadless has no scene runner.
@@ -119,15 +121,20 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
     /**
      * @param frameCount
      */
-    public void runLimitedFrames(int frameCount, double tpf) {
+    public void runLimitedFrames(int frameCount, double tpf, int delay) {
         for (int i = 0; i < frameCount; i++) {
             singleUpdate(tpf);
+            sleepMs(delay);
         }
+    }
+
+    public void runLimitedFrames(int frameCount, double tpf) {
+        runLimitedFrames(frameCount, tpf, 0);
     }
 
     public void runLimitedFrames(int frameCount) {
         // tpf 0 ist unguenstig, dann bewegt sich nichts.
-        runLimitedFrames(frameCount, 0.1);
+        runLimitedFrames(frameCount, 0.1, 0);
     }
 
     /**
