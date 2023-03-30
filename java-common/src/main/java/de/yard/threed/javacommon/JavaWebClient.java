@@ -30,7 +30,8 @@ public class JavaWebClient {
             try {
                 Content content = Request.get(url).execute().returnContent();
                 String s = content.asString(StandardCharsets.UTF_8);
-                return new AsyncHttpResponse(0, null, s);
+                // just assume its 200
+                return new AsyncHttpResponse(200, null, s);
             } catch (HttpResponseException e) {
                 return new AsyncHttpResponse(e.getStatusCode(), null, null);
             } catch (Exception e) {

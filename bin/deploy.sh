@@ -54,6 +54,7 @@ $COPYCMD $BUILDDIR/.htaccess $HOSTDIR
 $COPYCMD docs/tcp-22.html $HOSTDIR
 $COPYCMD docs/tcp-22.js $HOSTDIR
 $COPYCMD docs/util.js $HOSTDIR
+$COPYCMD docs/sceneutil.js $HOSTDIR
 $COPYCMD $BUILDDIR/version.html $HOSTDIR
 $COPYCMD docs/*.png $HOSTDIR
 $COPYCMD docs/favicon.ico $HOSTDIR

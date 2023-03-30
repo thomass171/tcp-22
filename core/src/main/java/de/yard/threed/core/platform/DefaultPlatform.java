@@ -236,7 +236,7 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public void httpGet(String url, List<Pair<String,String>> params, List<Pair<String,String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
+    public void httpGet(String url, List<Pair<String,String>> parameter, List<Pair<String,String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
         throw new RuntimeException(("not implemented"));
     }
 

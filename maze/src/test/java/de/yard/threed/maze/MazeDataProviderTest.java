@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -51,6 +52,12 @@ public class MazeDataProviderTest {
         Assertions.assertNotNull(gridName);
         // the default name without explicit initial maze
         assertEquals("skbn/SokobanWikipedia.txt", gridName);
+    }
+
+    @Test
+    public void testGridTestData() throws Exception {
+        // The grid should contain the sequence '\''n' as separate character.
+        assertTrue(MazeTestUtils.responseBody.contains("\\n"));
     }
 
     @Test

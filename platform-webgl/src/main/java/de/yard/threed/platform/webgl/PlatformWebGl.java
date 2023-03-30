@@ -2,6 +2,11 @@ package de.yard.threed.platform.webgl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.typedarrays.shared.ArrayBuffer;
@@ -13,6 +18,7 @@ import com.google.gwt.xml.client.XMLParser;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
@@ -144,8 +150,36 @@ public class PlatformWebGl extends Platform {
     }*/
 
     @Override
-    public void httpGet(String url, List<Pair<String,String>> params, List<Pair<String,String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
-        throw new RuntimeException(("not implemented"));
+    public void httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
+
+        // Using a name 'requestBuilder' instead of 'rb' apparently causes strange runtime errors(??).
+        RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, url);
+        //not valid in CORS. Useless anyway? requestBuilder.setHeader("Mime-Type", "text/plain");
+        //Might cause code 406 rb.setHeader("Accept", "text/plain");
+        try {
+            rb.sendRequest(null, new RequestCallback() {
+                public void onError(Request request, Throwable exception) {
+                    logger.error("onError" + exception.getMessage());
+                }
+
+                public void onResponseReceived(Request request, Response response) {
+
+                    String responsedata = response.getText();
+                    if (response.getStatusCode() != 200) {
+                        logger.error("Status code " + response.getStatusCode() + " for url " + url);
+                    }
+                    // hier kommt man auch hin, wenn der Server eine Fehlerseite schickt (z.b: Jetty im Dev mode)
+                    AsyncHttpResponse r = new AsyncHttpResponse(response.getStatusCode(), null, responsedata);
+                    NativeFuture<AsyncHttpResponse> future = new WebGlFuture<AsyncHttpResponse>(r);
+                    sceneRunner.addFuture(future, asyncJobDelegate);
+
+                }
+            });
+        } catch (RequestException e) {
+            e.printStackTrace();
+            //TODO Fehlerhandling
+            logger.error("loadRessource" + e.getMessage());
+        }
     }
 
     @Override

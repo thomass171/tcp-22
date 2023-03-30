@@ -221,27 +221,27 @@ public class MazeTestUtils {
         return sceneRunner;
     }
 
-    public static void mockHttpGetSokobanWikipedia(WireMockServer wireMockServer) throws Exception {
+    public static String responseBody = "{\n" +
+            "  \"name\" : \"Sokoban Wikipedia\",\n" +
+            "  \"grid\" : \"  ####\\n###  ####\\n#     $ #\\n# #  #$ #\\n# . .#@ #\\n#########\",\n" +
+            "  \"secret\" : null,\n" +
+            "  \"description\" : \"The example from Wikipedia\",\n" +
+            "  \"type\" : \"S\",\n" +
+            "  \"createdAt\" : \"2023-03-18T17:16:58.609591+01:00\",\n" +
+            "  \"createdBy\" : \"admin\",\n" +
+            "  \"modifiedAt\" : \"2023-03-18T17:16:58.609591+01:00\",\n" +
+            "  \"modifiedBy\" : \"admin\",\n" +
+            "  \"_links\" : {\n" +
+            "    \"self\" : {\n" +
+            "      \"href\" : \"http://ubuntu-server.udehlavj1efjeuqv.myfritz.net/mazes/1\"\n" +
+            "    },\n" +
+            "    \"maze\" : {\n" +
+            "      \"href\" : \"http://ubuntu-server.udehlavj1efjeuqv.myfritz.net/mazes/1\"\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
 
-        String responseBody = "{\n" +
-                "  \"name\" : \"Sokoban Wikipedia\",\n" +
-                "  \"grid\" : \"  ####\n###  ####\n#     $ #\n# #  #$ #\n# . .#@ #\n#########\",\n" +
-                "  \"secret\" : null,\n" +
-                "  \"description\" : \"The example from Wikipedia\",\n" +
-                "  \"type\" : \"S\",\n" +
-                "  \"createdAt\" : \"2023-03-18T17:16:58.609591+01:00\",\n" +
-                "  \"createdBy\" : \"admin\",\n" +
-                "  \"modifiedAt\" : \"2023-03-18T17:16:58.609591+01:00\",\n" +
-                "  \"modifiedBy\" : \"admin\",\n" +
-                "  \"_links\" : {\n" +
-                "    \"self\" : {\n" +
-                "      \"href\" : \"http://ubuntu-server.udehlavj1efjeuqv.myfritz.net/mazes/1\"\n" +
-                "    },\n" +
-                "    \"maze\" : {\n" +
-                "      \"href\" : \"http://ubuntu-server.udehlavj1efjeuqv.myfritz.net/mazes/1\"\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+    public static void mockHttpGetSokobanWikipedia(WireMockServer wireMockServer) throws Exception {
 
         String url = "http://localhost:" + wireMockServer.port() + "/mazes/1";
 

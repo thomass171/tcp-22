@@ -462,7 +462,7 @@ public abstract class Platform {
     /**
      * "response" will be null in case of network error (ie. no network connection and thus no response)
      */
-    public abstract void httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate);
+    public abstract void httpGet(String url, List<Pair<String, String>> parameter, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate);
 
     /**
      * 23.7.21: NativeScene should be created initially in platform instead of Scenerunner

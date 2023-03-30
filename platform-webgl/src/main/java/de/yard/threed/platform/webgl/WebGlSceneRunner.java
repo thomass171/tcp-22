@@ -70,30 +70,30 @@ public class WebGlSceneRunner extends AbstractSceneRunner implements NativeScene
             dimension = new Dimension(Window.getClientWidth(), Window.getClientHeight());
         }
         AbstractSceneRunner.getInstance().dimension = dimension;
-
+        Platform.getInstance().sceneRunner = this;
 
         // Die ScreenViewer Camera gehoert nicht zur Scene und wird daher aich nicht an dei
         // Scene geadded.
 
         //((EngineHelper)PlatformWebGl.getInstance()).setWorld(new World());
         World world = new World();
-        Scene.world=world;
+        Scene.world = world;
         double fov = (scsettings.fov == null) ? Settings.defaultfov : scsettings.fov;
         double near = (scsettings.near == null) ? Settings.defaultnear : scsettings.near;
         double far = (scsettings.far == null) ? Settings.defaultfar : scsettings.far;
         double aspect = (double) dimension.getWidth() / dimension.getHeight();
 
-        WebGlCamera webglcamera = WebGlCamera.buildPerspectiveCamera(webglscene,fov,aspect,near,far);
+        WebGlCamera webglcamera = WebGlCamera.buildPerspectiveCamera(webglscene, fov, aspect, near, far);
         webglcamera.setName("Main Camera");
         Transform worldtranform = Scene.getWorld().getTransform();
         //7.5.21 Das mach ich mal nicht mehr. Warum sollte die camera in die world. Wenn, soll das doch die Scene machen. Und in VR stoert es massiv (MA35).
         //14.6.21: Aber als Konvention ist das so vorgesehen (siehe ReferenceSceneTests). Evtl. auch wegen mirror in Unity. Also hier
         //doch erstmal setzen. Für VR wird es spaeter at runtime geloescht.
-        WebGlObject3D.setParent(webglcamera.carrier.object3d,((WebGlObject3D)worldtranform.transform).object3d);
+        WebGlObject3D.setParent(webglcamera.carrier.object3d, ((WebGlObject3D) worldtranform.transform).object3d);
         scene.setSceneAndCamera(webglscene, /*webglcamera,*/ Scene.getWorld());
         sceneRenderer = WebGlSceneRenderer.buildInstance((Scene) scene, canvasPanel, scsettings);
 
-        ((WebGlBundleLoader)Platform.getInstance().bundleLoader).preLoad(scene.getPreInitBundle());
+        ((WebGlBundleLoader) Platform.getInstance().bundleLoader).preLoad(scene.getPreInitBundle());
 
         // Preload still running
         sceneRenderer.startRenderLoop();

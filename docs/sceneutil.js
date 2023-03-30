@@ -30,5 +30,6 @@ function launchScene(scenename,args) {
         url += "&" + key + "=" + value;
     });
 
+    console.log("Opening url ", url);
     var win = window.open(url, '_blank');
 }
