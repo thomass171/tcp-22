@@ -120,8 +120,8 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
                 this.flyCam.setEnabled(false);
 
                 Platform.getInstance().nativeScene = JmeScene.getInstance();
-                Platform.getInstance().sceneRunner = instance;
                 initAbstract(null/*JmeScene.getInstance(), rm*/, scene);
+                Platform.getInstance().sceneRunner = instance;
 
                 World world = new World();
                 //((EngineHelper) PlatformJme.getInstance()).setWorld(new World());

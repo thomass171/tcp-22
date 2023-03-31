@@ -122,7 +122,8 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
 
     @Override
     public void httpGet(String url, List<Pair<String,String>> params, List<Pair<String,String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
-        throw new RuntimeException(("not implemented"));
+        NativeFuture<AsyncHttpResponse> future = JavaWebClient.httpGet(url, params, header, asyncJobDelegate);
+        sceneRunner.addFuture(future, asyncJobDelegate);
     }
 
     @Override

@@ -16,8 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -56,8 +55,8 @@ public class MazeDataProviderTest {
 
     @Test
     public void testGridTestData() throws Exception {
-        // The grid should contain the sequence '\''n' as separate character.
-        assertTrue(MazeTestUtils.responseBody.contains("\\n"));
+        // The grid should not contain the sequence '\''n' as separate character.
+        assertFalse(MazeTestUtils.responseBody.contains("\\"));
     }
 
     @Test

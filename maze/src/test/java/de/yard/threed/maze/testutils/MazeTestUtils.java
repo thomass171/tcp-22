@@ -223,7 +223,7 @@ public class MazeTestUtils {
 
     public static String responseBody = "{\n" +
             "  \"name\" : \"Sokoban Wikipedia\",\n" +
-            "  \"grid\" : \"  ####\\n###  ####\\n#     $ #\\n# #  #$ #\\n# . .#@ #\\n#########\",\n" +
+            "  \"grid\" : \"  ####n###  ####n#     $ #n# #  #$ #n# . .#@ #n#########\",\n" +
             "  \"secret\" : null,\n" +
             "  \"description\" : \"The example from Wikipedia\",\n" +
             "  \"type\" : \"S\",\n" +

@@ -25,6 +25,8 @@ public class Setup {
             "  ]\n" +
             "}";
 
+    static String mazeshost = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net";
+
     public static HashMap<String, String> setUp() {
         HashMap<String, String> properties = new HashMap<String, String>();
 
@@ -57,6 +59,7 @@ public class Setup {
         //properties.put("argv.enableNearView", "true");
         properties.put("initialMaze", "skbn/SokobanWikipedia.txt");
         properties.put("initialMaze", "maze/Maze-P-Simple.txt");
+        properties.put("initialMaze", mazeshost + "/mazes/1");
         //properties.put("argv.initialMaze", "maze/Maze-P-60x20.txt");
         //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");
         //properties.put("argv.initialMaze","maze/Area15x10.txt");
