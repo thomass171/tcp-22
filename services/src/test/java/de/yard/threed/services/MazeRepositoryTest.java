@@ -1,5 +1,12 @@
 package de.yard.threed.services;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import de.yard.threed.services.maze.Maze;
 import de.yard.threed.services.maze.MazeRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -7,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -21,6 +29,7 @@ import static de.yard.threed.services.util.Util.buildList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 public class MazeRepositoryTest {
@@ -85,7 +94,7 @@ public class MazeRepositoryTest {
         maze1.setName("name");
         maze1.setGrid("aa\nbb");
         // make sure it really is newline
-        assertEquals(5,maze1.getGrid().length());
+        assertEquals(5, maze1.getGrid().length());
         maze1.setSecret("sec");
         maze1.setDescription("bb");
         maze1.setType("P");
@@ -97,4 +106,24 @@ public class MazeRepositoryTest {
         mazeRepository.save(maze1);
 
     }
+
+    @Test
+    @Sql({"classpath:testGrids.sql"})
+    public void testFindByName() throws Exception {
+        this.mockMvc.perform(get("/mazes/mazes/search/findByName?name=Sokoban Wikipedia")).andDo(print())
+                .andExpect(content().string(containsString("##")));
     }
+
+    @Test
+    @Sql({"classpath:testGrids.sql"})
+    public void testHidingSecrets() throws Exception {
+        this.mockMvc.perform(get("/mazes/mazes")).andDo(print())
+                .andExpect(content().string(not(containsString("secret"))));
+
+        this.mockMvc.perform(get("/mazes/mazes")).andDo(print())
+                .andExpect(content().string(containsString("\"locked\" : false")));
+
+        this.mockMvc.perform(get("/mazes/mazes/search/findByName?name=Sokoban Wikipedia")).andDo(print())
+                .andExpect(content().string(containsString("\"locked\" : true")));
+    }
+}
