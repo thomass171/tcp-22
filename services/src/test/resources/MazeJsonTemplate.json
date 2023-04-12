@@ -1,0 +1,11 @@
+{
+  "name": "Sokoban Wikipedia",
+  "grid": "  ####n###  ####n#     $ #n# #  #$ #n# . .#@ #n#########",
+  "secret": "should be ignored",
+  "description": "The example from Wikipedia",
+  "type": "S",
+  "createdAt": "2020-04-11T17:02:50.251+02:00",
+  "createdBy": "admin",
+  "modifiedAt": "2020-04-11T17:02:50.251+02:00",
+  "modifiedBy": "admin"
+}

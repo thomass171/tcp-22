@@ -1,6 +1,7 @@
 package de.yard.threed.services.maze;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import javax.persistence.Column;
@@ -16,6 +17,9 @@ import java.time.ZonedDateTime;
 @Entity
 @Data
 @Table
+//@JsonDeserialize(using = MazeDeserializer.class)
+// Exclude some fields from deserialization
+@JsonIgnoreProperties(value = {"id","createdAt","createdBy","modifiedAt","modifiedBy"}, allowGetters = true)
 public class Maze {
 
     @Id
@@ -53,6 +57,13 @@ public class Maze {
 
     @Transient
     private boolean locked;
+
+    public Maze() {
+        createdAt = ZonedDateTime.now();
+        createdBy = "";
+        modifiedAt = ZonedDateTime.now();
+        modifiedBy = "";
+    }
 
     public boolean getLocked() {
         return getSecret() != null;

@@ -1,14 +1,17 @@
 package de.yard.threed.services;
 
+import static de.yard.threed.testutils.TestUtils.loadFileFromClasspath;
+import static de.yard.threed.testutils.TestUtils.validateAlmostNow;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import de.yard.threed.services.maze.Maze;
 import de.yard.threed.services.maze.MazeRepository;
+import de.yard.threed.testutils.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,23 +19,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.ZonedDateTime;
 
 import static de.yard.threed.services.util.Util.buildList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration
 public class MazeRepositoryTest {
+
+    final String SB_NAME = "Sokoban Wikipedia";
+    final String S10x10_NAME = "Sokoban 10x10";
+    final String ENDPOINT_MAZES = "/mazes/mazes";
 
     private MockMvc mockMvc;
 
@@ -41,6 +49,9 @@ public class MazeRepositoryTest {
 
     @Autowired
     private WebApplicationContext context;
+
+    @Autowired
+    private JsonService jsonService;
 
     @BeforeEach
     void setUp() {
@@ -125,5 +136,92 @@ public class MazeRepositoryTest {
 
         this.mockMvc.perform(get("/mazes/mazes/search/findByName?name=Sokoban Wikipedia")).andDo(print())
                 .andExpect(content().string(containsString("\"locked\" : true")));
+    }
+
+    @Test
+    @Sql({"classpath:testGrids.sql"})
+    public void postNewShouldCreate() throws Exception {
+
+        String json = loadFileFromClasspath("MazeJsonTemplate.json");
+        json = json.replace("Sokoban Wikipedia", "Playground");
+        MvcResult result = TestUtils.doPost(mockMvc, ENDPOINT_MAZES, json);
+        assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
+
+        assertEquals(3, mazeRepository.count());
+        assertNotNull(mazeRepository.findByName("Playground"));
+        assertEquals("Playground", mazeRepository.findByName("Playground").getName());
+    }
+
+    @Test
+    @Sql({"classpath:testGrids.sql"})
+    public void postWithDuplicateNameShouldFail() throws Exception {
+
+        String json = loadFileFromClasspath("MazeJsonTemplate.json");
+
+        MvcResult result = TestUtils.doPost(mockMvc, ENDPOINT_MAZES, json);
+        // unique constraint violation causing 409 (conflict)
+        assertEquals(HttpStatus.CONFLICT.value(), result.getResponse().getStatus());
+    }
+
+    @Test
+    @Sql({"classpath:testGrids.sql"})
+    public void testPatch() throws Exception {
+
+        Maze mazeSB = getMazeByName(SB_NAME);
+        //String json = loadFileFromClasspath("MazeJsonTemplate.json");
+        String json = "{\"description\": \"New description\"}";
+
+        // Locked without key Should fail
+        String requestBody = jsonService.modelToJson(mazeSB);
+        assertFalse(requestBody.contains("secret"));
+        MvcResult result = TestUtils.doPatch(mockMvc, ENDPOINT_MAZES + "/" + mazeSB.getId(), requestBody);
+        assertEquals(403, result.getResponse().getStatus());
+
+        // Locked with wrong key should fail
+        requestBody = jsonService.modelToJson(mazeSB);
+        result = TestUtils.doPatchWithKey(mockMvc, ENDPOINT_MAZES + "/" + mazeSB.getId(), requestBody, "invalid");
+        assertEquals(403, result.getResponse().getStatus());
+
+        // Locked with valid key should succeed
+        requestBody = jsonService.modelToJson(mazeSB);
+        result = TestUtils.doPatchWithKey(mockMvc, ENDPOINT_MAZES + "/" + mazeSB.getId(), requestBody, "Baskerville");
+        assertEquals(HttpStatus.NO_CONTENT.value(), result.getResponse().getStatus());
+
+        // unlocked without key should succeed
+        Maze mazeS10x10 = getMazeByName(S10x10_NAME);
+        requestBody = jsonService.modelToJson(mazeS10x10).replace(S10x10_NAME, "play");
+
+        result = TestUtils.doPatch(mockMvc, ENDPOINT_MAZES + "/" + mazeS10x10.getId(), requestBody);
+        assertEquals(HttpStatus.NO_CONTENT.value(), result.getResponse().getStatus());
+        assertNotNull(getMazeByName("play"));
+    }
+
+    @Test
+    @Sql({"classpath:testGrids.sql"})
+    public void testExcludedFieldsFromDeserialization() throws Exception {
+        Maze maze = getMazeByName(SB_NAME);
+        assertNotNull(maze.getId());
+        assertNotNull(maze.getCreatedAt());
+        maze.setCreatedAt(ZonedDateTime.now().minusYears(2));
+
+        maze = jsonService.jsonToModel(jsonService.modelToJson(maze), Maze.class);
+
+        assertNull(maze.getId());
+        // filled with default in constructor
+        assertNotNull(maze.getCreatedAt());
+        validateAlmostNow(maze.getCreatedAt());
+
+    }
+
+    private Maze getMazeByName(String name) {
+        Maze maze = mazeRepository.findByName(name);
+        assertEquals(name, maze.getName());
+        if (name.equals(SB_NAME)) {
+            assertTrue(maze.getLocked());
+        }
+        if (name.equals(S10x10_NAME)) {
+            assertFalse(maze.getLocked());
+        }
+        return maze;
     }
 }
