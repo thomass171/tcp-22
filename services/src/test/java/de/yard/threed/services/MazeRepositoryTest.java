@@ -40,7 +40,7 @@ public class MazeRepositoryTest {
 
     final String SB_NAME = "Sokoban Wikipedia";
     final String S10x10_NAME = "Sokoban 10x10";
-    final String ENDPOINT_MAZES = "/mazes/mazes";
+    public static final String ENDPOINT_MAZES = "/mazes/mazes";
 
     private MockMvc mockMvc;
 

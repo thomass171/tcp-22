@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 public class ServicesControllerTest {
 
-    private String URL = "/mazes/confirmsecret";
+    public static String ENDPOINT_CONFIRM_SECRET = "/mazes/confirmsecret";
 
     @Value(value = "${local.server.port}")
     private int port;
@@ -80,7 +80,7 @@ public class ServicesControllerTest {
     }
 
     private Content confirmSecret(long mazeId, String secret) throws Exception {
-        URI uri = new URIBuilder("http://localhost:" + port + URL)
+        URI uri = new URIBuilder("http://localhost:" + port + ENDPOINT_CONFIRM_SECRET)
                 .addParameter((secret != null) ? "secret" : "xx", secret)
                 .addParameter("mazeid", "" + mazeId)
                 .build();

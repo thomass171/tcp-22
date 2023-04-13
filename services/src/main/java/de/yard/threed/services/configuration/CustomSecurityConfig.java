@@ -17,7 +17,9 @@ public class CustomSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        // 'cors' needs to be the first entry
+        http.cors().and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .csrf(CsrfConfigurer::disable)
                 .authorizeRequests()
