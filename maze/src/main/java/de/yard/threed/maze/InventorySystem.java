@@ -32,7 +32,7 @@ public class InventorySystem extends DefaultEcsSystem {
      */
     public InventorySystem() {
         super(new RequestType[]{}, new EventType[]{
-                EVENT_ITEM_COLLECTED, EventRegistry.EVENT_BULLET_FIRED});
+                EVENT_ITEM_COLLECTED, MazeEventRegistry.EVENT_BULLET_FIRED});
     }
 
     @Override

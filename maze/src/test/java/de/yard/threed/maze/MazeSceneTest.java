@@ -1,13 +1,16 @@
 package de.yard.threed.maze;
 
+import de.yard.threed.core.Event;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.Ray;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.InputToRequestSystem;
 import de.yard.threed.engine.ecs.SystemManager;
@@ -19,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static de.yard.threed.maze.MazeEventRegistry.EVENT_MAZE_VISUALIZED;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -54,6 +58,8 @@ public class MazeSceneTest {
         assertTrue(SystemState.readyToJoin());
         MazeVisualizationSystem mazeVisualizationSystem = ((MazeVisualizationSystem) SystemManager.findSystem(MazeVisualizationSystem.TAG));
         assertNotNull(mazeVisualizationSystem.gridTeleporter);
+
+        assertEquals(1, EcsTestHelper.filterEventList(((SimpleEventBusForTesting) Platform.getInstance().getEventBus()).getEventHistory(), (e) -> e.getType().equals(EVENT_MAZE_VISUALIZED)).size(), "EVENT_MAZE_VISUALIZED");
 
         EcsEntity user = UserSystem.getInitialUser();
         assertNotNull(user);

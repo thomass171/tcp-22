@@ -7,7 +7,7 @@ import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.javanative.JavaUtil;
-import de.yard.threed.maze.EventRegistry;
+import de.yard.threed.maze.MazeEventRegistry;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -46,7 +46,7 @@ public class RealServerTest {
 
         // MAke sure to register all needed events/requests, even with some components  in an outside server
         BaseEventRegistry baseEventRegistry = new BaseEventRegistry();
-        EventRegistry eentRegistry = new EventRegistry();
+        MazeEventRegistry eentRegistry = new MazeEventRegistry();
     }
 
     @AfterEach

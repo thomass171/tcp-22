@@ -184,14 +184,17 @@ public class MazeScene extends Scene {
         }
 
         if (sceneMode.isServer() && !sceneMode.isClient()) {
-            SystemManager.addSystem(ServerSystem.buildForInitialEventsForClient(new EventType[]{EventRegistry.EVENT_MAZE_LOADED}));
+            SystemManager.addSystem(ServerSystem.buildForInitialEventsForClient(new EventType[]{MazeEventRegistry.EVENT_MAZE_LOADED}));
         }
         if (!sceneMode.isServer() && sceneMode.isClient()) {
             SystemManager.addSystem(new ClientSystem(new ModelBuilderRegistry[]{new MazeAvatarBuilder(), MazeModelFactory.getInstance()}));
         }
 
-        // grid loading might be aync!
-        MazeDataProvider.init();
+        // In pure client mode the grid to be loaded is received from server via event MAZE_LOADED.
+        if (sceneMode.isServer()) {
+            // grid loading might be aync!
+            MazeDataProvider.init();
+        }
         addLight();
 
         // Send login request in both monolith and client mode

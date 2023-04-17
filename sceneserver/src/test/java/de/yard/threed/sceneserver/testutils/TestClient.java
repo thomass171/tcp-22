@@ -22,13 +22,11 @@ import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.testutil.EventFilter;
 import de.yard.threed.engine.ecs.ServerSystem;
 import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.Request;
-import de.yard.threed.maze.EventRegistry;
+import de.yard.threed.maze.MazeEventRegistry;
 import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeUtils;
-import de.yard.threed.sceneserver.Main;
 import de.yard.threed.sceneserver.SceneServer;
 import de.yard.threed.sceneserver.SceneServerBusConnector;
 import org.junit.jupiter.api.Assertions;
@@ -212,7 +210,7 @@ public class TestClient {
     }
 
     public void assertEventMazeLoaded(String gridName) {
-        SceneServerTestUtils.assertEvents(EventRegistry.EVENT_MAZE_LOADED, systemTracker.getEventsProcessed(), 1, p -> {
+        SceneServerTestUtils.assertEvents(MazeEventRegistry.EVENT_MAZE_LOADED, systemTracker.getEventsProcessed(), 1, p -> {
             assertEquals(gridName, p.get("gridname"));
         });
         //ServerSystem not available with real server

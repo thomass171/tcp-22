@@ -2,6 +2,7 @@ package de.yard.threed.maze;
 
 
 import de.yard.threed.core.Point;
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.StringReader;
@@ -21,11 +22,12 @@ import java.util.Map;
  * <p>
  * 26.4.21: Vielleicht mache ich den mal static? Aber nicht schoen wegen unabhaengiger Tests. TODO der static muss in ?? MazeScene? Oder als Provider ins System?
  * <p>
+ * 16.4.23: Until today property 'name' is not needed.
  * <p/>
  * Created by thomass on 15.07.15.
  */
 public class Grid {
-    Log logger = Platform.getInstance().getLog(Grid.class);
+
     MazeLayout layout;
     List<Point> boxes;
     List<Point> diamonds;
@@ -37,12 +39,14 @@ public class Grid {
     static int STRAIGHTWALLMODE_FULL = 1;
     static final int STRAIGHTWALLMODE_LOW_PART = 2;
     static final int STRAIGHTWALLMODE_HIGH_PART = 3;
+    private String rawGrid;
 
-    public Grid(MazeLayout layout, List<Point> boxes, List<Point> diamonds, Map<String, String> tags) throws InvalidMazeException {
+    public Grid(MazeLayout layout, List<Point> boxes, List<Point> diamonds, Map<String, String> tags, String rawGrid) throws InvalidMazeException {
         this.layout = layout;
         this.boxes = boxes;
         this.diamonds = diamonds;
         this.tags = tags;
+        this.rawGrid = rawGrid;
         if (!GridValidator.hasClosedWallBoundary(this)) {
             throw new InvalidMazeException("no closed wall boundary");
         }
@@ -54,8 +58,33 @@ public class Grid {
         return reader.readGrid(ins);
     }
 
+
+    /**
+     * There is no need for a grid name.
+     * Returns null in case of error (already logged the error)
+     */
+    public static Grid loadFromRaw(String rawGrid) {
+
+        if (rawGrid == null) {
+            getLogger().error("rawGrid is null");
+            return null;
+        }
+        try {
+            List<Grid> grids = loadByReader(new StringReader(StringUtils.replaceAll(rawGrid, "n", "\n")));
+            if (grids.size() != 1) {
+                getLogger().warn("inconsistent raw grid. Using first entry");
+            }
+            Grid grid = grids.get(0);
+            return grid;
+        } catch (InvalidMazeException e) {
+            getLogger().error("load error: InvalidMazeException:" + e.getMessage());
+            return null;
+        }
+    }
+
     /**
      * 15.2.23 TODO should be no static singleton
+     *
      * @return
      */
     @Deprecated
@@ -294,4 +323,11 @@ public class Grid {
         return wallNeighbors;
     }
 
+    public String getRaw() {
+        return rawGrid;
+    }
+
+    private static Log getLogger() {
+        return Platform.getInstance().getLog(Grid.class);
+    }
 }

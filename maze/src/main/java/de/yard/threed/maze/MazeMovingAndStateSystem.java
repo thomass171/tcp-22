@@ -502,7 +502,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
     /**
      * There is no level reload, so no need to get rid of old one.
-     * TODO Fehlerbehandlung
+     * This is triggered when grid data was loaded (eg. from a remote server) and the data provider is ready.
+     * TODO error handling
      */
     private void loadLevel() {
         logger.debug("loadLevel ");
@@ -541,7 +542,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         // 20.12.22: Bullets for player are created at join time. Since bots are just a kind of multiplayer, the same applies to bots.
 
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
-        SystemManager.sendEvent(new Event(EventRegistry.EVENT_MAZE_LOADED, new Payload().add("gridname", MazeDataProvider.getGridName())));
+        SystemManager.sendEvent(MazeEventRegistry.buildMazeLoadedEvent(MazeDataProvider.getGridName(), grid.getRaw()));
 
         //11.4.16 addTestObjekte();
         logger.debug("load of " + MazeDataProvider.getGridName() + " completed. state = " + SystemState.getStateAsString());

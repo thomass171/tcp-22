@@ -105,7 +105,7 @@ public class SystemManager {
     }
 
     /**
-     * Vor dem eigentlichen update() werden erst anliegende Requests und Events verarbeitet.
+     * Before calling update() in each ECS System, the incoming requests and events are processed.
      *
      * @param tpf
      */

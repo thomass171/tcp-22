@@ -85,6 +85,7 @@ class GridDraft {
         destinations = new ArrayList<Point>();
         diamonds = new ArrayList<Point>();
         fields = new ArrayList<Point>();
+        String rawGrid = "";
 
         if (rows.size() < 3) {
             throw new InvalidMazeException("less than 3 rows:inconsistent grid?");
@@ -153,14 +154,14 @@ class GridDraft {
                             throw new InvalidMazeException("invalid char " + c);
                     }
                 }
+                rawGrid = row + "n" + rawGrid;
             }
         }
         if (playerposition.size() == 0)
             throw new InvalidMazeException("no start position");
         //default heading is 'N'orth.
         MazeLayout mazeLayout = new MazeLayout(walls, destinations, playerposition, maxwidth, height, fields);
-        Grid grid = new Grid(mazeLayout, boxes, diamonds, tags);
-
+        Grid grid = new Grid(mazeLayout, boxes, diamonds, tags, rawGrid);
         return grid;
 
     }

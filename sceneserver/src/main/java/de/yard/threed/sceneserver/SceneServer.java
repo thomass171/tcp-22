@@ -9,6 +9,7 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.javanative.ConfigurationHelper;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.platform.homebrew.HomeBrewSceneRunner;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Server;
 
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.HashMap;
  * <p>
  * Corresponds functionally to JMEs or homebrew {@link de.yard.threed.platform.homebrew.Main}.
  */
+@Slf4j
 public class SceneServer {
     public /*Native*/ AbstractSceneRunner nsr;
     Scene updater;
@@ -47,6 +49,7 @@ public class SceneServer {
      */
     public void runServer(int port) throws Exception {
 
+        log.info("Starting SceneServer on base port {}", port);
         // exceptions while starting jetty will be catched/handled by main catch.
         jettyServer = JettyServer.startJettyServer(port + 1);
 

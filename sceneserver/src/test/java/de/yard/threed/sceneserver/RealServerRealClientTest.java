@@ -1,6 +1,8 @@
 package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Event;
+import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.ClientSystem;
@@ -27,7 +29,8 @@ import java.util.List;
 
 import static de.yard.threed.engine.ecs.UserSystem.USER_EVENT_JOINED;
 import static de.yard.threed.engine.ecs.UserSystem.USER_EVENT_LOGGEDIN;
-import static de.yard.threed.maze.EventRegistry.EVENT_MAZE_LOADED;
+import static de.yard.threed.maze.MazeEventRegistry.EVENT_MAZE_LOADED;
+import static de.yard.threed.maze.MazeEventRegistry.EVENT_MAZE_VISUALIZED;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -84,11 +87,14 @@ public class RealServerRealClientTest {
 
         List<Event> eventlist = EcsTestHelper.toEventList(systemTracker.getPacketsReceivedFromNetwork());
         eventlist = EcsTestHelper.filterEventList(eventlist, (e) -> e.getType().getType() != BaseEventRegistry.EVENT_ENTITYSTATE.getType());
-        // should have MAZE_LOADED, LOGIN and JOINED
+        // should have MAZE_LOADED, LOGIN and JOINED from network
         assertEquals(3, eventlist.size());
         assertEquals(EVENT_MAZE_LOADED.getType(), eventlist.get(0).getType().getType());
         assertEquals(USER_EVENT_LOGGEDIN.getType(), eventlist.get(1).getType().getType());
         assertEquals(USER_EVENT_JOINED.getType(), eventlist.get(2).getType().getType());
+
+        // As result of EVENT_MAZE_LOADED we should have EVENT_MAZE_VISUALIZED locally
+        assertEquals(1, EcsTestHelper.filterEventList(((SimpleEventBusForTesting) Platform.getInstance().getEventBus()).getEventHistory(), (e) -> e.getType().equals(EVENT_MAZE_VISUALIZED)).size(), "EVENT_MAZE_VISUALIZED");
 
         // Entity change events should be complete. The total number might vary.
         SceneServerTestUtils.assertAllEventEntityState(EcsTestHelper.toEventList(systemTracker.getPacketsReceivedFromNetwork()));
@@ -97,8 +103,8 @@ public class RealServerRealClientTest {
         assertEquals(2 + 1, SystemManager.findEntities((EntityFilter) null).size(),
                 "number of entites (2 boxes + player)");
 
-        // only a login request should have been sent
-        assertEquals(1, systemTracker.getPacketsSentToNetwork().size());
+        // only a login request and a EVENT_MAZE_VISUALIZED should have been sent
+        assertEquals(2, systemTracker.getPacketsSentToNetwork().size());
 
     }
 }

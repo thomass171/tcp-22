@@ -6,7 +6,6 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.platform.PlatformHelper;
 import de.yard.threed.engine.GridTeleportDestination;
 import de.yard.threed.engine.GridTeleporter;
 import de.yard.threed.engine.PointerHandler;
@@ -30,6 +29,8 @@ import de.yard.threed.engine.platform.common.RequestType;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static de.yard.threed.maze.MazeEventRegistry.buildMazeVisualizedEvent;
 
 /**
  * Maze visualization. Not really needed for playing. Only visual. No collision detection isType used.
@@ -62,7 +63,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
      *
      */
     public MazeVisualizationSystem() {
-        super(new String[]{}, new RequestType[]{}, new EventType[]{EventRegistry.EVENT_MAZE_LOADED});
+        super(new String[]{}, new RequestType[]{}, new EventType[]{MazeEventRegistry.EVENT_MAZE_LOADED});
 
         Boolean b;
         if ((b = Platform.getInstance().getConfiguration().getBoolean("enableMazeGridTeleporter")) != null) {
@@ -76,37 +77,44 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             logger.debug("got event " + evt.getType());
         }
 
-        if (evt.getType().equals(EventRegistry.EVENT_MAZE_LOADED)) {
-            //wird scheitern, wenn noch kein Login und damit kein Ray.
+        if (evt.getType().equals(MazeEventRegistry.EVENT_MAZE_LOADED)) {
             // gridname is not really needed currently to load the grid from the data provider
-            Grid grid = MazeDataProvider.getGrid();
-            createView(grid);
+            // take grid from payload because dataprovider are not available in pure client mode.
+            String rawGrid = (String) evt.getPayload().get("grid");
+            Grid grid = Grid.loadFromRaw(rawGrid);
+            if (grid == null) {
+                logger.error("no or invalid grid in payload");
+            } else {
+                createView(grid);
 
-            // VR und zum Testen
-            if (MazeScene.vrInstance != null) {
+                // VR and testing
+                if (MazeScene.vrInstance != null) {
 
-                if (vrFireMode == 1) {
-                    //wall center is on ground level. So raise marker to have it above ground
-                    //fireTargetMarker = VrSceneHelper.buildGroundMarker(Icon.ICON_DESTINATION);
-                    //fireTargetMarker= ModelSamples.buildCube(1.5,Color.GREEN);
-                    fireTargetMarker = MazeModelFactory.buildFireTargetMarker();
-                    fireTargetMarker.getTransform().setPosition(new Vector3(0, 1.2, 0.7));
-                    Scene.getCurrent().addToWorld(fireTargetMarker);
+                    if (vrFireMode == 1) {
+                        //wall center is on ground level. So raise marker to have it above ground
+                        //fireTargetMarker = VrSceneHelper.buildGroundMarker(Icon.ICON_DESTINATION);
+                        //fireTargetMarker= ModelSamples.buildCube(1.5,Color.GREEN);
+                        fireTargetMarker = MazeModelFactory.buildFireTargetMarker();
+                        fireTargetMarker.getTransform().setPosition(new Vector3(0, 1.2, 0.7));
+                        Scene.getCurrent().addToWorld(fireTargetMarker);
+                    }
+                    // Once gridTeleporterEnabled was set here in general. But since it is CPU consuming leave it up to the user.
+                    //gridTeleporterEnabled = true;
                 }
-                // Once gridTeleporterEnabled was set here in general. But since it is CPU consuming leave it up to the user.
-                //gridTeleporterEnabled = true;
-            }
 
-            if (gridTeleporterEnabled) {
-                logger.debug("Building GridTeleporter");
-                SceneNode locationMarker = VrSceneHelper.buildGroundMarker(Icon.ICON_CLOSE);
-                Scene.getCurrent().addToWorld(locationMarker);
-                SceneNode directionMarker = VrSceneHelper.buildGroundMarker(Icon.ICON_UPARROW);
-                Scene.getCurrent().addToWorld(directionMarker);
-                gridTeleporter = new GridTeleporter(locationMarker, directionMarker);
-            }
+                if (gridTeleporterEnabled) {
+                    logger.debug("Building GridTeleporter");
+                    SceneNode locationMarker = VrSceneHelper.buildGroundMarker(Icon.ICON_CLOSE);
+                    Scene.getCurrent().addToWorld(locationMarker);
+                    SceneNode directionMarker = VrSceneHelper.buildGroundMarker(Icon.ICON_UPARROW);
+                    Scene.getCurrent().addToWorld(directionMarker);
+                    gridTeleporter = new GridTeleporter(locationMarker, directionMarker);
+                }
 
-            ((InputToRequestSystem) SystemManager.findSystem(InputToRequestSystem.TAG)).addPointerHandler(this);
+                ((InputToRequestSystem) SystemManager.findSystem(InputToRequestSystem.TAG)).addPointerHandler(this);
+
+                SystemManager.sendEvent(buildMazeVisualizedEvent());
+            }
         }
     }
 

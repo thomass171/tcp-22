@@ -43,6 +43,9 @@ public class MazeDataProvider implements DataProvider {
      * Might be async/deferred in case of remote grids.
      */
     public static void init(String initialMaze) {
+
+        getLogger().debug("init for " + initialMaze);
+
         if (instance != null) {
             throw new RuntimeException("already inited");
         }
@@ -59,7 +62,7 @@ public class MazeDataProvider implements DataProvider {
                     NativeJsonValue json = Platform.getInstance().parseJson(response.responseText);
                     NativeJsonObject mazeObject = json.isObject();
                     String rawGrid = JsonHelper.getString(mazeObject, "grid");
-                    Grid grid = loadGrids(StringUtils.replaceAll(rawGrid,"n","\n"), null);
+                    Grid grid = Grid.loadFromRaw(rawGrid);
                     instance = new MazeDataProvider(JsonHelper.getString(mazeObject, "name"), grid);
                     SystemManager.putDataProvider(PROVIDER_NAME, instance);
                 } else {

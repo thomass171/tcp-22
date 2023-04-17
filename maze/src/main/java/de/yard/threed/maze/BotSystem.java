@@ -34,7 +34,7 @@ public class BotSystem extends DefaultEcsSystem {
     public BotSystem(boolean serverMode) {
         super(new String[]{BotComponent.TAG},
                 new RequestType[]{},
-                new EventType[]{EventRegistry.EVENT_MAZE_LOADED, UserSystem.USER_EVENT_JOINED});
+                new EventType[]{MazeEventRegistry.EVENT_MAZE_LOADED, UserSystem.USER_EVENT_JOINED});
         this.serverMode = serverMode;
     }
 
@@ -79,9 +79,16 @@ public class BotSystem extends DefaultEcsSystem {
             logger.debug("got event " + evt.getType());
         }
 
-        if (evt.getType().equals(EventRegistry.EVENT_MAZE_LOADED)) {
-            Grid grid = MazeDataProvider.getGrid();
-            startPositions = grid.getMazeLayout().getStartPositions();
+        if (evt.getType().equals(MazeEventRegistry.EVENT_MAZE_LOADED)) {
+            // take grid from payload because dataprovider are not available in pure client mode (which probably doesn't apply for BotSystem.
+            // but it makes it more consistent.
+            String rawGrid = (String) evt.getPayload().get("grid");
+            Grid grid = Grid.loadFromRaw(rawGrid);
+            if (grid == null) {
+                logger.error("no or invalid grid in payload");
+            } else {
+                startPositions = grid.getMazeLayout().getStartPositions();
+            }
         }
         if (evt.getType().equals(UserSystem.USER_EVENT_JOINED) && !serverMode) {
             // Start a bot for remaining players when running standalone.

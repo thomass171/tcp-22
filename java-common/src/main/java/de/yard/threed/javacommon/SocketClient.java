@@ -43,7 +43,7 @@ public class SocketClient {
     public void connect() throws IOException {
         logger.debug("Connecting to " + host + ":" + port);
 
-        socket.connect(new InetSocketAddress("", port), 3000);
+        socket.connect(new InetSocketAddress(host, port), 3000);
         endpoint = new SocketEndpoint(socket);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 

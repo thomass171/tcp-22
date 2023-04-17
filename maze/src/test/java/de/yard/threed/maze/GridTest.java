@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 /**
  * Tests without ECS (See MazeTest for tests with ECS) and without visuals.
  * Just for testing the grid (the maze logic).
- * Also for GridState, MazeTerrain, Direction and GridOrientation.
+ * Also for GridState, MazeTerrain, Direction, GridOrientation and GridReader.
  * <p>
  * <p>
  * Created by thomass on 15.07.15.
@@ -532,6 +532,15 @@ public class GridTest {
         MazeTestUtils.move(gridState.players.get(0), gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 2));
         MazeTestUtils.move(gridState.players.get(0), gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 3));
         assertTrue(gridState.isSolved(grid.getMazeLayout()));
+    }
+
+    @Test
+    public void testGridReader() throws Exception {
+
+        Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
+
+        String expectedRawGrid = "  ####n###  ####n#     $ #n# #  #$ #n# . .#@ #n#########n";
+        assertEquals(expectedRawGrid, grid.getRaw());
     }
 
     public static Grid loadGridAndTerrain(String mazeName, int expectedNumberOfTeams) throws InvalidMazeException {
