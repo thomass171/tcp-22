@@ -503,8 +503,8 @@ public class PlatformWebGl extends Platform {
 
     @Override
     public NativeSocket connectToServer(Server server) {
-        // websocket port is one higher than base port (unix socket)
-        return WebGlSocket.buildSocket(server.getHost(), server.getPort() + 1);
+        // websocket port is one higher than base port (unix socket). But don't increase it here implicitly. The property should be set accordingly.
+        return WebGlSocket.buildSocket(server.getHost(), server.getPort() /* + 1*/);
     }
 
     @Override
