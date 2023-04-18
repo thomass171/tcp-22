@@ -56,9 +56,7 @@ public abstract class DefaultBusConnector {
      */
     public void pushEvent(Event evt, String clientId) {
         Packet packet = encodeEvent(evt);
-        for (NativeSocket socket : getSockets(clientId)) {
-            socket.sendPacket(packet);
-        }
+        pushPacket(packet, clientId);
         systemTracker.packetSentToNetwork(packet);
     }
 
@@ -67,20 +65,15 @@ public abstract class DefaultBusConnector {
      */
     public void pushRequest(Request request) {
         Packet packet = encodeRequest(request);
-        for (NativeSocket socket : getSockets(null)) {
-            socket.sendPacket(packet);
-        }
+        pushPacket(packet,null);
         systemTracker.packetSentToNetwork(packet);
     }
 
     /**
-     * Client and server usable socket provider.
-     *
      * @param clientId null to return all client sockets.
-     * @return List of sockets on server, always one socket in client.
+     *
      */
-    public abstract List<NativeSocket> getSockets(String clientId);
-
+    public abstract void pushPacket(Packet packet, String clientId);
 
     public abstract boolean isServer();
 
@@ -95,7 +88,7 @@ public abstract class DefaultBusConnector {
         // An entity without scene node might happen during entity creation temporarily, when another system is needed to build the model/scenenode.
         // But it should be sent anyway, because the client might need it, eg. a user entity after login that wants to join.
         if (entity.getSceneNode() != null) {
-            
+
             Transform transform = entity.getSceneNode().getTransform();
             payload = payload.add("position", transform.getPosition())
                     .add("rotation", transform.getRotation())

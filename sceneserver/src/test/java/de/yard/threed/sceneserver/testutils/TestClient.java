@@ -100,7 +100,7 @@ public class TestClient {
 
     public void sendRequestToServer(Request request) {
         //socketClient.writePacket(SceneServerBusConnector.encodeRequest(request).getData());
-        clientBusConnector.getSockets(null).get(0).sendPacket(SceneServerBusConnector.encodeRequest(request));
+        clientBusConnector.pushPacket(SceneServerBusConnector.encodeRequest(request),null);
         logger.debug("Sent request " + request);
     }
 
@@ -279,7 +279,7 @@ public class TestClient {
      * Just close the connection/socket. No logoff etc.
      * But not reliable in any test case.
      */
-    public void disconnect() {
+    public void disconnectByClose() {
         clientBusConnector.close();
     }
 }

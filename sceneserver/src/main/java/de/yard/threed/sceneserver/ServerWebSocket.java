@@ -1,6 +1,7 @@
 package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.WriteException;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.BlockReader;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,7 @@ public class ServerWebSocket implements NativeSocket {
     }
 
     @Override
-    public void sendPacket(Packet packet) {
+    public void sendPacket(Packet packet) throws WriteException {
         if (session == null) {
             log.warn("Ignoring send to closed socket");
             return;

@@ -3,6 +3,7 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.sceneserver.testutils.PlatformSceneServerFactoryForTesting;
@@ -20,6 +21,9 @@ import static de.yard.threed.javanative.JavaUtil.sleepMs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * No scene server is started but only the ClientListener and Jetty (for websocket connection).
+ */
 @Slf4j
 public class ClientConnectionTest {
 
@@ -31,7 +35,6 @@ public class ClientConnectionTest {
 
         ClientListener.dropInstance();
 
-        // System (eg UserSystem) need a platform
         EngineTestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod) null,
                 ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
@@ -69,8 +72,25 @@ public class ClientConnectionTest {
         assertNotNull(requestLoginPacket);
         assertEquals(1 + 2, requestLoginPacket.getData().size());
 
-        // disconnect not possible without server
-        // testClient.disconnect();
+        assertEquals(1, clientListener.getClientConnections().size());
+        // nothing to discard yet
+        clientListener.discardClosedConnection();
+        assertEquals(1, clientListener.getClientConnections().size());
+
+        // disconnect not possible without server, but possible by just closing socket.
+        testClient.disconnectByClose();
+        // give chance to detect closed peer. Might not be reliable. So do multiple times to have better chance. Hmm, tricky.
+        log.debug("Sending packet to closed client");
+        TestUtils.waitUntil(() -> {
+            clientListener.getClientConnections().get(0).sendPacket(new Packet().add("key", "value"));
+            clientListener.discardClosedConnection();
+            return clientListener.getClientConnections().size()==0;
+        }, 5000);
+
+        // now connection should be discard
+        assertEquals(0, clientListener.getClientConnections().size());
+
+        sleepMs(100);
     }
 
     @Test

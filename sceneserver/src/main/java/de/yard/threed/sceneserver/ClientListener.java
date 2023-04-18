@@ -142,20 +142,9 @@ public class ClientListener extends Thread {
     }
 
     /**
-     * Called each frame for publishing events/requests. But this is not a good location for checking for closed connections, because a close
-     * event should be sent.
-     * <p>
-     * Needs optimization. TODO and sync
+     * TODO sync?
+     * @return
      */
-    public List<NativeSocket> getSockets() {
-
-        List<NativeSocket> sockets = new ArrayList<NativeSocket>();
-        for (ClientConnection connection : getClientConnections()) {
-            sockets.add(connection.getSocket());
-        }
-        return sockets;
-    }
-
     public ClientConnection discardClosedConnection() {
 
         Iterator<ClientConnection> iter = clientConnectionList.iterator();

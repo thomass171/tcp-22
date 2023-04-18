@@ -2,6 +2,7 @@ package de.yard.threed.core.platform;
 
 
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.WriteException;
 
 /**
  * A (web)socket connection between tow peers.
@@ -10,7 +11,7 @@ import de.yard.threed.core.Packet;
  *
  */
 public interface NativeSocket {
-    void sendPacket(Packet packet);
+    void sendPacket(Packet packet) throws WriteException;
 
     /**
      * Returns next packet, null if no packet exists.

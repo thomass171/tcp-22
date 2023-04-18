@@ -104,7 +104,7 @@ public class RealServerRealClientTest {
                 "number of entites (2 boxes + player)");
 
         // only a login request and a EVENT_MAZE_VISUALIZED should have been sent
-        assertEquals(2, systemTracker.getPacketsSentToNetwork().size());
+        assertEquals(2, systemTracker.getPacketsSentToNetwork().size(), "packets sent to network");
 
     }
 }

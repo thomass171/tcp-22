@@ -55,7 +55,7 @@ public class BlockReader {
      * @param packet
      * @param linePrinter
      */
-    public static void writePacket(List<String> packet, LinePrinter linePrinter) {
+    public static void writePacket(List<String> packet, LinePrinter linePrinter) throws WriteException {
         for (String s : packet) {
             linePrinter.println(s);
         }

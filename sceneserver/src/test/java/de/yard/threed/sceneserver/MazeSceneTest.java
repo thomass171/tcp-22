@@ -27,7 +27,7 @@ import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FORWARD;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for MazeScene.
+ * Tests for MazeScene in a scene server in current JVM with a simple test client.
  */
 @Slf4j
 public class MazeSceneTest {
@@ -114,7 +114,7 @@ public class MazeSceneTest {
         });
 
         testClient.assertAllEventEntityState();
-        testClient.disconnect();
+        testClient.disconnectByClose();
 
         // should publish connection closed event.
         SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);

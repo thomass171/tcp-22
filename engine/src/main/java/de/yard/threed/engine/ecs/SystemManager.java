@@ -35,7 +35,7 @@ public class SystemManager {
     private static Map<String, EcsService> services = new HashMap<String, EcsService>();
     //11.10.19: Die Requests sollten auch ueber den EventBus gehen. TODO ja, 20.3.20. 12.10.21: Aber Requests haben Handler.Hmm.
     private static RequestQueue requestQueue = new RequestQueue();
-    private static DefaultBusConnector busConnector = null;
+    public static DefaultBusConnector busConnector = null;
     private static List<Event> netEvents = new ArrayList<Event>();
     private static List<Request> netRequests = new ArrayList<Request>();
     private static SystemTracker systemTracker = new DefaultSystemTracker();

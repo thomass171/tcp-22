@@ -74,7 +74,7 @@ public class RealServerTest {
         testClient0.assertEventMazeLoaded("maze/Area15x10.txt");
         testClient1.assertEventMazeLoaded("maze/Area15x10.txt");
 
-        testClient0.disconnect();
+        testClient0.disconnectByClose();
         // testClient1 should get connection closed event. But for now the server socket isn't closed.
         //Event evt = testClient1.waitForEvent(DefaultBusConnector.EVENT_CONNECTION_CLOSED);
         //assertNotNull(evt);

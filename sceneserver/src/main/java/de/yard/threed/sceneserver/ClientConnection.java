@@ -1,5 +1,6 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.WriteException;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.Packet;
 import org.slf4j.Logger;
@@ -10,18 +11,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ClientConnection {
     private static final Logger logger = LoggerFactory.getLogger(ClientConnection.class.getName());
-    NativeSocket socket;
+    private NativeSocket socket;
 
     public ClientConnection(NativeSocket clientSocket) {
         logger.debug("Client connected: Starting new ClientConnection");
         this.socket = clientSocket;
-    }
-
-    /**
-     * @param packet
-     */
-    public void writePacket(Packet packet) {
-        socket.sendPacket(packet);
     }
 
     /**
@@ -35,6 +29,7 @@ public class ClientConnection {
 
     public void close() {
         socket.close();
+        socket = null;
     }
 
     public NativeSocket getSocket() {
@@ -42,7 +37,15 @@ public class ClientConnection {
     }
 
     public void sendPacket(Packet packet) {
-        writePacket(packet);
+        try {
+            // socket might have been closed already.
+            if (socket != null) {
+                socket.sendPacket(packet);
+            }
+        } catch (WriteException e) {
+            logger.warn("Write to socket failed (connection will be closed): " + e.getMessage());
+            close();
+        }
     }
 
     public boolean isClosed() {

@@ -1,5 +1,8 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.core.Event;
+import de.yard.threed.core.Packet;
+import de.yard.threed.core.WriteException;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
@@ -25,9 +28,13 @@ public class SceneServerBusConnector extends DefaultBusConnector {
     }
 
     @Override
-    public List<NativeSocket> getSockets(String clientId) {
-        //ClientListener.getInstance().getMpSocket());
-        return ClientListener.getInstance().getSockets();
+    public void pushPacket(Packet packet, String clientId) {
+        //TODO respect clientid
+        for (ClientConnection cc : ClientListener.getInstance().getClientConnections()) {
+
+                cc.sendPacket(packet);
+
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package de.yard.threed.engine.ecs;
 
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.WriteException;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
@@ -25,10 +26,14 @@ public class ClientBusConnector extends DefaultBusConnector {
     }
 
     @Override
-    public List<NativeSocket> getSockets(String clientId) {
-        List<NativeSocket> list = new ArrayList<NativeSocket>();
-        list.add(socket);
-        return list;
+    public void pushPacket(Packet packet, String clientId) {
+        // clientid not used in client
+        try {
+            socket.sendPacket(packet);
+        } catch (WriteException e) {
+            logger.warn("Write to socket failed (connection will be closed): " + e.getMessage());
+            //TODO close
+        }
     }
 
     @Override

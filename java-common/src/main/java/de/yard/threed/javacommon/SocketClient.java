@@ -1,5 +1,6 @@
 package de.yard.threed.javacommon;
 
+import de.yard.threed.core.WriteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class SocketClient {
      * Should not be done async because of possible race condition when sending data.
      */
     public void connect() throws IOException {
-        logger.debug("Connecting to " + host + ":" + port);
+        logger.debug("Connecting to " + host + " on port " + port);
 
         socket.connect(new InetSocketAddress(host, port), 3000);
         endpoint = new SocketEndpoint(socket);
@@ -58,7 +59,7 @@ public class SocketClient {
         return queuingSocketListener;
     }
 
-    public void writePacket(List<String> packet) {
+    public void writePacket(List<String> packet) throws WriteException {
         endpoint.writePacket(packet);
     }
 

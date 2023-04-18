@@ -46,8 +46,10 @@ public class SystemManagerTest {
         // Only a server send entity states
         DefaultBusConnector mockedServerBusConnector = new DefaultBusConnector() {
             @Override
-            public List<NativeSocket> getSockets(String clientId) {
-                return Collections.singletonList(new SocketMock());
+            public void pushPacket(Packet packet, String clientId) {
+            //public List<NativeSocket> getSockets(String clientId) {
+              //  return Collections.singletonList(new SocketMock());
+                new SocketMock().sendPacket(packet);
             }
 
             @Override

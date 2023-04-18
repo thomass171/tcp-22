@@ -1,13 +1,14 @@
 package de.yard.threed.javacommon;
 
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.WriteException;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
 
 import java.io.IOException;
 
 /**
- * Implementation for all Java platforms.
+ * Client implementation for all Java platforms.
  */
 public class JavaSocket implements NativeSocket {
     SocketClient socketClient;
@@ -20,7 +21,7 @@ public class JavaSocket implements NativeSocket {
     }
 
     @Override
-    public void sendPacket(Packet packet) {
+    public void sendPacket(Packet packet) throws WriteException {
         socketClient.writePacket(packet.getData());
     }
 

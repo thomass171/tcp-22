@@ -1,6 +1,7 @@
 package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.WriteException;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.BlockReader;
 import de.yard.threed.javacommon.QueuingSocketListener;
@@ -15,7 +16,7 @@ import java.net.Socket;
 import java.util.List;
 
 /**
- * A traditional socket.
+ * A traditional socket for an incoming connection (from accept()).
  * QueuingSocketListener runs a separate thread that blocks for reading from a socket.
  */
 @Slf4j
@@ -33,6 +34,7 @@ public class ServerUnixSocket implements NativeSocket {
         logger.debug("Client connected via socket: Starting new ClientConnection");
 
         this.clientSocket = clientSocket;
+        this.clientSocket.setTcpNoDelay(true);
 
         queuingSocketListener = new QueuingSocketListener(clientSocket);
         queuingSocketListener.start();
@@ -41,7 +43,7 @@ public class ServerUnixSocket implements NativeSocket {
     }
 
     @Override
-    public void sendPacket(Packet packet) {
+    public void sendPacket(Packet packet) throws WriteException {
         endpoint.writePacket(packet.getData());
     }
 
@@ -54,8 +56,11 @@ public class ServerUnixSocket implements NativeSocket {
 
     //@Override
     public void close() {
-        throw new RuntimeException("not yet");
-
+        try {
+            clientSocket.close();
+        } catch (IOException e) {
+            logger.warn("socket close failed: " + e.getMessage());
+        }
     }
 
     /**
