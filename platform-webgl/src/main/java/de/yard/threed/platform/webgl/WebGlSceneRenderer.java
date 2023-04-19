@@ -473,7 +473,7 @@ public class WebGlSceneRenderer implements AnimationController {
             // wait for socket. preload and init() are done here.
             if (AbstractSceneRunner.getInstance().getBusConnector() != null) {
                 ClientBusConnector cbc = AbstractSceneRunner.getInstance().getBusConnector();
-                WebGlSocket socket = (WebGlSocket) cbc.getSockets(null).get(0);
+                WebGlSocket socket = (WebGlSocket) cbc.getSocket();
                 logger.debug("check socket");
                 if (socket.isPending()) {
                     logger.debug("Waiting for socket to connect");

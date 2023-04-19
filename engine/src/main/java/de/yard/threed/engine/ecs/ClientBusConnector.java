@@ -55,4 +55,8 @@ public class ClientBusConnector extends DefaultBusConnector {
     public void close() {
         socket.close();
     }
+
+    public NativeSocket getSocket() {
+        return socket;
+    }
 }

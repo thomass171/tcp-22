@@ -5,6 +5,7 @@ import de.yard.threed.core.BlockReader;
 import de.yard.threed.core.LinePrinter;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Util;
+import de.yard.threed.core.WriteException;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
@@ -32,7 +33,7 @@ public class WebGlSocket implements NativeSocket {
     }
 
     @Override
-    public void sendPacket(Packet packet) {
+    public void sendPacket(Packet packet) throws WriteException {
         BlockReader.writePacket(packet.getData(), text -> sendMessage(webSocket, text));
     }
 
