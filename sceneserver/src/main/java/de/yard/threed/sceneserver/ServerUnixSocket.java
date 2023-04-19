@@ -16,7 +16,7 @@ import java.net.Socket;
 import java.util.List;
 
 /**
- * A traditional socket for an incoming connection (from accept()).
+ * A traditional socket for an incoming connection (from accept(), not jettys websocket).
  * QueuingSocketListener runs a separate thread that blocks for reading from a socket.
  */
 @Slf4j
@@ -57,8 +57,14 @@ public class ServerUnixSocket implements NativeSocket {
     //@Override
     public void close() {
         try {
+            queuingSocketListener.terminate();
             clientSocket.close();
-        } catch (IOException e) {
+            while (!queuingSocketListener.isTerminated()) {
+                logger.debug("Waiting for socket listener to terminate");
+                Thread.sleep(100);
+            }
+            logger.debug("ServerUnixSocket closed");
+        } catch (Exception e) {
             logger.warn("socket close failed: " + e.getMessage());
         }
     }
