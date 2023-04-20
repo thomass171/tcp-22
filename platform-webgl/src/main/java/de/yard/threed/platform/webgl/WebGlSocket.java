@@ -22,7 +22,8 @@ public class WebGlSocket implements NativeSocket {
     int state = STATE_WAITING_FOR_OPEN;
 
     private WebGlSocket(String host, int port) {
-        this.webSocket = buildWebSocket(host, port, this);
+        // protocol needs to be 'ws' or 'wss', depending on how JS was loaded.
+        this.webSocket = buildWebSocket(Main.usesTLS ? "wss" : "ws", host, port, this);
         addListener(webSocket, this);
     }
 
@@ -64,8 +65,11 @@ public class WebGlSocket implements NativeSocket {
         blockReader.add(s);
     }
 
-    private static native JavaScriptObject buildWebSocket(String host, int port, WebGlSocket instance)  /*-{
-        var socket = new WebSocket('ws://' + host + ':' + port + "/connect");
+    /**
+     *
+     */
+    private static native JavaScriptObject buildWebSocket(String protocol, String host, int port, WebGlSocket instance)  /*-{
+        var socket = new WebSocket(protocol + '://' + host + ':' + port + "/connect");
         console.log("socket created");
         socket.addEventListener('open', function (event) {
             console.log('socket opened');

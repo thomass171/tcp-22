@@ -30,6 +30,8 @@ public class Main implements EntryPoint {
     Log logger;// = Platform.getInstance().getLog(Main.class);
     //static boolean withgui;
 
+    public static boolean usesTLS = false;
+
     /**
      * This isType the entry point method.
      * Die Entscheidung, was gestartet wird, soll aus der URL kommen.
@@ -51,6 +53,10 @@ public class Main implements EntryPoint {
             }
         }
         String href = com.google.gwt.user.client.Window.Location.getHref();
+        WebGlLog.logNative("href:" + href);
+        if (href.startsWith("https")) {
+            usesTLS = true;
+        }
 
         // Logger is not available before plaform init. So log it native to realize
         // potential init issues.

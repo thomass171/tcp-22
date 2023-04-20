@@ -215,7 +215,8 @@ public class AbstractSceneRunner implements NativeSceneRunner {
                 cnt++;
             }
             if (cnt > 0) {
-                logger.debug("Read " + cnt + " packets from client bus connector");
+                // too much. TODO add to statistic
+                //  logger.debug("Read " + cnt + " packets from client bus connector");
             }
         }
 
