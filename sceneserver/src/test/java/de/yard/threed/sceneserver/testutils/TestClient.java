@@ -191,6 +191,9 @@ public class TestClient {
         return result;
     }
 
+    /**
+     * No need for runAdditionalFrames here?
+     */
     public Event waitForEvent(/*SceneServer sceneServer*/ EventType eventType) {
 
         int counter = 0;

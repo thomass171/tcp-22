@@ -3,6 +3,7 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.Pair;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.ConfigurationByEnv;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.List;
 
 import static de.yard.threed.javanative.JavaUtil.sleepMs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,27 +70,27 @@ public class ClientConnectionTest {
 
         SceneServerTestUtils.waitForClientConnected();
 
-        Packet requestLoginPacket = waitForClientPacket(clientListener.getClientConnections().get(0));
+        Packet requestLoginPacket = waitForFirstClientPacket();
         assertNotNull(requestLoginPacket);
         assertEquals(1 + 2, requestLoginPacket.getData().size());
 
-        assertEquals(1, clientListener.getClientConnections().size());
+        assertEquals(1, clientListener.getClientConnectionCount());
         // nothing to discard yet
         clientListener.discardClosedConnection();
-        assertEquals(1, clientListener.getClientConnections().size());
+        assertEquals(1, clientListener.getClientConnectionCount());
 
         // disconnect not possible without server, but possible by just closing socket.
         testClient.disconnectByClose();
         // give chance to detect closed peer. Might not be reliable. So do multiple times to have better chance. Hmm, tricky.
         log.debug("Sending packet to closed client");
         TestUtils.waitUntil(() -> {
-            clientListener.getClientConnections().get(0).sendPacket(new Packet().add("key", "value"));
+            clientListener.publishPacketToClients(new Packet().add("key", "value"), null);
             clientListener.discardClosedConnection();
-            return clientListener.getClientConnections().size()==0;
+            return clientListener.getClientConnectionCount() == 0;
         }, 5000);
 
         // now connection should be discard
-        assertEquals(0, clientListener.getClientConnections().size());
+        assertEquals(0, clientListener.getClientConnectionCount());
 
         sleepMs(100);
     }
@@ -100,7 +102,7 @@ public class ClientConnectionTest {
 
         SceneServerTestUtils.waitForClientConnected();
 
-        Packet requestLoginPacket = waitForClientPacket(clientListener.getClientConnections().get(0));
+        Packet requestLoginPacket = waitForFirstClientPacket();
         assertNotNull(requestLoginPacket);
         // request+user+id?
         assertEquals(1 + 2, requestLoginPacket.getData().size());
@@ -109,20 +111,20 @@ public class ClientConnectionTest {
         // testClient.disconnect();
     }
 
-    private Packet waitForClientPacket(ClientConnection clientConnection) {
+    private Packet waitForFirstClientPacket() {
 
         int cnt = 0;
 
-        Packet packet;
+        List<Pair<Packet, String>> l;
 
-        while ((packet = clientConnection.getPacket()) == null) {
+        while ((l = ClientListener.getInstance().getPacketsFromClients()).size() == 0) {
             sleepMs(100);
             if (cnt++ > 50) {
                 // dont wait more than 5 seconds
                 throw new RuntimeException("no packet from client");
             }
         }
-        return packet;
+        return l.get(0).getFirst();
     }
 
 

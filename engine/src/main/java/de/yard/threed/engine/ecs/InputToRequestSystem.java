@@ -276,9 +276,9 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             logger.debug("got event " + evt.getType());
         }
         if (evt.getType().equals(UserSystem.USER_EVENT_LOGGEDIN)) {
-            String username = (String) evt.getPayloadByIndex(0);
-            String clientid = (String) evt.getPayloadByIndex(1);
-            Integer userEntityId = (Integer) evt.getPayloadByIndex(2);
+            String username = (String) evt.getPayload().get("username");
+            String clientid = (String) evt.getPayload().get("clientid");
+            Integer userEntityId = (Integer) evt.getPayload().get("userentityid");
 
             //TODO check clientid that login was from here. For now only consider first login to be the player
             if (this.userEntityId == null) {

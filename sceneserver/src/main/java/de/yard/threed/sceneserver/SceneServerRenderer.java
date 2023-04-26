@@ -4,12 +4,14 @@ import de.yard.threed.core.Dimension;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.Pair;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.EcsEntity;
@@ -188,27 +190,19 @@ public class SceneServerRenderer extends HomeBrewRenderer {
         ClientListener.getInstance().checkLiveness();
 
         // for closed connections send a close event, independent from whether the client logged off.
-        ClientConnection cc;
-        while ((cc = ClientListener.getInstance().discardClosedConnection()) != null) {
-            SystemManager.sendEvent(new Event(DefaultBusConnector.EVENT_CONNECTION_CLOSED, new Payload()));
+        String discardedConnectionId;
+        while ((discardedConnectionId = ClientListener.getInstance().discardClosedConnection()) != null) {
+            SystemManager.sendEvent(BaseEventRegistry.buildConnectionClosedEvent(discardedConnectionId));
         }
 
         // instead of keyboard/mouse events get remote events.
 
         // get clients packets and publish before prepareFrame, which distributes the events.
-        List<ClientConnection> clientConnections = ClientListener.getInstance().getClientConnections();
-        int cnt = 0;
-        for (ClientConnection clientConnection : clientConnections) {
-            Packet packet;
-            while ((packet = clientConnection.getPacket()) != null) {
-                SystemManager.publishPacketFromClient(packet);
-                cnt++;
-            }
+        List<Pair<Packet,String>> ps = ClientListener.getInstance().getPacketsFromClients();
+        for (Pair<Packet,String> p  : ps) {
+            SystemManager.publishPacketFromClient(p.getFirst(), p.getSecond());
         }
-        if (cnt > 0) {
-            log.debug("Read {} packets from {} clients", cnt, clientConnections.size());
-        }
-        if (clientConnections.size() == 0) {
+        if (ClientListener.getInstance().getClientConnectionCount() == 0) {
             // extra wait for saving CPU
             try {
                 Thread.sleep(noClientCpuSaveDelay);

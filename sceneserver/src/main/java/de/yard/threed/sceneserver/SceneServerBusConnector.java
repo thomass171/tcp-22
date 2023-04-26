@@ -28,13 +28,9 @@ public class SceneServerBusConnector extends DefaultBusConnector {
     }
 
     @Override
-    public void pushPacket(Packet packet, String clientId) {
-        //TODO respect clientid
-        for (ClientConnection cc : ClientListener.getInstance().getClientConnections()) {
+    public void pushPacket(Packet packet, String connectionId) {
 
-                cc.sendPacket(packet);
-
-        }
+        ClientListener.getInstance().publishPacketToClients(packet, connectionId);
     }
 
     @Override

@@ -40,7 +40,7 @@ public class SceneServerTestUtils {
 
         ClientListener clientListener = ClientListener.getInstance();
 
-        while (clientListener.getClientConnections().size() == 0) {
+        while (clientListener.getClientConnectionCount() == 0) {
             sleepMs(100);
             if (cnt++ > 50) {
                 // dont wait more than 5 seconds

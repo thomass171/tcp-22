@@ -26,8 +26,8 @@ public class ClientBusConnector extends DefaultBusConnector {
     }
 
     @Override
-    public void pushPacket(Packet packet, String clientId) {
-        // clientid not used in client
+    public void pushPacket(Packet packet, String connectionId) {
+        // connectionId not used in client
         try {
             socket.sendPacket(packet);
         } catch (WriteException e) {

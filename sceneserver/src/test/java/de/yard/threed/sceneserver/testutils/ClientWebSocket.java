@@ -34,7 +34,7 @@ public class ClientWebSocket implements NativeSocket {
 
             @Override
             public void onTextFrame(String payload, boolean finalFragment, int rsv) {
-                log.debug("Got response {}", payload);
+                //log.debug("Got response {}", payload);
                 blockReader.add(payload);
             }
 

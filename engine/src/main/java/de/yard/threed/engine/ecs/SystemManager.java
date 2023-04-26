@@ -267,12 +267,12 @@ public class SystemManager {
         Platform.getInstance().getEventBus().publish(new Event(evt.getType(), evt.payload));
     }
 
-    public static void sendEventToClient(Event evt, String clientId) {
+    public static void sendEventToClient(Event evt, String connectionId) {
         if (busConnector == null) {
             getLogger().warn("No bus connector");
             return;
         }
-        busConnector.pushEvent(evt, clientId);
+        busConnector.pushEvent(evt, connectionId);
     }
 
     /**
@@ -409,28 +409,31 @@ public class SystemManager {
     /**
      * Publish packet from network to local bus.
      */
-    public static void publishPacketFromClient(Packet packet) {
-        publishPacket(packet);
+    public static void publishPacketFromClient(Packet packet, String connectionId) {
+        publishPacket(packet, connectionId);
         systemTracker.packetReceivedFromNetwork(packet);
     }
 
     public static void publishPacketFromServer(Packet packet) {
-        publishPacket(packet);
+        // client only has one connection, so connectionId can be static
+        publishPacket(packet, "c-to-s");
         systemTracker.packetReceivedFromNetwork(packet);
     }
 
-    private static void publishPacket(Packet packet) {
+    private static void publishPacket(Packet packet, String connectionId) {
 
         Request request;
 
         if (DefaultBusConnector.isEvent(packet)) {
             Event evt = DefaultBusConnector.decodeEvent(packet);
             if (evt != null) {
+                // not needed for now evt.setConnectionId(connectionId);
                 netEvents.add(evt);
             } else {
                 getLogger().warn("Discarding event");
             }
         } else if ((request = DefaultBusConnector.decodeRequest(packet)) != null) {
+            request.setConnectionId(connectionId);
             netRequests.add(request);
         } else {
             getLogger().error("unsupported packet (just a newline?): " + packet);

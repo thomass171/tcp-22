@@ -16,6 +16,8 @@ public class Request {
     private RequestType requesttype;
     // userEntityId is null for non user requests.
     private Integer userEntityId;
+    // Set in client/server. null otherwise
+    private String connectionId;
 
     public Request(RequestType requesttype, Payload payload, Integer userEntityId) {
         this.requesttype = requesttype;
@@ -74,5 +76,16 @@ public class Request {
     @Override
     public String toString() {
         return "type=" + requesttype + ",payload=" + payload + ",userEntityId=" + userEntityId;
+    }
+
+    public void setConnectionId(String connectionId) {
+        this.connectionId = connectionId;
+    }
+
+    /**
+     * Will be null in local mode.
+     */
+    public String getConnectionId(){
+        return connectionId;
     }
 }

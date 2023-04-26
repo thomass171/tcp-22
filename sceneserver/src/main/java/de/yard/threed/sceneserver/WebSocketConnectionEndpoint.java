@@ -25,7 +25,7 @@ public class WebSocketConnectionEndpoint {
         ServerWebSocket socket = new ServerWebSocket(session);
         ClientConnection connection = new ClientConnection(socket);
         connections.put(session.getId(),socket);
-        ClientListener.getInstance().addConnection(connection);
+        ClientListener.getInstance().addConnectionFromWebsocket(connection);
     }
 
     @OnMessage

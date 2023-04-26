@@ -15,9 +15,16 @@ public class UserComponent extends EcsComponent {
     public static String TAG = "UserComponent";
 
     private String username;
+    private String connectionId;
+
+    public UserComponent(String username, String connectionId) {
+        this.username = username;
+        this.connectionId = connectionId;
+    }
 
     public UserComponent(String username) {
         this.username = username;
+        this.connectionId = null;
     }
 
     @Override
@@ -32,5 +39,12 @@ public class UserComponent extends EcsComponent {
 
     public String getUsername() {
         return username;
+    }
+
+    /**
+     * Will be null in local mode.
+     */
+    public String getConnectionId() {
+        return connectionId;
     }
 }

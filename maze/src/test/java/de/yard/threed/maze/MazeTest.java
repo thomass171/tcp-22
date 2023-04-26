@@ -140,7 +140,7 @@ public class MazeTest {
         sceneRunner.runLimitedFrames(5);
         List<Event> loginEvents = EcsTestHelper.getEventsFromHistory(UserSystem.USER_EVENT_LOGGEDIN);
         assertEquals(1, loginEvents.size());
-        int userEntityId = (Integer) loginEvents.get(0).getPayloadByIndex(2);
+        int userEntityId = (Integer) loginEvents.get(0).getPayload().get("userentityid");
 
         assertEquals(2 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (2 boxes+avatar)");
 

@@ -51,10 +51,10 @@ public class ServerSystem extends DefaultEcsSystem {
 
         if (evt.getType().equals(UserSystem.USER_EVENT_LOGGEDIN)) {
 
-            // TODO send events to new client only.
-            String clientid = (String) evt.getPayloadByIndex(1);
+            // send events to new client only.
+            String connectionId = (String) evt.getPayload().get("connectionid");
             for (Event e : savedInitEvents) {
-                SystemManager.sendEventToClient(e,clientid);
+                SystemManager.sendEventToClient(e, connectionId);
             }
         }
 

@@ -12,10 +12,15 @@ import org.slf4j.LoggerFactory;
 public class ClientConnection {
     private static final Logger logger = LoggerFactory.getLogger(ClientConnection.class.getName());
     private NativeSocket socket;
+    private String connectionId;
+    private static int id = 10000;
 
     public ClientConnection(NativeSocket clientSocket) {
         logger.debug("Client connected: Starting new ClientConnection");
         this.socket = clientSocket;
+        synchronized (this) {
+            this.connectionId = "c" + id++;
+        }
     }
 
     /**
@@ -51,6 +56,10 @@ public class ClientConnection {
     public boolean isClosed() {
         //logger.debug("terminated="+queuingSocketListener.isTerminated());
         return socket == null;
+    }
+
+    public String getConnectionId() {
+        return connectionId;
     }
 }
 

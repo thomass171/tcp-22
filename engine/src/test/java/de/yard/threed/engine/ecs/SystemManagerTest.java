@@ -46,7 +46,7 @@ public class SystemManagerTest {
         // Only a server send entity states
         DefaultBusConnector mockedServerBusConnector = new DefaultBusConnector() {
             @Override
-            public void pushPacket(Packet packet, String clientId) {
+            public void pushPacket(Packet packet, String connectionId) {
             //public List<NativeSocket> getSockets(String clientId) {
               //  return Collections.singletonList(new SocketMock());
                 new SocketMock().sendPacket(packet);
@@ -61,7 +61,7 @@ public class SystemManagerTest {
         SystemManager.setSystemTracker(systemTracker);
         EcsEntity entityWithoutSceneNode = new EcsEntity();
 
-        SystemManager.sendEvent(UserSystem.buildLoggedinEvent("a", "clientid", entityWithoutSceneNode.getId()));
+        SystemManager.sendEvent(UserSystem.buildLoggedinEvent("a", "clientid", entityWithoutSceneNode.getId(), null));
         SystemManager.update(0);
 
         List<Packet> packets = systemTracker.getPacketsSentToNetwork();

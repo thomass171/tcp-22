@@ -36,7 +36,6 @@ public abstract class DefaultBusConnector {
     public static EventType EVENT_NODECREATED = EventType.register(1005, "EVENT_NODECREATED");
     public static EventType EVENT_NODEPARENTCHANGED = EventType.register(1006, "EVENT_NODEPARENTCHANGED");
     public static EventType EVENT_NODECHANGED = EventType.register(1007, "EVENT_NODECHANGED");
-    public static EventType EVENT_CONNECTION_CLOSED = EventType.register(1010, "EVENT_CONNECTION_CLOSED");
 
     // Events on entity level appear to be more efficient
     public static boolean entitySyncEnabled = true;
@@ -54,9 +53,9 @@ public abstract class DefaultBusConnector {
     /**
      * Send event to network (optionally to specific client).
      */
-    public void pushEvent(Event evt, String clientId) {
+    public void pushEvent(Event evt, String connectionId) {
         Packet packet = encodeEvent(evt);
-        pushPacket(packet, clientId);
+        pushPacket(packet, connectionId);
         systemTracker.packetSentToNetwork(packet);
     }
 
@@ -70,10 +69,10 @@ public abstract class DefaultBusConnector {
     }
 
     /**
-     * @param clientId null to return all client sockets.
+     * @param connectionId null to return all client sockets.
      *
      */
-    public abstract void pushPacket(Packet packet, String clientId);
+    public abstract void pushPacket(Packet packet, String connectionId);
 
     public abstract boolean isServer();
 

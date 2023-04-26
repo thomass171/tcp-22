@@ -1,16 +1,16 @@
 package de.yard.threed.sceneserver;
 
-import de.yard.threed.core.platform.NativeSocket;
-import de.yard.threed.engine.ecs.DefaultBusConnector;
+import de.yard.threed.core.Packet;
+import de.yard.threed.core.Pair;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import static de.yard.threed.javanative.JavaUtil.sleepMs;
 
@@ -27,7 +27,7 @@ public class ClientListener extends Thread {
     private volatile boolean terminated = false;
     private volatile boolean aborted = false;
     java.net.ServerSocket serverSocket;
-    private List<ClientConnection> clientConnectionList = new ArrayList();
+    private List<ClientConnection> clientConnectionList = new Vector();
     private static ClientListener instance;
 
     private ClientListener(String host, int port) {
@@ -63,7 +63,7 @@ public class ClientListener extends Thread {
 
     /**
      * Executor of separate thread.
-     * Endless listen for clients.
+     * Endless listen for new clients connecting.
      */
     public void run() {
         logger.debug("Starting");
@@ -77,7 +77,7 @@ public class ClientListener extends Thread {
                 Socket clientSocket = serverSocket.accept();
                 logger.debug("Client connected: ");
 
-                clientConnectionList.add(new ClientConnection(new ServerUnixSocket(clientSocket)));
+                addClientConnection(new ClientConnection(new ServerUnixSocket(clientSocket)));
 
             }
         } catch (Exception e) {
@@ -116,15 +116,80 @@ public class ClientListener extends Thread {
         serverSocket = null;
     }
 
-    /**
-     * TODO sync
-     * @return
-     */
-    public List<ClientConnection> getClientConnections() {
-        return clientConnectionList;
+    public void publishPacketToClients(Packet packet, String connectionId) {
+
+        Iterator<ClientConnection> iter = clientConnectionList.iterator();
+        while (iter.hasNext()) {
+            ClientConnection cc = iter.next();
+            if (connectionId == null || connectionId.equals(cc.getConnectionId())) {
+                cc.sendPacket(packet);
+            }
+        }
     }
 
-    public void addConnection(ClientConnection clientConnection){
+    public List<Pair<Packet, String>> getPacketsFromClients() {
+
+        int cnt = 0;
+
+        List<Pair<Packet, String>> result = new ArrayList<Pair<Packet, String>>();
+
+        Iterator<ClientConnection> iter = clientConnectionList.iterator();
+        while (iter.hasNext()) {
+
+            ClientConnection cc = iter.next();
+            Packet packet;
+
+            while ((packet = cc.getPacket()) != null) {
+                result.add(new Pair(packet, cc.getConnectionId()));
+                cnt++;
+            }
+        }
+        if (cnt > 0) {
+            logger.debug("Read {} packets from {} clients", cnt, clientConnectionList.size());
+        }
+        return result;
+    }
+
+    public void addConnectionFromWebsocket(ClientConnection clientConnection) {
+        addClientConnection(clientConnection);
+    }
+
+    public int getClientConnectionCount() {
+        return clientConnectionList.size();
+    }
+
+    /**
+     * Checks for closed connections and removes the first(!) found.
+     * This is returned for further processing.
+     *
+     *
+     * @return connectionId of closed and removed connection
+     */
+    public String discardClosedConnection() {
+
+        Iterator<ClientConnection> iter = clientConnectionList.iterator();
+        while (iter.hasNext()) {
+
+            ClientConnection cc = iter.next();
+            if (cc.isClosed()) {
+                logger.debug("Discarding closed connection");
+                clientConnectionList.remove(cc);
+                return cc.getConnectionId();
+            }
+        }
+        return null;
+    }
+
+    public void checkLiveness() {
+        if (terminated) {
+            throw new RuntimeException("ClientListener terminated");
+        }
+        if (aborted) {
+            throw new RuntimeException("ClientListener aborted");
+        }
+    }
+
+    private void addClientConnection(ClientConnection clientConnection) {
         this.clientConnectionList.add(clientConnection);
     }
 
@@ -141,31 +206,4 @@ public class ClientListener extends Thread {
         }
     }
 
-    /**
-     * TODO sync?
-     * @return
-     */
-    public ClientConnection discardClosedConnection() {
-
-        Iterator<ClientConnection> iter = clientConnectionList.iterator();
-        while (iter.hasNext()) {
-            // TODO risk of ava.util.ConcurrentModificationException. Occured once
-            ClientConnection cc = iter.next();
-            if (cc.isClosed()) {
-                logger.debug("Discarding closed connection");
-                clientConnectionList.remove(cc);
-                return cc;
-            }
-        }
-        return null;
-    }
-
-    public void checkLiveness() {
-        if (terminated) {
-            throw new RuntimeException("ClientListener terminated");
-        }
-        if (aborted) {
-            throw new RuntimeException("ClientListener aborted");
-        }
-    }
 }

@@ -4,11 +4,11 @@
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <!-- 'server' added to see whats from the server in mixed output (eg. from IDE)-->
-            <PatternLayout pattern="%d{HH:mm:ss,SSS} server %-5p %-10.20c{1}: '%m'%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss,SSS} server %-5p %-10.20c{1}: %m%n"/>
         </Console>
         <RollingFile name="RollingFile" fileName="sceneserver.log" filePattern="threed-%d{MM-dd-yyyy}.log.gz"
                      ignoreExceptions="false" append="false" >
-            <PatternLayout pattern="%d{HH:mm:ss,SSS} %-5p %-10.20c{1}: '%m'%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss,SSS} %-5p %-10.20c{1}: %m%n"/>
             <TimeBasedTriggeringPolicy />
         </RollingFile>
     </Appenders>

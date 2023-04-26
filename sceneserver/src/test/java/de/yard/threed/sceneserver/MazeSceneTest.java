@@ -3,11 +3,13 @@ package de.yard.threed.sceneserver;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.testutil.TestUtils;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.ServerSystem;
 import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.engine.ecs.UserComponent;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeModelFactory;
@@ -25,6 +27,7 @@ import java.util.List;
 import static de.yard.threed.maze.RequestRegistry.*;
 import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FORWARD;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests for MazeScene in a scene server in current JVM with a simple test client.
@@ -90,6 +93,10 @@ public class MazeSceneTest {
         MoverComponent mc = MoverComponent.getMoverComponent(userEntity);
         assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(userEntity).toString(), "initial orientation");
         assertEquals(new Point(6, 1).toString(), MazeUtils.getMoverposition(userEntity).toString(), "initial location");
+        UserComponent userComponent = UserComponent.getUserComponent(userEntity);
+        assertNotNull(userComponent, "userComponent");
+        String connectionId = userComponent.getConnectionId();
+        assertNotNull(connectionId, "connectionId");
 
         testClient.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_TURNRIGHT, userEntity.getId()));
         testClient.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_FORWARD, userEntity.getId()));
@@ -114,14 +121,17 @@ public class MazeSceneTest {
         });
 
         testClient.assertAllEventEntityState();
-        testClient.disconnectByClose();
 
+        loggingSystemTracker.tag();
+        testClient.disconnectByClose();
         // should publish connection closed event.
         SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
+        assertEquals(1, loggingSystemTracker.getLatestEventsProcessed().size());
+        SceneServerTestUtils.assertEvents(BaseEventRegistry.EVENT_CONNECTION_CLOSED, loggingSystemTracker.getLatestEventsProcessed(), 1, p -> {
+            assertEquals(connectionId, p.get("connectionid"));
+        });
+        assertEquals(0,SystemManager.findEntities(e -> UserComponent.getUserComponent(e)!=null).size());
 
-        //TestUtils.
-        //Event evt = testClient1.waitForEvent(DefaultBusConnector.EVENT_CONNECTION_CLOSED);
-        //assertNotNull(evt);
     }
 
     /**

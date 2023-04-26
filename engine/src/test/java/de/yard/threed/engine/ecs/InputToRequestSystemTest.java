@@ -70,7 +70,7 @@ public class InputToRequestSystemTest {
 
         String clientId = "677";
         int userEntitId = 343;
-        SystemManager.sendEvent(UserSystem.buildLoggedinEvent("u0", clientId, userEntitId));
+        SystemManager.sendEvent(UserSystem.buildLoggedinEvent("u0", clientId, userEntitId, null));
         SimpleHeadlessPlatform.mockedKeyInput.add(KeyCode.KEY_K);
         // process login
         EcsTestHelper.processSeconds(2);

@@ -31,7 +31,7 @@ public class ServerWebSocket implements NativeSocket {
     public void sendPacket(Packet packet) throws WriteException {
         if (session == null) {
             log.warn("Ignoring send to closed socket");
-            return;
+            throw new WriteException("websocket was closed");
         }
         // getBasicRemote() cannot be used from other thread (this one), so use getAsyncRemote()
         RemoteEndpoint.Async async = session.getAsyncRemote();

@@ -60,22 +60,25 @@ public class Payload {
         o = (Object[]) objs.toArray(new Object[0]);
     }
 
-    public Payload add(String key, String value){
-        values.put(key, value);
+    public Payload add(String key, String value) {
+        // in the packet there will be no way to differ an empty string and null. So don't add null values to the packet at all.
+        if (value != null) {
+            values.put(key, value);
+        }
         return this;
     }
 
-    public Payload add(String key, int value){
+    public Payload add(String key, int value) {
         values.put(key, new Integer(value));
         return this;
     }
 
-    public Payload add(String key, Vector3 value){
+    public Payload add(String key, Vector3 value) {
         values.put(key, value);
         return this;
     }
 
-    public Payload add(String key, Quaternion value){
+    public Payload add(String key, Quaternion value) {
         values.put(key, value);
         return this;
     }
