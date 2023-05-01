@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static de.yard.threed.javanative.JavaUtil.sleepMs;
 
@@ -27,7 +27,9 @@ public class ClientListener extends Thread {
     private volatile boolean terminated = false;
     private volatile boolean aborted = false;
     java.net.ServerSocket serverSocket;
-    private List<ClientConnection> clientConnectionList = new Vector();
+    // Using Vector does not protect against ConcurrentModificationException. Using CopyOnWriteArrayList
+    // will create a sub copy each time an iterator is used.
+    private List<ClientConnection> clientConnectionList = new CopyOnWriteArrayList();
     private static ClientListener instance;
 
     private ClientListener(String host, int port) {

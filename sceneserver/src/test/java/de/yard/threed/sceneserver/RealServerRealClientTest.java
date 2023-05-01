@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.List;
 
-import static de.yard.threed.engine.ecs.UserSystem.USER_EVENT_JOINED;
+import static de.yard.threed.engine.BaseEventRegistry.USER_EVENT_JOINED;
 import static de.yard.threed.engine.ecs.UserSystem.USER_EVENT_LOGGEDIN;
 import static de.yard.threed.maze.MazeEventRegistry.EVENT_MAZE_LOADED;
 import static de.yard.threed.maze.MazeEventRegistry.EVENT_MAZE_VISUALIZED;
@@ -87,11 +87,12 @@ public class RealServerRealClientTest {
 
         List<Event> eventlist = EcsTestHelper.toEventList(systemTracker.getPacketsReceivedFromNetwork());
         eventlist = EcsTestHelper.filterEventList(eventlist, (e) -> e.getType().getType() != BaseEventRegistry.EVENT_ENTITYSTATE.getType());
-        // should have MAZE_LOADED, LOGIN and JOINED from network
-        assertEquals(3, eventlist.size());
+        // should have MAZE_LOADED, LOGIN JOINED and ASSEMBLED from network
+        assertEquals(4, eventlist.size());
         assertEquals(EVENT_MAZE_LOADED.getType(), eventlist.get(0).getType().getType());
         assertEquals(USER_EVENT_LOGGEDIN.getType(), eventlist.get(1).getType().getType());
         assertEquals(USER_EVENT_JOINED.getType(), eventlist.get(2).getType().getType());
+        assertEquals(BaseEventRegistry.EVENT_USER_ASSEMBLED.getType(), eventlist.get(3).getType().getType());
 
         // As result of EVENT_MAZE_LOADED we should have EVENT_MAZE_VISUALIZED locally
         assertEquals(1, EcsTestHelper.filterEventList(((SimpleEventBusForTesting) Platform.getInstance().getEventBus()).getEventHistory(), (e) -> e.getType().equals(EVENT_MAZE_VISUALIZED)).size(), "EVENT_MAZE_VISUALIZED");

@@ -142,6 +142,7 @@ public class MazeScene extends Scene {
             AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
             // avatar builder is for player and monster
             avatarSystem.setAvatarBuilder(MazeAvatarBuilder.AVATAR_BUILDER, new MazeAvatarBuilder());
+            avatarSystem.disableShortCutJoin();
             SystemManager.addSystem(avatarSystem);
 
         }

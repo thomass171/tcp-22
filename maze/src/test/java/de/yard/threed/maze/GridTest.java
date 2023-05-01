@@ -38,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class GridTest {
     static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
 
+    //no good idea to define statics here because it restarts platform init
+
     @BeforeEach
     public void setup() {
         MazeSettings.init(MazeSettings.MODE_SOKOBAN);

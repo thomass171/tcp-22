@@ -34,13 +34,10 @@ public class EcsTestHelper {
     }
 
     /**
-     * bis es keine mehr gibt
+     * until there is no more
      */
     public static void processRequests() {
-        processUntil(() -> {
-            return SystemManager.getRequestCount() == 0;
-        });
-
+        processUntil(() -> SystemManager.getRequestCount() == 0);
     }
 
     public static void processUntil(BooleanMethod booleanMethod) {

@@ -39,14 +39,14 @@ public class MazeSceneTest {
 
     SceneServer sceneServer;
     // TestContext testContext;
-    LoggingSystemTracker loggingSystemTracker;
+    LoggingSystemTracker systemManagerTracker;
 
     public void setup(String gridname) throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("initialMaze", gridname);
         sceneServer = SceneServerTestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties, 20);
-        loggingSystemTracker = new LoggingSystemTracker();
-        SystemManager.setSystemTracker(loggingSystemTracker);
+        systemManagerTracker = new LoggingSystemTracker();
+        SystemManager.setSystemTracker(systemManagerTracker);
     }
 
     @AfterEach
@@ -78,25 +78,8 @@ public class MazeSceneTest {
 
         TestClient testClient = new TestClient(TestClient.USER_NAME0);
 
-        testClient.assertConnectAndLogin(sceneServer, viaWebSocket);
-        // EVENT_MAZE_LOADED should have been resent after login, but only to the new client
-        testClient.assertEventMazeLoaded("skbn/SokobanWikipedia.txt");
-
-        entities = SystemManager.findEntities((EntityFilter) null);
-        assertEquals(1 + 2, entities.size(), "number of entites (player+2 boxes)");
-        EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME0.equals(e.getName())).get(0);
-        assertNotNull(userEntity, "user entity");
-        //EcsEntity botEntity = SystemManager.findEntities(e -> "Bot0".equals(e.getName())).get(0);
-        //assertNotNull(botEntity, "bot entity");
-
-
+        EcsEntity userEntity = connectToSokobanWikipediaServer(testClient, viaWebSocket);
         MoverComponent mc = MoverComponent.getMoverComponent(userEntity);
-        assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(userEntity).toString(), "initial orientation");
-        assertEquals(new Point(6, 1).toString(), MazeUtils.getMoverposition(userEntity).toString(), "initial location");
-        UserComponent userComponent = UserComponent.getUserComponent(userEntity);
-        assertNotNull(userComponent, "userComponent");
-        String connectionId = userComponent.getConnectionId();
-        assertNotNull(connectionId, "connectionId");
 
         testClient.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_TURNRIGHT, userEntity.getId()));
         testClient.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_FORWARD, userEntity.getId()));
@@ -108,10 +91,10 @@ public class MazeSceneTest {
 
         TestUtils.assertPoint(new Point(7, 2), mc.getLocation(), "player location");
 
-        loggingSystemTracker.tag();
+        systemManagerTracker.tag();
         SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
         // entity change events go to network directly. So there shouldn't have been any event.
-        assertEquals(0, loggingSystemTracker.getLatestEventsProcessed().size());
+        assertEquals(0, systemManagerTracker.getLatestEventsProcessed().size());
 
         // first two should be boxes
         List<Integer> knownEntityIds = testClient.getKnownEntitiesFromEventEntityState();
@@ -122,15 +105,20 @@ public class MazeSceneTest {
 
         testClient.assertAllEventEntityState();
 
-        loggingSystemTracker.tag();
+        String connectionId=UserComponent.getUserComponent(userEntity).getConnectionId();
         testClient.disconnectByClose();
         // should publish connection closed event.
         SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
-        assertEquals(1, loggingSystemTracker.getLatestEventsProcessed().size());
-        SceneServerTestUtils.assertEvents(BaseEventRegistry.EVENT_CONNECTION_CLOSED, loggingSystemTracker.getLatestEventsProcessed(), 1, p -> {
+        assertEquals(1, systemManagerTracker.getLatestEventsProcessed().size());
+        SceneServerTestUtils.assertEvents(BaseEventRegistry.EVENT_CONNECTION_CLOSED, systemManagerTracker.getLatestEventsProcessed(), 1, p -> {
             assertEquals(connectionId, p.get("connectionid"));
         });
-        assertEquals(0,SystemManager.findEntities(e -> UserComponent.getUserComponent(e)!=null).size());
+        assertEquals(0, SystemManager.findEntities(e -> UserComponent.getUserComponent(e) != null).size());
+
+        // connect again. Should again be located on start position.
+        userEntity = connectToSokobanWikipediaServer(testClient, viaWebSocket);
+        mc = MoverComponent.getMoverComponent(userEntity);
+        TestUtils.assertPoint(new Point(6, 1), mc.getLocation(), "player location");
 
     }
 
@@ -175,5 +163,25 @@ public class MazeSceneTest {
                 new Pair("buildername", MazeModelFactory.DIAMOND_BUILDER)
         });
 
+    }
+
+    private EcsEntity connectToSokobanWikipediaServer(TestClient testClient, boolean viaWebSocket) throws Exception {
+
+        testClient.assertConnectAndLogin(sceneServer, viaWebSocket);
+        // EVENT_MAZE_LOADED should have been resent after login, but only to the new client
+        testClient.assertEventMazeLoaded("skbn/SokobanWikipedia.txt");
+
+        List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
+        assertEquals(1 + 2, entities.size(), "number of entites (player+2 boxes)");
+        EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME0.equals(e.getName())).get(0);
+        assertNotNull(userEntity, "user entity");
+
+        assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(userEntity).toString(), "initial orientation");
+        assertEquals(new Point(6, 1).toString(), MazeUtils.getMoverposition(userEntity).toString(), "initial location");
+        UserComponent userComponent = UserComponent.getUserComponent(userEntity);
+        assertNotNull(userComponent, "userComponent");
+        String connectionId = userComponent.getConnectionId();
+        assertNotNull(connectionId, "connectionId");
+        return userEntity;
     }
 }

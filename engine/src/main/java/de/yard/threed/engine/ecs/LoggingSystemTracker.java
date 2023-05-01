@@ -55,6 +55,10 @@ public class LoggingSystemTracker implements SystemTracker {
     }
 
     public List<Event> getLatestEventsProcessed() {
+        if (tags.get("eventsProcessed") == null) {
+            // without tag just return all
+            return eventsProcessed;
+        }
         return eventsProcessed.subList(tags.get("eventsProcessed"), eventsProcessed.size());
     }
 

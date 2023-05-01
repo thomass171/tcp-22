@@ -42,10 +42,14 @@ public class MazeLayout {
         return walls.contains(p);
     }
 
-    public Point getNextLaunchPosition(List<Point> usedLaunchPositions) {
+    /**
+     * Find a previously unused launch position. For now this is team independent. So a new player
+     * will join a team randomly.
+     */
+    public Point getNextLaunchPosition(List<Point> positionsToIgnore) {
         for (List<StartPosition> pset : initialPosition) {
             for (StartPosition p : pset) {
-                if (usedLaunchPositions == null || !usedLaunchPositions.contains(p.p)) {
+                if (positionsToIgnore == null || !positionsToIgnore.contains(p.p)) {
                     return p.p;
                 }
             }
@@ -104,6 +108,14 @@ public class MazeLayout {
         return -1;
     }
 
+    public int getStartPositionCount() {
+        int cnt = 0;
+        for (int team = 0; team < initialPosition.size(); team++) {
+            cnt += initialPosition.get(team).size();
+        }
+        return cnt;
+    }
+
     public List<List<StartPosition>> getStartPositions() {
         return initialPosition;
     }
@@ -120,7 +132,7 @@ public class MazeLayout {
         return walls;
     }
 
-    public MazeLayout addWalls(List<Point> additionalWall){
+    public MazeLayout addWalls(List<Point> additionalWall) {
         List<Point> newWalls = new ArrayList<>();
         newWalls.addAll(walls);
         newWalls.addAll(additionalWall);

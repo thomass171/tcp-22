@@ -4,6 +4,7 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
@@ -34,7 +35,7 @@ public class BotSystem extends DefaultEcsSystem {
     public BotSystem(boolean serverMode) {
         super(new String[]{BotComponent.TAG},
                 new RequestType[]{},
-                new EventType[]{MazeEventRegistry.EVENT_MAZE_LOADED, UserSystem.USER_EVENT_JOINED});
+                new EventType[]{MazeEventRegistry.EVENT_MAZE_LOADED, BaseEventRegistry.USER_EVENT_JOINED});
         this.serverMode = serverMode;
     }
 
@@ -90,7 +91,7 @@ public class BotSystem extends DefaultEcsSystem {
                 startPositions = grid.getMazeLayout().getStartPositions();
             }
         }
-        if (evt.getType().equals(UserSystem.USER_EVENT_JOINED) && !serverMode) {
+        if (evt.getType().equals(BaseEventRegistry.USER_EVENT_JOINED) && !serverMode) {
             // Start a bot for remaining players when running standalone.
             // TODO Also for monster?
             // But only once, the login request fired here will also trigger a JOINED event again.
@@ -104,7 +105,7 @@ public class BotSystem extends DefaultEcsSystem {
                         EcsEntity user = new EcsEntity(BotComponent.buildFromGridDefinition(startPosition));
                         //TODO improve unique naming
                         user.setName("Bot" + (botIndex));
-                        SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId(), false));
+                        SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId()/*, false*/));
                         botIndex++;
                     }
                 }

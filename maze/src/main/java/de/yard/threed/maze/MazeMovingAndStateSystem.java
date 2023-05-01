@@ -39,13 +39,12 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     protected MazeSettings st;
 
     private Hud helphud = null;
-    List<Point> usedLaunchPositions = new ArrayList<Point>();
 
     public MazeMovingAndStateSystem() {
         super(new String[]{"MazeMovingComponent"}, new RequestType[]{RequestRegistry.TRIGGER_REQUEST_BACK,
                         RequestRegistry.TRIGGER_REQUEST_TURNLEFT, RequestRegistry.TRIGGER_REQUEST_FORWARD,
                         RequestRegistry.TRIGGER_REQUEST_TURNRIGHT, RequestRegistry.MAZE_REQUEST_LOADLEVEL,
-                        RequestRegistry.TRIGGER_REQUEST_AUTOSOLVE, /*3.3.22 not needed here UserSystem.USER_REQUEST_JOIN,*/ RequestRegistry.TRIGGER_REQUEST_UNDO,
+                        RequestRegistry.TRIGGER_REQUEST_AUTOSOLVE, UserSystem.USER_REQUEST_JOIN, RequestRegistry.TRIGGER_REQUEST_UNDO,
                         RequestRegistry.TRIGGER_REQUEST_VALIDATE, RequestRegistry.TRIGGER_REQUEST_HELP,
                         RequestRegistry.TRIGGER_REQUEST_RESET,
                         RequestRegistry.TRIGGER_REQUEST_FORWARDMOVE,
@@ -57,7 +56,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                         RequestRegistry.TRIGGER_REQUEST_KICK,
                 },
                 new EventType[]{
-                        UserSystem.USER_EVENT_LOGGEDIN, UserSystem.USER_EVENT_JOINED});
+                        BaseEventRegistry.EVENT_USER_ASSEMBLED});
     }
 
     public static MazeMovingAndStateSystem buildFromArguments() {
@@ -180,6 +179,18 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             relocateOrTeleport(request.getType(), request.getPayload(), currentstate);
             return true;
         }
+        if (request.getType().equals(UserSystem.USER_REQUEST_JOIN)) {
+
+            int userEntityId = request.getUserEntityId();
+
+            EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
+
+            logger.debug("User '" + userEntity.getName() + "' joining");
+
+            SystemManager.sendEvent(processJoin(userEntityId));
+
+            return true;
+        }
         return processSolutionOrUserRequest(currentstate, request);
     }
 
@@ -247,63 +258,82 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             logger.debug("got event " + evt.getType());
         }
 
-        if (evt.getType().equals(UserSystem.USER_EVENT_JOINED)) {
-            if (Grid.getInstance() == null) {
-                throw new RuntimeException("unexpected flow. state no readtojoin?");
-            }
-            // Init player (entity already created) and publish "new player". But not before maze was loaded.
-            // 1.4.21: Avatar was build by AvatarSystem (and attached to world and previously created user entity).
-
-            Integer playerEntityId = (Integer) evt.getPayload().get("userentityid");
-            EcsEntity playerEntity = EcsHelper.findEntityById(playerEntityId);
-            MazeLayout layout = Grid.getInstance().getMazeLayout();
-            Point launchPosition = layout.getNextLaunchPosition(usedLaunchPositions);
-
-            if (launchPosition != null) {
-                int teamid = layout.getTeamByHome(launchPosition);
-                joinPlayer(playerEntity, launchPosition, teamid);
-            } else {
-                logger.warn("Rejecting join request due to too may players. Currently " + usedLaunchPositions.size());
-            }
+        if (evt.getType().equals(BaseEventRegistry.EVENT_USER_ASSEMBLED)) {
+            // final join step still to do which needs scenenode
+            //processJoin((Integer) evt.getPayload().get("userentityid"));
+            EcsEntity playerEntity = EcsHelper.findEntityById((Integer) evt.getPayload().get("userentityid"));
+            joinPlayer(Grid.getInstance().getMazeLayout(), playerEntity/*, launchPosition, teamid*/);
         }
     }
 
     /**
-     * Join a new player.
+     * Return JOINED_EVENT on success and error message on failure.
      */
-    private void joinPlayer(EcsEntity playerEntity, Point launchPosition, int team) {
-        logger.debug("New player joins: " + playerEntity + "for team " + team);
-        //MA35 hier mal jetzt trennen zischen bot avatar und eigenem (obserser). Also in VR kein Avatar fuer main Player. Ohne VR schon, weil damit die Blickrotation einfacher
-        //ist.
-        // 14.2.22: More consistent approach. Independent from VR mode have a avatar and observer independent from each other, but
-        // observer always attached to avatar (in AvatarSystem).
+    private Event processJoin(int playerEntityId) {
+        if (Grid.getInstance() == null) {
+            throw new RuntimeException("unexpected flow. state no readtojoin?");
+        }
+        // Init player (entity already created) and publish "new player". But not before maze was loaded.
+        // 1.4.21: Avatar was (29.4.23 will be)  build by AvatarSystem (and attached to world and previously created user entity).
+
+        EcsEntity playerEntity = EcsHelper.findEntityById(playerEntityId);
         MazeLayout layout = Grid.getInstance().getMazeLayout();
-        MoverComponent mover;
-        mover = new MoverComponent(playerEntity.scenenode.getTransform(), true, launchPosition, layout.getInitialOrientation(launchPosition), team);
-        usedLaunchPositions.add(launchPosition);
-        /*Now in AvatarSystem if (MazeScene.vrInstance == null) {
 
-            Observer.getInstance().initFineTune(getSettings().getViewpoint().position.add(new Vector3(0, MazeScene.rayy, 0)));
-            // Rotation for looking slightly down.
-            Observer.getInstance().getInstance().getTransform().setRotation(getSettings().getViewpoint().rotation);
+        // In server mode clients might connect and disconnect, so the used and available launch positions are quite dynamic.
+        List<EcsEntity> currentPlayer = MazeUtils.getPlayer();
+        if (currentPlayer.size() >= layout.getStartPositionCount()) {
+            logger.warn("Rejecting join request due to too may players. Currently " + currentPlayer.size());
+            return BaseEventRegistry.buildUserJoinFailedEvent(playerEntity,"error");
+        }
+        Point launchPosition = findAvailableLaunchPosition(layout, currentPlayer);
 
-        }*/
+        int teamid;
+        if (launchPosition != null) {
+            teamid = layout.getTeamByHome(launchPosition);
+            //joinPlayer(layout, playerEntity, launchPosition, teamid);
+        } else {
+            logger.warn("No start position found. too may players?. Currently " + currentPlayer.size());
+            return BaseEventRegistry.buildUserJoinFailedEvent(playerEntity, "error");
+        }
+        MoverComponent mover = new MoverComponent(null/*playerEntity.scenenode.getTransform()*/, true, launchPosition, layout.getInitialOrientation(launchPosition), teamid);
+        //usedLaunchPositions.add(launchPosition);
+
         playerEntity.addComponent(mover);
 
-        if (MazeVisualizationSystem.view != null) {
-            /*15.5.21 das ist doch auch Asbach Kruecke
-                MazeVisualizationSystem.view.setRayPosition(startpos);
-                MazeVisualizationSystem.view.setRayRotation(new Degree(0));            */
-        }
-        mover.updateMovable();
+        return BaseEventRegistry.buildUserJoinedEvent(playerEntity);
+    }
 
-        // 11.11.20: Raising the camera must be done again since splitting to system. Reason isType unclear, well the Avatar drops the position, so its obvious, but
-        // why didn't that occur before?
-        //15.5.21: Scene.getCurrent().getMainCamera().getCarrier().getTransform().setPosition(new Vector3(0, st.simplerayheight / 2 + 0.3f, 0.2f/*0/*+0.4f*/));
+    private Point findAvailableLaunchPosition(MazeLayout layout, List<EcsEntity> currentPlayer) {
+        List<Point> positionsToIgnore = new ArrayList<Point>();
+        for (EcsEntity p : currentPlayer) {
+            MoverComponent mc = MoverComponent.getMoverComponent(p);
+            // new player is also in the list without mc
+            if (mc != null) {
+                positionsToIgnore.add(mc.getLocation());
+            }
+        }
+        Point launchPosition = layout.getNextLaunchPosition(positionsToIgnore);
+        return launchPosition;
+    }
+
+    /**
+     * Join a new player. 28.4.23: Now after it has been assembled (avatar, scenenode)
+     */
+    private void joinPlayer(MazeLayout layout, EcsEntity playerEntity/*29.4.23 , Point launchPosition, int team*/) {
+        logger.debug("New player joins: " + playerEntity + "for team ?" );
+
+        // MazeLayout layout = Grid.getInstance().getMazeLayout();
+        // MoverComponent already exists, but has no transofrm yet. Needs to be updated.
+        MoverComponent mover = MoverComponent.getMoverComponent(playerEntity);
+        //mover = new MoverComponent(playerEntity.scenenode.getTransform(), true, launchPosition, layout.getInitialOrientation(launchPosition), team);
+        mover.setMovable(playerEntity.scenenode.getTransform());
+        //usedLaunchPositions.add(launchPosition);
+        //playerEntity.addComponent(mover);
+
+        mover.updateMovable();
 
         InputToRequestSystem.setPayload0(playerEntity.getName());
 
-        //avatar.avatarE.addComponent(new InventoryComponent());
         // In multi player every joined user gets three bullets
         if (layout.getNumberOfTeams() > 1) {
             createBullets(3, playerEntity.getId());

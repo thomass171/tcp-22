@@ -23,12 +23,10 @@ public class UserSystem extends DefaultEcsSystem {
     public static String TAG = "UserSystem";
     public static RequestType USER_REQUEST_LOGIN = RequestType.register(1000, "USER_REQUEST_LOGIN");
     // The logged in user wants to join.
-    // The join request creates an avatar for the user entity. Parameter 0 "userEntityId", Parameter 1 "forlogin"
+    // The join request no longer creates an avatar for the user entity (is done after successful join)
     public static RequestType USER_REQUEST_JOIN = RequestType.register(1001, "USER_REQUEST_JOIN");
 
     public static EventType USER_EVENT_LOGGEDIN = EventType.register(1000, "USER_EVENT_LOGGEDIN");
-    // payload is entity id
-    public static EventType USER_EVENT_JOINED = EventType.register(1001, "USER_EVENT_JOINED");
 
     //MA31 aus RequestRegistry nach hier verschoben. Ob automove allerdings hier so passt? Mal sehen.
     public static RequestType USER_REQUEST_TELEPORT = RequestType.register(1002, "USER_REQUEST_TELEPORT");
@@ -59,7 +57,7 @@ public class UserSystem extends DefaultEcsSystem {
 
             SystemManager.sendEvent(buildLoggedinEvent(username, clientid, user.getId(), request.getConnectionId()));
             // For simplification join immediately, without explicit request by client.
-            SystemManager.putRequest(buildJoinRequest(user.getId(), true));
+            SystemManager.putRequest(buildJoinRequest(user.getId()));
             userIndex++;
             return true;
         }
@@ -105,8 +103,8 @@ public class UserSystem extends DefaultEcsSystem {
                 .add("connectionid", connectionId));
     }
 
-    public static Request buildJoinRequest(int userEntityId, boolean forLogin) {
-        return new Request(USER_REQUEST_JOIN, new Payload(new Integer(userEntityId), new Boolean(forLogin)));
+    public static Request buildJoinRequest(int userEntityId/*, boolean forLogin*/) {
+        return new Request(USER_REQUEST_JOIN, new Payload(/*new Integer(userEntityId), new Boolean(forLogin)*/),userEntityId);
     }
 
     /**

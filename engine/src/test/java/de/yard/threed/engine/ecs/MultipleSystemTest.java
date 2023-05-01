@@ -3,6 +3,7 @@ package de.yard.threed.engine.ecs;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.ObserverComponent;
 import de.yard.threed.engine.ObserverSystem;
@@ -44,9 +45,9 @@ public class MultipleSystemTest {
         // process join
         EcsTestHelper.processSeconds(2);
 
-        assertEquals(1, EcsTestHelper.filterEventList(systemTracker.getEventsProcessed(), (e) -> e.getType().equals(UserSystem.USER_EVENT_JOINED)).size());
+        assertEquals(1, EcsTestHelper.filterEventList(systemTracker.getEventsProcessed(), (e) -> e.getType().equals(BaseEventRegistry.USER_EVENT_JOINED)).size());
 
-        List<Event> joinEvents = EcsTestHelper.getEventsFromHistory(UserSystem.USER_EVENT_JOINED);
+        List<Event> joinEvents = EcsTestHelper.getEventsFromHistory(BaseEventRegistry.USER_EVENT_JOINED);
         assertEquals(1, joinEvents.size());
         Event joinEvent = joinEvents.get(0);
         int playerEntityId = (Integer) joinEvent.getPayload().get("userentityid");

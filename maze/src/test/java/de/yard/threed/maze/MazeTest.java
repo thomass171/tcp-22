@@ -75,6 +75,7 @@ public class MazeTest {
 
                 AvatarSystem avatarSystem = new AvatarSystem();
                 avatarSystem.setAvatarBuilder(MazeAvatarBuilder.AVATAR_BUILDER, new MazeAvatarBuilder());
+                avatarSystem.disableShortCutJoin();
                 SystemManager.addSystem(avatarSystem);
 
                 ObserverSystem observerSystem = new ObserverSystem();
@@ -583,12 +584,13 @@ public class MazeTest {
     }
 
     /**
-     * Launch all player, check items
+     * Launch two player (third fails to join), check items.
+     * not suited for bot system?
      *
      * @return list of player
      */
     private List<EcsEntity> initMaze_P(int diamonds) {
-        // no boxes, no player, two diamond
+        // no boxes, no player, only diamonds
         assertEquals(diamonds, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
         assertEquals(0, MazeUtils.getPlayer().size(), "number of player");
         assertNull(MazeUtils.getMainPlayer());

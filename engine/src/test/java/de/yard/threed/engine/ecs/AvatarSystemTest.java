@@ -5,6 +5,7 @@ import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.ObserverSystem;
 import de.yard.threed.engine.Transform;
@@ -20,8 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * <p>
@@ -53,7 +53,7 @@ public class AvatarSystemTest {
         Observer.buildForDefaultCamera();
         assertNotNull(Observer.getInstance(), "observer");
 
-        startSimpleTest();
+        startSimpleTest(true);
 
         assertNotNull(Observer.getInstance(), "observer");
         // Should be assigned to avatar
@@ -73,7 +73,7 @@ public class AvatarSystemTest {
         Observer.buildForDefaultCamera();
         assertNotNull(Observer.getInstance(), "observer");
 
-        startSimpleTest();
+        startSimpleTest(true);
 
         assertNotNull(Observer.getInstance(), "observer");
         // Should NOT be assigned to avatar in VR
@@ -82,29 +82,62 @@ public class AvatarSystemTest {
         assertNotNull(observerParent, "observerParent");
     }
 
-    private void startSimpleTest() {
+    @Test
+    public void testWithoutShortCutJoin() throws Exception {
+
+        Observer.buildForDefaultCamera();
+        assertNotNull(Observer.getInstance(), "observer");
+        ((AvatarSystem) SystemManager.findSystem(AvatarSystem.TAG)).disableShortCutJoin();
+
+        EcsEntity playerEntity = startSimpleTest(false);
+
+        assertNotNull(Observer.getInstance(), "observer");
+        // Not yet assembled so not yet assigned to avatar
+        Transform observerParent = Observer.getInstance().getTransform().getParent();
+        assertNull(observerParent, "observerParent");
+
+        SystemManager.sendEvent(BaseEventRegistry.buildUserJoinedEvent(playerEntity));
+        EcsTestHelper.processSeconds(2);
+
+        validateAssembledUserEntity(playerEntity);
+        // Now should be assigned to avatar
+        observerParent = Observer.getInstance().getTransform().getParent();
+        assertNotNull(observerParent, "observerParent");
+    }
+
+    private EcsEntity startSimpleTest(boolean expectJoinedEvent) {
 
         String testUserName = "testUserName";
         EcsEntity user = new EcsEntity(new UserComponent("user account"));
         user.setName(testUserName);
 
-        SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId(), true));
+        SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId()/*, true*/));
         assertEquals(1, SystemManager.getRequestCount(), "requests ");
         // process join
         EcsTestHelper.processSeconds(2);
 
-        List<Event> joinEvents = EcsTestHelper.getEventsFromHistory(UserSystem.USER_EVENT_JOINED);
-        assertEquals(1, joinEvents.size());
-        Event joinEvent = joinEvents.get(0);
-        int playerEntityId = (Integer) joinEvent.getPayload().get("userentityid");
-        EcsEntity playerEntity = EcsHelper.findEntityById(playerEntityId);
-        assertNotNull(playerEntity, "player");
-        assertNotNull("Player", playerEntity.getName());
-        assertEquals(testUserName, playerEntity.getName());
+        EcsEntity playerEntity;
+        if (expectJoinedEvent) {
+            List<Event> joinEvents = EcsTestHelper.getEventsFromHistory(BaseEventRegistry.USER_EVENT_JOINED);
+            assertEquals(1, joinEvents.size(), "JOIN events");
+            Event joinEvent = joinEvents.get(0);
+            int playerEntityId = (Integer) joinEvent.getPayload().get("userentityid");
+            playerEntity = EcsHelper.findEntityById(playerEntityId);
+            assertNotNull(playerEntity, "player");
+            assertNotNull("Player", playerEntity.getName());
+            assertEquals(testUserName, playerEntity.getName());
+        }
 
         playerEntity = SystemManager.findEntities(e -> testUserName.equals(e.getName())).get(0);
         assertNotNull(playerEntity, "player");
         assertNotNull("Player", playerEntity.getName());
         assertEquals(testUserName, playerEntity.getName());
+
+        return playerEntity;
+    }
+
+    private void validateAssembledUserEntity(EcsEntity userEntity){
+        assertNotNull(userEntity.getSceneNode());
+        // TeleportComponent is just optional
     }
 }

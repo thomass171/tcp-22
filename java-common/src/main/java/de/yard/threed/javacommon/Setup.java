@@ -58,7 +58,7 @@ public class Setup {
         //18.11.19: NearView geht in VR eh nicht, darum damit üblicherweise auch sonst nicht arbeiten.
         //properties.put("argv.enableNearView", "true");
         properties.put("initialMaze", "skbn/SokobanWikipedia.txt");
-        //properties.put("initialMaze", "maze/Maze-P-Simple.txt");
+        properties.put("initialMaze", "maze/Maze-P-Simple.txt");
         //properties.put("initialMaze", mazeshost + "/mazes/mazes/1");
         //properties.put("argv.initialMaze", "maze/Maze-P-60x20.txt");
         //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");
@@ -85,7 +85,7 @@ public class Setup {
         if (wayland) {
             properties.put("basename", "traffic:tiles/Wayland.xml");
             properties.put("enableAutomove", "true");
-            System.setProperty("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
+            properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
         boolean demo = false;
         if (demo) {

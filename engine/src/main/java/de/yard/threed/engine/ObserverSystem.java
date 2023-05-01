@@ -5,12 +5,10 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.ecs.EcsHelper;
-import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.vr.VrInstance;
 
@@ -36,7 +34,7 @@ public class ObserverSystem extends DefaultEcsSystem {
      *
      */
     public ObserverSystem() {
-        super(new String[]{"ObserverComponent"}, new RequestType[]{}, new EventType[]{UserSystem.USER_EVENT_JOINED});
+        super(new String[]{"ObserverComponent"}, new RequestType[]{}, new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED/*UserSystem.USER_EVENT_JOINED*/});
     }
 
     @Override
@@ -65,7 +63,7 @@ public class ObserverSystem extends DefaultEcsSystem {
         if (observersystemdebuglog) {
             logger.debug("got event " + evt.getType());
         }
-        if (evt.getType().equals(UserSystem.USER_EVENT_JOINED)) {
+        if (evt.getType().equals(BaseEventRegistry.EVENT_USER_ASSEMBLED)) {
             int userEntityId = ((Integer) evt.getPayload().get("userentityid"));
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
 

@@ -118,6 +118,9 @@ public class MoverComponent extends EcsComponent implements GridMover {
         return null;
     }
 
+    public void setMovable(SimpleTransform movable){
+        this.movable=movable;
+    }
     /**
      * Liefert das Movement, wenn der Schritt ausgefuehrt wurde, sonst null.
      * 12.4.21: rotation nicht mehr reinstecken bzw. igmorieren. orientation isType needed for being moved.

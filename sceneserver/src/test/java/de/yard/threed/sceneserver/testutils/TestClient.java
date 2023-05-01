@@ -47,7 +47,9 @@ public class TestClient {
     public static String USER_NAME1 = "wayne";
     public String username;
     List<Request> allRequests = new ArrayList<>();
-    LoggingSystemTracker systemTracker = new LoggingSystemTracker();
+    // this tracker is for client view and different from the tracker in SystemManager.
+    // Created before each connect.
+    LoggingSystemTracker clientTracker = null;
 
     public TestClient(String username) {
         this.username = username;
@@ -67,6 +69,8 @@ public class TestClient {
             socket = Platform.getInstance().connectToServer(new Server("localhost"));
         }
         clientBusConnector = new ClientBusConnector(socket);
+        // new tracker for discarding previous entries.
+        clientTracker = new LoggingSystemTracker();
         sendRequestToServer(UserSystem.buildLoginRequest(username, "34"));
     }
 
@@ -89,9 +93,8 @@ public class TestClient {
         List<Packet> packets = readLatestPackets();
         assertTrue(packets.size() > 0, "packets from server found");
         SceneServerTestUtils.assertEventPacket(UserSystem.USER_EVENT_LOGGEDIN, null, packets, 1);
-
-        // join happened implicitly, so Avatar should exist.
-        SceneServerTestUtils.assertEventPacket(UserSystem.USER_EVENT_JOINED, null, packets, 1);
+        SceneServerTestUtils.assertEventPacket(BaseEventRegistry.USER_EVENT_JOINED, null, packets, 1);
+        SceneServerTestUtils.assertEventPacket(BaseEventRegistry.EVENT_USER_ASSEMBLED, null, packets, 1);
     }
 
     public void assertConnectAndLogin(SceneServer sceneServer) throws Exception {
@@ -147,7 +150,7 @@ public class TestClient {
         Packet packet;
         while ((packet = getPacket()) != null) {
             packets.add(packet);
-            systemTracker.packetReceivedFromNetwork(packet);
+            clientTracker.packetReceivedFromNetwork(packet);
         }
 
         for (Packet p : packets) {
@@ -157,7 +160,7 @@ public class TestClient {
                     Assertions.fail("decode failed");
                 }
                 // Since this is no full client, immediately consider events to be processed.
-                systemTracker.eventProcessed(event);
+                clientTracker.eventProcessed(event);
             } else {
                 Request request = DefaultBusConnector.decodeRequest(p);
                 if (request == null) {
@@ -171,8 +174,8 @@ public class TestClient {
 
     public List<Packet> getAllPackets() {
         readLatestPackets();
-        Assertions.assertEquals(systemTracker.getPacketsReceivedFromNetwork().size(), systemTracker.getEventsProcessed().size());
-        return systemTracker.getPacketsReceivedFromNetwork();
+        Assertions.assertEquals(clientTracker.getPacketsReceivedFromNetwork().size(), clientTracker.getEventsProcessed().size());
+        return clientTracker.getPacketsReceivedFromNetwork();
     }
 
     public EcsEntity getUserEntity() {
@@ -183,7 +186,7 @@ public class TestClient {
 
     public List<Event> findEvents(EventFilter filter) {
         List<Event> result = new ArrayList<Event>();
-        for (Event e : systemTracker.getEventsProcessed()) {
+        for (Event e : clientTracker.getEventsProcessed()) {
             if (filter == null || filter.matches(e)) {
                 result.add(e);
             }
@@ -213,7 +216,7 @@ public class TestClient {
     }
 
     public void assertEventMazeLoaded(String gridName) {
-        SceneServerTestUtils.assertEvents(MazeEventRegistry.EVENT_MAZE_LOADED, systemTracker.getEventsProcessed(), 1, p -> {
+        SceneServerTestUtils.assertEvents(MazeEventRegistry.EVENT_MAZE_LOADED, clientTracker.getLatestEventsProcessed(), 1, p -> {
             assertEquals(gridName, p.get("gridname"));
         });
         //ServerSystem not available with real server
@@ -229,7 +232,7 @@ public class TestClient {
      */
     @Deprecated
     public void assertEventEntityState(int entityId, Point expectedLocation, GridOrientation expectedOrientation) {
-        List<Event> entityStateEvents = EcsTestHelper.filterEventList(systemTracker.getEventsProcessed(), e -> {
+        List<Event> entityStateEvents = EcsTestHelper.filterEventList(clientTracker.getEventsProcessed(), e -> {
             return e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType() &&
                     (Integer) e.getPayload().get("entityid") == entityId;
         });
@@ -249,11 +252,11 @@ public class TestClient {
      * Validate all
      */
     public void assertAllEventEntityState() {
-        SceneServerTestUtils.assertAllEventEntityState(systemTracker.getEventsProcessed());
+        SceneServerTestUtils.assertAllEventEntityState(clientTracker.getEventsProcessed());
     }
 
     public void assertLatestEventEntityState(int entityId, Pair<String, String>[] expectedProperties) {
-        List<Event> entityStateEvents = EcsTestHelper.filterEventList(systemTracker.getEventsProcessed(), e ->
+        List<Event> entityStateEvents = EcsTestHelper.filterEventList(clientTracker.getEventsProcessed(), e ->
                 e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType() &&
                         (Integer) e.getPayload().get("entityid") == entityId);
 
@@ -266,7 +269,7 @@ public class TestClient {
 
     public List<Integer> getKnownEntitiesFromEventEntityState() {
         List<Integer> result = new ArrayList();
-        EcsTestHelper.filterEventList(systemTracker.getEventsProcessed(), e -> {
+        EcsTestHelper.filterEventList(clientTracker.getEventsProcessed(), e -> {
             if (e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType()) {
                 Integer id = (Integer) e.getPayload().get("entityid");
                 if (!result.contains(id)) {

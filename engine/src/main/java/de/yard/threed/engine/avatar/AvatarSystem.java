@@ -2,11 +2,11 @@ package de.yard.threed.engine.avatar;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.Geometry;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.ModelBuilderRegistry;
-import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.ObserverComponent;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneNode;
@@ -14,7 +14,6 @@ import de.yard.threed.engine.ViewPoint;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
-import de.yard.threed.engine.vr.VrInstance;
 
 import java.util.List;
 
@@ -31,7 +30,6 @@ import java.util.List;
  * <p>
  * Created by thomass on 20.11.20.
  */
-
 public class AvatarSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(AvatarSystem.class);
     public static String TAG = "AvatarSystem";
@@ -43,13 +41,14 @@ public class AvatarSystem extends DefaultEcsSystem {
     boolean enableObserverComponent = false;
     String builderName;
     ModelBuilderRegistry modelBuilderRegistry;
+    // option to join with building an avatar. Otherwise the avatar will be built after successful join.
     private boolean useShortCutJoin = true;
 
     /**
      *
      */
     public AvatarSystem(boolean enableObserverComponent) {
-        super(new String[]{"AvatarComponent"}, new RequestType[]{UserSystem.USER_REQUEST_JOIN}, new EventType[]{});
+        super(new String[]{"AvatarComponent"}, new RequestType[]{UserSystem.USER_REQUEST_JOIN}, new EventType[]{BaseEventRegistry.USER_EVENT_JOINED});
         this.enableObserverComponent = enableObserverComponent;
     }
 
@@ -88,19 +87,14 @@ public class AvatarSystem extends DefaultEcsSystem {
         if (request.getType().equals(UserSystem.USER_REQUEST_JOIN)) {
 
             if (useShortCutJoin) {
-                int userEntityId = ((int) request.getPayloadByIndex(0));
-                Boolean forLogin = (Boolean) request.getPayloadByIndex(1);
+                int userEntityId = request.getUserEntityId();
 
-                EcsEntity userEntity = shortCutJoin(userEntityId);
+                // now after joined EcsEntity userEntity = shortCutJoin(userEntityId);
+                EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
 
-                /*if (attachObserver(forLogin, isFirstJoin, userEntity, viewTransform)){
-                    isFirstJoin=false;
-                }*/
+                logger.debug("User '" + userEntity.getName() + "' joining via shortCutJoin");
 
-                //avatar.avatarE.setName("Player");
-                logger.debug("User '" + userEntity.getName() + "' joined");
-
-                SystemManager.sendEvent(buildUserJoinedEvent(userEntity));
+                SystemManager.sendEvent(BaseEventRegistry.buildUserJoinedEvent(userEntity));
 
                 return true;
             }
@@ -108,24 +102,43 @@ public class AvatarSystem extends DefaultEcsSystem {
         return false;
     }
 
+    /**
+     * @param evt
+     */
+    @Override
+    public void process(Event evt) {
+
+        if (avatarsystemdebuglog) {
+            logger.debug("got event " + evt.getType());
+        }
+        if (evt.getType().equals(BaseEventRegistry.USER_EVENT_JOINED)) {
+
+            int userEntityId = (Integer) evt.getPayload().get("userentityid");
+            EcsEntity userEntity = assembleJoinedUser(userEntityId);
+            SystemManager.sendEvent(BaseEventRegistry.buildUserAssembledEvent(userEntity));
+
+            logger.debug("User '" + userEntity.getName() + "' assembled");
+        }
+    }
+
     @Override
     public String getTag() {
         return TAG;
     }
 
-    public static Event buildUserJoinedEvent(EcsEntity userEntity) {
-        return new Event(UserSystem.USER_EVENT_JOINED, new Payload().add("userentityid", userEntity.getId()));
+    public void disableShortCutJoin() {
+        useShortCutJoin = false;
     }
 
     /**
-     * Do a join, which makes a player a participant in the game:
+     * Assemble a joined user with avatar, which makes a player a participant in the game:
      * - create components needed
      * - build and locate(?) avatar.
      * <p>
      * The login process created the user entity.
      */
-    private EcsEntity shortCutJoin(int userEntityId) {
-        logger.debug("shortCutJoin userEntityId"+userEntityId);
+    private EcsEntity assembleJoinedUser(int userEntityId) {
+        logger.debug("assembling joined user userEntityId" + userEntityId);
 
         EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
         SceneNode avatarNode = buildAvatarForUserEntity(userEntity);
@@ -155,8 +168,6 @@ public class AvatarSystem extends DefaultEcsSystem {
         }
         return userEntity;
     }
-
-
 
     /**
      * Build avatar for user. No observer change here.
