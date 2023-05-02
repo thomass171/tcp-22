@@ -8,15 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.*;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.message.*;
+import org.apache.hc.core5.net.URIBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -74,7 +73,7 @@ public class ServerControllerTest {
 
         HttpPost post = new HttpPost(uri);
         CloseableHttpResponse response = client.execute(post);
-        assertEquals(201, response.getStatusLine().getStatusCode());
+        assertEquals(201, response.getCode());
         String responseBody = readResponse(response);
         log.debug("response={}", responseBody);
         ServerInstance si = objectMapper.readValue(responseBody, ServerInstance.class);
@@ -92,7 +91,7 @@ public class ServerControllerTest {
         uri = new URIBuilder("http://localhost:" + port + URL).addParameters(nameValuePairs).build();
         HttpDelete delete = new HttpDelete(uri);
         response = client.execute(delete);
-        assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT.value(), response.getCode());
         // no response
 
         sil = getList(client);
@@ -106,7 +105,7 @@ public class ServerControllerTest {
         URI uri = new URIBuilder("http://localhost:" + port + URL + "/list").build();
         HttpGet get = new HttpGet(uri);
         CloseableHttpResponse response = client.execute(get);
-        assertEquals(200, response.getStatusLine().getStatusCode());
+        assertEquals(200, response.getCode());
         String responseBody = readResponse(response);
         log.debug("response={}", responseBody);
         ServerInstanceList sil = objectMapper.readValue(responseBody, ServerInstanceList.class);

@@ -1,5 +1,6 @@
 package de.yard.threed.sceneserver;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.testutil.TestUtils;
@@ -15,15 +16,18 @@ import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeModelFactory;
 import de.yard.threed.maze.MazeUtils;
 import de.yard.threed.maze.MoverComponent;
+import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static de.yard.threed.maze.RequestRegistry.*;
 import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FORWARD;
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,10 +45,19 @@ public class MazeSceneTest {
     // TestContext testContext;
     LoggingSystemTracker systemManagerTracker;
 
-    public void setup(String gridname) throws Exception {
+    private WireMockServer wireMockServer;
+
+    @BeforeEach
+    public void setup() {
+        wireMockServer = new WireMockServer(wireMockConfig().port(8089));
+        wireMockServer.start();
+    }
+
+    private void init(String gridname) throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("initialMaze", gridname);
-        sceneServer = SceneServerTestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties, 20);
+        // Loading a grid from wiremock really takes some time. So renderbrake 20->40
+        sceneServer = SceneServerTestUtils.setupServerForScene("de.yard.threed.maze.MazeScene", INITIAL_FRAMES, properties, 40);
         systemManagerTracker = new LoggingSystemTracker();
         SystemManager.setSystemTracker(systemManagerTracker);
     }
@@ -52,20 +65,35 @@ public class MazeSceneTest {
     @AfterEach
     public void tearDown() {
         sceneServer.stopServer();
+        wireMockServer.stop();
     }
 
     @Test
     public void testLaunchSokobanWikipedia() throws Exception {
-        runLaunchSokobanWikipedia(false);
+        runLaunchSokobanWikipedia(false, false);
     }
 
     @Test
     public void testLaunchSokobanWikipediaViaWebSocket() throws Exception {
-        runLaunchSokobanWikipedia(true);
+        runLaunchSokobanWikipedia(true, false);
     }
 
-    public void runLaunchSokobanWikipedia(boolean viaWebSocket) throws Exception {
-        setup("skbn/SokobanWikipedia.txt");
+    @Test
+    public void testLaunchRemoteSokobanWikipedia() throws Exception {
+        MazeTestUtils.mockHttpGetSokobanWikipedia(wireMockServer);
+        runLaunchSokobanWikipedia(false, true);
+    }
+
+    @Test
+    public void testLaunchRemoteSokobanWikipediaViaWebSocket() throws Exception {
+        MazeTestUtils.mockHttpGetSokobanWikipedia(wireMockServer);
+        runLaunchSokobanWikipedia(true, true);
+    }
+
+    public void runLaunchSokobanWikipedia(boolean viaWebSocket, boolean remoteGrid) throws Exception {
+        init(remoteGrid ? "http://localhost:" + wireMockServer.port() + "/mazes/1" : "skbn/SokobanWikipedia.txt");
+        String expectedGridname = remoteGrid ? "Sokoban Wikipedia" : "skbn/SokobanWikipedia.txt";
+
         log.debug("testLaunchSokobanWikipedia");
         assertEquals(INITIAL_FRAMES, sceneServer.getSceneRunner().getFrameCount());
         // no user/avatar and graph yet. Only 2 diamonds. Bots are currently launched after after user joined.
@@ -78,7 +106,7 @@ public class MazeSceneTest {
 
         TestClient testClient = new TestClient(TestClient.USER_NAME0);
 
-        EcsEntity userEntity = connectToSokobanWikipediaServer(testClient, viaWebSocket);
+        EcsEntity userEntity = connectToSokobanWikipediaServer(testClient, viaWebSocket, expectedGridname);
         MoverComponent mc = MoverComponent.getMoverComponent(userEntity);
 
         testClient.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_TURNRIGHT, userEntity.getId()));
@@ -116,7 +144,7 @@ public class MazeSceneTest {
         assertEquals(0, SystemManager.findEntities(e -> UserComponent.getUserComponent(e) != null).size());
 
         // connect again. Should again be located on start position.
-        userEntity = connectToSokobanWikipediaServer(testClient, viaWebSocket);
+        userEntity = connectToSokobanWikipediaServer(testClient, viaWebSocket, expectedGridname);
         mc = MoverComponent.getMoverComponent(userEntity);
         TestUtils.assertPoint(new Point(6, 1), mc.getLocation(), "player location");
 
@@ -138,7 +166,7 @@ public class MazeSceneTest {
      */
     @Test
     public void testMultiUser() throws Exception {
-        setup("maze/Area15x10.txt");
+        init("maze/Area15x10.txt");
         log.debug("testMultiUser");
 
         //SystemState.state = SystemState.STATE_READY_TO_JOIN;
@@ -165,11 +193,11 @@ public class MazeSceneTest {
 
     }
 
-    private EcsEntity connectToSokobanWikipediaServer(TestClient testClient, boolean viaWebSocket) throws Exception {
+    private EcsEntity connectToSokobanWikipediaServer(TestClient testClient, boolean viaWebSocket, String expectedGridname) throws Exception {
 
         testClient.assertConnectAndLogin(sceneServer, viaWebSocket);
         // EVENT_MAZE_LOADED should have been resent after login, but only to the new client
-        testClient.assertEventMazeLoaded("skbn/SokobanWikipedia.txt");
+        testClient.assertEventMazeLoaded(expectedGridname);
 
         List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
         assertEquals(1 + 2, entities.size(), "number of entites (player+2 boxes)");

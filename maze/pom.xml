@@ -13,7 +13,7 @@
     </parent>
 
     <dependencies>
-        <!-- junit comes from parent -->
+        <!-- junit, wiremock comes from parent -->
         <!-- own project dependencies-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>

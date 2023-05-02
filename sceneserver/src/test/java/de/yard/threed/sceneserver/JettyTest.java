@@ -5,10 +5,10 @@ import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.sceneserver.testutils.WSClient;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.HttpResponse;
 import org.asynchttpclient.Dsl;
 import org.asynchttpclient.ws.WebSocket;
 import org.asynchttpclient.ws.WebSocketListener;
@@ -49,7 +49,7 @@ public class JettyTest {
 
         HttpResponse response = client.execute(request);
 
-        assertEquals(200, response.getStatusLine().getStatusCode());
+        assertEquals(200, response.getCode());
     }
 
     /**

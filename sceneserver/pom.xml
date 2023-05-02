@@ -13,11 +13,15 @@
     </parent>
 
     <properties>
-        <!-- A build output outside target to have a better separation from target-->
-        <libdir>${project.basedir}/build/lib</libdir>
+        <!-- A build output outside target to have a better separation from target. But that doesn't clean it,
+        potentially leading to nasty dependency issues with old files. So put it to target-->
+        <libdir>${project.build.directory}/buildlib</libdir>
+        <!-- gwt has its own jetty version? -->
+        <!-- wiremock also uses jetty, but needs at least 9.4.16 with SslContextFactory splitted into Client and Server) -->
+        <jettyexceptgwt.version>9.4.19.v20190610</jettyexceptgwt.version>
     </properties>
     <dependencies>
-        <!-- junit comes from parent -->
+        <!-- junit, wiremock comes from parent -->
         <!-- No limitation here in using any lib; no need for GWT or C# conversion. -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -36,21 +40,27 @@
             <!-- provided because its not needed during runtime-->
             <scope>provided</scope>
         </dependency>
-        <!-- embedded jetty for websockets -->
+        <!-- embedded jetty for websockets (wiremock also uses jetty, but needs at least 9.4.16 with SslContextFactory splitted into Client and Server) -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.14.v20181114</version>
+            <version>${jettyexceptgwt.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.4.14.v20181114</version>
+            <version>${jettyexceptgwt.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.websocket</groupId>
             <artifactId>javax-websocket-server-impl</artifactId>
-            <version>9.4.14.v20181114</version>
+            <version>${jettyexceptgwt.version}</version>
+        </dependency>
+        <!-- Needed for the SSLContextFactory$Client class, which seems to be needed by wiremock -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>${jettyexceptgwt.version}</version>
         </dependency>
         <!-- client for testing. But not a jetty client to avoid false positives due
           to the same implementation base. And for compatibility.-->
@@ -60,12 +70,12 @@
             <version>2.12.3</version>
             <scope>test</scope>
         </dependency>
-        <!-- httpclient only for testing. Cannot use websockets -->
+        <!-- httpclient cannot use websockets -->
+        <!-- client5 httpclient is available in principle also via java-common in platform-homebrew, but make sure we have it though with expected version-->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
-            <scope>test</scope>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>${hc.client5.version}</version>
         </dependency>
         <!-- own project dependencies-->
         <dependency>
@@ -125,14 +135,14 @@
 
 
     <build>
-         <!--28.2.23 not needed? <resources>
-            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.java</include>
-                </includes>
-            </resource>
-        </resources>-->
+        <!--28.2.23 not needed? <resources>
+           <resource>
+               <directory>src/main/java</directory>
+               <includes>
+                   <include>**/*.java</include>
+               </includes>
+           </resource>
+       </resources>-->
 
         <plugins>
             <!-- "surefire", "source" and "jar"(for tests.jar) come from parent-->

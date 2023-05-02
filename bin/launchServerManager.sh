@@ -2,7 +2,7 @@
 #
 # Launches a server manager.
 #
-# Uses the fat jar also used for deployment and sceneserver/build/lib
+# Uses the fat jar also used for deployment and sceneserver/target/buildlib
 # for launching a scene server
 #
 

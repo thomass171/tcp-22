@@ -98,6 +98,7 @@ public class HomeBrewSceneRunner extends AbstractSceneRunner implements NativeSc
         Scene.world = new World();
         //HomeBrewScene openglscene = new HomeBrewScene();
         initAbstract(null, scene);
+        Platform.getInstance().sceneRunner = instance;
 
         if (sceneMode.isClient()) {
             cameraToRender = new HomeBrewPerspectiveCamera(fov, aspect, near, far);

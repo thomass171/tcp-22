@@ -159,7 +159,7 @@
                         <log4j.configuration>file:${project.build.directory}/test-classes/log4j.properties</log4j.configuration>
                     </systemProperties>-->
 
-                    <!--30.4.21 Ohne standalone Jetty versuchen. Das geht aber nicht, weil er dann die Bundle nicht vom Apache holen kann.-->
+                    <!--30.4.21 Try without standalone Jetty. But thats not possible, weil er dann die Bundle nicht vom Apache holen kann.-->
                     <!--20.9.21 Try again with bundle path .-->
                     <noServer>false</noServer>
                     <style>DETAILED</style>
