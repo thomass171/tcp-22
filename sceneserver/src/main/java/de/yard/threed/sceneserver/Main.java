@@ -18,8 +18,6 @@ public class Main {
 
         try {
 
-            // basePort is the bus connector port
-            int basePort = Server.DEFAULT_BASE_PORT;
             // A dedicated logger; helpful to diff client/server logs in mixed operation like tests from IDE?
             // No, better rely on log4j auto configuration. An absolute path doesn't make things easier.
             // Console output should be sufficient (no file) because of docker.
@@ -36,6 +34,8 @@ public class Main {
             // args have more prio than env
             Configuration configuration = new ConfigurationByArgs(args).addConfiguration(new ConfigurationByEnv(), true);
             String scene = configuration.getString("scene");
+            // baseport is the bus connector port for native socket connections
+            int baseport = configuration.getInt("baseport", Server.DEFAULT_BASE_PORT);
 
 
             SceneServer sceneServer = new SceneServer(subdir, scene, configuration);
@@ -44,7 +44,7 @@ public class Main {
                 SystemManager.setSystemTracker(new LoggingSystemTracker());
             }
             // start (blocking) render loop
-            sceneServer.runServer(basePort);
+            sceneServer.runServer(baseport);
 
 
         } catch (Exception e) {

@@ -14,18 +14,19 @@ public class ServerInstance {
     // just a unique subsequent id
     int id;
 
-    // not available unitl java 9
+    // not available until java 9
     long pid;
 
     OffsetDateTime started;
 
     long startedMillis;
 
-    String sceneName;
+    // no camel case for scenename, gridname and baseport to comply to query parameter
+    String scenename;
 
     String gridname;
 
-    int basePort;
+    int baseport;
 
     String state;
 

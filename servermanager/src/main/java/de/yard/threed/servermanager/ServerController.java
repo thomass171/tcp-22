@@ -26,9 +26,9 @@ public class ServerController {
     @CrossOrigin
     @PostMapping("/server")
     //@ResponseBody
-    public ResponseEntity<ServerInstance> start(@RequestParam String scenename, @RequestParam String gridname) {
-        log.info("Starting server for scene {} {}", scenename, gridname);
-        return new ResponseEntity<>(serverManagerService.startServer(scenename, gridname), HttpStatus.CREATED);
+    public ResponseEntity<ServerInstance> start(@RequestParam String scenename, @RequestParam String gridname, @RequestParam(required = false) Integer baseport) {
+        log.info("Starting server for scene {} with grid name {} on port {}", scenename, gridname, baseport);
+        return new ResponseEntity<>(serverManagerService.startServer(scenename, gridname, baseport), HttpStatus.CREATED);
     }
 
     @CrossOrigin

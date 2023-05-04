@@ -42,7 +42,7 @@ public abstract class Configuration {
         return getInt(property, null);
     }
 
-    Integer getInt(String property, Integer defaultValue) {
+    public Integer getInt(String property, Integer defaultValue) {
         String s;
         if ((s = getString(property)) == null) {
             return defaultValue;
@@ -54,7 +54,7 @@ public abstract class Configuration {
         return getBoolean(property, null);
     }
 
-    Boolean getBoolean(String property, Boolean defaultValue) {
+    public Boolean getBoolean(String property, Boolean defaultValue) {
         String s;
         if ((s = getString(property)) == null) {
             return defaultValue;
@@ -69,7 +69,7 @@ public abstract class Configuration {
         return getDouble(property, null);
     }
 
-    Double getDouble(String property, Double defaultValue) {
+    public Double getDouble(String property, Double defaultValue) {
         String s;
         if ((s = getString(property)) == null) {
             return defaultValue;

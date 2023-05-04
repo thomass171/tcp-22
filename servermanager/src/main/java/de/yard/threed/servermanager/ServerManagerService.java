@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,14 +32,14 @@ public class ServerManagerService {
 
     @Value("${servermanager.childmainclass:}")
     private String servermanagerChildMainClass;
-    Process process = null;
 
     AtomicInteger idInteger = new AtomicInteger(1);
 
-    public ServerInstance startServer(String scenename, String gridname) {
-        int basePort = 887;
+    public ServerInstance startServer(String scenename, String gridname, Integer baseport) {
+
+        Process process;
         try {
-            process = startServerInstance(scenename, gridname);
+            process = startServerInstance(scenename, gridname, baseport);
         } catch (Exception e) {
             e.printStackTrace();
             // trigger HTTP code 500
@@ -51,7 +50,7 @@ public class ServerManagerService {
 
         }*/
         int id = idInteger.addAndGet(1);
-        ServerInstance si = new ServerInstance(id, -1, OffsetDateTime.now(), System.currentTimeMillis(), scenename, gridname, basePort, STATE_RUNNING, 0);
+        ServerInstance si = new ServerInstance(id, -1, OffsetDateTime.now(), System.currentTimeMillis(), scenename, gridname, baseport == null ? -1 : baseport, STATE_RUNNING, 0);
         serverInstances.add(0, si);
         processMap.put(id, process);
         if (!process.isAlive()) {
@@ -77,22 +76,24 @@ public class ServerManagerService {
     public void stopServer(int id) {
         log.debug("Stopping {}", id);
         for (ServerInstance si : serverInstances) {
-            if (si.getId() == id) {
-                log.debug("Stopping");
+            if (id == -1 || si.getId() == id) {
+                log.debug("Stopping " + id);
                 JavaUtil.stopProcess(processMap.get(id));
                 si.setState(STATE_TERMINATED);
-                return;
             }
         }
     }
 
-    public void stopAllServer() {
-        if (process != null) {
-            JavaUtil.stopProcess(process);
-        }
+    public void stopAllServerAndClean() {
+        stopServer(-1);
+        processMap = new TreeMap<>();
+        serverInstances = new Vector();
     }
 
-    public Process startServerInstance(String scenename, String gridname) throws Exception {
+    /**
+     * baseport isn't mandatory, but helpful for returning it later.
+     */
+    public Process startServerInstance(String scenename, String gridname, Integer baseport) throws Exception {
 
         Process serverProcess;
 
@@ -105,6 +106,9 @@ public class ServerManagerService {
         args.add("--throttle=100");
         args.add("--initialMaze=" + gridname);
         args.add("--scene=" + scenename);
+        if (baseport != null) {
+            args.add("--baseport=" + baseport);
+        }
 //        Class clazz = Class.forName(servermanagerChildMainClass);
         log.debug("servermanagerLib={}", servermanagerLib);
         String classPath = System.getProperty("user.dir") + "/" + servermanagerLib + "/*";

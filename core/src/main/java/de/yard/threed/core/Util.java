@@ -13,7 +13,8 @@ import java.util.List;
  * Date: 01.04.14
  */
 public class Util {
-    static Log logger = Platform.getInstance().getLog(Util.class);
+    //3.5.23: This class is also used during setup when a platform is not yet available.
+    //static Log logger = Platform.getInstance().getLog(Util.class);
 
 
     /**
