@@ -15,6 +15,9 @@ import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Has its own baseport management to make sure a new server doesn't use ports already in use.
+ */
 @Service
 @Slf4j
 public class ServerManagerService {
@@ -37,9 +40,16 @@ public class ServerManagerService {
 
     public ServerInstance startServer(String scenename, String gridname, Integer baseport) {
 
+        int port;
+        if (baseport != null) {
+            port = baseport;
+        } else {
+            port = findUnusedBaseport();
+        }
+
         Process process;
         try {
-            process = startServerInstance(scenename, gridname, baseport);
+            process = startServerInstance(scenename, gridname, port);
         } catch (Exception e) {
             e.printStackTrace();
             // trigger HTTP code 500
@@ -50,7 +60,7 @@ public class ServerManagerService {
 
         }*/
         int id = idInteger.addAndGet(1);
-        ServerInstance si = new ServerInstance(id, -1, OffsetDateTime.now(), System.currentTimeMillis(), scenename, gridname, baseport == null ? -1 : baseport, STATE_RUNNING, 0);
+        ServerInstance si = new ServerInstance(id, -1, OffsetDateTime.now(), System.currentTimeMillis(), scenename, gridname, port, STATE_RUNNING, 0);
         serverInstances.add(0, si);
         processMap.put(id, process);
         if (!process.isAlive()) {
@@ -64,8 +74,7 @@ public class ServerManagerService {
 
     /**
      * make it a single object for more visual json representation
-     *
-     * @return
+     * The latest instances are at the beginning of the list!
      */
     public ServerInstanceList getServer() {
         ServerInstanceList l = new ServerInstanceList();
@@ -91,9 +100,9 @@ public class ServerManagerService {
     }
 
     /**
-     * baseport isn't mandatory, but helpful for returning it later.
+     * baseport is mandatory to know which ports are in use.
      */
-    public Process startServerInstance(String scenename, String gridname, Integer baseport) throws Exception {
+    private Process startServerInstance(String scenename, String gridname, int baseport) throws Exception {
 
         Process serverProcess;
 
@@ -106,9 +115,7 @@ public class ServerManagerService {
         args.add("--throttle=100");
         args.add("--initialMaze=" + gridname);
         args.add("--scene=" + scenename);
-        if (baseport != null) {
-            args.add("--baseport=" + baseport);
-        }
+        args.add("--baseport=" + baseport);
 //        Class clazz = Class.forName(servermanagerChildMainClass);
         log.debug("servermanagerLib={}", servermanagerLib);
         String classPath = System.getProperty("user.dir") + "/" + servermanagerLib + "/*";
@@ -126,6 +133,25 @@ public class ServerManagerService {
         Thread.sleep(5000);
 
         return serverProcess;
+    }
+
+    private Integer findUnusedBaseport() {
+        int port = 5890;
+
+        do {
+            boolean used = false;
+            for (ServerInstance si : serverInstances) {
+                if (si.getState().equals(STATE_RUNNING) && si.baseport == port) {
+                    used = true;
+                }
+            }
+            if (!used) {
+                return port;
+            }
+            port += 2;
+        } while (port < 5890 + 10);
+        log.warn("No unused port found");
+        return null;
     }
 
     @Scheduled(fixedDelay = 1000)

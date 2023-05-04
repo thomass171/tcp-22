@@ -74,6 +74,7 @@ public class ServerControllerTest {
         ServerInstanceList sil = getList();
         assertEquals(1, sil.getServerInstanceList().size());
         assertEquals(ServerManagerService.STATE_RUNNING, sil.getServerInstanceList().get(0).getState());
+        assertEquals(5890, sil.getServerInstanceList().get(0).getBaseport());
 
         // stop server
         stopServer(serverid);
@@ -95,11 +96,14 @@ public class ServerControllerTest {
         assertEquals(1, sil.getServerInstanceList().size());
         assertEquals(ServerManagerService.STATE_RUNNING, sil.getServerInstanceList().get(0).getState());
 
-        sis.add(startServer("maze/Area15x10.txt", 5895));
+        sis.add(startServer("maze/Area15x10.txt"));
         sil = getList();
         assertEquals(2, sil.getServerInstanceList().size());
         assertEquals(ServerManagerService.STATE_RUNNING, sil.getServerInstanceList().get(0).getState());
         assertEquals(ServerManagerService.STATE_RUNNING, sil.getServerInstanceList().get(1).getState());
+        // list order is by age desc
+        assertEquals(5892, sil.getServerInstanceList().get(0).getBaseport());
+        assertEquals(5890, sil.getServerInstanceList().get(1).getBaseport());
 
         // stop all server
         for (ServerInstance si : sis) {
@@ -114,20 +118,12 @@ public class ServerControllerTest {
         client.close();
     }
 
-    /**
-     * Default base port is 5890.
-     */
     private ServerInstance startServer(String gridName) throws Exception {
-        return startServer(gridName, null);
-    }
-
-    private ServerInstance startServer(String gridName, Integer baseport) throws Exception {
         List<NameValuePair> nameValuePairs = new ArrayList<>();
         nameValuePairs.add(new BasicNameValuePair("scenename", "de.yard.threed.maze.MazeScene"));
         nameValuePairs.add(new BasicNameValuePair("gridname", gridName));
-        if (baseport != null) {
-            nameValuePairs.add(new BasicNameValuePair("baseport", Integer.toString(baseport)));
-        }
+        // use internal port management
+        // nameValuePairs.add(new BasicNameValuePair("baseport", Integer.toString(baseport)));
         URI uri = new URIBuilder("http://localhost:" + port + URL).addParameters(nameValuePairs).build();
 
         HttpPost post = new HttpPost(uri);
