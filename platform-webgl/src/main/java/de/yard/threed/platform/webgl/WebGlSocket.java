@@ -4,6 +4,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 import de.yard.threed.core.BlockReader;
 import de.yard.threed.core.LinePrinter;
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.WriteException;
 import de.yard.threed.core.platform.Log;
@@ -21,15 +22,21 @@ public class WebGlSocket implements NativeSocket {
     static final int STATE_OPEN = 1;
     int state = STATE_WAITING_FOR_OPEN;
 
-    private WebGlSocket(String host, int port) {
+    private WebGlSocket(String host, int port, String path) {
+        if (StringUtils.empty(path)) {
+            path = "/connect";
+        }
+        if (!StringUtils.startsWith(path, "/")) {
+            path = "/" + path;
+        }
         // protocol needs to be 'ws' or 'wss', depending on how JS was loaded.
-        this.webSocket = buildWebSocket(Main.usesTLS ? "wss" : "ws", host, port, this);
+        this.webSocket = buildWebSocket(Main.usesTLS ? "wss" : "ws", host, port, path, this);
         addListener(webSocket, this);
     }
 
-    public static WebGlSocket buildSocket(String host, int port) {
-        logger.debug("Building websocket to " + host + ":" + port);
-        WebGlSocket webGlSocket = new WebGlSocket(host, port);
+    public static WebGlSocket buildSocket(String host, int port, String path) {
+        logger.debug("Building websocket to " + host + ":" + port + ", path=" + path);
+        WebGlSocket webGlSocket = new WebGlSocket(host, port, path);
         return webGlSocket;
     }
 
@@ -68,8 +75,8 @@ public class WebGlSocket implements NativeSocket {
     /**
      *
      */
-    private static native JavaScriptObject buildWebSocket(String protocol, String host, int port, WebGlSocket instance)  /*-{
-        var socket = new WebSocket(protocol + '://' + host + ':' + port + "/connect");
+    private static native JavaScriptObject buildWebSocket(String protocol, String host, int port, String path, WebGlSocket instance)  /*-{
+        var socket = new WebSocket(protocol + '://' + host + ':' + port + path);
         console.log("socket created");
         socket.addEventListener('open', function (event) {
             console.log('socket opened');
