@@ -3,12 +3,12 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.NativeSocket;
+import de.yard.threed.javanative.JsonUtil;
+import de.yard.threed.sceneserver.jsonmodel.Client;
+import de.yard.threed.sceneserver.jsonmodel.Status;
+import de.yard.threed.sceneserver.testutils.TestUtils;
 import de.yard.threed.sceneserver.testutils.WSClient;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.client5.http.classic.HttpClient;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.http.HttpResponse;
 import org.asynchttpclient.Dsl;
 import org.asynchttpclient.ws.WebSocket;
 import org.asynchttpclient.ws.WebSocketListener;
@@ -18,7 +18,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 public class JettyTest {
@@ -27,11 +32,16 @@ public class JettyTest {
 
     @BeforeEach
     public void setup() throws Exception {
+
+        ClientListener.init("localhost", de.yard.threed.core.Server.DEFAULT_BASE_PORT);
+        ClientListener.getInstance();
+
         jettyServer = JettyServer.startJettyServer(port);
     }
 
     @AfterEach
     public void tearDown() {
+        ClientListener.dropInstance();
         try {
             log.debug("Stopping jetty");
             jettyServer.stop();
@@ -44,12 +54,12 @@ public class JettyTest {
     @Test
     public void testStatus() throws Exception {
         String url = "http://localhost:8090/status";
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpGet request = new HttpGet(url);
 
-        HttpResponse response = client.execute(request);
+        String response = TestUtils.httpGet(url);
+        log.debug("response={}", response);
 
-        assertEquals(200, response.getCode());
+        Status status = JsonUtil.fromJson(response, Status.class);
+        assertNotNull(status);
     }
 
     /**
@@ -111,5 +121,27 @@ public class JettyTest {
         NativeSocket wsSocket = WSClient.connectToServer(new de.yard.threed.core.Server("localhost", 8090));
 
         wsSocket.sendPacket(new Packet().add("m", "test message"));
+    }
+
+    @Test
+    public void testJson() throws Exception {
+
+        Status status = new Status();
+        status.setCpuload(0.5);
+        Client client = new Client();
+        OffsetDateTime connectedAt = OffsetDateTime.of(2012, 1, 13, 5, 6, 7, 0, ZoneOffset.UTC);
+        client.setConnectedAt(connectedAt);
+        List<Client> clients = new ArrayList<>();
+        clients.add(client);
+        status.setClients(clients);
+
+        String json = JsonUtil.toJson(status);
+        log.debug("json={}", json);
+        // should use ISO instead of single fields
+        assertTrue(json.contains("2012-01-13T05:06:07Z"));
+
+        status = JsonUtil.fromJson(json, Status.class);
+        assertNotNull(status);
+        assertEquals(connectedAt, status.getClients().get(0).getConnectedAt());
     }
 }

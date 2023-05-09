@@ -13,13 +13,16 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.javanative.JavaUtil;
+import de.yard.threed.javanative.JsonUtil;
 import de.yard.threed.maze.BotSystem;
 import de.yard.threed.maze.BulletSystem;
 import de.yard.threed.maze.MazeMovingAndStateSystem;
 import de.yard.threed.maze.MazeVisualizationSystem;
 import de.yard.threed.maze.testutils.MazeTestUtils;
+import de.yard.threed.sceneserver.jsonmodel.Status;
 import de.yard.threed.sceneserver.testutils.RealServer;
 import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
+import de.yard.threed.sceneserver.testutils.TestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -106,6 +109,12 @@ public class RealServerRealClientTest {
 
         // only a login request and a EVENT_MAZE_VISUALIZED should have been sent
         assertEquals(2, systemTracker.getPacketsSentToNetwork().size(), "packets sent to network");
+
+        String response = TestUtils.httpGet("http://localhost:5891/status");
+        log.debug("response={}", response);
+        Status status = JsonUtil.fromJson(response, Status.class);
+        assertNotNull(status);
+        assertEquals(1, status.getClients().size());
 
     }
 }

@@ -5,6 +5,9 @@ import de.yard.threed.core.platform.NativeJsonObject;
 import de.yard.threed.core.platform.NativeJsonString;
 import de.yard.threed.core.platform.NativeJsonValue;
 
+/**
+ * There are also two JsonUtil classes in other modules.
+ */
 public class JsonHelper {
 
     public static String getString(NativeJsonObject json, String key) {
@@ -46,7 +49,7 @@ public class JsonHelper {
     public static String buildProperty(String tag, String v) {
         String result = "\"" + tag + "\":";
 
-        //OhOhOH
+        //OhOhOH. But seems correct.
         v = v.replace("\"", "\\\"");
         //// GWT JsonParser doesn't like line breaks.
         //??v = v.replace("\\n", "\\\n");

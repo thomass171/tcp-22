@@ -8,6 +8,9 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.trafficcore.model.Airport;
 import de.yard.threed.trafficcore.model.Runway;
 
+/**
+ * There are also other JsonUtil/JsonHelper classes.
+ */
 public class JsonUtil {
     public static String TAG_GROUNDNETXML = "groundNetXml";
     public static String TAG_ICAO = "icao";

@@ -6,6 +6,8 @@ import de.yard.threed.core.Packet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.OffsetDateTime;
+
 /**
  * Client connection either via socket or websocket.
  */
@@ -13,6 +15,7 @@ public class ClientConnection {
     private static final Logger logger = LoggerFactory.getLogger(ClientConnection.class.getName());
     private NativeSocket socket;
     private String connectionId;
+    private OffsetDateTime connectedAt;
     private static int id = 10000;
 
     public ClientConnection(NativeSocket clientSocket) {
@@ -21,6 +24,7 @@ public class ClientConnection {
         synchronized (this) {
             this.connectionId = "c" + id++;
         }
+        this.connectedAt = OffsetDateTime.now();
     }
 
     /**
@@ -60,6 +64,10 @@ public class ClientConnection {
 
     public String getConnectionId() {
         return connectionId;
+    }
+
+    public OffsetDateTime getConnectedAt() {
+        return connectedAt;
     }
 }
 

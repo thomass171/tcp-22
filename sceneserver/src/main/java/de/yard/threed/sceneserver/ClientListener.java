@@ -2,6 +2,7 @@ package de.yard.threed.sceneserver;
 
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
+import de.yard.threed.sceneserver.jsonmodel.Client;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,6 +190,19 @@ public class ClientListener extends Thread {
         if (aborted) {
             throw new RuntimeException("ClientListener aborted");
         }
+    }
+
+    public List<Client> getClients() {
+        List<Client> clients = new ArrayList<>();
+        Iterator<ClientConnection> iter = clientConnectionList.iterator();
+        while (iter.hasNext()) {
+
+            Client client = new Client();
+            ClientConnection cc = iter.next();
+            client.setConnectedAt(cc.getConnectedAt());
+            clients.add(client);
+        }
+        return clients;
     }
 
     private void addClientConnection(ClientConnection clientConnection) {
