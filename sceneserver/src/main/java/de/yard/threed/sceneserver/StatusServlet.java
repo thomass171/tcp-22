@@ -3,6 +3,7 @@ package de.yard.threed.sceneserver;
 import de.yard.threed.javanative.JsonUtil;
 import de.yard.threed.sceneserver.jsonmodel.Status;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.core5.http.HttpHeaders;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -31,6 +32,8 @@ public class StatusServlet extends HttpServlet {
         status.setCpuload(getProcessCpuLoad());
 
         response.setContentType("application/json");
+        // There is no preflight for GET, so this header should be sufficient?
+        response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,"*");
         response.setStatus(HttpServletResponse.SC_OK);
         //response.getWriter().println("{ \"status\": \"ok\"}");
         response.getWriter().println(JsonUtil.toJson(status));
