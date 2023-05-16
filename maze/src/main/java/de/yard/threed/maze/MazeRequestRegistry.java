@@ -10,7 +10,7 @@ import de.yard.threed.engine.platform.common.RequestType;
  * <p>
  * Created on 24.10.20.
  */
-public class RequestRegistry {
+public class MazeRequestRegistry {
     /**
      *
      */
@@ -54,5 +54,11 @@ public class RequestRegistry {
 
     public static Request buildKick(int userEntityId) {
         return new Request(TRIGGER_REQUEST_KICK, new Payload(new Object[]{""}), new Integer(userEntityId));
+    }
+
+    public static RequestType TRIGGER_REQUEST_FIRE = RequestType.register(2017,"TRIGGER_REQUEST_FIRE");
+
+    public static Request buildFireRequest(int userEntityId, Direction targetDirection) {
+        return new Request(TRIGGER_REQUEST_FIRE, new Payload().add("targetdirection", targetDirection.getCode()), new Integer(userEntityId));
     }
 }

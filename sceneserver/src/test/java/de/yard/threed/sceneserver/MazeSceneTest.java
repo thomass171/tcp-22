@@ -14,9 +14,10 @@ import de.yard.threed.engine.ecs.ServerSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserComponent;
 import de.yard.threed.engine.platform.common.Request;
+import de.yard.threed.maze.GridMovement;
 import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeModelFactory;
-import de.yard.threed.maze.MazeUtils;
+import de.yard.threed.maze.MazeRequestRegistry;
 import de.yard.threed.maze.MoverComponent;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.sceneserver.testutils.TestClient;
@@ -31,8 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static de.yard.threed.maze.RequestRegistry.*;
-import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FORWARD;
+import static de.yard.threed.maze.MazeRequestRegistry.*;
+import static de.yard.threed.maze.MazeRequestRegistry.TRIGGER_REQUEST_FORWARD;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -208,6 +209,16 @@ public class MazeSceneTest {
             });
         }
         // TODO test bullets in inventory
+
+        // testclient0 is on (6, 4) facing "N".
+        testClient0.assertPositionAndOrientation(new Point(6, 4),"N");
+
+        testClient0.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_FORWARD, testClient0.getUserEntity().getId()));
+        testClient0.assertPositionAndOrientation(new Point(6, 5),"N");
+
+        testClient0.sendRequestAndWait(sceneServer, MazeRequestRegistry.buildFireRequest(testClient0.getUserEntity().getId(),
+                MoverComponent.getMoverComponent(testClient0.getUserEntity()).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
+        //TODO t.b.c.
     }
 
     private EcsEntity connectToSokobanWikipediaServer(TestClient testClient, boolean viaWebSocket, String expectedGridname) throws Exception {
@@ -221,8 +232,7 @@ public class MazeSceneTest {
         EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME0.equals(e.getName())).get(0);
         assertNotNull(userEntity, "user entity");
 
-        assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(userEntity).toString(), "initial orientation");
-        assertEquals(new Point(6, 1).toString(), MazeUtils.getMoverposition(userEntity).toString(), "initial location");
+        testClient.assertPositionAndOrientation(new Point(6, 1),new GridOrientation());
         UserComponent userComponent = UserComponent.getUserComponent(userEntity);
         assertNotNull(userComponent, "userComponent");
         String connectionId = userComponent.getConnectionId();

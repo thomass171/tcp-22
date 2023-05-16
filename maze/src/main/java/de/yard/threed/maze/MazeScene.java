@@ -89,7 +89,7 @@ public class MazeScene extends Scene {
 
         });
         buttonDelegates.put("pull", () -> {
-            InputToRequestSystem.sendRequestWithId(new Request(RequestRegistry.TRIGGER_REQUEST_PULL, new Payload(new Object[]{""})));
+            InputToRequestSystem.sendRequestWithId(new Request(MazeRequestRegistry.TRIGGER_REQUEST_PULL, new Payload(new Object[]{""})));
         });
 
         vrInstance = VrInstance.buildFromArguments();
@@ -105,28 +105,28 @@ public class MazeScene extends Scene {
             //'M' nur Provisorium? Och wieso? Man kann KEys immer als Fallback haben.
             //inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
             inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_CONTROLMENU);
-            inputToRequestSystem.addKeyMapping(KeyCode.W, RequestRegistry.TRIGGER_REQUEST_FORWARD);
-            inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, RequestRegistry.TRIGGER_REQUEST_FORWARD);
+            inputToRequestSystem.addKeyMapping(KeyCode.W, MazeRequestRegistry.TRIGGER_REQUEST_FORWARD);
+            inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, MazeRequestRegistry.TRIGGER_REQUEST_FORWARD);
 
-            inputToRequestSystem.addKeyMapping(KeyCode.S, RequestRegistry.TRIGGER_REQUEST_BACK);
-            inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, RequestRegistry.TRIGGER_REQUEST_BACK);
+            inputToRequestSystem.addKeyMapping(KeyCode.S, MazeRequestRegistry.TRIGGER_REQUEST_BACK);
+            inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, MazeRequestRegistry.TRIGGER_REQUEST_BACK);
 
-            inputToRequestSystem.addKeyMapping(KeyCode.LeftArrow, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
-            inputToRequestSystem.addKeyMapping(KeyCode.RightArrow, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+            inputToRequestSystem.addKeyMapping(KeyCode.LeftArrow, MazeRequestRegistry.TRIGGER_REQUEST_TURNLEFT);
+            inputToRequestSystem.addKeyMapping(KeyCode.RightArrow, MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
 
-            inputToRequestSystem.addKeyMapping(KeyCode.U, RequestRegistry.TRIGGER_REQUEST_UNDO);
-            inputToRequestSystem.addKeyMapping(KeyCode.V, RequestRegistry.TRIGGER_REQUEST_VALIDATE);
-            inputToRequestSystem.addKeyMapping(KeyCode.H, RequestRegistry.TRIGGER_REQUEST_HELP);
-            inputToRequestSystem.addKeyMapping(KeyCode.R, RequestRegistry.TRIGGER_REQUEST_RESET);
-            inputToRequestSystem.addKeyMapping(KeyCode.K, RequestRegistry.TRIGGER_REQUEST_KICK);
-            inputToRequestSystem.addKeyMapping(KeyCode.Space, BulletSystem.TRIGGER_REQUEST_FIRE);
+            inputToRequestSystem.addKeyMapping(KeyCode.U, MazeRequestRegistry.TRIGGER_REQUEST_UNDO);
+            inputToRequestSystem.addKeyMapping(KeyCode.V, MazeRequestRegistry.TRIGGER_REQUEST_VALIDATE);
+            inputToRequestSystem.addKeyMapping(KeyCode.H, MazeRequestRegistry.TRIGGER_REQUEST_HELP);
+            inputToRequestSystem.addKeyMapping(KeyCode.R, MazeRequestRegistry.TRIGGER_REQUEST_RESET);
+            inputToRequestSystem.addKeyMapping(KeyCode.K, MazeRequestRegistry.TRIGGER_REQUEST_KICK);
+            inputToRequestSystem.addKeyMapping(KeyCode.Space, MazeRequestRegistry.TRIGGER_REQUEST_FIRE);
 
-            inputToRequestSystem.setSegmentRequest(0, RequestRegistry.TRIGGER_REQUEST_LEFT);
-            inputToRequestSystem.setSegmentRequest(2, RequestRegistry.TRIGGER_REQUEST_RIGHT);
-            inputToRequestSystem.setSegmentRequest(3, RequestRegistry.TRIGGER_REQUEST_TURNLEFT);
-            inputToRequestSystem.setSegmentRequest(4, BulletSystem.TRIGGER_REQUEST_FIRE);
-            inputToRequestSystem.setSegmentRequest(5, RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
-            inputToRequestSystem.setSegmentRequest(7, RequestRegistry.TRIGGER_REQUEST_FORWARD);
+            inputToRequestSystem.setSegmentRequest(0, MazeRequestRegistry.TRIGGER_REQUEST_LEFT);
+            inputToRequestSystem.setSegmentRequest(2, MazeRequestRegistry.TRIGGER_REQUEST_RIGHT);
+            inputToRequestSystem.setSegmentRequest(3, MazeRequestRegistry.TRIGGER_REQUEST_TURNLEFT);
+            inputToRequestSystem.setSegmentRequest(4, MazeRequestRegistry.TRIGGER_REQUEST_FIRE);
+            inputToRequestSystem.setSegmentRequest(5, MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+            inputToRequestSystem.setSegmentRequest(7, MazeRequestRegistry.TRIGGER_REQUEST_FORWARD);
             SystemManager.addSystem(inputToRequestSystem);
 
             ObserverSystem observerSystem = new ObserverSystem();

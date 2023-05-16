@@ -47,17 +47,17 @@ public class SimpleBotAITest {
         IntProvider intProvider = new DeterministicIntProvider(new int[]{1,1});
         Request request = botAI.getNextRequest(leftBot, gridState, grid.getMazeLayout(), intProvider);
         // should not fire at own team member but turn
-        assertEquals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
+        assertEquals(MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
         MazeTestUtils.rotatePlayer(leftBot, false,  new Point(5, 2));
 
         request = botAI.getNextRequest(leftBot, gridState, grid.getMazeLayout(), intProvider);
         // should now fire player
-        assertEquals(BulletSystem.TRIGGER_REQUEST_FIRE.getLabel(), request.getType().getLabel());
+        assertEquals(MazeRequestRegistry.TRIGGER_REQUEST_FIRE.getLabel(), request.getType().getLabel());
 
         // right bot should not solve
         MazeTestUtils.move(rightBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(7, 2));
         request = botAI.getNextRequest(rightBot, gridState, grid.getMazeLayout(), intProvider);
-        assertEquals(RequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
+        assertEquals(MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
 
     }
 }

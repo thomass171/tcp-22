@@ -35,18 +35,18 @@ public class SimpleBotAI implements BotAI {
             // don't fire own team member.
             if (mover.getTeam() != nextPlayer.getTeam() && Point.getDistance(mover.getLocation(), nextPlayer.getLocation()) < 3) {
                 // Different from VR player, for bots firing direction is the same as orientation.
-                return BulletSystem.buildFireRequest(mover.getId(), mover.getOrientation().getDirectionForMovement(GridMovement.Forward));
+                return MazeRequestRegistry.buildFireRequest(mover.getId(), mover.getOrientation().getDirectionForMovement(GridMovement.Forward));
             }
         }
 
         if (gridState.canWalk(mover.getLocation(), GridMovement.Forward, mover.getOrientation(), mover.getTeam(), layout)) {
             // don't solve
             if (!gridState.isDestinationAhead(mover.getLocation(),  mover.getOrientation(), layout)) {
-                return new Request(RequestRegistry.TRIGGER_REQUEST_FORWARD);
+                return new Request(MazeRequestRegistry.TRIGGER_REQUEST_FORWARD);
             }
         }
         // just turn left or right
-        return new Request((rand.nextInt() % 2 == 0) ? RequestRegistry.TRIGGER_REQUEST_TURNLEFT : RequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+        return new Request((rand.nextInt() % 2 == 0) ? MazeRequestRegistry.TRIGGER_REQUEST_TURNLEFT : MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
     }
 
     @Override

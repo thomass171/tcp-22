@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static de.yard.threed.maze.RequestRegistry.*;
+import static de.yard.threed.maze.MazeRequestRegistry.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -219,7 +219,7 @@ public class MazeTest {
         //da fehlt doch was by y??
         Assertions.assertEquals(0.6 + 0.75, observerDummy.getTransform().getWorldModelMatrix().extractPosition().getY(), 0.000001, "camera.world.y");
 
-        SystemManager.putRequest(BulletSystem.buildFireRequest(player.getId(), mc.getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
+        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(player.getId(), mc.getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
         sceneRunner.runLimitedFrames(1);
 
         // no balls without bot
@@ -278,13 +278,13 @@ public class MazeTest {
         assertEquals(3, MazeUtils.getBullets(player).size(), "bullets");
 
         // firing from home field should be ignored
-        SystemManager.putRequest(BulletSystem.buildFireRequest(player.getId(), MoverComponent.getMoverComponent(player).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
+        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(player.getId(), MoverComponent.getMoverComponent(player).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
         sceneRunner.runLimitedFrames(1);
         assertEquals(3, MazeUtils.getBullets(player).size(), "bullets");
         MazeTestUtils.ecsWalk(sceneRunner, player, true, new Point(6, 5));
 
         // but from regular field is should be possible
-        SystemManager.putRequest(BulletSystem.buildFireRequest(player.getId(), MoverComponent.getMoverComponent(player).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
+        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(player.getId(), MoverComponent.getMoverComponent(player).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
         sceneRunner.runLimitedFrames(1);
         assertEquals(3 - 1, MazeUtils.getBullets(player).size(), "bullets");
         assertEquals(1 + 1 + 4 + 2 * 3, EcsHelper.findAllEntities().size(), "number of entites (player+bot+4 diamonds+2*3 balls)");
@@ -343,13 +343,13 @@ public class MazeTest {
         EcsEntity user1 = users.get(1);
 
         // firing from home field should be ignored
-        SystemManager.putRequest(BulletSystem.buildFireRequest(user0.getId(), MoverComponent.getMoverComponent(user0).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
+        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(user0.getId(), MoverComponent.getMoverComponent(user0).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
         sceneRunner.runLimitedFrames(1);
         assertEquals(3, MazeUtils.getBullets(user0).size(), "bullets");
 
         // Step forward user0 and fire again
         MazeTestUtils.ecsWalk(sceneRunner, user0, true, new Point(5, 2));
-        SystemManager.putRequest(BulletSystem.buildFireRequest(user0.getId(), MoverComponent.getMoverComponent(user0).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
+        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(user0.getId(), MoverComponent.getMoverComponent(user0).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
         sceneRunner.runLimitedFrames(1);
         assertEquals(3 - 1, MazeUtils.getBullets(user0).size(), "bullets");
         assertEquals(3, MazeUtils.getBullets(user1).size(), "bullets");

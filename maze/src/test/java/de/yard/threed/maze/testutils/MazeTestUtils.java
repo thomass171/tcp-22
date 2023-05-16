@@ -3,8 +3,6 @@ package de.yard.threed.maze.testutils;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.NativeCollision;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.GridTeleporter;
@@ -28,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static de.yard.threed.maze.RequestRegistry.TRIGGER_REQUEST_FORWARD;
+import static de.yard.threed.maze.MazeRequestRegistry.TRIGGER_REQUEST_FORWARD;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MazeTestUtils {

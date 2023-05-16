@@ -313,4 +313,16 @@ public class TestClient {
     public void disconnectByClose() {
         clientBusConnector.close();
     }
+
+    public void assertPositionAndOrientation(Point expectedPosition, GridOrientation expectedOrientation) {
+        EcsEntity userEntity = SystemManager.findEntities(e -> e.getId() == userEntityId).get(0);
+        assertNotNull(userEntity, "user entity");
+
+        assertEquals(expectedOrientation.toString(), MazeUtils.getPlayerorientation(userEntity).toString(), "initial orientation");
+        assertEquals(expectedPosition.toString(), MazeUtils.getMoverposition(userEntity).toString(), "initial location");
+    }
+
+    public void assertPositionAndOrientation(Point expectedPosition, String expectedDirection) {
+        assertPositionAndOrientation(expectedPosition, GridOrientation.fromDirection(expectedDirection));
+    }
 }

@@ -14,24 +14,26 @@ import de.yard.threed.engine.util.RandomIntProvider;
  * Created by thomass on 19.01.16.
  */
 public class Direction {
-    public static Direction S/*N*/ = new Direction(0, -1);
-    public static Direction N/*S*/ = new Direction(0, 1);
-    public static Direction W = new Direction(-1, 0);
-    public static Direction E = new Direction(1, 0);
+    public static Direction S/*N*/ = new Direction(0, -1, "S");
+    public static Direction N/*S*/ = new Direction(0, 1, "N");
+    public static Direction W = new Direction(-1, 0, "W");
+    public static Direction E = new Direction(1, 0, "E");
     static Direction[] ORTHODIRECTIONS = new Direction[]{N, S, W, E};
     //public int xo;
     //public int yo;
     private Point point;
+    private String code;
 
     static IntProvider rand = new RandomIntProvider();
 
-    public Direction(int xo, int yo) {
+    private Direction(int xo, int yo, String code) {
         // check auf genau 1 Step
         if (Math.abs(xo) + Math.abs(yo) != 1) {
             throw new RuntimeException("invalid direction");
         }
 
         point = new Point(xo, yo);
+        this.code = code;
     }
 
     /**
@@ -52,12 +54,6 @@ public class Direction {
             ar[index] = ar[i];
             ar[i] = a;
         }
-    }
-
-    /*12.4.21: directions cannot be added/subtracted wird aber gemacht :-( TODO better move?*/
-    @Deprecated
-    public static Direction subtract(Point p1, Point p2) {
-        return new Direction(p1.getX() - p2.getX(), p1.getY() - p2.getY());
     }
 
     @Deprecated
@@ -94,7 +90,19 @@ public class Direction {
     }
 
     public Direction getReverted() {
-        return new Direction(point.getX() * -1, point.getY() * -1);
+        if (code.equals(N.getCode())) {
+            return S;
+        }
+        if (code.equals(W.getCode())) {
+            return E;
+        }
+        if (code.equals(S.getCode())) {
+            return N;
+        }
+        if (code.equals(E.getCode())) {
+            return W;
+        }
+        return null;
     }
 
     public Point getPoint() {
@@ -123,5 +131,25 @@ public class Direction {
                 return "North";
             }
         }
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public static Direction fromCode(String code) {
+        if (code.equals(N.getCode())) {
+            return N;
+        }
+        if (code.equals(W.getCode())) {
+            return W;
+        }
+        if (code.equals(S.getCode())) {
+            return S;
+        }
+        if (code.equals(E.getCode())) {
+            return E;
+        }
+        return null;
     }
 }

@@ -16,6 +16,8 @@ import de.yard.threed.engine.platform.common.*;
 
 import java.util.List;
 
+import static de.yard.threed.maze.MazeRequestRegistry.TRIGGER_REQUEST_FIRE;
+
 /**
  * <p>
  * Created by thomass on 09.04.21.
@@ -24,7 +26,7 @@ import java.util.List;
 public class BulletSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(BulletSystem.class);
     public static String TAG = "BulletSystem";
-    public static RequestType TRIGGER_REQUEST_FIRE = RequestType.register(2017,"TRIGGER_REQUEST_FIRE");
+
 
     boolean bulletsystemdebuglog = false;
     private RelocationStrategy relocationStrategy = new HomeRelocationStrategy();
@@ -80,7 +82,7 @@ public class BulletSystem extends DefaultEcsSystem {
                     // orientation, because in VR the target direction can differ from orientation. In non VR its always the same. The trigger
                     // not always knows the direction of targeting, eg. keyboard/pad events do not know about orientation. So, if payload doesn't contain a direction,
                     // derive it from currents player orientation.
-                    Direction bulletDirection = (Direction) request.getPayloadByIndex(0);
+                    Direction bulletDirection = Direction.fromCode((String) request.getPayload().get("targetdirection"));
                     if (bulletDirection == null) {
                         bulletDirection = mv.getGridOrientation().getDirection();
                     }
@@ -99,9 +101,7 @@ public class BulletSystem extends DefaultEcsSystem {
         return TAG;
     }
 
-    public static Request buildFireRequest(int userEntityId, Direction targetDirection) {
-        return new Request(TRIGGER_REQUEST_FIRE, new Payload(new Object[]{targetDirection}), userEntityId);
-    }
+
 
     /**
      * pick bullet from inventory
@@ -151,7 +151,7 @@ public class BulletSystem extends DefaultEcsSystem {
                     bc.state = 2;
 
                     Point p = relocationStrategy.getLocation(layout, player);
-                    SystemManager.putRequest(RequestRegistry.buildRelocate(player.getId(), p, null));
+                    SystemManager.putRequest(MazeRequestRegistry.buildRelocate(player.getId(), p, null));
                     locateToGround(bullet, ballLocation);
 
                 }

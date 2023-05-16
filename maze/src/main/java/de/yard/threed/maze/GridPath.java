@@ -44,7 +44,8 @@ public class GridPath {
                 p = Direction.add(p, way.steps.get(i + j));
             }
             if (MazeUtils.distance(somepoint, p) == 1) {
-                Direction dir = Direction.subtract(p, somepoint);
+                // 16.5.23: "of" instead of substract
+                Direction dir = Direction.of(p, somepoint);
                 for (int j = 0; j < 3; j++) {
                     p = Direction.add(p, way.steps.remove(i));
                 }

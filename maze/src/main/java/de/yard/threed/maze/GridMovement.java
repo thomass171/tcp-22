@@ -108,21 +108,21 @@ public class GridMovement {
     public /*EventType*/Object getEvent() {
         switch (movement) {
             case 1:
-                return RequestRegistry.TRIGGER_REQUEST_FORWARD;
+                return MazeRequestRegistry.TRIGGER_REQUEST_FORWARD;
             case 2:
-                return RequestRegistry.TRIGGER_REQUEST_TURNLEFT;
+                return MazeRequestRegistry.TRIGGER_REQUEST_TURNLEFT;
             case 3:
-                return RequestRegistry.TRIGGER_REQUEST_TURNRIGHT;
+                return MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT;
             case 4:
-                return RequestRegistry.TRIGGER_REQUEST_FORWARDMOVE;
+                return MazeRequestRegistry.TRIGGER_REQUEST_FORWARDMOVE;
             case 5:
-                return RequestRegistry.TRIGGER_REQUEST_BACK;
+                return MazeRequestRegistry.TRIGGER_REQUEST_BACK;
             case 6:
-                return RequestRegistry.TRIGGER_REQUEST_PULL;
+                return MazeRequestRegistry.TRIGGER_REQUEST_PULL;
             case 7:
-                return RequestRegistry.TRIGGER_REQUEST_LEFT;
+                return MazeRequestRegistry.TRIGGER_REQUEST_LEFT;
             case 8:
-                return RequestRegistry.TRIGGER_REQUEST_RIGHT;
+                return MazeRequestRegistry.TRIGGER_REQUEST_RIGHT;
         }
         throw new RuntimeException("unknown");
     }

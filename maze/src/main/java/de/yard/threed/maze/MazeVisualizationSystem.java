@@ -242,7 +242,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                 // And be sure sure the box is really intersected
                 GridMover nextBox = state.findNextBox(mc.getLocation(), mc.getGridOrientation(), Grid.getInstance().getMazeLayout());
                 if (nextBox != null && box.getId() == nextBox.getId() && ray.intersects(box.getSceneNode(), true)) {
-                    return RequestRegistry.buildKick(userEntityId);
+                    return MazeRequestRegistry.buildKick(userEntityId);
                 }
             }
             // look for hit avatar or just a destination wall? Outside VR fire is always possible (in direction of orientation), even without target.
@@ -258,7 +258,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                     Point playerLocation = MoverComponent.getMoverComponent(EcsHelper.findEntityById(userEntityId)).getLocation();
                     if (playerLocation.onSameAxis(wallLocation)) {
                         Direction direction = Direction.of(playerLocation, wallLocation);
-                        return BulletSystem.buildFireRequest(userEntityId, direction);
+                        return MazeRequestRegistry.buildFireRequest(userEntityId, direction);
                     }
                 }
             }
@@ -272,7 +272,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                         // In VR the target direction might differ from current player orientation.
                         Direction targetDirection = Direction.of(myLocation, loc);
 
-                        return BulletSystem.buildFireRequest(userEntityId, targetDirection);
+                        return MazeRequestRegistry.buildFireRequest(userEntityId, targetDirection);
                     }
                 }
             }
@@ -286,7 +286,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
                     GridTeleportDestination transform = gridTeleporter.updateDestinationMarker(ray, tile, MazeDimensions.GRIDSEGMENTSIZE);
                     if (transform != null) {
                         Point p = MazeUtils.vector2Point(transform.getTransform().position);
-                        return RequestRegistry.buildRelocate(userEntityId, p, GridOrientation.fromDirection(transform.getDirection()));
+                        return MazeRequestRegistry.buildRelocate(userEntityId, p, GridOrientation.fromDirection(transform.getDirection()));
                     }
                 }
             }
