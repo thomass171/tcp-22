@@ -69,7 +69,8 @@ public class ObserverSystem extends DefaultEcsSystem {
 
             if (userEntity == null || userEntity.getSceneNode() == null) {
                 logger.warn("cannot attach observer because no user entity with scene node found");
-                //TODO maybe republish
+                // in client/server mode avatar might not yet been build? Recycle event?
+                // Recycle is no good idea. Might be processed double and again sent to server.
             } else {
                 boolean forLogin = true;//TODO check purpose
                 if (attachObserver(forLogin, isFirstJoin, userEntity, viewTransform)) {

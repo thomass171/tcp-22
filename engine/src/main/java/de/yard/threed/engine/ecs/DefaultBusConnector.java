@@ -93,6 +93,7 @@ public abstract class DefaultBusConnector {
                     .add("rotation", transform.getRotation())
                     .add("scale", transform.getScale());
         }
+        //logger.debug("buildEntitiyStateEvent: payload="+payload);
         return new Event(BaseEventRegistry.EVENT_ENTITYSTATE, payload);
     }
 

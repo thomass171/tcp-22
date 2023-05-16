@@ -19,7 +19,9 @@ public class Main {
         try {
 
             // A dedicated logger; helpful to diff client/server logs in mixed operation like tests from IDE?
-            // No, better rely on log4j auto configuration. An absolute path doesn't make things easier.
+            // No, better rely on log4j auto configuration (see log4j2.xml im platform-homebrew). An absolute path doesn't make things easier.
+            // So set a thread name for server main thread.
+            Thread.currentThread().setName("sceneserver");
             // Console output should be sufficient (no file) because of docker.
             //System.setProperty("log4j2.configurationFile", System.getProperty("user.dir") + "/src/main/resources/log4j2-server.xml");
             //System.setProperty("log4j2.debug", "true");

@@ -1,11 +1,13 @@
 package de.yard.threed.sceneserver;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import de.yard.threed.core.Event;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.ServerSystem;
@@ -20,6 +22,7 @@ import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -133,7 +136,7 @@ public class MazeSceneTest {
 
         testClient.assertAllEventEntityState();
 
-        String connectionId=UserComponent.getUserComponent(userEntity).getConnectionId();
+        String connectionId = UserComponent.getUserComponent(userEntity).getConnectionId();
         testClient.disconnectByClose();
         // should publish connection closed event.
         SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 5);
@@ -177,20 +180,33 @@ public class MazeSceneTest {
         TestClient testClient1 = new TestClient(TestClient.USER_NAME1);
         testClient1.assertConnectAndLogin(sceneServer);
 
-        // EVENT_MAZE_LOADED should have been resent after login, but only to the new client
+        // client0 should be informed about entity of second. Count of 4 entity state events seems plausibel.
+        List<Event> evs = testClient0.getAllEventsEntityState(testClient1.userEntityId);
+        assertEquals(4, evs.size());
+        List<Event> entityEventsWithBuilderName = EcsTestHelper.filterEventList(evs, (e) -> !StringUtils.isBlank((String) e.getPayload().get("buildername")));
+        assertEquals(3, entityEventsWithBuilderName.size());
+
+        // EVENT_MAZE_LOADED should have been resent after login, but only to the new client. TODO check: is that really tested here?
         testClient0.assertEventMazeLoaded("maze/Area15x10.txt");
         testClient1.assertEventMazeLoaded("maze/Area15x10.txt");
 
         testClient0.assertEventEntityState(testClient0.getUserEntity().getId(), new Point(6, 4), GridOrientation.fromDirection("N"));
 
-        // first two should be diamonds
+        // first two known entities should be diamonds
         List<Integer> knownEntityIds = testClient1.getKnownEntitiesFromEventEntityState();
         // 2 player (3 bullets each) + 4 diamonds
         assertEquals(12, knownEntityIds.size());
         testClient1.assertLatestEventEntityState(knownEntityIds.get(0), new Pair[]{
                 new Pair("buildername", MazeModelFactory.DIAMOND_BUILDER)
         });
-
+        // In general all entities should have a builder name (at least in latest events)
+        for (int entityId : knownEntityIds) {
+            testClient1.assertLatestEventEntityState(entityId, e -> {
+                // TODO assertFalse(StringUtils.isBlank((String) e.getPayload().get("buildername")), "entityid " + entityId);
+                return null;
+            });
+        }
+        // TODO test bullets in inventory
     }
 
     private EcsEntity connectToSokobanWikipediaServer(TestClient testClient, boolean viaWebSocket, String expectedGridname) throws Exception {

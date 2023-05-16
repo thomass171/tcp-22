@@ -137,7 +137,7 @@ public class MazeScene extends Scene {
             SystemManager.addSystem(MazeMovingAndStateSystem.buildFromArguments());
             SystemManager.addSystem(new UserSystem());
             SystemManager.addSystem(new BulletSystem());
-            SystemManager.addSystem(new BotSystem(sceneMode.isServer() && !sceneMode.isClient()));
+            SystemManager.addSystem(new BotSystem(sceneMode.isServer() && !sceneMode.isClient(), new SimpleBotAiBuilder()));
             // AvatarSystem handles login etc., so no need to have it here. Avatar is built just by entity model builder.
             AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
             // avatar builder is for player and monster

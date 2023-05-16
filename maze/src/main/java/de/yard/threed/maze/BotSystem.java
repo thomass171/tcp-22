@@ -28,15 +28,17 @@ public class BotSystem extends DefaultEcsSystem {
     private List<List<StartPosition>> startPositions;
     private IntProvider rand = new RandomIntProvider();
     private boolean serverMode;
+    private BotAiBuilder botAiBuilder;
 
     /**
      * Isn't a bot system always in server?
      */
-    public BotSystem(boolean serverMode) {
+    public BotSystem(boolean serverMode, BotAiBuilder botAiBuilder) {
         super(new String[]{BotComponent.TAG},
                 new RequestType[]{},
                 new EventType[]{MazeEventRegistry.EVENT_MAZE_LOADED, BaseEventRegistry.USER_EVENT_JOINED});
         this.serverMode = serverMode;
+        this.botAiBuilder = botAiBuilder;
     }
 
     @Override
@@ -102,7 +104,7 @@ public class BotSystem extends DefaultEcsSystem {
                     // A bot is no logged in user, thus will only join
                     int botIndex = 0;
                     for (StartPosition startPosition : startPositions.get(i)) {
-                        EcsEntity user = new EcsEntity(BotComponent.buildFromGridDefinition(startPosition));
+                        EcsEntity user = new EcsEntity(BotComponent.buildFromGridDefinition(startPosition, botAiBuilder.build()));
                         //TODO improve unique naming
                         user.setName("Bot" + (botIndex));
                         SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId()/*, false*/));

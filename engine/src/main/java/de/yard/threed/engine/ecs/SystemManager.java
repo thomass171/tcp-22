@@ -17,7 +17,8 @@ import java.util.Map;
  * From http://www.richardlord.net/blog/what-is-an-entity-framework.
  * <p>
  * Singleton by making all elements static.
- *
+ * Thread safe by syncing all methods (TODO make variables private).
+ * Important for concurrent access in sceneserver/servermanager.
  * <p>
  * Created by thomass on 28.11.16.
  */
@@ -40,7 +41,7 @@ public class SystemManager {
     private static List<Request> netRequests = new ArrayList<Request>();
     private static SystemTracker systemTracker = new DefaultSystemTracker();
 
-    public static void addSystem(EcsSystem system, int priority) {
+    public synchronized static void addSystem(EcsSystem system, int priority) {
         systems.add(system);
         // 27.12.16: Hier der init ist doch doof, dann kann er es doch selber sofort machen.
         //Tja, brauch ich den wirklich? system.init();
@@ -65,7 +66,7 @@ public class SystemManager {
 
     }
 
-    public static void initSystems() {
+    public synchronized static void initSystems() {
         //4.4.17: fuer entities witzlos, weil es keine neuen entities handled. Aber das Sydstem selber soll/kann auch nochmal einen init machen 
         //im update ist es aber auch doof. 18.4.17: Besser ist es da aber doch. Denn es koennen doch jederzeit Components dazukommen.
         if (isinited) {
@@ -100,7 +101,7 @@ public class SystemManager {
 
     }
 
-    public static void addSystem(EcsSystem system) {
+    public synchronized static void addSystem(EcsSystem system) {
         addSystem(system, 0);
     }
 
@@ -109,7 +110,7 @@ public class SystemManager {
      *
      * @param tpf
      */
-    public static void update(double tpf) {
+    public synchronized static void update(double tpf) {
         if (paused) {
             return;
         }
@@ -118,22 +119,32 @@ public class SystemManager {
         // Requests received from net. Requests not processed stay in the list.
         requestQueue.processRequestsFromNetwork(netRequests);
 
+        // process non entity state events inclusive sending to network
+        List<Event> eventsToProcess=new ArrayList<Event>();
         NativeEventBus eb = Platform.getInstance().getEventBus();
         Event evt;
         //getLogger().debug("update: processing " + eb.getEventCount() + " events");
+        // MA46: Defer new events from being processed in this cycle
         while ((evt = eb.poll(0)) != null) {
-            processEvent(evt);
+            eventsToProcess.add(evt);
+        }
+        for (Event evt1 :eventsToProcess) {
+            processEvent(evt1);
             if (busConnector != null) {
                 // client server ping pong is avoided by not putting network events into the local bus
-                busConnector.pushEvent(evt);
+                busConnector.pushEvent(evt1);
             }
-            systemTracker.eventProcessed(evt);
+            systemTracker.eventProcessed(evt1);
         }
         for (Event et : netEvents) {
             processEvent(et);
         }
         netEvents.clear();
+        // Send entity states after regular events to have latest changes.
+        // Doing it before regular events to give the client the chance to build the model before a regular event arrives that needs
+        // a model (like EVENT_USER_ASSEMBLED) seems better, but isn't really a benefit. This might be argued depending on the situation this way or the other.
         if (DefaultBusConnector.entitySyncEnabled && busConnector != null && busConnector.isServer()) {
+            //getLogger().debug("Sending state events for " + entities.size() + " entities");
             for (EcsEntity entity : entities) {
                 Event entityEvent = DefaultBusConnector.buildEntitiyStateEvent(entity);
                 if (entityEvent != null) {
@@ -231,7 +242,7 @@ public class SystemManager {
     /**
      * eigentlich nur für Tests
      */
-    public static void reset() {
+    public synchronized static void reset() {
         //nicht hier, weil Teil der Platform. ((Platform)  Platform.getInstance()).getEventBus().clear();
         requestQueue.reset();
         eventhandler.clear();
@@ -246,14 +257,14 @@ public class SystemManager {
         systemTracker = new DefaultSystemTracker();
     }
 
-    public static void setSystemTracker(SystemTracker psystemTracker) {
+    public synchronized static void setSystemTracker(SystemTracker psystemTracker) {
         systemTracker = psystemTracker;
         if (busConnector != null) {
             busConnector.setSystemTracker(psystemTracker);
         }
     }
 
-    public static void reportStatistics() {
+    public synchronized static void reportStatistics() {
         systemTracker.report();
     }
 
@@ -263,11 +274,11 @@ public class SystemManager {
         systems.remove(system);
     }
 
-    public static void sendEvent(Event evt) {
+    public synchronized static void sendEvent(Event evt) {
         Platform.getInstance().getEventBus().publish(new Event(evt.getType(), evt.payload));
     }
 
-    public static void sendEventToClient(Event evt, String connectionId) {
+    public synchronized static void sendEventToClient(Event evt, String connectionId) {
         if (busConnector == null) {
             getLogger().warn("No bus connector");
             return;
@@ -280,12 +291,12 @@ public class SystemManager {
      *
      * @param request
      */
-    public static void putRequest(Request request) {
+    public synchronized static void putRequest(Request request) {
         getLogger().debug("putRequest " + request);
         requestQueue.addRequest(request);
     }
 
-    public static void addEntity(EcsEntity entity) {
+    public synchronized static void addEntity(EcsEntity entity) {
         entities.add(entity);
         //7.4.17:Mal hier den init fuer neue versuchen
         //18.4.17: Das ist aber doch irgendwie zu frueh, weil es noch keine Component gibt.
@@ -294,7 +305,7 @@ public class SystemManager {
         }*/
     }
 
-    public static void initEntity(EcsEntity entity) {
+    public synchronized static void initEntity(EcsEntity entity) {
         for (EcsSystem system : systems) {
             EcsGroup group = entity.getGroup(system.getGroupId());
             if (group != null) {
@@ -310,11 +321,11 @@ public class SystemManager {
     }
 
 
-    public static void removeEntity(EcsEntity ecsEntity) {
+    public synchronized static void removeEntity(EcsEntity ecsEntity) {
         entities.remove(ecsEntity);
     }
 
-    public static void pause() {
+    public synchronized static void pause() {
         paused = !paused;
     }
 
@@ -325,11 +336,11 @@ public class SystemManager {
      *
      * @return
      */
-    public static List<EcsEntity> findEntities(EntityFilter filter) {
+    public synchronized static List<EcsEntity> findEntities(EntityFilter filter) {
         return EcsHelper.filterList(entities, filter);
     }
 
-    public static void processEntityGroups(String groupid, EcsGroupHandler ecsGroupHandler) {
+    public synchronized static void processEntityGroups(String groupid, EcsGroupHandler ecsGroupHandler) {
         for (EcsEntity entity : entities) {
             // erstmal dynamsich matchen.
                     /*EcsGroup group = getMatchingGroup(ubs, entity);
@@ -348,7 +359,7 @@ public class SystemManager {
         }
     }
 
-    public static void putDataProvider(String name, DataProvider provider) {
+    public synchronized static void putDataProvider(String name, DataProvider provider) {
         // Allow removing provider by 'null'
         if (provider == null) {
             dataprovider.remove(name);
@@ -360,7 +371,7 @@ public class SystemManager {
         dataprovider.put(name, provider);
     }
 
-    public static DataProvider getDataProvider(String name) {
+    public synchronized static DataProvider getDataProvider(String name) {
         DataProvider dp = dataprovider.get(name);
         if (dp == null) {
             getLogger().warn("no data provider for '" + name + "'");
@@ -368,7 +379,7 @@ public class SystemManager {
         return dp;
     }
 
-    public static void registerService(String name, EcsService service) {
+    public synchronized static void registerService(String name, EcsService service) {
         // Allow removing service by 'null'
         if (service == null) {
             services.remove(name);
@@ -380,7 +391,7 @@ public class SystemManager {
         services.put(name, service);
     }
 
-    public static EcsService getService(String name) {
+    public synchronized static EcsService getService(String name) {
         EcsService dp = services.get(name);
         if (dp == null) {
             getLogger().warn("no service for '" + name + "'");
@@ -388,11 +399,11 @@ public class SystemManager {
         return dp;
     }
 
-    public static int getEventCount() {
+    public synchronized static int getEventCount() {
         return (Platform.getInstance()).getEventBus().getEventCount();
     }
 
-    public static int getRequestCount() {
+    public synchronized static int getRequestCount() {
         return requestQueue.getRequestCount();
     }
 
@@ -402,19 +413,19 @@ public class SystemManager {
      *
      * @return
      */
-    public static Request getRequest(int i) {
+    public synchronized static Request getRequest(int i) {
         return requestQueue.getRequest(i);
     }
 
     /**
      * Publish packet from network to local bus.
      */
-    public static void publishPacketFromClient(Packet packet, String connectionId) {
+    public synchronized static void publishPacketFromClient(Packet packet, String connectionId) {
         publishPacket(packet, connectionId);
         systemTracker.packetReceivedFromNetwork(packet);
     }
 
-    public static void publishPacketFromServer(Packet packet) {
+    public synchronized static void publishPacketFromServer(Packet packet) {
         // client only has one connection, so connectionId can be static
         publishPacket(packet, "c-to-s");
         systemTracker.packetReceivedFromNetwork(packet);
@@ -440,7 +451,7 @@ public class SystemManager {
         }
     }
 
-    public static EcsSystem findSystem(String tag) {
+    public synchronized static EcsSystem findSystem(String tag) {
         for (EcsSystem system : systems) {
             if (tag.equals(system.getTag())) {
                 return system;
@@ -450,7 +461,7 @@ public class SystemManager {
     }
 
 
-    public static void setBusConnector(DefaultBusConnector pbusConnector) {
+    public synchronized static void setBusConnector(DefaultBusConnector pbusConnector) {
         busConnector = pbusConnector;
         // keep systemtrack synced. Hopefully this is really intended.
         busConnector.setSystemTracker(systemTracker);
@@ -460,11 +471,11 @@ public class SystemManager {
      * 13.1.23: ugly workround needed for Requestqueue.
      */
     @Deprecated
-    public static DefaultBusConnector getBusConnector() {
+    public synchronized static DefaultBusConnector getBusConnector() {
         return busConnector;
     }
 
-    private static Log getLogger(){
+    private static Log getLogger() {
         return Platform.getInstance().getLog(SystemManager.class);
     }
 }

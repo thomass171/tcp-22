@@ -9,4 +9,5 @@ public class Status {
 
     List<Client> clients;
     double cpuload;
+    List<Entity> entities;
 }

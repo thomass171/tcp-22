@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Assertions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,6 +51,7 @@ public class TestClient {
     // this tracker is for client view and different from the tracker in SystemManager.
     // Created before each connect.
     LoggingSystemTracker clientTracker = null;
+    public int userEntityId;
 
     public TestClient(String username) {
         this.username = username;
@@ -95,6 +97,11 @@ public class TestClient {
         SceneServerTestUtils.assertEventPacket(UserSystem.USER_EVENT_LOGGEDIN, null, packets, 1);
         SceneServerTestUtils.assertEventPacket(BaseEventRegistry.USER_EVENT_JOINED, null, packets, 1);
         SceneServerTestUtils.assertEventPacket(BaseEventRegistry.EVENT_USER_ASSEMBLED, null, packets, 1);
+
+        // find 'my' login event. These are not saved currently, so also the second client only has one.
+        List<Event> loggedInEvents = getAllEvents(UserSystem.USER_EVENT_LOGGEDIN);
+        assertEquals(1, loggedInEvents.size());
+        userEntityId = (Integer) loggedInEvents.get(0).getPayload().get("userentityid");
     }
 
     public void assertConnectAndLogin(SceneServer sceneServer) throws Exception {
@@ -103,7 +110,7 @@ public class TestClient {
 
     public void sendRequestToServer(Request request) {
         //socketClient.writePacket(SceneServerBusConnector.encodeRequest(request).getData());
-        clientBusConnector.pushPacket(SceneServerBusConnector.encodeRequest(request),null);
+        clientBusConnector.pushPacket(SceneServerBusConnector.encodeRequest(request), null);
         logger.debug("Sent request " + request);
     }
 
@@ -256,15 +263,33 @@ public class TestClient {
     }
 
     public void assertLatestEventEntityState(int entityId, Pair<String, String>[] expectedProperties) {
-        List<Event> entityStateEvents = EcsTestHelper.filterEventList(clientTracker.getEventsProcessed(), e ->
-                e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType() &&
-                        (Integer) e.getPayload().get("entityid") == entityId);
+        assertLatestEventEntityState(entityId, e -> {
+            TestUtils.assertEvent(BaseEventRegistry.EVENT_ENTITYSTATE, expectedProperties, e, "");
+            return null;
+        });
+    }
+
+    public void assertLatestEventEntityState(int entityId, Function<Event, Void> asserter) {
+        List<Event> entityStateEvents = getAllEventsEntityState(entityId);
 
         if (entityStateEvents.size() == 0) {
             logger.error("no events found");
         }
         Event latest = entityStateEvents.get(entityStateEvents.size() - 1);
-        TestUtils.assertEvent(BaseEventRegistry.EVENT_ENTITYSTATE, expectedProperties, latest, "");
+        asserter.apply(latest);
+    }
+
+    public List<Event> getAllEvents(EventType eventType) {
+        List<Event> entityStateEvents = EcsTestHelper.filterEventList(clientTracker.getEventsProcessed(), e -> e.getType().getType() == eventType.getType());
+        return entityStateEvents;
+    }
+
+    public List<Event> getAllEventsEntityState(int entityId) {
+        readLatestPackets();
+        List<Event> entityStateEvents = EcsTestHelper.filterEventList(clientTracker.getEventsProcessed(), e ->
+                e.getType().getType() == BaseEventRegistry.EVENT_ENTITYSTATE.getType() &&
+                        (Integer) e.getPayload().get("entityid") == entityId);
+        return entityStateEvents;
     }
 
     public List<Integer> getKnownEntitiesFromEventEntityState() {

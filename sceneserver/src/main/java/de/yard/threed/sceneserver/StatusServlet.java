@@ -1,6 +1,9 @@
 package de.yard.threed.sceneserver;
 
+import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.javanative.JsonUtil;
+import de.yard.threed.sceneserver.jsonmodel.Entity;
 import de.yard.threed.sceneserver.jsonmodel.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.HttpHeaders;
@@ -15,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class StatusServlet extends HttpServlet {
@@ -30,6 +34,14 @@ public class StatusServlet extends HttpServlet {
             status.setClients(new ArrayList<>());
         }
         status.setCpuload(getProcessCpuLoad());
+        if (SystemManager.isinited){
+            //  SystemManager is MT safe.
+            List<EcsEntity> el = SystemManager.findEntities(null);
+            status.setEntities(new ArrayList<>());
+            for (EcsEntity e:el){
+                status.getEntities().add(Entity.fromEcs(e));
+            }
+        }
 
         response.setContentType("application/json");
         // There is no preflight for GET, so this header should be sufficient?

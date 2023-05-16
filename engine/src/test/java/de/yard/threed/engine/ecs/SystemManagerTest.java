@@ -66,6 +66,7 @@ public class SystemManagerTest {
 
         List<Packet> packets = systemTracker.getPacketsSentToNetwork();
         assertEquals(2, packets.size());
+        // 15.5.23: entity state events are sent AFTER other events. So its the latest.
         TestUtils.assertEvent( BaseEventRegistry.EVENT_ENTITYSTATE, new Pair[]{
                 new Pair("entityid", "" + entityWithoutSceneNode.getId()),
                 new Pair("buildername", "*")

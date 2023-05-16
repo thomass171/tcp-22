@@ -1,11 +1,24 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.util.IntProvider;
 
 public class SimpleBotAI implements BotAI {
 
+    long lastActionAt = 0;
+    static long WAIT_TIME = 1500;
+
+    @Override
+    public boolean isReadyToAct() {
+        // TODO: move decision
+        long current = Platform.getInstance().currentTimeMillis();
+        if (current > lastActionAt + WAIT_TIME) {
+            return true;
+        }
+        return false;
+    }
     /**
      * Priority of actions:
      * 1) fire at near player ahead (but not from home field)
@@ -14,6 +27,8 @@ public class SimpleBotAI implements BotAI {
      */
     @Override
     public Request getNextRequest(GridMover mover, GridState gridState, MazeLayout layout, IntProvider rand) {
+
+        lastActionAt = Platform.getInstance().currentTimeMillis();
 
         GridMover nextPlayer;
         if (!MazeUtils.getHomesOfTeam(layout, mover.getTeam()).contains(mover.getLocation()) && (nextPlayer = gridState.findNextPlayer(mover.getLocation(), mover.getOrientation(), layout)) != null) {

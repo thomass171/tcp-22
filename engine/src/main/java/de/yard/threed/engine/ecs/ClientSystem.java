@@ -4,6 +4,7 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
@@ -56,11 +57,10 @@ public class ClientSystem extends DefaultEcsSystem {
             if (entity == null) {
                 logger.debug("Building entity " + entityid + " with builder '" + buildername + "'");
                 entity = new EcsEntity(entityid);
-                if (buildername != null) {
-                    if (entity.getSceneNode() == null) {
-                        entity.buildSceneNodeByModelFactory(buildername, modelBuilderRegistries);
-                    }
-                }
+            }
+            if (entity.getSceneNode() == null && !StringUtils.empty(buildername)) {
+                logger.debug("Building scene node for entity " + entityid + " with builder '" + buildername + "'");
+                entity.buildSceneNodeByModelFactory(buildername, modelBuilderRegistries);
             }
             SceneNode sceneNode = entity.getSceneNode();
             if (sceneNode != null && position != null) {

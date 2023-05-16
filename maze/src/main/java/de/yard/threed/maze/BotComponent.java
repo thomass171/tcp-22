@@ -17,25 +17,20 @@ public class BotComponent extends EcsComponent {
     Log logger = Platform.getInstance().getLog(BotComponent.class);
 
     static String TAG = "BotComponent";
-    BotAI botAI = new SimpleBotAI();
-    long lastActionAt = 0;
-    static long WAIT_TIME = 1500;
+    // dont' set default Bot AI. In tests a deterministic might be better.
+    BotAI botAI;
     public boolean monster;
 
-    public BotComponent() {
+    public BotComponent(BotAI botAI) {
+        this.botAI = botAI;
     }
 
     public boolean isReadyToAct() {
-        long current = Platform.getInstance().currentTimeMillis();
-        if (current > lastActionAt + WAIT_TIME) {
-            return true;
-        }
-        return false;
+        return (botAI == null) ? false : botAI.isReadyToAct();
     }
 
     public Request getNextRequest(GridMover mover, GridState gridState, MazeLayout layout, IntProvider rand) {
-        lastActionAt = Platform.getInstance().currentTimeMillis();
-        return botAI.getNextRequest(mover, gridState, layout, rand);
+        return (botAI == null) ? null : botAI.getNextRequest(mover, gridState, layout, rand);
     }
 
     @Override
@@ -48,8 +43,8 @@ public class BotComponent extends EcsComponent {
         return m;
     }
 
-    public static BotComponent buildFromGridDefinition(StartPosition startPosition) {
-        BotComponent bc = new BotComponent();
+    public static BotComponent buildFromGridDefinition(StartPosition startPosition, BotAI botAI) {
+        BotComponent bc = new BotComponent(botAI);
         bc.monster = startPosition.isMonster;
         return bc;
     }
@@ -58,7 +53,7 @@ public class BotComponent extends EcsComponent {
         return monster;
     }
 
-    public void setBotAI(BotAI botAI){
+    public void setBotAI(BotAI botAI) {
         this.botAI = botAI;
     }
 }

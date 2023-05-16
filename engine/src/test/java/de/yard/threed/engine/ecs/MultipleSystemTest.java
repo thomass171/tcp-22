@@ -67,6 +67,9 @@ public class MultipleSystemTest {
         // observercomponent is disabled by default
         assertNull(ObserverComponent.getObserverComponent(playerEntity));
 
+        // process EVENT_USER_ASSEMBLED
+        EcsTestHelper.processSeconds(2);
+
         assertNotNull(Observer.getInstance(), "observer");
         // Should be assigned to avatar
         Transform observerParent = Observer.getInstance().getTransform().getParent();

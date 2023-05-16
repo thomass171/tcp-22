@@ -18,6 +18,7 @@ import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
+import de.yard.threed.maze.testutils.EmptyBotAIBuilder;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -62,7 +63,7 @@ public class MazeTest {
     /**
      * Due to parameter not in @Before
      */
-    private void setupTest(String levelname, boolean withBotSystem) {
+    private void setupTest(String levelname, BotAiBuilder botAiBuilder) {
         InitMethod initMethod = new InitMethod() {
             @Override
             public void init() {
@@ -85,8 +86,8 @@ public class MazeTest {
                 SystemManager.addSystem(new BulletSystem());
                 replaySystem = new ReplaySystem();
                 SystemManager.addSystem(replaySystem);
-                if (withBotSystem) {
-                    SystemManager.addSystem(new BotSystem(false));
+                if (botAiBuilder!=null) {
+                    SystemManager.addSystem(new BotSystem(false, botAiBuilder));
                 }
 
 
@@ -130,7 +131,7 @@ public class MazeTest {
      */
     public void runSokobanWikipedia(boolean remoteGrid) {
 
-        setupTest(remoteGrid ? "http://localhost:" + wireMockServer.port() + "/mazes/1" : "skbn/SokobanWikipedia.txt", false);
+        setupTest(remoteGrid ? "http://localhost:" + wireMockServer.port() + "/mazes/1" : "skbn/SokobanWikipedia.txt", null);
 
         assertEquals(2, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (2 boxes)");
 
@@ -190,7 +191,7 @@ public class MazeTest {
     @Test
     public void testGrid1() {
         //grid1.txt
-        setupTest("maze/grid1.txt", false);
+        setupTest("maze/grid1.txt", null);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (0 boxes)");
@@ -242,7 +243,7 @@ public class MazeTest {
     @Test
     public void testArea15x10() {
 
-        setupTest("maze/Area15x10.txt", true);
+        setupTest("maze/Area15x10.txt", new SimpleBotAiBuilder());
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(4, EcsHelper.findAllEntities().size(), "number of entities (4 diamonds)");
@@ -307,7 +308,7 @@ public class MazeTest {
     @Test
     public void testDavidJoffe2() {
         //grid1.txt
-        setupTest("skbn/DavidJoffe.txt:2", false);
+        setupTest("skbn/DavidJoffe.txt:2", null);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(10, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (0 boxes)");
@@ -335,7 +336,7 @@ public class MazeTest {
     @Test
     public void testSimpleMultiplayer() {
 
-        setupTest("maze/Maze-P-Simple.txt", false);
+        setupTest("maze/Maze-P-Simple.txt", null);
 
         List<EcsEntity> users = initMaze_P(2);
         EcsEntity user0 = users.get(0);
@@ -387,7 +388,7 @@ public class MazeTest {
     @Test
     public void testSimpleMultiplayerWithBot() {
 
-        setupTest("maze/Maze-P-Simple.txt", true);
+        setupTest("maze/Maze-P-Simple.txt", new SimpleBotAiBuilder());
 
         //ready for botsystem? initMaze_P_Simple();
 
@@ -422,7 +423,7 @@ public class MazeTest {
     @Test
     public void testCollect() throws Exception {
 
-        setupTest("maze/Maze-P-Simple.txt", false);
+        setupTest("maze/Maze-P-Simple.txt", null);
 
         List<EcsEntity> users = initMaze_P(2);
         EcsEntity user0 = users.get(0);
@@ -470,7 +471,7 @@ public class MazeTest {
     @Test
     public void testM30x20WithBot() {
 
-        setupTest("maze/Maze-M-30x20.txt", true);
+        setupTest("maze/Maze-M-30x20.txt", new SimpleBotAiBuilder());
 
         //ready for botsystem? initMaze_P_Simple();
 
@@ -510,11 +511,11 @@ public class MazeTest {
                 "#        #\n" +
                 "#        #\n" +
                 "#   @    #\n" +
-                "##########", true);
+                "##########", new SimpleBotAiBuilder());
 
         // initMaze_P not suited for bot system
         SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
-        sceneRunner.runLimitedFrames(3);
+        sceneRunner.runLimitedFrames(5);
 
         assertEquals(1 + 3 + 1 + 3 + 1, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (one player+3 bullets+bot with bullets +1 diamond)");
         assertEquals(2, MazeUtils.getPlayer().size(), "number of player");
@@ -544,11 +545,11 @@ public class MazeTest {
                 "#@@      #\n" +
                 "#        #\n" +
                 "#   @    #\n" +
-                "##########", true);
+                "##########", new EmptyBotAIBuilder());
 
         // initMaze_P not suited for bot system
         SystemManager.putRequest(UserSystem.buildLoginRequest("u0", ""));
-        sceneRunner.runLimitedFrames(3);
+        sceneRunner.runLimitedFrames(7);
 
         assertEquals(1 + 3 + 2 * (1 + 3) + 1, SystemManager.findEntities((EntityFilter) null).size(),
                 "number of entites (one player+3 bullets+2 bots with bullets +1 diamond)");
@@ -561,23 +562,25 @@ public class MazeTest {
         assertNotNull(bot1);
         assertEquals(3, MazeUtils.getBullets(bot0).size());
 
-        // bot must/will leave home field to make firing possible. By default it will wait real time for next move.
+        // bot must/will leave home field to make firing possible. By default it will wait real time for next move (but only with SimpleBotAI, which
+        // isn't used in tests).
 
         MazeTestUtils.assertPosition(bot0, new Point(1, 3));
         assertEquals(Direction.E.toString(), MazeUtils.getPlayerorientation(bot0).getDirection().toString(), "bot0 initial orientation");
         MazeTestUtils.assertPosition(bot1, new Point(2, 3));
         assertEquals(Direction.E.toString(), MazeUtils.getPlayerorientation(bot1).getDirection().toString(), "bot1 initial orientation");
 
-        DeterministicBotAI dbAI0 = new DeterministicBotAI(new Request[]{new Request(TRIGGER_REQUEST_FORWARD)});
         DeterministicBotAI dbAI1 = new DeterministicBotAI(new Request[]{new Request(TRIGGER_REQUEST_FORWARD)});
-        BotComponent.getBotComponent(bot0).setBotAI(dbAI0);
         BotComponent.getBotComponent(bot1).setBotAI(dbAI1);
-        // bot by default will wait real time for next move.
-        EcsTestHelper.processUntil(() -> {
-            return dbAI0.index < 1 && dbAI1.index < 1;
-        }, 0.1, 100000000);
+        // wait until both bots move one step. bot1 needs to move first.
+        // bot in test with DeterministicBotAI will not wait real time for next move.
+        EcsTestHelper.processRequests();
 
-        //TestUtils.assertPosition(bot0, new Point(2, 3));
+        DeterministicBotAI dbAI0 = new DeterministicBotAI(new Request[]{new Request(TRIGGER_REQUEST_FORWARD)});
+        BotComponent.getBotComponent(bot0).setBotAI(dbAI0);
+        EcsTestHelper.processRequests();
+
+        MazeTestUtils.assertPosition(bot0, new Point(2, 3));
         MazeTestUtils.assertPosition(bot1, new Point(3, 3));
 
 
