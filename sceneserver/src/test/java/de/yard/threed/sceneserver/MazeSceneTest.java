@@ -199,10 +199,11 @@ public class MazeSceneTest {
         testClient1.assertLatestEventEntityState(knownEntityIds.get(0), new Pair[]{
                 new Pair("buildername", MazeModelFactory.DIAMOND_BUILDER)
         });
+        List<EcsEntity> entities = SystemManager.findEntities(null);
         // In general all entities should have a builder name (at least in latest events)
         for (int entityId : knownEntityIds) {
             testClient1.assertLatestEventEntityState(entityId, e -> {
-                // TODO assertFalse(StringUtils.isBlank((String) e.getPayload().get("buildername")), "entityid " + entityId);
+                assertFalse(StringUtils.isBlank((String) e.getPayload().get("buildername")), "entity event:" + e);
                 return null;
             });
         }

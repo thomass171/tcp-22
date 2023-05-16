@@ -5,6 +5,7 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.GeneralHandlerMap;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Payload;
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
@@ -83,6 +84,7 @@ public abstract class DefaultBusConnector {
 
         Payload payload = new Payload()
                 .add("entityid", entity.getId())
+                .add("entityname", StringUtils.defaultString(entity.getName()))
                 .add("buildername", (entity.getBuilderName() != null) ? entity.getBuilderName() : "");
         // An entity without scene node might happen during entity creation temporarily, when another system is needed to build the model/scenenode.
         // But it should be sent anyway, because the client might need it, eg. a user entity after login that wants to join.

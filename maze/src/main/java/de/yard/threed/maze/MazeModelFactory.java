@@ -28,6 +28,7 @@ public class MazeModelFactory implements ModelBuilderRegistry {
 
     public static String DIAMOND_BUILDER = "diamondbuilder";
     public static String BOX_BUILDER = "boxbuilder";
+    public static String BULLET_BUILDER = "bulletbuilder";
 
     private static Log logger = Platform.getInstance().getLog(MazeModelFactory.class);
 
@@ -464,6 +465,9 @@ public class MazeModelFactory implements ModelBuilderRegistry {
         }
         if (key.equals(BOX_BUILDER)) {
             return (destinationNode, entity) -> destinationNode.attach(buildSokobanBox());
+        }
+        if (key.equals(BULLET_BUILDER)) {
+            return (destinationNode, entity) -> destinationNode.attach(buildSimpleBall(0.3, MazeSettings.bulletColor));
         }
         // No need to do a logging here because there might be other builder factories registered.
         return null;

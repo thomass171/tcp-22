@@ -13,6 +13,8 @@ import de.yard.threed.engine.platform.common.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static de.yard.threed.maze.MazeModelFactory.BULLET_BUILDER;
+
 
 /**
  * Controls movement and the "GridState".
@@ -581,8 +583,8 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     private void createBullets(int cnt, int owner) {
         logger.debug("create " + cnt + " Bullets for " + owner);
         for (int i = 0; i < cnt; i++) {
-            SceneNode ball = MazeModelFactory.getInstance().buildSimpleBall(0.3, MazeSettings.bulletColor);
-            EcsEntity e = new EcsEntity(ball);
+            EcsEntity e = new EcsEntity();
+            e.buildSceneNodeByModelFactory(BULLET_BUILDER, new ModelBuilderRegistry[]{MazeModelFactory.getInstance()});
             BulletComponent bulletComponent = new BulletComponent(owner);
             e.addComponent(bulletComponent);
             e.setName("bullet");

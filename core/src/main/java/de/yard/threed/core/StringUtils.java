@@ -115,7 +115,7 @@ public class StringUtils {
         if (contains(str, "\r\n")) {
             separator = "\r\n";
         }
-        return split(str,separator);
+        return split(str, separator);
     }
 
     public static int indexOf(String s, char c) {
@@ -192,5 +192,16 @@ public class StringUtils {
         if (len > length(s))
             return false;
         return substring(s, 0, len).equals(sf);
+    }
+
+    public static String defaultString(String str) {
+        return defaultString(str, "");
+    }
+
+    public static String defaultString(String str, String defaultStr) {
+        if (str == null) {
+            return defaultStr;
+        }
+        return str;
     }
 }

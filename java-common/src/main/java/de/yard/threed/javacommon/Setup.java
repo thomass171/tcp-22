@@ -67,7 +67,7 @@ public class Setup {
         //properties.put("argv.sceneExtension0",sceneExtension0);
 
         //properties.put("server", "localhost:5890");
-        properties.put("server", "192.168.98.151:5890");
+        //properties.put("server", "192.168.98.151:5890");
 
         //properties.put("argv.vehiclelist","GenericRoad");
 
