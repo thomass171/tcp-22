@@ -26,23 +26,14 @@ public class InputToRequestSystemTest {
 
     @BeforeEach
     public void setup() {
-        InitMethod initMethod = new InitMethod() {
-            @Override
-            public void init() {
-                SystemManager.reset();
+        EcsTestHelper.setup(() -> {
+                //should have be done in setup. SystemManager.reset();
                 InputToRequestSystem inputToRequestSystem = new InputToRequestSystem();
                 inputToRequestSystem.addKeyMapping(KeyCode.KEY_K, RequestType.register(1016, "requestForKeyK"));
                 SystemManager.addSystem(inputToRequestSystem);
-
-            }
-        };
-
-        EngineTestFactory.initPlatformForTest(new String[]{"engine", "engine", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
-                ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
-
+        });
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
         sceneRunner.runLimitedFrames(3);
-
     }
 
     @Test

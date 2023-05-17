@@ -55,17 +55,15 @@ public class MazeMovingAndStateSystemTest {
 
         SystemState.state = 0;
         MazeDataProvider.reset();
-        SystemManager.reset();
+        // should be done in setup SystemManager.reset();
 
         wireMockServer = new WireMockServer(wireMockConfig().port(8089));
         wireMockServer.start();
 
-        InitMethod initMethod = () -> {
+        EcsTestHelper.setup(() -> {
             SystemManager.addSystem(new MazeMovingAndStateSystem());
 
-        };
-        SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());
-        EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, platformFactory, initMethod, ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        }, "engine", "maze");
 
         MazeSettings.init(MazeSettings.MODE_SOKOBAN);
 

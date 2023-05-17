@@ -6,6 +6,7 @@ import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.BaseEventRegistry;
+import de.yard.threed.engine.ModelBuilderRegistry;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.ObserverSystem;
 import de.yard.threed.engine.Transform;
@@ -34,17 +35,11 @@ public class AvatarSystemTest {
      */
     @BeforeEach
     public void setup() {
-        InitMethod initMethod = new InitMethod() {
-            @Override
-            public void init() {
-                //world = new SceneNode();
-                SystemManager.addSystem(new AvatarSystem());
-                SystemManager.addSystem(new ObserverSystem());
-            }
-        };
-        SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());
-        //platformFactory.enableCamera();
-        EngineTestFactory.initPlatformForTest(new String[]{"engine"}, platformFactory, initMethod, ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        EcsTestHelper.setup(() -> {
+            //world = new SceneNode();
+            SystemManager.addSystem(new AvatarSystem());
+            SystemManager.addSystem(new ObserverSystem());
+        });
     }
 
     @Test

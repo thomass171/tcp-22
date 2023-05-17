@@ -25,11 +25,9 @@ public class ClientSystemTest {
      */
     @BeforeEach
     public void setup() {
-        InitMethod initMethod = () -> {
+        EcsTestHelper.setup(() -> {
             SystemManager.addSystem(new ClientSystem(new ModelBuilderRegistry[]{}));
-        };
-        SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());
-        EngineTestFactory.initPlatformForTest(new String[]{"engine"}, platformFactory, initMethod, ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        });
     }
 
     @Test

@@ -1,17 +1,23 @@
 package de.yard.threed.engine.ecs;
 
+import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.NativeEventBus;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.ModelBuilderRegistry;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.testutil.EventFilter;
 import de.yard.threed.engine.util.BooleanMethod;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
+import de.yard.threed.javacommon.ConfigurationByEnv;
+import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +27,15 @@ import java.util.stream.Collectors;
  * 21.3.20
  */
 public class EcsTestHelper {
+
+    public static void setup(InitMethod initMethod) {
+        setup(initMethod, new String[]{"engine"});
+    }
+
+    public static void setup(InitMethod initMethod, String... bundles) {
+        SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());
+        EngineTestFactory.initPlatformForTest(bundles, platformFactory, initMethod, ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
+    }
 
     /**
      * Process "seconds" frames with a tpf of 1 each.
