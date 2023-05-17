@@ -16,8 +16,8 @@ public class BulletComponent extends ItemComponent {
     //2=falling after hit
     //3=lying around
     public int state = 0;
-    // player firing the bullet
-    public String origin;
+    // player entity firing the bullet
+    public int originEntityId;
     Log logger = Platform.getInstance().getLog(BulletComponent.class);
     // Der Speed muss zur Skalierung der Szene passen. Abhaengig davon kann 10 zu
     // schnell oder zu langsam sein.
@@ -34,14 +34,14 @@ public class BulletComponent extends ItemComponent {
         // But hide() is not yet available. So its up to the creatr to hide it.
     }
 
-    public void launchBullet(Direction direction, String origin) {
-        if (origin == null) {
+    public void launchBullet(Direction direction, int originEntityId) {
+        /*if (originEntityId == null) {
             throw new RuntimeException("origin must not be null");
-        }
+        }*/
         logger.debug("Launching bullet");
         this.direction = direction;
         this.vdirection = MazeUtils.direction2Vector3(direction);
-        this.origin = origin;
+        this.originEntityId = originEntityId;
         state = 1;
         setOwner(-1);
     }

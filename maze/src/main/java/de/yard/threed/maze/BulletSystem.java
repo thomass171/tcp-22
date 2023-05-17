@@ -88,7 +88,7 @@ public class BulletSystem extends DefaultEcsSystem {
                     if (bulletDirection == null) {
                         bulletDirection = mv.getGridOrientation().getDirection();
                     }
-                    bc.launchBullet(bulletDirection, player.getName());
+                    bc.launchBullet(bulletDirection, player.getId());
                 }
             }
             //das event kann ich mir sparen. Ic muss ja es ins inventory sehen.
@@ -147,9 +147,9 @@ public class BulletSystem extends DefaultEcsSystem {
         for (EcsEntity player : players) {
             MoverComponent mc = MoverComponent.getMoverComponent(player);
             // don't hit myself. And player on a home filed are immune
-            if (!player.getName().equals(bc.origin) && !mc.isOnHomeField(layout)) {
+            if (player.getId() != bc.originEntityId && !mc.isOnHomeField(layout)) {
                 if (mc.getLocation().equals(ballLocation)) {
-                    logger.debug("Hit detected of '" + player.getName() + "' with bullet by '" + bc.origin + "'. Will request relocate.");
+                    logger.debug("Hit detected of '" + player.getName() + "' with bullet by '" + bc.originEntityId + "'. Will request relocate.");
                     bc.state = 2;
 
                     Point p = relocationStrategy.getLocation(layout, player);
