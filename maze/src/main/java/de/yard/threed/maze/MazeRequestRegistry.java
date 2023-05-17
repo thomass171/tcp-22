@@ -58,6 +58,9 @@ public class MazeRequestRegistry {
 
     public static RequestType TRIGGER_REQUEST_FIRE = RequestType.register(2017,"TRIGGER_REQUEST_FIRE");
 
+    /**
+     * "targetDirection" is only optional. InputToRequestSystem will not set it in all cases, for example.
+     */
     public static Request buildFireRequest(int userEntityId, Direction targetDirection) {
         return new Request(TRIGGER_REQUEST_FIRE, new Payload().add("targetdirection", targetDirection.getCode()), new Integer(userEntityId));
     }

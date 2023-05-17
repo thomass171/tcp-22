@@ -82,7 +82,10 @@ public class BulletSystem extends DefaultEcsSystem {
                     // orientation, because in VR the target direction can differ from orientation. In non VR its always the same. The trigger
                     // not always knows the direction of targeting, eg. keyboard/pad events do not know about orientation. So, if payload doesn't contain a direction,
                     // derive it from currents player orientation.
-                    Direction bulletDirection = Direction.fromCode((String) request.getPayload().get("targetdirection"));
+                    Direction bulletDirection = null;
+                    if (request.getPayload().get("targetdirection") != null) {
+                        bulletDirection = Direction.fromCode((String) request.getPayload().get("targetdirection"));
+                    }
                     if (bulletDirection == null) {
                         bulletDirection = mv.getGridOrientation().getDirection();
                     }
