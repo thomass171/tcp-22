@@ -71,7 +71,8 @@ public class BulletSystem extends DefaultEcsSystem {
             MoverComponent mv = MoverComponent.getMoverComponent(player);
             if (mv.isOnHomeField(Grid.getInstance().getMazeLayout())) {
                 logger.debug("Ignoring fire from home field");
-                // Firing is not allowed on home field. Just ignore request
+                // Firing is not allowed on home field. Just ignore/reject request
+                SystemManager.sendEvent(MazeEventRegistry.buildFireFailedEvent(player, "fire from home field ignored"));
             } else {
                 List<EcsEntity> bullets = MazeUtils.getBullets(player);
 

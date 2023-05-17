@@ -3,6 +3,7 @@ package de.yard.threed.maze;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.Payload;
+import de.yard.threed.engine.ecs.EcsEntity;
 
 /**
  * Events outside of systems.
@@ -33,4 +34,9 @@ public class MazeEventRegistry {
         return new Event(EVENT_MAZE_LOADED, new Payload().add("gridname", gridname).add("grid", rawGrid));
     }
 
+    public static EventType EVENT_MAZE_FIREFAILED = EventType.register(2004, "EVENT_MAZE_FIREFAILED");
+
+    public static Event buildFireFailedEvent(EcsEntity userEntity, String msg) {
+        return new Event(EVENT_MAZE_FIREFAILED, new Payload().add("userentityid", userEntity.getId()).add("message", msg));
+    }
 }

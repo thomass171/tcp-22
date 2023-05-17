@@ -1,5 +1,6 @@
 package de.yard.threed.maze;
 
+import de.yard.threed.core.Event;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.KeyCode;
 import de.yard.threed.engine.SceneNode;
@@ -17,6 +18,8 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatform;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -31,12 +34,8 @@ public class BulletSystemTest {
         MazeDataProvider.reset();
 
         EcsTestHelper.setup(() -> {
-            InputToRequestSystem inputToRequestSystem = new InputToRequestSystem();
-            inputToRequestSystem.addKeyMapping(KeyCode.Space, MazeRequestRegistry.TRIGGER_REQUEST_FIRE);
-            SystemManager.addSystem(inputToRequestSystem);
             SystemManager.addSystem(new MazeMovingAndStateSystem());
             SystemManager.addSystem(new BulletSystem());
-
         }, "engine", "maze");
 
         MazeSettings.init(MazeSettings.MODE_SOKOBAN);
@@ -74,10 +73,23 @@ public class BulletSystemTest {
 
         assertEquals(3, MazeUtils.getBullets(userEntity).size());
 
-        SimpleHeadlessPlatform.mockedKeyInput.add(KeyCode.KEY_SPACE);
-        EcsTestHelper.processSeconds(2);
+        // targetDirection is only optional
+        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(userEntity.getId(),null));
+        EcsTestHelper.processSeconds(1);
 
         // user still on home field.
-        // TODO t.b.c. check fire reject a.s.o.
+        List<Event> failEvents = EcsTestHelper.getEventsFromHistory(MazeEventRegistry.EVENT_MAZE_FIREFAILED);
+        assertEquals(1, failEvents.size(), "fire fail events");
+        Event failEvent = failEvents.get(0);
+        assertEquals("fire from home field ignored", failEvent.getPayload().get("message"));
+
+        // move and fire again
+        SystemManager.putRequest(new Request(MazeRequestRegistry.TRIGGER_REQUEST_FORWARD,userEntity.getId()));
+        EcsTestHelper.processSeconds(1);
+        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(userEntity.getId(),null));
+        EcsTestHelper.processSeconds(1);
+        // one bullet is gone
+        assertEquals(2, MazeUtils.getBullets(userEntity).size());
+
     }
 }
