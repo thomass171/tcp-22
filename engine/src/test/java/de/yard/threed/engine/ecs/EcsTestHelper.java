@@ -38,7 +38,8 @@ public class EcsTestHelper {
     }
 
     /**
-     * Process "seconds" frames with a tpf of 1 each.
+     * Process "seconds" frames with a tpf of 1 each. These are virtual seconds, no real time.
+     * Not suitable where fine grained moving is needed! tpf=1.0 causes large skips.
      */
     public static void processSeconds(int seconds) {
 

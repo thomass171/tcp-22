@@ -27,6 +27,7 @@ import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.maze.MazeEventRegistry;
 import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.MazeUtils;
+import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.sceneserver.SceneServer;
 import de.yard.threed.sceneserver.SceneServerBusConnector;
 import org.junit.jupiter.api.Assertions;
@@ -186,7 +187,7 @@ public class TestClient {
     }
 
     public EcsEntity getUserEntity() {
-        EcsEntity userEntity = SystemManager.findEntities(e -> TestClient.USER_NAME0.equals(e.getName())).get(0);
+        EcsEntity userEntity = SystemManager.findEntities(e -> e.getId() == userEntityId).get(0);
         assertNotNull(userEntity, "user entity");
         return userEntity;
     }
@@ -315,11 +316,8 @@ public class TestClient {
     }
 
     public void assertPositionAndOrientation(Point expectedPosition, GridOrientation expectedOrientation) {
-        EcsEntity userEntity = SystemManager.findEntities(e -> e.getId() == userEntityId).get(0);
-        assertNotNull(userEntity, "user entity");
-
-        assertEquals(expectedOrientation.toString(), MazeUtils.getPlayerorientation(userEntity).toString(), "initial orientation");
-        assertEquals(expectedPosition.toString(), MazeUtils.getMoverposition(userEntity).toString(), "initial location");
+        EcsEntity userEntity = getUserEntity();
+        MazeTestUtils.assertPositionAndOrientation(userEntity, expectedPosition, expectedOrientation);
     }
 
     public void assertPositionAndOrientation(Point expectedPosition, String expectedDirection) {

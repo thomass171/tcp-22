@@ -26,9 +26,7 @@ import static de.yard.threed.maze.MazeRequestRegistry.TRIGGER_REQUEST_FIRE;
 public class BulletSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(BulletSystem.class);
     public static String TAG = "BulletSystem";
-
-
-    boolean bulletsystemdebuglog = false;
+    boolean bulletsystemdebuglog = true;
     private RelocationStrategy relocationStrategy = new HomeRelocationStrategy();
 
     /**
@@ -38,25 +36,25 @@ public class BulletSystem extends DefaultEcsSystem {
         super(new String[]{BulletComponent.TAG}, new RequestType[]{TRIGGER_REQUEST_FIRE}, new EventType[]{});
     }
 
+    /**
+     * Update moving bullet.
+     */
     @Override
-    public void update(EcsEntity entity, EcsGroup group, double tpf) {
-        BulletComponent bc = BulletComponent.getBulletComponent(entity);
+    public void update(EcsEntity bulletEntity, EcsGroup group, double tpf) {
+        BulletComponent bc = BulletComponent.getBulletComponent(bulletEntity);
         Vector3 offset = new Vector3();
         Grid grid = Grid.getInstance();
-        SceneNode ball = entity.getSceneNode();
+        SceneNode ball = bulletEntity.getSceneNode();
 
         switch (bc.state) {
             case 1:
                 offset = bc.getOffset(tpf);
                 moveForward(ball, offset);
-                checkCollision(entity, bc, grid.getMazeLayout(), MazeUtils.getPlayerOrBoxes(false));
+                if (bulletsystemdebuglog) {
+                    logger.debug("bullet position= " + ball.getTransform().getPosition() + ", offset=" + offset + ", tpf=" + tpf);
+                }
+                checkCollision(bulletEntity, bc, grid.getMazeLayout(), MazeUtils.getPlayerOrBoxes(false));
                 break;
-
-        }
-
-
-        if (bulletsystemdebuglog) {
-            logger.debug("ball position= " + ball.getTransform().getPosition() + ", offset=" + offset + ", tpf=" + tpf);
         }
     }
 
@@ -151,7 +149,7 @@ public class BulletSystem extends DefaultEcsSystem {
             // don't hit myself. And player on a home filed are immune
             if (!player.getName().equals(bc.origin) && !mc.isOnHomeField(layout)) {
                 if (mc.getLocation().equals(ballLocation)) {
-                    logger.debug("Hit detected of '" + player.getName() + "' with bullet by '" + bc.origin + "'");
+                    logger.debug("Hit detected of '" + player.getName() + "' with bullet by '" + bc.origin + "'. Will request relocate.");
                     bc.state = 2;
 
                     Point p = relocationStrategy.getLocation(layout, player);

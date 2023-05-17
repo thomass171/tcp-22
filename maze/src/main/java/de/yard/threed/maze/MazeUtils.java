@@ -274,7 +274,7 @@ public class MazeUtils {
     }
 
     /**
-     * Return the mover if any is moving. null if nobody moves.
+     * Return the mover if any is moving(including rotating). null if nobody moves.
      */
     public static GridMover isAnyMoving() {
 

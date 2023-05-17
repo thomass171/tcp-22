@@ -20,6 +20,7 @@ import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.maze.testutils.EmptyBotAIBuilder;
 import de.yard.threed.maze.testutils.MazeTestUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests using ECS (See GridTest for tests without ECS).
  * But NO visualization to reveal model-view coupling.
  */
+@Slf4j
 public class MazeTest {
 
     static final int INITIAL_FRAMES = 10;
@@ -86,7 +88,7 @@ public class MazeTest {
                 SystemManager.addSystem(new BulletSystem());
                 replaySystem = new ReplaySystem();
                 SystemManager.addSystem(replaySystem);
-                if (botAiBuilder!=null) {
+                if (botAiBuilder != null) {
                     SystemManager.addSystem(new BotSystem(false, botAiBuilder));
                 }
 
@@ -502,6 +504,7 @@ public class MazeTest {
 
     /**
      * Without diamonds its solved immediately.
+     * BotSystem will start a bot for remaining player.
      */
     @Test
     public void testBot() throws Exception {
@@ -526,16 +529,33 @@ public class MazeTest {
         assertEquals(3, MazeUtils.getBullets(bot).size());
 
         // bot must/will leave home field to make firing possible. By default it will wait real time for next move.
-
+        // So its only a question of time until the bot moves forward and fires.
+        // Anyway, user is on home filed and cannot be hit.
         EcsTestHelper.processUntil(() -> {
             return MazeUtils.getBullets(bot).size() < 3;
         }, 0.1, 100000000);
+        MazeTestUtils.assertPositionAndOrientation(bot, new Point(4, 3), GridOrientation.fromDirection("S"));
 
-        // Anyway, user is on home filed and cannot be hit.
+        // wait for bullet that might still be on its way. Dont use high tpf. Makes bullet disappear and miss hit.
+        // TODO smarter wait
+        //EcsTestHelper.processSeconds(200);
+        sceneRunner.runLimitedFrames(200, 0.1);
+        // TODO check bullet location
+
+        // disable bot auto move, step forward and fire at bot
+        log.debug("Disabling bot AI");
+        BotComponent.getBotComponent(bot).setBotAI(new EmptyBotAIBuilder().build());
+        MazeTestUtils.ecsWalk(TRIGGER_REQUEST_FORWARD, sceneRunner, user, true, new Point(4, 2));
+        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(user.getId(), null));
+
+        // wait for hitting bot and check relocate of bot to home position
+        sceneRunner.runLimitedFrames(200, 0.1);
+        MazeTestUtils.assertPositionAndOrientation(bot, new Point(4, 4), GridOrientation.fromDirection("S"));
     }
 
     /**
      * Without diamonds its solved immediately.
+     * BotSystem will start a bot for remaining player.
      */
     @Test
     public void testMultiBot() throws Exception {

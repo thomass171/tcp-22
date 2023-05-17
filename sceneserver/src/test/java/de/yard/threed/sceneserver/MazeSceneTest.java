@@ -212,13 +212,21 @@ public class MazeSceneTest {
 
         // testclient0 is on (6, 4) facing "N".
         testClient0.assertPositionAndOrientation(new Point(6, 4),"N");
+        testClient1.assertPositionAndOrientation(new Point(6, 8),"E");
 
+        // move both players to make firing/hitting possible.
         testClient0.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_FORWARD, testClient0.getUserEntity().getId()));
         testClient0.assertPositionAndOrientation(new Point(6, 5),"N");
+        testClient1.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_TURNRIGHT, testClient1.getUserEntity().getId()));
+        testClient1.assertPositionAndOrientation(new Point(6, 8),"S");
+        testClient1.sendRequestAndWait(sceneServer, new Request(TRIGGER_REQUEST_FORWARD, testClient1.getUserEntity().getId()));
+        testClient1.assertPositionAndOrientation(new Point(6, 7),"S");
 
         testClient0.sendRequestAndWait(sceneServer, MazeRequestRegistry.buildFireRequest(testClient0.getUserEntity().getId(),
                 MoverComponent.getMoverComponent(testClient0.getUserEntity()).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
-        //TODO t.b.c.
+        // wait for hitting client1 and check relocate of bot to home position
+        SceneServerTestUtils.runAdditionalFrames(sceneServer.getSceneRunner(), 50);
+        testClient1.assertPositionAndOrientation(new Point(6, 8),"S");
     }
 
     private EcsEntity connectToSokobanWikipediaServer(TestClient testClient, boolean viaWebSocket, String expectedGridname) throws Exception {

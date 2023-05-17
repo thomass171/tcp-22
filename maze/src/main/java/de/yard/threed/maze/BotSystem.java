@@ -17,6 +17,8 @@ import de.yard.threed.engine.util.RandomIntProvider;
 import java.util.List;
 
 /**
+ * Creates bots for remaining player after the first player joined.
+ *
  * <p>
  * Created by thomass on 09.04.21.
  */

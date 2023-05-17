@@ -38,6 +38,7 @@ public class BulletComponent extends ItemComponent {
         if (origin == null) {
             throw new RuntimeException("origin must not be null");
         }
+        logger.debug("Launching bullet");
         this.direction = direction;
         this.vdirection = MazeUtils.direction2Vector3(direction);
         this.origin = origin;
