@@ -9,6 +9,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * There are two major strategies for generating maze grids:
+ * 1) Start with an empty grid and add wall by wall. Aspects are:
+ * - it might be hard to make sure there still is a way through (is solvable)
+ * 2) Start with a grid full of blocks and dig corridors/areas by removing blocks. Aspects are:
+ * - Starting initially with a corridor form start to destination (solution path) make it easy to keep it solvable.
+ *
+ * Both strategies run iterative. Mixing probably doesn't make sense.
+ *
+ * Method name convention is:
+ * - add*() add blocks
+ * - dig*() remove blocks
+ */
 public class MazeGenerator {
 
     static final int ORIENTATION_DONTCARE = 0;

@@ -4,7 +4,7 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.platform.common.Request;
-import de.yard.threed.engine.testutil.DeterministicIntProvider;
+import de.yard.threed.engine.util.DeterministicIntProvider;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.util.IntProvider;

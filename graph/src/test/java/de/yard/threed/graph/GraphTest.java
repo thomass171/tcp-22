@@ -10,7 +10,7 @@ import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import de.yard.threed.engine.testutil.DeterministicIntProvider;
+import de.yard.threed.engine.util.DeterministicIntProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

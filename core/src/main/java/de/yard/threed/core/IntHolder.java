@@ -14,7 +14,15 @@ public class IntHolder {
         v = i;
     }
 
-    public void setValue(int i){
-        v=i;
+    public void setValue(int i) {
+        v = i;
+    }
+
+    public void inc() {
+        v++;
+    }
+
+    public int getValue() {
+        return v;
     }
 }

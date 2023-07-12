@@ -1,7 +1,7 @@
 package de.yard.threed.core;
 
 /**
- * Universalklasse fuer 2D int Koordinaten
+ * Universal class for 2D int coordinates
  * <p/>
  * Created by thomass on 19.06.15.
  */
@@ -67,6 +67,10 @@ public class Point {
         return new Point(x + p.x, y + p.y);
     }
 
+    public Point add(int x, int y) {
+        return new Point(this.x + x, this.y + y);
+    }
+
     public Point subtract(Point p) {
         return new Point(x - p.x, y - p.y);
     }
@@ -97,6 +101,7 @@ public class Point {
 
     /**
      * 31.5.21: als Standard: translate ist selbstaendernd.
+     *
      * @param t
      */
     public void translateX(int t) {
@@ -108,14 +113,37 @@ public class Point {
     }
 
     public Point addX(int t) {
-        return new Point(x+t,y);
+        return new Point(x + t, y);
     }
 
     public Point addY(int t) {
-        return new Point(x,y+t);
+        return new Point(x, y + t);
     }
 
     public boolean onSameAxis(Point p) {
         return (p.getX() == x || p.getY() == y);
+    }
+
+    /**
+     * Inclusive!
+     */
+    public boolean insideXRange(int lowerX, int upperX) {
+        return x >= lowerX && x <= upperX;
+    }
+
+    /**
+     * Inclusive!
+     */
+    public boolean insideYRange(int lowerY, int upperY) {
+        return y >= lowerY && y <= upperY;
+    }
+
+    public void visitNeighbor(PointVisitor visitor) {
+        for (int i = -1; i < 1; i++) {
+            visitor.visit(add(i, -1));
+            visitor.visit(add(i, 1));
+        }
+        visitor.visit(add(-1, 0));
+        visitor.visit(add(1, 0));
     }
 }

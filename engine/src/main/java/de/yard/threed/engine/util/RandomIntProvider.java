@@ -9,8 +9,12 @@ public class RandomIntProvider implements IntProvider {
     /*Random*/ LFSR rand;
 
     public RandomIntProvider() {
+        this(450);
+    }
+
+    public RandomIntProvider(int seed) {
         // rand = new Random(System.currentTimeMillis());
-        rand = new LFSR(450);
+        rand = new LFSR(seed);
     }
 
     RandomIntProvider(int low, int high) {

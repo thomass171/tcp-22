@@ -27,11 +27,13 @@ import java.util.List;
 
 /**
  * Simple Platform implementation eg. for unit tests. This is less than a full platform and PlatformHomeBrew without renderer but more
- * than DefaultPlatform. However clear difference is not yet defined.
+ * than DefaultPlatform. However clear difference is not yet defined, but there are some charateristics:
+ * - has no dependency to a 3D library/engine, so has no renderer (headless!)
+ * - uses typical Java implementations (eg. log4j for logging, GsonBuilder for json)
  * Therefore it resides in java-common. Not for C#.
- * Has no renderer (headless!).
+ *
  * <p>
- * Just provides a logger and StringHelper. ResourceManager must be added later because it might need the LogFactory.
+ * Provides a logger and StringHelper. ResourceManager must be added later because it might need the LogFactory.
  * <p>
  * The name "headless" is confusing because its the super class for all(some?) Java based platforms.
  * Or the class hierarchy is confusing? Jme extends it and replaces may things. Maybe a component based approavh is better

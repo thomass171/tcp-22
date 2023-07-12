@@ -146,7 +146,8 @@ public class BulletSystem extends DefaultEcsSystem {
         }
         for (EcsEntity player : players) {
             MoverComponent mc = MoverComponent.getMoverComponent(player);
-            // don't hit myself. And player on a home filed are immune
+            // don't hit myself. And player on a home field are immune. But own team members are not immune. So user
+            // should be careful not to hit their own team mates.
             if (player.getId() != bc.originEntityId && !mc.isOnHomeField(layout)) {
                 if (mc.getLocation().equals(ballLocation)) {
                     logger.debug("Hit detected of '" + player.getName() + "' with bullet by '" + bc.originEntityId + "'. Will request relocate.");
