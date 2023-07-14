@@ -281,11 +281,11 @@ public abstract class Platform {
     public abstract boolean GetKey(int keycode);
 
     /**
-     * Liefert die absolute Position (mit (0,0) links unten) zu der sich die Maus bewegt hat. Aber nur bei Bewegung.
-     * Liefert null, wenn sich die Maus nicht bewegt hat.
-     * 8.4.16: (0,0) war mal links oben, ist jetzt links unten, weil Unity das auch so macht. Und es gibt Aussagen, dass
-     * "in 3D y von unten nach oben läuft". Ist wohl openGl convention.
-     * 14.5.19: Arbeitet bei "Drag" (move mit pressed button oder touchmove) genauso.
+     * Returns absolute position ((0,0) lower left) to where mouse moved, but only when there was a movement.
+     * Without movement null is returned.
+     * 8.4.16: (0,0) was top left once, but is lower left now, weil Unity das auch so macht. Und es gibt Aussagen, dass
+     * "in 3D y von unten nach oben läuft". openGl convention?
+     * 14.5.19: Works the same with "Drag" (move with pressed button or touchmove).
      *
      * @return
      */

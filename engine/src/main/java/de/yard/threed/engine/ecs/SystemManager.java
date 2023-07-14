@@ -114,13 +114,14 @@ public class SystemManager {
         if (paused) {
             return;
         }
+        long starttime = Platform.getInstance().currentTimeMillis();
         // 21.3.19: Requests are processed before events without any special reason. And published to the net.
         requestQueue.process(busConnector);
         // Requests received from net. Requests not processed stay in the list.
         requestQueue.processRequestsFromNetwork(netRequests);
 
         // process non entity state events inclusive sending to network
-        List<Event> eventsToProcess=new ArrayList<Event>();
+        List<Event> eventsToProcess = new ArrayList<Event>();
         NativeEventBus eb = Platform.getInstance().getEventBus();
         Event evt;
         //getLogger().debug("update: processing " + eb.getEventCount() + " events");
@@ -128,7 +129,7 @@ public class SystemManager {
         while ((evt = eb.poll(0)) != null) {
             eventsToProcess.add(evt);
         }
-        for (Event evt1 :eventsToProcess) {
+        for (Event evt1 : eventsToProcess) {
             processEvent(evt1);
             if (busConnector != null) {
                 // client server ping pong is avoided by not putting network events into the local bus
@@ -175,6 +176,7 @@ public class SystemManager {
             }
             //}
         }
+        //getLogger().debug("update took " + (Platform.getInstance().currentTimeMillis() - starttime) + " ms");
     }
 
     private static void processEvent(Event evt) {

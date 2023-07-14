@@ -182,12 +182,12 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     }
 
     /**
-     * Alles das was vor dem draw gemacht wird.
+     * Everything before drawing.
      *
      * @param tpf
      */
     public void prepareFrame(double tpf) {
-        // Die Reihenfolge ob erst Callback und dan Updater ist eigentlich rein willkürlich. Aber es ist
+        // The order here is quite arbitrary. Aber es ist
         // schon sinnvoll, dass der updater auf einen beendeten Job reagieren kann.
 
         processCompletedJobs();

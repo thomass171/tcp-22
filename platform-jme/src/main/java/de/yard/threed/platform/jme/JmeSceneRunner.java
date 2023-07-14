@@ -206,14 +206,7 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
             public void simpleUpdate(float tpf) {
                 //logger.info("simpleUpdate. tpf=" + tpf);
 
-                // Das ist so aber noch nicht ganz rund.
-                final JmeScene sc = (JmeScene) scene.scene;
-
                 scene.deltaTime = tpf;
-                /*if (recorder != null){
-                    int key = recorder.next();
-                }*/
-                /*runnerhelper.*/
                 prepareFrame(tpf);
                 jmecamera.updateCameraModel();
             }
