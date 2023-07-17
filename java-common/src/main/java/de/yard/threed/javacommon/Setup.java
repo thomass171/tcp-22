@@ -39,9 +39,7 @@ public class Setup {
         // After fix of webxr floor handling yoffsetVR can have a 'real' height (above avatar).
         boolean emulateVR = false;
         if (emulateVR) {
-            properties.put("emulateVR", "true");
-            // 1.3 is only good for maze, VrScene needs less (eg 0.3), or better 0 like BasicTravelScene. App does the rest.
-            properties.put("offsetVR", "0,0,0");
+            emulateVR(properties);
         }
 
         //properties.put("argv.initialVehicle", "c172p");
@@ -58,8 +56,8 @@ public class Setup {
         //18.11.19: NearView geht in VR eh nicht, darum damit üblicherweise auch sonst nicht arbeiten.
         //properties.put("argv.enableNearView", "true");
         properties.put("initialMaze", "skbn/SokobanWikipedia.txt");
-        properties.put("initialMaze", "maze/Maze-P-Simple.txt");
-        properties.put("initialMaze", genV1);
+        //properties.put("initialMaze", "maze/Maze-P-Simple.txt");
+        //properties.put("initialMaze", genV1);
         //properties.put("initialMaze", mazeshost + "/mazes/mazes/1");
         //properties.put("argv.initialMaze", "maze/Maze-P-60x20.txt");
         //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");
@@ -82,6 +80,14 @@ public class Setup {
         //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
         //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
 
+        boolean testFireTargetMarker = false;
+        if (testFireTargetMarker) {
+            // only in VR and mode 1
+            properties.put("scene", "de.yard.threed.maze.MazeScene");
+            properties.put("initialMaze", "maze/Maze-P-Simple.txt");
+            properties.put("vrFireMode", "1");
+            emulateVR(properties);
+        }
         boolean wayland = false;
         if (wayland) {
             properties.put("basename", "traffic:tiles/Wayland.xml");
@@ -97,6 +103,12 @@ public class Setup {
 
 
         return properties;
+    }
+
+    private static void emulateVR(HashMap<String, String> properties) {
+        properties.put("emulateVR", "true");
+        // 1.3 is only good for maze, VrScene needs less (eg 0.3), or better 0 like BasicTravelScene. App does the rest.
+        properties.put("offsetVR", "0,0,0");
     }
 
     static String genV1 = "################################################################################\n" +

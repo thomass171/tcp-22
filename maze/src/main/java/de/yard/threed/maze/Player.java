@@ -27,7 +27,7 @@ public class Player extends SceneNode /*implements Entity/*16.9.16 , Movable*/ {
 
     public Player(Color color) {
         setName("Ray");
-        body = buildSimpleBody(MazeSettings.getSettings().simplerayheight, MazeSettings.getSettings().simpleraydiameter, color);
+        body = buildSimpleBody(MazeTheme.getSettings().simplerayheight, MazeTheme.getSettings().simpleraydiameter, color);
         attach(body);
 
         //kommt spaeter addCamera();

@@ -37,12 +37,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  */
 public class GridTest {
     static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
+    MazeTheme mazeTheme;
 
     //no good idea to define statics here because it restarts platform init
 
     @BeforeEach
     public void setup() {
-        MazeSettings.init(MazeSettings.MODE_SOKOBAN);
+        mazeTheme = MazeTheme.init(MazeTheme.THEME_TRADITIONAL);
     }
 
     /**
@@ -59,19 +60,20 @@ public class GridTest {
 
         Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "maze/grid1.txt"))).get(0);
 
+        MazeLayout layout = grid.getMazeLayout();
         Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null);
-        Assertions.assertEquals(11, grid.getMaxWidth(), "width");
-        Assertions.assertEquals(7, grid.getHeight(), "height");
+        Assertions.assertEquals(11, layout.getMaxWidth(), "width");
+        Assertions.assertEquals(7, layout.getHeight(), "height");
         Assertions.assertEquals(5, startPosition.getX(), "start.x");
         Assertions.assertEquals(1, startPosition.getY(), "start.y");
-        Assertions.assertTrue(grid.hasTopPillar(new Point(0, 0)), "top pillar");
-        Assertions.assertTrue(grid.hasTopPillar(new Point(0, 1)), "top pillar");
-        Assertions.assertFalse(grid.hasTopPillar(new Point(1, 0)), "top pillar");
-        Assertions.assertFalse(grid.hasTopPillar(new Point(1, 1)), "top pillar");
-        Assertions.assertTrue(grid.hasRightPillar(new Point(0, 0)), "right pillar");
-        Assertions.assertFalse(grid.hasRightPillar(new Point(0, 1)), "right pillar");
-        Assertions.assertTrue(grid.hasRightPillar(new Point(1, 0)), "right pillar");
-        Assertions.assertFalse(grid.hasRightPillar(new Point(1, 1)), "right pillar");
+        Assertions.assertTrue(MazeTraditionalTerrain.hasTopPillar(layout, new Point(0, 0)), "top pillar");
+        Assertions.assertTrue(MazeTraditionalTerrain.hasTopPillar(layout, new Point(0, 1)), "top pillar");
+        Assertions.assertFalse(MazeTraditionalTerrain.hasTopPillar(layout, new Point(1, 0)), "top pillar");
+        Assertions.assertFalse(MazeTraditionalTerrain.hasTopPillar(layout, new Point(1, 1)), "top pillar");
+        Assertions.assertTrue(MazeTraditionalTerrain.hasRightPillar(layout, new Point(0, 0)), "right pillar");
+        Assertions.assertFalse(MazeTraditionalTerrain.hasRightPillar(layout, new Point(0, 1)), "right pillar");
+        Assertions.assertTrue(MazeTraditionalTerrain.hasRightPillar(layout, new Point(1, 0)), "right pillar");
+        Assertions.assertFalse(MazeTraditionalTerrain.hasRightPillar(layout, new Point(1, 1)), "right pillar");
 
         Assertions.assertEquals(2, startPosition.add(Direction.N.getPoint()).getY(), "starty.");
 
@@ -90,7 +92,8 @@ public class GridTest {
         boolean iscorner = true;
         float distance = 0.8f;
         float d2 = distance / 2;
-        MazeModelFactory mf = MazeModelFactory.getInstance();
+        MazeTheme st = MazeTheme.init();
+        MazeTraditionalModelFactory mf = (MazeTraditionalModelFactory) st.getMazeModelFactory();
         Shape shape = mf.buildWallShape(6, istop, false, distance);
         List<Vector2> points = shape.getPoints();
         TestUtils.assertVector2(new Vector2(-3, 0), points.get(0), "p0");
@@ -244,9 +247,10 @@ public class GridTest {
     public void testTerrainWikipedia() throws Exception {
 
         Grid grid = loadGridAndTerrain("skbn/SokobanWikipedia.txt", 1);
-        MazeTerrain terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());
-        terrain.visualizeGrid(grid);
-        Assertions.assertEquals(grid.getMaxWidth() * grid.getHeight(), terrain.getTiles().values().size(), "tiles");
+        MazeLayout layout = grid.getMazeLayout();
+        MazeTraditionalTerrain terrain = (MazeTraditionalTerrain) mazeTheme.buildTerrain(layout);
+        terrain.visualizeGrid();
+        Assertions.assertEquals(layout.getMaxWidth() * layout.getHeight(), terrain.getTiles().values().size(), "tiles");
     }
 
     /**
@@ -265,8 +269,9 @@ public class GridTest {
     public void testArea15x10() throws Exception {
 
         Grid grid = loadGridAndTerrain("maze/Area15x10.txt", 2);
-        MazeTerrain terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());
-        terrain.visualizeGrid(grid);
+        MazeLayout layout = grid.getMazeLayout();
+        MazeTraditionalTerrain terrain = (MazeTraditionalTerrain) mazeTheme.buildTerrain(layout);
+        terrain.visualizeGrid();
 
         SceneNode[] pillar = terrain.getPillar(new Point(5, 3));
         Assertions.assertNull(pillar[0], "top of 5,3");
@@ -354,9 +359,9 @@ public class GridTest {
 
     @Test
     public void testTerrain() {
-        MazeModelFactory mf = MazeModelFactory.getInstance();
-        MazeTerrain terrain = new MazeTerrain(3, 6);
-        terrain.addGridElement(mf.buildWall(1, Grid.STRAIGHTWALLMODE_FULL), 0, 0, 0);
+        MazeTraditionalModelFactory mf = (MazeTraditionalModelFactory) mazeTheme.getMazeModelFactory();
+        MazeTraditionalTerrain terrain = new MazeTraditionalTerrain(new MazeLayout(new ArrayList<Point>(), new ArrayList<Point>(), null, 3, 6, new ArrayList<Point>()),mf);
+        terrain.addGridElement(mf.buildWall(1, MazeTraditionalTerrain.STRAIGHTWALLMODE_FULL), 0, 0, 0);
         SceneNode wall = terrain.getNode().getTransform().getChild(0).getSceneNode();
         TestUtils.assertVector3(new Vector3(-MazeDimensions.GRIDSEGMENTSIZE, 0, 2.5f * MazeDimensions.GRIDSEGMENTSIZE), wall.getTransform().getPosition(), "wallpos");
     }

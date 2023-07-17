@@ -2,32 +2,31 @@ package de.yard.threed.maze;
 
 
 import de.yard.threed.core.*;
-import de.yard.threed.engine.*;
-import de.yard.threed.engine.apps.WoodenToyFactory;
-import de.yard.threed.engine.geometry.ShapeGeometry;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.Color;
 
 /**
- * MazeSettings
+ * Defines visual appearance only. Should not have effect on game play.
+ * Especially sizes of fields, players might effect something like visibility at corners, bullet hitting, firetargetmarker, etc.
+ * So be careful.
+ * <p>
+ * Was MazeSettings once.
  * <p/>
  * Created by thomass on 11.01.16.
  */
-public class MazeSettings {
-    public String grid;
-    public boolean ambilight;
-    //16.8.19: Sowas wie mode sollte durch Ableitungen von AbstractScene und ECS obsolet sein.
-    @Deprecated
-    public static final int MODE_MAZE = 1;
-    public static final int MODE_SOKOBAN = 2;
-    //public int mode = MODE_SOKOBAN;
-    public static final int THEME_DRAFT = 1;
-    public static final int THEME_WOOD = 2;
-    public static final int THEME_REALWOOD = 3;
-    private int theme = THEME_DRAFT;
+public class MazeTheme {
+    //public String grid;
+    public boolean ambilight = false;
+    public static final int THEME_TRADITIONAL = 2;
+    public static final int THEME_DUNGEON = 3;
+    // Theme THEME_REALWOOD was an idea based on real 'jenga' texture "textures/realwood/Wall.png". But without normalmap etc.
+    // its just not complete. (See history of MazeModelFactory).
+    //public static final int THEME_REALWOOD = 3;
+    private int theme = -1;
     //13.1.16 Hoehe 0.9 statt 0.3, Diameter 0.3->0.1 um nicht sichtbar zu sein
     public float simplerayheight = 0.9f;
     public float simpleraydiameter = 0.1f;
-    private static MazeSettings st;
+    private static MazeTheme st;
     public boolean debug = false;
     public float sokobanboxsize = 0.6f;
     // Color is well fitting to ground
@@ -37,21 +36,12 @@ public class MazeSettings {
     // Color.LIGHTBLUE is general background. So a custom lighter blue. .
     public static Color diamondColor = new Color(0x99, 0xFF, 0xFF);
     public static String[] teamColors = new String[]{"darkgreen", "red"};
+    private MazeModelFactory mazeModelFactory;
 
-    private MazeSettings(int mode) {
-        switch (mode) {
-            case MODE_MAZE:
-                grid = "maze/grid1.txt";
-                ambilight = false;
-                break;
-            case MODE_SOKOBAN:
-                grid = "skbn/SokobanWikipedia.txt";
-                //grid = "skbn/SokobanTrivial.txt";
-                ambilight = false;
-                theme = THEME_WOOD;
-                break;
-        }
-
+    private MazeTheme(int theme) {
+        this.theme = theme;
+        // no nice solution, but factory currently needs constructor parameter (which makes sense), so we have a cycle dependency.
+        this.mazeModelFactory =  new MazeTraditionalModelFactory(this);
     }
 
     public LocalTransform getViewpoint() {
@@ -72,18 +62,35 @@ public class MazeSettings {
         return viewpoint;
     }
 
-    public static MazeSettings init(int mode) {
+    public static MazeTheme init() {
+        String theme = Platform.getInstance().getConfiguration().getString("theme", "traditional");
+        if (theme.equals("dungeon")) {
+            return init(THEME_DUNGEON);
+        } else {
+            return init(THEME_TRADITIONAL);
+        }
+    }
+
+    public static MazeTheme init(int theme) {
         if (st == null) {
-            st = new MazeSettings(mode);
+            st = new MazeTheme(theme);
         }
         return st;
     }
 
-    public static MazeSettings getSettings() {
+    public static MazeTheme getSettings() {
         return st;
     }
 
-    public int getTheme(){
+    public int getTheme() {
         return theme;
+    }
+
+    public MazeModelFactory getMazeModelFactory() {
+        return mazeModelFactory;
+    }
+
+    public AbstractMazeTerrain buildTerrain(MazeLayout layout) {
+        return new MazeTraditionalTerrain(layout, (MazeTraditionalModelFactory) mazeModelFactory);
     }
 }

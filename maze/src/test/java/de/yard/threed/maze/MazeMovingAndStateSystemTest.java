@@ -2,11 +2,9 @@ package de.yard.threed.maze;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import de.yard.threed.core.Event;
-import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.ModelBuilderRegistry;
@@ -18,14 +16,10 @@ import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserComponent;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
-import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.engine.vr.VrInstance;
-import de.yard.threed.javacommon.ConfigurationByEnv;
-import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -61,11 +55,10 @@ public class MazeMovingAndStateSystemTest {
         wireMockServer.start();
 
         EcsTestHelper.setup(() -> {
-            SystemManager.addSystem(new MazeMovingAndStateSystem());
+            MazeTheme st = MazeTheme.init(MazeTheme.THEME_TRADITIONAL);
+            SystemManager.addSystem(new MazeMovingAndStateSystem(st));
 
         }, "engine", "maze");
-
-        MazeSettings.init(MazeSettings.MODE_SOKOBAN);
 
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
         mazeMovingAndStateSystem = (MazeMovingAndStateSystem) SystemManager.findSystem(MazeMovingAndStateSystem.TAG);

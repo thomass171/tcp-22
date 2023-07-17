@@ -2,19 +2,15 @@ package de.yard.threed.maze;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.engine.BaseEventRegistry;
-import de.yard.threed.engine.KeyCode;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsTestHelper;
-import de.yard.threed.engine.ecs.InputToRequestSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.UserComponent;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Request;
-import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
-import de.yard.threed.javacommon.SimpleHeadlessPlatform;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,11 +30,11 @@ public class BulletSystemTest {
         MazeDataProvider.reset();
 
         EcsTestHelper.setup(() -> {
-            SystemManager.addSystem(new MazeMovingAndStateSystem());
+            MazeTheme st = MazeTheme.init(MazeTheme.THEME_TRADITIONAL);
+
+            SystemManager.addSystem(new MazeMovingAndStateSystem(st));
             SystemManager.addSystem(new BulletSystem());
         }, "engine", "maze");
-
-        MazeSettings.init(MazeSettings.MODE_SOKOBAN);
 
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
     }

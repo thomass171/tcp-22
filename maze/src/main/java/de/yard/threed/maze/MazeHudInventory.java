@@ -3,7 +3,6 @@ package de.yard.threed.maze;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.gui.ControlPanel;
-import de.yard.threed.engine.gui.ControlPanelArea;
 import de.yard.threed.engine.gui.ControlPanelHelper;
 import de.yard.threed.engine.gui.TextTexture;
 import de.yard.threed.core.Color;
@@ -16,7 +15,7 @@ import de.yard.threed.core.DimensionF;
 public class MazeHudInventory implements MazeInventory {
 
     ControlPanel controlPanel;
-    private Color backgroundColor = MazeSettings.hudColor;
+    private Color backgroundColor = MazeTheme.hudColor;
     private BasicInventory basicInventory;
 
     public MazeHudInventory(Camera deferredcamera, Dimension dimension) {

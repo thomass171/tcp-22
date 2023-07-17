@@ -55,7 +55,7 @@ public class MazeScene extends Scene {
         Configuration configuration = Platform.getInstance().getConfiguration();
         configuration.addConfiguration(new ConfigurationByProperties(new BundleResource(BundleRegistry.getBundle("maze"), "maze.properties")), true);
 
-        MazeSettings.init(MazeSettings.MODE_SOKOBAN);
+        MazeTheme st = MazeTheme.init();
 
         // Observer can exist before login/join for showing eg. an overview.
         // After login/join it might be attched to an avatar? Also for VR? (MA35).
@@ -94,12 +94,9 @@ public class MazeScene extends Scene {
 
         vrInstance = VrInstance.buildFromArguments();
 
-        MazeSettings st = MazeSettings.init(MazeSettings.MODE_SOKOBAN);
-
-
         InputToRequestSystem inputToRequestSystem = null;
         if (sceneMode.isClient()) {
-            SystemManager.addSystem(new MazeVisualizationSystem());
+            SystemManager.addSystem(new MazeVisualizationSystem(st));
             //16.4.21: Kein main menu mehr. Level change geht einfach über Neustart. Dafuer das control menu togglen.
             inputToRequestSystem = new InputToRequestSystem(/*new MainMenu(getMainCamera())*/);
             //'M' nur Provisorium? Och wieso? Man kann KEys immer als Fallback haben.
@@ -134,14 +131,14 @@ public class MazeScene extends Scene {
             SystemManager.addSystem(observerSystem);
         }
         if (sceneMode.isServer()) {
-            SystemManager.addSystem(MazeMovingAndStateSystem.buildFromArguments());
+            SystemManager.addSystem(MazeMovingAndStateSystem.buildFromArguments(st));
             SystemManager.addSystem(new UserSystem());
             SystemManager.addSystem(new BulletSystem());
             SystemManager.addSystem(new BotSystem(sceneMode.isServer() && !sceneMode.isClient(), new SimpleBotAiBuilder()));
             // AvatarSystem handles login etc., so no need to have it here. Avatar is built just by entity model builder.
             AvatarSystem avatarSystem = AvatarSystem.buildFromArguments();
             // avatar builder is for player and monster
-            avatarSystem.setAvatarBuilder(MazeAvatarBuilder.AVATAR_BUILDER, new MazeAvatarBuilder());
+            avatarSystem.setAvatarBuilder(MazeAvatarBuilder.AVATAR_BUILDER, new MazeAvatarBuilder(st.getMazeModelFactory()));
             avatarSystem.disableShortCutJoin();
             SystemManager.addSystem(avatarSystem);
 
@@ -188,7 +185,7 @@ public class MazeScene extends Scene {
             SystemManager.addSystem(ServerSystem.buildForInitialEventsForClient(new EventType[]{MazeEventRegistry.EVENT_MAZE_LOADED}));
         }
         if (!sceneMode.isServer() && sceneMode.isClient()) {
-            SystemManager.addSystem(new ClientSystem(new ModelBuilderRegistry[]{new MazeAvatarBuilder(), MazeModelFactory.getInstance()}));
+            SystemManager.addSystem(new ClientSystem(new ModelBuilderRegistry[]{new MazeAvatarBuilder(st.getMazeModelFactory()), st.getMazeModelFactory()}));
         }
 
         // In pure client mode the grid to be loaded is received from server via event MAZE_LOADED.
@@ -238,7 +235,7 @@ public class MazeScene extends Scene {
      * PointLight lass ich mal ganz weg.
      */
     private void addLight() {
-        if (MazeSettings.getSettings().ambilight) {
+        if (MazeTheme.getSettings().ambilight) {
             AmbientLight light = new AmbientLight(Color.WHITE);
 
             //pointLight.setPosition(new Vector3(0, 2, -5.5f));
@@ -293,7 +290,7 @@ public class MazeScene extends Scene {
      * @return
      */
     public static LocalTransform getViewTransform() {
-        LocalTransform viewTransform = MazeSettings.getSettings().getViewpoint();
+        LocalTransform viewTransform = MazeTheme.getSettings().getViewpoint();
         viewTransform.position = viewTransform.position.add(new Vector3(0, MazeScene.rayy, 0));
         return viewTransform;
     }

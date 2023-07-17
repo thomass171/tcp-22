@@ -38,11 +38,11 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     List<GridMovement> solution = null;
     boolean mazeMovingAndStateSystemdebuglog = true;
 
-    protected MazeSettings st;
+    protected MazeTheme mazeTheme;
 
     private Hud helphud = null;
 
-    public MazeMovingAndStateSystem() {
+    public MazeMovingAndStateSystem(MazeTheme mazeTheme) {
         super(new String[]{"MazeMovingComponent"}, new RequestType[]{MazeRequestRegistry.TRIGGER_REQUEST_BACK,
                         MazeRequestRegistry.TRIGGER_REQUEST_TURNLEFT, MazeRequestRegistry.TRIGGER_REQUEST_FORWARD,
                         MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT, MazeRequestRegistry.MAZE_REQUEST_LOADLEVEL,
@@ -59,10 +59,11 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 },
                 new EventType[]{
                         BaseEventRegistry.EVENT_USER_ASSEMBLED});
+        this.mazeTheme = mazeTheme;
     }
 
-    public static MazeMovingAndStateSystem buildFromArguments() {
-        return new MazeMovingAndStateSystem();
+    public static MazeMovingAndStateSystem buildFromArguments(MazeTheme mazeTheme) {
+        return new MazeMovingAndStateSystem(mazeTheme);
     }
 
     @Override
@@ -552,7 +553,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //static EcsEntity buildSokobanBox(int x, int y) {
             //SceneNode p = MazeModelFactory.getInstance().buildSokobanBox(/*b.getX(), b.getY()*/);
             EcsEntity box = new EcsEntity();
-            box.buildSceneNodeByModelFactory(MazeModelFactory.BOX_BUILDER, new ModelBuilderRegistry[]{MazeModelFactory.getInstance()});
+            box.buildSceneNodeByModelFactory(MazeModelFactory.BOX_BUILDER, new ModelBuilderRegistry[]{mazeTheme.getMazeModelFactory()});
             MoverComponent mover = new MoverComponent(box.getSceneNode().getTransform()/*this*/, false, b, new GridOrientation(), -1);
             mover.setLocation(b);
             box.addComponent(mover);
@@ -562,7 +563,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         }
         for (Point b : grid.getDiamonds()) {
             EcsEntity diamond = new EcsEntity();
-            diamond.buildSceneNodeByModelFactory(MazeModelFactory.DIAMOND_BUILDER, new ModelBuilderRegistry[]{MazeModelFactory.getInstance()});
+            diamond.buildSceneNodeByModelFactory(MazeModelFactory.DIAMOND_BUILDER, new ModelBuilderRegistry[]{mazeTheme.getMazeModelFactory()});
             diamond.setName("diamond");
             Vector3 dp = MazeUtils.point2Vector3(b);
             dp = new Vector3(dp.getX(), 0.8, dp.getZ());
@@ -584,7 +585,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         logger.debug("create " + cnt + " Bullets for " + owner);
         for (int i = 0; i < cnt; i++) {
             EcsEntity e = new EcsEntity();
-            e.buildSceneNodeByModelFactory(BULLET_BUILDER, new ModelBuilderRegistry[]{MazeModelFactory.getInstance()});
+            e.buildSceneNodeByModelFactory(BULLET_BUILDER, new ModelBuilderRegistry[]{mazeTheme.getMazeModelFactory()});
             BulletComponent bulletComponent = new BulletComponent(owner);
             e.addComponent(bulletComponent);
             e.setName("bullet");

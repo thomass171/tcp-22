@@ -53,22 +53,25 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
     // fireMode 1: Use a target marker at a wall to indicate fire target. Fire targets are difficult to display correctly at all walls
     // due to different wall orientations. Not completely implemented.
     // fireMode 2: Highlight target like boxes are highlighted. This is visually more consistent.
-    int vrFireMode = 2;
+    private int vrFireMode = 2;
     // a grid teleporter is used in VR and for testing.
     private boolean gridTeleporterEnabled;
     // give left and right controller same functions
     private boolean distinctLeftRightVrControllerEnabled = false;
+    private MazeTheme mazeTheme;
 
     /**
      *
      */
-    public MazeVisualizationSystem() {
+    public MazeVisualizationSystem(MazeTheme mazeTheme) {
         super(new String[]{}, new RequestType[]{}, new EventType[]{MazeEventRegistry.EVENT_MAZE_LOADED});
+        this.mazeTheme = mazeTheme;
 
         Boolean b;
         if ((b = Platform.getInstance().getConfiguration().getBoolean("enableMazeGridTeleporter")) != null) {
             gridTeleporterEnabled = (boolean) b;
         }
+        vrFireMode = Platform.getInstance().getConfiguration().getInt("vrFireMode", 2);
     }
 
     @Override
@@ -344,11 +347,11 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         Configuration configuration = Platform.getInstance().getConfiguration();
         String terrainbuilder = configuration.getString("maze.visualization", "");
         if (terrainbuilder.equals("traditional")) {
-            view.terrain = new MazeTerrain(grid.getMaxWidth(), grid.getHeight());
+            view.terrain = mazeTheme.buildTerrain(grid.getMazeLayout());
         } else {
             throw new RuntimeException("unknown visualization " + terrainbuilder);
         }
-        view.terrain.visualizeGrid(grid);
+        view.terrain.visualizeGrid();
         Scene.getCurrent().addToWorld(view.terrain.getNode());
 
     }

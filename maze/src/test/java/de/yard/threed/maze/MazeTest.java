@@ -70,14 +70,14 @@ public class MazeTest {
             @Override
             public void init() {
 
-                MazeSettings.init(MazeSettings.MODE_SOKOBAN);
+                MazeTheme st = MazeTheme.init(MazeTheme.THEME_TRADITIONAL);
 
                 // No visualization to reveal model-view coupling.
-                SystemManager.addSystem(new MazeMovingAndStateSystem());
+                SystemManager.addSystem(new MazeMovingAndStateSystem(st));
                 SystemManager.addSystem(new UserSystem());
 
                 AvatarSystem avatarSystem = new AvatarSystem();
-                avatarSystem.setAvatarBuilder(MazeAvatarBuilder.AVATAR_BUILDER, new MazeAvatarBuilder());
+                avatarSystem.setAvatarBuilder(MazeAvatarBuilder.AVATAR_BUILDER, new MazeAvatarBuilder(st.getMazeModelFactory()));
                 avatarSystem.disableShortCutJoin();
                 SystemManager.addSystem(avatarSystem);
 

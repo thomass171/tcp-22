@@ -12,11 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Static data of a maze grid. Moving objects only have a start position here.
+ * Representation of a maze grid loaded from a grid definition. Moving objects only have a start position here.
  * <p/>
  * <p>
- * - A pillar is always located in the mid on the boundary of two grid fields.
- * - There is no pillar at corners (where walls intersect) or on 'T's.
  * <p>
  * top is in Y-direction, right in X-direction
  * <p>
@@ -35,10 +33,6 @@ public class Grid {
     static Grid instance;
     Map<String, String> tags;
 
-    static int STRAIGHTWALLMODE_NONE = 0;
-    static int STRAIGHTWALLMODE_FULL = 1;
-    static final int STRAIGHTWALLMODE_LOW_PART = 2;
-    static final int STRAIGHTWALLMODE_HIGH_PART = 3;
     private String rawGrid;
 
     public Grid(MazeLayout layout, List<Point> boxes, List<Point> diamonds, Map<String, String> tags, String rawGrid) throws InvalidMazeException {
@@ -151,139 +145,6 @@ public class Grid {
         return true;
     }
 
-    public int getMaxWidth() {
-
-        return layout.maxwidth;
-    }
-
-    public int getHeight() {
-        return layout.height;
-    }
-
-    public int isVWALL(Point p) {
-
-        if (!isWall(p)) {
-            return STRAIGHTWALLMODE_NONE;
-        }
-        if (isWall(p.addX(-1)) || isWall(p.addX(1))) {
-            return STRAIGHTWALLMODE_NONE;
-        }
-        boolean high = isWall(p.addY(1));
-        boolean low = isWall(p.addY(-1));
-        if (high && low) {
-            return STRAIGHTWALLMODE_FULL;
-        }
-        if (high) {
-            return STRAIGHTWALLMODE_HIGH_PART;
-        }
-        if (low) {
-            return STRAIGHTWALLMODE_LOW_PART;
-        }
-
-        return STRAIGHTWALLMODE_NONE;
-    }
-
-    public int isHWALL(Point p) {
-
-        // selber Block und links oder rechts aber nicht drüber oder drunter
-        if (!isWall(p)) {
-            return STRAIGHTWALLMODE_NONE;
-        }
-        if (isWall(p.addY(-1)) || isWall(p.addY(1))) {
-            return STRAIGHTWALLMODE_NONE;
-        }
-        boolean high = isWall(p.addX(1));
-        boolean low = isWall(p.addX(-1));
-        if (high && low) {
-            return STRAIGHTWALLMODE_FULL;
-        }
-        if (high) {
-            return STRAIGHTWALLMODE_HIGH_PART;
-        }
-        if (low) {
-            return STRAIGHTWALLMODE_LOW_PART;
-        }
-
-        return STRAIGHTWALLMODE_NONE;
-    }
-
-    public boolean isWall(Point p) {
-        return layout.walls.contains(p);
-    }
-
-    /**
-     * Is it an inner field, a field that could be visited. No walls.
-     */
-    public boolean isField(Point p) {
-        return layout.getFields().contains(p);
-    }
-
-    /**
-     * Does the wall continue at top?
-     * <p>
-     * 31.5.21: Also when it is a wall and beyond, but not to the left or right?
-     * 1.6.21: No, then it is a center
-     */
-    public boolean hasTopPillar(Point p) {
-        boolean isblock = false;
-
-        if (isWall(p)) {
-            isblock = true;
-        }
-
-        // Wenn es selber Wall ist und darüber auch
-        if (isblock && isWall(p.addY(1))) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Does the wall continue to the right?
-     * <p>
-     * 31.5.21: Also when it is the end of a wall, ie wall to the left but not above and beyond?
-     * 3.6.21: No, then it is a center
-     */
-    public boolean hasRightPillar(Point p) {
-
-        boolean isblock = false;
-
-        if (isWall(p)) {
-            isblock = true;
-        }
-        // Wenn es selber BLOCK ist und rechts auch
-        if (isblock && isWall(p.addX(1))) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Alle nicht durchgehenden Walls (also endende) haben einen center pillar. Ausser alleinstehende.
-     *
-     * @return
-     */
-    public boolean hasCenterPillar(Point p) {
-
-        int surroundingwalls = 0;
-
-        if (!isWall(p)) {
-            return false;
-        }
-        if (isWall(p.addX(1))) {
-            surroundingwalls++;
-        }
-        if (isWall(p.addX(-1))) {
-            surroundingwalls++;
-        }
-        if (isWall(p.addY(1))) {
-            surroundingwalls++;
-        }
-        if (isWall(p.addY(-1))) {
-            surroundingwalls++;
-        }
-        return surroundingwalls == 1;
-    }
 
     public List<Point> getBoxes() {
         return boxes;

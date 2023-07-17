@@ -17,12 +17,14 @@ public class MazeAvatarBuilder implements ModelBuilderRegistry {
     public static String AVATAR_BUILDER = "avatarbuilder";
 
     AvatarABuilder avatarABuilder;
+    MazeModelFactory mazeModelFactory;
 
-    public MazeAvatarBuilder() {
+    public MazeAvatarBuilder(MazeModelFactory mazeModelFactory) {
         // AvatarA needs to be raised above ground (maze is in xz plane) to have the view point in head height for viewing other avatars eye to eye.
         // But since it only has a height of appx 1, we scale it up to avoid a hover effect. And it should not be to close to the ground to have the home marker
         // visible.
         avatarABuilder = new AvatarABuilder(new LocalTransform(new Vector3(0, 0.5, 0), Quaternion.buildRotationY(new Degree(-90)), new Vector3(1.2, 1.3, 1.2)));
+        this.mazeModelFactory = mazeModelFactory;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class MazeAvatarBuilder implements ModelBuilderRegistry {
             avatar = avatarABuilder.buildAvatar(player);
         } else {
             // decouple monster transform from scale for avoidng math effects and to make a hit monster markable by scaling without changing its position.
-            SceneNode monster = MazeModelFactory.getInstance().buildMonster();
+            SceneNode monster = mazeModelFactory.buildMonster();
             monster.getTransform().setScale(new Vector3(1.2, 1.2, 1.2));
 
             avatar = new SceneNode(monster);

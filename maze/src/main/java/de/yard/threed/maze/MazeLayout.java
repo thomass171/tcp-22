@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Static parts of a maze.
- * Somehow duplicate to {@Grid}? Not really, grid also contains initial non static elements.
+ * Static parts of a maze grid.
+ * Somehow duplicate to {@link Grid}? Not really, grid also contains initial non static elements.
  *
  * <p>
- * 26.4.21: Und darum ist es jetzt auch static/singleton. NeeNee, das muss dann woanders ein, in Grid.
+ * 26.4.21: Isn't static/singleton because there might be multiple (multi level multi player? who knows)
  *
  * <p>
  * Created by thomass on 07.03.17.
@@ -23,7 +23,6 @@ public class MazeLayout {
     public List<Point> destinations;
     // Several sets of start positions. Starting at lower (small y) left (small x).
     private List<List<StartPosition>> initialPosition;
-    //private static MazeLayout instance;
     int maxwidth, height;
     // the inner fields that could be visited. No walls.
     private List<Point> fields;
@@ -142,4 +141,26 @@ public class MazeLayout {
     public boolean isDestinationAt(Point p) {
         return destinations.contains(p);
     }
+
+    public int getMaxWidth() {
+
+        return maxwidth;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+
+    public boolean isWall(Point p) {
+        return walls.contains(p);
+    }
+
+    /**
+     * Is it an inner field, a field that could be visited. No walls.
+     */
+    public boolean isField(Point p) {
+        return getFields().contains(p);
+    }
+
 }

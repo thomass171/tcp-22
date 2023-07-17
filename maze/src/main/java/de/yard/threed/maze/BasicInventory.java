@@ -55,9 +55,9 @@ public  class BasicInventory implements MazeInventory {
             return;
         }
         if (count == 0) {
-            bulletCountArea.setTexture(textTexture.getTextureForText("-", MazeSettings.bulletColor));
+            bulletCountArea.setTexture(textTexture.getTextureForText("-", MazeTheme.bulletColor));
         } else {
-            bulletCountArea.setTexture(textTexture.getTextureForText("" + count, MazeSettings.bulletColor));
+            bulletCountArea.setTexture(textTexture.getTextureForText("" + count, MazeTheme.bulletColor));
         }
         bullets = count;
     }

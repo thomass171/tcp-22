@@ -20,7 +20,6 @@ import de.yard.threed.core.platform.Platform;
  * Time: 16:41
  */
 public class Color {
-    static Log logger = Platform.getInstance().getLog(Color.class);
 
     // geht nicht als final wegen C#
     // 6.3.21: Das sind z.T. awt Standard Colors and partly self defined
@@ -207,7 +206,7 @@ public class Color {
         }
         String[] s = StringUtils.split(data, " ");
         if (s.length != 4) {
-            logger.error("parseString: invalid color data");
+            getLogger().error("parseString: invalid color data");
         }
         return new Color(Util.parseFloat(s[0]), Util.parseFloat(s[1]), Util.parseFloat(s[2]), Util.parseFloat(s[3]));
     }
@@ -217,5 +216,9 @@ public class Color {
      */
     public Color transparency(int a) {
         return new Color(r, g, b, (float) a / 255);
+    }
+
+    private static Log getLogger(){
+        return Platform.getInstance().getLog(Color.class);
     }
 }

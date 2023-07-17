@@ -39,35 +39,36 @@ public class SokobanTest {
         try {
             Grid grid = Grid.loadByReader(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanWikipedia.txt"))).get(0);
 
+            MazeLayout layout = grid.getMazeLayout();
             Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null);
-            Assertions.assertEquals(9, grid.getMaxWidth(), "width");
-            Assertions.assertEquals(6, grid.getHeight(), "height");
+            Assertions.assertEquals(9, layout.getMaxWidth(), "width");
+            Assertions.assertEquals(6, layout.getHeight(), "height");
             Assertions.assertEquals(6, startPosition.getX(), "start.x");
             Assertions.assertEquals(1, startPosition.getY(), "start.y");
-            Assertions.assertTrue(grid.hasTopPillar(new Point(0, 0)), "top pillar");
-            Assertions.assertTrue(grid.hasTopPillar(new Point(0, 1)), "top pillar");
-            Assertions.assertFalse(grid.hasTopPillar(new Point(0, 4)), "top pillar");
-            Assertions.assertFalse(grid.hasTopPillar(new Point(1, 3)), "top pillar (1,3)");
-            Assertions.assertTrue(grid.hasCenterPillar(new Point(5, 2)), "center pillar");
-            Assertions.assertTrue(grid.hasTopPillar(new Point(5, 4)), "top pillar");
-            Assertions.assertFalse(grid.hasTopPillar(new Point(7, 3)), "top pillar");
-            Assertions.assertFalse(grid.hasTopPillar(new Point(8, 4)), "top pillar");
-            Assertions.assertFalse(grid.hasTopPillar(new Point(6, 4)), "top pillar 6,4 ");
+            Assertions.assertTrue(MazeTraditionalTerrain.hasTopPillar(layout, new Point(0, 0)), "top pillar");
+            Assertions.assertTrue(MazeTraditionalTerrain.hasTopPillar(layout, new Point(0, 1)), "top pillar");
+            Assertions.assertFalse(MazeTraditionalTerrain.hasTopPillar(layout, new Point(0, 4)), "top pillar");
+            Assertions.assertFalse(MazeTraditionalTerrain.hasTopPillar(layout, new Point(1, 3)), "top pillar (1,3)");
+            Assertions.assertTrue(MazeTraditionalTerrain.hasCenterPillar(layout, new Point(5, 2)), "center pillar");
+            Assertions.assertTrue(MazeTraditionalTerrain.hasTopPillar(layout, new Point(5, 4)), "top pillar");
+            Assertions.assertFalse(MazeTraditionalTerrain.hasTopPillar(layout, new Point(7, 3)), "top pillar");
+            Assertions.assertFalse(MazeTraditionalTerrain.hasTopPillar(layout, new Point(8, 4)), "top pillar");
+            Assertions.assertFalse(MazeTraditionalTerrain.hasTopPillar(layout, new Point(6, 4)), "top pillar 6,4 ");
             // right
-            Assertions.assertTrue(grid.hasRightPillar(new Point(0, 0)), "right pillar");
-            Assertions.assertTrue(grid.hasRightPillar(new Point(5, 0)), "right pillar");
-            Assertions.assertFalse(grid.hasRightPillar(new Point(5, 1)), "right pillar");
-            Assertions.assertFalse(grid.hasRightPillar(new Point(5, 2)), "right pillar");
-            Assertions.assertTrue(grid.hasRightPillar(new Point(5, 4)), "right pillar");
+            Assertions.assertTrue(MazeTraditionalTerrain.hasRightPillar(layout, new Point(0, 0)), "right pillar");
+            Assertions.assertTrue(MazeTraditionalTerrain.hasRightPillar(layout, new Point(5, 0)), "right pillar");
+            Assertions.assertFalse(MazeTraditionalTerrain.hasRightPillar(layout, new Point(5, 1)), "right pillar");
+            Assertions.assertFalse(MazeTraditionalTerrain.hasRightPillar(layout, new Point(5, 2)), "right pillar");
+            Assertions.assertTrue(MazeTraditionalTerrain.hasRightPillar(layout, new Point(5, 4)), "right pillar");
 
             // left
-            Assertions.assertFalse(grid.hasRightPillar(new Point(-1, 0)), "left pillar");
+            Assertions.assertFalse(MazeTraditionalTerrain.hasRightPillar(layout,new Point(-1, 0)), "left pillar");
 
             // bottom
-            Assertions.assertFalse(grid.hasTopPillar(new Point(0, -1)), "bottom pillar");
+            Assertions.assertFalse(MazeTraditionalTerrain.hasTopPillar(layout,new Point(0, -1)), "bottom pillar");
 
-            Assertions.assertEquals(Grid.STRAIGHTWALLMODE_NONE, grid.isVWALL(new Point(0, 0)));
-            Assertions.assertEquals(Grid.STRAIGHTWALLMODE_NONE, grid.isHWALL(new Point(0, 0)));
+            Assertions.assertEquals(MazeTraditionalTerrain.STRAIGHTWALLMODE_NONE, MazeTraditionalTerrain.isVWALL(layout,new Point(0, 0)));
+            Assertions.assertEquals(MazeTraditionalTerrain.STRAIGHTWALLMODE_NONE, MazeTraditionalTerrain.isHWALL(layout,new Point(0, 0)));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

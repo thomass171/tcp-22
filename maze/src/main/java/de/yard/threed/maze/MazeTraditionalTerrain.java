@@ -14,17 +14,15 @@ import java.util.Map;
  * - A pillar is always located in the mid on the boundary of two grid fields.
  * - There is no pillar at corners (where walls intersect) or on 'T's.
  * <p>
- * Dazu gibt es noch die logische (GridState oder MazeLayout).
- * Das ist zunächst mal speziell auf Maze zugeschnitten.
- * Es enthält alles statische, den Ground, alle Wände und Pillars. Ist alles in einem SubModel, sodass ein Löschen einfach mit remove des Terrain geht.
+ * Also see GridState and MazeLayout.
  * <p>
- * Aber keine Player, keine Boxen.
+ * TODO: Maybe this should be a theme dependent extention of MazeModelFactory. But heads up, its not only a builder. MAybe extract the builder.
  * <p>
  * <p/>
  * Created by thomass on 07.05.15.
  */
-public class MazeTerrain implements AbstractMazeTerrain {
-    Log logger = Platform.getInstance().getLog(MazeTerrain.class);
+public class MazeTraditionalTerrain implements AbstractMazeTerrain {
+    Log logger = Platform.getInstance().getLog(MazeTraditionalTerrain.class);
     int width;
     int height;
     float effectivewidth, effectiveheight;
@@ -37,8 +35,20 @@ public class MazeTerrain implements AbstractMazeTerrain {
     public Map<Point, SceneNode> rightPillars = new HashMap<Point, SceneNode>();
     public Map<Point, SceneNode> centerPillars = new HashMap<Point, SceneNode>();
     private SceneNode node;
+    MazeLayout layout;
+    MazeTraditionalModelFactory mazeModelFactory;
 
-    public MazeTerrain(int width, int height) {
+    static int STRAIGHTWALLMODE_NONE = 0;
+    static int STRAIGHTWALLMODE_FULL = 1;
+    static final int STRAIGHTWALLMODE_LOW_PART = 2;
+    static final int STRAIGHTWALLMODE_HIGH_PART = 3;
+
+    public MazeTraditionalTerrain(MazeLayout layout/*int width, int height*/, MazeTraditionalModelFactory mazeModelFactory) {
+        this.layout = layout;
+        this.mazeModelFactory = mazeModelFactory;
+        int width = layout.getMaxWidth();
+        int height = layout.getHeight();
+
         node = new SceneNode();
         this.width = width;
         this.height = height;
@@ -48,13 +58,13 @@ public class MazeTerrain implements AbstractMazeTerrain {
         if (simpleground) {
             // eigentlich nur fuer Tests. Nur eine einzige grosse Plane. Die ist schon in der xz Ebene.
             ShapeGeometry planeGeometry = ShapeGeometry.buildPlane(effectivewidth, effectiveheight, width, height);
-            Material material = MazeModelFactory.getInstance().getGroundmaterial();
+            Material material = mazeModelFactory.getGroundmaterial();
             /*terrain = new SceneNode(*/
             node.setMesh(new Mesh(planeGeometry, material/*, false, true*/));
         } else {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    SceneNode tile = MazeModelFactory.getInstance().buildGroundElement();
+                    SceneNode tile = mazeModelFactory.buildGroundElement();
                     //Position relativ zum terrain
                     addGridElement(tile, x, y, 0);
                     Point point = new Point(x, y);
@@ -65,24 +75,23 @@ public class MazeTerrain implements AbstractMazeTerrain {
         node.getTransform().setPosition(new Vector3(effectivewidth / 2 - MazeDimensions.GRIDSEGMENTSIZE / 2, 0, -effectiveheight / 2 + MazeDimensions.GRIDSEGMENTSIZE / 2));
 
 
-        if (MazeSettings.getSettings().debug) {
+        if (MazeTheme.getSettings().debug) {
             //TODO material.setWireframe(true);
         }
     }
 
     /**
-     * Alle Walls und Pillars kommen ins Terrain. Nur die Boxen nicht.
+     * Put all walls und pillars into the terrain node. But no boxes.
      * <p>
-     * Jedes Element baut seine Pillar nur oben und rechts, damit die nicht doppelt
-     * gebaut werdebn.
+     * Every element puts pillar only top/right for avoiding duplicates.
      * <p>
      */
     @Override
-    public void visualizeGrid(Grid grid) {
-        MazeModelFactory mf = MazeModelFactory.getInstance();
+    public void visualizeGrid() {
+        MazeTraditionalModelFactory mf = mazeModelFactory;
 
-        int w = grid.getMaxWidth();
-        int h = grid.getHeight();
+        int w = layout.getMaxWidth();
+        int h = layout.getHeight();
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
                 Point p = new Point(x, y);
@@ -90,56 +99,56 @@ public class MazeTerrain implements AbstractMazeTerrain {
                 if (x == 6 && y == 2) {
                     int hh = 9;
                 }
-                if (grid.hasTopPillar(p)) {
+                if (hasTopPillar(layout, p)) {
                     addTopPillar(mf.buildPillar(), p);
                 }
-                if (grid.hasRightPillar(p)) {
+                if (hasRightPillar(layout, p)) {
                     addRightPillar(mf.buildPillar(), p);
                 }
-                if (grid.hasCenterPillar(p)) {
+                if (hasCenterPillar(layout, p)) {
                     addCenterPillar(mf.buildPillar(), p);
                 }
-                if (grid.getMazeLayout().destinations.contains(p)) {
+                if (layout.destinations.contains(p)) {
                     addDecoratedField(x, y, Texture.buildBundleTexture("data", "textures/SokobanTarget.png"));
                 }
-                if (grid.getMazeLayout().isStartField(p) && grid.getMazeLayout().getNumberOfTeams() > 1) {
+                if (layout.isStartField(p) && layout.getNumberOfTeams() > 1) {
                     // mark home position, but only when multiple teams are playing
-                    int teamId = grid.getMazeLayout().getTeamByHome(p);
+                    int teamId = layout.getTeamByHome(p);
                     String textureFile;
-                    if (grid.getMazeLayout().getStartPositionsOfTeam(teamId).get(0).isMonster) {
+                    if (layout.getStartPositionsOfTeam(teamId).get(0).isMonster) {
                         textureFile = "textures/MazeHome-monster.png";
                     } else {
-                        textureFile = "textures/MazeHome-" + MazeSettings.teamColors[teamId] + ".png";
+                        textureFile = "textures/MazeHome-" + MazeTheme.teamColors[teamId] + ".png";
                     }
                     addDecoratedField(x, y, Texture.buildBundleTexture("data", textureFile));
                 }
                 int wallmode;
-                if ((wallmode = grid.isHWALL(p)) > 0) {
+                if ((wallmode = isHWALL(layout, p)) > 0) {
                     SceneNode wall = mf.buildWall(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH, wallmode);
                     addGridElement(wall, x, y, 0);
                     walls.put(p, wall);
                 } else {
-                    if ((wallmode = grid.isVWALL(p)) > 0) {
+                    if ((wallmode = isVWALL(layout, p)) > 0) {
                         SceneNode wall = mf.buildWall(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH, wallmode);
                         wall.getTransform().rotateY(new Degree(90));
                         addGridElement(wall, x, y, 0);
                         walls.put(p, wall);
                     } else {
                         // some kind of corner, 'T' or single block?
-                        if (grid.isWall(p)) {
+                        if (layout.isWall(p)) {
                             // Erstmal feststellen, in welche Richtungen ein Wand gehen muss.
 
                             String directions = "";
-                            if (grid.hasTopPillar(p)) {
+                            if (hasTopPillar(layout, p)) {
                                 directions += "T";
                             }
-                            if (grid.hasRightPillar(p)) {
+                            if (hasRightPillar(layout, p)) {
                                 directions += "R";
                             }
-                            if (grid.hasTopPillar(new Point(x, y - 1))) {
+                            if (hasTopPillar(layout, new Point(x, y - 1))) {
                                 directions += "B";
                             }
-                            if (grid.hasRightPillar(new Point(x - 1, y))) {
+                            if (hasRightPillar(layout, new Point(x - 1, y))) {
                                 directions += "L";
                             }
 
@@ -157,7 +166,7 @@ public class MazeTerrain implements AbstractMazeTerrain {
                                     break;
                                 case 2:
                                     // Ecke
-                                    wallElement = mf.buildCorner(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH/*, xypos*/, Grid.STRAIGHTWALLMODE_NONE);
+                                    wallElement = mf.buildCorner(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH/*, xypos*/, STRAIGHTWALLMODE_NONE);
                                     // Die Drehung ist abhängig davon, wo die Ecke steht
                                     if (StringUtils.contains(directions, "T")) {
                                         if (StringUtils.contains(directions, "R")) {
@@ -284,4 +293,119 @@ public class MazeTerrain implements AbstractMazeTerrain {
     public SceneNode[] getPillar(Point p) {
         return new SceneNode[]{topPillars.get(p), rightPillars.get(p), centerPillars.get(p)};
     }
+
+    public static int isVWALL(MazeLayout layout, Point p) {
+
+        if (!layout.isWall(p)) {
+            return STRAIGHTWALLMODE_NONE;
+        }
+        if (layout.isWall(p.addX(-1)) || layout.isWall(p.addX(1))) {
+            return STRAIGHTWALLMODE_NONE;
+        }
+        boolean high = layout.isWall(p.addY(1));
+        boolean low = layout.isWall(p.addY(-1));
+        if (high && low) {
+            return STRAIGHTWALLMODE_FULL;
+        }
+        if (high) {
+            return STRAIGHTWALLMODE_HIGH_PART;
+        }
+        if (low) {
+            return STRAIGHTWALLMODE_LOW_PART;
+        }
+
+        return STRAIGHTWALLMODE_NONE;
+    }
+
+    public static int isHWALL(MazeLayout layout, Point p) {
+
+        // selber Block und links oder rechts aber nicht drüber oder drunter
+        if (!layout.isWall(p)) {
+            return STRAIGHTWALLMODE_NONE;
+        }
+        if (layout.isWall(p.addY(-1)) || layout.isWall(p.addY(1))) {
+            return STRAIGHTWALLMODE_NONE;
+        }
+        boolean high = layout.isWall(p.addX(1));
+        boolean low = layout.isWall(p.addX(-1));
+        if (high && low) {
+            return STRAIGHTWALLMODE_FULL;
+        }
+        if (high) {
+            return STRAIGHTWALLMODE_HIGH_PART;
+        }
+        if (low) {
+            return STRAIGHTWALLMODE_LOW_PART;
+        }
+
+        return STRAIGHTWALLMODE_NONE;
+    }
+
+    /**
+     * Does the wall continue at top?
+     * <p>
+     * 31.5.21: Also when it is a wall and beyond, but not to the left or right?
+     * 1.6.21: No, then it is a center
+     */
+    public static boolean hasTopPillar(MazeLayout layout, Point p) {
+        boolean isblock = false;
+
+        if (layout.isWall(p)) {
+            isblock = true;
+        }
+
+        // Wenn es selber Wall ist und darüber auch
+        if (isblock && layout.isWall(p.addY(1))) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Does the wall continue to the right?
+     * <p>
+     * 31.5.21: Also when it is the end of a wall, ie wall to the left but not above and beyond?
+     * 3.6.21: No, then it is a center
+     */
+    public static boolean hasRightPillar(MazeLayout layout, Point p) {
+
+        boolean isblock = false;
+
+        if (layout.isWall(p)) {
+            isblock = true;
+        }
+        // Wenn es selber BLOCK ist und rechts auch
+        if (isblock && layout.isWall(p.addX(1))) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Alle nicht durchgehenden Walls (also endende) haben einen center pillar. Ausser alleinstehende.
+     *
+     * @return
+     */
+    public static boolean hasCenterPillar(MazeLayout layout, Point p) {
+
+        int surroundingwalls = 0;
+
+        if (!layout.isWall(p)) {
+            return false;
+        }
+        if (layout.isWall(p.addX(1))) {
+            surroundingwalls++;
+        }
+        if (layout.isWall(p.addX(-1))) {
+            surroundingwalls++;
+        }
+        if (layout.isWall(p.addY(1))) {
+            surroundingwalls++;
+        }
+        if (layout.isWall(p.addY(-1))) {
+            surroundingwalls++;
+        }
+        return surroundingwalls == 1;
+    }
+
 }

@@ -22,7 +22,7 @@ public class MazeVrControlPanel extends ControlPanel implements MazeInventory {
     private static int ControlPanelRows = 3;
     private static double[] ControlPanelColWidth = new double[]{0.1, 0.2, 0.2, 0.1};
     private static double ControlPanelMargin = 0.005;
-    private static Color controlPanelBackground = MazeSettings.hudColor;
+    private static Color controlPanelBackground = MazeTheme.hudColor;
 
     TextTexture boxCountTextTexture;
     private BasicInventory basicInventory;
