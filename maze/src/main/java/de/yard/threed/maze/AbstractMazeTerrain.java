@@ -41,7 +41,7 @@ public abstract class AbstractMazeTerrain {
     boolean simpleground = false;
     private Map<Point, SceneNode> tiles = new HashMap<Point, SceneNode>();
     // walls are only pure H and V walls. But the nodes are the center of two single planes, not the real wall!
-    private Map<Point, SceneNode> walls = new HashMap<Point, SceneNode>();
+    protected Map<Point, SceneNode> walls = new HashMap<Point, SceneNode>();
 
     static int STRAIGHTWALLMODE_NONE = 0;
     static int STRAIGHTWALLMODE_FULL = 1;
@@ -104,18 +104,7 @@ public abstract class AbstractMazeTerrain {
                 if (x == 6 && y == 2) {
                     int hh = 9;
                 }
-                if (hasTopWall(layout, p)) {
-                    handleTopWall(p);
-                    //addTopPillar(mf.buildPillar(), p);
-                }
-                if (hasRightWall(layout, p)) {
-                    handleRightWall(p);
-                    //addRightPillar(mf.buildPillar(), p);
-                }
-                if (hasCenterWall(layout, p)) {
-                    handleCenterWall(p);
-                    //addCenterPillar(mf.buildPillar(), p);
-                }
+
                 if (layout.destinations.contains(p)) {
                     addDecoratedField(x, y, Texture.buildBundleTexture("data", "textures/SokobanTarget.png"));
                 }
@@ -130,23 +119,10 @@ public abstract class AbstractMazeTerrain {
                     }
                     addDecoratedField(x, y, Texture.buildBundleTexture("data", textureFile));
                 }
-                int wallmode;
-                if ((wallmode = isHWALL(layout, p)) > 0) {
-                    SceneNode wall = mf.buildWall(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH, wallmode);
-                    addGridElement(wall, x, y, 0);
-                    walls.put(p, wall);
-                } else {
-                    if ((wallmode = isVWALL(layout, p)) > 0) {
-                        SceneNode wall = mf.buildWall(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH, wallmode);
-                        wall.getTransform().rotateY(new Degree(90));
-                        addGridElement(wall, x, y, 0);
-                        walls.put(p, wall);
-                    } else {
-                        // some kind of corner, 'T' or single block?
-                        handleNonStraight(p);
-
-                    }
+                if (layout.isWall(p)){
+                    handleWall(p);
                 }
+
             }
         }
         logger.debug("grid visualized");
@@ -322,14 +298,6 @@ public abstract class AbstractMazeTerrain {
         return surroundingwalls == 1;
     }
 
-    abstract void handleTopWall(Point p);
-    abstract void handleRightWall(Point p);
-    abstract void handleCenterWall(Point p);
-
-    /**
-     * some kind of corner, 'T' or single block?
-     *
-     */
-    abstract void handleNonStraight(Point p);
+    abstract void handleWall(Point p);
 
 }

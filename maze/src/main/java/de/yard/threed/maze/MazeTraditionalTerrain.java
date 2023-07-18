@@ -34,83 +34,97 @@ public class MazeTraditionalTerrain extends AbstractMazeTerrain {
 
 
     @Override
-    void handleTopWall(Point p) {
-        addTopPillar(mazeModelFactory.buildPillar(), p);
-    }
+    void handleWall(Point p) {
 
-    @Override
-    void handleRightWall(Point p) {
-        addRightPillar(mazeModelFactory.buildPillar(), p);
-    }
+        int x = p.getX();
+        int y = p.getY();
 
-    @Override
-    void handleCenterWall(Point p) {
-        addCenterPillar(mazeModelFactory.buildPillar(), p);
-    }
+        if (hasTopWall(layout, p)) {
+            addTopPillar(mazeModelFactory.buildPillar(), p);
+            //addTopPillar(mf.buildPillar(), p);
+        }
+        if (hasRightWall(layout, p)) {
+            addRightPillar(mazeModelFactory.buildPillar(), p);
+            //addRightPillar(mf.buildPillar(), p);
+        }
+        if (hasCenterWall(layout, p)) {
+            addCenterPillar(mazeModelFactory.buildPillar(), p);
+            //addCenterPillar(mf.buildPillar(), p);
+        }
+        int wallmode;
+        if ((wallmode = isHWALL(layout, p)) > 0) {
+            SceneNode wall = mazeModelFactory.buildWall(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH, wallmode);
+            addGridElement(wall, x, y, 0);
+            walls.put(p, wall);
+        } else {
+            if ((wallmode = isVWALL(layout, p)) > 0) {
+                SceneNode wall = mazeModelFactory.buildWall(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH, wallmode);
+                wall.getTransform().rotateY(new Degree(90));
+                addGridElement(wall, x, y, 0);
+                walls.put(p, wall);
+            } else {
+                // some kind of corner, 'T' or single block?
+                if (layout.isWall(p)) {
 
-    @Override
-    void handleNonStraight(Point p) {
-        if (layout.isWall(p)) {
-            int x = p.getX();
-            int y = p.getY();
+                    // Erstmal feststellen, in welche Richtungen ein Wand gehen muss.
 
-            // Erstmal feststellen, in welche Richtungen ein Wand gehen muss.
-
-            String directions = "";
-            if (hasTopWall(layout, p)) {
-                directions += "T";
-            }
-            if (hasRightWall(layout, p)) {
-                directions += "R";
-            }
-            if (hasTopWall(layout, new Point(x, y - 1))) {
-                directions += "B";
-            }
-            if (hasRightWall(layout, new Point(x - 1, y))) {
-                directions += "L";
-            }
-
-            SceneNode wallElement = null;
-            Degree angle = new Degree(0);
-            switch (StringUtils.length(directions)) {
-                case 4:
-                    // Kreuz
-                    wallElement = mazeModelFactory.buildCross(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH/*, xypos*/);
-                    break;
-                case 3:
-                    // T
-                    wallElement = mazeModelFactory.buildT(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH/*, xypos*/);
-                    angle = getTAngle(directions);
-                    break;
-                case 2:
-                    // Ecke
-                    wallElement = mazeModelFactory.buildCorner(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH/*, xypos*/, STRAIGHTWALLMODE_NONE);
-                    // Die Drehung ist abhängig davon, wo die Ecke steht
-                    if (StringUtils.contains(directions, "T")) {
-                        if (StringUtils.contains(directions, "R")) {
-                            angle = new Degree(180);
-                        } else if (StringUtils.contains(directions, "L")) {
-                            angle = new Degree(-90);
-                        }
-                    } else {
-                        if (StringUtils.contains(directions, "R")) {
-                            angle = new Degree(90);
-                        }
-                        // ansonsten keine Drehung
+                    String directions = "";
+                    if (hasTopWall(layout, p)) {
+                        directions += "T";
                     }
-                    break;
-                case 0:
-                    // Ein einzelnes Block Element
-                    wallElement = mazeModelFactory.buildStandaloneWallElement(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH);
-                    break;
-                default:
-                    logger.warn("invalid wall element at " + x + " " + y);
-                    // should not happen
-                    break;
-            }
-            if (wallElement != null) {
-                wallElement.getTransform().rotateY(angle);
-                addGridElement(wallElement, x, y, 0);
+                    if (hasRightWall(layout, p)) {
+                        directions += "R";
+                    }
+                    if (hasTopWall(layout, new Point(x, y - 1))) {
+                        directions += "B";
+                    }
+                    if (hasRightWall(layout, new Point(x - 1, y))) {
+                        directions += "L";
+                    }
+
+                    SceneNode wallElement = null;
+                    Degree angle = new Degree(0);
+                    switch (StringUtils.length(directions)) {
+                        case 4:
+                            // Kreuz
+                            wallElement = mazeModelFactory.buildCross(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH/*, xypos*/);
+                            break;
+                        case 3:
+                            // T
+                            wallElement = mazeModelFactory.buildT(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH/*, xypos*/);
+                            angle = getTAngle(directions);
+                            break;
+                        case 2:
+                            // Ecke
+                            wallElement = mazeModelFactory.buildCorner(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH/*, xypos*/, STRAIGHTWALLMODE_NONE);
+                            // Die Drehung ist abhängig davon, wo die Ecke steht
+                            if (StringUtils.contains(directions, "T")) {
+                                if (StringUtils.contains(directions, "R")) {
+                                    angle = new Degree(180);
+                                } else if (StringUtils.contains(directions, "L")) {
+                                    angle = new Degree(-90);
+                                }
+                            } else {
+                                if (StringUtils.contains(directions, "R")) {
+                                    angle = new Degree(90);
+                                }
+                                // ansonsten keine Drehung
+                            }
+                            break;
+                        case 0:
+                            // Ein einzelnes Block Element
+                            wallElement = mazeModelFactory.buildStandaloneWallElement(MazeDimensions.GRIDSEGMENTSIZE - MazeModelFactory.PILLARWIDTH);
+                            break;
+                        default:
+                            logger.warn("invalid wall element at " + x + " " + y);
+                            // should not happen
+                            break;
+                    }
+                    if (wallElement != null) {
+                        wallElement.getTransform().rotateY(angle);
+                        addGridElement(wallElement, x, y, 0);
+                    }
+                }
             }
         }
     }
