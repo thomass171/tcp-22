@@ -66,14 +66,14 @@ public class GridTest {
         Assertions.assertEquals(7, layout.getHeight(), "height");
         Assertions.assertEquals(5, startPosition.getX(), "start.x");
         Assertions.assertEquals(1, startPosition.getY(), "start.y");
-        Assertions.assertTrue(MazeTraditionalTerrain.hasTopPillar(layout, new Point(0, 0)), "top pillar");
-        Assertions.assertTrue(MazeTraditionalTerrain.hasTopPillar(layout, new Point(0, 1)), "top pillar");
-        Assertions.assertFalse(MazeTraditionalTerrain.hasTopPillar(layout, new Point(1, 0)), "top pillar");
-        Assertions.assertFalse(MazeTraditionalTerrain.hasTopPillar(layout, new Point(1, 1)), "top pillar");
-        Assertions.assertTrue(MazeTraditionalTerrain.hasRightPillar(layout, new Point(0, 0)), "right pillar");
-        Assertions.assertFalse(MazeTraditionalTerrain.hasRightPillar(layout, new Point(0, 1)), "right pillar");
-        Assertions.assertTrue(MazeTraditionalTerrain.hasRightPillar(layout, new Point(1, 0)), "right pillar");
-        Assertions.assertFalse(MazeTraditionalTerrain.hasRightPillar(layout, new Point(1, 1)), "right pillar");
+        Assertions.assertTrue(MazeTraditionalTerrain.hasTopWall(layout, new Point(0, 0)), "top pillar");
+        Assertions.assertTrue(MazeTraditionalTerrain.hasTopWall(layout, new Point(0, 1)), "top pillar");
+        Assertions.assertFalse(MazeTraditionalTerrain.hasTopWall(layout, new Point(1, 0)), "top pillar");
+        Assertions.assertFalse(MazeTraditionalTerrain.hasTopWall(layout, new Point(1, 1)), "top pillar");
+        Assertions.assertTrue(MazeTraditionalTerrain.hasRightWall(layout, new Point(0, 0)), "right pillar");
+        Assertions.assertFalse(MazeTraditionalTerrain.hasRightWall(layout, new Point(0, 1)), "right pillar");
+        Assertions.assertTrue(MazeTraditionalTerrain.hasRightWall(layout, new Point(1, 0)), "right pillar");
+        Assertions.assertFalse(MazeTraditionalTerrain.hasRightWall(layout, new Point(1, 1)), "right pillar");
 
         Assertions.assertEquals(2, startPosition.add(Direction.N.getPoint()).getY(), "starty.");
 

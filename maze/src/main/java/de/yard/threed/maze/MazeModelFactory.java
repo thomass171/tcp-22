@@ -184,6 +184,8 @@ public class MazeModelFactory implements ModelBuilderRegistry {
                 wallnormalmap[3] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
                 wallnormalmap[4] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
                 break;
+            default:
+                throw new RuntimeException("unknown theme "+ settings.getTheme());
         }
     }
 
