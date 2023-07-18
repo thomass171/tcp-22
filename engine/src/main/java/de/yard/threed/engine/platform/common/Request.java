@@ -33,6 +33,8 @@ public class Request {
     public Request(RequestType requesttype, Integer userEntityId) {
         this.requesttype = requesttype;
         this.userEntityId = userEntityId;
+        // avoid NPE
+        this.payload = new Payload();
     }
 
     public Request(RequestType requesttype) {
@@ -85,7 +87,7 @@ public class Request {
     /**
      * Will be null in local mode.
      */
-    public String getConnectionId(){
+    public String getConnectionId() {
         return connectionId;
     }
 }

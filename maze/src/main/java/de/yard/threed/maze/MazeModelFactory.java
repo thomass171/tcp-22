@@ -56,8 +56,10 @@ public class MazeModelFactory implements ModelBuilderRegistry {
     public Material pillarmaterial, groundmaterial;
     private ShapeGeometry sokobanboxgeo;
     private Material sokobanboxmaterial;
+    MazeTheme settings;
 
     public MazeModelFactory(MazeTheme settings) {
+        this.settings=settings;
         buildBasics(settings);
     }
 
@@ -92,7 +94,7 @@ public class MazeModelFactory implements ModelBuilderRegistry {
         SceneNode container = new SceneNode();
         SceneNode mesh = new SceneNode(new Mesh(sokobanboxgeo, sokobanboxmaterial));
         // Das Mesh halb nach oben
-        mesh.getTransform().setPosition(new Vector3(0, MazeTheme.getSettings().sokobanboxsize / 2, 0));
+        mesh.getTransform().setPosition(new Vector3(0, settings.sokobanboxsize / 2, 0));
         // Und das ganze Model auf dir Gridposition
         //Vector3 pos = MazeDimensions.getWorldElementCoordinates(x, y);
         //24.4.21  getTransform().setPosition(pos);
@@ -108,7 +110,7 @@ public class MazeModelFactory implements ModelBuilderRegistry {
     }
 
     public SceneNode buildDiamond() {
-        double size = MazeTheme.getSettings().sokobanboxsize / 2;
+        double size = settings.sokobanboxsize / 2;
         Geometry cuboid = Geometry.buildCube(size, size, size);
         // Not too much transparency (0xCC)
         Mesh m = new Mesh(cuboid, Material.buildBasicMaterial(MazeTheme.diamondColor.transparency(0xCC), true));

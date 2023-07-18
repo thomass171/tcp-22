@@ -81,9 +81,9 @@ public abstract class AbstractMazeTerrain {
         node.getTransform().setPosition(new Vector3(effectivewidth / 2 - MazeDimensions.GRIDSEGMENTSIZE / 2, 0, -effectiveheight / 2 + MazeDimensions.GRIDSEGMENTSIZE / 2));
 
 
-        if (MazeTheme.getSettings().debug) {
+        /*if (MazeTheme.getSettings().debug) {
             //TODO material.setWireframe(true);
-        }
+        }*/
     }
 
     /**

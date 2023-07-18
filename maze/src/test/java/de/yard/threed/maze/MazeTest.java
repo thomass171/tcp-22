@@ -82,7 +82,7 @@ public class MazeTest {
                 SystemManager.addSystem(avatarSystem);
 
                 ObserverSystem observerSystem = new ObserverSystem();
-                observerSystem.setViewTransform(MazeScene.getViewTransform());
+                observerSystem.setViewTransform(MazeScene.getViewTransform(st));
                 SystemManager.addSystem(observerSystem);
 
                 SystemManager.addSystem(new BulletSystem());

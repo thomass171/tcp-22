@@ -11,6 +11,7 @@ import de.yard.threed.core.Color;
  * So be careful.
  * <p>
  * Was MazeSettings once.
+ * 18.7.23: No more a singleton.
  * <p/>
  * Created by thomass on 11.01.16.
  */
@@ -75,10 +76,6 @@ public class MazeTheme {
         if (st == null) {
             st = new MazeTheme(theme);
         }
-        return st;
-    }
-
-    public static MazeTheme getSettings() {
         return st;
     }
 

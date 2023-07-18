@@ -206,6 +206,12 @@ Major changes:
   * fix for parameter "offsetVR" passing in browser
   * preparation for multi player scene server.
 
+## 2023-05
+  * multi player server completed
+
+## 2023-07-18
+  * fix for NPE when firing
+
 # Technical Details
 
 ## Architecture

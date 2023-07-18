@@ -127,7 +127,7 @@ public class MazeScene extends Scene {
             SystemManager.addSystem(inputToRequestSystem);
 
             ObserverSystem observerSystem = new ObserverSystem();
-            observerSystem.setViewTransform(getViewTransform());
+            observerSystem.setViewTransform(getViewTransform(st));
             SystemManager.addSystem(observerSystem);
         }
         if (sceneMode.isServer()) {
@@ -193,7 +193,7 @@ public class MazeScene extends Scene {
             // grid loading might be aync!
             MazeDataProvider.init();
         }
-        addLight();
+        addLight(st);
 
         // Send login request in both monolith and client mode
         if (sceneMode.isClient()) {
@@ -233,9 +233,10 @@ public class MazeScene extends Scene {
      * 22.3.17: Mit ambient greift die Normalmap nicht. Ist aber alles irgendwie nicht das wahre.
      * Mit zwei "gegenüber liegenden" DirLights ist die Beleuchtung zumindest in ThreeJs ganz gut.
      * PointLight lass ich mal ganz weg.
+     * @param st
      */
-    private void addLight() {
-        if (MazeTheme.getSettings().ambilight) {
+    private void addLight(MazeTheme st) {
+        if (st.ambilight) {
             AmbientLight light = new AmbientLight(Color.WHITE);
 
             //pointLight.setPosition(new Vector3(0, 2, -5.5f));
@@ -289,8 +290,8 @@ public class MazeScene extends Scene {
      *
      * @return
      */
-    public static LocalTransform getViewTransform() {
-        LocalTransform viewTransform = MazeTheme.getSettings().getViewpoint();
+    public static LocalTransform getViewTransform(MazeTheme st) {
+        LocalTransform viewTransform = st.getViewpoint();
         viewTransform.position = viewTransform.position.add(new Vector3(0, MazeScene.rayy, 0));
         return viewTransform;
     }

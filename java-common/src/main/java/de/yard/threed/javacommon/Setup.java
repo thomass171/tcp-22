@@ -56,7 +56,7 @@ public class Setup {
         //18.11.19: NearView geht in VR eh nicht, darum damit üblicherweise auch sonst nicht arbeiten.
         //properties.put("argv.enableNearView", "true");
         properties.put("initialMaze", "skbn/SokobanWikipedia.txt");
-        //properties.put("initialMaze", "maze/Maze-P-Simple.txt");
+        properties.put("initialMaze", "maze/Maze-P-Simple.txt");
         //properties.put("initialMaze", genV1);
         //properties.put("initialMaze", mazeshost + "/mazes/mazes/1");
         //properties.put("argv.initialMaze", "maze/Maze-P-60x20.txt");
