@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -43,7 +44,7 @@ public class MazeTerrainTest {
 
     @BeforeEach
     public void setup() {
-        mazeTheme = MazeTheme.init(MazeTheme.THEME_TRADITIONAL);
+        mazeTheme = MazeTheme.buildFromIdentifier(THEME_TRADITIONAL);
     }
 
     /**
@@ -84,7 +85,7 @@ public class MazeTerrainTest {
         boolean iscorner = true;
         float distance = 0.8f;
         float d2 = distance / 2;
-        MazeTheme st = MazeTheme.init();
+        MazeTheme st = MazeTheme.buildFromIdentifier(null);
         MazeTraditionalModelFactory mf = (MazeTraditionalModelFactory) st.getMazeModelFactory();
         Shape shape = mf.buildWallShape(6, istop, false, distance);
         List<Vector2> points = shape.getPoints();

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -30,7 +31,7 @@ public class BulletSystemTest {
         MazeDataProvider.reset();
 
         EcsTestHelper.setup(() -> {
-            MazeTheme st = MazeTheme.init(MazeTheme.THEME_TRADITIONAL);
+            MazeTheme st = MazeTheme.buildFromIdentifier(THEME_TRADITIONAL);
 
             SystemManager.addSystem(new MazeMovingAndStateSystem(st));
             SystemManager.addSystem(new BulletSystem());

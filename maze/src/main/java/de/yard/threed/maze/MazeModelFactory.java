@@ -9,7 +9,6 @@ import de.yard.threed.engine.apps.WoodenToyFactory;
 import de.yard.threed.engine.avatar.AvatarPmlFactory;
 import de.yard.threed.engine.geometry.Primitives;
 import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 
 import de.yard.threed.engine.gui.Icon;
@@ -22,8 +21,7 @@ import de.yard.threed.engine.platform.common.SimpleGeometry;
 
 /**
  *
- * 15.7.23: Many parts here belong to traditional TerrainBuilder and should be moved to there. But needs to be merged with generic theme rules.
- * Maybe this should be a super factory where MazeTerrain extends.
+ * 15.7.23: Many model building parts belong to traditional TerrainBuilder and were moved to MazeTraditionalModelFactory. But needs to be merged with generic theme rules.
  *
  * Created by thomass on 06.03.17.
  */
@@ -49,7 +47,6 @@ public class MazeModelFactory implements ModelBuilderRegistry {
 
     // 1.6.21: Die Wall Geometries nicht mehr per Shape und CustomGeometry bauen, sondern per Primitives. Das macht das ganze vielleicht etwas einfacher.
     public static boolean simpleGeo = true;
-    private static MazeModelFactory instance = null;
 
     public Texture walltexture;
     public Texture[] wallnormalmap;
@@ -169,7 +166,24 @@ public class MazeModelFactory implements ModelBuilderRegistry {
     private void buildBasics(MazeTheme settings) {
 
         switch (settings.getTheme()) {
-            case MazeTheme.THEME_TRADITIONAL:
+            case MazeTheme.THEME_ID_TRADITIONAL:
+                walltexture = buildTexture("textures/gimp/wood/BucheHell.png");
+                pillarmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheDunkel.png"));
+                sokobanboxgeo = ShapeGeometry.buildBox(settings.sokobanboxsize, settings.sokobanboxsize, settings.sokobanboxsize, null);
+                sokobanboxmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheMedium.png"));
+                //22.3.17: Wallmaterial also for ground instead of Ground.png
+                groundmaterial = Material.buildPhongMaterialWithNormalMap(buildTexture("textures/gimp/wood/BucheHell.png"),
+                        Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));
+                //wallnormalmap = buildTexture("textures/gimp/SampleWallNormalMapByPetry.png"));
+                // Create a few normal maps and use by random to avoid same looking.
+                wallnormalmap = new Texture[5];
+                wallnormalmap[0] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                wallnormalmap[1] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                wallnormalmap[2] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                wallnormalmap[3] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                wallnormalmap[4] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                break;
+            case MazeTheme.THEME_ID_DUNGEON:
                 walltexture = buildTexture("textures/gimp/wood/BucheHell.png");
                 pillarmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheDunkel.png"));
                 sokobanboxgeo = ShapeGeometry.buildBox(settings.sokobanboxsize, settings.sokobanboxsize, settings.sokobanboxsize, null);
@@ -177,14 +191,9 @@ public class MazeModelFactory implements ModelBuilderRegistry {
                 //22.3.17: Wandmaterial auch fuer Boden statt Ground.png
                 groundmaterial = Material.buildPhongMaterialWithNormalMap(buildTexture("textures/gimp/wood/BucheHell.png"),
                         Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));
-                //wallnormalmap = buildTexture("textures/gimp/SampleWallNormalMapByPetry.png"));
-                //Ein paar anlegen, damit nicht alle gleich aussehen. Die werden durch randon alle unterschiedlich
-                wallnormalmap = new Texture[5];
+                wallnormalmap = new Texture[1];
                 wallnormalmap[0] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
-                wallnormalmap[1] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
-                wallnormalmap[2] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
-                wallnormalmap[3] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
-                wallnormalmap[4] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+
                 break;
             default:
                 throw new RuntimeException("unknown theme "+ settings.getTheme());

@@ -48,29 +48,43 @@ public abstract class AbstractMazeTerrain {
     static final int STRAIGHTWALLMODE_LOW_PART = 2;
     static final int STRAIGHTWALLMODE_HIGH_PART = 3;
 
-    public AbstractMazeTerrain(MazeLayout layout/*int width, int height*/, MazeTraditionalModelFactory mazeModelFactory) {
+    public AbstractMazeTerrain(MazeLayout layout) {
         this.layout = layout;
-        this.mazeModelFactory = mazeModelFactory;
+
         int width = layout.getMaxWidth();
         int height = layout.getHeight();
         logger = Platform.getInstance().getLog(MazeTraditionalTerrain.class);
 
-        node = new SceneNode();
         this.width = width;
         this.height = height;
         effectivewidth = width * MazeDimensions.GRIDSEGMENTSIZE;
         effectiveheight = height * MazeDimensions.GRIDSEGMENTSIZE;
+
+        // some tests expect node to exist
+        node = new SceneNode();
+        node.getTransform().setPosition(new Vector3(effectivewidth / 2 - MazeDimensions.GRIDSEGMENTSIZE / 2, 0, -effectiveheight / 2 + MazeDimensions.GRIDSEGMENTSIZE / 2));
+
+        /*if (MazeTheme.getSettings().debug) {
+            //TODO material.setWireframe(true);
+        }*/
+    }
+
+    /**
+     * Was in constructor once.
+     */
+    private void buildGround(){
+
         // 6.10.5: Wie hoch die Anzahl Segments ein wird, ist noch unklar.Erstmal pro GridElement
         if (simpleground) {
             // eigentlich nur fuer Tests. Nur eine einzige grosse Plane. Die ist schon in der xz Ebene.
             ShapeGeometry planeGeometry = ShapeGeometry.buildPlane(effectivewidth, effectiveheight, width, height);
-            Material material = mazeModelFactory.getGroundmaterial();
+            Material material = /*mazeModelFactory.*/getGroundmaterial();
             /*terrain = new SceneNode(*/
             node.setMesh(new Mesh(planeGeometry, material/*, false, true*/));
         } else {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    SceneNode tile = mazeModelFactory.buildGroundElement();
+                    SceneNode tile = /*mazeModelFactory.*/buildGroundElement();
                     //Position relativ zum terrain
                     addGridElement(tile, x, y, 0);
                     Point point = new Point(x, y);
@@ -78,12 +92,7 @@ public abstract class AbstractMazeTerrain {
                 }
             }
         }
-        node.getTransform().setPosition(new Vector3(effectivewidth / 2 - MazeDimensions.GRIDSEGMENTSIZE / 2, 0, -effectiveheight / 2 + MazeDimensions.GRIDSEGMENTSIZE / 2));
 
-
-        /*if (MazeTheme.getSettings().debug) {
-            //TODO material.setWireframe(true);
-        }*/
     }
 
     /**
@@ -93,8 +102,8 @@ public abstract class AbstractMazeTerrain {
      * <p>
      */
     public void visualizeGrid() {
-        MazeTraditionalModelFactory mf = mazeModelFactory;
 
+        buildGround();
         int w = layout.getMaxWidth();
         int h = layout.getHeight();
         for (int y = 0; y < h; y++) {
@@ -125,10 +134,13 @@ public abstract class AbstractMazeTerrain {
 
             }
         }
+        finalizeGrid();
         logger.debug("grid visualized");
     }
 
+    protected void finalizeGrid(){
 
+    }
 
     /**
      * Returns the top node containing everything.
@@ -298,6 +310,8 @@ public abstract class AbstractMazeTerrain {
         return surroundingwalls == 1;
     }
 
+    abstract Material getGroundmaterial();
+    abstract SceneNode buildGroundElement();
     abstract void handleWall(Point p);
 
 }

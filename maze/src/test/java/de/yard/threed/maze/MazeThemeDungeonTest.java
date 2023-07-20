@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static de.yard.threed.maze.MazeTheme.THEME_DUNGEON;
+
 
 /**
  * Created by thomass on 15.07.23.
@@ -19,7 +21,7 @@ public class MazeThemeDungeonTest {
 
     @BeforeEach
     public void setup() {
-        mazeTheme = MazeTheme.init(MazeTheme.THEME_DUNGEON);
+        mazeTheme = MazeTheme.buildFromIdentifier(THEME_DUNGEON);
     }
 
     /**
@@ -36,7 +38,7 @@ public class MazeThemeDungeonTest {
 
         Grid grid = GridTest.loadGridAndTerrain("skbn/SokobanWikipedia.txt", 1);
         MazeLayout layout = grid.getMazeLayout();
-        MazeTraditionalTerrain terrain = (MazeTraditionalTerrain) mazeTheme.buildTerrain(layout);
+        MazeDungeonTerrain terrain = (MazeDungeonTerrain) mazeTheme.buildTerrain(layout);
         terrain.visualizeGrid();
         Assertions.assertEquals(layout.getMaxWidth() * layout.getHeight(), terrain.getTiles().values().size(), "tiles");
     }

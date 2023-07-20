@@ -55,7 +55,7 @@ public class MazeScene extends Scene {
         Configuration configuration = Platform.getInstance().getConfiguration();
         configuration.addConfiguration(new ConfigurationByProperties(new BundleResource(BundleRegistry.getBundle("maze"), "maze.properties")), true);
 
-        MazeTheme st = MazeTheme.init();
+        MazeTheme st = MazeTheme.buildFromIdentifier(Platform.getInstance().getConfiguration().getString("theme"));
 
         // Observer can exist before login/join for showing eg. an overview.
         // After login/join it might be attched to an avatar? Also for VR? (MA35).

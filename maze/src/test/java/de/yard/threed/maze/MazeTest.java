@@ -32,6 +32,7 @@ import java.util.List;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static de.yard.threed.maze.MazeRequestRegistry.*;
+import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -70,7 +71,7 @@ public class MazeTest {
             @Override
             public void init() {
 
-                MazeTheme st = MazeTheme.init(MazeTheme.THEME_TRADITIONAL);
+                MazeTheme st = MazeTheme.buildFromIdentifier(THEME_TRADITIONAL);
 
                 // No visualization to reveal model-view coupling.
                 SystemManager.addSystem(new MazeMovingAndStateSystem(st));

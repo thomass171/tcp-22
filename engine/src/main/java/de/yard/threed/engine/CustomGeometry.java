@@ -6,6 +6,7 @@ import de.yard.threed.core.platform.Log;
 
 import de.yard.threed.engine.platform.common.FaceList;
 import de.yard.threed.engine.geometry.SmoothingMap;
+import de.yard.threed.engine.platform.common.SimpleGeometryBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,8 @@ import java.util.List;
  * <p>
  * Wichtig/Nützlich z.B. um CSG verwenden zu koennen. 17.3.17: Das trifft nicht wirklich zu. SimpleGeometry ist viel besser geeignet.
  * 01.06.21: CustomGeometry hat aber die property "hasedges", die hier und da ja wichtig ist. Die hat SimpleGeometry doch nicht(?).
+ *
+ * Somehow this class has a confusing/overloaded design, {@link SimpleGeometryBuilder} is more straightforward.
  *
  * Date: 17.07.15
  * Time: 08:31

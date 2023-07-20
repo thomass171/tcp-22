@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -55,7 +56,7 @@ public class MazeMovingAndStateSystemTest {
         wireMockServer.start();
 
         EcsTestHelper.setup(() -> {
-            MazeTheme st = MazeTheme.init(MazeTheme.THEME_TRADITIONAL);
+            MazeTheme st = MazeTheme.buildFromIdentifier(THEME_TRADITIONAL);
             SystemManager.addSystem(new MazeMovingAndStateSystem(st));
 
         }, "engine", "maze");

@@ -2,7 +2,6 @@ package de.yard.threed.maze;
 
 
 import de.yard.threed.core.*;
-import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.Color;
 
 /**
@@ -18,8 +17,10 @@ import de.yard.threed.core.Color;
 public class MazeTheme {
     //public String grid;
     public boolean ambilight = false;
-    public static final int THEME_TRADITIONAL = 2;
-    public static final int THEME_DUNGEON = 3;
+    public static final int THEME_ID_TRADITIONAL = 2;
+    public static final int THEME_ID_DUNGEON = 3;
+    public static final String THEME_TRADITIONAL = "traditional";
+    public static final String THEME_DUNGEON = "dungeon";
     // Theme THEME_REALWOOD was an idea based on real 'jenga' texture "textures/realwood/Wall.png". But without normalmap etc.
     // its just not complete. (See history of MazeModelFactory).
     //public static final int THEME_REALWOOD = 3;
@@ -27,7 +28,6 @@ public class MazeTheme {
     //13.1.16 Hoehe 0.9 statt 0.3, Diameter 0.3->0.1 um nicht sichtbar zu sein
     public float simplerayheight = 0.9f;
     public float simpleraydiameter = 0.1f;
-    private static MazeTheme st;
     public boolean debug = false;
     public float sokobanboxsize = 0.6f;
     // Color is well fitting to ground
@@ -42,7 +42,16 @@ public class MazeTheme {
     private MazeTheme(int theme) {
         this.theme = theme;
         // no nice solution, but factory currently needs constructor parameter (which makes sense), so we have a cycle dependency.
-        this.mazeModelFactory =  new MazeTraditionalModelFactory(this);
+        switch (theme) {
+            case THEME_ID_TRADITIONAL:
+                this.mazeModelFactory = new MazeTraditionalModelFactory(this);
+                break;
+            case THEME_ID_DUNGEON:
+                this.mazeModelFactory = new MazeDungeonModelFactory(this);
+                break;
+            default:
+                throw new RuntimeException("unknown theme");
+        }
     }
 
     public LocalTransform getViewpoint() {
@@ -63,20 +72,14 @@ public class MazeTheme {
         return viewpoint;
     }
 
-    public static MazeTheme init() {
-        String theme = Platform.getInstance().getConfiguration().getString("theme", "traditional");
-        if (theme.equals("dungeon")) {
-            return init(THEME_DUNGEON);
-        } else {
-            return init(THEME_TRADITIONAL);
+    /**
+     * Defaults to THEME_TRADITIONAL
+     */
+    public static MazeTheme buildFromIdentifier(String ident) {
+        if (ident != null && ident.equals(THEME_DUNGEON)) {
+            return new MazeTheme(THEME_ID_DUNGEON);
         }
-    }
-
-    public static MazeTheme init(int theme) {
-        if (st == null) {
-            st = new MazeTheme(theme);
-        }
-        return st;
+        return new MazeTheme(THEME_ID_TRADITIONAL);
     }
 
     public int getTheme() {
@@ -87,7 +90,17 @@ public class MazeTheme {
         return mazeModelFactory;
     }
 
+    /**
+     * Bad class layout to have a switch here?
+     */
     public AbstractMazeTerrain buildTerrain(MazeLayout layout) {
-        return new MazeTraditionalTerrain(layout, (MazeTraditionalModelFactory) mazeModelFactory);
+        switch (theme) {
+            case THEME_ID_TRADITIONAL:
+                return new MazeTraditionalTerrain(layout, (MazeTraditionalModelFactory) mazeModelFactory);
+            case THEME_ID_DUNGEON:
+                return new MazeDungeonTerrain(layout, (MazeDungeonModelFactory) mazeModelFactory);
+            default:
+                throw new RuntimeException("unknown theme");
+        }
     }
 }

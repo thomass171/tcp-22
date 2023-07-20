@@ -16,8 +16,6 @@ import java.util.Map;
  * <p>
  * Also see GridState and MazeLayout.
  * <p>
- * TODO: Maybe this should be a theme dependent extention of MazeModelFactory. But heads up, its not only a builder. MAybe extract the builder.
- * <p>
  * <p/>
  * Created by thomass on 07.05.15.
  */
@@ -26,12 +24,22 @@ public class MazeTraditionalTerrain extends AbstractMazeTerrain {
     public Map<Point, SceneNode> topPillars = new HashMap<Point, SceneNode>();
     public Map<Point, SceneNode> rightPillars = new HashMap<Point, SceneNode>();
     public Map<Point, SceneNode> centerPillars = new HashMap<Point, SceneNode>();
-
+    MazeTraditionalModelFactory mazeModelFactory;
 
     public MazeTraditionalTerrain(MazeLayout layout/*int width, int height*/, MazeTraditionalModelFactory mazeModelFactory) {
-        super(layout, mazeModelFactory);
+        super(layout);
+        this.mazeModelFactory = mazeModelFactory;
     }
 
+    @Override
+    Material getGroundmaterial() {
+        return mazeModelFactory.getGroundmaterial();
+    }
+
+    @Override
+    SceneNode buildGroundElement() {
+        return mazeModelFactory.buildGroundElement();
+    }
 
     @Override
     void handleWall(Point p) {

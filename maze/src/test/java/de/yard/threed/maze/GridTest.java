@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -45,7 +46,7 @@ public class GridTest {
 
     @BeforeEach
     public void setup() {
-        mazeTheme = MazeTheme.init(MazeTheme.THEME_TRADITIONAL);
+        mazeTheme = MazeTheme.buildFromIdentifier(THEME_TRADITIONAL);
     }
 
     /**
