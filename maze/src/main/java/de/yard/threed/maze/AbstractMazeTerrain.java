@@ -72,7 +72,7 @@ public abstract class AbstractMazeTerrain {
     /**
      * Was in constructor once.
      */
-    private void buildGround(){
+    private void buildGround() {
 
         // 6.10.5: Wie hoch die Anzahl Segments ein wird, ist noch unklar.Erstmal pro GridElement
         if (simpleground) {
@@ -128,22 +128,29 @@ public abstract class AbstractMazeTerrain {
                     }
                     addDecoratedField(x, y, Texture.buildBundleTexture("data", textureFile));
                 }
-                if (layout.isWall(p)){
+                if (layout.isWall(p)) {
                     handleWall(p);
                 }
 
             }
         }
+
+        buildCeiling();
+
         finalizeGrid();
         logger.debug("grid visualized");
     }
 
-    protected void finalizeGrid(){
+    protected void buildCeiling() {
+    }
+
+    protected void finalizeGrid() {
 
     }
 
     /**
      * Returns the top node containing everything.
+     *
      * @return
      */
     public SceneNode getNode() {
@@ -311,7 +318,9 @@ public abstract class AbstractMazeTerrain {
     }
 
     abstract Material getGroundmaterial();
+
     abstract SceneNode buildGroundElement();
+
     abstract void handleWall(Point p);
 
 }

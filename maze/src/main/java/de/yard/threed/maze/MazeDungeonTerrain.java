@@ -21,7 +21,7 @@ import de.yard.threed.engine.platform.common.SimpleGeometryBuilder;
 public class MazeDungeonTerrain extends AbstractMazeTerrain {
 
     MazeDungeonModelFactory mazeModelFactory;
-    SimpleGeometryBuilder simpleGeometryBuilder;
+    SimpleGeometryBuilder wallGeometryBuilder = null;
     Vector3 southNormal = new Vector3(0, 0, 1);
     Vector3 northNormal = new Vector3(0, 0, -1);
     Vector3 westNormal = new Vector3(-1, 0, 0);
@@ -46,6 +46,10 @@ public class MazeDungeonTerrain extends AbstractMazeTerrain {
     @Override
     void handleWall(Point p) {
 
+        if (wallGeometryBuilder == null) {
+            wallGeometryBuilder = new SimpleGeometryBuilder();
+        }
+
         int x = p.getX();
         int y = p.getY();
 
@@ -65,43 +69,70 @@ public class MazeDungeonTerrain extends AbstractMazeTerrain {
         }
     }
 
+    @Override
+    protected void buildCeiling() {
+
+        SimpleGeometryBuilder ceilingGeometryBuilder = new SimpleGeometryBuilder();
+        Vector3 ceilingNormal = new Vector3(0, -1, 0);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                addCeilingElement(ceilingGeometryBuilder, x, y, ceilingNormal);
+            }
+        }
+        SimpleGeometry sg = ceilingGeometryBuilder.getGeometry();
+        SceneNode n = new SceneNode(new Mesh(sg, mazeModelFactory.pillarmaterial));
+        node.attach(n);
+    }
+
     private void addSouthWallElement(int x, int y) {
-        addWallElement(x, y, new Vector3(-gsz2, 0, gsz2), new Vector3(gsz2, 0, gsz2), southNormal);
+        addWallElement(wallGeometryBuilder, x, y, new Vector3(-gsz2, 0, gsz2), new Vector3(gsz2, 0, gsz2), southNormal);
     }
 
     private void addNorthWallElement(int x, int y) {
-        addWallElement(x, y, new Vector3(gsz2, 0, -gsz2), new Vector3(-gsz2, 0, -gsz2), northNormal);
+        addWallElement(wallGeometryBuilder, x, y, new Vector3(gsz2, 0, -gsz2), new Vector3(-gsz2, 0, -gsz2), northNormal);
     }
 
     private void addWestWallElement(int x, int y) {
-        addWallElement(x, y, new Vector3(-gsz2, 0, -gsz2), new Vector3(-gsz2, 0, gsz2), westNormal);
+        addWallElement(wallGeometryBuilder, x, y, new Vector3(-gsz2, 0, -gsz2), new Vector3(-gsz2, 0, gsz2), westNormal);
     }
 
     private void addEastWallElement(int x, int y) {
-        addWallElement(x, y, new Vector3(gsz2, 0, gsz2), new Vector3(gsz2, 0, -gsz2), eastNormal);
+        addWallElement(wallGeometryBuilder, x, y, new Vector3(gsz2, 0, gsz2), new Vector3(gsz2, 0, -gsz2), eastNormal);
     }
 
-    private void addWallElement(int x, int y, Vector3 offset0, Vector3 offset1, Vector3 normal) {
-        if (simpleGeometryBuilder == null) {
-            simpleGeometryBuilder = new SimpleGeometryBuilder();
-        }
+    private void addWallElement(SimpleGeometryBuilder gb, int x, int y, Vector3 offset0, Vector3 offset1, Vector3 normal) {
+
 
         Vector3 center = getTerrainElementCoordinates(x, y);
         Vector3 h = new Vector3(0, MazeModelFactory.PILLARHEIGHT, 0);
         // 3 - 2
         // 0 - 1
-        int index = simpleGeometryBuilder.addVertex(center.add(offset0), normal, new Vector2(0, 0));
-        simpleGeometryBuilder.addVertex(center.add(offset1), normal, new Vector2(1, 0));
-        simpleGeometryBuilder.addVertex(center.add(offset1).add(h), normal, new Vector2(1, 1));
-        simpleGeometryBuilder.addVertex(center.add(offset0).add(h), normal, new Vector2(0, 1));
+        int index = gb.addVertex(center.add(offset0), normal, new Vector2(0, 0));
+        gb.addVertex(center.add(offset1), normal, new Vector2(1, 0));
+        gb.addVertex(center.add(offset1).add(h), normal, new Vector2(1, 1));
+        gb.addVertex(center.add(offset0).add(h), normal, new Vector2(0, 1));
 
-        simpleGeometryBuilder.addFace(index + 0, index + 1, index + 2);
-        simpleGeometryBuilder.addFace(index + 2, index + 3, index + 0);
+        gb.addFace(index + 0, index + 1, index + 2);
+        gb.addFace(index + 2, index + 3, index + 0);
+    }
+
+    private void addCeilingElement(SimpleGeometryBuilder gb, int x, int y, Vector3 normal) {
+
+        Vector3 center = getTerrainElementCoordinates(x, y);
+        // 3 - 2
+        // 0 - 1
+        int index = gb.addVertex(center.add(new Vector3(-gsz2, MazeModelFactory.PILLARHEIGHT, -gsz2)), normal, new Vector2(0, 0));
+        gb.addVertex(center.add(new Vector3(gsz2, MazeModelFactory.PILLARHEIGHT, -gsz2)), normal, new Vector2(1, 0));
+        gb.addVertex(center.add(new Vector3(gsz2, MazeModelFactory.PILLARHEIGHT, gsz2)), normal, new Vector2(1, 1));
+        gb.addVertex(center.add(new Vector3(-gsz2, MazeModelFactory.PILLARHEIGHT, gsz2)), normal, new Vector2(0, 1));
+
+        gb.addFace(index + 0, index + 1, index + 2);
+        gb.addFace(index + 2, index + 3, index + 0);
     }
 
     @Override
     protected void finalizeGrid() {
-        SimpleGeometry sg = simpleGeometryBuilder.getGeometry();
+        SimpleGeometry sg = wallGeometryBuilder.getGeometry();
         //sg = Primitives.buildBox(0.5f, 0.5f, 0.5f);
 
         SceneNode n = new SceneNode(new Mesh(sg, mazeModelFactory.pillarmaterial));

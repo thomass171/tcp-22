@@ -4,6 +4,7 @@ maze/grid1.txt
 maze/Maze-M-30x20.txt
 maze/Maze-P-60x20.txt
 maze/Maze-P-Simple.txt
+maze/Maze-D-80x25.txt
 skbn/DavidJoffe.txt
 skbn/Sokoban10x10.txt
 skbn/SokobanSimple.txt
