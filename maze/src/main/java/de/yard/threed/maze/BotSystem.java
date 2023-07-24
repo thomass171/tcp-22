@@ -95,24 +95,21 @@ public class BotSystem extends DefaultEcsSystem {
                 startPositions = grid.getMazeLayout().getStartPositions();
             }
         }
-        if (evt.getType().equals(BaseEventRegistry.USER_EVENT_JOINED) && !serverMode) {
-            // Start a bot for remaining players when running standalone.
-            // TODO Also for monster?
+        if (evt.getType().equals(BaseEventRegistry.USER_EVENT_JOINED) && startPositions != null) {
+            // The latest joined user isn't really interesting but the total of already joined user.
+            // currentPlaver will only contain the login user, no bots exist yet.
+            List<EcsEntity> currentPlayer = MazeUtils.getPlayer();
+
+            // Start a bot for remaining players (including monster) when running standalone.
             // But only once, the login request fired here will also trigger a JOINED event again.
-            // Be prepared for inconsistent (negative) botNeeded.
-            if (startPositions != null) {
-                logger.debug("Launching bots");
-                for (int i = 1; i < startPositions.size(); i++) {
-                    // A bot is no logged in user, thus will only join
-                    int botIndex = 0;
-                    for (StartPosition startPosition : startPositions.get(i)) {
-                        EcsEntity user = new EcsEntity(BotComponent.buildFromGridDefinition(startPosition, botAiBuilder.build()));
-                        //TODO improve unique naming
-                        user.setName("Bot" + (botIndex));
-                        SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId()/*, false*/));
-                        botIndex++;
-                    }
+            if (serverMode) {
+                // In server mode we should wait for additional user joining.
+                if (currentPlayer.size() >= Grid.getInstance().getMazeLayout().getStartPositionCount(true)) {
+                    startRemainingPlayer(currentPlayer);
                 }
+            } else {
+                // In non server mode the joined user is alone, so we need to start bots for remaining player and start monster
+                startRemainingPlayer(currentPlayer);
             }
             startPositions = null;
         }
@@ -125,5 +122,41 @@ public class BotSystem extends DefaultEcsSystem {
 
     public void setIntProvider(IntProvider intProvider) {
         this.rand = intProvider;
+    }
+
+    /**
+     * Start player/monster bots. Both don't need a login but just join.
+     */
+    private void startRemainingPlayer(List<EcsEntity> currentPlayer) {
+
+        // find team/start position of current user for ignoring this. No longer, in multi player a bot might complete a team.
+        // In fact, the start position isn't really used here, just for identifying player/monster
+        // int startTeam = MoverComponent.getMoverComponent(startUser).getGridMover().getTeam();
+        // logger.debug("Launching bots ignoring positions of team " + startTeam);
+        int botIndex = 0;
+        int skipped = 0;
+        for (int i = 0; i < startPositions.size(); i++) {
+            // A bot is no logged in user, thus will only join
+            for (StartPosition startPosition : startPositions.get(i)) {
+                EcsEntity user = null;
+                if (startPosition.isMonster) {
+                    user = new EcsEntity(BotComponent.buildFromGridDefinition(true, botAiBuilder.build()));
+                } else {
+                    // skip already logged in user
+                    if (skipped >= currentPlayer.size()) {
+                        user = new EcsEntity(BotComponent.buildFromGridDefinition(false, botAiBuilder.build()));
+                    } else {
+                        skipped++;
+                    }
+                }
+                if (user != null) {
+                    //TODO improve unique naming
+                    user.setName("Bot" + (botIndex));
+                    SystemManager.putRequest(UserSystem.buildJoinRequest(user.getId()/*, false*/));
+                    botIndex++;
+                }
+            }
+        }
+        logger.debug("Launched " + botIndex + " bots. skipped " + skipped);
     }
 }

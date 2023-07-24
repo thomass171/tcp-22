@@ -10,6 +10,7 @@ import de.yard.threed.engine.util.IntProvider;
 /**
  * 14.3.22: Not needed because a bot is just a regular user?
  * A bot is not a regular user but a bot. For example a bot doesn't log in.
+ * A monster is also/always a bot.
  * <p>
  * Created by thomass on 08.04.21.
  */
@@ -43,9 +44,9 @@ public class BotComponent extends EcsComponent {
         return m;
     }
 
-    public static BotComponent buildFromGridDefinition(StartPosition startPosition, BotAI botAI) {
+    public static BotComponent buildFromGridDefinition(boolean isMonster, BotAI botAI) {
         BotComponent bc = new BotComponent(botAI);
-        bc.monster = startPosition.isMonster;
+        bc.monster = isMonster;
         return bc;
     }
 

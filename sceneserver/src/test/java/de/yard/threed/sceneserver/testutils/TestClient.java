@@ -96,8 +96,9 @@ public class TestClient {
         List<Packet> packets = readLatestPackets();
         assertTrue(packets.size() > 0, "packets from server found");
         SceneServerTestUtils.assertEventPacket(UserSystem.USER_EVENT_LOGGEDIN, null, packets, 1);
-        SceneServerTestUtils.assertEventPacket(BaseEventRegistry.USER_EVENT_JOINED, null, packets, 1);
-        SceneServerTestUtils.assertEventPacket(BaseEventRegistry.EVENT_USER_ASSEMBLED, null, packets, 1);
+        // also race conditions with bots joining, so don't expect specific number of JOINED/ASSEMBLED
+        SceneServerTestUtils.assertEventPacket(BaseEventRegistry.USER_EVENT_JOINED, null, packets, -1);
+        SceneServerTestUtils.assertEventPacket(BaseEventRegistry.EVENT_USER_ASSEMBLED, null, packets, -1);
 
         // find 'my' login event. These are not saved currently, so also the second client only has one.
         List<Event> loggedInEvents = getAllEvents(UserSystem.USER_EVENT_LOGGEDIN);

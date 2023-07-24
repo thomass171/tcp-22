@@ -33,7 +33,7 @@ public class Setup {
         properties.put("enableUsermode", "false");
         properties.put("visualizeTrack", "true");
         // VR control panel visible for debugging 25.1.23:TODO check count values not visible?
-        properties.put("enableHud", "true");
+        //properties.put("enableHud", "true");
 
         // emulateVR for testing VR panel outside VR via mouse move/click (mouseclick is right trigger, shift pressed for left trigger)
         // After fix of webxr floor handling yoffsetVR can have a 'real' height (above avatar).
@@ -57,7 +57,7 @@ public class Setup {
         //properties.put("argv.enableNearView", "true");
         properties.put("initialMaze", "skbn/SokobanWikipedia.txt");
         properties.put("initialMaze", "maze/Maze-P-Simple.txt");
-        properties.put("initialMaze", "maze/Maze-D-80x25.txt");
+        //properties.put("initialMaze", "maze/Maze-D-80x25.txt");
         //properties.put("initialMaze", mazeshost + "/mazes/mazes/1");
         //properties.put("argv.initialMaze", "maze/Maze-P-60x20.txt");
         //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");

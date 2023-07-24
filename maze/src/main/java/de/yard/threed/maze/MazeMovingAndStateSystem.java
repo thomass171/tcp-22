@@ -188,7 +188,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
 
-            logger.debug("User '" + userEntity.getName() + "' joining");
+            logger.debug("User/Bot '" + userEntity.getName() + "' joining");
 
             SystemManager.sendEvent(processJoin(userEntityId));
 
@@ -265,11 +265,12 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             // final join step still to do which needs scenenode
             //processJoin((Integer) evt.getPayload().get("userentityid"));
             EcsEntity playerEntity = EcsHelper.findEntityById((Integer) evt.getPayload().get("userentityid"));
-            joinPlayer(Grid.getInstance().getMazeLayout(), playerEntity/*, launchPosition, teamid*/);
+            completeJoin(Grid.getInstance().getMazeLayout(), playerEntity/*, launchPosition, teamid*/);
         }
     }
 
     /**
+     * Join a user/player/bot/monster.
      * Return JOINED_EVENT on success and error message on failure.
      */
     private Event processJoin(int playerEntityId) {
@@ -284,16 +285,20 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
         // In server mode clients might connect and disconnect, so the used and available launch positions are quite dynamic.
         List<EcsEntity> currentPlayer = MazeUtils.getPlayer();
-        if (currentPlayer.size() >= layout.getStartPositionCount()) {
+        // this is also reached for joining monster, so don't ignore monster lauch locations
+        if (currentPlayer.size() >= layout.getStartPositionCount(false)) {
             logger.warn("Rejecting join request due to too may players. Currently " + currentPlayer.size());
             return BaseEventRegistry.buildUserJoinFailedEvent(playerEntity,"error");
         }
-        Point launchPosition = findAvailableLaunchPosition(layout, currentPlayer);
+        BotComponent botComponent = BotComponent.getBotComponent(playerEntity);
+
+        Point launchPosition = findAvailableLaunchPosition(layout, currentPlayer, botComponent!=null && botComponent.isMonster());
 
         int teamid;
         if (launchPosition != null) {
             teamid = layout.getTeamByHome(launchPosition);
-            //joinPlayer(layout, playerEntity, launchPosition, teamid);
+            //completeJoin(layout, playerEntity, launchPosition, teamid);
+            logger.debug("Launching player at "+launchPosition);
         } else {
             logger.warn("No start position found. too may players?. Currently " + currentPlayer.size());
             return BaseEventRegistry.buildUserJoinFailedEvent(playerEntity, "error");
@@ -306,7 +311,10 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         return BaseEventRegistry.buildUserJoinedEvent(playerEntity);
     }
 
-    private Point findAvailableLaunchPosition(MazeLayout layout, List<EcsEntity> currentPlayer) {
+    /**
+     * Also used for bots/monster.
+     */
+    private Point findAvailableLaunchPosition(MazeLayout layout, List<EcsEntity> currentPlayer, boolean forMonster) {
         List<Point> positionsToIgnore = new ArrayList<Point>();
         for (EcsEntity p : currentPlayer) {
             MoverComponent mc = MoverComponent.getMoverComponent(p);
@@ -315,24 +323,23 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 positionsToIgnore.add(mc.getLocation());
             }
         }
-        Point launchPosition = layout.getNextLaunchPosition(positionsToIgnore);
+        Point launchPosition = layout.getNextLaunchPosition(positionsToIgnore, forMonster);
         return launchPosition;
     }
 
     /**
-     * Join a new player. 28.4.23: Now after it has been assembled (avatar, scenenode)
+     * Complete a join a new player. 28.4.23: Now after it has been assembled (avatar, scenenode).
+     * mover(Component) already exists but needs the scene node.
      */
-    private void joinPlayer(MazeLayout layout, EcsEntity playerEntity/*29.4.23 , Point launchPosition, int team*/) {
-        logger.debug("New player joins: " + playerEntity + "for team ?" );
+    private void completeJoin(MazeLayout layout, EcsEntity playerEntity) {
 
         // MazeLayout layout = Grid.getInstance().getMazeLayout();
         // MoverComponent already exists, but has no transofrm yet. Needs to be updated.
         MoverComponent mover = MoverComponent.getMoverComponent(playerEntity);
-        //mover = new MoverComponent(playerEntity.scenenode.getTransform(), true, launchPosition, layout.getInitialOrientation(launchPosition), team);
-        mover.setMovable(playerEntity.scenenode.getTransform());
-        //usedLaunchPositions.add(launchPosition);
-        //playerEntity.addComponent(mover);
+        logger.debug("Complete join of " + playerEntity.getName() + " for team " + mover.getGridMover().getTeam());
 
+        mover.setMovable(playerEntity.scenenode.getTransform());
+        // set mover to its position
         mover.updateMovable();
 
         InputToRequestSystem.setPayload0(playerEntity.getName());

@@ -40,7 +40,7 @@ public class SokobanTest {
             Grid grid = Grid.loadByReader(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanWikipedia.txt"))).get(0);
 
             MazeLayout layout = grid.getMazeLayout();
-            Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null);
+            Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true);
             Assertions.assertEquals(9, layout.getMaxWidth(), "width");
             Assertions.assertEquals(6, layout.getHeight(), "height");
             Assertions.assertEquals(6, startPosition.getX(), "start.x");

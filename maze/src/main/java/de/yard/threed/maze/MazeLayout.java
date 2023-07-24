@@ -22,6 +22,7 @@ public class MazeLayout {
     public List<Point> walls;
     public List<Point> destinations;
     // Several sets of start positions. Starting at lower (small y) left (small x).
+    // also for monster
     private List<List<StartPosition>> initialPosition;
     int maxwidth, height;
     // the inner fields that could be visited. No walls.
@@ -42,14 +43,17 @@ public class MazeLayout {
     }
 
     /**
-     * Find a previously unused launch position. For now this is team independent. So a new player
+     * Find a previously unused launch position for a new joining player. For now this is team independent. So a new player
      * will join a team randomly.
+     * Might also return monster start locations.
      */
-    public Point getNextLaunchPosition(List<Point> positionsToIgnore) {
+    public Point getNextLaunchPosition(List<Point> positionsToIgnore, boolean includeMonster) {
         for (List<StartPosition> pset : initialPosition) {
             for (StartPosition p : pset) {
                 if (positionsToIgnore == null || !positionsToIgnore.contains(p.p)) {
-                    return p.p;
+                    if (!p.isMonster || includeMonster) {
+                        return p.p;
+                    }
                 }
             }
         }
@@ -107,10 +111,14 @@ public class MazeLayout {
         return -1;
     }
 
-    public int getStartPositionCount() {
+    public int getStartPositionCount(boolean ignoreMonster) {
         int cnt = 0;
         for (int team = 0; team < initialPosition.size(); team++) {
-            cnt += initialPosition.get(team).size();
+            for (int i=0;i<initialPosition.get(team).size();i++) {
+                if (ignoreMonster == false || !initialPosition.get(team).get(i).isMonster) {
+                    cnt++;
+                }
+            }
         }
         return cnt;
     }

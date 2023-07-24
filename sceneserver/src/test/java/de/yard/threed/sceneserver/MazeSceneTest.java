@@ -229,6 +229,29 @@ public class MazeSceneTest {
         testClient1.assertPositionAndOrientation(new Point(6, 8),"S");
     }
 
+    /**
+     * A monster is a bot player.
+     * ##########
+     * #   M    #
+     * #  D# #  #
+     * #   # #  #
+     * #    P D #
+     * ##########
+     */
+    @Test
+    public void testSingleUserWithMonster() throws Exception {
+
+        init("maze/Maze-P-Simple.txt");
+        log.debug("testSingleUserWithMonster");
+
+        TestClient testClient0 = new TestClient(TestClient.USER_NAME0);
+        testClient0.assertConnectAndLogin(sceneServer);
+
+        EcsEntity botEntity = SystemManager.findEntities(e -> "Bot0".equals(e.getName())).get(0);
+        assertNotNull(botEntity, "bot entity");
+
+    }
+
     private EcsEntity connectToSokobanWikipediaServer(TestClient testClient, boolean viaWebSocket, String expectedGridname) throws Exception {
 
         testClient.assertConnectAndLogin(sceneServer, viaWebSocket);

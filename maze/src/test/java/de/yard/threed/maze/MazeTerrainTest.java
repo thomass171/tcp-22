@@ -1,7 +1,6 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
@@ -11,22 +10,16 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.Shape;
 import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.engine.testutil.EngineTestFactory;
-import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.TestHelper;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -62,7 +55,7 @@ public class MazeTerrainTest {
         Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "maze/grid1.txt"))).get(0);
 
         MazeLayout layout = grid.getMazeLayout();
-        Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null);
+        Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true);
         Assertions.assertEquals(11, layout.getMaxWidth(), "width");
         Assertions.assertEquals(7, layout.getHeight(), "height");
         Assertions.assertEquals(5, startPosition.getX(), "start.x");

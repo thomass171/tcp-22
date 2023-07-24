@@ -7,7 +7,6 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class SokobanAutosolver {
     public void solve() {
         Timestamp timestamp = new Timestamp();
 
-        GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null));
+        GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null, true));
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
 
         //no items here for now.

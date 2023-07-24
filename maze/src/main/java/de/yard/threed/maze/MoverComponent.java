@@ -32,7 +32,7 @@ public class MoverComponent extends EcsComponent implements GridMover {
     private GridMover gridMover;
     public static final int MOVER_PLAYER = 1;
     public static final int MOVER_BOX = 2;
-    // a box isn't a player, but a bot is
+    // a box isn't a player, but a bot/monster is
     //public static final int MOVER_BOT = 3;
     private boolean player;
     //private int type = -1;

@@ -190,6 +190,31 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                         </div>
                     </div>
                 </div>
+                <!-- Dungeons-->
+                <div class="w3-third">
+                    <div class="w3-card-2">
+                        <div class="w3-container">
+                            <h3>Dungeon</h3>
+                            <div class="w3-container w3-center">
+                                <img src="Maze-D-Preview.png" style="width:100%">
+                            </div>
+                            <p>A maze with several rooms connected with corridors. Find the hidden item.
+                                Uses the theme 'dungeon' which displays massive walls and a ceiling.
+                            </p>
+                            <select class="w3-select  " id="sel_sceneBox3">
+                                <option value="maze/Maze-D-80x25.txt">D 80x25</option>
+                            </select>
+                            <p></p>
+                            <button class=" w3-button  w3-round w3-khaki "
+                                    onclick="launchMazeScene(false,'sel_sceneBox3','dungeon')">Launch
+                            </button>
+                            <button class=" w3-button  w3-round w3-khaki "
+                                    onclick="launchMazeScene(true,'sel_sceneBox3','dungeon')">Launch VR
+                            </button>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- accordion for showing additional information optionally, but shown by default-->

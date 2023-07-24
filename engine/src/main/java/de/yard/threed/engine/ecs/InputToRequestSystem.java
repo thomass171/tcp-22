@@ -35,7 +35,7 @@ import java.util.Map;
  * Created by thomass on 11.10.19.
  */
 public class InputToRequestSystem extends DefaultEcsSystem {
-    Log logger = Platform.getInstance().getLog(InputToRequestSystem.class);
+    static Log logger = Platform.getInstance().getLog(InputToRequestSystem.class);
     private Map<KeyEntry, RequestType> keymapping = new HashMap<KeyEntry, RequestType>();
 
     //2.4.21: menu. Why not in UserSystem?
@@ -55,6 +55,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     private Map<Integer, RequestType> segmentRequests;
     private List<PointerHandler> pointerHandlerList = new ArrayList<PointerHandler>();
     private List<ControlPanel> controlPanelList = new ArrayList<ControlPanel>();
+    @Deprecated
     static String playername;
     public static String TAG = "InputToRequestSystem";
     // 1=identity segment request (default), 2=emulate (left) VR controller trigger
@@ -93,7 +94,9 @@ public class InputToRequestSystem extends DefaultEcsSystem {
      *
      * @param playername
      */
+    @Deprecated
     public static void setPayload0(String playername) {
+        logger.warn("remove this");
         InputToRequestSystem.playername = playername;
     }
 
