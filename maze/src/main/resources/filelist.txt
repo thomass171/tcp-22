@@ -11,4 +11,10 @@ skbn/SokobanSimple.txt
 skbn/SokobanTrivial.txt
 skbn/SokobanWikipedia.txt
 textures/Face-Monster.png
+textures/wovado/stone_wall02-diffuse_map.jpg
+textures/wovado/stone_wall02-diffuse_map.png
+textures/wovado/stone_wall02-height_map.png
+textures/wovado/stone_wall02-normal_map.png
+textures/wovado/stone_wall02-normal_map.jpg
+textures/wovado/stone_wall02-specularity_map.png
 maze.properties

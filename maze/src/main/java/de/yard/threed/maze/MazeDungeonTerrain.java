@@ -135,7 +135,8 @@ public class MazeDungeonTerrain extends AbstractMazeTerrain {
         SimpleGeometry sg = wallGeometryBuilder.getGeometry();
         //sg = Primitives.buildBox(0.5f, 0.5f, 0.5f);
 
-        SceneNode n = new SceneNode(new Mesh(sg, mazeModelFactory.pillarmaterial));
+        //SceneNode n = new SceneNode(new Mesh(sg, mazeModelFactory.pillarmaterial));
+        SceneNode n = new SceneNode(new Mesh(sg, mazeModelFactory.stoneWallMaterial));
         node.attach(n);
     }
 
