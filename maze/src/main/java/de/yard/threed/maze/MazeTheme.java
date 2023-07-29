@@ -19,8 +19,10 @@ public class MazeTheme {
     public boolean ambilight = false;
     public static final int THEME_ID_TRADITIONAL = 2;
     public static final int THEME_ID_DUNGEON = 3;
+    public static final int THEME_ID_DUNGEON_ART = 4;
     public static final String THEME_TRADITIONAL = "traditional";
     public static final String THEME_DUNGEON = "dungeon";
+    public static final String THEME_DUNGEON_ART = "dungeon-art";
     // Theme THEME_REALWOOD was an idea based on real 'jenga' texture "textures/realwood/Wall.png". But without normalmap etc.
     // its just not complete. (See history of MazeModelFactory).
     //public static final int THEME_REALWOOD = 3;
@@ -47,7 +49,10 @@ public class MazeTheme {
                 this.mazeModelFactory = new MazeTraditionalModelFactory(this);
                 break;
             case THEME_ID_DUNGEON:
-                this.mazeModelFactory = new MazeDungeonModelFactory(this);
+                this.mazeModelFactory = new MazeDungeonModelFactory(this, false);
+                break;
+            case THEME_ID_DUNGEON_ART:
+                this.mazeModelFactory = new MazeDungeonModelFactory(this,true);
                 break;
             default:
                 throw new RuntimeException("unknown theme");
@@ -79,6 +84,9 @@ public class MazeTheme {
         if (ident != null && ident.equals(THEME_DUNGEON)) {
             return new MazeTheme(THEME_ID_DUNGEON);
         }
+        if (ident != null && ident.equals(THEME_DUNGEON_ART)) {
+            return new MazeTheme(THEME_ID_DUNGEON_ART);
+        }
         return new MazeTheme(THEME_ID_TRADITIONAL);
     }
 
@@ -98,6 +106,8 @@ public class MazeTheme {
             case THEME_ID_TRADITIONAL:
                 return new MazeTraditionalTerrain(layout, (MazeTraditionalModelFactory) mazeModelFactory);
             case THEME_ID_DUNGEON:
+                return new MazeDungeonTerrain(layout, (MazeDungeonModelFactory) mazeModelFactory);
+            case THEME_ID_DUNGEON_ART:
                 return new MazeDungeonTerrain(layout, (MazeDungeonModelFactory) mazeModelFactory);
             default:
                 throw new RuntimeException("unknown theme");

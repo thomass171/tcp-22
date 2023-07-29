@@ -189,6 +189,10 @@ MA46: Defer processing of newly created events in a frame cycle. Otherwise a ser
 might keep processing without giving the client the chance to catch up. 
 Occured in the sequence LOGGEDIN->JOINED->ASSEMBLED.
 
+# Credits
+
+See https://thomass171.github.io/tcp-22/tcp-22.html for credits.
+
 # Releases
 This is the release list In terms of installations to the examples hosting
 server used from https://thomass171.github.io/tcp-22/tcp-22.html. Every release contains lots of bug fixes.

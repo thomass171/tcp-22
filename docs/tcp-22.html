@@ -190,6 +190,9 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                         </div>
                     </div>
                 </div>
+            </div>
+            <!-- second w3-row-->
+            <div class="w3-row-padding w3-padding-16">
                 <!-- Dungeons-->
                 <div class="w3-third">
                     <div class="w3-card-2">
@@ -198,8 +201,8 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                             <div class="w3-container w3-center">
                                 <img src="Maze-D-Preview.png" style="width:100%">
                             </div>
-                            <p>A maze with several rooms connected with corridors. Find the hidden item.
-                                Uses the theme 'dungeon' which displays massive walls and a ceiling.
+                            <p>A maze with several rooms connected with corridors. Collect all diamonds.
+                                Uses the theme 'dungeon' which displays massive walls and a ceiling with simple wood textures.
                             </p>
                             <select class="w3-select  " id="sel_sceneBox3">
                                 <option value="maze/Maze-D-80x25.txt">D 80x25</option>
@@ -210,6 +213,31 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                             </button>
                             <button class=" w3-button  w3-round w3-khaki "
                                     onclick="launchMazeScene(true,'sel_sceneBox3','dungeon')">Launch VR
+                            </button>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="w3-third">
+                    <div class="w3-card-2">
+                        <div class="w3-container">
+                            <h3>Dungeon</h3>
+                            <div class="w3-container w3-center">
+                                <img src="Maze-D-Preview-Art.png" style="width:100%">
+                            </div>
+                            <p>A maze with several rooms connected with corridors. Collect all diamonds.
+                                Uses a theme 'dungeon' which displays massive walls and a ceiling combined with
+                                artwork textures.
+                            </p>
+                            <select class="w3-select  " id="sel_sceneBox4">
+                                <option value="maze/Maze-D-80x25.txt">D 80x25</option>
+                            </select>
+                            <p></p>
+                            <button class=" w3-button  w3-round w3-khaki "
+                                    onclick="launchMazeScene(false,'sel_sceneBox4','dungeon-art')">Launch
+                            </button>
+                            <button class=" w3-button  w3-round w3-khaki "
+                                    onclick="launchMazeScene(true,'sel_sceneBox4','dungeon-art')">Launch VR
                             </button>
                             <p></p>
                         </div>
@@ -380,6 +408,7 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                 </li>
                 <li>
                     Thanks to wovado (https://opengameart.org/content/stone-wall-1) for the stone wall textures.
+                    Thanks to cethiel (https://opengameart.org/content/tileable-bricks-ground-textures-set-1) for the ground textures.
                 </li>
             </ul>
         </div>

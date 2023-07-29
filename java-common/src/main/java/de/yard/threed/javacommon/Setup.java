@@ -69,6 +69,7 @@ public class Setup {
         //properties.put("server", "192.168.98.151:5890");
 
         properties.put("theme", "dungeon");
+        properties.put("theme", "dungeon-art");
 
         //properties.put("argv.vehiclelist","GenericRoad");
 

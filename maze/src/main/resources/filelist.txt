@@ -17,4 +17,6 @@ textures/wovado/stone_wall02-height_map.png
 textures/wovado/stone_wall02-normal_map.png
 textures/wovado/stone_wall02-normal_map.jpg
 textures/wovado/stone_wall02-specularity_map.png
+textures/cethiel/Ground_02.jpg
+textures/cethiel/Ground_02_Nrm.jpg
 maze.properties

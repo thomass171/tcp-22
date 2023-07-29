@@ -12,6 +12,8 @@ import de.yard.threed.engine.platform.common.SimpleGeometryBuilder;
 /**
  * 3D visualization of a maze. This is a dungeon grid where
  * - A wall completely occupies a field.
+ *
+ * For all "dungeon" themes
  * <p>
  * Also see GridState and MazeLayout.
  * <p>
@@ -136,7 +138,7 @@ public class MazeDungeonTerrain extends AbstractMazeTerrain {
         //sg = Primitives.buildBox(0.5f, 0.5f, 0.5f);
 
         //SceneNode n = new SceneNode(new Mesh(sg, mazeModelFactory.pillarmaterial));
-        SceneNode n = new SceneNode(new Mesh(sg, mazeModelFactory.stoneWallMaterial));
+        SceneNode n = new SceneNode(new Mesh(sg, mazeModelFactory.wallMaterial));
         node.attach(n);
     }
 

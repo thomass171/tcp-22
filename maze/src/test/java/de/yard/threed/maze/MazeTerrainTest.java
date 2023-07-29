@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 /**
@@ -147,39 +149,60 @@ public class MazeTerrainTest {
         terrain.visualizeGrid();
 
         SceneNode[] pillar = terrain.getPillar(new Point(5, 3));
-        Assertions.assertNull(pillar[0], "top of 5,3");
-        Assertions.assertNull(pillar[1], "right of 5,3");
-        Assertions.assertNotNull(pillar[2], "center of 5,3");
+        assertNull(pillar[0], "top of 5,3");
+        assertNull(pillar[1], "right of 5,3");
+        assertNotNull(pillar[2], "center of 5,3");
 
         pillar = terrain.getPillar(new Point(3, 2));
-        Assertions.assertNull(pillar[0], "top of 3,2");
-        Assertions.assertNull(pillar[1], "right of 3,2");
-        Assertions.assertNull(pillar[2], "center of 3,2");
+        assertNull(pillar[0], "top of 3,2");
+        assertNull(pillar[1], "right of 3,2");
+        assertNull(pillar[2], "center of 3,2");
 
         pillar = terrain.getPillar(new Point(4, 2));
-        Assertions.assertNull(pillar[0], "top of 4,2");
-        Assertions.assertNotNull(pillar[1], "right of 4,2");
-        Assertions.assertNotNull(pillar[2], "center of 4,2");
+        assertNull(pillar[0], "top of 4,2");
+        assertNotNull(pillar[1], "right of 4,2");
+        assertNotNull(pillar[2], "center of 4,2");
 
         pillar = terrain.getPillar(new Point(5, 2));
-        Assertions.assertNotNull(pillar[0], "top of 5,2");
-        Assertions.assertNotNull(pillar[1], "right of 5,2");
-        Assertions.assertNull(pillar[2], "center of 5,2");
+        assertNotNull(pillar[0], "top of 5,2");
+        assertNotNull(pillar[1], "right of 5,2");
+        assertNull(pillar[2], "center of 5,2");
 
         pillar = terrain.getPillar(new Point(6, 2));
-        Assertions.assertNull(pillar[0], "top of 6,2");
-        Assertions.assertNull(pillar[1], "right of 6,2");
-        Assertions.assertNotNull(pillar[2], "center of 6,2");
+        assertNull(pillar[0], "top of 6,2");
+        assertNull(pillar[1], "right of 6,2");
+        assertNotNull(pillar[2], "center of 6,2");
 
 
     }
 
     @Test
-    public void testTerrain() {
-        MazeTraditionalModelFactory mf = (MazeTraditionalModelFactory) mazeTheme.getMazeModelFactory();
+    public void testTerrainTraditional() {
+        // leads to traditional
+        MazeTheme mz = MazeTheme.buildFromIdentifier("xyz");
+        MazeTraditionalModelFactory mf = (MazeTraditionalModelFactory) mz.getMazeModelFactory();
         MazeTraditionalTerrain terrain = new MazeTraditionalTerrain(new MazeLayout(new ArrayList<Point>(), new ArrayList<Point>(), null, 3, 6, new ArrayList<Point>()),mf);
         terrain.addGridElement(mf.buildWall(1, MazeTraditionalTerrain.STRAIGHTWALLMODE_FULL), 0, 0, 0);
         SceneNode wall = terrain.getNode().getTransform().getChild(0).getSceneNode();
         TestUtils.assertVector3(new Vector3(-MazeDimensions.GRIDSEGMENTSIZE, 0, 2.5f * MazeDimensions.GRIDSEGMENTSIZE), wall.getTransform().getPosition(), "wallpos");
     }
+
+    @Test
+    public void testTerrainDungeon() {
+        MazeTheme mz = MazeTheme.buildFromIdentifier("dungeon");
+        MazeDungeonModelFactory mf = (MazeDungeonModelFactory) mz.getMazeModelFactory();
+        MazeDungeonTerrain terrain = new MazeDungeonTerrain(new MazeLayout(new ArrayList<Point>(), new ArrayList<Point>(), null, 3, 6, new ArrayList<Point>()),mf);
+        assertNull(mf.wallnormalmap);
+        assertNotNull(mf.wallNormal);
+    }
+
+    @Test
+    public void testTerrainDungeonArt() {
+        MazeTheme mz = MazeTheme.buildFromIdentifier("dungeon-art");
+        MazeDungeonModelFactory mf = (MazeDungeonModelFactory) mz.getMazeModelFactory();
+        MazeDungeonTerrain terrain = new MazeDungeonTerrain(new MazeLayout(new ArrayList<Point>(), new ArrayList<Point>(), null, 3, 6, new ArrayList<Point>()),mf);
+        assertNull(mf.wallnormalmap);
+        assertNotNull(mf.wallNormal);
+    }
+
 }

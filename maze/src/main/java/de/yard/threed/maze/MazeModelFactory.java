@@ -184,15 +184,16 @@ public class MazeModelFactory implements ModelBuilderRegistry {
                 wallnormalmap[4] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
                 break;
             case MazeTheme.THEME_ID_DUNGEON:
-                walltexture = buildTexture("textures/gimp/wood/BucheHell.png");
+            case MazeTheme.THEME_ID_DUNGEON_ART:
+                //walltexture = buildTexture("textures/gimp/wood/BucheHell.png");
                 pillarmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheDunkel.png"));
                 sokobanboxgeo = ShapeGeometry.buildBox(settings.sokobanboxsize, settings.sokobanboxsize, settings.sokobanboxsize, null);
                 sokobanboxmaterial = Material.buildLambertMaterial(buildTexture("textures/gimp/wood/BucheMedium.png"));
                 //22.3.17: Wandmaterial auch fuer Boden statt Ground.png
-                groundmaterial = Material.buildPhongMaterialWithNormalMap(buildTexture("textures/gimp/wood/BucheHell.png"),
-                        Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));
-                wallnormalmap = new Texture[1];
-                wallnormalmap[0] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+                //groundmaterial = Material.buildPhongMaterialWithNormalMap(buildTexture("textures/gimp/wood/BucheHell.png"),
+                //        Texture.buildNormalMap(MazeModelFactory.buildEdgeNormalmap().image));
+                //wallnormalmap = new Texture[1];
+                //wallnormalmap[0] = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
 
                 break;
             default:
@@ -200,7 +201,7 @@ public class MazeModelFactory implements ModelBuilderRegistry {
         }
     }
 
-    private Texture buildTexture(String s) {
+    public Texture buildTexture(String s) {
         return Texture.buildBundleTexture("data", s);
     }
 
