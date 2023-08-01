@@ -46,7 +46,7 @@ public class BulletSystemTest {
     @Test
     public void testFireRequest() throws Exception {
 
-        MazeDataProvider.init("maze/Maze-P-Simple.txt");
+        MazeDataProvider.init("maze/Maze-P-Simple.txt", null);
 
         // load grid
         EcsTestHelper.processSeconds(2);

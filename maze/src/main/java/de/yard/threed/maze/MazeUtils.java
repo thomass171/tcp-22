@@ -306,7 +306,7 @@ public class MazeUtils {
 
     public static List<Point> getHomesOfTeam(MazeLayout layout, int teamid) {
         List<Point> homes = new ArrayList<Point>();
-        for (StartPosition startPosition : layout.getStartPositionsOfTeam(teamid)) {
+        for (StartPosition startPosition : layout.getStartPositionsOfTeam(teamid).positions) {
             homes.add(startPosition.getPoint());
         }
         return homes;

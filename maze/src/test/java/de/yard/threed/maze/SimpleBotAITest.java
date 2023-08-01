@@ -8,6 +8,7 @@ import de.yard.threed.engine.util.DeterministicIntProvider;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.util.IntProvider;
+import de.yard.threed.maze.testutils.ExpectedGridData;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,16 @@ public class SimpleBotAITest {
                 "#    @   #\n" +
                 "##########", 2);
 
-        GridState gridState = GridTest.initContent(grid, new Point[]{new Point(5, 1), new Point(3, 2), new Point(4, 2)}, new Point[]{}, new Point[]{});
+        ExpectedGridData expectedGridData = new ExpectedGridData(
+                new GridTeam[]{
+                        new GridTeam(new StartPosition[]{new StartPosition(5, 1, GridOrientation.N)}, false),
+                        new GridTeam(new StartPosition[]{new StartPosition(3, 2, GridOrientation.S), new StartPosition(4, 2, GridOrientation.E)}, true),
+                },
+                new Point[]{},
+                new Point[]{}
+        );
+
+        GridState gridState = GridTest.initAndValidateGrid(grid, expectedGridData);
         GridMover player = gridState.players.get(0);
         GridMover leftBot = gridState.players.get(1);
         GridMover rightBot = gridState.players.get(2);
@@ -44,11 +54,11 @@ public class SimpleBotAITest {
         MazeTestUtils.move(leftBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(5, 2));
 
         SimpleBotAI botAI = new SimpleBotAI();
-        IntProvider intProvider = new DeterministicIntProvider(new int[]{1,1});
+        IntProvider intProvider = new DeterministicIntProvider(new int[]{1, 1});
         Request request = botAI.getNextRequest(leftBot, gridState, grid.getMazeLayout(), intProvider);
         // should not fire at own team member but turn
         assertEquals(MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
-        MazeTestUtils.rotatePlayer(leftBot, false,  new Point(5, 2));
+        MazeTestUtils.rotatePlayer(leftBot, false, new Point(5, 2));
 
         request = botAI.getNextRequest(leftBot, gridState, grid.getMazeLayout(), intProvider);
         // should now fire player

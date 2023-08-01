@@ -20,6 +20,11 @@ public class GridOrientation {
     private static Direction[] leftdirs = {Direction.W, Direction.N, Direction.E, Direction.S};
     private static Direction[] rightdirs = {Direction.E, Direction.S, Direction.W, Direction.N};
 
+    public static GridOrientation N = new GridOrientation(0);
+    public static GridOrientation E = new GridOrientation(1);
+    public static GridOrientation S = new GridOrientation(2);
+    public static GridOrientation W = new GridOrientation(3);
+
     /**
      * Defaultausrichtung (North)
      */

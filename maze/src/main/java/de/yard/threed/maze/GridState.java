@@ -261,8 +261,21 @@ public class GridState {
             }
         }
 
-        if (boxes.size() == 0) {
-            //No Sokoban
+        if (boxes.size() > 0) {
+            // Maybe sokoban style, but not necessarily. Assume Sokoban if number of destination matches boxes.
+            // Solved if on any destination there is a box
+            if (mazeLayout.destinations.size() == boxes.size()) {
+                // assume its Sokoban
+                for (Point d : mazeLayout.destinations) {
+                    if (MazeUtils.getMoverFromListAtLocation(boxes, d) == null) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        //No Sokoban, but might also have boxes
             if (itemsNeededToCollect) {
                 if (allItemsNeededCollected) {
                     return true;
@@ -277,15 +290,7 @@ public class GridState {
                 return true;
             }
             return false;
-        } else {
-            // Sokoban style. Solved if on any destination there is a box
-            for (Point d : mazeLayout.destinations) {
-                if (MazeUtils.getMoverFromListAtLocation(boxes, d) == null) {
-                    return false;
-                }
-            }
-            return true;
-        }
+
     }
 
     /**

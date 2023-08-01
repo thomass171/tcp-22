@@ -57,7 +57,7 @@ public class MazeTerrainTest {
         Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "maze/grid1.txt"))).get(0);
 
         MazeLayout layout = grid.getMazeLayout();
-        Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true);
+        Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true).p;
         Assertions.assertEquals(11, layout.getMaxWidth(), "width");
         Assertions.assertEquals(7, layout.getHeight(), "height");
         Assertions.assertEquals(5, startPosition.getX(), "start.x");

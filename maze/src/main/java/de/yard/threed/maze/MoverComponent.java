@@ -37,10 +37,10 @@ public class MoverComponent extends EcsComponent implements GridMover {
     private boolean player;
     //private int type = -1;
 
-    public MoverComponent(SimpleTransform movable, boolean player, Point location, GridOrientation orientation, int team) {
+    public MoverComponent(SimpleTransform movable, boolean player, StartPosition startPosition, int team) {
         this.movable = movable;
         this.player = player;
-        gridMover = new SimpleGridMover(location, orientation, this, team);
+        gridMover = new SimpleGridMover(startPosition, this, team);
     }
 
     /**
@@ -156,6 +156,11 @@ public class MoverComponent extends EcsComponent implements GridMover {
     @Override
     public int getTeam() {
         return gridMover.getTeam();
+    }
+
+    @Override
+    public StartPosition getStartPosition() {
+        return gridMover.getStartPosition();
     }
 
     @Override

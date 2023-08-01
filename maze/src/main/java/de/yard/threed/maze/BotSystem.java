@@ -27,7 +27,7 @@ public class BotSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(BotSystem.class);
     public static String TAG = "BotSystem";
     private boolean botsystemdebuglog = true;
-    private List<List<StartPosition>> startPositions;
+    private List<GridTeam> startPositions;
     private IntProvider rand = new RandomIntProvider();
     private boolean serverMode;
     private BotAiBuilder botAiBuilder;
@@ -88,7 +88,8 @@ public class BotSystem extends DefaultEcsSystem {
             // take grid from payload because dataprovider are not available in pure client mode (which probably doesn't apply for BotSystem.
             // but it makes it more consistent.
             String rawGrid = (String) evt.getPayload().get("grid");
-            Grid grid = Grid.loadFromRaw(rawGrid);
+            // Need to handle teamSize?
+            Grid grid = Grid.loadFromRaw(rawGrid, null);
             if (grid == null) {
                 logger.error("no or invalid grid in payload");
             } else {
@@ -104,6 +105,7 @@ public class BotSystem extends DefaultEcsSystem {
             // But only once, the login request fired here will also trigger a JOINED event again.
             if (serverMode) {
                 // In server mode we should wait for additional user joining.
+                logger.debug("" + currentPlayer.size() + " " + Grid.getInstance().getMazeLayout().getStartPositionCount(true));
                 if (currentPlayer.size() >= Grid.getInstance().getMazeLayout().getStartPositionCount(true)) {
                     startRemainingPlayer(currentPlayer);
                 }
@@ -111,7 +113,7 @@ public class BotSystem extends DefaultEcsSystem {
                 // In non server mode the joined user is alone, so we need to start bots for remaining player and start monster
                 startRemainingPlayer(currentPlayer);
             }
-            startPositions = null;
+
         }
     }
 
@@ -124,11 +126,16 @@ public class BotSystem extends DefaultEcsSystem {
         this.rand = intProvider;
     }
 
+    public boolean isServerMode() {
+        return serverMode;
+    }
+
     /**
      * Start player/monster bots. Both don't need a login but just join.
      */
     private void startRemainingPlayer(List<EcsEntity> currentPlayer) {
 
+        logger.debug("startRemainingPlayer");
         // find team/start position of current user for ignoring this. No longer, in multi player a bot might complete a team.
         // In fact, the start position isn't really used here, just for identifying player/monster
         // int startTeam = MoverComponent.getMoverComponent(startUser).getGridMover().getTeam();
@@ -137,9 +144,9 @@ public class BotSystem extends DefaultEcsSystem {
         int skipped = 0;
         for (int i = 0; i < startPositions.size(); i++) {
             // A bot is no logged in user, thus will only join
-            for (StartPosition startPosition : startPositions.get(i)) {
+            for (StartPosition startPosition : startPositions.get(i).positions) {
                 EcsEntity user = null;
-                if (startPosition.isMonster) {
+                if (startPositions.get(i).isMonsterTeam) {
                     user = new EcsEntity(BotComponent.buildFromGridDefinition(true, botAiBuilder.build()));
                 } else {
                     // skip already logged in user
@@ -158,5 +165,6 @@ public class BotSystem extends DefaultEcsSystem {
             }
         }
         logger.debug("Launched " + botIndex + " bots. skipped " + skipped);
+        startPositions = null;
     }
 }

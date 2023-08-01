@@ -68,7 +68,7 @@ public class MazeDataProviderTest {
 
         String url = "http://localhost:" + wireMockServer.port() + "/mazes/1";
 
-        MazeDataProvider.init(url);
+        MazeDataProvider.init(url, null);
 
         TestUtils.waitUntil(() -> sceneRunner.futures.size() > 0 && sceneRunner.futures.get(0).getFirst().isDone(), 2000);
 

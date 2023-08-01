@@ -7,6 +7,6 @@ public class HomeRelocationStrategy implements RelocationStrategy {
     @Override
     public Point getLocation(MazeLayout layout, EcsEntity player) {
         MoverComponent mc = MoverComponent.getMoverComponent(player);
-        return layout.getStartPositionsOfTeam(mc.getTeam()).get(0).getPoint();
+        return layout.getStartPositionsOfTeam(mc.getTeam()).positions.get(0).getPoint();
     }
 }

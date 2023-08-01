@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Factory for grid elements (mover, items etc).
+ * Not for 3D model building and visuals. No ECS.
  * See also {@MazeModelBuilder}
  * <p>
  * 13.4.21
@@ -25,12 +27,12 @@ public class MazeFactory {
      */
     public static GridMover buildMover(Point initialLocation) {
 
-        return buildMover(initialLocation, new GridOrientation(), -1);
+        return buildMover(new StartPosition(initialLocation, new GridOrientation()), -1);
     }
 
-    public static GridMover buildMover(Point initialLocation, GridOrientation initialOrientation, int team) {
+    public static GridMover buildMover(StartPosition startPosition, int team) {
 
-        return new SimpleGridMover(initialLocation, initialOrientation, team);
+        return new SimpleGridMover(startPosition, team);
     }
 
     /**
@@ -44,7 +46,7 @@ public class MazeFactory {
         int team = -1;
         List<GridMover> mover = new ArrayList<GridMover>();
         for (Point p : initialLocation) {
-            mover.add(new SimpleGridMover(p, new GridOrientation(), team));
+            mover.add(new SimpleGridMover(new StartPosition(p, new GridOrientation()), team));
         }
         return mover;
     }

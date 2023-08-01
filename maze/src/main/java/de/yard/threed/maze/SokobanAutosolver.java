@@ -45,7 +45,7 @@ public class SokobanAutosolver {
     public void solve() {
         Timestamp timestamp = new Timestamp();
 
-        GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null, true));
+        GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null, true).p);
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
 
         //no items here for now.

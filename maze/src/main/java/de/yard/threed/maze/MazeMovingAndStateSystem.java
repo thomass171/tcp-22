@@ -292,18 +292,18 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         }
         BotComponent botComponent = BotComponent.getBotComponent(playerEntity);
 
-        Point launchPosition = findAvailableLaunchPosition(layout, currentPlayer, botComponent!=null && botComponent.isMonster());
+        StartPosition launchPosition = findAvailableLaunchPosition(layout, currentPlayer, botComponent!=null && botComponent.isMonster());
 
         int teamid;
         if (launchPosition != null) {
-            teamid = layout.getTeamByHome(launchPosition);
+            teamid = layout.getTeamByHome(launchPosition.getPoint());
             //completeJoin(layout, playerEntity, launchPosition, teamid);
             logger.debug("Launching player at "+launchPosition);
         } else {
             logger.warn("No start position found. too may players?. Currently " + currentPlayer.size());
             return BaseEventRegistry.buildUserJoinFailedEvent(playerEntity, "error");
         }
-        MoverComponent mover = new MoverComponent(null/*playerEntity.scenenode.getTransform()*/, true, launchPosition, layout.getInitialOrientation(launchPosition), teamid);
+        MoverComponent mover = new MoverComponent(null/*playerEntity.scenenode.getTransform()*/, true, launchPosition/* layout.getInitialOrientation(launchPosition)*/, teamid);
         //usedLaunchPositions.add(launchPosition);
 
         playerEntity.addComponent(mover);
@@ -314,7 +314,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     /**
      * Also used for bots/monster.
      */
-    private Point findAvailableLaunchPosition(MazeLayout layout, List<EcsEntity> currentPlayer, boolean forMonster) {
+    private StartPosition findAvailableLaunchPosition(MazeLayout layout, List<EcsEntity> currentPlayer, boolean forMonster) {
         List<Point> positionsToIgnore = new ArrayList<Point>();
         for (EcsEntity p : currentPlayer) {
             MoverComponent mc = MoverComponent.getMoverComponent(p);
@@ -323,7 +323,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
                 positionsToIgnore.add(mc.getLocation());
             }
         }
-        Point launchPosition = layout.getNextLaunchPosition(positionsToIgnore, forMonster);
+        StartPosition launchPosition = layout.getNextLaunchPosition(positionsToIgnore, forMonster);
         return launchPosition;
     }
 
@@ -561,7 +561,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //SceneNode p = MazeModelFactory.getInstance().buildSokobanBox(/*b.getX(), b.getY()*/);
             EcsEntity box = new EcsEntity();
             box.buildSceneNodeByModelFactory(MazeModelFactory.BOX_BUILDER, new ModelBuilderRegistry[]{mazeTheme.getMazeModelFactory()});
-            MoverComponent mover = new MoverComponent(box.getSceneNode().getTransform()/*this*/, false, b, new GridOrientation(), -1);
+            MoverComponent mover = new MoverComponent(box.getSceneNode().getTransform()/*this*/, false, new StartPosition(b, new GridOrientation()), -1);
             mover.setLocation(b);
             box.addComponent(mover);
             //return box;

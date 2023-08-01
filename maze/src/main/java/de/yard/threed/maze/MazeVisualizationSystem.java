@@ -84,7 +84,8 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
             // gridname is not really needed currently to load the grid from the data provider
             // take grid from payload because dataprovider are not available in pure client mode.
             String rawGrid = (String) evt.getPayload().get("grid");
-            Grid grid = Grid.loadFromRaw(rawGrid);
+            // Need to handle teamSize?
+            Grid grid = Grid.loadFromRaw(rawGrid, null);
             if (grid == null) {
                 logger.error("no or invalid grid in payload");
             } else {

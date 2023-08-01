@@ -47,9 +47,13 @@ public class Grid {
     }
 
     public static List<Grid> loadByReader(StringReader ins) throws InvalidMazeException {
+        return loadByReader(ins, null);
+    }
+
+    public static List<Grid> loadByReader(StringReader ins, String teamSize) throws InvalidMazeException {
 
         GridReader reader = new GridReader();
-        return reader.readGrid(ins);
+        return reader.readGrid(ins, teamSize);
     }
 
 
@@ -57,14 +61,14 @@ public class Grid {
      * There is no need for a grid name.
      * Returns null in case of error (already logged the error)
      */
-    public static Grid loadFromRaw(String rawGrid) {
+    public static Grid loadFromRaw(String rawGrid, String teamSize) {
 
         if (rawGrid == null) {
             getLogger().error("rawGrid is null");
             return null;
         }
         try {
-            List<Grid> grids = loadByReader(new StringReader(StringUtils.replaceAll(rawGrid, "n", "\n")));
+            List<Grid> grids = loadByReader(new StringReader(StringUtils.replaceAll(rawGrid, "n", "\n")), teamSize);
             if (grids.size() != 1) {
                 getLogger().warn("inconsistent raw grid. Using first entry");
             }
@@ -165,8 +169,8 @@ public class Grid {
         unusedFields.addAll(layout.getFields());
         unusedFields.removeAll(boxes);
         unusedFields.removeAll(diamonds);
-        for (List<StartPosition> starts : layout.getStartPositions()) {
-            for (StartPosition start : starts) {
+        for (GridTeam starts : layout.getStartPositions()) {
+            for (StartPosition start : starts.positions) {
                 unusedFields.remove(start.p);
             }
         }

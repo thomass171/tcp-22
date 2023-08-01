@@ -19,6 +19,7 @@ import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.maze.testutils.EmptyBotAIBuilder;
+import de.yard.threed.maze.testutils.ExpectedGridData;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.maze.testutils.TestingBotAiBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -57,6 +57,8 @@ public class MazeTest {
 
     private WireMockServer wireMockServer;
 
+    GridOrientation defaultOrientation;
+
     @BeforeEach
     void setup() {
         SystemState.state = 0;
@@ -65,12 +67,14 @@ public class MazeTest {
 
         wireMockServer = new WireMockServer(wireMockConfig().port(8089));
         wireMockServer.start();
+
+        defaultOrientation = GridOrientation.fromDirection("N");
     }
 
     /**
      * Due to parameter not in @Before
      */
-    private void setupTest(String levelname, BotAiBuilder botAiBuilder, boolean replaceMonsterWithPlayer) {
+    private void setupTest(String levelname, BotAiBuilder botAiBuilder, boolean replaceMonsterWithPlayer, boolean serverMode) {
         InitMethod initMethod = new InitMethod() {
             @Override
             public void init() {
@@ -94,7 +98,7 @@ public class MazeTest {
                 replaySystem = new ReplaySystem();
                 SystemManager.addSystem(replaySystem);
                 if (botAiBuilder != null) {
-                    botSystem = new BotSystem(false, botAiBuilder);
+                    botSystem = new BotSystem(serverMode, botAiBuilder);
                     SystemManager.addSystem(botSystem);
                 }
 
@@ -107,9 +111,9 @@ public class MazeTest {
 
         if (replaceMonsterWithPlayer) {
             String fileContent = MazeUtils.readMazefile(levelname).replace("M", "P");
-            MazeDataProvider.init(fileContent);
+            MazeDataProvider.init(fileContent, null);
         } else {
-            MazeDataProvider.init(levelname);
+            MazeDataProvider.init(levelname, null);
         }
 
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
@@ -144,7 +148,7 @@ public class MazeTest {
      */
     public void runSokobanWikipedia(boolean remoteGrid) {
 
-        setupTest(remoteGrid ? "http://localhost:" + wireMockServer.port() + "/mazes/1" : "skbn/SokobanWikipedia.txt", null, false);
+        setupTest(remoteGrid ? "http://localhost:" + wireMockServer.port() + "/mazes/1" : "skbn/SokobanWikipedia.txt", null, false, false);
 
         assertEquals(2, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (2 boxes)");
 
@@ -204,7 +208,7 @@ public class MazeTest {
     @Test
     public void testGrid1() {
         //grid1.txt
-        setupTest("maze/grid1.txt", null, false);
+        setupTest("maze/grid1.txt", null, false, false);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(0, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (0 boxes)");
@@ -256,7 +260,7 @@ public class MazeTest {
     @Test
     public void testArea15x10() {
 
-        setupTest("maze/Area15x10.txt", new SimpleBotAiBuilder(), false);
+        setupTest("maze/Area15x10.txt", new SimpleBotAiBuilder(), false, false);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(4, EcsHelper.findAllEntities().size(), "number of entities (4 diamonds)");
@@ -321,7 +325,7 @@ public class MazeTest {
     @Test
     public void testDavidJoffe2() {
         //grid1.txt
-        setupTest("skbn/DavidJoffe.txt:2", null, false);
+        setupTest("skbn/DavidJoffe.txt:2", null, false, false);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertEquals(10, SystemManager.findEntities((EntityFilter) null).size(), "number of entities (0 boxes)");
@@ -349,10 +353,9 @@ public class MazeTest {
     @Test
     public void testSimpleMultiplayerWithoutBotSystem() {
 
-        setupTest("maze/Maze-P-Simple.txt", null, true);
+        setupTest("maze/Maze-P-Simple.txt", null, true, false);
 
-        List<EcsEntity> users = initMaze(new Point[]{new Point(5, 1), new Point(4, 4)}, new Direction[]{Direction.N, Direction.E},
-                new Point[]{}, 2, 2);
+        List<EcsEntity> users = initMaze(ExpectedGridData.buildForP_simple(true));
         EcsEntity user0 = users.get(0);
         EcsEntity user1 = users.get(1);
 
@@ -404,12 +407,11 @@ public class MazeTest {
 
         TestingBotAiBuilder testingBotAiBuilder = new TestingBotAiBuilder();
 
-        setupTest("maze/Maze-P-Simple.txt", testingBotAiBuilder, false);
+        setupTest("maze/Maze-P-Simple.txt", testingBotAiBuilder, false, false);
 
         assertNull(MazeUtils.getMainPlayer());
 
-        List<EcsEntity> users = initMaze(new Point[]{new Point(5, 1)}, new Direction[]{Direction.N},
-                new Point[]{new Point(4, 4)}, 2, 1);
+        List<EcsEntity> users = initMaze(ExpectedGridData.buildForP_simple(false));
 
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user0);
@@ -431,10 +433,10 @@ public class MazeTest {
     @Test
     public void testCollectWithoutBotSystem() throws Exception {
 
-        setupTest("maze/Maze-P-Simple.txt", null, false);
+        setupTest("maze/Maze-P-Simple.txt", null, false, false);
 
-        List<EcsEntity> users = initMaze(new Point[]{new Point(5, 1)}, new Direction[]{Direction.N},
-                new Point[]{/*no bots without botsystem*/}, 2, 1);
+        //no bots without botsystem
+        List<EcsEntity> users = initMaze(ExpectedGridData.buildForP_simple(false));
         EcsEntity user0 = users.get(0);
 
         MazeTestUtils.ecsWalk(TRIGGER_REQUEST_LEFT, sceneRunner, user0, true, new Point(4, 1));
@@ -481,13 +483,9 @@ public class MazeTest {
 
         TestingBotAiBuilder testingBotAiBuilder = new TestingBotAiBuilder();
 
-        setupTest("maze/Maze-M-30x20.txt", testingBotAiBuilder, false);
+        setupTest("maze/Maze-M-30x20.txt", testingBotAiBuilder, false, false);
 
-        List<EcsEntity> users = initMaze(new Point[]{new Point(28, 3)}, new Direction[]{Direction.N},
-                new Point[]{new Point(21, 11),
-                        new Point(22, 11),
-                        new Point(23, 11),
-                }, 0, 1);
+        List<EcsEntity> users = initMaze(ExpectedGridData.buildForM_30x20());
 
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user0);
@@ -517,10 +515,20 @@ public class MazeTest {
                 "#        #\n" +
                 "#        #\n" +
                 "#   @    #\n" +
-                "##########", testingBotAiBuilder, false);
+                "##########", testingBotAiBuilder, false, false);
 
-        List<EcsEntity> users = initMaze(new Point[]{new Point(4, 1)}, new Direction[]{Direction.N},
-                new Point[]{new Point(4, 4)}, 1, 2);
+        ExpectedGridData expectedGridData = new ExpectedGridData(
+                new GridTeam[]{
+                        new GridTeam(new StartPosition[]{
+                                new StartPosition(4, 1, GridOrientation.N)}, false),
+                        new GridTeam(new StartPosition[]{
+                                new StartPosition(4, 4, GridOrientation.S)}, false),
+                },
+                new Point[]{},
+                new Point[]{new Point(6, 4)}
+        );
+
+        List<EcsEntity> users = initMaze(expectedGridData);
 
         EcsEntity user = users.get(0);
         assertNotNull(user);
@@ -558,7 +566,7 @@ public class MazeTest {
 
     /**
      * Without diamonds its solved immediately.
-     * BotSystem will start a bot for remaining player.
+     * BotSystem (in non server mode) will start a bot for remaining player.
      */
     @Test
     public void testMultiBot() throws Exception {
@@ -568,11 +576,21 @@ public class MazeTest {
                 "#@@      #\n" +
                 "#        #\n" +
                 "#   @    #\n" +
-                "##########", new EmptyBotAIBuilder(), false);
+                "##########", new EmptyBotAIBuilder(), false, false);
 
-        initMaze(new Point[]{new Point(4, 1)}, new Direction[]{Direction.N},
-                new Point[]{new Point(1, 3),
-                        new Point(2, 3)}, 1, 3);
+        ExpectedGridData expectedGridData = new ExpectedGridData(
+                new GridTeam[]{
+                        new GridTeam(new StartPosition[]{
+                                new StartPosition(4, 1, GridOrientation.N)}, false),
+                        new GridTeam(new StartPosition[]{
+                                new StartPosition(1, 3, GridOrientation.E),
+                                new StartPosition(2, 3, GridOrientation.E)}, false),
+                },
+                new Point[]{},
+                new Point[]{new Point(6, 5)}
+        );
+
+        initMaze(expectedGridData);
 
         assertEquals(3, MazeUtils.getPlayer().size(), "number of player");
         EcsEntity user = MazeUtils.getPlayerByUsername("u0");
@@ -619,14 +637,26 @@ public class MazeTest {
                 "#MM      #\n" +
                 "#  @     #\n" +
                 "#   M M  #\n" +
-                "##########", new EmptyBotAIBuilder(), false);
+                "##########", new EmptyBotAIBuilder(), false, false);
 
-        initMaze(new Point[]{new Point(3, 2)}, new Direction[]{Direction.N},
+        ExpectedGridData expectedGridData = new ExpectedGridData(
+                new GridTeam[]{
+                        new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, true),
+                        new GridTeam(new StartPosition[]{new StartPosition(6, 1, defaultOrientation)}, true),
+                        new GridTeam(new StartPosition[]{new StartPosition(3, 2, defaultOrientation)}, false),
+                        new GridTeam(new StartPosition[]{new StartPosition(1, 3, GridOrientation.E),
+                                new StartPosition(2, 3, GridOrientation.E)}, true),
+                },
+                new Point[]{},
+                new Point[]{new Point(6, 5)}
+        );
+
+        initMaze(expectedGridData/*new Point[]{new Point(3, 2)}, new Direction[]{Direction.N},
                 new Point[]{new Point(4, 1),
                         new Point(6, 1),
                         new Point(1, 3),
                         new Point(2, 3)
-                }, 1, 1);
+                }, 1, 1*/);
 
         EcsEntity user = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user);
@@ -648,64 +678,123 @@ public class MazeTest {
     }
 
     /**
-     * Launch a number of login player (next fails to join), check items.
-     * Might have option to add bots some day, but currently (7/23) we have no player bots, only bot monster.
-     * <p>
-     * "initialPositions" might not contain bots and no monster.
-     *
-     * @return list of player (incl. monster(and bots?)
+     * ################################################################################
+     * ####  M         ################################################################
+     * ####  M         ################################################################
+     * ####                  ##########################################################
+     * ######D## ########### ##########################################################
+     * ######### ###########                        ###################################
+     * ######### ################################## ###################################
+     * ######### ################################## ###################################
+     * ########     #######    #################### ###################################
+     * ########  M  #######    #################### ###################################
+     * ########     #######  M ####################            ########################
+     * #####            ###    ############################### ########################
+     * ##### ##     ### ###    ##################     ######## ########################
+     * ##### ##     ### ###    ################## M      ##### ########################
+     * ##### ##     ### #### #################### M   ## ##### ########################
+     * ##### ##     ### ###  ##############           ##      B       #################
+     * ##### ##  M  ### ### ############### #####     ######## ###### #################
+     * ##### ########## ### ############### ################## ###### #################
+     * ##### ########## ##   ############## ################## ###### #################
+     * ##### ########## ##   ##############       D####        ######                 #
+     * #@ ## ########## ##   ############## ########################################  #
+     * #@    ##########              ###### ######################################## D#
+     * #@ ################   ##      ###### ###########################################
+     * ########################  M          ###########################################
+     * ################################################################################
      */
-    private List<EcsEntity> initMaze(Point[] initialPositions, Direction[] initialOrientation, Point[] expectedBotPositions,
-                                     int diamonds, int expectedLoginPositions) {
+    @Test
+    public void testD_80x25() throws Exception {
+        runD_80x25(false);
+    }
+
+    @Test
+    public void testD_80x25ServerMode() throws Exception {
+        runD_80x25(true);
+    }
+
+    public void runD_80x25(boolean serverMode) {
+
+        setupTest("maze/Maze-D-80x25.txt", new EmptyBotAIBuilder(), false, serverMode);
+        List<EcsEntity> users = initMaze(ExpectedGridData.buildForD_80x25());
+
+        GridState currentstate = MazeUtils.buildGridStateFromEcs();
+        //??assertEquals(4, currentstate.players.size());
+        assertFalse(currentstate.isSolved(Grid.getInstance().getMazeLayout()));
+    }
+
+    /**
+     * Launch a number of login player (next fails to join), check items and bots.
+     * <p>
+     * @return list of player (incl. monster and bots)
+     */
+    private List<EcsEntity> initMaze(ExpectedGridData expectedGridData) {
         List<EcsEntity> users = new ArrayList<>();
 
-        // no boxes, no player, only diamonds
-        assertEquals(diamonds, SystemManager.findEntities((EntityFilter) null).size(), "number of entities");
+        // no boxes, no player, only diamonds (and other items)
+        List<EcsEntity> entities = SystemManager.findEntities((EntityFilter) null);
+        assertEquals(expectedGridData.expectedItemsLocations.length + expectedGridData.expectedBoxesLocations.length, entities.size(), "number of entities");
         assertEquals(0, MazeUtils.getPlayer().size(), "number of player");
         assertNull(MazeUtils.getMainPlayer());
 
-        assertEquals(expectedLoginPositions, Grid.getInstance().getMazeLayout().getStartPositionCount(true));
-        if (botSystem != null) {
-            assertEquals(initialPositions.length + expectedBotPositions.length, Grid.getInstance().getMazeLayout().getStartPositionCount(false));
-        }
+        assertEquals(expectedGridData.getStartPositionCount(true), Grid.getInstance().getMazeLayout().getStartPositionCount(true));
+        assertEquals(expectedGridData.getStartPositionCount(false), Grid.getInstance().getMazeLayout().getStartPositionCount(false));
 
         assertTrue(SystemState.readyToJoin());
 
-        for (int uindex = 0; uindex < initialPositions.length; uindex++) {
-            SystemManager.putRequest(UserSystem.buildLoginRequest("u" + uindex, ""));
-            sceneRunner.runLimitedFrames(5);
+        // start initial user
+        int initialPlayerTeam = expectedGridData.getInitialPlayerTeam();
+        users.add(startUser(0, expectedGridData.expectedTeams[initialPlayerTeam].positions.get(0)));
 
-            EcsEntity user = MazeUtils.getPlayerByUsername("u" + uindex);
-            assertNotNull(user);
-            assertEquals(initialOrientation[uindex].toString(), MazeUtils.getPlayerorientation(user).getDirection().toString(), "initial orientation for " + uindex);
-            users.add(user);
+        // start remaining user. Only needed in server mode. Otherwise BotSystem would have started further user.
+        // uindex is not for bots.
+        if (botSystem == null || botSystem.isServerMode()) {
+            int uindex = 1;
+            for (int team = 0; team < expectedGridData.expectedLoginTeams.size(); team++) {
+                GridTeam gridTeam = expectedGridData.expectedLoginTeams.get(team);
+                for (int i = 0; i < gridTeam.positions.size(); i++) {
+                    // initial user has already been started
 
-            // if botsystem exists it will start monster immediately.
-            if (botSystem != null) {
-                for (int bindex = 0; bindex < expectedBotPositions.length; bindex++) {
-
-                    int uCount = initialPositions.length + bindex + 1;
-                    List<EcsEntity> bots = EcsHelper.findEntitiesByName("Bot" + bindex);
-                    if (bots.size() == 0) {
-                        fail("Bot" + bindex + " not found");
+                    if (team > 0 || i > 0) {
+                        users.add(startUser(uindex, gridTeam.positions.get(i)));
+                        //possible race condition with botsystem, so better no validation of total entities here
+                        uindex++;
                     }
-                    EcsEntity monster = bots.get(0);
-                    assertNotNull(monster);
-                    //assertEquals(initialOrientation[mindex].toString(), MazeUtils.getPlayerorientation(user).getDirection().toString(), "initial orientation for " + uindex);
-                    users.add(monster);
-
-                }
-            } else {
-                if (expectedBotPositions.length > 0) {
-                    fail("Cannot expect monster without botSystem");
                 }
             }
-            int uCount = uindex + 1 + expectedBotPositions.length;
-            assertEquals(uCount + (uCount * 3) + diamonds, SystemManager.findEntities((EntityFilter) null).size(), "number of entites (" + uCount + " player + 3 bullets each+" + diamonds + " diamond) at uindex " + uindex);
-            assertEquals(uCount, MazeUtils.getPlayer().size(), "number of player at uindex " + uindex);
-            assertNotNull(MazeUtils.getMainPlayer());
-
         }
+
+        // if botsystem exists it will start monster immediately after first user join (depending on server mode).
+        // And depending on server mode also additional user
+        if (botSystem != null) {
+
+            int bindex = 0;
+            for (int team = 0; team < expectedGridData.expectedTeams.length; team++) {
+                GridTeam gridTeam = expectedGridData.expectedTeams[team];
+
+                for (int i = 0; i < expectedGridData.expectedTeams[team].positions.size(); i++) {
+
+                    // skip initial user
+                    if (i > 0 || team != initialPlayerTeam) {
+                        if (!botSystem.isServerMode() || gridTeam.isMonsterTeam) {
+                            StartPosition expectedStartPosition = gridTeam.positions.get(i);
+                            List<EcsEntity> bots = EcsHelper.findEntitiesByName("Bot" + bindex);
+                            if (bots.size() == 0) {
+                                fail("Bot" + bindex + " not found");
+                            }
+                            EcsEntity bot = bots.get(0);
+                            assertNotNull(bot);
+                            MazeTestUtils.assertPositionAndOrientation(bot, expectedStartPosition.getPoint(), expectedStartPosition.initialOrientation,
+                                    "bot=" + bindex + ",team=" + team + ",i=" + i + ",expectedStartPosition=" + expectedStartPosition + ":");
+                            users.add(bot);
+                            bindex++;
+                        }
+                    }
+                }
+            }
+        }
+        validateNumberOfUsersAndEntities(users.size(), expectedGridData.expectedItemsLocations.length + expectedGridData.expectedBoxesLocations.length);
 
         // observer should stay attached to first player
         assertEquals("Avatar", Observer.getInstance().getTransform().getParent().getSceneNode().getName(), "parent of observer");
@@ -713,20 +802,33 @@ public class MazeTest {
         assertEquals(users.get(0).scenenode.getTransform().transform, Observer.getInstance().getTransform().getParent().transform, "parent of observer");
 
         // don't expect additional user (however, login should be possible)
-        SystemManager.putRequest(UserSystem.buildLoginRequest("u" + initialPositions.length, ""));
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u999999", ""));
         sceneRunner.runLimitedFrames(5);
-        assertEquals(initialPositions.length + expectedBotPositions.length, MazeUtils.getPlayer().size(), "number of player");
-        // all user still on their start position and have 3 bullets
-        for (int uindex = 0; uindex < initialPositions.length; uindex++) {
-            MazeTestUtils.assertPosition(users.get(uindex), initialPositions[uindex]);
-            assertEquals(3, MazeUtils.getBullets(users.get(uindex)).size(), "bullets");
-        }
-        for (int mindex = 0; mindex < expectedBotPositions.length; mindex++) {
-            MazeTestUtils.assertPosition(users.get(1 + mindex), expectedBotPositions[mindex]);
-        }
-        assertEquals((initialPositions.length + expectedBotPositions.length) * 3 + diamonds, MazeUtils.getAllItems().size(), "(x*3 bullets, 2 diamond)");
+        assertEquals(users.size(), MazeUtils.getPlayer().size(), "number of player");
 
-
+        // all user still on their start position and have 3 bullets? BotSystem should not use an undeterministic AI component.
+        for (EcsEntity user : users) {
+            StartPosition startPosition = MoverComponent.getMoverComponent(user).getGridMover().getStartPosition();
+            MazeTestUtils.assertPositionAndOrientation(user, startPosition.p, startPosition.initialOrientation);
+            assertEquals(3, MazeUtils.getBullets(user).size(), "bullets");
+        }
         return users;
+    }
+
+    private EcsEntity startUser(int uindex, StartPosition startPosition) {
+        SystemManager.putRequest(UserSystem.buildLoginRequest("u" + uindex, ""));
+        sceneRunner.runLimitedFrames(5);
+
+        EcsEntity user = MazeUtils.getPlayerByUsername("u" + uindex);
+        assertNotNull(user);
+        MazeTestUtils.assertPositionAndOrientation(user, startPosition.p, startPosition.initialOrientation, "initial orientation for " + uindex);
+        return user;
+    }
+
+    private void validateNumberOfUsersAndEntities(int uCount, int itemCount) {
+        assertEquals(uCount + (uCount * 3) + itemCount, SystemManager.findEntities((EntityFilter) null).size(),
+                "number of entites (" + uCount + " player + 3 bullets each+" + itemCount + " diamonds/boxes) with " + uCount + " users");
+        assertEquals(uCount, MazeUtils.getPlayer().size(), "number of player with " + uCount + " users");
+        assertNotNull(MazeUtils.getMainPlayer());
     }
 }

@@ -121,7 +121,7 @@ public abstract class AbstractMazeTerrain {
                     // mark home position, but only when multiple teams are playing
                     int teamId = layout.getTeamByHome(p);
                     String textureFile;
-                    if (layout.getStartPositionsOfTeam(teamId).get(0).isMonster) {
+                    if (layout.getStartPositionsOfTeam(teamId).isMonsterTeam) {
                         textureFile = "textures/MazeHome-monster.png";
                     } else {
                         textureFile = "textures/MazeHome-" + MazeTheme.teamColors[teamId] + ".png";

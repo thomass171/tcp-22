@@ -81,4 +81,6 @@ public interface GridMover {
      * @return
      */
     int getTeam();
+
+    StartPosition getStartPosition();
 }

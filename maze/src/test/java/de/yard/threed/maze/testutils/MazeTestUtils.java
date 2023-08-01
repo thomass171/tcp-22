@@ -189,9 +189,13 @@ public class MazeTestUtils {
     }
 
     public static void assertPositionAndOrientation(EcsEntity userEntity, Point expectedPosition, GridOrientation expectedOrientation) {
+        assertPositionAndOrientation(userEntity, expectedPosition, expectedOrientation, "");
+    }
+
+    public static void assertPositionAndOrientation(EcsEntity userEntity, Point expectedPosition, GridOrientation expectedOrientation, String label) {
         assertNotNull(userEntity, "user entity");
-        assertEquals(expectedOrientation.toString(), MazeUtils.getPlayerorientation(userEntity).toString(), "orientation");
-        TestUtils.assertPoint(expectedPosition, MazeUtils.getMoverposition(userEntity), "position");
+        assertEquals(expectedOrientation.toString(), MazeUtils.getPlayerorientation(userEntity).toString(), label + ".orientation");
+        TestUtils.assertPoint(expectedPosition, MazeUtils.getMoverposition(userEntity), label + ".position");
     }
 
     public static void assertDirection(Direction expected, Direction actual) {

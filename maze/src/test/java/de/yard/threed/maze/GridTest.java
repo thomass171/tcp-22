@@ -4,8 +4,8 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
-import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
+import de.yard.threed.maze.testutils.ExpectedGridData;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 
@@ -29,8 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Tests without ECS (See MazeTest for tests with ECS) and without visuals.
- * Just for testing the grid (the maze logic).
- * Also for GridState, Direction, GridOrientation and GridReader (MazeTerrain now in MazeTerrainTest).
+ * Just for testing the grid (the maze logic) and some of the base helper.
+ * Also for MazeFactory, GridState, Direction, GridOrientation and GridReader (MazeTerrain now in MazeTerrainTest).
  * <p>
  * <p>
  * Created by thomass on 15.07.15.
@@ -38,11 +38,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class GridTest {
     static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()));
     MazeTheme mazeTheme;
-
+    GridOrientation defaultOrientation;
     //no good idea to define statics here because it restarts platform init
 
     @BeforeEach
     public void setup() {
+        defaultOrientation = GridOrientation.fromDirection("N");
         mazeTheme = MazeTheme.buildFromIdentifier(THEME_TRADITIONAL);
     }
 
@@ -61,15 +62,15 @@ public class GridTest {
         Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "maze/grid1.txt"))).get(0);
 
         MazeLayout layout = grid.getMazeLayout();
-        Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true);
+        StartPosition startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true);
         Assertions.assertEquals(11, layout.getMaxWidth(), "width");
         Assertions.assertEquals(7, layout.getHeight(), "height");
-        Assertions.assertEquals(5, startPosition.getX(), "start.x");
-        Assertions.assertEquals(1, startPosition.getY(), "start.y");
+        Assertions.assertEquals(5, startPosition.p.getX(), "start.x");
+        Assertions.assertEquals(1, startPosition.p.getY(), "start.y");
 
-        Assertions.assertEquals(2, startPosition.add(Direction.N.getPoint()).getY(), "starty.");
+        Assertions.assertEquals(2, startPosition.p.add(Direction.N.getPoint()).getY(), "starty.");
 
-        GridMover player = MazeFactory.buildMover(startPosition);
+        GridMover player = MazeFactory.buildMover(startPosition.p);
 
         assertPoint(new Point(5, 1), player.getLocation(), "current location");
         GridState state = new GridState(Arrays.asList(player), new ArrayList<GridMover>(), new ArrayList<GridItem>());
@@ -91,8 +92,8 @@ public class GridTest {
 
         Grid grid = Grid.loadByReader(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanSimple.txt"))).get(0);
 
-        Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true);
-        GridMover player = MazeFactory.buildMover(startPosition);
+        StartPosition startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true);
+        GridMover player = MazeFactory.buildMover(startPosition.p);
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
         Assertions.assertEquals(1, boxes.size(), "boxes");
         GridMover box = boxes.get(0);
@@ -142,7 +143,7 @@ public class GridTest {
 
         Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
 
-        GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null, true));
+        GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null, true).p);
         List<GridMover> players = Arrays.asList(player);
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
         GridMover bottombox = boxes.get(0);
@@ -209,8 +210,16 @@ public class GridTest {
 
         Grid grid = loadGridAndTerrain("maze/Area15x10.txt", 2);
 
-        GridState gridState = initContent(grid, new Point[]{new Point(6, 4), new Point(6, 8)}, new Point[]{},
-                new Point[]{new Point(11, 2), new Point(6, 3), new Point(6, 6), new Point(10, 6)});
+        ExpectedGridData expectedGridData = new ExpectedGridData(
+                new GridTeam[]{
+                        new GridTeam(new StartPosition[]{new StartPosition(6, 4, defaultOrientation)}, false),
+                        new GridTeam(new StartPosition[]{new StartPosition(6, 8, GridOrientation.fromDirection("E"))}, false)
+                },
+                new Point[]{},
+                new Point[]{new Point(11, 2), new Point(6, 3), new Point(6, 6), new Point(10, 6)}
+        );
+
+        GridState gridState = initAndValidateGrid(grid, expectedGridData);
 
         GridMover player = gridState.players.get(0);
         assertPoint(new Point(6, 4), player.getLocation(), "current location");
@@ -256,9 +265,7 @@ public class GridTest {
     public void testM_30x20() throws Exception {
 
         Grid grid = loadGridAndTerrain("maze/Maze-M-30x20.txt", 2);
-
-        GridState gridState = initContent(grid, new Point[]{new Point(28, 3), new Point(21, 11), new Point(22, 11), new Point(23, 11)}, new Point[]{},
-                new Point[]{});
+        GridState gridState = initAndValidateGrid(grid, ExpectedGridData.buildForM_30x20());
         assertFalse(gridState.isSolved(grid.getMazeLayout()));
 
         GridMover player = gridState.players.get(0);
@@ -293,8 +300,7 @@ public class GridTest {
     public void testP_Simple() throws Exception {
 
         Grid grid = loadGridAndTerrain("maze/Maze-P-Simple.txt", 2);
-
-        GridState gridState = initContent(grid, new Point[]{new Point(5, 1), new Point(4, 4)}, new Point[]{}, new Point[]{new Point(7, 1), new Point(3, 3)});
+        GridState gridState = initAndValidateGrid(grid, ExpectedGridData.buildForP_simple(false));
 
         GridMover player = gridState.players.get(0);
         MazeTestUtils.move(player, gridState, GridMovement.Right, grid.getMazeLayout(), new Point(6, 1));
@@ -325,7 +331,8 @@ public class GridTest {
                 "#   @    #\n" +
                 "##########", 1);
 
-        List<GridMover> players = initGridMover(grid, new Point(4, 1), new Point(4, 2));
+        List<GridMover> players = initGridMover(grid,
+                new GridTeam[]{new GridTeam(new StartPosition[]{new StartPosition(4, 1, GridOrientation.fromDirection("E")), new StartPosition(4, 2, GridOrientation.fromDirection("E"))}, false)});
 
         MazeTestUtils.move(players.get(0), players, Collections.emptyList(), GridMovement.Forward, grid.getMazeLayout(), new Point(4, 1));
     }
@@ -339,7 +346,9 @@ public class GridTest {
                 "#   @    #\n" +
                 "##########", 1);
 
-        List<GridMover> players = initGridMover(grid, new Point(4, 1), new Point(4, 2));
+        List<GridMover> players = initGridMover(grid,
+                new GridTeam[]{new GridTeam(new StartPosition[]{new StartPosition(4, 1, GridOrientation.fromDirection("E")),
+                        new StartPosition(4, 2, defaultOrientation)}, false)});
 
         // Neither move ...
         MazeTestUtils.move(players.get(0), players, Collections.emptyList(), GridMovement.Forward, grid.getMazeLayout(), new Point(4, 1));
@@ -356,7 +365,10 @@ public class GridTest {
                 "#   @    #\n" +
                 "##########", 2);
 
-        List<GridMover> players = initGridMover(grid, new Point(4, 1), new Point(4, 3));
+        List<GridMover> players = initGridMover(grid,
+                new GridTeam[]{
+                        new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, false),
+                        new GridTeam(new StartPosition[]{new StartPosition(4, 3, GridOrientation.fromDirection("E"))}, false)});
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
 
         // Neither move ...
@@ -374,7 +386,8 @@ public class GridTest {
                 "#   @    #\n" +
                 "##########", 1);
 
-        List<GridMover> players = initGridMover(grid, new Point(4, 1), new Point(4, 2));
+        List<GridMover> players = initGridMover(grid,
+                new GridTeam[]{new GridTeam(new StartPosition[]{new StartPosition(4, 1, GridOrientation.fromDirection("E")), new StartPosition(4, 2, defaultOrientation)}, false)});
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
 
         // Neither move ...
@@ -396,7 +409,15 @@ public class GridTest {
                 "#   @    #\n" +
                 "##########", 1);
 
-        GridState gridState = initContent(grid, new Point[]{new Point(4, 1)}, new Point[]{}, new Point[]{new Point(4, 2)});
+        ExpectedGridData expectedGridData = new ExpectedGridData(
+                new GridTeam[]{
+                        new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, false),
+                },
+                new Point[]{},
+                new Point[]{new Point(4, 2)}
+        );
+
+        GridState gridState = initAndValidateGrid(grid, expectedGridData);
         Assertions.assertEquals(1, gridState.items.size(), "diamonds");
 
         MazeTestUtils.move(gridState.players.get(0), gridState, GridMovement.Forward, grid.getMazeLayout(), new Point(4, 2));
@@ -413,7 +434,10 @@ public class GridTest {
                 "#   @    #\n" +
                 "##########", 2);
 
-        List<GridMover> players = initGridMover(grid, new Point(4, 1), new Point(4, 3));
+        List<GridMover> players = initGridMover(grid, new GridTeam[]{
+                new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, false),
+                new GridTeam(new StartPosition[]{new StartPosition(4, 3, GridOrientation.fromDirection("E"))}, false)});
+
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
 
         // just leave home
@@ -434,7 +458,15 @@ public class GridTest {
                 "#   @    #\n" +
                 "##########", 1);
 
-        GridState gridState = initContent(grid, new Point[]{new Point(4, 1)}, new Point[]{}, new Point[]{});
+        ExpectedGridData expectedGridData = new ExpectedGridData(
+                new GridTeam[]{
+                        new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, false),
+                },
+                new Point[]{},
+                new Point[]{}
+        );
+
+        GridState gridState = initAndValidateGrid(grid, expectedGridData);
 
         assertFalse(gridState.isSolved(grid.getMazeLayout()));
 
@@ -464,9 +496,58 @@ public class GridTest {
                 "#   M    #\n" +
                 "##########", 2);
 
-        GridState gridState = initContent(grid, new Point[]{new Point(4, 1), new Point(3, 2), }, new Point[]{}, new Point[]{new Point(7, 1), new Point(53, 3)});
+        ExpectedGridData expectedGridData = new ExpectedGridData(
+                new GridTeam[]{
+                        new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, true),
+                        new GridTeam(new StartPosition[]{new StartPosition(3, 2, defaultOrientation)}, false)
+                },
+                new Point[]{},
+                new Point[]{}
+        );
 
-        assertPoint(new Point(3,2), grid.getMazeLayout().getNextLaunchPosition(null, false));
+        GridState gridState = initAndValidateGrid(grid, expectedGridData);
+
+        assertPoint(new Point(3, 2), grid.getMazeLayout().getNextLaunchPosition(null, false).p);
+    }
+
+    /**
+     * ################################################################################
+     * ####  M         ################################################################
+     * ####  M         ################################################################
+     * ####                  ##########################################################
+     * ######D## ########### ##########################################################
+     * ######### ###########                        ###################################
+     * ######### ################################## ###################################
+     * ######### ################################## ###################################
+     * ########     #######    #################### ###################################
+     * ########  M  #######    #################### ###################################
+     * ########     #######  M ####################            ########################
+     * #####            ###    ############################### ########################
+     * ##### ##     ### ###    ##################     ######## ########################
+     * ##### ##     ### ###    ################## M      ##### ########################
+     * ##### ##     ### #### #################### M   ## ##### ########################
+     * ##### ##     ### ###  ##############           ##      B       #################
+     * ##### ##  M  ### ### ############### #####     ######## ###### #################
+     * ##### ########## ### ############### ################## ###### #################
+     * ##### ########## ##   ############## ################## ###### #################
+     * ##### ########## ##   ##############       D####        ######                 #
+     * #@ ## ########## ##   ############## ########################################  #
+     * #@    ##########              ###### ######################################## D#
+     * #@ ################   ##      ###### ###########################################
+     * ########################  M          ###########################################
+     * ################################################################################
+     */
+    @Test
+    public void testD_80x25() throws Exception {
+
+        Grid grid = loadGridAndTerrain("maze/Maze-D-80x25.txt", 7);
+        ExpectedGridData expectedGridData = ExpectedGridData.buildForD_80x25();
+        GridState gridState = initAndValidateGrid(grid, expectedGridData);
+        assertFalse(gridState.isSolved(grid.getMazeLayout()));
+
+        GridMover player = gridState.players.get(0);
+        // t.b.c. with moving
+
     }
 
     public static Grid loadGridAndTerrain(String mazeName, int expectedNumberOfTeams) throws InvalidMazeException {
@@ -483,15 +564,15 @@ public class GridTest {
     /**
      * Monster are also player.
      */
-    public static GridState initContent(Grid grid, Point[] expectedPlayerLocations, Point[] expectedBoxesLocations, Point[] expectedItemsLocations) {
-        List<GridMover> players = initGridMover(grid, expectedPlayerLocations);
+    public static GridState initAndValidateGrid(Grid grid, ExpectedGridData expectedGridData) {
+        List<GridMover> players = initGridMover(grid, expectedGridData.expectedTeams);
         List<GridMover> boxes = MazeFactory.buildMovers(grid.getBoxes());
         for (int i = 0; i < boxes.size(); i++) {
-            assertPoint(expectedBoxesLocations[i], boxes.get(i).getLocation());
+            assertPoint(expectedGridData.expectedBoxesLocations[i], boxes.get(i).getLocation(), "box " + i + " ");
         }
         List<GridItem> items = MazeFactory.buildItems(grid.getDiamonds(), 'D');
         for (int i = 0; i < items.size(); i++) {
-            assertPoint(expectedItemsLocations[i], items.get(i).getLocation());
+            assertPoint(expectedGridData.expectedItemsLocations[i], items.get(i).getLocation(), "point" + i + " ");
         }
         return new GridState(players, boxes, items);
     }
@@ -499,21 +580,34 @@ public class GridTest {
     /**
      * Player(User) and monster (monster is nothing special here).
      */
-    public static List<GridMover> initGridMover(Grid grid, Point... points) {
+    public static List<GridMover> initGridMover(Grid grid, GridTeam[] expectedTeams) {
         List<Point> usedLaunchPositions = new ArrayList<Point>();
         List<GridMover> players = new ArrayList<>();
 
-        Point startPosition;
-        while ((startPosition = grid.getMazeLayout().getNextLaunchPosition(usedLaunchPositions, true)) != null) {
-            int teamID = grid.getMazeLayout().getTeamByHome(startPosition);
-            List<Point> teamHomes = grid.getMazeLayout().getStartPositionsOfTeam(teamID).stream().map(StartPosition::getPoint).collect(Collectors.toList());
-            GridMover player = MazeFactory.buildMover(startPosition, grid.getMazeLayout().getInitialOrientation(startPosition), teamID/*new Team(teamID, teamHomes)*/);
-            usedLaunchPositions.add(startPosition);
-            assertPoint(points[players.size()], player.getLocation(), "current location player ");
-            assertTrue(MazeUtils.getHomesOfTeam(grid.getMazeLayout(), player.getTeam()).contains(points[players.size()]));
-            players.add(player);
+        StartPosition startPosition;
+        for (int team = 0; team < expectedTeams.length; team++) {
+            for (int index = 0; index < expectedTeams[team].positions.size(); index++) {
+                if ((startPosition = grid.getMazeLayout().getNextLaunchPosition(usedLaunchPositions, true)) != null) {
+                    int teamID = grid.getMazeLayout().getTeamByHome(startPosition.p);
+                    assertEquals(team, teamID);
+                    List<Point> teamHomes = grid.getMazeLayout().getStartPositionsOfTeam(teamID).positions.stream().map(StartPosition::getPoint).collect(Collectors.toList());
+                    GridMover playerOrMonster = MazeFactory.buildMover(startPosition, teamID/*new Team(teamID, teamHomes)*/);
+                    usedLaunchPositions.add(startPosition.p);
+                    Point expectLocation = expectedTeams[team].positions.get(index).getPoint();
+                    assertPoint(expectLocation, playerOrMonster.getLocation(), "current location player, team=" + team + " ");
+                    assertTrue(MazeUtils.getHomesOfTeam(grid.getMazeLayout(), playerOrMonster.getTeam()).contains(expectLocation));
+                    players.add(playerOrMonster);
+                    /*currentIndex++;
+                    if (currentIndex >= expectedTeams[currentTeam].positions.size()) {
+                        currentTeam++;
+                        currentIndex = 0;
+                    }*/
+                } else {
+                    fail("no start position");
+                }
+            }
         }
-        assertEquals(points.length, players.size());
+        //assertEquals(points.length, players.size());
 
         return players;
     }

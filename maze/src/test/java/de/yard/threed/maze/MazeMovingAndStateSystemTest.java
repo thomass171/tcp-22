@@ -105,7 +105,7 @@ public class MazeMovingAndStateSystemTest {
         // shows wiremock log message 'url does not match'
         String url = "http://localhost:" + wireMockServer.port() + "/mazes/99";
 
-        MazeDataProvider.init(url);
+        MazeDataProvider.init(url,null);
 
         sceneRunner.runLimitedFrames(10, 0.1, 100);
     }

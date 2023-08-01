@@ -36,13 +36,14 @@ public class MazeDataProvider implements DataProvider {
     public static void init() {
         Configuration configuration = Platform.getInstance().getConfiguration();
         String initialMaze = configuration.getString("initialMaze");
-        init(initialMaze);
+        String teamSize = configuration.getString("teamSize");
+        init(initialMaze, teamSize);
     }
 
     /**
      * Might be async/deferred in case of remote grids.
      */
-    public static void init(String initialMaze) {
+    public static void init(String initialMaze, String teamSize) {
 
         getLogger().debug("init for " + initialMaze);
 
@@ -62,7 +63,7 @@ public class MazeDataProvider implements DataProvider {
                     NativeJsonValue json = Platform.getInstance().parseJson(response.responseText);
                     NativeJsonObject mazeObject = json.isObject();
                     String rawGrid = JsonHelper.getString(mazeObject, "grid");
-                    Grid grid = Grid.loadFromRaw(rawGrid);
+                    Grid grid = Grid.loadFromRaw(rawGrid, teamSize);
                     instance = new MazeDataProvider(JsonHelper.getString(mazeObject, "name"), grid);
                     SystemManager.putDataProvider(PROVIDER_NAME, instance);
                 } else {
@@ -86,7 +87,7 @@ public class MazeDataProvider implements DataProvider {
                 title = StringUtils.substringAfterLast(initialMaze, ":");
             }
             //loadLevel(fileContent, title);
-            Grid grid = loadGrids(fileContent, title);
+            Grid grid = loadGrids(fileContent, title,teamSize);
 
             instance = new MazeDataProvider(initialMaze, grid);
             SystemManager.putDataProvider(PROVIDER_NAME, instance);
@@ -135,11 +136,11 @@ public class MazeDataProvider implements DataProvider {
      * The file(content) might contain more than one grid.
      * If 'gridName' is null, the first is returned.
      */
-    private static Grid loadGrids(String fileContent, String gridName) {
+    private static Grid loadGrids(String fileContent, String gridName, String teamSize) {
 
         Grid grid;
         try {
-            List<Grid> grids = Grid.loadByReader(new StringReader(fileContent));
+            List<Grid> grids = Grid.loadByReader(new StringReader(fileContent), teamSize);
             if (grids.size() > 1 && gridName != null) {
                 grid = Grid.findByTitle(grids, gridName);
             } else {
