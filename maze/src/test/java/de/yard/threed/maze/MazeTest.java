@@ -717,7 +717,7 @@ public class MazeTest {
     public void runD_80x25(boolean serverMode) {
 
         setupTest("maze/Maze-D-80x25.txt", new EmptyBotAIBuilder(), false, serverMode);
-        List<EcsEntity> users = initMaze(ExpectedGridData.buildForD_80x25());
+        List<EcsEntity> users = initMaze(ExpectedGridData.buildForD_80x25(null));
 
         GridState currentstate = MazeUtils.buildGridStateFromEcs();
         //??assertEquals(4, currentstate.players.size());

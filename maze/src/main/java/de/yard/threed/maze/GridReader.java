@@ -166,6 +166,16 @@ class GridDraft {
         }
         if (playerposition.size() == 0)
             throw new InvalidMazeException("no start position");
+        if (teamSize != null) {
+            logger.info("Limiting team size to " + teamSize);
+            for (GridTeam team : playerposition) {
+                if (!team.isMonsterTeam) {
+                    while (team.positions.size() > teamSize.intValue()) {
+                        team.positions.remove(team.positions.size() - 1);
+                    }
+                }
+            }
+        }
         //default heading is 'N'orth.
         MazeLayout mazeLayout = new MazeLayout(walls, destinations, playerposition, maxwidth, height, fields);
         // not before now the initial orientation can be set
@@ -202,25 +212,13 @@ class GridDraft {
         for (int team = 0; team < playerposition.size(); team++) {
             GridTeam gridTeam = playerposition.get(team);
             if (gridTeam.canExtend(p)) {
-                // same team start location. But only if team size is not limited.
-                boolean doAdd = false;
-                if (teamSize == null || gridTeam.isMonsterTeam) {
-                    //TODO check monster inconsistency
-                    doAdd = true;
-                } else {
-                    if (gridTeam.positions.size() < teamSize) {
-                        doAdd = true;
-                    }
-                }
-                if (doAdd) {
-                    gridTeam.add(new StartPosition(p));
-                } else {
-                    logger.info("Limiting team size to " + teamSize);
-                }
+                // same team start location.
+                //TODO check monster inconsistency
+                gridTeam.add(new StartPosition(p));
                 return;
             }
         }
-        // create new team. teamsize doesn't apply here.
+        // create new team.
         playerposition.add(new GridTeam(new StartPosition(p), isMonster));
     }
 }

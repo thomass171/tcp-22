@@ -1,6 +1,7 @@
 package de.yard.threed.maze.testutils;
 
 import de.yard.threed.core.Point;
+import de.yard.threed.core.Util;
 import de.yard.threed.maze.GridOrientation;
 import de.yard.threed.maze.GridTeam;
 import de.yard.threed.maze.StartPosition;
@@ -29,11 +30,11 @@ public class ExpectedGridData {
         }
     }
 
-    public int getStartPositionCount(boolean ignoreMonster){
-        int cnt=0;
+    public int getStartPositionCount(boolean ignoreMonster) {
+        int cnt = 0;
 
         for (GridTeam gridTeam : expectedTeams) {
-            if (ignoreMonster == false || !gridTeam.isMonsterTeam){
+            if (ignoreMonster == false || !gridTeam.isMonsterTeam) {
                 cnt += gridTeam.positions.size();
             }
         }
@@ -69,15 +70,26 @@ public class ExpectedGridData {
     }
 
 
-    public static ExpectedGridData buildForD_80x25() {
+    public static ExpectedGridData buildForD_80x25(String pteamSize) {
 
+        GridTeam playerTeam = new GridTeam(new StartPosition[]{
+                new StartPosition(1, 2, GridOrientation.N),
+                new StartPosition(1, 3, GridOrientation.N),
+                new StartPosition(1, 4, GridOrientation.E)}, false);
+        if (pteamSize != null) {
+
+            switch (Util.parseInt(pteamSize)) {
+                case 1:
+                    playerTeam = new GridTeam(new StartPosition[]{new StartPosition(1, 2, GridOrientation.N)}, false);
+                    break;
+                default:
+                    throw new RuntimeException("not yet");
+            }
+        }
         return new ExpectedGridData(
                 new GridTeam[]{
                         new GridTeam(new StartPosition[]{new StartPosition(26, 1, GridOrientation.N)}, true),
-                        new GridTeam(new StartPosition[]{
-                                new StartPosition(1, 2, GridOrientation.N),
-                                new StartPosition(1, 3, GridOrientation.N),
-                                new StartPosition(1, 4, GridOrientation.E)}, false),
+                        playerTeam,
                         new GridTeam(new StartPosition[]{new StartPosition(10, 8, GridOrientation.N)}, true),
                         new GridTeam(new StartPosition[]{
                                 new StartPosition(43, 10, GridOrientation.N),

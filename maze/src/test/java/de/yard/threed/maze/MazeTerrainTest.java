@@ -121,7 +121,7 @@ public class MazeTerrainTest {
     @Test
     public void testTerrainWikipedia() throws Exception {
 
-        Grid grid = GridTest.loadGridAndTerrain("skbn/SokobanWikipedia.txt", 1);
+        Grid grid = GridTest.loadGridAndTerrain("skbn/SokobanWikipedia.txt", 1, null);
         MazeLayout layout = grid.getMazeLayout();
         MazeTraditionalTerrain terrain = (MazeTraditionalTerrain) mazeTheme.buildTerrain(layout);
         terrain.visualizeGrid();
@@ -143,7 +143,7 @@ public class MazeTerrainTest {
     @Test
     public void testArea15x10() throws Exception {
 
-        Grid grid = GridTest.loadGridAndTerrain("maze/Area15x10.txt", 2);
+        Grid grid = GridTest.loadGridAndTerrain("maze/Area15x10.txt", 2, null);
         MazeLayout layout = grid.getMazeLayout();
         MazeTraditionalTerrain terrain = (MazeTraditionalTerrain) mazeTheme.buildTerrain(layout);
         terrain.visualizeGrid();

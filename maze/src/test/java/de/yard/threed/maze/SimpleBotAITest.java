@@ -28,7 +28,7 @@ public class SimpleBotAITest {
         Grid grid = GridTest.loadGridAndTerrainFromString("##########\n" +
                 "#  MM   .#\n" +
                 "#    @   #\n" +
-                "##########", 2);
+                "##########", 2, null);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
                 new GridTeam[]{

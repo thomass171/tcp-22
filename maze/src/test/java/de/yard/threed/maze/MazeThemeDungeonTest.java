@@ -36,7 +36,7 @@ public class MazeThemeDungeonTest {
     @Test
     public void testTerrainWikipedia() throws Exception {
 
-        Grid grid = GridTest.loadGridAndTerrain("skbn/SokobanWikipedia.txt", 1);
+        Grid grid = GridTest.loadGridAndTerrain("skbn/SokobanWikipedia.txt", 1, null);
         MazeLayout layout = grid.getMazeLayout();
         MazeDungeonTerrain terrain = (MazeDungeonTerrain) mazeTheme.buildTerrain(layout);
         terrain.visualizeGrid();

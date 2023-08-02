@@ -57,7 +57,7 @@ public class Setup {
         //properties.put("argv.enableNearView", "true");
         properties.put("initialMaze", "skbn/SokobanWikipedia.txt");
         properties.put("initialMaze", "maze/Maze-P-Simple.txt");
-        //properties.put("initialMaze", "maze/Maze-D-80x25.txt");
+        properties.put("initialMaze", "maze/Maze-D-80x25.txt");
         //properties.put("initialMaze", mazeshost + "/mazes/mazes/1");
         //properties.put("argv.initialMaze", "maze/Maze-P-60x20.txt");
         //properties.put("argv.initialMaze", "maze/Maze-M-30x20.txt");

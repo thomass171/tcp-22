@@ -208,7 +208,7 @@ public class GridTest {
     @Test
     public void testArea15x10() throws Exception {
 
-        Grid grid = loadGridAndTerrain("maze/Area15x10.txt", 2);
+        Grid grid = loadGridAndTerrain("maze/Area15x10.txt", 2, null);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
                 new GridTeam[]{
@@ -264,7 +264,7 @@ public class GridTest {
     @Test
     public void testM_30x20() throws Exception {
 
-        Grid grid = loadGridAndTerrain("maze/Maze-M-30x20.txt", 2);
+        Grid grid = loadGridAndTerrain("maze/Maze-M-30x20.txt", 2, null);
         GridState gridState = initAndValidateGrid(grid, ExpectedGridData.buildForM_30x20());
         assertFalse(gridState.isSolved(grid.getMazeLayout()));
 
@@ -299,7 +299,7 @@ public class GridTest {
     @Test
     public void testP_Simple() throws Exception {
 
-        Grid grid = loadGridAndTerrain("maze/Maze-P-Simple.txt", 2);
+        Grid grid = loadGridAndTerrain("maze/Maze-P-Simple.txt", 2, null);
         GridState gridState = initAndValidateGrid(grid, ExpectedGridData.buildForP_simple(false));
 
         GridMover player = gridState.players.get(0);
@@ -329,7 +329,7 @@ public class GridTest {
         Grid grid = loadGridAndTerrainFromString("##########\n" +
                 "#   @    #\n" +
                 "#   @    #\n" +
-                "##########", 1);
+                "##########", 1, null);
 
         List<GridMover> players = initGridMover(grid,
                 new GridTeam[]{new GridTeam(new StartPosition[]{new StartPosition(4, 1, GridOrientation.fromDirection("E")), new StartPosition(4, 2, GridOrientation.fromDirection("E"))}, false)});
@@ -344,7 +344,7 @@ public class GridTest {
                 "#        #\n" +
                 "#   @    #\n" +
                 "#   @    #\n" +
-                "##########", 1);
+                "##########", 1, null);
 
         List<GridMover> players = initGridMover(grid,
                 new GridTeam[]{new GridTeam(new StartPosition[]{new StartPosition(4, 1, GridOrientation.fromDirection("E")),
@@ -363,7 +363,7 @@ public class GridTest {
                 "#   @    #\n" +
                 "#   $    #\n" +
                 "#   @    #\n" +
-                "##########", 2);
+                "##########", 2, null);
 
         List<GridMover> players = initGridMover(grid,
                 new GridTeam[]{
@@ -384,7 +384,7 @@ public class GridTest {
                 "#   $    #\n" +
                 "#   @    #\n" +
                 "#   @    #\n" +
-                "##########", 1);
+                "##########", 1, null);
 
         List<GridMover> players = initGridMover(grid,
                 new GridTeam[]{new GridTeam(new StartPosition[]{new StartPosition(4, 1, GridOrientation.fromDirection("E")), new StartPosition(4, 2, defaultOrientation)}, false)});
@@ -407,7 +407,7 @@ public class GridTest {
         Grid grid = loadGridAndTerrainFromString("##########\n" +
                 "#   D    #\n" +
                 "#   @    #\n" +
-                "##########", 1);
+                "##########", 1, null);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
                 new GridTeam[]{
@@ -432,7 +432,7 @@ public class GridTest {
                 "#   @    #\n" +
                 "#        #\n" +
                 "#   @    #\n" +
-                "##########", 2);
+                "##########", 2, null);
 
         List<GridMover> players = initGridMover(grid, new GridTeam[]{
                 new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, false),
@@ -456,7 +456,7 @@ public class GridTest {
                 "#   .    #\n" +
                 "#        #\n" +
                 "#   @    #\n" +
-                "##########", 1);
+                "##########", 1, null);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
                 new GridTeam[]{
@@ -494,7 +494,7 @@ public class GridTest {
                 "#   .    #\n" +
                 "#  @     #\n" +
                 "#   M    #\n" +
-                "##########", 2);
+                "##########", 2, null);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
                 new GridTeam[]{
@@ -539,9 +539,18 @@ public class GridTest {
      */
     @Test
     public void testD_80x25() throws Exception {
+        runD_80x25(null);
+    }
 
-        Grid grid = loadGridAndTerrain("maze/Maze-D-80x25.txt", 7);
-        ExpectedGridData expectedGridData = ExpectedGridData.buildForD_80x25();
+    @Test
+    public void testD_80x25Teamsize1() throws Exception {
+        runD_80x25("1");
+    }
+
+    public void runD_80x25(String teamSize) throws Exception {
+
+        Grid grid = loadGridAndTerrain("maze/Maze-D-80x25.txt", 7, teamSize);
+        ExpectedGridData expectedGridData = ExpectedGridData.buildForD_80x25(teamSize);
         GridState gridState = initAndValidateGrid(grid, expectedGridData);
         assertFalse(gridState.isSolved(grid.getMazeLayout()));
 
@@ -550,12 +559,12 @@ public class GridTest {
 
     }
 
-    public static Grid loadGridAndTerrain(String mazeName, int expectedNumberOfTeams) throws InvalidMazeException {
-        return loadGridAndTerrainFromString(TestHelper.getDataBundleString("maze", mazeName), expectedNumberOfTeams);
+    public static Grid loadGridAndTerrain(String mazeName, int expectedNumberOfTeams, String teamSize) throws InvalidMazeException {
+        return loadGridAndTerrainFromString(TestHelper.getDataBundleString("maze", mazeName), expectedNumberOfTeams, teamSize);
     }
 
-    public static Grid loadGridAndTerrainFromString(String gridData, int expectedNumberOfTeams) throws InvalidMazeException {
-        Grid grid = Grid.loadByReader(new StringReader(gridData)).get(0);
+    public static Grid loadGridAndTerrainFromString(String gridData, int expectedNumberOfTeams, String teamSize) throws InvalidMazeException {
+        Grid grid = Grid.loadByReader(new StringReader(gridData), teamSize).get(0);
         assertEquals(expectedNumberOfTeams, grid.getMazeLayout().getNumberOfTeams(), "number of teams");
 
         return grid;
