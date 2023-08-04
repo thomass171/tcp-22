@@ -144,7 +144,7 @@ public class MazeLayout {
         return initialPosition;
     }
 
-    public GridTeam getStartPositionsOfTeam(int teamId) {
+    public GridTeam getTeamByIndex(int teamId) {
         return initialPosition.get(teamId);
     }
 

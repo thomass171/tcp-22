@@ -611,7 +611,7 @@ public class GridTest {
                 if ((startPosition = grid.getMazeLayout().getNextLaunchPosition(usedLaunchPositions, true)) != null) {
                     int teamID = grid.getMazeLayout().getTeamByHome(startPosition.p);
                     assertEquals(team, teamID);
-                    List<Point> teamHomes = grid.getMazeLayout().getStartPositionsOfTeam(teamID).positions.stream().map(StartPosition::getPoint).collect(Collectors.toList());
+                    List<Point> teamHomes = grid.getMazeLayout().getTeamByIndex(teamID).positions.stream().map(StartPosition::getPoint).collect(Collectors.toList());
                     GridMover playerOrMonster = MazeFactory.buildMover(startPosition, teamID/*new Team(teamID, teamHomes)*/);
                     usedLaunchPositions.add(startPosition.p);
                     Point expectLocation = expectedTeams[team].positions.get(index).getPoint();

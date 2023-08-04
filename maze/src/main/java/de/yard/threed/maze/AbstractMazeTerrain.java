@@ -1,8 +1,6 @@
 package de.yard.threed.maze;
 
-import de.yard.threed.core.Degree;
 import de.yard.threed.core.Point;
-import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
@@ -122,7 +120,7 @@ public abstract class AbstractMazeTerrain {
                     // TODO use GridTeam and extract for unit test
                     int teamId = layout.getTeamByHome(p);
                     String textureFile;
-                    if (layout.getStartPositionsOfTeam(teamId).isMonsterTeam) {
+                    if (layout.getTeamByIndex(teamId).isMonsterTeam) {
                         textureFile = "textures/MazeHome-monster.png";
                     } else {
                         // Monster(teams) have their own color. So don't just use teamid as index for user color.
