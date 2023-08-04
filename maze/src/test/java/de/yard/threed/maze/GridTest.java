@@ -59,7 +59,7 @@ public class GridTest {
     @Test
     public void testGrid1() throws Exception {
 
-        Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "maze/grid1.txt"))).get(0);
+        Grid grid = GridReader.readPlain(new StringReader(TestHelper.getDataBundleString("maze", "maze/grid1.txt"))).get(0);
 
         MazeLayout layout = grid.getMazeLayout();
         StartPosition startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true);
@@ -90,7 +90,7 @@ public class GridTest {
     @Test
     public void testGridStateSimple() throws Exception {
 
-        Grid grid = Grid.loadByReader(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanSimple.txt"))).get(0);
+        Grid grid = GridReader.readPlain(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanSimple.txt"))).get(0);
 
         StartPosition startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true);
         GridMover player = MazeFactory.buildMover(startPosition.p);
@@ -141,7 +141,7 @@ public class GridTest {
     @Test
     public void testGridStateWikipedia() throws Exception {
 
-        Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
+        Grid grid = GridReader.readPlain(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
 
         GridMover player = MazeFactory.buildMover(grid.getMazeLayout().getNextLaunchPosition(null, true).p);
         List<GridMover> players = Arrays.asList(player);
@@ -278,7 +278,7 @@ public class GridTest {
     @Test
     public void testMultiple() throws Exception {
 
-        List<Grid> grids = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "skbn/DavidJoffe.txt")));
+        List<Grid> grids = GridReader.readPlain(new StringReader(TestHelper.getDataBundleString("maze", "skbn/DavidJoffe.txt")));
 
         Assertions.assertEquals(90, grids.size(), "grids");
 
@@ -478,10 +478,12 @@ public class GridTest {
     @Test
     public void testGridReader() throws Exception {
 
-        Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
+        Grid grid = GridReader.readPlain(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
 
-        String expectedRawGrid = "  ####n###  ####n#     $ #n# #  #$ #n# . .#@ #n#########n";
-        assertEquals(expectedRawGrid, grid.getRaw());
+        // has three more blanks than original at end of irst line.
+        String expectedRawGrid = "  ####   n###  ####n#     $ #n# #  #$ #n# . .#@ #n#########n";
+        // grid rebuild doesn't use traditional sokoban style
+        assertEquals(expectedRawGrid.replace("$","B"), grid.getRawGrid("n"));
     }
 
     /**
@@ -564,7 +566,7 @@ public class GridTest {
     }
 
     public static Grid loadGridAndTerrainFromString(String gridData, int expectedNumberOfTeams, String teamSize) throws InvalidMazeException {
-        Grid grid = Grid.loadByReader(new StringReader(gridData), teamSize).get(0);
+        Grid grid = GridReader.readWithModificator(new StringReader(gridData), teamSize).get(0);
         assertEquals(expectedNumberOfTeams, grid.getMazeLayout().getNumberOfTeams(), "number of teams");
 
         return grid;

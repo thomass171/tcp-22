@@ -63,7 +63,7 @@ public class MazeDataProvider implements DataProvider {
                     NativeJsonValue json = Platform.getInstance().parseJson(response.responseText);
                     NativeJsonObject mazeObject = json.isObject();
                     String rawGrid = JsonHelper.getString(mazeObject, "grid");
-                    Grid grid = Grid.loadFromRaw(rawGrid, teamSize);
+                    Grid grid = GridReader.readWithModificatorFromRaw(rawGrid, teamSize);
                     instance = new MazeDataProvider(JsonHelper.getString(mazeObject, "name"), grid);
                     SystemManager.putDataProvider(PROVIDER_NAME, instance);
                 } else {
@@ -140,7 +140,7 @@ public class MazeDataProvider implements DataProvider {
 
         Grid grid;
         try {
-            List<Grid> grids = Grid.loadByReader(new StringReader(fileContent), teamSize);
+            List<Grid> grids = GridReader.readWithModificator(new StringReader(fileContent), teamSize);
             if (grids.size() > 1 && gridName != null) {
                 grid = Grid.findByTitle(grids, gridName);
             } else {

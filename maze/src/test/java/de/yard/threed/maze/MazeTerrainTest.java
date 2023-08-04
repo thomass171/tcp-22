@@ -54,7 +54,7 @@ public class MazeTerrainTest {
     @Test
     public void testGrid1() throws Exception {
 
-        Grid grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "maze/grid1.txt"))).get(0);
+        Grid grid = GridReader.readPlain(new StringReader(TestHelper.getDataBundleString("maze", "maze/grid1.txt"))).get(0);
 
         MazeLayout layout = grid.getMazeLayout();
         Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true).p;

@@ -582,7 +582,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         // 20.12.22: Bullets for player are created at join time. Since bots are just a kind of multiplayer, the same applies to bots.
 
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
-        SystemManager.sendEvent(MazeEventRegistry.buildMazeLoadedEvent(MazeDataProvider.getGridName(), grid.getRaw()));
+        SystemManager.sendEvent(MazeEventRegistry.buildMazeLoadedEvent(MazeDataProvider.getGridName(), grid.getRawGrid("n")));
 
         //11.4.16 addTestObjekte();
         logger.debug("load of " + MazeDataProvider.getGridName() + " completed. state = " + SystemState.getStateAsString());

@@ -18,7 +18,42 @@ import java.util.Map;
 public class GridReader {
     Log logger = Platform.getInstance().getLog(GridReader.class);
 
-    public List<Grid> readGrid(StringReader ins, String teamSize) throws InvalidMazeException {
+    public static List<Grid> readPlain(StringReader ins) throws InvalidMazeException {
+        return new GridReader().readGrid(ins, null);
+    }
+
+    public static List<Grid> readWithModificator(StringReader ins, String teamSize) throws InvalidMazeException {
+        return new GridReader().readGrid(ins, teamSize);
+    }
+
+    /**
+     * There is no need for a grid name.
+     * Returns null in case of error (already logged the error)
+     */
+    public static Grid readWithModificatorFromRaw(String rawGrid, String teamSize) {
+
+        if (rawGrid == null) {
+            getLogger().error("rawGrid is null");
+            return null;
+        }
+        try {
+            List<Grid> grids = readWithModificator(new StringReader(StringUtils.replaceAll(rawGrid, "n", "\n")), teamSize);
+            if (grids.size() != 1) {
+                getLogger().warn("inconsistent raw grid. Using first entry");
+            }
+            Grid grid = grids.get(0);
+            return grid;
+        } catch (InvalidMazeException e) {
+            getLogger().error("load error: InvalidMazeException:" + e.getMessage());
+            return null;
+        }
+    }
+
+    public static Grid readPlainFromRaw(String rawGrid) {
+        return readWithModificatorFromRaw(rawGrid,null);
+    }
+
+    private List<Grid> readGrid(StringReader ins, String teamSize) throws InvalidMazeException {
         List<String> rows = new ArrayList<String>();
         List<GridDraft> drafts = new ArrayList<GridDraft>();
 
@@ -57,6 +92,10 @@ public class GridReader {
         }
         return trows;
     }
+
+    private static Log getLogger() {
+        return Platform.getInstance().getLog(GridReader.class);
+    }
 }
 
 class GridDraft {
@@ -92,7 +131,6 @@ class GridDraft {
         destinations = new ArrayList<Point>();
         diamonds = new ArrayList<Point>();
         fields = new ArrayList<Point>();
-        String rawGrid = "";
 
         if (rows.size() < 3) {
             throw new InvalidMazeException("less than 3 rows:inconsistent grid?");
@@ -161,7 +199,6 @@ class GridDraft {
                             throw new InvalidMazeException("invalid char " + c);
                     }
                 }
-                rawGrid = row + "n" + rawGrid;
             }
         }
         if (playerposition.size() == 0)
@@ -185,7 +222,7 @@ class GridDraft {
             }
         }
 
-        Grid grid = new Grid(mazeLayout, boxes, diamonds, tags, rawGrid);
+        Grid grid = new Grid(mazeLayout, boxes, diamonds, tags);
         return grid;
 
     }

@@ -37,7 +37,7 @@ public class SokobanTest {
     public void testSokobanWikipedia() {
 
         try {
-            Grid grid = Grid.loadByReader(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanWikipedia.txt"))).get(0);
+            Grid grid = GridReader.readPlain(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanWikipedia.txt"))).get(0);
 
             MazeLayout layout = grid.getMazeLayout();
             Point startPosition = grid.getMazeLayout().getNextLaunchPosition(null, true).p;
@@ -76,7 +76,7 @@ public class SokobanTest {
 
     @Test
     public void testAutosolverTrivial() throws Exception {
-        Grid grid = Grid.loadByReader(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanTrivial.txt"))).get(0);
+        Grid grid = GridReader.readPlain(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanTrivial.txt"))).get(0);
 
         SokobanAutosolver solver = new SokobanAutosolver(grid/*MA32, grid.getState()*/);
         solver.solve();
@@ -88,7 +88,7 @@ public class SokobanTest {
 
     @Test
     public void testAutosolverSimple() throws Exception {
-        Grid grid = Grid.loadByReader(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanSimple.txt"))).get(0);
+        Grid grid = GridReader.readPlain(new StringReader(MazeTestUtils.loadGrid("skbn/SokobanSimple.txt"))).get(0);
 
         SokobanAutosolver solver = new SokobanAutosolver(grid/*MA32, grid.getState()*/);
         solver.solve();
@@ -106,7 +106,7 @@ public class SokobanTest {
     public void testAutosolverWiki() {
         Grid grid = null;
         try {
-            grid = Grid.loadByReader(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
+            grid = GridReader.readPlain(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
 
 
         } catch (Exception e) {
@@ -122,7 +122,7 @@ public class SokobanTest {
     @Test
     public void testEmptyGrid() {
         try {
-            Grid.loadByReader(new StringReader(""));
+            GridReader.readPlain(new StringReader(""));
         } catch (InvalidMazeException e) {
             return;
         }
@@ -131,7 +131,7 @@ public class SokobanTest {
 
     public static Grid load(String grid) {
         try {
-            Grid.loadByReader(new StringReader(grid));
+            GridReader.readPlain(new StringReader(grid));
             return null;
         } catch (InvalidMazeException e) {
             throw new RuntimeException(e);

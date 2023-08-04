@@ -88,8 +88,8 @@ public class BotSystem extends DefaultEcsSystem {
             // take grid from payload because dataprovider are not available in pure client mode (which probably doesn't apply for BotSystem.
             // but it makes it more consistent.
             String rawGrid = (String) evt.getPayload().get("grid");
-            // Need to handle teamSize?
-            Grid grid = Grid.loadFromRaw(rawGrid, null);
+            // Need to handle teamSize? But grid in event should be the effective one.
+            Grid grid = GridReader.readPlainFromRaw(rawGrid);
             if (grid == null) {
                 logger.error("no or invalid grid in payload");
             } else {

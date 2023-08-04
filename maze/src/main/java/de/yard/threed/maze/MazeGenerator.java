@@ -62,7 +62,7 @@ public class MazeGenerator {
             }
         }
         MazeLayout layout = new MazeLayout(walls, destinations, initialPositions, width, height, fields);
-        return new Grid(layout, new ArrayList<Point>(), new ArrayList<Point>(), new HashMap<String, String>(), null/*TODO rawGrid*/);
+        return new Grid(layout, new ArrayList<Point>(), new ArrayList<Point>(), new HashMap<String, String>());
     }
 
     /**
@@ -153,6 +153,6 @@ p=direction.move(p);
 
     private Grid addWallsToGrid(Grid grid, List<Point> additionalWall) throws InvalidMazeException {
         MazeLayout layout = grid.getMazeLayout().addWalls(additionalWall);
-        return new Grid(layout, new ArrayList<Point>(), new ArrayList<Point>(), new HashMap<String, String>(),  null/*TODO rawGrid*/);
+        return new Grid(layout, new ArrayList<Point>(), new ArrayList<Point>(), new HashMap<String, String>());
     }
 }

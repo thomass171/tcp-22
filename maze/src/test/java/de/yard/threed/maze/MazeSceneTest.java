@@ -17,6 +17,7 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
+import de.yard.threed.maze.testutils.ExpectedGridData;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.Test;
 
@@ -252,4 +253,57 @@ public class MazeSceneTest {
         assertEquals(1, MoverComponent.getMoverComponent(bot1).getTeam());
         assertEquals(1, MoverComponent.getMoverComponent(bot2).getTeam());
     }
+
+    /**
+     * ################################################################################
+     * ####  M         ################################################################
+     * ####  M         ################################################################
+     * ####                  ##########################################################
+     * ######D## ########### ##########################################################
+     * ######### ###########                        ###################################
+     * ######### ################################## ###################################
+     * ######### ################################## ###################################
+     * ########     #######    #################### ###################################
+     * ########  M  #######    #################### ###################################
+     * ########     #######  M ####################            ########################
+     * #####            ###    ############################### ########################
+     * ##### ##     ### ###    ##################     ######## ########################
+     * ##### ##     ### ###    ################## M      ##### ########################
+     * ##### ##     ### #### #################### M   ## ##### ########################
+     * ##### ##     ### ###  ##############           ##      B       #################
+     * ##### ##  M  ### ### ############### #####     ######## ###### #################
+     * ##### ########## ### ############### ################## ###### #################
+     * ##### ########## ##   ############## ################## ###### #################
+     * ##### ########## ##   ##############       D####        ######                 #
+     * #@ ## ########## ##   ############## ########################################  #
+     * #@    ##########              ###### ######################################## D#
+     * #@ ################   ##      ###### ###########################################
+     * ########################  M          ###########################################
+     * ################################################################################
+     */
+    @Test
+    public void testD_80x25() throws Exception {
+        runD_80x25(null);
+    }
+
+    @Test
+    public void testD_80x25Teamsize1() throws Exception {
+        runD_80x25("1");
+    }
+
+    public void runD_80x25(String teamSize) throws Exception {
+
+        sceneRunner = MazeTestUtils.buildSceneRunnerForMazeScene("maze/Maze-D-80x25.txt", false, INITIAL_FRAMES);
+        ExpectedGridData expectedGridData = ExpectedGridData.buildForD_80x25(teamSize);
+
+        assertTrue(SystemState.readyToJoin());
+
+        MazeVisualizationSystem mazeVisualizationSystem = ((MazeVisualizationSystem) SystemManager.findSystem(MazeVisualizationSystem.TAG));
+        // difficult to test team marker??
+        BotSystem botSystem = ((BotSystem) SystemManager.findSystem(BotSystem.TAG));
+        //ReflectionTestUtils.
+        //botSystem.
+        // TODO test effective grid with teamsize
+    }
+
 }
