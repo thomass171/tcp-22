@@ -38,7 +38,8 @@ public class MazeTheme {
     public static Color bulletColor = new Color(0xff, 0x80, 00);
     // Color.LIGHTBLUE is general background. So a custom lighter blue. .
     public static Color diamondColor = new Color(0x99, 0xFF, 0xFF);
-    public static String[] teamColors = new String[]{"darkgreen", "red"};
+    // We have four (login)user colors. Monster have their own.
+    public static String[] teamColors = new String[]{"darkgreen", "red", "blue", "green"};
     private MazeModelFactory mazeModelFactory;
 
     private MazeTheme(int theme) {
@@ -52,7 +53,7 @@ public class MazeTheme {
                 this.mazeModelFactory = new MazeDungeonModelFactory(this, false);
                 break;
             case THEME_ID_DUNGEON_ART:
-                this.mazeModelFactory = new MazeDungeonModelFactory(this,true);
+                this.mazeModelFactory = new MazeDungeonModelFactory(this, true);
                 break;
             default:
                 throw new RuntimeException("unknown theme");

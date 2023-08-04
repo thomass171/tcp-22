@@ -476,14 +476,24 @@ public class GridTest {
     }
 
     @Test
-    public void testGridReader() throws Exception {
+    public void testGridReaderSokoban() throws Exception {
 
         Grid grid = GridReader.readPlain(new StringReader(TestHelper.getDataBundleString("maze", "skbn/SokobanWikipedia.txt"))).get(0);
 
         // has three more blanks than original at end of irst line.
         String expectedRawGrid = "  ####   n###  ####n#     $ #n# #  #$ #n# . .#@ #n#########n";
         // grid rebuild doesn't use traditional sokoban style
-        assertEquals(expectedRawGrid.replace("$","B"), grid.getRawGrid("n"));
+        assertEquals(expectedRawGrid.replace("$", "B"), grid.getRawGrid("n"));
+    }
+
+    @Test
+    public void testGridReaderD80x25() throws Exception {
+
+        String rawGrid = TestHelper.getDataBundleString("maze", "maze/Maze-D-80x25.txt");
+        Grid grid = GridReader.readPlain(new StringReader(rawGrid)).get(0);
+
+        String expectedRawGrid = rawGrid;
+        assertEquals(expectedRawGrid, grid.getRawGrid("\n"));
     }
 
     /**

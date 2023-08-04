@@ -119,12 +119,14 @@ public abstract class AbstractMazeTerrain {
                 }
                 if (layout.isStartField(p) && layout.getNumberOfTeams() > 1) {
                     // mark home position, but only when multiple teams are playing
+                    // TODO use GridTeam and extract for unit test
                     int teamId = layout.getTeamByHome(p);
                     String textureFile;
                     if (layout.getStartPositionsOfTeam(teamId).isMonsterTeam) {
                         textureFile = "textures/MazeHome-monster.png";
                     } else {
-                        textureFile = "textures/MazeHome-" + MazeTheme.teamColors[teamId] + ".png";
+                        // Monster(teams) have their own color. So don't just use teamid as index for user color.
+                        textureFile = "textures/MazeHome-" + MazeTheme.teamColors[layout.getNonMonsterTeamByHome(p)] + ".png";
                     }
                     addDecoratedField(x, y, Texture.buildBundleTexture("data", textureFile));
                 }

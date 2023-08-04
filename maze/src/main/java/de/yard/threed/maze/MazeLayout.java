@@ -113,6 +113,21 @@ public class MazeLayout {
         return -1;
     }
 
+    public int getNonMonsterTeamByHome(Point p) {
+        int idx = 0;
+        for (GridTeam team : initialPosition) {
+            if (!team.isMonsterTeam) {
+                for (StartPosition point : team.positions) {
+                    if (point.p.equals(p)) {
+                        return idx;
+                    }
+                }
+                idx++;
+            }
+        }
+        return -1;
+    }
+
     public int getStartPositionCount(boolean ignoreMonster) {
         int cnt = 0;
         for (int team = 0; team < initialPosition.size(); team++) {

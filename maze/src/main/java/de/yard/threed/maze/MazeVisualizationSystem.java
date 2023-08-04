@@ -345,13 +345,13 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         logger.debug("visualizing maze terrain");
         view = new MazeView();
 
-        Configuration configuration = Platform.getInstance().getConfiguration();
-        String terrainbuilder = configuration.getString("maze.visualization", "");
-        if (terrainbuilder.equals("traditional")) {
+        //Configuration configuration = Platform.getInstance().getConfiguration();
+        //String terrainbuilder = configuration.getString("maze.visualization", "");
+        //if (terrainbuilder.equals("traditional")) {
             view.terrain = mazeTheme.buildTerrain(grid.getMazeLayout());
-        } else {
+        /*} else {
             throw new RuntimeException("unknown visualization " + terrainbuilder);
-        }
+        }*/
         view.terrain.visualizeGrid();
         Scene.getCurrent().addToWorld(view.terrain.getNode());
 
