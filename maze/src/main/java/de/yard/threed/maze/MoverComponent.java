@@ -4,6 +4,7 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.engine.avatar.TeamColor;
 import de.yard.threed.engine.ecs.EcsComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
 
@@ -36,11 +37,14 @@ public class MoverComponent extends EcsComponent implements GridMover {
     //public static final int MOVER_BOT = 3;
     private boolean player;
     //private int type = -1;
+    // boxes and monster have no team color
+    public TeamColor teamColor;
 
-    public MoverComponent(SimpleTransform movable, boolean player, StartPosition startPosition, int team) {
+    public MoverComponent(SimpleTransform movable, boolean player, StartPosition startPosition, int team, TeamColor teamColor) {
         this.movable = movable;
         this.player = player;
         gridMover = new SimpleGridMover(startPosition, this, team);
+        this.teamColor = teamColor;
     }
 
     /**
@@ -118,9 +122,10 @@ public class MoverComponent extends EcsComponent implements GridMover {
         return null;
     }
 
-    public void setMovable(SimpleTransform movable){
-        this.movable=movable;
+    public void setMovable(SimpleTransform movable) {
+        this.movable = movable;
     }
+
     /**
      * Liefert das Movement, wenn der Schritt ausgefuehrt wurde, sonst null.
      * 12.4.21: rotation nicht mehr reinstecken bzw. igmorieren. orientation isType needed for being moved.
@@ -197,7 +202,6 @@ public class MoverComponent extends EcsComponent implements GridMover {
 
     /**
      * 4.4.22: Redefined. Adjust visual location to final grid location. Is only used when movement completed.
-     *
      */
     private void catchPosition() {
         Vector3 loc = movable.getPosition();

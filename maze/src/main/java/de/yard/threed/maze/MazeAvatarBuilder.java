@@ -41,7 +41,9 @@ public class MazeAvatarBuilder implements ModelBuilderRegistry {
         SceneNode avatar;
 
         if (botComponent == null || !botComponent.isMonster()) {
-            avatar = avatarABuilder.buildAvatar(player);
+            // Derive avatar style/color from team membership. MoverComponent was created during join.
+            MoverComponent mc = MoverComponent.getMoverComponent(player);
+            avatar = avatarABuilder.buildAvatar(player, mc.teamColor);
         } else {
             // decouple monster transform from scale for avoidng math effects and to make a hit monster markable by scaling without changing its position.
             SceneNode monster = mazeModelFactory.buildMonster();

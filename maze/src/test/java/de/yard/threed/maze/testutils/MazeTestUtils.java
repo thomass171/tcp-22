@@ -8,7 +8,9 @@ import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.GridTeleporter;
 import de.yard.threed.engine.Ray;
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.avatar.TeamColor;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EcsHelper;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.platform.common.Request;
@@ -260,5 +262,22 @@ public class MazeTestUtils {
                         .withHeader("Content-Type", "application/hal+json")
                         .withBody(responseBody)));
 
+    }
+
+    public static EcsEntity findSingleEntityByName(String name) {
+        List<EcsEntity> es = EcsHelper.findEntitiesByName(name);
+        if (es.size() != 1) {
+            fail("Not exactly one entitiy with name '" + name + "' found");
+        }
+        return es.get(0);
+    }
+
+    public static void assertPlayer(String username, TeamColor expectedTeamColor, String label) {
+        EcsEntity user = findSingleEntityByName(username);
+        assertNotNull(user);
+        if (expectedTeamColor == null) {
+            assertNull(MoverComponent.getMoverComponent(user).teamColor, label);
+        } else
+            assertEquals(expectedTeamColor.getColor(), MoverComponent.getMoverComponent(user).teamColor.getColor(), label);
     }
 }

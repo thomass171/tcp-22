@@ -6,6 +6,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.maze.testutils.ExpectedGridData;
+import de.yard.threed.maze.testutils.ExpectedGridTeam;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static de.yard.threed.core.testutil.TestUtils.assertPoint;
+import static de.yard.threed.engine.avatar.TeamColor.TEAMCOLOR_DARKGREEN;
+import static de.yard.threed.engine.avatar.TeamColor.TEAMCOLOR_RED;
 import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -211,9 +214,9 @@ public class GridTest {
         Grid grid = loadGridAndTerrain("maze/Area15x10.txt", 2, null);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
-                new GridTeam[]{
-                        new GridTeam(new StartPosition[]{new StartPosition(6, 4, defaultOrientation)}, false),
-                        new GridTeam(new StartPosition[]{new StartPosition(6, 8, GridOrientation.fromDirection("E"))}, false)
+                new ExpectedGridTeam[]{
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(6, 4, defaultOrientation)}, false, TEAMCOLOR_DARKGREEN),
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(6, 8, GridOrientation.fromDirection("E"))}, false, TEAMCOLOR_RED)
                 },
                 new Point[]{},
                 new Point[]{new Point(11, 2), new Point(6, 3), new Point(6, 6), new Point(10, 6)}
@@ -410,8 +413,8 @@ public class GridTest {
                 "##########", 1, null);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
-                new GridTeam[]{
-                        new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, false),
+                new ExpectedGridTeam[]{
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, false, TEAMCOLOR_DARKGREEN),
                 },
                 new Point[]{},
                 new Point[]{new Point(4, 2)}
@@ -459,8 +462,8 @@ public class GridTest {
                 "##########", 1, null);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
-                new GridTeam[]{
-                        new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, false),
+                new ExpectedGridTeam[]{
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, false, TEAMCOLOR_DARKGREEN),
                 },
                 new Point[]{},
                 new Point[]{}
@@ -509,9 +512,9 @@ public class GridTest {
                 "##########", 2, null);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
-                new GridTeam[]{
-                        new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, true),
-                        new GridTeam(new StartPosition[]{new StartPosition(3, 2, defaultOrientation)}, false)
+                new ExpectedGridTeam[]{
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, true, null),
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(3, 2, defaultOrientation)}, false, TEAMCOLOR_DARKGREEN)
                 },
                 new Point[]{},
                 new Point[]{}

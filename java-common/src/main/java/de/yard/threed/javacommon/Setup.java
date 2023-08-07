@@ -70,7 +70,7 @@ public class Setup {
 
         properties.put("theme", "dungeon");
         //properties.put("theme", "dungeon-art");
-        properties.put("teamSize", "1");
+        //properties.put("teamSize", "1");
 
         //properties.put("argv.vehiclelist","GenericRoad");
 

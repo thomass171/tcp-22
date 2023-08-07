@@ -5,6 +5,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.engine.avatar.TeamColor;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.engine.gui.Hud;
@@ -285,25 +286,26 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
 
         // In server mode clients might connect and disconnect, so the used and available launch positions are quite dynamic.
         List<EcsEntity> currentPlayer = MazeUtils.getPlayer();
-        // this is also reached for joining monster, so don't ignore monster lauch locations
+        // this is also reached for joining monster, so don't ignore monster launch locations
         if (currentPlayer.size() >= layout.getStartPositionCount(false)) {
             logger.warn("Rejecting join request due to too may players. Currently " + currentPlayer.size());
-            return BaseEventRegistry.buildUserJoinFailedEvent(playerEntity,"error");
+            return BaseEventRegistry.buildUserJoinFailedEvent(playerEntity, "error");
         }
         BotComponent botComponent = BotComponent.getBotComponent(playerEntity);
 
-        StartPosition launchPosition = findAvailableLaunchPosition(layout, currentPlayer, botComponent!=null && botComponent.isMonster());
+        StartPosition launchPosition = findAvailableLaunchPosition(layout, currentPlayer, botComponent != null && botComponent.isMonster());
 
         int teamid;
         if (launchPosition != null) {
             teamid = layout.getTeamByHome(launchPosition.getPoint());
             //completeJoin(layout, playerEntity, launchPosition, teamid);
-            logger.debug("Launching player at "+launchPosition);
+            logger.debug("Launching player at " + launchPosition);
         } else {
             logger.warn("No start position found. too may players?. Currently " + currentPlayer.size());
             return BaseEventRegistry.buildUserJoinFailedEvent(playerEntity, "error");
         }
-        MoverComponent mover = new MoverComponent(null/*playerEntity.scenenode.getTransform()*/, true, launchPosition/* layout.getInitialOrientation(launchPosition)*/, teamid);
+        MoverComponent mover = new MoverComponent(null/*playerEntity.scenenode.getTransform()*/, true, launchPosition/* layout.getInitialOrientation(launchPosition)*/, teamid,
+                (botComponent != null && botComponent.isMonster()) ?null:TeamColor.getByIndex(layout.getNonMonsterTeamByHome(launchPosition.getPoint())));
         //usedLaunchPositions.add(launchPosition);
 
         playerEntity.addComponent(mover);
@@ -561,7 +563,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //SceneNode p = MazeModelFactory.getInstance().buildSokobanBox(/*b.getX(), b.getY()*/);
             EcsEntity box = new EcsEntity();
             box.buildSceneNodeByModelFactory(MazeModelFactory.BOX_BUILDER, new ModelBuilderRegistry[]{mazeTheme.getMazeModelFactory()});
-            MoverComponent mover = new MoverComponent(box.getSceneNode().getTransform()/*this*/, false, new StartPosition(b, new GridOrientation()), -1);
+            MoverComponent mover = new MoverComponent(box.getSceneNode().getTransform()/*this*/, false, new StartPosition(b, new GridOrientation()), -1, null);
             mover.setLocation(b);
             box.addComponent(mover);
             //return box;

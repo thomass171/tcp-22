@@ -20,6 +20,7 @@ import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.maze.testutils.EmptyBotAIBuilder;
 import de.yard.threed.maze.testutils.ExpectedGridData;
+import de.yard.threed.maze.testutils.ExpectedGridTeam;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.maze.testutils.TestingBotAiBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +34,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static de.yard.threed.engine.avatar.TeamColor.TEAMCOLOR_DARKGREEN;
+import static de.yard.threed.engine.avatar.TeamColor.TEAMCOLOR_RED;
 import static de.yard.threed.maze.MazeRequestRegistry.*;
 import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
+import static de.yard.threed.maze.testutils.MazeTestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -283,12 +287,14 @@ public class MazeTest {
         MoverComponent mc = MoverComponent.getMoverComponent(player);
         assertNotNull(mc, "MoverComponent");
         assertEquals("aaa", player.getName(), "player name");
+        assertEquals("darkgreen", mc.teamColor.getColor());
 
         EcsEntity bot = players.get(1);
         mc = MoverComponent.getMoverComponent(bot);
         assertNotNull(mc, "MoverComponent");
         // a bot is not just a user
         assertEquals("Bot0", bot.getName(), "bot name");
+        assertEquals("red", mc.teamColor.getColor());
 
         List<EcsEntity> inventory = MazeUtils.getInventory(player);
         assertEquals(3, inventory.size(), "inventory size");
@@ -358,6 +364,8 @@ public class MazeTest {
         List<EcsEntity> users = initMaze(ExpectedGridData.buildForP_simple(true));
         EcsEntity user0 = users.get(0);
         EcsEntity user1 = users.get(1);
+        assertEquals("darkgreen", MoverComponent.getMoverComponent(user0).teamColor.getColor());
+        assertEquals("red", MoverComponent.getMoverComponent(user1).teamColor.getColor());
 
         // firing from home field should be ignored
         SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(user0.getId(), MoverComponent.getMoverComponent(user0).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
@@ -415,8 +423,11 @@ public class MazeTest {
 
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user0);
+        assertEquals("darkgreen", MoverComponent.getMoverComponent(user0).teamColor.getColor());
+
         EcsEntity user1 = EcsHelper.findEntitiesByName("Bot0").get(0);
         assertNotNull(user1);
+        assertNull(MoverComponent.getMoverComponent(user1).teamColor);
 
         assertEquals(1, SceneNode.findByName("Monster").size());
     }
@@ -518,11 +529,11 @@ public class MazeTest {
                 "##########", testingBotAiBuilder, false, false);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
-                new GridTeam[]{
-                        new GridTeam(new StartPosition[]{
-                                new StartPosition(4, 1, GridOrientation.N)}, false),
-                        new GridTeam(new StartPosition[]{
-                                new StartPosition(4, 4, GridOrientation.S)}, false),
+                new ExpectedGridTeam[]{
+                        new ExpectedGridTeam(new StartPosition[]{
+                                new StartPosition(4, 1, GridOrientation.N)}, false, TEAMCOLOR_DARKGREEN),
+                        new ExpectedGridTeam(new StartPosition[]{
+                                new StartPosition(4, 4, GridOrientation.S)}, false, TEAMCOLOR_RED),
                 },
                 new Point[]{},
                 new Point[]{new Point(6, 4)}
@@ -579,12 +590,12 @@ public class MazeTest {
                 "##########", new EmptyBotAIBuilder(), false, false);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
-                new GridTeam[]{
-                        new GridTeam(new StartPosition[]{
-                                new StartPosition(4, 1, GridOrientation.N)}, false),
-                        new GridTeam(new StartPosition[]{
+                new ExpectedGridTeam[]{
+                        new ExpectedGridTeam(new StartPosition[]{
+                                new StartPosition(4, 1, GridOrientation.N)}, false, TEAMCOLOR_DARKGREEN),
+                        new ExpectedGridTeam(new StartPosition[]{
                                 new StartPosition(1, 3, GridOrientation.E),
-                                new StartPosition(2, 3, GridOrientation.E)}, false),
+                                new StartPosition(2, 3, GridOrientation.E)}, false, TEAMCOLOR_RED),
                 },
                 new Point[]{},
                 new Point[]{new Point(6, 5)}
@@ -594,12 +605,18 @@ public class MazeTest {
 
         assertEquals(3, MazeUtils.getPlayer().size(), "number of player");
         EcsEntity user = MazeUtils.getPlayerByUsername("u0");
+        assertEquals("darkgreen", MoverComponent.getMoverComponent(user).teamColor.getColor());
+
         assertNotNull(user);
         EcsEntity bot0 = MazeUtils.getPlayer().get(1);
         assertNotNull(bot0);
+        assertEquals("red", MoverComponent.getMoverComponent(bot0).teamColor.getColor());
+        assertEquals(3, MazeUtils.getBullets(bot0).size());
+
         EcsEntity bot1 = MazeUtils.getPlayer().get(2);
         assertNotNull(bot1);
-        assertEquals(3, MazeUtils.getBullets(bot0).size());
+        assertEquals("red", MoverComponent.getMoverComponent(bot1).teamColor.getColor());
+        assertEquals(3, MazeUtils.getBullets(bot1).size());
 
         // bot must/will leave home field to make firing possible. By default it will wait real time for next move (but only with SimpleBotAI, which
         // isn't used in tests).
@@ -640,31 +657,32 @@ public class MazeTest {
                 "##########", new EmptyBotAIBuilder(), false, false);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
-                new GridTeam[]{
-                        new GridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, true),
-                        new GridTeam(new StartPosition[]{new StartPosition(6, 1, defaultOrientation)}, true),
-                        new GridTeam(new StartPosition[]{new StartPosition(3, 2, defaultOrientation)}, false),
-                        new GridTeam(new StartPosition[]{new StartPosition(1, 3, GridOrientation.E),
-                                new StartPosition(2, 3, GridOrientation.E)}, true),
+                new ExpectedGridTeam[]{
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(4, 1, defaultOrientation)}, true, null),
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(6, 1, defaultOrientation)}, true, null),
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(3, 2, defaultOrientation)}, false, TEAMCOLOR_DARKGREEN),
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(1, 3, GridOrientation.E),
+                                new StartPosition(2, 3, GridOrientation.E)}, true, null),
                 },
                 new Point[]{},
                 new Point[]{new Point(6, 5)}
         );
 
-        initMaze(expectedGridData/*new Point[]{new Point(3, 2)}, new Direction[]{Direction.N},
-                new Point[]{new Point(4, 1),
-                        new Point(6, 1),
-                        new Point(1, 3),
-                        new Point(2, 3)
-                }, 1, 1*/);
+        initMaze(expectedGridData);
 
         EcsEntity user = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user);
+        assertEquals("darkgreen", MoverComponent.getMoverComponent(user).teamColor.getColor());
+
         EcsEntity bot0 = MazeUtils.getPlayer().get(1);
         assertNotNull(bot0);
+        assertNull(MoverComponent.getMoverComponent(bot0).teamColor);
+        assertEquals(3, MazeUtils.getBullets(bot0).size());
+
         EcsEntity bot1 = MazeUtils.getPlayer().get(2);
         assertNotNull(bot1);
-        assertEquals(3, MazeUtils.getBullets(bot0).size());
+        assertNull(MoverComponent.getMoverComponent(bot1).teamColor);
+        assertEquals(3, MazeUtils.getBullets(bot1).size());
 
         // bot must/will leave home field to make firing possible. By default it will wait real time for next move (but only with SimpleBotAI, which
         // isn't used in tests).
@@ -727,6 +745,7 @@ public class MazeTest {
     /**
      * Launch a number of login player (next fails to join), check items and bots.
      * <p>
+     *
      * @return list of player (incl. monster and bots)
      */
     private List<EcsEntity> initMaze(ExpectedGridData expectedGridData) {
@@ -746,18 +765,21 @@ public class MazeTest {
         // start initial user
         int initialPlayerTeam = expectedGridData.getInitialPlayerTeam();
         users.add(startUser(0, expectedGridData.expectedTeams[initialPlayerTeam].positions.get(0)));
+        assertPlayer("u0", TEAMCOLOR_DARKGREEN, "u0");
 
         // start remaining user. Only needed in server mode. Otherwise BotSystem would have started further user.
         // uindex is not for bots.
         if (botSystem == null || botSystem.isServerMode()) {
             int uindex = 1;
             for (int team = 0; team < expectedGridData.expectedLoginTeams.size(); team++) {
-                GridTeam gridTeam = expectedGridData.expectedLoginTeams.get(team);
+                ExpectedGridTeam gridTeam = expectedGridData.expectedLoginTeams.get(team);
                 for (int i = 0; i < gridTeam.positions.size(); i++) {
                     // initial user has already been started
 
                     if (team > 0 || i > 0) {
-                        users.add(startUser(uindex, gridTeam.positions.get(i)));
+                        EcsEntity newUser = startUser(uindex, gridTeam.positions.get(i));
+                        users.add(newUser);
+                        assertPlayer("u" + uindex, gridTeam.expectedTeamColor, "uindex=" + uindex);
                         //possible race condition with botsystem, so better no validation of total entities here
                         uindex++;
                     }
@@ -771,7 +793,7 @@ public class MazeTest {
 
             int bindex = 0;
             for (int team = 0; team < expectedGridData.expectedTeams.length; team++) {
-                GridTeam gridTeam = expectedGridData.expectedTeams[team];
+                ExpectedGridTeam gridTeam = expectedGridData.expectedTeams[team];
 
                 for (int i = 0; i < expectedGridData.expectedTeams[team].positions.size(); i++) {
 
@@ -779,12 +801,9 @@ public class MazeTest {
                     if (i > 0 || team != initialPlayerTeam) {
                         if (!botSystem.isServerMode() || gridTeam.isMonsterTeam) {
                             StartPosition expectedStartPosition = gridTeam.positions.get(i);
-                            List<EcsEntity> bots = EcsHelper.findEntitiesByName("Bot" + bindex);
-                            if (bots.size() == 0) {
-                                fail("Bot" + bindex + " not found");
-                            }
-                            EcsEntity bot = bots.get(0);
+                            EcsEntity bot = findSingleEntityByName("Bot" + bindex);
                             assertNotNull(bot);
+                            assertPlayer("Bot" + bindex, gridTeam.expectedTeamColor, "team=" + team);
                             MazeTestUtils.assertPositionAndOrientation(bot, expectedStartPosition.getPoint(), expectedStartPosition.initialOrientation,
                                     "bot=" + bindex + ",team=" + team + ",i=" + i + ",expectedStartPosition=" + expectedStartPosition + ":");
                             users.add(bot);

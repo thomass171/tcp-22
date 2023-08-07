@@ -3,15 +3,18 @@ package de.yard.threed.maze;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtils;
+import de.yard.threed.engine.avatar.TeamColor;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.util.DeterministicIntProvider;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.util.IntProvider;
 import de.yard.threed.maze.testutils.ExpectedGridData;
+import de.yard.threed.maze.testutils.ExpectedGridTeam;
 import de.yard.threed.maze.testutils.MazeTestUtils;
 import org.junit.jupiter.api.Test;
 
+import static de.yard.threed.engine.avatar.TeamColor.TEAMCOLOR_DARKGREEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -31,9 +34,9 @@ public class SimpleBotAITest {
                 "##########", 2, null);
 
         ExpectedGridData expectedGridData = new ExpectedGridData(
-                new GridTeam[]{
-                        new GridTeam(new StartPosition[]{new StartPosition(5, 1, GridOrientation.N)}, false),
-                        new GridTeam(new StartPosition[]{new StartPosition(3, 2, GridOrientation.S), new StartPosition(4, 2, GridOrientation.E)}, true),
+                new ExpectedGridTeam[]{
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(5, 1, GridOrientation.N)}, false, TEAMCOLOR_DARKGREEN),
+                        new ExpectedGridTeam(new StartPosition[]{new StartPosition(3, 2, GridOrientation.S), new StartPosition(4, 2, GridOrientation.E)}, true, null),
                 },
                 new Point[]{},
                 new Point[]{}

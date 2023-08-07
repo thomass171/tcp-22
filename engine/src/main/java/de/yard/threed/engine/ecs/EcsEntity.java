@@ -193,6 +193,7 @@ public final class EcsEntity {
      */
     public SceneNode buildSceneNodeByModelFactory(String builderName, ModelBuilderRegistry[] modelBuilderRegistries) {
 
+        logger.debug("buildSceneNodeByModelFactory: builderName=" + builderName);
         this.scenenode = new SceneNode();
         this.scenenode.setName("entity-wrapper");
         this.builderName = builderName;

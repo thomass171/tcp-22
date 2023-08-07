@@ -8,6 +8,7 @@ import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.Texture;
+import de.yard.threed.engine.avatar.TeamColor;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 
 import java.util.HashMap;
@@ -117,14 +118,14 @@ public abstract class AbstractMazeTerrain {
                 }
                 if (layout.isStartField(p) && layout.getNumberOfTeams() > 1) {
                     // mark home position, but only when multiple teams are playing
-                    // TODO use GridTeam and extract for unit test
+                    // TODO use GridTeam and extract for unit test?
                     int teamId = layout.getTeamByHome(p);
                     String textureFile;
                     if (layout.getTeamByIndex(teamId).isMonsterTeam) {
                         textureFile = "textures/MazeHome-monster.png";
                     } else {
                         // Monster(teams) have their own color. So don't just use teamid as index for user color.
-                        textureFile = "textures/MazeHome-" + MazeTheme.teamColors[layout.getNonMonsterTeamByHome(p)] + ".png";
+                        textureFile = "textures/MazeHome-" + TeamColor.teamColors[layout.getNonMonsterTeamByHome(p)].getColor() + ".png";
                     }
                     addDecoratedField(x, y, Texture.buildBundleTexture("data", textureFile));
                 }
