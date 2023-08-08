@@ -78,6 +78,7 @@ function init() {
     $("#inp_offsetVR").val("0.0, 0.0, 0.0");
     // for some unknown reason traffic needs to be lowered
     $("#inp_tf_offsetVR").val("0.0, -1.0, 0.0");
+    $("#inp_teamSize").val("1");
 
     $.get(host + "/version.html", function(responseText) {
         var s = responseText;

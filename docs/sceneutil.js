@@ -7,6 +7,7 @@ function addCommonArgs(args, prefix) {
     // there are two different fields for offsetvr
     args.set("offsetVR",$("#inp_" + prefix + "offsetVR").val());
     args.set("devmode",$("#chk_devMode").prop("checked"));
+    args.set("teamSize",$("#inp_teamSize").val());
 }
 
 function launchMazeScene(vr,boxname,theme) {
