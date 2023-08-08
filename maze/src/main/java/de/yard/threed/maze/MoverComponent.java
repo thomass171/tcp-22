@@ -37,14 +37,11 @@ public class MoverComponent extends EcsComponent implements GridMover {
     //public static final int MOVER_BOT = 3;
     private boolean player;
     //private int type = -1;
-    // boxes and monster have no team color
-    public TeamColor teamColor;
 
-    public MoverComponent(SimpleTransform movable, boolean player, StartPosition startPosition, int team, TeamColor teamColor) {
+    public MoverComponent(SimpleTransform movable, boolean player, StartPosition startPosition, int team) {
         this.movable = movable;
         this.player = player;
         gridMover = new SimpleGridMover(startPosition, this, team);
-        this.teamColor = teamColor;
     }
 
     /**

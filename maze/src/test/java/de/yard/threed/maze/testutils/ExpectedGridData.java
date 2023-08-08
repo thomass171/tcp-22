@@ -104,7 +104,9 @@ public class ExpectedGridData {
                                 new StartPosition(6, 23, GridOrientation.E)}, true, null),
 
                 },
+                // one box
                 new Point[]{new Point(55, 9)},
+                // three diamonds
                 new Point[]{new Point(78, 3), new Point(43, 5), new Point(6, 20)});
     }
 

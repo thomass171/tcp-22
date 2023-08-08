@@ -4,6 +4,7 @@ package de.yard.threed.engine.ecs;
  * A state of a game for example.
  * <p>
  * 18.11.21: Should be a system?
+ * 8.8.23: Also for a client?
  */
 public class SystemState {
     public static int STATE_READY_TO_JOIN = 10;

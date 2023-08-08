@@ -11,6 +11,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.avatar.TeamColor;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsHelper;
+import de.yard.threed.engine.ecs.JoinComponent;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.platform.common.Request;
@@ -276,8 +277,8 @@ public class MazeTestUtils {
         EcsEntity user = findSingleEntityByName(username);
         assertNotNull(user);
         if (expectedTeamColor == null) {
-            assertNull(MoverComponent.getMoverComponent(user).teamColor, label);
+            assertNull(JoinComponent.getJoinComponent(user).teamColor, label);
         } else
-            assertEquals(expectedTeamColor.getColor(), MoverComponent.getMoverComponent(user).teamColor.getColor(), label);
+            assertEquals(expectedTeamColor.getColor(), JoinComponent.getJoinComponent(user).teamColor.getColor(), label);
     }
 }

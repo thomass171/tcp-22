@@ -28,6 +28,8 @@ public class AvatarABuilder {
         model.getTransform().setPosition(offset.position);
         model.getTransform().setRotation(offset.rotation);
         model.getTransform().setScale(offset.scale);
-        return new SceneNode(model);
+        SceneNode avatar = new SceneNode(model);
+        avatar.setName("Avatar-" + teamColor.getColor());
+        return avatar;
     }
 }

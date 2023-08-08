@@ -287,14 +287,16 @@ public class MazeTest {
         MoverComponent mc = MoverComponent.getMoverComponent(player);
         assertNotNull(mc, "MoverComponent");
         assertEquals("aaa", player.getName(), "player name");
-        assertEquals("darkgreen", mc.teamColor.getColor());
+        JoinComponent jc = JoinComponent.getJoinComponent(player);
+        assertEquals("darkgreen", jc.teamColor.getColor());
 
         EcsEntity bot = players.get(1);
         mc = MoverComponent.getMoverComponent(bot);
         assertNotNull(mc, "MoverComponent");
         // a bot is not just a user
         assertEquals("Bot0", bot.getName(), "bot name");
-        assertEquals("red", mc.teamColor.getColor());
+        jc = JoinComponent.getJoinComponent(bot);
+        assertEquals("red", jc.teamColor.getColor());
 
         List<EcsEntity> inventory = MazeUtils.getInventory(player);
         assertEquals(3, inventory.size(), "inventory size");
@@ -364,8 +366,8 @@ public class MazeTest {
         List<EcsEntity> users = initMaze(ExpectedGridData.buildForP_simple(true));
         EcsEntity user0 = users.get(0);
         EcsEntity user1 = users.get(1);
-        assertEquals("darkgreen", MoverComponent.getMoverComponent(user0).teamColor.getColor());
-        assertEquals("red", MoverComponent.getMoverComponent(user1).teamColor.getColor());
+        assertEquals("darkgreen", JoinComponent.getJoinComponent(user0).teamColor.getColor());
+        assertEquals("red", JoinComponent.getJoinComponent(user1).teamColor.getColor());
 
         // firing from home field should be ignored
         SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(user0.getId(), MoverComponent.getMoverComponent(user0).getGridOrientation().getDirectionForMovement(GridMovement.Forward)));
@@ -423,13 +425,15 @@ public class MazeTest {
 
         EcsEntity user0 = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user0);
-        assertEquals("darkgreen", MoverComponent.getMoverComponent(user0).teamColor.getColor());
+        assertEquals("darkgreen", JoinComponent.getJoinComponent(user0).teamColor.getColor());
 
         EcsEntity user1 = EcsHelper.findEntitiesByName("Bot0").get(0);
         assertNotNull(user1);
-        assertNull(MoverComponent.getMoverComponent(user1).teamColor);
+        assertNull(JoinComponent.getJoinComponent(user1).teamColor);
 
+        assertEquals(2, SceneNode.findByName("Avatar").size());
         assertEquals(1, SceneNode.findByName("Monster").size());
+        assertEquals(1, SceneNode.findByName("Avatar-darkgreen").size());
     }
 
     /**
@@ -605,17 +609,17 @@ public class MazeTest {
 
         assertEquals(3, MazeUtils.getPlayer().size(), "number of player");
         EcsEntity user = MazeUtils.getPlayerByUsername("u0");
-        assertEquals("darkgreen", MoverComponent.getMoverComponent(user).teamColor.getColor());
+        assertEquals("darkgreen", JoinComponent.getJoinComponent(user).teamColor.getColor());
 
         assertNotNull(user);
         EcsEntity bot0 = MazeUtils.getPlayer().get(1);
         assertNotNull(bot0);
-        assertEquals("red", MoverComponent.getMoverComponent(bot0).teamColor.getColor());
+        assertEquals("red", JoinComponent.getJoinComponent(bot0).teamColor.getColor());
         assertEquals(3, MazeUtils.getBullets(bot0).size());
 
         EcsEntity bot1 = MazeUtils.getPlayer().get(2);
         assertNotNull(bot1);
-        assertEquals("red", MoverComponent.getMoverComponent(bot1).teamColor.getColor());
+        assertEquals("red", JoinComponent.getJoinComponent(bot1).teamColor.getColor());
         assertEquals(3, MazeUtils.getBullets(bot1).size());
 
         // bot must/will leave home field to make firing possible. By default it will wait real time for next move (but only with SimpleBotAI, which
@@ -672,16 +676,16 @@ public class MazeTest {
 
         EcsEntity user = MazeUtils.getPlayerByUsername("u0");
         assertNotNull(user);
-        assertEquals("darkgreen", MoverComponent.getMoverComponent(user).teamColor.getColor());
+        assertEquals("darkgreen", JoinComponent.getJoinComponent(user).teamColor.getColor());
 
         EcsEntity bot0 = MazeUtils.getPlayer().get(1);
         assertNotNull(bot0);
-        assertNull(MoverComponent.getMoverComponent(bot0).teamColor);
+        assertNull(JoinComponent.getJoinComponent(bot0).teamColor);
         assertEquals(3, MazeUtils.getBullets(bot0).size());
 
         EcsEntity bot1 = MazeUtils.getPlayer().get(2);
         assertNotNull(bot1);
-        assertNull(MoverComponent.getMoverComponent(bot1).teamColor);
+        assertNull(JoinComponent.getJoinComponent(bot1).teamColor);
         assertEquals(3, MazeUtils.getBullets(bot1).size());
 
         // bot must/will leave home field to make firing possible. By default it will wait real time for next move (but only with SimpleBotAI, which

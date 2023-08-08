@@ -304,11 +304,14 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             logger.warn("No start position found. too may players?. Currently " + currentPlayer.size());
             return BaseEventRegistry.buildUserJoinFailedEvent(playerEntity, "error");
         }
-        MoverComponent mover = new MoverComponent(null/*playerEntity.scenenode.getTransform()*/, true, launchPosition/* layout.getInitialOrientation(launchPosition)*/, teamid,
-                (botComponent != null && botComponent.isMonster()) ?null:TeamColor.getByIndex(layout.getNonMonsterTeamByHome(launchPosition.getPoint())));
+        MoverComponent mover = new MoverComponent(null/*playerEntity.scenenode.getTransform()*/, true, launchPosition/* layout.getInitialOrientation(launchPosition)*/, teamid);
         //usedLaunchPositions.add(launchPosition);
 
         playerEntity.addComponent(mover);
+        JoinComponent jc = new JoinComponent();
+        // boxes and monster have no team color
+        jc.teamColor = (botComponent != null && botComponent.isMonster()) ? null : TeamColor.getByIndex(layout.getNonMonsterTeamByHome(launchPosition.getPoint()));
+        playerEntity.addComponent(jc);
 
         return BaseEventRegistry.buildUserJoinedEvent(playerEntity);
     }
@@ -563,7 +566,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             //SceneNode p = MazeModelFactory.getInstance().buildSokobanBox(/*b.getX(), b.getY()*/);
             EcsEntity box = new EcsEntity();
             box.buildSceneNodeByModelFactory(MazeModelFactory.BOX_BUILDER, new ModelBuilderRegistry[]{mazeTheme.getMazeModelFactory()});
-            MoverComponent mover = new MoverComponent(box.getSceneNode().getTransform()/*this*/, false, new StartPosition(b, new GridOrientation()), -1, null);
+            MoverComponent mover = new MoverComponent(box.getSceneNode().getTransform()/*this*/, false, new StartPosition(b, new GridOrientation()), -1);
             mover.setLocation(b);
             box.addComponent(mover);
             //return box;

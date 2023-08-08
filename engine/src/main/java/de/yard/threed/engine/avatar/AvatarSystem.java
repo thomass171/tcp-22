@@ -91,7 +91,7 @@ public class AvatarSystem extends DefaultEcsSystem {
 
                 // now after joined EcsEntity userEntity = shortCutJoin(userEntityId);
                 EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
-
+                userEntity.addComponent(new JoinComponent());
                 logger.debug("User '" + userEntity.getName() + "' joining via shortCutJoin");
 
                 SystemManager.sendEvent(BaseEventRegistry.buildUserJoinedEvent(userEntity));
@@ -186,7 +186,10 @@ public class AvatarSystem extends DefaultEcsSystem {
             // used as marker
             user.addComponent(new AvatarComponent());
         } else {
-            mainNode = user.buildSceneNodeByModelFactory(builderName, new ModelBuilderRegistry[]{modelBuilderRegistry});
+            JoinComponent jc = JoinComponent.getJoinComponent(user);
+            // modifying the builder name this way is no nice solution, but works for now
+            mainNode = user.buildSceneNodeByModelFactory(jc.teamColor == null ? builderName : builderName + "." + jc.teamColor.getColor(),
+                    new ModelBuilderRegistry[]{modelBuilderRegistry});
         }
         mainNode.setName("Avatar");
 

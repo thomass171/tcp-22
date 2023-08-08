@@ -60,10 +60,11 @@ public class MultipleSystemTest {
         assertNotNull(playerEntity, "player");
         assertNotNull("Player", playerEntity.getName());
         assertEquals(testUserName, playerEntity.getName());
-        assertEquals(3, playerEntity.getComponentCount());
+        assertEquals(4, playerEntity.getComponentCount());
         assertNotNull(TeleportComponent.getTeleportComponent(playerEntity));
         assertNotNull(AvatarComponent.getAvatarComponent(playerEntity));
         assertNotNull(UserComponent.getUserComponent(playerEntity));
+        assertNotNull(JoinComponent.getJoinComponent(playerEntity));
         // observercomponent is disabled by default
         assertNull(ObserverComponent.getObserverComponent(playerEntity));
 

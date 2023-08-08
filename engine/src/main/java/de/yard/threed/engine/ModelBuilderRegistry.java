@@ -8,7 +8,7 @@ package de.yard.threed.engine;
 public interface ModelBuilderRegistry {
 
     /**
-     * Returns null if 'key' is not registered in the registry.
+     * Returns a model builder for 'key' and null if 'key' is not registered in the registry.
      */
     ModelBuilder lookupModelBuilder(String key);
 }
