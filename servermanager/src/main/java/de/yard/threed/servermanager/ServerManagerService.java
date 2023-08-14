@@ -38,7 +38,7 @@ public class ServerManagerService {
 
     AtomicInteger idInteger = new AtomicInteger(1);
 
-    public ServerInstance startServer(String scenename, String gridname, Integer baseport) {
+    public ServerInstance startServer(String scenename, Integer baseport, Map<String, String> argMap) {
 
         int port;
         if (baseport != null) {
@@ -49,7 +49,7 @@ public class ServerManagerService {
 
         Process process;
         try {
-            process = startServerInstance(scenename, gridname, port);
+            process = startServerInstance(scenename, port, argMap);
         } catch (Exception e) {
             e.printStackTrace();
             // trigger HTTP code 500
@@ -60,7 +60,7 @@ public class ServerManagerService {
 
         }*/
         int id = idInteger.addAndGet(1);
-        ServerInstance si = new ServerInstance(id, -1, OffsetDateTime.now(), System.currentTimeMillis(), scenename, gridname, port, STATE_RUNNING, 0);
+        ServerInstance si = new ServerInstance(id, -1, OffsetDateTime.now(), System.currentTimeMillis(), scenename, argMap, port, STATE_RUNNING, 0);
         serverInstances.add(0, si);
         processMap.put(id, process);
         if (!process.isAlive()) {
@@ -102,20 +102,23 @@ public class ServerManagerService {
     /**
      * baseport is mandatory to know which ports are in use.
      */
-    private Process startServerInstance(String scenename, String gridname, int baseport) throws Exception {
+    private Process startServerInstance(String scenename, int baseport, Map<String, String> argMap) throws Exception {
 
         Process serverProcess;
 
         log.debug("Working Directory = " + System.getProperty("user.dir"));
 
-        HashMap<String, String> properties = new HashMap<String, String>();
-        properties.put("initialMaze", gridname);
+        //HashMap<String, String> properties = new HashMap<String, String>();
+        //properties.put("initialMaze", gridname);
 
         List<String> args = new ArrayList<>();
         args.add("--throttle=100");
-        args.add("--initialMaze=" + gridname);
+        //args.add("--initialMaze=" + gridname);
         args.add("--scene=" + scenename);
         args.add("--baseport=" + baseport);
+        for (String arg : argMap.keySet()) {
+            args.add("--" + arg + "=" + argMap.get(arg));
+        }
 //        Class clazz = Class.forName(servermanagerChildMainClass);
         log.debug("servermanagerLib={}", servermanagerLib);
         String classPath = System.getProperty("user.dir") + "/" + servermanagerLib + "/*";

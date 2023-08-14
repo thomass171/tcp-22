@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -21,10 +22,10 @@ public class ServerInstance {
 
     long startedMillis;
 
-    // no camel case for scenename, gridname and baseport to comply to query parameter
+    // no camel case for scenename and baseport to comply to query parameter
     String scenename;
 
-    String gridname;
+    Map<String, String> argMap;
 
     int baseport;
 

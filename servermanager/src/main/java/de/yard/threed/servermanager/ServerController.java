@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @AllArgsConstructor
 //its no REST @RestController
 @Controller
@@ -26,9 +29,11 @@ public class ServerController {
     @CrossOrigin
     @PostMapping("/server")
     //@ResponseBody
-    public ResponseEntity<ServerInstance> start(@RequestParam String scenename, @RequestParam String gridname, @RequestParam(required = false) Integer baseport) {
-        log.info("Starting server for scene {} with grid name {} on port {}", scenename, gridname, baseport);
-        return new ResponseEntity<>(serverManagerService.startServer(scenename, gridname, baseport), HttpStatus.CREATED);
+    public ResponseEntity<ServerInstance> start(@RequestParam String scenename, @RequestParam(required = false) Integer baseport,
+                                                @RequestParam Map<String, String> allRequestParams) {
+        log.info("Starting server for scene {} on port {} with args {}", scenename, baseport, allRequestParams);
+        Map<String, String> argMap = allRequestParams.entrySet().stream().filter(x -> x.getKey().startsWith("arg.")).collect(Collectors.toMap(x -> x.getKey().substring(4), x -> x.getValue()));
+        return new ResponseEntity<>(serverManagerService.startServer(scenename, baseport, argMap), HttpStatus.CREATED);
     }
 
     @CrossOrigin

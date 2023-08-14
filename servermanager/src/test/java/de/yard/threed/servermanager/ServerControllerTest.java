@@ -75,6 +75,7 @@ public class ServerControllerTest {
         assertEquals(1, sil.getServerInstanceList().size());
         assertEquals(ServerManagerService.STATE_RUNNING, sil.getServerInstanceList().get(0).getState());
         assertEquals(5890, sil.getServerInstanceList().get(0).getBaseport());
+        assertEquals("skbn/SokobanWikipedia.txt", sil.getServerInstanceList().get(0).getArgMap().get("initialMaze"));
 
         // stop server
         stopServer(serverid);
@@ -121,7 +122,7 @@ public class ServerControllerTest {
     private ServerInstance startServer(String gridName) throws Exception {
         List<NameValuePair> nameValuePairs = new ArrayList<>();
         nameValuePairs.add(new BasicNameValuePair("scenename", "de.yard.threed.maze.MazeScene"));
-        nameValuePairs.add(new BasicNameValuePair("gridname", gridName));
+        nameValuePairs.add(new BasicNameValuePair("arg.initialMaze", gridName));
         // use internal port management
         // nameValuePairs.add(new BasicNameValuePair("baseport", Integer.toString(baseport)));
         URI uri = new URIBuilder("http://localhost:" + port + URL).addParameters(nameValuePairs).build();
