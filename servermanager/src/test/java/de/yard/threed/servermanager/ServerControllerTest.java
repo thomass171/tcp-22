@@ -104,7 +104,9 @@ public class ServerControllerTest {
         assertEquals(ServerManagerService.STATE_RUNNING, sil.getServerInstanceList().get(1).getState());
         // list order is by age desc
         assertEquals(5892, sil.getServerInstanceList().get(0).getBaseport());
+        assertEquals("maze/Area15x10.txt", sil.getServerInstanceList().get(0).getArgMap().get("initialMaze"));
         assertEquals(5890, sil.getServerInstanceList().get(1).getBaseport());
+        assertEquals("skbn/SokobanWikipedia.txt", sil.getServerInstanceList().get(1).getArgMap().get("initialMaze"));
 
         // stop all server
         for (ServerInstance si : sis) {
