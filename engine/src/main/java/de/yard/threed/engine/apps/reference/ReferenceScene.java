@@ -99,8 +99,8 @@ public class ReferenceScene extends Scene {
     int HIDDENCUBELAYER = 9;//1 << 8;
     SceneNode lightNode;
     int shading = NumericValue.SMOOTH;
-    RequestType REQUEST_CLOSE = RequestType.register(1008,"close");
-    RequestType REQUEST_CYCLE = RequestType.register(1009,"cycle");
+    RequestType REQUEST_CLOSE = RequestType.register(1008, "close");
+    RequestType REQUEST_CYCLE = RequestType.register(1009, "cycle");
     // Outside VR inventory is in HIDDENCUBELAYER of derredcamera
     ControlPanel inventory;
     ControlPanel controlPanel;
@@ -113,6 +113,7 @@ public class ReferenceScene extends Scene {
     double DEFERRED_CAMERA_NEAR = 4.0;
     // far needs to cover hiddencube position in world space (its not attached)
     double DEFERRED_CAMERA_FAR = 15.0;
+    Audio elevatorPing;
 
     @Override
     public void init(SceneMode sceneMode) {
@@ -246,7 +247,7 @@ public class ReferenceScene extends Scene {
             ControlPanelArea area1884 = inventory.addArea("area1884", new Vector2(0, 0), new DimensionF(inventory.getSize().getWidth() / 3, inventory.getSize().getHeight()), null);
             area1884.setTexture(textTexture.getTextureForText("1884", Color.RED));
         }
-        controlPanel = buildControlPanel(controlPanelBackground);
+        controlPanel = buildControlPanel(controlPanelBackground, this);
         // in front of left box, dami man mit einem teleport gut davorsteht zur Bedienung
         controlPanel.getTransform().setPosition(new Vector3(-3, 1.5, 2.5));
         addToWorld(controlPanel);
@@ -317,6 +318,10 @@ public class ReferenceScene extends Scene {
         canvasNode.setName("Canvas");
         addToWorld(canvasNode);
 
+        AudioClip elevatorPingClip = AudioClip.buildAudioClipFromBundle("data", "audio/elevator-ping-01.wav");
+        elevatorPing = Audio.buildAudio(elevatorPingClip);
+        elevatorPing.setVolume(0.5);
+        elevatorPing.setLooping(false);
         logger.debug("setupScene completed");
     }
 
@@ -326,7 +331,7 @@ public class ReferenceScene extends Scene {
     private static double PropertyControlPanelRowHeight = 0.1;
     private static double PropertyControlPanelMargin = 0.005;
 
-    private static ControlPanel buildControlPanel(Color backGround) {
+    private static ControlPanel buildControlPanel(Color backGround, ReferenceScene rs) {
         Material mat = Material.buildBasicMaterial(backGround, false);
 
         DimensionF rowsize = new DimensionF(PropertyControlPanelWidth, PropertyControlPanelRowHeight);
@@ -349,6 +354,8 @@ public class ReferenceScene extends Scene {
                 PropertyControlPanelRowHeight), () -> {
             logger.debug("area clicked");
             indicator.toggle();
+            rs.elevatorPing.play();
+
         }).setIcon(Icon.ICON_POSITION);
 
 

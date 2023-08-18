@@ -45,6 +45,7 @@ public class FileReader {
      * 05.04.17: Liefert nie null.
      * 24.4.17: Seit Bundle ist das wohl deprecated. Eine Lösung fuer z.B. gz brauchts aber trotzdem.
      * 16.10.18: Jetzt in desktop und nicht mehr deprecated. zip gibt es aber nicht mehr.
+     * 16.8.23: Using NativeResource and isBundled appears really confusing TODO refactor. What is the zip/jar use case? Android?
      * @return
      * @throws IOException
      */

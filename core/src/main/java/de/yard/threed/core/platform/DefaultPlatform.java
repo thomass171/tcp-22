@@ -245,6 +245,16 @@ public class DefaultPlatform extends Platform {
         throw new RuntimeException("not implemented");
     }
 
+    @Override
+    public NativeAudioClip buildNativeAudioClip(BundleResource filename) {
+        throw new RuntimeException(("not implemented"));
+    }
+
+    @Override
+    public NativeAudio buildNativeAudio(NativeAudioClip audioClip) {
+        throw new RuntimeException(("not implemented"));
+    }
+
     /*@Override
     public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed) {
         throw new RuntimeException("no bundle loader implemented");

@@ -17,9 +17,9 @@ import java.util.HashMap;
  * <p/>
  * Date: 26.03.14
  * <p/>
- * 12.10.15: Texturen sollten einmalig als Resource in den GPU Speicher geladen werden.
- * Diese Klasse hier ist ueber NativeTexture eine Referenz auf eine Textur im GPU Speicher.
- * Die Platform prüft auf mehrfachLaden einer Textur.
+ * Textures are loaded once into GPU memory. This is via NativeTexture just a reference to it.
+ *
+ * There is also a TexturePool.
  */
 public class Texture {
     Log logger = Platform.getInstance().getLog(Texture.class);

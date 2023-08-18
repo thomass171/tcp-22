@@ -72,9 +72,8 @@ public class JmeTexture implements NativeTexture {
     }
 
     /**
-     * 9.11.15: Verwendet nicht mehr den so auf relative Verzeichnisse fixierten Assetmanager
-     * 11.4.17: Liefert null bei (already logged) error.
-     *
+     * 9.11.15: No longer uses the assetmanager, that is focusing on relative directories.
+     * 11.4.17: Returns null on (already logged) error.
      * @return
      */
     static JmeTexture loadFromFile(NativeResource textureresource) {

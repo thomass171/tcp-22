@@ -486,4 +486,8 @@ public abstract class Platform {
     public void setOption(String option, String value) {
         getLog().warn("setOption not implemented: " + option);
     }
+
+    public abstract NativeAudioClip buildNativeAudioClip(BundleResource filename);
+
+    public abstract NativeAudio buildNativeAudio(NativeAudioClip audioClip);
 }

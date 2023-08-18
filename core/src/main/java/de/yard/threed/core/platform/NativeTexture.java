@@ -1,13 +1,11 @@
 package de.yard.threed.core.platform;
 
 /**
- * Ist jetzt erstmal nur auf statische Texturen ausgelegt, die aus einer Datei gelesen werden.
  *
+ * Only for static textures that are loaded from a file for now.
  * Created by thomass on 05.06.15.
  */
 public interface NativeTexture {
-    //4.10.17: Noch nicht klar definiert, was name ist.
+    //4.10.17: Unclear what name is.
     String getName();
-    //void loadTexture(String name);
-    //public String getFilename();
 }

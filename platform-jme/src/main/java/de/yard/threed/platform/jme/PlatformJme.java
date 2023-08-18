@@ -121,7 +121,7 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
     }
 
     @Override
-    public void httpGet(String url, List<Pair<String,String>> params, List<Pair<String,String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
+    public void httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
         NativeFuture<AsyncHttpResponse> future = JavaWebClient.httpGet(url, params, header, asyncJobDelegate);
         sceneRunner.addFuture(future, asyncJobDelegate);
     }
@@ -547,5 +547,17 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
     @Override
     public NativeScene getScene() {
         return nativeScene;
+    }
+
+    @Override
+    public NativeAudioClip buildNativeAudioClip(BundleResource br) {
+        JmeAudioClip audioClip = JmeAudioClip.loadFromFile(br, jmeResourceManager.am);
+        return audioClip;
+    }
+
+    @Override
+    public NativeAudio buildNativeAudio(NativeAudioClip audioClip) {
+        JmeAudio audio = JmeAudio.createAudio((JmeAudioClip)audioClip);
+        return audio;
     }
 }

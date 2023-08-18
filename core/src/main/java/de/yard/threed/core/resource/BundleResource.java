@@ -15,6 +15,7 @@ import de.yard.threed.core.Util;
  * 29.11.21: Bad design having bundle here instead of just bundle name? Depends on the use case; before loading a resource or
  * after loading. Loading might include a lookup. Apparently, this class was intended for the second.
  * <p/>
+ * 16.8.23: Needs refactoring probably. Maybe split to a new "BundledResource" class.
  * Created by thomass on 19.04.16.
  */
 public class BundleResource implements NativeResource {
@@ -99,7 +100,7 @@ public class BundleResource implements NativeResource {
     }
 
     /**
-     * 12.6.17: Der Bundlename gehoert hier nicht rein.
+     * 12.6.17: Bundlename isn't part of full name.
      *
      * @return
      */
@@ -109,6 +110,17 @@ public class BundleResource implements NativeResource {
             return path.path + "/" + name;
         }
         return name;
+    }
+
+    public String getFullQualifiedName() {
+        String b = bundlename;
+        if (b == null) {
+            b = bundle.name;
+        }
+        if (path != null && path.path != null && StringUtils.length(path.path) > 0) {
+            return b + ":" + path.path + "/" + name;
+        }
+        return b + ":" + name;
     }
 
     /**
@@ -144,6 +156,7 @@ public class BundleResource implements NativeResource {
 
     /**
      * Never returns null. 30.11.21:Still in use(!?).
+     *
      * @return
      */
     public static BundleResource buildFromFullStringAndBundlename(String bundlename, String filename) {
@@ -155,13 +168,14 @@ public class BundleResource implements NativeResource {
      * Returns null is case of invalid fullQualifiedString.
      */
     public static BundleResource buildFromFullQualifiedString(String fullQualifiedString) {
-        if (!StringUtils.contains(fullQualifiedString,":")){
+        if (!StringUtils.contains(fullQualifiedString, ":")) {
             return null;
         }
-        BundleResource br = new BundleResource(StringUtils.substringAfter(fullQualifiedString,":"));
-        br.bundlename = StringUtils.substringBefore(fullQualifiedString,":");
+        BundleResource br = new BundleResource(StringUtils.substringAfter(fullQualifiedString, ":"));
+        br.bundlename = StringUtils.substringBefore(fullQualifiedString, ":");
         return br;
     }
+
     /**
      * Name without path and extension.
      *

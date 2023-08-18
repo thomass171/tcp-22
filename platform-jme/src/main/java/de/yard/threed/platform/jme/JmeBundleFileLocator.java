@@ -4,33 +4,33 @@ import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetLocator;
 import com.jme3.asset.AssetManager;
-import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.resource.BundleResolver;
+import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.javacommon.FileReader;
+import de.yard.threed.outofbrowser.FileSystemResource;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 /**
- * Alternativer Locator, um auch im Classpath zu suchen.
- * 2.5.19: Ist aber schon laenger über Bundle statt Classpath? Ich glaube das taeuscht. Wir sind
- * hier doch IN der Platform JME. Nee, nicht unbedingt. Custom shader werden aus Bundles geladen,
- * allerdings nicht hier.
- * 16.8.23: Using BundleResource is confusing. This locator is not related to bundle.
+ * 16.8.23: More upToDate generic locator for locating files in bundles and using bundleresolver.
+ * Uses ":" representation to pass bundle name to JmeBundleFileLocator
  */
-public class JmeFileLocator implements AssetLocator {
-    Log logger = Platform.getInstance().getLog(JmeFileLocator.class);
-    private String rootpath;
+public class JmeBundleFileLocator implements AssetLocator {
+    Log logger = Platform.getInstance().getLog(JmeBundleFileLocator.class);
 
-    public JmeFileLocator() {
-
+    public JmeBundleFileLocator() {
     }
 
+    /**
+     * Not used.
+     */
     @Override
     public void setRootPath(String s) {
-        rootpath = s;
     }
 
     /**
@@ -39,15 +39,16 @@ public class JmeFileLocator implements AssetLocator {
     @Override
     public AssetInfo locate(AssetManager assetManager, AssetKey assetKey) {
         String assetkey = assetKey.getName();
-        logger.debug("locate: " + assetkey + " with root path " + rootpath);
+        logger.debug("locate: " + assetkey);
 
         final InputStream is;
         try {
-            // 16.8.23: Using BundleResource here is really confusing!
-            is = FileReader.getFileStream(new BundleResource(new ResourcePath(rootpath),assetKey.getName()));
+            BundleResource bundleResource = BundleResource.buildFromFullQualifiedString(assetkey);
+            String bundlebasedir = BundleResolver.resolveBundle(bundleResource.bundlename, Platform.getInstance().bundleResolver).getPath();
+            FileSystemResource resource = FileSystemResource.buildFromFullString(bundlebasedir + "/" + bundleResource.getFullName());
+            is = FileReader.getFileStream(resource);
         } catch (Exception e) {
-            //Ein custom shader wird im FS tatsaechlich nicht gefunden. Nur ein Warning? Es kommen ja noch andere Locator.
-            //e.printStackTrace();
+            logger.debug("not found");
             return null;
         }
 
@@ -59,6 +60,4 @@ public class JmeFileLocator implements AssetLocator {
         };
         return ai;
     }
-
-
 }

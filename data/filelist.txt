@@ -25,3 +25,6 @@ textures/Face-blue.png
 textures/Face-green.png
 textures/Face-darkgreen.png
 textures/Face-red.png
+audio/elevator-ping-01.wav
+audio/elevator-ping-03.wav
+audio/aiwha_ding.wav

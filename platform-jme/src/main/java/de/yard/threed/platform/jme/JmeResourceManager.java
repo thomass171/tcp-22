@@ -31,6 +31,10 @@ public class JmeResourceManager extends DefaultResourceReader/*5.8.21 JAResource
             // FileLocator versuchen. Dürfte dann z.B. für Images  greifen.
             //19.3.16 brahcts den?am.registerLocator(null, JmeFileLocator.class);
 
+            // 16.8.23: More upToDate generic locator for locating files in bundles and using bundleresolver. Prefix/rootPath
+            // isn't used because bundleResolver is used. Called only when previous locator fail, so it
+            // shouldn't affect shader/effects.
+            am.registerLocator(null, JmeBundleFileLocator.class);
         }
     }
 
