@@ -21,10 +21,12 @@ public class LoadingBundle {
     public String bundlename;
     //timestamp when requesting all bundle content isType done. Might still be running in background.
     public long doneloading = 0;
+    public boolean delayed;
 
-    LoadingBundle(String bundlename, BundleLoadDelegate loadlistener) {
+    LoadingBundle(String bundlename, BundleLoadDelegate loadlistener, boolean delayed) {
         this.bundlename = bundlename;
         callback = loadlistener;
+        this.delayed = delayed;
     }
 
     public void addFailure(String filename) {

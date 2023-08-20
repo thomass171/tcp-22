@@ -4,7 +4,8 @@ import de.yard.threed.core.platform.NativeAudio;
 import de.yard.threed.core.platform.Platform;
 
 /**
- * Wrapper for audio.
+ * Wrapper for a global(background) audio. Becomes local(positional) by attaching it to a scene node.
+ * <p>
  * Is like light and mesh a component of a scene node, though its standalone in some platforms (JME, ThreeJS)
  */
 public class Audio {

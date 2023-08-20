@@ -141,16 +141,16 @@ public class WebGlBundleLoader implements NativeBundleLoader {
         //logger.debug("filename="+filename);
         char filetype = Bundle.filetype(filename);
         switch (filetype) {
-            case 'T':
+            case 'T'://GLTF
                 // C# conform fall through
             case 't':
                 if (filetype == 'T' && delayed) {
                     bundle.addResource(filename, null);
                     break;
                 }
-                loadRessource(resource, listener, false, false);
+                loadRessource(resource, listener, false);
                 break;
-            case 'B':
+            case 'B'://GLTF binary
                 // C# conform fall through
             case 'b':
                 if (filetype == 'B' && delayed) {
@@ -162,7 +162,7 @@ public class WebGlBundleLoader implements NativeBundleLoader {
                     // uncompressed lesen weil ein uncompress in js oder Browser offenbar nicht geht.
                     res = new WebGlResource(bundlebasedir + "/" + StringUtils.substringBeforeLast(filename, ".gz"));
                 }
-                loadRessource(res, listener, true, false);
+                loadRessource(res, listener, true);
                 break;
             case 'i':
                 //Image/Textur wird spaeter "intern" geladen.
@@ -171,8 +171,10 @@ public class WebGlBundleLoader implements NativeBundleLoader {
             case 'z':
                 //zipped binary (btg.gz). Der unzip wird schon hier statt beim getRersource gemacht, weil dies hier
                 //in der Platform ist.
-                loadRessource(resource, listener, true, true);
-                break;
+                //19.8.23: zip download was never a real option in JS.
+                throw new RuntimeException("no gz/zip download");
+                //loadRessource(resource, listener, true, true);
+                //break;
                                 /*12.1.18 case 'g':
                                     //gltf wird - je nach dem - spaeter "intern" geladen.
                                     if (PlatformWebGl.customgltfloader) {
@@ -201,7 +203,7 @@ public class WebGlBundleLoader implements NativeBundleLoader {
         String directoryresource = bundlebasedir + "/" + BundleRegistry.getDirectoryName(bundlename, true);
 
         // TODO race conditioin? Koennte das selbe Bundle mehrfach laden?
-        LoadingBundle lb = new LoadingBundle(bundlename, loadlistener);
+        LoadingBundle lb = new LoadingBundle(bundlename, loadlistener, delayed);
         loadingbundle.add(lb);
 
         WebGlResource directory = new WebGlResource(directoryresource);
@@ -235,7 +237,7 @@ public class WebGlBundleLoader implements NativeBundleLoader {
 
     //@Override
     public void loadRessource(final NativeResource ressource, final ResourceLoadingListener loadlistener) {
-        loadRessource(ressource, loadlistener, false, false);
+        loadRessource(ressource, loadlistener, false);
     }
 
     /**
@@ -246,11 +248,14 @@ public class WebGlBundleLoader implements NativeBundleLoader {
      * Das ist aber wohl ein Prinzipproblem, weil Javascript keine byte arrays kennt.
      * Man bekommt aus einem Utin8Array einfach keinen String gemacht. Läuft auf Fehler oder ist langsam.
      * Siehe auch https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures für Speicherbedarf.
+     * <p>
+     * 19.8.23: This method appears somehow weird. But flag binary is really useful with XMLHttpRequest, eg. for loading GLTF binary models? Really?.
+     * But 'zipped' is no valid option.
      *
      * @param ressource
      * @param loadlistener
      */
-    public void loadRessource(final NativeResource ressource, final ResourceLoadingListener loadlistener, boolean binary, boolean zipped) {
+    public void loadRessource(final NativeResource ressource, final ResourceLoadingListener loadlistener, boolean binary) {
         if (BundleRegistry.bundledebuglog) {
             logger.debug("loadRessource:" + ressource.getFullName());
         }
@@ -291,43 +296,7 @@ public class WebGlBundleLoader implements NativeBundleLoader {
                             if (BundleRegistry.bundledebuglog) {
                                 logger.debug("onReadyStateChange. size=" + buffer.byteLength());
                             }
-                            Uint8Array array = TypedArrays.createUint8Array(buffer);
-
-                            //if (binary) {
-
-                            //logger.debug(url);
-                            if (zipped) {
-                                //Blob dataBlob = new Blob([data], { "type": "application/zlib" });
-                                //GZIPInputStream p;
-                            }
                             loadlistener.onLoad(new BundleData(new WebGlByteBuffer(buffer), false));
-                            /*6.8.21 } else {
-                                boolean trybuytearray = false;
-                                if (trybuytearray) {
-                                    loadlistener.onLoad(new BundleData(new WebGlByteBuffer(buffer), true));
-                                } else {
-                                    //4.5.18: Das laeuft entweder auf Fehler oder ist sehr langsam. Wird erstmal nicht mehr gemacht.
-                                    String responsetext = "";
-                                    try {
-                                        //returns Maximum call stack size exceeded.for file bundles
-                                        //jsutils laueft manchmal auf "call stack", selber machen ist langsam. Doof
-                                        try {
-                                            responsetext = JsUtils.stringFromArrayBuffer(buffer);
-                                        } catch (Exception jse1) {
-                                            logger.error("JsUtils exception " + jse1.getMessage() + "for file " + name + ". Using self made conversion.");
-
-                                            byte[] buf = new byte[array.length()];
-                                            for (int i = 0; i < buf.length; i++) {
-                                                buf[i] = (byte) array.get(i);
-                                            }
-                                            responsetext = new String(buf);
-                                        }
-                                    } catch (Exception jse) {
-                                        logger.error("String convert exception " + jse.getMessage() + "for file " + name);
-                                    }
-                                    loadlistener.onLoad(new BundleData(responsetext));
-                                }
-                            }*/
                         } else {
                             logger.error("XHR Status code " + xhr.getStatus() + " for resource " + ressource.getFullName() + "with url " + url);
                             // Der onload und muss immer aufgerufen werden, sonst bleibt er im preload.
@@ -395,7 +364,7 @@ public class WebGlBundleLoader implements NativeBundleLoader {
         for (int index = 0; index < loadingbundle.size(); index++) {
             LoadingBundle lb = loadingbundle.get(index);
             if (lb.isReady()) {
-                BundleRegistry.registerBundle(lb.bundle.name, lb.bundle);
+                BundleRegistry.registerBundle(lb.bundle.name, lb.bundle, lb.delayed);
                 loadedindex = index;
                 break;
             }

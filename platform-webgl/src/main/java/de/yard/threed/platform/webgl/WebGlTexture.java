@@ -3,13 +3,17 @@ package de.yard.threed.platform.webgl;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayInteger;
 import de.yard.threed.core.ImageData;
+import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeTexture;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.platform.common.Settings;
 
 /**
  * Created by thomass on 07.05.15.
  */
 public class WebGlTexture implements NativeTexture {
+    static Log logger = Platform.getInstance().getLog(WebGlTexture.class);
+
     // Das JS Object ist ein THREE.Texture
     JavaScriptObject texture;
 
@@ -52,7 +56,11 @@ public class WebGlTexture implements NativeTexture {
         }*/
     }
 
+    /**
+     * "filename" is a complete URL here.
+     */
     public static WebGlTexture loadTexture(String filename) {
+        logger.debug("Loading texture " + filename);
         return new WebGlTexture(loadTextureNative(filename));
     }
 

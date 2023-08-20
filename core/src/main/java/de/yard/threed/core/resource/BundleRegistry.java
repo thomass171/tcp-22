@@ -34,12 +34,12 @@ public class BundleRegistry {
      * @param bundlename
      * @param bundle
      */
-    public static void registerBundle(String bundlename, Bundle bundle) {
-        if (logger==null){
+    public static void registerBundle(String bundlename, Bundle bundle, boolean delayed) {
+        if (logger == null) {
             logger = Platform.getInstance().getLog(BundleRegistry.class);
         }
         bundles.put(bundlename, bundle);
-        logger.info("Bundle load complete: " + bundle.name + "(" + (bundle.getSizeInBytes() / 1000000) + " MB)");
+        logger.info("Bundle load complete: " + bundle.name + "(" + (bundle.getSizeInBytes() / 1000000) + " MB),delayed=" + delayed);
 
     }
 
@@ -48,14 +48,14 @@ public class BundleRegistry {
     }
 
     public static void removeAircraftSpecific() {
-        for (int i=providerlist.size()-1;i>=0;i--){
-            if (providerlist.get(i).isAircraftSpecific()){
+        for (int i = providerlist.size() - 1; i >= 0; i--) {
+            if (providerlist.get(i).isAircraftSpecific()) {
                 providerlist.remove(i);
             }
         }
     }
 
-    public static int getProviderCount(){
+    public static int getProviderCount() {
         return providerlist.size();
     }
 
@@ -83,13 +83,13 @@ public class BundleRegistry {
                 throw new RuntimeException("no path");
             }*/
             BundleResource br = new BundleResource(current.getPath(), resource);
-            if (bundleexists(current.bundle,br)) {
+            if (bundleexists(current.bundle, br)) {
                 br.bundle = current.bundle;
                 return br;
             }
             //12.6.17: absolute Suche im Bundle
             br = new BundleResource(resource);
-            if (bundleexists(current.bundle,br)) {
+            if (bundleexists(current.bundle, br)) {
                 br.bundle = current.bundle;
                 return br;
             }
@@ -113,19 +113,19 @@ public class BundleRegistry {
         return null;
     }
 
-    static public boolean bundleexists(Bundle b, BundleResource br){
-        if (b.exists(br)){
+    static public boolean bundleexists(Bundle b, BundleResource br) {
+        if (b.exists(br)) {
             return true;
         }
-        if (br.getExtension().equals("ac")){
-            br = new BundleResource(br.bundle,StringUtils.substringBeforeLast(br.getFullName(),".ac")+".gltf");
+        if (br.getExtension().equals("ac")) {
+            br = new BundleResource(br.bundle, StringUtils.substringBeforeLast(br.getFullName(), ".ac") + ".gltf");
             return b.exists(br);
         }
         return false;
     }
 
 
-//TODO move to resolver?
+    //TODO move to resolver?
     public static String getDirectoryName(String bundlename, boolean b) {
         if (StringUtils.startsWith(bundlename, BundleRegistry.TERRAYSYNCPREFIX)) {
             // bucket or model bundle
@@ -150,7 +150,7 @@ public class BundleRegistry {
         bundles.clear();
         //30.9.19: Auch provider
         providerlist.clear();
-       // logger.debug("Bundles cleared");
+        // logger.debug("Bundles cleared");
     }
 
     public static void unregister(String bundlename) {

@@ -134,6 +134,7 @@ public class PlatformWebGl extends Platform {
                 logger.debug("using ThreeJS async gltf instead of ac");
                 //String bundlebasedir = BundleRegistry.getBundleBasedir(file.bundle.name, true);
                 String bundlebasedir = BundleResolver.resolveBundle(file.bundle.name, Platform.getInstance().bundleResolver).getPath();
+                // TODO don't use filename/bundlebasedir for HTTP part
                 BundleResource resource = new BundleResource(bundlebasedir + "/" + gltfile.getFullName());
                 WebGlLoader.loadGLTFbyThreeJS(resource, delegateid, basename);
                 return;
@@ -244,6 +245,7 @@ public class PlatformWebGl extends Platform {
 
     private NativeTexture buildNativeTextureWebGl(NativeResource filename, HashMap<NumericType, NumericValue> params) {
         //logger.debug("buildNativeTextureWebGl " + filename.getFullName());
+        //20.8.23:How is bundle name handled?
         WebGlTexture texture = WebGlTexture.loadTexture(filename.getFullName());
         NumericValue wraps = params.get(NumericType.TEXTURE_WRAP_S);
         if (wraps != null) {
@@ -267,6 +269,7 @@ public class PlatformWebGl extends Platform {
             return null;//defaulttexture;
         }
         //String bundlebasedir = BundleRegistry.getBundleBasedir(filename.bundle.name, true);
+        // TODO don't use filename/bundlebasedir for HTTP part
         String bundlebasedir = BundleResolver.resolveBundle(filename.bundle.name, Platform.getInstance().bundleResolver).getPath();
         BundleResource resource = new BundleResource(bundlebasedir + "/" + filename.getFullName());
         return buildNativeTextureWebGl(resource, parameters);
@@ -554,6 +557,22 @@ public class PlatformWebGl extends Platform {
             }
         });
         request.send();
+    }
+
+    @Override
+    public NativeAudioClip buildNativeAudioClip(BundleResource br) {
+        String bundlebasedir = BundleResolver.resolveBundle(br.bundle.name, Platform.getInstance().bundleResolver).getPath();
+        // TODO don't use filename/bundlebasedir for HTTP part
+        BundleResource resource = new BundleResource(bundlebasedir + "/" + br.getFullName());
+
+        WebGlAudioClip audioClip = WebGlAudioClip.loadFromBundle(resource);
+        return audioClip;
+    }
+
+    @Override
+    public NativeAudio buildNativeAudio(NativeAudioClip audioClip) {
+        WebGlAudio audio = WebGlAudio.createAudio((WebGlAudioClip)audioClip);
+        return audio;
     }
 }
 

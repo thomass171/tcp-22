@@ -10,6 +10,8 @@ import de.yard.threed.core.buffer.NativeByteBuffer;
  * speicherhungriger.
  * 
  * Evtl. mal native draus machen?
+ * 19.8.23: use case for binary data is eg. loading GLTF binary models? Textures, sound, etc should be loaded directly by the platform (depending on the platform?).
+ * Isn't GLTF loaded by the platform? So again: what is the purpose of binary data from bundles? Was it btg files once?
  * <p>
  * Created by thomass on 21.04.17.
  */

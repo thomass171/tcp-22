@@ -15,7 +15,9 @@ import de.yard.threed.core.Util;
  * 29.11.21: Bad design having bundle here instead of just bundle name? Depends on the use case; before loading a resource or
  * after loading. Loading might include a lookup. Apparently, this class was intended for the second.
  * <p/>
- * 16.8.23: Needs refactoring probably. Maybe split to a new "BundledResource" class.
+ * 16.8.23: Needs refactoring probably. Maybe split to a new "loaded BundledResource" class and a ResourceLocator.
+ * And name sometimes contains a HTTP part. That is confusing. Probably the HTTP part shouldn't be there, because its specific to
+ * the environment (like a drive name), not the resource.
  * Created by thomass on 19.04.16.
  */
 public class BundleResource implements NativeResource {

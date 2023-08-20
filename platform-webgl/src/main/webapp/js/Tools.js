@@ -30,6 +30,7 @@ function ThreedonDocumentKeyUp(event) {
 
 //die async geladenenen GLTF model
 var loadedmodel = new Array();
+var loadedaudiobuffer = new Map();
 
 // VRButton is not available from "GWT native $wnd" (because its a module?)
 function createVrButton(renderer) {

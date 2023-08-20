@@ -95,7 +95,7 @@ public class SyncBundleLoader {
             loadBundleData(bundle, resource, filename, delayed, rm);
         }
 
-        BundleRegistry.registerBundle((registername != null) ? registername : bundlename, bundle);
+        BundleRegistry.registerBundle((registername != null) ? registername : bundlename, bundle, delayed);
         logger.info("Bundle registered: " + bundlename);
         return null;
     }
