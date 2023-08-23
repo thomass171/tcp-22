@@ -17,7 +17,7 @@ public interface GraphVisualizer extends Visualizer<Graph> {
 
     /**
      * 18.11.20: destinationnode added
-     * Manual CS remove of annotation needed?
+     * Manual CS(C#) remove of annotation needed
      */
     @Override
     void visualize/*Graph*/(Graph graph, SceneNode destinationnode);

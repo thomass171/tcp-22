@@ -17,7 +17,6 @@ import java.util.Map;
 /**
  * Very basic Java to CS syntax converter.
  * Based on Pat Niemeyers Java to Swift converter (https://github.com/patniemeyer/j2swift)
- *
  */
 public class J2CSListener extends Java8BaseListener {
     Logger logger = LoggerFactory.getLogger(J2CSListener.class);
@@ -385,7 +384,7 @@ public class J2CSListener extends Java8BaseListener {
             // In Systems ist z.B. Exception definiert. Darum den immer einbinden. Und den mit den Javaklassen auch.
             usednamespaces.add("System");
             usednamespaces.add("java.lang");
-            replaceFirst(ctx, Java8Lexer.PACKAGE, "using System;\nusing java.lang;\nnamespace");
+            replaceFirst(ctx, Java8Lexer.PACKAGE, "using System;\nusing java.lang;\nusing System.Runtime.CompilerServices;\nnamespace");
             replaceLast(ctx, Java8Lexer.SEMI, " {");
         }
         if (swift) {
@@ -1094,16 +1093,16 @@ public class J2CSListener extends Java8BaseListener {
         //dumpContext("exitInterfaceMethodDeclaration", ctx);
         String methodname = getMethodname(ctx.methodHeader());
         if (isfunctionalinterface) {
-            // dann kann/muss der Methodenname durch den Interfacenamen ersetzt werden
+            // replace method name with interface name
             replaceFirst(ctx.methodHeader().methodDeclarator(), Java8Lexer.Identifier, functionalinterfacename);
-
-            processGenericMethod(methodname, ctx.methodHeader());
         }
+        // 21.8.23: processGenericMethod not only for funtional interfaces
+        processGenericMethod(methodname, ctx.methodHeader());
     }
 
     /**
-     * Fuer implementierte Methoden (ausserhalb interfaces). Erst hier, wenn auch der Methodennamen bekannt ist, kann entschieden werden, was mit
-     * einer override Annotation passiert.
+     * For implemented methods (outside interfaces). Only here, when the method name is known, we can decide what to do
+     * with "override" annotation.
      *
      * @param ctx
      */
@@ -1121,6 +1120,7 @@ public class J2CSListener extends Java8BaseListener {
         boolean isprotected = hasModifier(ctx, "protected");
         boolean ispublic = hasModifier(ctx, "public");
         boolean isabstract = hasModifier(ctx, "abstract");
+        boolean isSynchronized = hasModifier(ctx, "synchronized");
         // System.out.println("methodname=" + methodname + ",override=" + override + ", deprecated=" + depr + ", static=" + isstatic + ", private=" + isprivate);
         if (methodname.equals("parseJsonToModel")) {
             int h = 9;
@@ -1145,12 +1145,17 @@ public class J2CSListener extends Java8BaseListener {
                 // dann muss "virtual" dazu, damit eine ableitende Klasse ueberschreiben kann. Aber nicht wenn sie selber ueberschreibt
                 rewriter.insertBefore(ctx.start, "virtual ");
             }
-            // Eine Methode mit default access level bekommt public. C# hat strengere Defaults
+            // Eine Methode mit default access level bekommt public. C# has stronger Defaults
             if (!isprivate && !ispublic && !isprotected) {
                 rewriter.insertBefore(ctx.start, "public ");
 
             }
-            // und dann noch die vom Test entfernen
+            if (isSynchronized) {
+                //logger.debug("Synchronized found");
+                rewriter.insertBefore(ctx.start, "[MethodImpl(MethodImplOptions.Synchronized)]\n");
+                replaceMethodModifier(ctx, "synchronized", "");
+            }
+            // remove those from test
             replaceAnnotation(ctx, "Test", "");
             replaceAnnotation(ctx, "BeforeClass", "");
 
@@ -1486,6 +1491,15 @@ public class J2CSListener extends Java8BaseListener {
         }
     }
 
+    private void replaceMethodModifier(Java8Parser.MethodDeclarationContext ctx, String modifier, String replacement) {
+        List<Java8Parser.MethodModifierContext> modifiers = ctx.methodModifier();
+        for (Java8Parser.MethodModifierContext m : modifiers) {
+            if (m.stop.getText().equals(modifier)) {
+                replace(m, replacement);
+            }
+        }
+    }
+
     private void replaceModifier(Java8Parser.FieldDeclarationContext ctx, String mod, String replacement) {
         List<Java8Parser.FieldModifierContext> modifiers = ctx.fieldModifier();
         for (Java8Parser.FieldModifierContext modifier : modifiers) {
@@ -1554,26 +1568,40 @@ public class J2CSListener extends Java8BaseListener {
     }
 
     /**
-     * Fuer normale und in (Functional)Interfaces
+     * Several steps are donw for generics:
+     * 1) Relocate method level generic
+     * 2) TODO add
+     * For regular interfaces, (Functional)interfaces and methods implementing an interface method.
      */
     private void processGenericMethod(String methodname, Java8Parser.MethodHeaderContext methodHeader) {
 
+        if (methodname.equals("addFuture")) {
+            int h = 9;
+        }
         List<String> typelist;
-        //Die Erkennung der generics geht ueber "known...". Ginge wohl auch generisch über TypeParametersContext.
+        // Detection of generic is done via "known...". Should be possible via TypeParametersContext.
         if ((typelist = isGenericMethod(methodname)) != null) {
-            // Bei C# muss bei der ganzen Methoden ein Generc (<T>?)sein, wenn einzelne Parameter Generics sind.
-            // Man muss auch unterscheiden, ob die ganze Klasse generic ist oder nur die Methode.
-            // Muss evtl. noch weiter ausgebaut werden.
+            logger.debug("processGenericMethod " + methodname);
+            // C# needs an additional generic on method level when parameter are generics (<T>?).
+            // And its a difference whether only a method or the class is generic.
+            // Might need more extended handling.
             Java8Parser.MethodHeaderContext header = methodHeader;
             Java8Parser.TypeParametersContext typeParameter = header.typeParameters();
             Java8Parser.MethodDeclaratorContext declarator = header.methodDeclarator();
 
             if (typeParameter != null) {
-                //method itself has <T> declaration?
+                // method itself has some <T> or <T,D> declaration. Relocate it. In implementation might contain types that need conversion.
                 rewriter.delete(typeParameter.start, typeParameter.stop);
-            }
-            rewriter.insertAfter(declarator.getStart(), "<T>");
 
+                // There are probably more smart ways to map types in typeParameter
+                String rawTypeText = typeParameter.getText();
+                for (String t : typeMap.keySet()) {
+                    rawTypeText = rawTypeText.replace(t, mapType(t));
+                }
+                rewriter.insertAfter(declarator.getStart(), rawTypeText);
+            } else {
+                rewriter.insertAfter(declarator.getStart(), "<T>");
+            }
             if (header.methodDeclarator().formalParameterList() != null && header.methodDeclarator().formalParameterList().formalParameters() != null) {
                 List<Java8Parser.FormalParameterContext> parameters = header.methodDeclarator().formalParameterList().formalParameters().formalParameter();
                 for (Java8Parser.FormalParameterContext parameter : parameters) {

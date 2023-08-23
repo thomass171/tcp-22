@@ -133,7 +133,7 @@ public class Payload {
         } else if (o instanceof Quaternion) {
             return ("q:" + ((Quaternion) o).toSimpleString());
         } else {
-            Platform.getInstance().getLog(Payload.class).warn("unknown payload class " + o.getClass().getName());
+            Platform.getInstance().getLog(Payload.class).warn("unknown payload class " + o/*C#.getClass().getName()*/);
             return ("");
         }
     }
@@ -156,7 +156,7 @@ public class Payload {
             Map<String, Object> m = new HashMap<String, Object>();
             for (String s : packet.getData()) {
                 if (StringUtils.startsWith(s, "p_")) {
-                    String[] parts = s.split("=");
+                    String[] parts = StringUtils.split(s,"=");
                     m.put(StringUtils.substring(parts[0], 2), decodeObject(parts[1]));
                 }
             }
@@ -167,7 +167,7 @@ public class Payload {
 
     private static Object decodeObject(String s_p) {
 
-        if (s_p.length() == 0) {
+        if (StringUtils.length(s_p) == 0) {
             // empty string will start with 's:'
             Platform.getInstance().getLog(Payload.class).warn("null payload class ");
             return null;

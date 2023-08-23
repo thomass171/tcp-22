@@ -15,9 +15,9 @@ import java.util.List;
  * - it might be hard to make sure there still is a way through (is solvable)
  * 2) Start with a grid full of blocks and dig corridors/areas by removing blocks. Aspects are:
  * - Starting initially with a corridor form start to destination (solution path) make it easy to keep it solvable.
- *
+ * <p>
  * Both strategies run iterative. Mixing probably doesn't make sense.
- *
+ * <p>
  * Method name convention is:
  * - add*() add blocks
  * - dig*() remove blocks
@@ -67,7 +67,7 @@ public class MazeGenerator {
 
     /**
      * @param grid
-     * @param length
+     * @param len
      * @param orientation      0=dont't care
      *                         1=horizontal
      *                         2=vertical
@@ -78,22 +78,22 @@ public class MazeGenerator {
      *                         3=intersection allowed
      * @return
      */
-    public Grid addWall(Grid grid, int length, int orientation, int intersectionMode) throws InvalidMazeException {
+    public Grid addWall(Grid grid, int len, int orientation, int intersectionMode) throws InvalidMazeException {
         List<Point> unused = grid.getUnusedFields();
         for (Point p : unused) {
             if (grid.getWallNeighbors(p).size() == 0) {
                 // no wall or else around. start candidate.
                 if (orientation == ORIENTATION_DONTCARE) {
-                    List<Point> wall = attemptBuildWall(grid, p, length, ORIENTATION_HORIZONTAL, intersectionMode);
+                    List<Point> wall = attemptBuildWall(grid, p, len, ORIENTATION_HORIZONTAL, intersectionMode);
                     if (wall != null) {
                         return addWallsToGrid(grid, wall);
                     }
-                    wall = attemptBuildWall(grid, p, length, ORIENTATION_VERTICAL, intersectionMode);
+                    wall = attemptBuildWall(grid, p, len, ORIENTATION_VERTICAL, intersectionMode);
                     if (wall != null) {
                         return addWallsToGrid(grid, wall);
                     }
                 } else {
-                    List<Point> wall = attemptBuildWall(grid, p, length, orientation, intersectionMode);
+                    List<Point> wall = attemptBuildWall(grid, p, len, orientation, intersectionMode);
                     if (wall != null) {
                         return addWallsToGrid(grid, wall);
                     }
@@ -104,7 +104,7 @@ public class MazeGenerator {
         return null;
     }
 
-    private List<Point> attemptBuildWall(Grid grid, Point start, int length, int orientation, int intersectionMode) {
+    private List<Point> attemptBuildWall(Grid grid, Point start, int len, int orientation, int intersectionMode) {
         List<Point> wall = new ArrayList<Point>();
         wall.add(start);
         Direction[] directions = null;
@@ -121,10 +121,10 @@ public class MazeGenerator {
         for (Direction direction : directions) {
             Point p = wall.get(0);
             while (canExtendWall(grid, p, direction, intersectionMode)) {
-p=direction.move(p);
+                p = direction.move(p);
                 wall.add(p);
 
-                if (wall.size() >= length) {
+                if (wall.size() >= len) {
                     return wall;
                 }
             }

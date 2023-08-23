@@ -157,7 +157,7 @@ public class MazeLayout {
     }
 
     public MazeLayout addWalls(List<Point> additionalWall) {
-        List<Point> newWalls = new ArrayList<>();
+        List<Point> newWalls = new ArrayList<Point>();
         newWalls.addAll(walls);
         newWalls.addAll(additionalWall);
         return new MazeLayout(newWalls, this.destinations, this.initialPosition, this.maxwidth, this.height, this.fields);

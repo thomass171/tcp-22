@@ -87,7 +87,11 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     //20.5.20: Und noch eine Lösung fur invokeLater. <AsyncHttpResponse> wegen C#. Driss.
     public List<AsyncInvoked<AsyncHttpResponse>> invokedLater = new ArrayList<AsyncInvoked<AsyncHttpResponse>>();
     //23.3.23: And one more solution for real MTs Futures
-    public List<Pair<NativeFuture,AsyncJobDelegate>> futures = new ArrayList<>();
+    // ("<Object>" for C#. In C# a list of generic delegates cannot contain abstract delegates
+    // (See https://stackoverflow.com/questions/3319447/add-generic-actiont-delegates-to-a-list).
+    public List<Pair<NativeFuture,AsyncJobDelegate>> futures = new ArrayList();
+    // C# public List<Object> futures = new ArrayList<Object>();
+
     //2.8.21 public TreeMap<Integer, Bundle> bundledelegateresult = new TreeMap<Integer, Bundle>();
     // ResourceManager hier, damit er nicht mehr über die Platform zugreifbar ist (wegen Architektur)
     //5.8.21 private ResourceManager resourceManager = null;
@@ -471,8 +475,10 @@ public class AbstractSceneRunner implements NativeSceneRunner {
         invokedLater.add(asyncInvoked);
     }
 
+    @Override
     public  <T,D> void addFuture  (NativeFuture<T> future, AsyncJobDelegate<D> asyncJobDelegate) {
         futures.add(new Pair(future,asyncJobDelegate));
+        //C# futures.add(new Pair<NativeFuture<T>,AsyncJobDelegate<D>>(future,asyncJobDelegate));
     }
 
     /**

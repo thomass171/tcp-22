@@ -160,6 +160,9 @@ class Foo implements MyInterface, Gee {
     private void thrower() throws NichtGefundenException {
         throw new NichtGefundenException("");
     }
+
+    public <Integer,String> void addFuture(List<Integer> future, AsyncJobDelegate<String> asyncJobDelegate) {
+    }
 }
 
 interface MyInterface {
@@ -168,6 +171,7 @@ interface MyInterface {
 
 interface Gee {
     void run1();
+    <T,D> void addFuture (List<T> future, AsyncJobDelegate<D> asyncJobDelegate);
 }
 
 interface Gee2 extends Gee {
@@ -213,6 +217,10 @@ class Test1a extends Test1 implements MyInterface, Gee {
     float[] testMethod2(final int a, String[] fa) {
         return new float[]{42.0f};
     }
+
+    @Override
+    public <Integer,String> void addFuture(List<Integer> future, AsyncJobDelegate<String> asyncJobDelegate) {
+    }
 }
 
 abstract class AbstractClass {
@@ -233,6 +241,10 @@ class ImageHelper {
                 handler.handlePixel(image, x, y);
             }
         }
+    }
+
+    static public synchronized void initSystems() {
+
     }
 }
 

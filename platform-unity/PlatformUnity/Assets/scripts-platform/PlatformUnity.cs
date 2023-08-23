@@ -14,6 +14,7 @@ using SimpleJSON;
 
 using de.yard.threed.engine.platform.common;
 using de.yard.threed.outofbrowser;
+using de.yard.threed.core.configuration;
 
 namespace de.yard.threed.platform.unity
 {
@@ -26,31 +27,30 @@ namespace de.yard.threed.platform.unity
         Log logger = new UnityLog (typeof (PlatformUnity));
         public NativeLogFactory logfactory;
         string hostdir;
+        Configuration configuration;
 
-        private PlatformUnity ()
+        private PlatformUnity (Configuration configuration)
         {
             logfactory = new UnityLogFactory ();
 
-            hostdir = Environment.GetEnvironmentVariable("HOSTDIR");
+            hostdir =configuration.getString("HOSTDIR");
             if (hostdir == null)
             {
                 Debug.Break();
                 throw new System.Exception("HOSTDIR not set");
             }
             Debug.Log("using HOSTDIR=" + hostdir);
+
+            this.configuration = configuration;
         }
 
-        public static PlatformInternals init (HashMap<String, String> props)
+        public static PlatformInternals init (Configuration configuration)
         {
             if (instance != null) {
                 throw new System.Exception ("already inited");
             }
-            instance = new PlatformUnity ();
+            instance = new PlatformUnity (configuration);
 
-            Set<String> keyset = props.keySet ();
-            foreach (String key in keyset) {
-                ((PlatformUnity)instance).properties.put (key, props.get (key));
-            }
             UnityResourceManager resourceReader = new UnityResourceManager();
             instance.bundleResolver.add(new SimpleBundleResolver(((PlatformUnity)instance).hostdir + "/bundles", resourceReader));
             instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(Environment.GetEnvironmentVariable("ADDITIONALBUNDLE"), resourceReader));
@@ -512,7 +512,7 @@ namespace de.yard.threed.platform.unity
          */
         HashMap<String, String> properties = new HashMap<String, String> ();
 
-        public override void setSystemProperty (String key, String value)
+        /*22.8.23 public override void setSystemProperty (String key, String value)
         {
             properties.put (key, value);
         }
@@ -520,6 +520,11 @@ namespace de.yard.threed.platform.unity
         override public String getSystemProperty (String key)
         {
             return properties.get (key);
+        }*/
+
+        override public Configuration getConfiguration()
+        {
+            return configuration;
         }
 
         override public NativeEventBus getEventBus ()
@@ -669,6 +674,29 @@ namespace de.yard.threed.platform.unity
         override public NativeScene getScene ()
         {
             return nativeScene;
+        }
+
+        override public NativeSocket connectToServer(Server server)
+        {
+            Util.notyet();
+            return null;
+        }
+
+        override public void httpGet(String url, List<Pair<String, String>> parameters, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate)
+        {
+            Util.notyet();
+        }
+
+        override public NativeAudioClip buildNativeAudioClip(BundleResource br)
+        {
+            UnityAudioClip audioClip = new UnityAudioClip(br);
+            return audioClip;
+        }
+
+        override public NativeAudio buildNativeAudio(NativeAudioClip audioClip)
+        {
+            UnityAudio audio = new UnityAudio((UnityAudioClip)audioClip);
+            return audio;
         }
     }
 

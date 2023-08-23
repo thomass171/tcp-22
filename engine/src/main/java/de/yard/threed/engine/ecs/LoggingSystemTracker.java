@@ -59,7 +59,7 @@ public class LoggingSystemTracker implements SystemTracker {
             // without tag just return all
             return eventsProcessed;
         }
-        return eventsProcessed.subList(tags.get("eventsProcessed"), eventsProcessed.size());
+        return eventsProcessed.subList((int)tags.get("eventsProcessed"), eventsProcessed.size());
     }
 
     public List<Event> getEventsProcessed() {

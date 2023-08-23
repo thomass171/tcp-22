@@ -2,6 +2,7 @@ package de.yard.threed.engine;
 
 import de.yard.threed.engine.ecs.EcsEntity;
 
+@FunctionalInterface
 public interface ModelBuilder {
 
     /**

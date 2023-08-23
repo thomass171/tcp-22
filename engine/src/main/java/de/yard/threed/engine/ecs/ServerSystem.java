@@ -9,8 +9,6 @@ import de.yard.threed.engine.platform.common.RequestType;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.yard.threed.engine.ecs.UserSystem.USER_EVENT_LOGGEDIN;
-
 /**
  * system to provide information about inital events (static content, eg. scenery) and entity state changes
  * to a client in client-server mode. Events are sent after login not after join because the client might just be an observer.
@@ -67,7 +65,7 @@ public class ServerSystem extends DefaultEcsSystem {
 
     public static ServerSystem buildForInitialEventsForClient(EventType[] initialEvents) {
 
-        EventType[] listenEvents = EcsHelper.extendEventTypeArray(initialEvents, USER_EVENT_LOGGEDIN);
+        EventType[] listenEvents = EcsHelper.extendEventTypeArray(initialEvents, UserSystem.USER_EVENT_LOGGEDIN);
         return new ServerSystem(new String[0], new RequestType[0], listenEvents, initialEvents);
     }
 

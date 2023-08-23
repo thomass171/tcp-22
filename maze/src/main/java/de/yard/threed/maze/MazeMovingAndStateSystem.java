@@ -14,8 +14,6 @@ import de.yard.threed.engine.platform.common.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.yard.threed.maze.MazeModelFactory.BULLET_BUILDER;
-
 
 /**
  * Controls movement and the "GridState".
@@ -185,7 +183,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         }
         if (request.getType().equals(UserSystem.USER_REQUEST_JOIN)) {
 
-            int userEntityId = request.getUserEntityId();
+            int userEntityId = (int)request.getUserEntityId();
 
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
 
@@ -265,7 +263,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         if (evt.getType().equals(BaseEventRegistry.EVENT_USER_ASSEMBLED)) {
             // final join step still to do which needs scenenode
             //processJoin((Integer) evt.getPayload().get("userentityid"));
-            EcsEntity playerEntity = EcsHelper.findEntityById((Integer) evt.getPayload().get("userentityid"));
+            EcsEntity playerEntity = EcsHelper.findEntityById((int)(Integer) evt.getPayload().get("userentityid"));
             completeJoin(Grid.getInstance().getMazeLayout(), playerEntity/*, launchPosition, teamid*/);
         }
     }
@@ -597,7 +595,7 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         logger.debug("create " + cnt + " Bullets for " + owner);
         for (int i = 0; i < cnt; i++) {
             EcsEntity e = new EcsEntity();
-            e.buildSceneNodeByModelFactory(BULLET_BUILDER, new ModelBuilderRegistry[]{mazeTheme.getMazeModelFactory()});
+            e.buildSceneNodeByModelFactory(MazeModelFactory.BULLET_BUILDER, new ModelBuilderRegistry[]{mazeTheme.getMazeModelFactory()});
             BulletComponent bulletComponent = new BulletComponent(owner);
             e.addComponent(bulletComponent);
             e.setName("bullet");

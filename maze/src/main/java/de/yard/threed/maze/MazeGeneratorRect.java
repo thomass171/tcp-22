@@ -5,6 +5,7 @@ import de.yard.threed.core.IntHolder;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.PointValidator;
 import de.yard.threed.core.PointVisitor;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.util.DeterministicIntProvider;
@@ -12,8 +13,6 @@ import de.yard.threed.engine.util.IntProvider;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * A different rectangle based layout with rooms/corridors like nethack.
@@ -23,10 +22,10 @@ public class MazeGeneratorRect {
     int width, height;
     IntProvider intProvider;
     // every cell where there is no wall are fields
-    List<Point> fields = new ArrayList<>();
+    List<Point> fields = new ArrayList<Point>();
     // just some additional meta data (redundant to 'fields') for easier handling.
-    List<Room> rooms = new ArrayList<>();
-    List<Corridor> corridors = new ArrayList<>();
+    List<Room> rooms = new ArrayList<Room>();
+    List<Corridor> corridors = new ArrayList<Corridor>();
 
     MazeGeneratorRect(int width, int height, IntProvider intProvider) {
         this.width = width;
@@ -89,8 +88,8 @@ public class MazeGeneratorRect {
         int distanceY = getDistanceY(room0, room1);
 
         // where to leave r0?
-        List<Point> leaveCandidates = new ArrayList<>();
-        List<Point> enterCandidates = new ArrayList<>();
+        List<Point> leaveCandidates = new ArrayList<Point>();
+        List<Point> enterCandidates = new ArrayList<Point>();
         Point turnPoint;
         List<CorridorCandidate> corridorCandidates = new ArrayList<CorridorCandidate>();
 
@@ -203,7 +202,7 @@ public class MazeGeneratorRect {
         }
         // cannot dig into enter field because its no candidate. Add it manually
         corridorFields.add(cc.enter);
-        corridorFields = corridorFields.stream().distinct().collect(toList());
+        corridorFields = Util.<Point>distinctList(corridorFields);
         return corridorFields;
     }
 
@@ -255,7 +254,7 @@ public class MazeGeneratorRect {
     }
 
     private List<Point> getCandidates() {
-        List<Point> candidates = new ArrayList<>();
+        List<Point> candidates = new ArrayList<Point>();
         loop(width, height, p -> {
             if (isCandidate(p)) {
                 candidates.add(p);
@@ -302,7 +301,7 @@ public class MazeGeneratorRect {
     }
 
     private List<Point> getLowerUpperDoorCandidates(Room room, boolean lower) {
-        List<Point> candidates = new ArrayList<>();
+        List<Point> candidates = new ArrayList<Point>();
         //why not in the edges? for (int i = 1; i < room.rw - 1; i++) {
         for (int i = 0; i < room.rw; i++) {
             // TODO consider existing corridors
@@ -312,7 +311,7 @@ public class MazeGeneratorRect {
     }
 
     private List<Point> getLeftRightDoorCandidates(Room room, boolean left) {
-        List<Point> candidates = new ArrayList<>();
+        List<Point> candidates = new ArrayList<Point>();
         //why not in the edges? for (int i = 1; i < room.rh - 1; i++) {
         for (int i = 0; i < room.rh; i++) {
             // TODO consider existing corridors

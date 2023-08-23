@@ -2,6 +2,7 @@ using System;
 using java.lang;
 using de.yard.threed.engine;
 using de.yard.threed.core;
+using System.Collections.Generic;
 
 namespace java.util
 {
@@ -272,6 +273,14 @@ namespace java.util
                 return true;
             }
             return this.ContainsKey (o);
+        }
+
+        public void putAll(Map<T, T2> map)
+        {
+            foreach (KeyValuePair<T, T2> entry in map)
+            {
+                this.put(entry.Key, entry.Value);
+            }
         }
     }
 

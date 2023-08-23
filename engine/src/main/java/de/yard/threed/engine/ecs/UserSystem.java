@@ -5,12 +5,11 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.platform.common.*;
 
 import java.util.List;
-
-import static de.yard.threed.engine.BaseEventRegistry.EVENT_CONNECTION_CLOSED;
 
 /**
  * User administration
@@ -40,7 +39,7 @@ public class UserSystem extends DefaultEcsSystem {
      *
      */
     public UserSystem() {
-        super(new String[]{}, new RequestType[]{USER_REQUEST_LOGIN}, new EventType[]{EVENT_CONNECTION_CLOSED});
+        super(new String[]{}, new RequestType[]{USER_REQUEST_LOGIN}, new EventType[]{BaseEventRegistry.EVENT_CONNECTION_CLOSED});
     }
 
     @Override
@@ -71,7 +70,7 @@ public class UserSystem extends DefaultEcsSystem {
             logger.debug("got event " + evt.getType());
         }
 
-        if (evt.getType().equals(EVENT_CONNECTION_CLOSED)) {
+        if (evt.getType().equals(BaseEventRegistry.EVENT_CONNECTION_CLOSED)) {
             String connectionid = (String) evt.getPayload().get("connectionid");
             for (EcsEntity entity : SystemManager.findEntities(e -> {
                 UserComponent uc = UserComponent.getUserComponent(e);
@@ -99,7 +98,7 @@ public class UserSystem extends DefaultEcsSystem {
         return new Event(USER_EVENT_LOGGEDIN, new Payload()
                 .add("username", username)
                 .add("clientid", clientid)
-                .add("userentityid", new Integer(userEntityId))
+                .add("userentityid", userEntityId)
                 .add("connectionid", connectionId));
     }
 

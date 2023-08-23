@@ -18,6 +18,8 @@ public class ConfigurationByArgs extends Configuration {
      */
     public ConfigurationByArgs(String[] args) {
         for (String arg : args) {
+            //C#if (arg.StartsWith("--")) {
+            //C#String[] p = arg.Substring(2).Split("=");
             if (arg.startsWith("--")) {
                 String[] p = arg.substring(2).split("=");
                 switch (p.length) {

@@ -16,8 +16,6 @@ import de.yard.threed.engine.platform.common.*;
 
 import java.util.List;
 
-import static de.yard.threed.maze.MazeRequestRegistry.TRIGGER_REQUEST_FIRE;
-
 /**
  * <p>
  * Created by thomass on 09.04.21.
@@ -33,7 +31,7 @@ public class BulletSystem extends DefaultEcsSystem {
      *
      */
     public BulletSystem() {
-        super(new String[]{BulletComponent.TAG}, new RequestType[]{TRIGGER_REQUEST_FIRE}, new EventType[]{});
+        super(new String[]{BulletComponent.TAG}, new RequestType[]{MazeRequestRegistry.TRIGGER_REQUEST_FIRE}, new EventType[]{});
     }
 
     /**
@@ -63,7 +61,7 @@ public class BulletSystem extends DefaultEcsSystem {
         if (bulletsystemdebuglog) {
             logger.debug("got request " + request.getType());
         }
-        if (request.isType(TRIGGER_REQUEST_FIRE)) {
+        if (request.isType(MazeRequestRegistry.TRIGGER_REQUEST_FIRE)) {
 
             EcsEntity player = EcsHelper.findEntityById((int) request.getUserEntityId());
             MoverComponent mv = MoverComponent.getMoverComponent(player);

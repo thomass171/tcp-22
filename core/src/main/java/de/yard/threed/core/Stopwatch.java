@@ -23,12 +23,12 @@ public class Stopwatch {
         long current = Platform.getInstance().currentTimeMillis();
         String result = "";
         for (String tag : tags.keySet()) {
-            if (result.length() > 0) {
+            if (StringUtils.length(result) > 0) {
                 result += ", ";
             }
             result += tag + " " + tags.get(tag) + " ms";
         }
-        if (result.length() > 0) {
+        if (StringUtils.length(result) > 0) {
             result += ", ";
         }
         result += " total " + (current - startTime) + " ms";

@@ -87,7 +87,7 @@ public class AvatarSystem extends DefaultEcsSystem {
         if (request.getType().equals(UserSystem.USER_REQUEST_JOIN)) {
 
             if (useShortCutJoin) {
-                int userEntityId = request.getUserEntityId();
+                int userEntityId = (int)request.getUserEntityId();
 
                 // now after joined EcsEntity userEntity = shortCutJoin(userEntityId);
                 EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
@@ -113,7 +113,7 @@ public class AvatarSystem extends DefaultEcsSystem {
         }
         if (evt.getType().equals(BaseEventRegistry.USER_EVENT_JOINED)) {
 
-            int userEntityId = (Integer) evt.getPayload().get("userentityid");
+            int userEntityId = (int)(Integer) evt.getPayload().get("userentityid");
             EcsEntity userEntity = assembleJoinedUser(userEntityId);
             SystemManager.sendEvent(BaseEventRegistry.buildUserAssembledEvent(userEntity));
 

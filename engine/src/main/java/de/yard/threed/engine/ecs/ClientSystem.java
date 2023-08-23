@@ -53,10 +53,10 @@ public class ClientSystem extends DefaultEcsSystem {
             Vector3 scale = (Vector3) payload.get("scale");
             Quaternion rotation = (Quaternion) payload.get("rotation");
 
-            EcsEntity entity = EcsHelper.findEntityById(entityid);
+            EcsEntity entity = EcsHelper.findEntityById((int)entityid);
             if (entity == null) {
                 logger.debug("Building entity " + entityid + " with builder '" + buildername + "'");
-                entity = new EcsEntity(entityid);
+                entity = new EcsEntity((int)entityid);
             }
             if (entity.getSceneNode() == null && !StringUtils.empty(buildername)) {
                 logger.debug("Building scene node for entity " + entityid + " with builder '" + buildername + "'");

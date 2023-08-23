@@ -30,8 +30,6 @@ import de.yard.threed.engine.platform.common.RequestType;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.yard.threed.maze.MazeEventRegistry.buildMazeVisualizedEvent;
-
 /**
  * Maze visualization. Not really needed for playing. Only visual. No collision detection isType used.
  * <p>
@@ -71,7 +69,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
         if ((b = Platform.getInstance().getConfiguration().getBoolean("enableMazeGridTeleporter")) != null) {
             gridTeleporterEnabled = (boolean) b;
         }
-        vrFireMode = Platform.getInstance().getConfiguration().getInt("vrFireMode", 2);
+        vrFireMode = (int)Platform.getInstance().getConfiguration().getInt("vrFireMode", 2);
     }
 
     @Override
@@ -117,7 +115,7 @@ public class MazeVisualizationSystem extends DefaultEcsSystem implements Pointer
 
                 ((InputToRequestSystem) SystemManager.findSystem(InputToRequestSystem.TAG)).addPointerHandler(this);
 
-                SystemManager.sendEvent(buildMazeVisualizedEvent());
+                SystemManager.sendEvent(MazeEventRegistry.buildMazeVisualizedEvent());
             }
         }
     }

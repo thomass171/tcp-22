@@ -79,7 +79,7 @@ public class Packet {
     public String toString() {
         String s = "";
         for (String key : map.keySet()) {
-            if (s.length() > 0) {
+            if (StringUtils.length(s) > 0) {
                 s += ",";
             }
             s += key + "=" + map.get(key);

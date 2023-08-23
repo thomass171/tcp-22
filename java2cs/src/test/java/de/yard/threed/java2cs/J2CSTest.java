@@ -56,6 +56,7 @@ public class J2CSTest {
 
     private J2CS callConverter(String filename) {
         try {
+            // Its sometimes confusing that test knowninterfaces/knowngenerics differs from real life, but using those from main add additional dependencies to test files.
             return J2CS.main1(new String[]{"-src", "src/test/java/de/yard/threed/java2cs", "-target", "output", "-f", filename}, buildKnownInterfaces(), buildKnownGenericMethods());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -75,7 +76,7 @@ public class J2CSTest {
     private KnownInterfaces buildKnownInterfaces() {
         KnownInterfaces knownInterfaces = new KnownInterfaces();
         knownInterfaces.add("MyInterface", new String[]{"run"});
-        knownInterfaces.add("Gee", new String[]{"run1"});
+        knownInterfaces.add("Gee", new String[]{"run1", "addFuture"});
         //21.6.20: Handle FunctionalInterface
         knownInterfaces.add("PixelHandler", "handlePixel");
         knownInterfaces.add("AsyncJobDelegate", "completed");
@@ -84,10 +85,10 @@ public class J2CSTest {
 
     private KnownGenericMethods buildKnownGenericMethods() {
         KnownGenericMethods knowngenericmethods = new KnownGenericMethods();
-        //23.6.20: asyncContentLoad ist doch gar nicht generic??
+        //23.6.20: asyncContentLoad is only generic in test
         knowngenericmethods.add("asyncContentLoad", new String[]{"PlatformAsyncCallback"});
         knowngenericmethods.add("completed", new String[]{"AsyncJobDelegate"});
-        //knowngenericmethods.add("parseJsonToModel", new String[]{"??"});
+        knowngenericmethods.add("addFuture", new String[]{"??"});
         //knowngenericmethods.add("modelToJson", new String[]{"??"});
         return knowngenericmethods;
     }

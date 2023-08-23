@@ -503,7 +503,7 @@ public class Util {
             s = StringUtils.split(data, " ");
         }
         if (s.length != 3) {
-            throw new NumberFormatException("parseString: invalid vector3 data "+data);
+            throw new RuntimeException("parseString: invalid vector3 data " + data);
         }
         return new Vector3(Util.parseDouble(s[0]), Util.parseDouble(s[1]), Util.parseDouble(s[2]));
     }
@@ -516,9 +516,23 @@ public class Util {
             s = StringUtils.split(data, " ");
         }
         if (s.length != 4) {
-            throw new NumberFormatException("parseString: invalid quaternion data "+data);
+            throw new RuntimeException("parseString: invalid quaternion data " + data);
         }
         return new Quaternion(Util.parseDouble(s[0]), Util.parseDouble(s[1]), Util.parseDouble(s[2]), Util.parseDouble(s[3]));
+    }
+
+    /**
+     * C# has no streams
+     */
+    public static <T> List<T> distinctList(List<T> l) {
+        List<T> list = new ArrayList<T>();
+
+        for (T t : l) {
+            if (!list.contains(t)) {
+                list.add(t);
+            }
+        }
+        return list;
     }
 }
 

@@ -135,8 +135,12 @@ public class AsyncHelper {
         AbstractSceneRunner.getInstance().invokedLater.clear();
 
         //TODO make whole block  MT safe
+        // "<Object>" for C# (See "futures" definition
         List<Pair<NativeFuture, AsyncJobDelegate>> remainingFutures = new ArrayList<>();
+        //C# List<Object> remainingFutures = new ArrayList<Object>();
+        //C# for (Object p1 : AbstractSceneRunner.getInstance().futures) {
         for (Pair<NativeFuture, AsyncJobDelegate> p : AbstractSceneRunner.getInstance().futures) {
+            //C# Pair<NativeFuture<Object>, AsyncJobDelegate<Object>> p = (Pair<NativeFuture<Object>, AsyncJobDelegate<Object>>) p1;
             if (p.getFirst().isDone()) {
                 p.getSecond().completed(p.getFirst().get());
             } else {

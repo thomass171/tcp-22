@@ -1,6 +1,7 @@
 /*generated*/
 using System;
 using java.lang;
+using System.Runtime.CompilerServices;
 namespace de.yard.threed.java2cs.testfiles {
 
 /**

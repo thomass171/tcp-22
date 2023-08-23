@@ -1,6 +1,7 @@
 /*generated*/
 using System;
 using java.lang;
+using System.Runtime.CompilerServices;
 namespace de.yard.threed.java2cs.testfiles {
 
 using org.junit.jupiter.api;// import org.junit.jupiter.api.Test;
@@ -163,6 +164,9 @@ class Foo  :  MyInterface, Gee {
     private void thrower()  {
         throw new NichtGefundenException("");
     }
+
+    virtual public  void addFuture<Nullable<Int32>,string>(List<Nullable<Int32>> future, AsyncJobDelegate<string> asyncJobDelegate) {
+    }
 }
 
  public interface MyInterface {
@@ -171,6 +175,7 @@ class Foo  :  MyInterface, Gee {
 
  public interface Gee {
     void run1();
+     void addFuture<T,D> (List<T> future, AsyncJobDelegate<D> asyncJobDelegate);
 }
 
  public interface Gee2  :  Gee {
@@ -216,6 +221,10 @@ enum NumericType {
     float[] testMethod2( int a, string[] fa) {
         return new float[]{42.0f};
     }
+
+    virtual 
+    public  void addFuture<Nullable<Int32>,string>(List<Nullable<Int32>> future, AsyncJobDelegate<string> asyncJobDelegate) {
+    }
 }
 
  public abstract class AbstractClass {
@@ -236,6 +245,11 @@ enum NumericType {
                 handler(image, x, y);
             }
         }
+    }
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
+static public  void initSystems() {
+
     }
 }
 

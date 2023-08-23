@@ -207,7 +207,7 @@ class GridDraft {
             logger.info("Limiting team size to " + teamSize);
             for (GridTeam team : playerposition) {
                 if (!team.isMonsterTeam) {
-                    while (team.positions.size() > teamSize.intValue()) {
+                    while (team.positions.size() > (int)teamSize) {
                         team.positions.remove(team.positions.size() - 1);
                     }
                 }

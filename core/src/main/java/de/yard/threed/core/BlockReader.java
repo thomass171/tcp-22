@@ -14,20 +14,20 @@ public class BlockReader {
     static Log logger = Platform.getInstance().getLog(BlockReader.class);
 
     // Vector is synced
-    List<List<String>> blocks = new Vector<>();
-    List<String> lines = new Vector<>();
+    List<List<String>> blocks = new Vector<List<String>>();
+    List<String> lines = new Vector<String>();
     private boolean debuglog = false;
 
     public BlockReader() {
     }
 
     public void add(String inputLine) {
-        if (inputLine.length() == 0) {
+        if (StringUtils.length(inputLine) == 0) {
             if (debuglog) {
                 logger.debug("found block end");
             }
             blocks.add(lines);
-            lines = new ArrayList<>();
+            lines = new ArrayList<String>();
         } else {
             lines.add(inputLine);
         }
@@ -44,7 +44,7 @@ public class BlockReader {
         if (blocks.size() == 0) {
             return null;
         }
-        List<String> block = new ArrayList<>();
+        List<String> block = new ArrayList<String>();
         //TODO more than Vector needed to make MT safe?
         block = blocks.remove(0);
         return block;

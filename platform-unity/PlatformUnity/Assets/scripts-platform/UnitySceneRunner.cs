@@ -9,6 +9,7 @@ using de.yard.threed.engine;
 using java.util;
 using de.yard.threed.engine.platform.common;
 using de.yard.threed.outofbrowser;
+using de.yard.threed.core.configuration;
 
 namespace de.yard.threed.platform.unity
 {
@@ -38,12 +39,12 @@ namespace de.yard.threed.platform.unity
             logger.info ("Building UnitySceneRunner");
         }
 
-        public static UnitySceneRunner init (HashMap<String, String> properties)
+        public static UnitySceneRunner init (Configuration configuration)
         {
             if (scenerunner != null) {
                 throw new RuntimeException ("already inited");
             }
-            PlatformInternals platformInternals=PlatformUnity.init (properties);
+            PlatformInternals platformInternals=PlatformUnity.init (configuration);
             scenerunner = new UnitySceneRunner (platformInternals);
             //MA36 (PlatformUnity.getInstance ()).runner = scenerunner;
             scenerunner./*((PlatformJme) PlatformJme.getInstance()).*/httpClient = null;//31.3.21 new AirportDataProviderMock ();
@@ -99,7 +100,8 @@ namespace de.yard.threed.platform.unity
                 }
                 BundleLoaderExceptGwt.loadBundleSyncInternal(bundlename,null,delayed,null,AbstractSceneRunner.getInstance().getResourceManager());
             }*/
-            scene.init (false);
+            // Will never run a scene in server mode
+            scene.init (SceneMode.forClient());
             /*runnerhelper.*/postInit();
 
         }

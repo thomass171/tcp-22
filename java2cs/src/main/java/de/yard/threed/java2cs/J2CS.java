@@ -166,8 +166,9 @@ public class J2CS {
             result = result.replace("public T2 get(Object key)", "public T2 get(T1 key)");
         }
         if (file.endsWith("de/yard/threed/core/Util.java")) {
-            //TODO 6.7.20: geht jetzt generisch?
+            //TODO 6.7.20: generic meanwhile?
             result = result.replace("public static <T> List<T> buildList(", "public static List<T> buildList<T>(");
+            result = result.replace("public static <T> List<T> distinctList(", "public static List<T> distinctList<T>(");
         }
         /*if (file.endsWith("de/yard/threed/platform/DefaultPlatform.java")) {
             result = result.replace("public <T> T parseJsonToModel(", "public T parseJsonToModel(");
@@ -295,7 +296,7 @@ public class J2CS {
         return fileNames;
     }
 
-    private static KnownInterfaces buildKnownInterfaces() {
+    public static KnownInterfaces buildKnownInterfaces() {
         KnownInterfaces knownInterfaces = new KnownInterfaces();
         knownInterfaces.add("SceneUpdater", new String[]{"update"});
         knownInterfaces.add("Entity", new String[]{"getMover"});
@@ -341,19 +342,19 @@ public class J2CS {
         //Maze
         knownInterfaces.add("GridItem", new String[]{"getLocation", "setLocation", "getOwner", "collectedBy", "isNeededForSolving", "setNeededForSolving", "getId"});
         knownInterfaces.add("PointerHandler", new String[]{"processPointer", "getRequestByTrigger"});
-        knownInterfaces.add("GridMover", new String[]{"getLocation", "setLocation", "getOrientation", "rotate", "setOrientation", "walk", "getParent", "setOrientation", "getMoveOptions", "getId", "getTeam"});
+        knownInterfaces.add("GridMover", new String[]{"getLocation", "setLocation", "getOrientation", "rotate", "setOrientation", "walk", "getParent", "setOrientation", "getMoveOptions", "getId", "getTeam", "getStartPosition"});
         knownInterfaces.add("MazeInventory", new String[]{"setBullets", "setDiamonds"});
+
+        knownInterfaces.add("NativeSceneRunner", "addFuture");
 
         return knownInterfaces;
     }
 
-    private static KnownGenericMethods buildKnownGenericMethods() {
+    public static KnownGenericMethods buildKnownGenericMethods() {
         KnownGenericMethods knowngenericmethods = new KnownGenericMethods();
-        //23.6.20: asyncContentLoad ist doch gar nicht generic??
-        knowngenericmethods.add("asyncContentLoad", new String[]{"PlatformAsyncCallback"});
-        knowngenericmethods.add("parseJsonToModel", new String[]{"??"});
         knowngenericmethods.add("modelToJson", new String[]{"??"});
         knowngenericmethods.add("completed", new String[]{"AsyncJobDelegate"});
+        knowngenericmethods.add("addFuture", new String[]{"??"});
         return knowngenericmethods;
     }
 }

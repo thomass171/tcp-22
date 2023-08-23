@@ -64,7 +64,7 @@ public class ObserverSystem extends DefaultEcsSystem {
             logger.debug("got event " + evt.getType());
         }
         if (evt.getType().equals(BaseEventRegistry.EVENT_USER_ASSEMBLED)) {
-            int userEntityId = ((Integer) evt.getPayload().get("userentityid"));
+            int userEntityId = (int)((Integer) evt.getPayload().get("userentityid"));
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
 
             if (userEntity == null || userEntity.getSceneNode() == null) {

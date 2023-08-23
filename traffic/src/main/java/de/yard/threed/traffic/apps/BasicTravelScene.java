@@ -2,6 +2,7 @@ package de.yard.threed.traffic.apps;
 
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
@@ -45,8 +46,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static de.yard.threed.core.testutil.RuntimeTestUtil.assertNotNull;
 
 /**
  * Basic generic scene for traffic scene definitions like "traffic:tiles/Wayland.xml" and "traffic:tiles/Demo.xml".
@@ -714,7 +713,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     protected void runTests() {
         logger.debug("Running tests");
         // When there was a user starting tests there should also be an observer.
-        assertNotNull("observer", Observer.getInstance());
+        RuntimeTestUtil.assertNotNull("observer", Observer.getInstance());
     }
 
     public RoundBodyCalculations getRbcp() {

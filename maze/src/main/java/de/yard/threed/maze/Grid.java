@@ -118,6 +118,7 @@ public class Grid {
      * Might differ from original in line length due to possible clipped blanks.
      */
     public String getRawGrid(String delimiter) {
+        //C#    String[][] rawGrid = new String[layout.getHeight()][];
         String[][] rawGrid = new String[layout.getHeight()][layout.getMaxWidth()];
         for (int y = 0; y < layout.getHeight(); y++) {
             for (int x = 0; x < layout.getMaxWidth(); x++) {

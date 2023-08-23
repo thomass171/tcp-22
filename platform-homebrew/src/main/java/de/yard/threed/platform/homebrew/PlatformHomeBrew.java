@@ -348,19 +348,6 @@ public class PlatformHomeBrew extends DefaultPlatform {
         return new SimpleJsonObject(map);
     }
 
-    /*@Override
-    public <T> Object parseJsonToModel(String jsonstring, Class clazz) {
-        GsonBuilder builder = new GsonBuilder();
-        T model = (T) builder.create().fromJson(jsonstring, clazz);
-        return model;
-    }
-
-    @Override
-    public String modelToJson(Object model) {
-        GsonBuilder builder = new GsonBuilder();
-        return builder.create().toJson(model);
-    }*/
-
     @Override
     public boolean isDevmode() {
         return true;

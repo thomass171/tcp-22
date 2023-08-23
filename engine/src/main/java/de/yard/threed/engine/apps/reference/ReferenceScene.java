@@ -751,6 +751,9 @@ public class ReferenceScene extends Scene {
                 break;
             case 9://HIDDENCUBELAYER:
                 renderedLayer = -1;
+                break;
+            default:
+                break;
         }
         Platform.getInstance().setOption(Platform.PLATFORM_OPTION_RENDEREDLAYER, "" + renderedLayer);
     }

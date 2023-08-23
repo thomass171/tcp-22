@@ -62,7 +62,7 @@ public class SceneLoader extends AsciiLoader {
                 addObject(objects.get(i).isObject(), ppfile.materials, ppfile);
             }
 
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             //Alle Exceptions catchen, weil auch mal Array/Null etc. vorkommen koenen. 
             String msg = "reading scene failed from " + source + ":" + ((e.getMessage() != null) ? e.getMessage() : e.toString());
             if (e instanceof InvalidDataException) {

@@ -380,22 +380,6 @@ public abstract class Platform {
     public abstract NativeJsonValue parseJson(String jsonstring);
 
     /**
-     * Ist das GWT/C# safe?
-     * 23.5.2020
-     * C# kann den return null nicht und mag die ganze Konstruktion nicht. Darum ohne Generics.
-     * public abstract <T> T parseJsonToModel(String jsonstring, Class clazz);
-     * public abstract <T> String modelToJson(T model);
-     *
-     * @return
-     */
-    /*22.9.21: Better not. Requires kind of reflection and is tricky (if possible at all) in GWT.
-    Better XML like.
-    public abstract <T> Object parseJsonToModel(String jsonstring, Class clazz);
-
-    public abstract <T> String modelToJson(Object model);
-    */
-
-    /**
      * Production oder Entwicklung. Production sollte bedeuten:
      * - kein Debug Log (kein extra Fenster in GWT)
      * - keine Framebegrenzung

@@ -63,7 +63,7 @@ done
 The converted files are copied to _platform-unity/PlatformUnity/Assets/scripts-generated_
 
 Open the project platform-unity/PlatformUnity in Unity. It should compile all the
-files with two errors related to using delegates. Unfortunately the converter does not 
+files with some errors related to using delegates. Unfortunately the converter does not 
 remove the FunctionalInterface (which become delegates in CS) method names, so you need to remove these manually.
 In detail these are:
 
@@ -73,8 +73,18 @@ In detail these are:
 * DefaultMenuProvider:menuBuilder.buildMenu
 * EcsEntity:entityFilter.matches
 * ReferenceScene:GeneralHandler.handle
+* PointVisitor.visit
+* PointValidator.isValid
+* LinePrinter.println
+* EntityFilter.matches
+* ModelBuilder.buildModel
 
-Furthermore Unity needs to know your HOSTDIR for finding bundle data.
+Furthermore manual fixes are needed
+* in AbstractSceneRunner for futures list
+
+The code pieces are prepared and marked with "C#".
+
+Unity needs to know your HOSTDIR for finding bundle data.
 Go to file Main.js and adjust the SetEnvironmentVariable() call accordingly.
 
 And it might be necessary to reassign the script file

@@ -39,7 +39,7 @@ public class GuiGrid extends SceneNode implements Menu {
     private BgElement bg;
     private ControlPanel cp;
     private DimensionF nearPlaneDimension, backPlaneDimension;
-    private final double zpos;
+    private double zpos;
     public static double MAIN_Z_OFFSET = 0.0001;
     public static double MAIN_BUTTON_Z_OFFSET = 0.00001;
 
@@ -152,15 +152,16 @@ public class GuiGrid extends SceneNode implements Menu {
     }
 
     private Vector2 getButtonTranslation(int x, int y) {
+        Vector2 v;
         if (bg != null) {
-            Vector2 v = new Vector2(-bg.getElementsize().getWidth() / 2 + cellwidth / 2 + cellwidth * x,
+            v = new Vector2(-bg.getElementsize().getWidth() / 2 + cellwidth / 2 + cellwidth * x,
                     -bg.getElementsize().getHeight() / 2 + cellheight / 2 + cellheight * y);
             // Das Grid noch dazu, weil die Buttons keine echten Childs sind
             return v.add(bg.getXyTranslation(bg.nearplaneSize));
         }
 
         // button is attached to backplane, so values differ from above
-        Vector2 v = new Vector2(-backPlaneDimension.getWidth() / 2 + cellwidth / 2 + cellwidth * x,
+        v = new Vector2(-backPlaneDimension.getWidth() / 2 + cellwidth / 2 + cellwidth * x,
                 -backPlaneDimension.getHeight() / 2 + cellheight / 2 + cellheight * y);
         // Das Grid noch dazu, weil die Buttons keine echten Childs sind
         return v.add(getXyTranslation(backPlaneDimension));

@@ -8,7 +8,7 @@ import java.util.List;
 public class GridTeam {
 
     public boolean isMonsterTeam;
-    public List<StartPosition> positions = new ArrayList();
+    public List<StartPosition> positions = new ArrayList<StartPosition>();
 
     public GridTeam(StartPosition startPosition, boolean isMonsterTeam) {
         positions.add(startPosition);
