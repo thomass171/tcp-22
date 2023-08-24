@@ -18,7 +18,7 @@ namespace de.yard.threed.platform.unity
         {
             GameObject empty = new GameObject();
 
-            audioSource = empty.GetComponent<AudioSource>();
+            audioSource = empty.AddComponent<AudioSource>();
 
         }
 
@@ -30,6 +30,8 @@ namespace de.yard.threed.platform.unity
 
         public void play()
         {
+            logger.debug("Playing audio");
+            audioSource.volume = 1.0f;
             audioSource.Play();
         }
 
