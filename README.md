@@ -226,6 +226,11 @@ Major changes:
 ## 2023-07-18
   * fix for NPE when firing
 
+## 2023-08-25
+  * upgrade GWT 2.8.1 -> 2.10
+  * Ready for Java 17 (still language level 8/9 for C# parts)
+  * Sound added
+
 # Technical Details
 
 ## Architecture
