@@ -26,7 +26,10 @@ public class Direction {
 
     static IntProvider rand = new RandomIntProvider();
 
-    private Direction(int xo, int yo, String code) {
+    /**
+     * Some external projects need constructor
+     */
+    public Direction(int xo, int yo, String code) {
         // check auf genau 1 Step
         if (Math.abs(xo) + Math.abs(yo) != 1) {
             throw new RuntimeException("invalid direction");
