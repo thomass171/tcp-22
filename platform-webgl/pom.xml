@@ -13,6 +13,8 @@
     </parent>
 
     <properties>
+        <!--7.3.19 2.8.0->2.8.1. 2.8.2 runs into strange errors-->
+        <gwt.version>2.10.0</gwt.version>
         <!-- for version.html -->
         <fullVersion>${project.version}-${maven.build.timestamp}</fullVersion>
     </properties>
@@ -22,8 +24,7 @@
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
-            <!--7.3.19 2.8.0->2.8.1. 2.8.2 runs into strange errors-->
-            <version>2.8.1</version>
+            <version>${gwt.version}</version>
             <scope>provided</scope>
         </dependency>
         <!-- The embedded jetty in gwt 2.8.x doesn't like log4j 2.x because its incompatible with JEP-238 (MultiRelease) jar files. Leads to "MultiException..."-->
@@ -130,8 +131,8 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <!-- das ist die GWT Version, nicht die des Plugin-->
-                <version>2.8.0</version>
+                <!-- GWT Version, not the plugin version -->
+                <version>${gwt.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -164,7 +165,7 @@
                     <noServer>false</noServer>
                     <style>DETAILED</style>
                     <!--11.10.21 even with jvm set, GWT compile fails with JAVA_HOME pointing to Java17-->
-                    <jvm>/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home/bin/java</jvm>
+                    <!--25.8.23 <jvm>/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home/bin/java</jvm>-->
                 </configuration>
             </plugin>
             <!-- 10.10.18: Java compile (class files) wird doch gar nicht gebraucht. Der legt aber den Sparchlevel fest. Doch nicht verzichtbar?-->
