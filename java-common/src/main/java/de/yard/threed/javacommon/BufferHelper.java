@@ -23,10 +23,13 @@ public class BufferHelper {
     }
 
     /**
-     * OpenGL hat (0,0) links unten, ImageData aber links oben. Darum werden hier die Zeilen getauscht.
+     * OpenGL hat (0,0) links unten, ImageData aber links oben. So rows are flipped here.
      * Liefert RGBA Format (wenn die Pixel in ARGB sind;wie in BufferedImage).
      *
      * 4.7.21: Was OpenGlTexture.buildBuffer() before.
+     * 28.8.23: No longer flip rows. This spoils forward/backward conversion (via BufferedImageUtils) and isn't consistent.
+     * If split is needed, it must be done somewhere else, not here.
+     *
      */
     public static ByteBuffer buildTextureBuffer(int width, int height, int[] pixels, int BYTES_PER_PIXEL) {
        /* this.width = width;
@@ -36,7 +39,7 @@ public class BufferHelper {
 
         ByteBuffer buffer = BufferHelper/*OpenGlContext*/.createByteBuffer(width * height * BYTES_PER_PIXEL); //4 for RGBA, 3 for RGB
         // logger.debug(String.format("Erstes Pixel=0x%x", pixels[0]));
-        for (int y = height - 1; y >= 0; y--) {
+        for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int pix = pixels[y * width + x];
                 buffer.put((byte) ((pix >> 16) & 0xFF));     // Red component

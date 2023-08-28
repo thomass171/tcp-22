@@ -13,6 +13,7 @@ public class BufferedImageUtils {
             return null;
         }
         //logger.debug(String.format("loadFromFile took %d ms", System.currentTimeMillis() - starttime));
+        // pxl array will start with y=0 row
         int[] pxl = bi.getRGB(0, 0, bi.getWidth(), bi.getHeight(), null, 0, bi.getWidth());
         ByteBuffer bb = BufferHelper/*OpenGlTexture*/.buildTextureBuffer(bi.getWidth(), bi.getHeight(), pxl, 4);
         return bb;
@@ -35,6 +36,8 @@ public class BufferedImageUtils {
 
     static public BufferedImage fromBuffer(int width, int height, ByteBuffer buffer) {
 
+        // make sure to start at the beginning of the buffer.
+        buffer.rewind();
         BufferedImage bufferedimage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         int[] argb = ImageUtils.toARGB(width * height, buffer);
         bufferedimage.setRGB(0, 0, width, height, argb, 0, width);

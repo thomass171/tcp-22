@@ -94,7 +94,9 @@ public class JmeTexture implements NativeTexture {
             // 5.9.16: LoadedImage already has a bytebuffer, but Jme needs a BufferedImage for converting it back to bytebuffer.
             // Thats inefficient, but currently no other option. There is no way without JMEs AWTLoader to get it into one of JMEs formats.
             //logger.debug("loaded image from cache "+textureresource.getName()+" "+ ((li.width*li.height)/1024)+" kB");
-            Image img = new AWTLoader().load(li/*Image.Format.BGRA8,li.width,li.height,li.buffer*/, false);
+            // 28.8.23: Since there is no longer an intermediate LoadedImage (which contained a unintended flip conversion),
+            // flip needs to be done here.
+            Image img = new AWTLoader().load(li/*Image.Format.BGRA8,li.width,li.height,li.buffer*/, true);
             tex = new JmeTexture(new Texture2D(img), textureresource.getName());
         } else {
             try {

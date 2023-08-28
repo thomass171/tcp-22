@@ -47,7 +47,7 @@ public class ImageUtils {
     }
 
     /**
-     * Der Buffer muss in RGBA sein.
+     * Buffer must be RGBA.
      *
      * @param size
      * @param buffer
