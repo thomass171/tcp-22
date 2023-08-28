@@ -5,6 +5,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.ImageData;
 
+import de.yard.threed.javacommon.BufferedImageUtils;
 import de.yard.threed.javacommon.ImageUtil;
 import de.yard.threed.javacommon.PNGDecoder;
 import de.yard.threed.javacommon.LoadedImage;
@@ -453,7 +454,7 @@ public class GlImplLwjgl implements GlInterface {
                 glUploadTexture(decoder.getWidth(), decoder.getHeight(), buf, repeat);
                 buf.clear();
             } else {
-                LoadedImage li = ImageUtil.loadPNG(filename);
+                LoadedImage li = BufferedImageUtils.toLoadedImage(ImageUtil.loadCachableImage(filename));
                 glUploadTexture(li.width, li.height, li.buffer, repeat);
                 li.buffer.clear();
             }

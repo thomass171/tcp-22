@@ -2,11 +2,7 @@ package de.yard.threed.javacommon;
 
 
 import de.yard.threed.core.ImageData;
-import de.yard.threed.core.buffer.ByteArrayInputStream;
-import de.yard.threed.core.buffer.NativeOutputStream;
-import de.yard.threed.core.buffer.SimpleByteBuffer;
 import de.yard.threed.core.resource.NativeResource;
-import de.yard.threed.core.resource.ResourceSaveException;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
@@ -26,6 +22,7 @@ import java.nio.ByteBuffer;
  */
 public class ImageUtil {
     static Log logger = Platform.getInstance().getLog(ImageUtil.class);
+    public static Cache pngcache = null;
 
     /**
      * 24.5.16: Fuer innerhalb der Platformen, die pngs lesen koennen.
@@ -110,30 +107,57 @@ public class ImageUtil {
     }
 
     /**
-     * Read file.
+     * Read image from "some location" or cache and optionally add it to cache. Uses Javas ImageIO, so only works with formats supported by ImageIO.
+     * ImageIO is not very fast (both png and jpg). For having short turnaround times during development, it seems acceptable to cache
+     * more efficient raw data for the price of disk space.
+     * <p>
+     * For example for "2_no_clouds_4k.jpg" (1,4MB) we have 33,6MB cached file and load time reduction from >2000ms to 343ms.
+     * <p>
+     * The main use case for this method is loading a texture for Java platforms. But also some scenery tools might use it. And caching
+     * might be an option on platforms where the resources reside in tar/zip archives (Android). Even HTTP could be possible in principle, though not implemented.
+     * So for maximum flexibility NativeResource is used instead of java.io.File.
      *
-     * Return null in the case of error (already logged)
+     * Returning a byte buffer (LoadedImage) doesn't provide a real benefit because subsequent conversions are still needed
+     * (eg. JME has its own internal structure).
+     * <p>
+     * Maybe caching was used once for hiding conversions of strange formats like "rgb" (called "preprocessed"?). But that is no valid
+     * use case any more (if it ever existed).
+     * </p>
+     * <p>
+     * Returns null in the case of error (already logged)
      *
      * @param file
      * @return
      */
-    public static LoadedImage loadPNG(NativeResource file) {
+    public static BufferedImage loadCachableImage(NativeResource file) {
 
-        BufferedImage bi = null;
-        ByteBuffer bb = null;
-        //  try {
-        LoadedImage loadedimage = null;
+        if (System.getProperty("enablePngCaching") != null && pngcache == null) {
+            pngcache = new Cache("png-cache", System.getProperty("user.home") + "/tmp");
+        }
+        BufferedImage li;
+        if (pngcache != null) {
+            // check cache for file
+            li = pngcache.getCachedImage(file);
+            if (li != null) {
+                return li;
+            }
+        }
 
-        bi = ImageUtil.loadImageFromFile(file);
+        BufferedImage bi = ImageUtil.loadImageFromFile(file);
         if (bi == null) {
             return null;
         }
 
-        //logger.debug(String.format("loadFromFile took %d ms", System.currentTimeMillis() - starttime));
-        int[] pxl = bi.getRGB(0, 0, bi.getWidth(), bi.getHeight(), null, 0, bi.getWidth());
-        bb = BufferHelper.buildTextureBuffer(bi.getWidth(), bi.getHeight(), pxl,4);
-        //logger.debug("ByteBuffer created");
+        if (pngcache != null) {
+            logger.debug("adding file " + file.getName() + " to cache");
 
-        return new LoadedImage(bi.getWidth(), bi.getHeight(), bb);
+            try {
+                pngcache.saveImage(file, bi);
+            } catch (Exception e) {
+                logger.error("saveCachedObject failed:" + e.getMessage(), e);
+                return null;
+            }
+        }
+        return bi;
     }
 }

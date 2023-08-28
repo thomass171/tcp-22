@@ -33,7 +33,7 @@ public class JmeImageUtil {
         com.jme3.texture.Image image = null;
         // load() also uses ImageIO.read() like ImageUtils#loadImageFromFile() for PNG
         image = loader.load(ins, true);
-        logger.debug("AWTLoader took " + (System.currentTimeMillis() - starttime) + " ms");
+        //logger.debug("AWTLoader took " + (System.currentTimeMillis() - starttime) + " ms");
         return image;
     }
 }

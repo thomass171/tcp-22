@@ -16,26 +16,22 @@ import java.nio.ByteBuffer;
  */
 public class ImageUtils {
     /**
-     * Einfaches Lesen des Streams ohne eine Imagereader dekodiert keine JPGs.
-     * Und mit Imagereader bekommt man immer ein BufferedImage.
-     * Fazit: Ohne BufferedImage ist, zumindest mit OutOfTheBox Java, nichts
-     * zu machen.
-     * Liefert null, wenn das Image nicht geladen werden konnte (z.B. bei *.rgb images).
-     * Fehler wurde dann schon gelogged.
+     * BufferedImage and ImageIO are the only ways in pure Java to load an image.
+     * Returns null when the image couldn't be loaded, eg. *.rgb images (error already been logged).
      */
-    public static BufferedImage loadImageFromFile(Log logger, java.io.InputStream is, String name) {
+    public static BufferedImage loadImageFromFile(Log logger, java.io.InputStream is, String nameForLogging) {
         try {
             long starttime = System.currentTimeMillis();
             BufferedImage img = ImageIO.read(is);
             if (img != null) {
-                logger.debug(String.format("Image loaded with size %dx%d from %s. Took %d ms", img.getHeight(), img.getWidth(), name, System.currentTimeMillis() - starttime));
+                logger.debug(String.format("Image loaded with size %dx%d from %s. Took %d ms", img.getHeight(), img.getWidth(), nameForLogging, System.currentTimeMillis() - starttime));
             } else {
-                logger.warn("loadImageFromFile: ImageIO.read returned null for " + name);
+                logger.warn("loadImageFromFile: ImageIO.read returned null for " + nameForLogging);
             }
             return img;
             // TODO close auf stream
         } catch (IOException e) {
-            logger.error("loadImageFromFile: ImageIO.read failed for " + name);
+            logger.error("loadImageFromFile: ImageIO.read failed for " + nameForLogging);
             return null;
         }
     }

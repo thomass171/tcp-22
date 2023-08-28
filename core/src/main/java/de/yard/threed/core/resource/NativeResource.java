@@ -2,20 +2,24 @@ package de.yard.threed.core.resource;
 
 
 /**
- * 19.4.16: Eine Alternative zu einem simplen String als Filename, um besser
- * abbilden zu koennen, dass eine Resource nicht unbedingt als File im FS liegt; zumindest nicht
- * so unmittelbar, das kann auch ein Bundle sein (Unity) oder ein CLASSPATH.
- * Verschmolzen mit Resource zu NativeResource.
+ * 19.4.16: A pointer to a resource. Not necessarily a file in a local filesystem, might be also located in a bundle, tar/zip archive (Android?),
+ * a CLASSPATH, an asset (Unity/JME) or on a server. So this sounds similar to a URL/URI, but URLs have no hierarchy like filesystems.
+ * It is very abstract.
  *
- * 27.5.2016: Die Methoden exists() und getParent() gehoeren hier nicht hin, denn die
- * kann es ja erst nach dem Laden der Resource bzw. nur ueber die Platform geben.
+ *
+ * 27.5.2016: exists() and getParent() removed. Sound nice, but are difficult to implement. Probably need resource to be loaded.
+ *
  * path ist eigentlich doppelt zu name, was ja auch ein Pfad sein kann.
  * 
- * 01.06.2016: path ist jetzt ein optionmaler PRefix, wenn die Resource nicht gebundled ist. isBundled() hat Prio, dann wird 
+ * 01.06.2016: path is just an optional prefix, when resource isn't bundled. isBundled() hat Prio, dann wird
  * path ignoriert.
- * 21.12.16: Den path nicht mehr als string, sondern eigene Klasse. Aber auch in einem Bundle kann es einen Pfad geben. Der Name
- * ist idealerweise (muss aber nicht) nur der Dateiname. Darum noch eine Ebene bundlepath. Damit isType isbundled() aber nicht obselet.
- * 
+ * 21.12.16: class for path instead of string. But also Bundle can havd a path. The might name
+ * ist idealerweise (muss aber nicht) the file name. Darum noch eine Ebene bundlepath. Damit isType isbundled() aber nicht obselet.
+ *
+ * 26.8.23: Maybe needs refactoring: Shouldn't this be independent from bundle? What really is a path? And name sometimes als contains a path?
+ * Maybe a BundleResource is its own interface? Maybe rethink the use cases. Some use cases have file system traversal! Maybe addPath() in ResourcePath?
+ * Maybe we need hierarchical resources and non hierarchical (URL). So NativeResource can be the hierarchical.
+ *
  * Created by thomass on 11.12.15.
  */
 public interface NativeResource {

@@ -74,44 +74,39 @@ public class JmeTexture implements NativeTexture {
     /**
      * 9.11.15: No longer uses the assetmanager, that is focusing on relative directories.
      * 11.4.17: Returns null on (already logged) error.
+     *
      * @return
      */
     static JmeTexture loadFromFile(NativeResource textureresource) {
-        //long starttime = Platfo.currentTimeMillis();
-        //13.11.15: zu langsam: return buildFromImage(JmeImageUtil.buildImageData(JmeImageUtil.loadImageFromFile(new File(filename))));
+        long starttime = System.currentTimeMillis();
         //4.5.16: Ohne Zwischenschritt ImageData versuchen. Erscheint aber nicht wirklich schneller
         //JmeTexture tex = buildFromImage(ImageUtil.loadImageFromFile(new File(filename)));
         JmeTexture tex = null;
-        // AwtLoader ist langsam.
-        // Nicht nur fuer PNG, denn wer weiss, ob bei JPg o.ae. nicht aehnliches gilt.
-        // 5.9.16: Ich krieg das aber ohne AWTLoader in keines der JME Formate.
-        // 16.10.18: Mit jpg ist es zwar auch langsam, aber speiochern in eigenem Format bläht den Cache enorm auf. Darum lass ich
-        // anderes ausser png
-        if (textureresource.getName().toUpperCase().endsWith(".PNG")) {
-            LoadedImage li = ImageUtil.loadPNG(textureresource);
+        // AwtLoader/ImageIO is slow.
+        // 16.10.18: jpg is also slow, but caching it bloats the cache tremendously. So only use cache for 'png'.
+        // 26.8.23: Try again jpg.
+        if (textureresource.getName().toUpperCase().endsWith(".PNG") || textureresource.getName().toUpperCase().endsWith(".JPG")) {
+            // optionally use cache
+            BufferedImage li = ImageUtil.loadCachableImage(textureresource);
             if (li == null) {
                 return null;
             }
-
-            //27.7.21 Warum braucht der hier auf einmal so viel memory (OOM in direct buffer)? Wegen fehlendem Texturepool
+            // 5.9.16: LoadedImage already has a bytebuffer, but Jme needs a BufferedImage for converting it back to bytebuffer.
+            // Thats inefficient, but currently no other option. There is no way without JMEs AWTLoader to get it into one of JMEs formats.
             //logger.debug("loaded image from cache "+textureresource.getName()+" "+ ((li.width*li.height)/1024)+" kB");
-            BufferedImage bufferedimage = new BufferedImage(li.width, li.height, BufferedImage.TYPE_INT_ARGB);
-            int[] argb = ImageUtils.toARGB(li.width * li.height, li.buffer);
-
-            bufferedimage.setRGB(0, 0, li.width, li.height, argb, 0, li.width);
-            Image img = new AWTLoader().load(bufferedimage/*Image.Format.BGRA8,li.width,li.height,li.buffer*/, false);
+            Image img = new AWTLoader().load(li/*Image.Format.BGRA8,li.width,li.height,li.buffer*/, false);
             tex = new JmeTexture(new Texture2D(img), textureresource.getName());
-            li.buffer.clear();
         } else {
             try {
                 tex = buildFromInputStream(FileReader.getInputStream(FileReader.getFileStream(textureresource)));
             } catch (IOException e) {
                 //2.10.19: Kein Stacktrace, kann bei rgb Textures (bluebird) schon mal sein.
-                logger.error("IO Exception" ,e/*+ e.getMessage()/*2.10.19, e*/);
+                logger.error("IO Exception", e/*+ e.getMessage()/*2.10.19, e*/);
                 return null;
             }
         }
-        //logger.debug(String.format("loadFromFile took %d ms", System.currentTimeMillis() - starttime));
+        logger.debug(String.format("building JmeTexture for %s took %d ms",
+                textureresource.getFullName(), System.currentTimeMillis() - starttime));
 
         return tex;
     }
