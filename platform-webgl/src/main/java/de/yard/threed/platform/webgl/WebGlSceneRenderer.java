@@ -379,7 +379,7 @@ public class WebGlSceneRenderer implements AnimationController {
      * Callback loop while preloading. Triggers itself while preload is running.
      * There is no longer a timer here because this undermines the concept of ThreeJs (and others?).
      * There is and never really was a "pause" here.
-     * After preload ConnectLoopCallback and than "renderer.setAnimationLoop()" is triggered.
+     * After preload ConnectLoopCallback and then "renderer.setAnimationLoop()" is triggered.
      */
     class PreloadLoopCallback implements AnimationScheduler.AnimationCallback {
         Scene scene;
@@ -411,7 +411,7 @@ public class WebGlSceneRenderer implements AnimationController {
                     init();
                 }
                 // don't continue using AnimationScheduler but switch to ThreeJs animationloop
-                // 7.3.23 now switch to websocket loopback.
+                // 7.3.23 now switch to websocket loopback (ConnectLoopCallback).
                 logger.info("Switch to ConnectLoopCallback");
                 AnimationScheduler.get().requestAnimationFrame(new ConnectLoopCallback(renderer, scene, canvaspanel, cameras, bundleLoader));
                 // don't retrigger PreloadLoopCallback. Just return without requesting next frame.

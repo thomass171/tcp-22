@@ -1,6 +1,7 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.DefaultEcsComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.graph.GraphNode;
@@ -35,6 +36,8 @@ public class VehicleComponent extends DefaultEcsComponent {
     //28.3.20. aber von wem? besser in trafficgraph. Aber manchmal ist der Graph gemsmoothed, dann ist es kein TrafficGraph mehr. Also doch besser hier.
     //vielleicht ist es verzichtbar  public String currentAirportIcao;
     public FlightRouteBuilder flightRouteBuilder=null;
+    // 29.8.23
+    public SceneNode teleportParentNode;
 
     public VehicleComponent(VehicleConfig config/*String type,String modeltype*/) {
         this.config=config;

@@ -122,7 +122,7 @@ public class VehicleLauncher {
             //TODO Ich glaube mittlerweile, das z offset Problem sollte nicht hierhin mitgeschleppt werden.
             //Ist dafuer nicht die basenode in der Entity? JungeJunge, das ist aber auch'n Driss.
             //31.3.20: In EDDK stehen die AI aircraft aber doch wohl richtig, scheinbar auch in der Höhe.
-            EcsEntity vehicleEntity = buildVehicleOnGraph(offsetNode, graph, position, config, projectionforbackprojection,entityBuilder);
+            EcsEntity vehicleEntity = buildVehicleOnGraph(offsetNode, graph, position, config, projectionforbackprojection,entityBuilder,teleportParentNode);
             vehicleEntity.setName(config.getName());
             GraphMovingComponent.getGraphMovingComponent(vehicleEntity).setAutomove(vehicle.hasAutomove());
             //26.10.19vehicleEntity.setBasenode(modelNode);
@@ -179,8 +179,10 @@ public class VehicleLauncher {
      * type ist der
      * <p>
      * TODO: Die projection ist die totale Kruecke. Die koennte vielleicht mit dem Graph zusammen in einen "GraphContext".
+     * 29.8.23: teleportParentNode added
      */
-    public static EcsEntity buildVehicleOnGraph(SceneNode node, TrafficGraph graph, GraphPosition position, VehicleConfig config, /*Map*/GraphProjection projection, EntityBuilder entityBuilder) {
+    public static EcsEntity buildVehicleOnGraph(SceneNode node, TrafficGraph graph, GraphPosition position, VehicleConfig config,
+            /*Map*/GraphProjection projection, EntityBuilder entityBuilder,SceneNode teleportParentNode ) {
         GraphMovingComponent gmc = new GraphMovingComponent(node.getTransform());
         //MA31: navigator hat keinen graph
         gmc.setGraph((graph == null) ? null : graph.getBaseGraph(), position, projection);
@@ -191,7 +193,9 @@ public class VehicleLauncher {
         vc.setAcceleration(config.getAcceleration());
         e.addComponent(vc);
         if (config != null) {
+            // 29.8.23: Why VehicleComponent only if config exists? Conatins eg. also the teleportParentNode
             VehicleComponent vhc = new VehicleComponent(config/*type,modeltype*/);
+            vhc.teleportParentNode=teleportParentNode;
             e.addComponent(vhc);
             // 27.12.21: Extracted to VehicleEntityBuilder
             if (entityBuilder != null) {

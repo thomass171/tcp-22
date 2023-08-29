@@ -23,6 +23,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(GraphMovingSystem.class);
     //MA31 Kruecke zur Entkopplung von SGGeod.
     public static GraphAltitudeProvider graphAltitudeProvider;
+    public static String TAG = "GraphMovingSystem";
 
     /**
      *
