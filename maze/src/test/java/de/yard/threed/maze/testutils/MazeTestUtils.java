@@ -23,14 +23,15 @@ import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.maze.*;
 import de.yard.threed.engine.testutil.TestHelper;
 import org.junit.jupiter.api.Assertions;
+import de.yard.threed.engine.BaseRequestRegistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static de.yard.threed.maze.MazeRequestRegistry.TRIGGER_REQUEST_FORWARD;
 import static org.junit.jupiter.api.Assertions.*;
+
 
 public class MazeTestUtils {
 
@@ -164,7 +165,7 @@ public class MazeTestUtils {
     }
 
     public static void ecsWalk(SceneRunnerForTesting sceneRunner, EcsEntity player, boolean expectedMovement, Point expectedNewLocation) {
-        ecsWalk(TRIGGER_REQUEST_FORWARD, sceneRunner, player, expectedMovement, expectedNewLocation);
+        ecsWalk(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD, sceneRunner, player, expectedMovement, expectedNewLocation);
     }
 
     public static void ecsWalk(RequestType moveRequest, SceneRunnerForTesting sceneRunner, EcsEntity player, boolean expectedMovement, Point expectedNewLocation) {

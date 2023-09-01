@@ -4,6 +4,7 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.util.IntProvider;
+import de.yard.threed.engine.BaseRequestRegistry;
 
 public class SimpleBotAI implements BotAI {
 
@@ -42,11 +43,11 @@ public class SimpleBotAI implements BotAI {
         if (gridState.canWalk(mover.getLocation(), GridMovement.Forward, mover.getOrientation(), mover.getTeam(), layout)) {
             // don't solve
             if (!gridState.isDestinationAhead(mover.getLocation(),  mover.getOrientation(), layout)) {
-                return new Request(MazeRequestRegistry.TRIGGER_REQUEST_FORWARD);
+                return new Request(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD);
             }
         }
         // just turn left or right
-        return new Request((rand.nextInt() % 2 == 0) ? MazeRequestRegistry.TRIGGER_REQUEST_TURNLEFT : MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+        return new Request((rand.nextInt() % 2 == 0) ? BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT : BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
     }
 
     @Override

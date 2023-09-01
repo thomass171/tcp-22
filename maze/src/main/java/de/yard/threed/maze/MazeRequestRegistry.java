@@ -7,6 +7,7 @@ import de.yard.threed.engine.platform.common.RequestType;
 
 /**
  * Um Requests nicht im System zu definieren, weil sie ja auch übergreifend verwendet werden koennten.
+ * 31.8.23: Some general moving requests moved to {@link de.yard.threed.engine.BaseRequestRegistry}.
  * <p>
  * Created on 24.10.20.
  */
@@ -14,10 +15,6 @@ public class MazeRequestRegistry {
     /**
      *
      */
-    public static RequestType TRIGGER_REQUEST_FORWARD = RequestType.register(2000, "TRIGGER_REQUEST_FORWARD");
-    public static RequestType TRIGGER_REQUEST_BACK = RequestType.register(2001, "TRIGGER_REQUEST_BACK");
-    public static RequestType TRIGGER_REQUEST_TURNLEFT = RequestType.register(2002, "TRIGGER_REQUEST_TURNLEFT");
-    public static RequestType TRIGGER_REQUEST_TURNRIGHT = RequestType.register(2003, "TRIGGER_REQUEST_TURNRIGHT");
 
     public static RequestType TRIGGER_REQUEST_UNDO = RequestType.register(2004, "TRIGGER_REQUEST_UNDO");
 
@@ -32,8 +29,6 @@ public class MazeRequestRegistry {
 
     @Deprecated
     public static RequestType TRIGGER_REQUEST_FORWARDMOVE = RequestType.register(2010, "TRIGGER_REQUEST_FORWARDMOVE");
-    public static RequestType TRIGGER_REQUEST_LEFT = RequestType.register(2011, "TRIGGER_REQUEST_LEFT");
-    public static RequestType TRIGGER_REQUEST_RIGHT = RequestType.register(2012, "TRIGGER_REQUEST_RIGHT");
     public static RequestType TRIGGER_REQUEST_PULL = RequestType.register(2013, "TRIGGER_REQUEST_PULL");
 
 

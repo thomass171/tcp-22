@@ -1,6 +1,7 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
+import de.yard.threed.engine.BaseRequestRegistry;
 
 /**
  * Eine Bewegung im Grid (quasi ein Zug).
@@ -108,21 +109,21 @@ public class GridMovement {
     public /*EventType*/Object getEvent() {
         switch (movement) {
             case 1:
-                return MazeRequestRegistry.TRIGGER_REQUEST_FORWARD;
+                return BaseRequestRegistry.TRIGGER_REQUEST_FORWARD;
             case 2:
-                return MazeRequestRegistry.TRIGGER_REQUEST_TURNLEFT;
+                return BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT;
             case 3:
-                return MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT;
+                return BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT;
             case 4:
                 return MazeRequestRegistry.TRIGGER_REQUEST_FORWARDMOVE;
             case 5:
-                return MazeRequestRegistry.TRIGGER_REQUEST_BACK;
+                return BaseRequestRegistry.TRIGGER_REQUEST_BACK;
             case 6:
                 return MazeRequestRegistry.TRIGGER_REQUEST_PULL;
             case 7:
-                return MazeRequestRegistry.TRIGGER_REQUEST_LEFT;
+                return BaseRequestRegistry.TRIGGER_REQUEST_LEFT;
             case 8:
-                return MazeRequestRegistry.TRIGGER_REQUEST_RIGHT;
+                return BaseRequestRegistry.TRIGGER_REQUEST_RIGHT;
         }
         throw new RuntimeException("unknown");
     }

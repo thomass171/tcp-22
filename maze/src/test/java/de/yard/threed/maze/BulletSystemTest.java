@@ -19,7 +19,7 @@ import java.util.List;
 import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+import de.yard.threed.engine.BaseRequestRegistry;
 
 public class BulletSystemTest {
 
@@ -81,7 +81,7 @@ public class BulletSystemTest {
         assertEquals("fire from home field ignored", failEvent.getPayload().get("message"));
 
         // move and fire again
-        SystemManager.putRequest(new Request(MazeRequestRegistry.TRIGGER_REQUEST_FORWARD,userEntity.getId()));
+        SystemManager.putRequest(new Request(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD,userEntity.getId()));
         EcsTestHelper.processSeconds(1);
         SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(userEntity.getId(),null));
         EcsTestHelper.processSeconds(1);

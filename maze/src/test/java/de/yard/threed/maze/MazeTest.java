@@ -3,6 +3,7 @@ package de.yard.threed.maze;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.engine.BaseRequestRegistry;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.Observer;
@@ -34,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static de.yard.threed.engine.BaseRequestRegistry.TRIGGER_REQUEST_FORWARD;
+import static de.yard.threed.engine.BaseRequestRegistry.TRIGGER_REQUEST_LEFT;
 import static de.yard.threed.engine.avatar.TeamColor.TEAMCOLOR_DARKGREEN;
 import static de.yard.threed.engine.avatar.TeamColor.TEAMCOLOR_RED;
 import static de.yard.threed.maze.MazeRequestRegistry.*;
@@ -170,9 +173,9 @@ public class MazeTest {
         assertEquals(new GridOrientation().toString(), MazeUtils.getPlayerorientation(MazeUtils.getMainPlayer()).toString(), "initial orientation");
         assertEquals(new Point(6, 1).toString(), MazeUtils.getMoverposition(MazeUtils.getMainPlayer()).toString(), "initial location");
 
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNRIGHT, userEntityId));
+        replaySystem.addRequests(new Request(BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT, userEntityId));
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD, userEntityId));
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNLEFT, userEntityId));
+        replaySystem.addRequests(new Request(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT, userEntityId));
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD, userEntityId));
 
         // 30 is not sufficient
@@ -183,7 +186,7 @@ public class MazeTest {
         TestUtils.assertPoint(new Point(7, 2), mc.getLocation(), "player location");
 
         replaySystem.addRequests(new Request(TRIGGER_REQUEST_FORWARD, userEntityId));
-        replaySystem.addRequests(new Request(TRIGGER_REQUEST_TURNLEFT, userEntityId));
+        replaySystem.addRequests(new Request(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT, userEntityId));
         sceneRunner.runLimitedFrames(50);
         TestUtils.assertPoint(new Point(7, 3), mc.getLocation(), "player location");
         TestUtils.assertVector3(MazeUtils.point2Vector3(new Point(7, 3)), player.getSceneNode().getTransform().getPosition(), "player location");

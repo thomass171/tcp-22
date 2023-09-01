@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Klassifierung von verschiedenen Requests. Auch für Button/Menu/Click.
+ * Classification of all types of requests. Also for Button/Menu/Click.
  * <p>
- * 21.3.19: Abgrenzung Request/Event.
+ * 21.3.19: Range limits Request/Event.
  * Range of types:
  * 1000-1999 engine
  * 2000-2999 maze

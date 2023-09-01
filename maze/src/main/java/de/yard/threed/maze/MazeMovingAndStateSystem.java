@@ -42,15 +42,15 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
     private Hud helphud = null;
 
     public MazeMovingAndStateSystem(MazeTheme mazeTheme) {
-        super(new String[]{"MazeMovingComponent"}, new RequestType[]{MazeRequestRegistry.TRIGGER_REQUEST_BACK,
-                        MazeRequestRegistry.TRIGGER_REQUEST_TURNLEFT, MazeRequestRegistry.TRIGGER_REQUEST_FORWARD,
-                        MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT, MazeRequestRegistry.MAZE_REQUEST_LOADLEVEL,
+        super(new String[]{"MazeMovingComponent"}, new RequestType[]{BaseRequestRegistry.TRIGGER_REQUEST_BACK,
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT, BaseRequestRegistry.TRIGGER_REQUEST_FORWARD,
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT, MazeRequestRegistry.MAZE_REQUEST_LOADLEVEL,
                         MazeRequestRegistry.TRIGGER_REQUEST_AUTOSOLVE, UserSystem.USER_REQUEST_JOIN, MazeRequestRegistry.TRIGGER_REQUEST_UNDO,
                         MazeRequestRegistry.TRIGGER_REQUEST_VALIDATE, MazeRequestRegistry.TRIGGER_REQUEST_HELP,
                         MazeRequestRegistry.TRIGGER_REQUEST_RESET,
                         MazeRequestRegistry.TRIGGER_REQUEST_FORWARDMOVE,
-                        MazeRequestRegistry.TRIGGER_REQUEST_LEFT,
-                        MazeRequestRegistry.TRIGGER_REQUEST_RIGHT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_LEFT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_RIGHT,
                         MazeRequestRegistry.TRIGGER_REQUEST_PULL,
                         MazeRequestRegistry.TRIGGER_REQUEST_RELOCATE,
                         MazeRequestRegistry.TRIGGER_REQUEST_TELEPORT,
@@ -365,22 +365,22 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
             return true;
         }
         List<EcsEntity> foundStuff = null;
-        if (request.getType().equals(MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
+        if (request.getType().equals(BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
             attemptRotate(currentstate, mover, false);
-        } else if (request.getType().equals(MazeRequestRegistry.TRIGGER_REQUEST_TURNLEFT)) {
+        } else if (request.getType().equals(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT)) {
             attemptRotate(currentstate, mover, true);
-        } else if (request.getType().equals(MazeRequestRegistry.TRIGGER_REQUEST_BACK)) {
+        } else if (request.getType().equals(BaseRequestRegistry.TRIGGER_REQUEST_BACK)) {
             foundStuff = attemptMove(currentstate, mover, GridMovement.Back, user.getId());
-        } else if (request.getType().equals(MazeRequestRegistry.TRIGGER_REQUEST_FORWARD)) {
+        } else if (request.getType().equals(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD)) {
             foundStuff = attemptMove(currentstate, mover, GridMovement.Forward, user.getId());
         } else if (request.getType().equals(MazeRequestRegistry.TRIGGER_REQUEST_UNDO)) {
             undo(currentstate, mover, Grid.getInstance().getMazeLayout());
         } else if (request.getType().equals(MazeRequestRegistry.TRIGGER_REQUEST_FORWARDMOVE)) {
             // 10.4.21: Wer triggered denn einen TRIGGER_REQUEST_FORWARDMOVE? Nur der Replay?
             foundStuff = attemptMove(currentstate, mover, GridMovement.ForwardMove, user.getId());
-        } else if (request.getType().equals(MazeRequestRegistry.TRIGGER_REQUEST_LEFT)) {
+        } else if (request.getType().equals(BaseRequestRegistry.TRIGGER_REQUEST_LEFT)) {
             foundStuff = attemptMove(currentstate, mover, GridMovement.Left, user.getId());
-        } else if (request.getType().equals(MazeRequestRegistry.TRIGGER_REQUEST_RIGHT)) {
+        } else if (request.getType().equals(BaseRequestRegistry.TRIGGER_REQUEST_RIGHT)) {
             foundStuff = attemptMove(currentstate, mover, GridMovement.Right, user.getId());
         } else if (request.getType().equals(MazeRequestRegistry.TRIGGER_REQUEST_PULL)) {
             // pull kommt evtl auch bei undo? 27.5.21: jetzt auch eigenstaendig. UNDO hat aber sein eigenes Event.

@@ -32,8 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static de.yard.threed.engine.BaseRequestRegistry.*;
 import static de.yard.threed.maze.MazeRequestRegistry.*;
-import static de.yard.threed.maze.MazeRequestRegistry.TRIGGER_REQUEST_FORWARD;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

@@ -3,7 +3,7 @@ package de.yard.threed.maze;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtils;
-import de.yard.threed.engine.avatar.TeamColor;
+import de.yard.threed.engine.BaseRequestRegistry;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.util.DeterministicIntProvider;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
@@ -60,7 +60,7 @@ public class SimpleBotAITest {
         IntProvider intProvider = new DeterministicIntProvider(new int[]{1, 1});
         Request request = botAI.getNextRequest(leftBot, gridState, grid.getMazeLayout(), intProvider);
         // should not fire at own team member but turn
-        assertEquals(MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
+        assertEquals(BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
         MazeTestUtils.rotatePlayer(leftBot, false, new Point(5, 2));
 
         request = botAI.getNextRequest(leftBot, gridState, grid.getMazeLayout(), intProvider);
@@ -70,7 +70,7 @@ public class SimpleBotAITest {
         // right bot should not solve
         MazeTestUtils.move(rightBot, GridMovement.Forward, gridState, grid.getMazeLayout(), new Point(7, 2));
         request = botAI.getNextRequest(rightBot, gridState, grid.getMazeLayout(), intProvider);
-        assertEquals(MazeRequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
+        assertEquals(BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT.getLabel(), request.getType().getLabel());
 
     }
 }
