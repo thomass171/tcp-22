@@ -316,5 +316,14 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
     public void setFar(double far) {
         nativecamera.setFar(far);
     }
+
+    /**
+     * The position of the camera. Is this really correct?
+     * @return
+     */
+    public Vector3 getEye(){
+        Matrix4 rev = getViewMatrix();
+        return rev.extractPosition();
+    }
 }
 

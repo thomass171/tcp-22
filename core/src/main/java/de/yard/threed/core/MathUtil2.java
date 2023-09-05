@@ -16,6 +16,12 @@ public class MathUtil2 {
     public static float FLT_EPSILON = 1.19209290E-07f;
     public static double DBL_EPSILON = 2.2204460492503131e-016;
 
+    // OpenGL default orientation pointing to 'us' (object's lookat).
+    public static Vector3 DEFAULT_FORWARD = new Vector3(0,0,1);
+    public static Vector3 DEFAULT_UP = new Vector3(0,1,0);
+    public static Vector3 DEFAULT_LEFT = new Vector3(-1,0,0);
+    public static Vector3 DEFAULT_RIGHT = new Vector3(1,0,0);
+
     /**
      * Kopiert und laut (http://fabiensanglard.net/doom3_documentation/37726-293748.pdf) angepasst.
      * Die Original scheint mir nicht ganz richtig zu sein. Diese angepasste Version liefert Ergebnisse

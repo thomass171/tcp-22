@@ -70,7 +70,7 @@ public class WebGlObject3D implements NativeTransform {
 
     @Override
     public void translateOnAxis(Vector3 axis, double distance) {
-        //logger.debug("translateOnAxis: x= "+axis.getX()+",y="+axis.getY()+",z="+axis.getZ()+",distance="+distance);
+        //logger.debug("translateOnAxis(" + getName() + "): x= " + axis.getX() + ",y=" + axis.getY() + ",z=" + axis.getZ() + ",distance=" + distance);
         translateOnAxis(object3d, WebGlVector3.toWebGl(axis).vector3, distance);
     }
 

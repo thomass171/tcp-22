@@ -19,6 +19,8 @@ import de.yard.threed.engine.vr.VRController;
  * <p>
  * Kann justiert werden. Aber ohne Keybindings hier, um flexibel einsetzbar zu sein.
  * Darum hat der Observer eine logische Position, die um finetune ergaenzt wird.
+ * 1.9.23: Shouldn't the singleton be moved to ObserverSystem? No, because its not related to a specific entity or
+ * ObserverComponent. Maybe it belongs to the camera system.
  *
  * <p>
  * 8.5.2012
@@ -79,14 +81,14 @@ public class Observer implements SimpleTransform {
      * Nur ausserhalb VR
      */
     public void incHeading(Degree inc) {
-        FirstPersonController.incHeading(observer, inc);
+        Transform.incHeading(observer, inc);
     }
 
     /**
      * Nur ausserhalb VR
      */
     public void incPitch(Degree inc) {
-        FirstPersonController.incPitch(observer, inc);
+        Transform.incPitch(observer, inc);
     }
 
     public void fineTune(boolean up) {

@@ -19,6 +19,7 @@ import de.yard.threed.engine.vr.VrInstance;
  * 2) attach the observer after joining (was in AvatarSystem before)
  * <p>
  * Not for teleporting, movement or viewports, which is something different.
+ * 1.9.23: Should not host observer instance because that is not related to a specific entity.
  * <p>
  * Created by thomass on 16.09.16.
  */
@@ -28,6 +29,7 @@ public class ObserverSystem extends DefaultEcsSystem {
     // workaround for attaching the observer only once to the main/first player, but not to further bots.
     private boolean isFirstJoin = true;
     private boolean observersystemdebuglog = true;
+    // offset to attachment (player,avatar etc)
     private LocalTransform viewTransform;
 
     /**

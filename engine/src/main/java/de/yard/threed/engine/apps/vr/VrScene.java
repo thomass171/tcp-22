@@ -109,9 +109,9 @@ public class VrScene extends Scene {
             // No VR. just attach observer to avatar? Hmm, keep it separate for now for separate testing of teleport of avatar and moving view point.
             //observer.getTransform().setParent(avatar.getSceneNode().getTransform());
             // use FPC to move around? Conflicts with teleport. But only if attached to avatar.
-            fps = new FirstPersonController(getMainCamera().getCarrier().getTransform());
-            fps.setMovementSpeed(3.2);
-            fps.setRotationSpeed(42.2);
+            fps = new FirstPersonController(getMainCamera().getCarrier().getTransform(), true);
+            fps.transformer.setMovementSpeed(3.2);
+            fps.transformer.setRotationSpeed(42.2);
             // avoid conflicts with mouse clicks on control panel
             fps.moveByMouseEnabled = false;
         }

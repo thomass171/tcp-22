@@ -13,7 +13,7 @@ import java.util.List;
  * Und fuer sowas wie rotateOnAxis(Degree) ists wieder ganz gut. Überhaupt wegen Convenience Methoden.
  * <p>
  * Fuer einfache Zwecke gibt es noch LocalTransform.
- *
+ * <p>
  * 19.5.21: Extracted interface for decoupling.
  * <p>
  * Created by thomass on 26.01.17
@@ -207,4 +207,44 @@ public class Transform implements SimpleTransform {
         Vector3 p = getPosition();
         setPosition(new Vector3(p.getX(), y, p.getZ()));
     }
+
+    /**
+     * Move forward. Is always along the foward vector/z-axis in local space. Rotation will do the rest.
+     * <p>
+     * For the common use case for the method, moving the camera, it is a convenience convention to use a negative offset, which
+     * is surprising at first glance.
+     * Since the camera looks (in fact its just the view frustum to which the world is transformed) to the negative area of the z-axis,
+     * increasing the forward vector (which has a default of (0,0,1) in OpenGL) of a camera would move the camera away from the frustum
+     * (in fact its moving the world even far away), a offset of -1 is more intuitive.
+     * <p>
+     * See Base3DTest.testAndExplainMoveForward for an example.
+     * <p>
+     * However this intuity doesn't apply to objects. So we will have just two methods.
+     * BTW:
+     * Unity uses a left handed coordinate system, so in Unity the forward vector is increased for having the same effect. However, since
+     * the coordinate system is mirrored in platform-unity to be right handed, its again suitable to decrease the forward vector here.
+     * <p>
+     * JME uses a reverted forward view vector internally(?), that also is mirrored in platform-jme. So this here also fits.
+     */
+    public static void moveForward(Transform target, double amount) {
+        target.translateOnAxis(new Vector3(0, 0, 1), amount);
+    }
+
+    public static void moveForwardAsCamera(Transform target, double amount) {
+        target.translateOnAxis(new Vector3(0, 0, -1), amount);
+    }
+
+    public static void incPitch(Transform target, Degree inc) {
+        target.rotateOnAxis(new Vector3(1, 0, 0), inc);
+    }
+
+    public static void incHeading(Transform target, Degree inc) {
+        target.rotateOnAxis(new Vector3(0, 1, 0), inc);
+    }
+
+    public static void incRoll(Transform target, Degree inc) {
+        target.rotateOnAxis(new Vector3(0, 0, 1), inc);
+    }
+
+
 }

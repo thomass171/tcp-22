@@ -397,11 +397,12 @@ public class Matrix4 /*30.5.implements Dumpable*/ {
 
     /**
      * http://www.songho.ca/opengl/gl_lookattoaxes.html
+     * Confusing: Why left? This must be right in OpenGL(??)
      *
      * @return
      */
-    public Vector3 getLeft() {
-        return getColumn(0);
+    public Vector3 getRight/*Left*/() {
+        return getColumn(0).normalize();
     }
 
     /**
@@ -410,15 +411,16 @@ public class Matrix4 /*30.5.implements Dumpable*/ {
      * @return
      */
     public Vector3 getUp() {
-        return getColumn(1);
+        return getColumn(1).normalize();
     }
 
     /**
+     * calculated by normalizing the lookat vector.
      * http://www.songho.ca/opengl/gl_lookattoaxes.html
      *
      * @return
      */
     public Vector3 getForward() {
-        return getColumn(2);
+        return getColumn(2).normalize();
     }
 }

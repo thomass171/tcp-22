@@ -185,8 +185,8 @@ public class Primitives {
     }
 
     /**
-     * 9.3.17: Wird in der y=0 Ebene analog zur Plane ueber Shapegeometry gebaut (von +z nach -z). Auch, was die Vertexreihenfolge angeht.
-     * 6.3.21: Das passt zum OpenGl coordinate system, wo y nach oben/unten geht.
+     * 9.3.17: In y=0 layer like in Shapegeometry (from +z to -z). Also the vertex order.
+     * 6.3.21: Fits to OpenGl coordinate system, with y from down to up.
      *
      * @return
      */

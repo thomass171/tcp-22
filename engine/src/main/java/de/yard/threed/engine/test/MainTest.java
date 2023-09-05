@@ -4,15 +4,14 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
 /**
- * Wrapper fuer Testaufrufe, die auch in den jeweiligen Platformen wie im Browser laufen sollen. Wird aber auch per JUnit aufgerufen, um die Tests für JME zu machen. 
- * 
- * 22.12.16: Es gibt auch eine MainTestScene, um die Tests als Scene in der Platform laufen zu lassen.
- * 23.1.18: In ReferenceScene aufgenommen. Damit ist die MainTestScene wohl obsolet.
+ * Wrapper for tests that are used during platform tests (ReferenceScene) and during unit tests (SimpleHeadless platform).
+ *
+ * 23.1.18: Added to ReferenceScene, so no dedicated test scene is needed.
  * <p/>
  * Created by thomass on 29.05.15.
  */
 public class MainTest {
-    public static void runTest(String testname) {
+    public static void runTest() {
         Log logger = Platform.getInstance().getLog(MainTest.class);
 
         try {
@@ -46,6 +45,7 @@ public class MainTest {
             base3DTest.testTranslationAndRotation();
             logger.info("Running Base3DTest.testTranslationAndRotation2()");
             base3DTest.testTranslationAndRotation2();
+            base3DTest.testMatrixDefaults();
 
             ViewTest viewtest = new ViewTest();
             logger.info("Running ViewTest.testCameraRotation()");

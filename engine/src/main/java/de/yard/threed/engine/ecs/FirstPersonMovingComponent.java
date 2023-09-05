@@ -4,6 +4,8 @@ package de.yard.threed.engine.ecs;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.FirstPersonTransformer;
+import de.yard.threed.engine.Transform;
 
 /**
  * .
@@ -13,14 +15,16 @@ import de.yard.threed.core.platform.Platform;
 public class FirstPersonMovingComponent extends EcsComponent {
     static Log logger = Platform.getInstance().getLog(FirstPersonMovingComponent.class);
     public static String TAG = "FirstPersonMovingComponent";
-    boolean firstpersonmovementdebuglog = false;
-    LocalTransform currentposition;
+    boolean firstpersonmovementdebuglog = true;
+    //LocalTransform currentposition;
+    FirstPersonTransformer firstPersonTransformer;
     boolean automove;
 
     /**
      *
      */
-    public FirstPersonMovingComponent() {
+    public FirstPersonMovingComponent(Transform transform) {
+        firstPersonTransformer=new FirstPersonTransformer(transform);
     }
 
     @Override
@@ -33,14 +37,15 @@ public class FirstPersonMovingComponent extends EcsComponent {
      * @param amount
      */
     public void moveForward(double amount) {
-        if (currentposition == null) {
+        /*if (currentposition == null) {
             logger.error("no currentposition.");
             return;// null;
-        }
+        }*/
         if (firstpersonmovementdebuglog) {
-            logger.debug("moveForward: completed,currentposition=" + currentposition);
+            logger.debug("moveForward: completed,amount=" + amount);
         }
         //return pathcompleted;
+        firstPersonTransformer.moveForward(amount);
     }
 
 
@@ -48,9 +53,9 @@ public class FirstPersonMovingComponent extends EcsComponent {
         return (FirstPersonMovingComponent) e.getComponent(FirstPersonMovingComponent.TAG);
     }
 
-    public LocalTransform getCurrentposition() {
+    /*public LocalTransform getCurrentposition() {
         return currentposition;
-    }
+    }*/
 
 
     public boolean hasAutomove() {

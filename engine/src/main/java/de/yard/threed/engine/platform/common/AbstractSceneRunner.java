@@ -283,10 +283,9 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     }
 
     /**
-     * Liefert die Koordinaten zu denen sich die Maus bewegt hat.
-     * null bei keiner Bewegung.
+     * Coordinates where the mouse moved to. null if it didn't move.
      * <p/>
-     * y= 0 ist oben(unten!), wie bei ThreeJS und auch OpenGL.
+     * y= 0 ist oben(bottom!), wie bei ThreeJS und auch OpenGL.
      */
     //@Override
     public Point getMouseMove() {

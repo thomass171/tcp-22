@@ -2,6 +2,7 @@ package de.yard.threed.engine.test;
 
 
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
@@ -37,7 +38,7 @@ public class Base3DTest {
         model.translateY(5.7f);
         model.translateZ(-12.7f);
         //Hier wurde erst rotiert und dnan translated. Damit entspricht die Position nicht mehr der Translation!
-         checkLocalModelMatrix(model, new Matrix4(0.433f, -0.75f, 0.5f, -9.456f,
+        checkLocalModelMatrix(model, new Matrix4(0.433f, -0.75f, 0.5f, -9.456f,
                 0.896f, 0.417f, -0.1504f, 6.708f,
                 -0.096f, 0.513f, 0.852f, -8.164f,
                 0, 0, 0, 1));
@@ -46,7 +47,7 @@ public class Base3DTest {
         // Dann sind Quaternions doch nicht plattformabhängig.
         Quaternion rotation = model.getRotation();
         RuntimeTestUtil.assertEquals("x1", 0.20182428f, rotation.getX());
-        RuntimeTestUtil.assertEquals("y1", 0.18119794f, rotation.getY() );
+        RuntimeTestUtil.assertEquals("y1", 0.18119794f, rotation.getY());
         RuntimeTestUtil.assertEquals("z1", 0.50066054f, rotation.getZ());
         RuntimeTestUtil.assertEquals("w1", 0.82205427f, rotation.getW());
 
@@ -84,7 +85,7 @@ public class Base3DTest {
 
         Vector3 scale = new Vector3(2, 3, 4);
         model.setScale(scale);
-        logger.debug("scalematrix="+Matrix4.buildScaleMatrix(scale).dump("\n"));
+        logger.debug("scalematrix=" + Matrix4.buildScaleMatrix(scale).dump("\n"));
         checkLocalModelMatrix(model, (Matrix4.buildTranslationMatrix(position).multiply(refrotation)).multiply(Matrix4.buildScaleMatrix(scale)));
 
         // Die Rotationreferenzweret stammen aus JME, sind aber identisch zu ThreeJS.
@@ -104,6 +105,49 @@ public class Base3DTest {
         // checkLocalModelMatrix(model,  Matrix4.buildTranslationMatrix(position).multiply(refrotation));
     }
 
+    public void testMatrixDefaults() {
+        SceneNode sn = new SceneNode();
+        Transform transform = sn.getTransform();
+        RuntimeTestUtil.assertVector3(MathUtil2.DEFAULT_FORWARD, transform.getLocalModelMatrix().getForward());
+        RuntimeTestUtil.assertVector3(MathUtil2.DEFAULT_UP, transform.getLocalModelMatrix().getUp());
+        RuntimeTestUtil.assertVector3(MathUtil2.DEFAULT_RIGHT, transform.getLocalModelMatrix().getRight());
+        RuntimeTestUtil.assertVector3(new Vector3(0, 0, 0), transform.getPosition());
+    }
+
+    public static void testViewMatrixDefaults(Camera camera, Log logger) {
+        // Difficult. Will need a camera, but creating a camera here will spoil other tests.
+        // So this test is directly in ReferenceScene with default camera.
+        // should both be identity
+        RuntimeTestUtil.assertMatrix4(new Matrix4(), camera.getViewMatrix());
+        RuntimeTestUtil.assertMatrix4(new Matrix4(), camera.getWorldModelMatrix());
+    }
+
+    public static void testAndExplainMoveForward(Camera camera, Log logger) {
+        // Difficult. Will need a camera, but creating a camera here will spoil other tests.
+        // So this test is directly in ReferenceScene with default camera.
+
+        // assume an object that will be visible with typical near/far planes.
+        // the view frustum reaches into -z.
+        Vector3 visibleObjectLocation = new Vector3(0, 0, -2);
+
+        // assume a default view matrix (the identity), which is the reverse of the camera world matrix (also the identity).
+        RuntimeTestUtil.assertMatrix4(new Matrix4(), camera.getViewMatrix());
+        RuntimeTestUtil.assertMatrix4(new Matrix4(), camera.getWorldModelMatrix());
+
+        // A camera objects transform is just an object like all others (even though we have a carrier here).
+        Transform cameraTransform = camera.getCarrierTransform();
+
+        // A moveForward with positive offset moves the camera away from the frustum...
+        Transform.moveForward(cameraTransform, 0.5);
+        Vector3 visibleObjectLocationAfterTransformOfWorldToFrustum = camera.getViewMatrix().transform(visibleObjectLocation);
+        RuntimeTestUtil.assertVector3(new Vector3(0, 0, -2.5), visibleObjectLocationAfterTransformOfWorldToFrustum);
+
+        // ...but with negative offset (asCamera) it moved nearer to the object.
+        Transform.moveForwardAsCamera(cameraTransform, 0.5 + 0.5);
+        visibleObjectLocationAfterTransformOfWorldToFrustum = camera.getViewMatrix().transform(visibleObjectLocation);
+        RuntimeTestUtil.assertVector3(new Vector3(0, 0, -1.5), visibleObjectLocationAfterTransformOfWorldToFrustum);
+    }
+
     private void checkLocalModelMatrix(Transform model, Matrix4 expected) {
         Matrix4 m = model.getLocalModelMatrix();
 
@@ -114,8 +158,8 @@ public class Base3DTest {
 }
 
 class TestBase3D extends Transform {
-   public TestBase3D() {
-        super( Platform.getInstance().buildModel("name").getTransform());
+    public TestBase3D() {
+        super(Platform.getInstance().buildModel("name").getTransform());
     }
 
 }

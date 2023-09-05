@@ -2,6 +2,7 @@ package de.yard.threed.platform.webgl;
 
 
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.apps.FirstPersonScene;
 import de.yard.threed.engine.apps.reference.ReferenceScene;
 import de.yard.threed.engine.apps.vr.VrScene;
 import de.yard.threed.engine.apps.LightedRotatingCubeScene;
@@ -9,7 +10,6 @@ import de.yard.threed.engine.Scene;
 
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.maze.MazeScene;
-import de.yard.threed.engine.test.MainTestScene;
 import de.yard.threed.traffic.apps.BasicTravelScene;
 
 
@@ -28,12 +28,12 @@ public class ScenePool {
             return new MazeScene();
         if (name.equals("ReferenceScene"))
             return new ReferenceScene();
-        if (name.equals("MainTestScene"))
-            return new MainTestScene();
         if (name.equals("VrScene"))
             return new VrScene();
         if (name.equals("BasicTravelScene"))
             return new BasicTravelScene();
+        if (name.equals("FirstPersonScene"))
+            return new FirstPersonScene();
         logger.error("Scene " + name + " not found");
         return null;
     }

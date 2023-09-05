@@ -16,6 +16,10 @@ import de.yard.threed.core.Vector3;
 public class WebGlMatrix4 /*implements Matrix4*/ {
     JavaScriptObject matrix4;
 
+    public WebGlMatrix4() {
+        matrix4 = buildMatrix4();
+    }
+
     public WebGlMatrix4(double a11, double a12, double a13, double a14,
                         double a21, double a22, double a23, double a24,
                         double a31, double a32, double a33, double a34,
@@ -69,6 +73,10 @@ public class WebGlMatrix4 /*implements Matrix4*/ {
     public Quaternion extractQuaternion() {
         return WebGlQuaternion.fromWebGl(new WebGlQuaternion(extractQuaternion(matrix4)));
     }
+
+    private static native JavaScriptObject buildMatrix4()  /*-{
+        return new $wnd.THREE.Matrix4( );
+    }-*/;
 
     private static native JavaScriptObject buildMatrix4(double a11, double a12, double a13, double a14,
                                                               double a21, double a22, double a23, double a24,

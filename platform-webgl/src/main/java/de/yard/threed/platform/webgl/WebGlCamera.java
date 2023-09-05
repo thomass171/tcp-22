@@ -122,6 +122,7 @@ public class WebGlCamera implements NativeCamera/*, NativeTransform*/ {
 
     @Override
     public Matrix4 getViewMatrix() {
+        //logger.debug("carrier position:"+carrier.getPosition());
         return WebGlMatrix4.fromWebGl(new WebGlMatrix4(getViewMatrix(object3d.object3d)));
     }
 
@@ -351,16 +352,15 @@ public class WebGlCamera implements NativeCamera/*, NativeTransform*/ {
     }-*/;
 
     /**
-     * 30.11.15: Liefert die Viewmatrix  einer Camera
-     * Das ist laut https://github.com/mrdoob/three.js/issues/1188 camera.matrixWorldInverse (??).
-     * Aber das ist wohl tatsächlich so.
-     * 7.3.16: Sie wird aber nur beim rendern aktualisiert, darum hier explizit.
+     * 30.11.15: The view matrix. This is just the matrixWorldInverse.
+     *
+     * 7.3.16: Only updated during rendering, so explicitly do updateMatrixWorld().
+     * 5.9.23: updateWorldMatrix() including parents added to reflect carrier changes.
      */
     private static native JavaScriptObject getViewMatrix(JavaScriptObject camera)  /*-{
+        camera.updateWorldMatrix(true,false);
         camera.updateMatrixWorld();
-        //5.5.21 change of API [Warning] THREE.Matrix4: .getInverse() has been removed. Use matrixInv.copy( matrix ).invert(); instead. (three.js, line 34597)
-        //was soll(te) das ueberhaupt?
-        //camera.matrixWorldInverse.getInverse( camera.matrixWorld  );
+        // updateMatrixWorld also updates 'matrixWorldInverse'
         return camera.matrixWorldInverse;
     }-*/;
 
