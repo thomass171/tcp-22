@@ -27,12 +27,20 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(FirstPersonMovingSystem.class);
     public static String TAG = "FirstPersonMovingSystem";
     boolean firstpersonmovingsystemdebuglog = true;
+    // Mouse movement is different between platforms and hard to unify. So stay with key control
+    // and focus on VR
+    boolean useMouseControl = false;
 
     /**
      *
      */
     private FirstPersonMovingSystem() {
-        super(new String[]{FirstPersonMovingComponent.TAG}, new RequestType[]{BaseRequestRegistry.TRIGGER_REQUEST_FORWARD},
+        super(new String[]{FirstPersonMovingComponent.TAG}, new RequestType[]{
+                        BaseRequestRegistry.TRIGGER_REQUEST_FORWARD,
+                        BaseRequestRegistry.TRIGGER_REQUEST_BACK,
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT
+                },
                 new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED});
     }
 
@@ -49,62 +57,43 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
             FirstPersonMovingComponent gmc = (FirstPersonMovingComponent) group.cl.get(0);
         }
     }
-static    Point lastpoint;
+
+    static Point lastpoint;
+
     /**
      *
      */
     @Override
     final public void update(EcsEntity entity, EcsGroup group, double tpf) {
 
-        FirstPersonMovingComponent tmc = (FirstPersonMovingComponent) group.cl.get(0);
+        FirstPersonMovingComponent fpmc = (FirstPersonMovingComponent) group.cl.get(0);
 
-        if (tmc.hasAutomove()) {
+        if (fpmc.hasAutomove()) {
             //moveForward(entity, gmc, vc, tpf * vc.movementSpeed);
             //logger.debug("new position of "+entity.getName()+entity.getId()+" isType "+gmc.getPosition());
         }
 
-        Point point = Input.getMouseMove();
-        if (point !=null) {
-            if (lastpoint!=null) {
+        if (useMouseControl) {
+            Point point = Input.getMouseMove();
+            if (point != null) {
+                if (lastpoint != null) {
 
-                logger.debug("mouse move " + point);
-int x=point.getX()-lastpoint.getX();
-int y=point.getY()-lastpoint.getY();
-                Matrix4 m4 = entity.getSceneNode().getTransform().getLocalModelMatrix();
-
-                Vector3 refVector = new Vector3(0, 1, 0);
-                Quaternion q = m4.extractQuaternion();
-                Degree d=new Degree(0);
-                if (x < 0){
-                 d=new Degree(1);
+                    logger.debug("mouse move " + point);
+                    int dx = point.getX() - lastpoint.getX();
+                    int dy = point.getY() - lastpoint.getY();
+                    fpmc.firstPersonTransformer.mouseMove(dx, dy);
                 }
-                if (x > 0){
-                    d=new Degree(-1);
-                }
-                Degree dy=new Degree(0);
-                if (y < 0){
-                    dy=new Degree(-1);
-                }
-                if (y > 0){
-                    dy=new Degree(1);
-                }
-
-                m4 = m4.multiply(Matrix4.buildRotationMatrix(
-                        Quaternion.buildRotationY(d).multiply(Quaternion.buildRotationX(dy))));
-                //entity.getSceneNode().getTransform().setPosition(m4.extractPosition());
-                entity.getSceneNode().getTransform().setRotation(m4.extractQuaternion());
+                lastpoint = point;
             }
-            lastpoint=point;
         }
     }
-
 
     @Override
     public boolean processRequest(Request request) {
         if (firstpersonmovingsystemdebuglog) {
             logger.debug("got request " + request.getType());
         }
-        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD)) {
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_BACK)) {
             int userEntityId = (int) request.getUserEntityId();
 
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
@@ -113,14 +102,25 @@ int y=point.getY()-lastpoint.getY();
 
             Matrix4 m4 = userEntity.getSceneNode().getTransform().getLocalModelMatrix();
 
-            Vector3 refVector = new Vector3(0,0,-1);
-            m4 = m4.multiply(Matrix4.buildTransformationMatrix(refVector,m4.extractQuaternion()));
+            Vector3 refVector = new Vector3(0, 0, -1);
+            m4 = m4.multiply(Matrix4.buildTransformationMatrix(refVector, m4.extractQuaternion()));
             //userEntity.getSceneNode().getTransform().setPosition(m4.extractPosition());
             //userEntity.getSceneNode().getTransform().setRotation(m4.extractQuaternion());
-fpmc.moveForward(1);
-          //  movedirection = orientation.forward +
+            fpmc.moveForward(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD) ? 0.1 : -0.1);
+            //  movedirection = orientation.forward +
             return true;
         }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
+            int userEntityId = (int) request.getUserEntityId();
+
+            EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
+            FirstPersonMovingComponent fpmc = FirstPersonMovingComponent.getFirstPersonMovingComponent(userEntity);
+
+
+            fpmc.firstPersonTransformer.incHeading(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT) ? 0.1 : -0.1);
+            return true;
+        }
+
         return false;
     }
 

@@ -24,7 +24,7 @@ public class FirstPersonMovingComponent extends EcsComponent {
      *
      */
     public FirstPersonMovingComponent(Transform transform) {
-        firstPersonTransformer=new FirstPersonTransformer(transform);
+        firstPersonTransformer=new FirstPersonTransformer(transform, FirstPersonTransformer.ROTATE_MODE_PERAXIS);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class FirstPersonMovingComponent extends EcsComponent {
             logger.debug("moveForward: completed,amount=" + amount);
         }
         //return pathcompleted;
-        firstPersonTransformer.moveForward(amount);
+        firstPersonTransformer.moveForwardAsCamera(amount);
     }
 
 

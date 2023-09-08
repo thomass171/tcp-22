@@ -1,25 +1,47 @@
 package de.yard.threed.engine;
 
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
 
 /**
  * Decoupled from FirstPersonController.
  */
 public class FirstPersonTransformer {
+    static Log logger = Platform.getInstance().getLog(FirstPersonTransformer.class);
     //the rotation around the Y axis of the camera
     // speed must fit to the scene. The default might be too high/low.
     private double movementSpeed = 10.0f; //move 10 units per getSecond
     private double rotationSpeed = 20.0f; //move 10 units per getSecond
     private Transform target;
+    // involves all three axes
+    static public int ROTATE_MODE_ADDITIVE = 1;
+    // single axis
+    static public int ROTATE_MODE_PERAXIS = 2;
+    int rotateMode;
+    // default straight to -z
+    double heading = 0, pitch = 0;
 
     public FirstPersonTransformer(Transform target) {
         // logger.debug("Building FirstPersonController ");
         this.target = target;
+        this.rotateMode = ROTATE_MODE_ADDITIVE;
+    }
+
+    public FirstPersonTransformer(Transform target, int rotateMode) {
+        // logger.debug("Building FirstPersonController ");
+        this.target = target;
+        this.rotateMode = rotateMode;
     }
 
     public void incPitch(double tpf) {
         Transform.incPitch(target, new Degree(rotationSpeed * tpf));
+    }
+
+    public void incPitch(Degree inc) {
+        target.rotateOnAxis(new Vector3(1, 0, 0), inc);
     }
 
     public void incHeading(double tpf) {
@@ -64,5 +86,21 @@ public class FirstPersonTransformer {
 
     public void moveSidew(double amount) {
         target.translateOnAxis(new Vector3(1, 0, 0), amount);
+    }
+
+    public void mouseMove(int dx, int dy) {
+        logger.debug("dx=" + dx + ",dy=" + dy);
+        if (rotateMode == ROTATE_MODE_ADDITIVE) {
+            // rotating involves all axes, accumulating diviations (requiring roll to fix)
+            // TODO needs a kind of mouse/cursor lock
+            incHeading(new Degree(((double) -dx / 5)));
+            incPitch(new Degree(((double) dy / 5)));
+        }
+        if (rotateMode == ROTATE_MODE_PERAXIS) {
+            heading += ((double) -dx / 100);
+            pitch += ((double) dy / 100);
+            Quaternion rotation = Quaternion.buildFromAngles(pitch, heading, 0);
+            target.setRotation(rotation);
+        }
     }
 }

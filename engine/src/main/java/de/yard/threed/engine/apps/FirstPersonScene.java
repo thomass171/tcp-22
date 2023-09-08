@@ -68,6 +68,7 @@ public class FirstPersonScene extends Scene {
             inputToRequestSystem = new InputToRequestSystem();
             inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_CONTROLMENU);
             inputToRequestSystem.addKeyMapping(KeyCode.W, BaseRequestRegistry.TRIGGER_REQUEST_FORWARD);
+            inputToRequestSystem.addKeyMapping(KeyCode.S, BaseRequestRegistry.TRIGGER_REQUEST_BACK);
             inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_FORWARD);
 
             inputToRequestSystem.addKeyMapping(KeyCode.S, BaseRequestRegistry.TRIGGER_REQUEST_BACK);
@@ -182,7 +183,7 @@ public class FirstPersonScene extends Scene {
         double size = 0.5;
         Geometry cuboid = Geometry.buildCube(size, size, size);
         SceneNode cube = new SceneNode(new Mesh(cuboid, Material.buildBasicMaterial(Color.ORANGE)));
-        cube.getTransform().setPosition(new Vector3(0, 0, 3));
+        cube.getTransform().setPosition(new Vector3(0, 0, -3));
         addToWorld(cube);
 
     }

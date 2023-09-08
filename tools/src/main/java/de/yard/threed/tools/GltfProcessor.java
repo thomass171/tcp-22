@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 /**
  * Reads a model file and converts it to GLTF.
  * Also for dumping a GLTF and corresponding bin file
- * 17.4.19: umbenannt ModelPreProcessor->GltfProcessor
+ * 17.4.19: renamed ModelPreProcessor->GltfProcessor
  * <p>
  * Created by thomass on 11.04.17.
  */

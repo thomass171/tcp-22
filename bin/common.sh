@@ -1,3 +1,7 @@
+#
+# Also used by external projects like tcp-flightgear. So should contain generic parts only
+# and not be too specific.
+#
 export VERBOSELOG=0
 
 MR=$HOME/.m2/repository
