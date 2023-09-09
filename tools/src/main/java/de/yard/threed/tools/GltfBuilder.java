@@ -17,12 +17,13 @@ import de.yard.threed.engine.platform.common.SimpleGeometry;
 import de.yard.threed.javacommon.JAOutputStream;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Optional;
 
 /**
- * Baut das gltf analog zum Blender export, z.B. was die Nomenklatur angeht.
+ * Build a gltf like blender export does, eg. using similar namings.
  */
 public class GltfBuilder {
-    // hier auch ueber Platform loggen?
+    // use Platform for logging? platform might bee needed for libs.
     Log logger = Platform.getInstance().getLog(GltfBuilder.class);
     private JsonArray accessors, bufferViews, nodes, meshes, materials, scenes, textures, images, samplers;
     private boolean isfirstobject = true;
@@ -30,33 +31,9 @@ public class GltfBuilder {
     private JAOutputStream binarystream;
     private ByteArrayOutputStream bos;
     private PortableModelList ppfile;
-    private boolean usematlib = false;
 
     public GltfBuilder() {
 
-    }
-
-    public GltfBuilder(boolean usematlib) {
-        this.usematlib = usematlib;
-    }
-
-    /**
-     * Bekommt die Resource statt pp, um selber den Loader zu ermitteln. Das koennte man auch mal auslagern.
-     * 28.12.17: Jetzt hat er seinen eigenen findLoaderBySuffix und koennte generell ohne Bundle auf Filesystemebene arbeiten.
-     *
-     * @param file
-     * @return
-     */
-    public GltfBuilderResult process(String/*BundleResource*/ file) throws InvalidDataException {
-        //try {
-        // AC world wird ignoriert.
-        ppfile = GltfProcessor.findLoaderBySuffix(/*file, file.bundle.getResource(file)*/file, true, usematlib);
-
-        if (ppfile == null) {
-            // Fehler. Ist bereits gelogged.
-            return null;
-        }
-        return process(ppfile);
     }
 
     public GltfBuilderResult process(PortableModelList ppfile) {

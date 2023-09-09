@@ -1,0 +1,1 @@
+Destination directory for files generated during tests

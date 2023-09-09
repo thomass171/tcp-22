@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * 12.12.17: Hier ist jetzt der preprocess, damit BTG Loader den ueberschreiben kann (andere natuerlich auch, gibt es aber noch nicht).
+ * 8.9.23: Needs some documentation and maybe small refactorings. See also LoaderRegistry.
  * Created by thomass on 12.02.16.
  */
 public abstract class AbstractLoader {
@@ -48,6 +49,10 @@ public abstract class AbstractLoader {
 
     /**
      * Die eingelesenen Geometrien in SimpleGeos konvertieren.
+     * 8.9.23: This is a confusing step. After loading the model
+     * there is a optional but meanwhile standard to unify it.
+     * Should be no need to explicitly call it? Or call it just get...()?
+     * Either rename or don't cache ppfile?
      */
     public PortableModelList preProcess() {
         getLog().info("preprocessing");

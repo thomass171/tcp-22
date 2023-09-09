@@ -12,15 +12,18 @@ import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.engine.platform.common.StringReader;
 
 /**
- * OSG hat auch so einen Namen als Zentrale Stelle. Besser nicht einfach Registry nennen.
- * Nicht als Singleton, sondern static.
+ *
+ * No Singleton, but static.
+ * 8.9.23: Sounds nice to have a registry by suffix. But as long as AbstractLoader not only is the loader but also contains the loaded
+ * data and parameter for loader are very specific (eg. ignoreacworld), it isn't worth the effort.
+ * 8.9.23: Using a LoaderRegistry only sounds good. Model loader might have complex setup
+ * (eg. ac texturepath, btg matlib) and the use case often needs to know what type of model
+ * it is loading for providing all needed information.
  * <p>
  * Created by thomass on 21.12.16.
  */
 public class LoaderRegistry {
     static Log logger = Platform.getInstance().getLog(LoaderRegistry.class);
-    //MA17 static HashMap<String, ReadFileCallback> nodeCallbackMap = new HashMap<String, ReadFileCallback>();
-    //9.3.21 no longer used? private static HashMap<String, de.yard.threed.engine.LoaderFactory> loader = new HashMap<String, de.yard.threed.engine.LoaderFactory>();
 
     /**
      * noch ziemlich drissig
@@ -31,7 +34,7 @@ public class LoaderRegistry {
      * die tools wandern. 28.12.17: Jetzt dorhin kopiert.
      * @throws InvalidDataException
      */
-    public static PortableModelList findLoaderBySuffix(BundleResource file, BundleData /* InputStream*/ ins, boolean  ignoreacworld) throws InvalidDataException {
+    public static PortableModelList loadBySuffix(BundleResource file, BundleData /* InputStream*/ ins, boolean  ignoreacworld) throws InvalidDataException {
         String filename = file.getName();
         String extension = file.getExtension();
         /*15.6.21 if (extension.equals( "3ds")) {

@@ -148,7 +148,7 @@ public class ModelLoader {
         }
 
         try {
-            PortableModelList processor = LoaderRegistry.findLoaderBySuffix(file, (ins), false);
+            PortableModelList processor = LoaderRegistry.loadBySuffix(file, (ins), false);
             return processor;
         } catch (InvalidDataException e) {
             //7.4.17: Es gibt schon mal Fehler in Modelfiles. Das wird gelogged (auch tiefer mit Zeilennummer). Auf den Stacktrace verzichten wir mal.

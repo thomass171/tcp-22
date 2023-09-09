@@ -1,30 +1,33 @@
 package de.yard.threed.tools;
 
+import de.yard.threed.engine.AbstractLoaderBuilder;
 import de.yard.threed.javacommon.DefaultResourceReader;
-import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.ResourceNotFoundException;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.engine.loader.*;
 import de.yard.threed.engine.platform.common.SimpleGeometry;
-import de.yard.threed.core.buffer.ByteArrayInputStream;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.engine.platform.common.StringReader;
-import de.yard.threed.outofbrowser.NativeResourceReader;
-import de.yard.threed.outofbrowser.SyncBundleLoader;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 /**
  * Reads a model file and converts it to GLTF.
- * Also for dumping a GLTF and corresponding bin file
+ * Also for dumping a GLTF and corresponding bin file.
+ * Usages:
+ * - GltfProcessor -gltf -o destinationdirectory inputfile [-l loaderclass ]
+ * - GltfProcessor -dump gltffile
+ * <p>
+ * 22.12.18: Option "-acpp" and preprocessAcpp(), AcppBuilder removed
  * 17.4.19: renamed ModelPreProcessor->GltfProcessor
  * <p>
  * Created by thomass on 11.04.17.
@@ -32,35 +35,10 @@ import java.nio.file.Paths;
 public class GltfProcessor {
     public static Platform platform = ToolsPlatform.init();
     static Log logger = Platform.getInstance().getLog(GltfProcessor.class);
-    //22.8.21 static SGMaterialLib matlib = null;
 
     public static void main(String[] argv) {
         try {
-            if (argv.length == 2 && argv[0].equals("-dump")) {
-                dumpGltf(argv[1]);
-
-            } else {
-                if (argv.length != 4) {
-                    usage();
-                }
-                if (!argv[1].equals("-o")) {
-                    usage();
-                    ;
-                }
-                String opt = argv[0];
-                String outdir = argv[2];
-                if (opt.equals("-acpp")) {
-                    //22.12.18: Das ist Asbach
-                    Util.nomore();
-
-
-                    //preprocessAcpp(argv[3]);
-                } else if (opt.equals("-gltf")) {
-                    preprocessGltf(argv[3], outdir);
-                } else {
-                    usage();
-                }
-            }
+            runMain(argv);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -68,36 +46,58 @@ public class GltfProcessor {
         System.exit(0);
     }
 
+    /**
+     * Extracted to be testable without calling exit()
+     */
+    public static void runMain(String[] argv) throws Exception {
+
+        if (argv.length == 2 && argv[0].equals("-dump")) {
+            dumpGltf(argv[1]);
+
+        } else {
+            if (argv.length != 4 && argv.length != 6) {
+                usage();
+            }
+            if (!argv[1].equals("-o")) {
+                usage();
+            }
+            String opt = argv[0];
+            String outdir = argv[2];
+            if (opt.equals("-gltf")) {
+                Optional<String> loaderClass = Optional.empty();
+                if (argv.length == 6) {
+                    if (!argv[4].equals("-l")) {
+                        usage();
+                    }
+                    loaderClass = Optional.ofNullable(argv[5]);
+                }
+                convertToGltf(argv[3], outdir, loaderClass);
+            } else {
+                usage();
+            }
+        }
+    }
+
     private static void usage() {
-        System.out.println("usage: GltfProcessor -gltf <file>");
+        System.out.println("usage: GltfProcessor -gltf -o <destinationdirectory> <file> [-l loaderclass ]");
         System.out.println("usage: GltfProcessor -dump <gltffile>");
         System.exit(1);
     }
 
-    /**
-     * 8.12.18: AcppBuilder ist doch wohl deprecated
-     *
-     * @param acfile
-     * @throws ResourceNotFoundException
-     * @throws InvalidDataException
-     * @throws IOException
-     */
-    /*3.1.19 private static void preprocessAcpp(String acfile) throws ResourceNotFoundException, InvalidDataException, IOException {
-        Util.nomore();
-        /*LoadedFile ppfile = new AcppBuilder().process(acfile);
-        String destination = acfile + "pp";
-        NativeOutputStream outs = new JAOutputStream(destination);
-        ppfile.serialize(outs);
-        outs.close();* /
-    }*/
-    private static void preprocessGltf(String acfile, String outdir) throws ResourceNotFoundException, IOException {
-        String basepath = StringUtils.substringBeforeLast(acfile, "/");
-        String basename = StringUtils.substringAfterLast(acfile, "/");
+    private static void convertToGltf(String inputfile, String outdir, Optional<String> loaderClass) throws
+            IOException {
+        String basepath = StringUtils.substringBeforeLast(inputfile, "/");
+        String basename = StringUtils.substringAfterLast(inputfile, "/");
         basename = StringUtils.substringBeforeLast(basename, ".");
-        GltfBuilder gltfbuilder = new GltfBuilder(false);
+        GltfBuilder gltfbuilder = new GltfBuilder();
         GltfBuilderResult gltf = null;
         try {
-            gltf = gltfbuilder.process(acfile);
+            AbstractLoaderBuilder customLoader = null;
+            if (loaderClass.isPresent()) {
+                customLoader = buildDynamicLoader(loaderClass.get());
+            }
+            // AC world will be ignored.
+            gltf = gltfbuilder.process(loadBySuffix(inputfile, true, customLoader));
         } catch (InvalidDataException e) {
             System.out.println("InvalidDataException:" + e.getMessage());
             return;
@@ -129,7 +129,7 @@ public class GltfProcessor {
     private static void dumpObject(PortableModelDefinition obj) {
         System.out.println("Node " + obj.name);
         for (int j = 0; j < obj.geolist.size(); j++) {
-            dumpGeo(obj.geolist.get(j), obj.geolistmaterial.get(j) );
+            dumpGeo(obj.geolist.get(j), obj.geolistmaterial.get(j));
         }
         System.out.println("Kids " + obj.kids.size());
         for (int i = 0; i < obj.kids.size(); i++) {
@@ -161,15 +161,14 @@ public class GltfProcessor {
     }
 
     /**
-     * 3.1.19:TODO Methode in anderer Klasse unterbringen
-     *
      * @param outdir
      * @param basename
      * @param json
      * @param bindata
      * @throws IOException
      */
-    public static void writeGltfOutput(String outdir, String basename, String json, byte[] bindata) throws IOException {
+    public static void writeGltfOutput(String outdir, String basename, String json, byte[] bindata) throws
+            IOException {
         String destinationpath = outdir;//basepath + "/" + basename + "-gltf";
         String destfile = destinationpath + "/" + basename + ".gltf";
         //Files.createDirectory(Paths.get(destinationpath));
@@ -180,12 +179,27 @@ public class GltfProcessor {
 
     }
 
+    private static AbstractLoaderBuilder buildDynamicLoader(String loaderClass) {
+        try {
+            Class clazz = Class.forName(loaderClass);
+            Constructor constructor = clazz.getConstructor(new Class[]{});
+            Object instance = constructor.newInstance(new Object[]{});
+            return (AbstractLoaderBuilder) instance;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
-     * 28.12.17: Aus LoaderRegistry hierhin dupliziert.
+     * 28.12.17: Duplicated from LoaderRegistry.
+     * 8.9.23: Using a LoaderRegistry only sounds good. Model loader might have complex setup
+     * (eg. ac texturepath, btg matlib) and the use case often needs to know what type of model
+     * it is loading for providing all needed information.
      *
      * @throws InvalidDataException
      */
-    public static PortableModelList/*21.12.17 de.yard.threed.engine.Loader/*ResourceProcessor*/ findLoaderBySuffix(/*BundleResource file, BundleData ins,*/String filename, boolean ignoreacworld, boolean usematlib) throws InvalidDataException {
+    private static PortableModelList loadBySuffix(String filename, boolean ignoreacworld, AbstractLoaderBuilder customLoader) throws
+            InvalidDataException {
         //String filename = file.getName();
         String extension;// = file.getExtension();
         extension = StringUtils.substringAfterLast(filename, ".");
@@ -194,6 +208,10 @@ public class GltfProcessor {
             ins = new DefaultResourceReader().loadBinaryFile(filename);
         } catch (ResourceNotFoundException e) {
             throw new RuntimeException(e);
+        }
+        if (customLoader != null && customLoader.supports(extension)){
+            AbstractLoader loader = customLoader.buildAbstractLoader(ins);
+            return loader.preProcess();
         }
         if (extension.equals("3ds")) {
             //22.8.21 TODO 3DS plugin
