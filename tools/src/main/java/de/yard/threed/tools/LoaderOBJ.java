@@ -1,15 +1,15 @@
 package de.yard.threed.tools;
 
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.loader.AcToken;
+import de.yard.threed.core.loader.AsciiLoader;
 import de.yard.threed.core.platform.Log;
 
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.loader.AcToken;
-import de.yard.threed.engine.loader.AsciiLoader;
-import de.yard.threed.engine.loader.InvalidDataException;
-import de.yard.threed.engine.loader.LoadedObject;
-import de.yard.threed.engine.platform.common.Face3;
-import de.yard.threed.engine.platform.common.StringReader;
+import de.yard.threed.core.loader.InvalidDataException;
+import de.yard.threed.core.loader.LoadedObject;
+import de.yard.threed.core.geometry.Face3;
+import de.yard.threed.core.loader.StringReader;
 
 import java.util.ArrayList;
 import java.util.List;

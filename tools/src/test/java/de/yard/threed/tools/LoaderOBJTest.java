@@ -3,9 +3,9 @@ package de.yard.threed.tools;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtils;
-import de.yard.threed.engine.loader.LoadedObject;
-import de.yard.threed.engine.platform.common.Face3;
-import de.yard.threed.engine.platform.common.StringReader;
+import de.yard.threed.core.loader.LoadedObject;
+import de.yard.threed.core.geometry.Face3;
+import de.yard.threed.core.loader.StringReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

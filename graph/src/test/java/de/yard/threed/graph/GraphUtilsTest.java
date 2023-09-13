@@ -1,7 +1,7 @@
 package de.yard.threed.graph;
 
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.CustomGeometry;
+import de.yard.threed.core.geometry.CustomGeometry;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.core.MathUtil2;

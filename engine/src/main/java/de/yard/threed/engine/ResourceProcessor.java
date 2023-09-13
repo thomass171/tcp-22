@@ -1,7 +1,7 @@
 package de.yard.threed.engine;
 
 
-import de.yard.threed.engine.loader.AbstractLoader;
+import de.yard.threed.core.loader.AbstractLoader;
 
 /**
  * Created by thomass on 21.12.16.

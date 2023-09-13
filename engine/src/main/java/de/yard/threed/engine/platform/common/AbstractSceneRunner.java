@@ -27,11 +27,10 @@ import de.yard.threed.engine.SceneAnimationController;
 import de.yard.threed.engine.SceneMode;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.ClientBusConnector;
-import de.yard.threed.engine.ecs.DefaultBusConnector;
 import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.engine.loader.InvalidDataException;
+import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.engine.loader.PortableModelBuilder;
-import de.yard.threed.engine.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.engine.loader.SceneLoader;
 import de.yard.threed.engine.platform.*;
 
@@ -444,7 +443,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
             try {
                 sceneLoader = new SceneLoader(sceneExtension0, "");
                 PortableModelList ppfile = sceneLoader.preProcess();
-                PortableModelBuilder pmb = ppfile.createPortableModelBuilder();
+                PortableModelBuilder pmb = new PortableModelBuilder(ppfile);
                 SceneNode node = pmb.buildModel(null);
                 ascene.addToWorld(node);
             } catch (InvalidDataException e) {

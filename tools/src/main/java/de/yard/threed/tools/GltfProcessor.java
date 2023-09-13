@@ -1,16 +1,21 @@
 package de.yard.threed.tools;
 
-import de.yard.threed.engine.AbstractLoaderBuilder;
+import de.yard.threed.core.loader.AbstractLoader;
+import de.yard.threed.core.loader.InvalidDataException;
+import de.yard.threed.core.loader.LoaderAC;
+import de.yard.threed.core.loader.LoaderGLTF;
+import de.yard.threed.core.loader.PortableModelDefinition;
+import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.AbstractLoaderBuilder;
 import de.yard.threed.javacommon.DefaultResourceReader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.ResourceNotFoundException;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.loader.*;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.resource.ResourcePath;
-import de.yard.threed.engine.platform.common.StringReader;
+import de.yard.threed.core.loader.StringReader;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -181,6 +186,7 @@ public class GltfProcessor {
 
     private static AbstractLoaderBuilder buildDynamicLoader(String loaderClass) {
         try {
+            logger.debug("Building loader from " + loaderClass);
             Class clazz = Class.forName(loaderClass);
             Constructor constructor = clazz.getConstructor(new Class[]{});
             Object instance = constructor.newInstance(new Object[]{});
@@ -209,8 +215,8 @@ public class GltfProcessor {
         } catch (ResourceNotFoundException e) {
             throw new RuntimeException(e);
         }
-        if (customLoader != null && customLoader.supports(extension)){
-            AbstractLoader loader = customLoader.buildAbstractLoader(ins);
+        if (customLoader != null && customLoader.supports(extension)) {
+            AbstractLoader loader = customLoader.buildAbstractLoader(ins, filename);
             return loader.preProcess();
         }
         if (extension.equals("3ds")) {

@@ -1,6 +1,7 @@
 package de.yard.threed.engine;
 
-import de.yard.threed.engine.platform.common.FaceList;
+import de.yard.threed.core.geometry.CustomGeometry;
+import de.yard.threed.core.geometry.FaceList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  * 
  * Created by thomass on 23.11.16.
  */
-public class PrimitiveGeometry extends  CustomGeometry {
+public class PrimitiveGeometry extends CustomGeometry {
     public List<FaceList> facelist = new ArrayList<FaceList>();
     
     @Override

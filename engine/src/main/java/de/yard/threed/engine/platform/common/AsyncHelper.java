@@ -2,8 +2,8 @@ package de.yard.threed.engine.platform.common;
 
 import de.yard.threed.core.BuildResult;
 import de.yard.threed.core.Pair;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.buffer.NativeByteBuffer;
+import de.yard.threed.core.loader.LoaderGLTF;
 import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Config;
@@ -15,8 +15,8 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.SceneNode;
 
 
-import de.yard.threed.engine.loader.LoaderGLTF;
-import de.yard.threed.engine.loader.PortableModelList;
+
+import de.yard.threed.core.loader.PortableModelList;
 
 import java.util.ArrayList;
 import java.util.List;

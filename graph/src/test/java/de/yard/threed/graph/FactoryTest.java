@@ -3,7 +3,7 @@ package de.yard.threed.graph;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.Shape;
+import de.yard.threed.core.geometry.Shape;
 import de.yard.threed.engine.avatar.VehicleFactory;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.engine.testutil.EngineTestFactory;

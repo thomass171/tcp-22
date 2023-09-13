@@ -2,11 +2,12 @@ package de.yard.threed.engine.apps;
 
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.loader.PmlFactory;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.Shape;
+import de.yard.threed.core.geometry.Shape;
 import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.engine.loader.PortableMaterial;
-import de.yard.threed.engine.loader.PortableModelDefinition;
+import de.yard.threed.core.loader.PortableMaterial;
+import de.yard.threed.core.loader.PortableModelDefinition;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.util.IntProvider;
 import de.yard.threed.engine.util.RandomIntProvider;
@@ -50,7 +51,7 @@ public class WoodenToyPmlFactory {
         ShapeGeometry box = ShapeGeometry.buildBox(width, height, depth, null);
         // Die Textur kommt erstmal ohne wickeln komplett auf jede Seite. Sie ist ja seamless, so dass dass ausser bei Front/Back
         // gut passen muesste.
-        return PmlFactory.buildElement(box, matname);
+        return de.yard.threed.engine.loader.PmlFactory.buildElement(box, matname);
     }
 
     /**
@@ -60,7 +61,7 @@ public class WoodenToyPmlFactory {
      */
     public PortableModelDefinition buildCylinder(double radius, double depth, String matname) {
         ShapeGeometry box = ShapeGeometry.buildCylinder(radius, depth);
-        return PmlFactory.buildElement(box, matname);
+        return de.yard.threed.engine.loader.PmlFactory.buildElement(box, matname);
     }
 
 
@@ -79,7 +80,7 @@ public class WoodenToyPmlFactory {
         //SceneNode m = new SceneNode(mesh);
         //mesh.rotateZ(new Degree(90));
         //m.add(mesh);
-        return PmlFactory.buildElement(geometry, matname);
+        return de.yard.threed.engine.loader.PmlFactory.buildElement(geometry, matname);
     }
 
     /**
@@ -113,7 +114,7 @@ public class WoodenToyPmlFactory {
         shape.addPoint(new Vector2(innerradius, -height2), true);
         shape.addPoint(new Vector2(0, -height2), false);
         ShapeGeometry chimney = ShapeGeometry.buildByCircleRotation(shape, 64);
-        PortableModelDefinition e = PmlFactory.buildElement(chimney, matname);
+        PortableModelDefinition e = de.yard.threed.engine.loader.PmlFactory.buildElement(chimney, matname);
         e.setName("Chimney");
         return e;
     }

@@ -45,12 +45,6 @@
             <artifactId>module-graph</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        <!-- engine ist needed for GLTF builder. A design issue?-->
-        <dependency>
-            <groupId>de.yard.tcp-22</groupId>
-            <artifactId>module-engine</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
         <!-- tests wegen z.B. ModelAssertions-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>

@@ -1,6 +1,7 @@
 package de.yard.threed.engine;
 
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.geometry.Shape;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.testutil.TestUtils;

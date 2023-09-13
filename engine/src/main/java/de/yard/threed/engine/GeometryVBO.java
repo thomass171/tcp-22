@@ -1,7 +1,7 @@
 package de.yard.threed.engine;
 
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.platform.common.Face3;
+import de.yard.threed.core.geometry.Face3;
 import de.yard.threed.core.platform.Log;
 
 import java.util.ArrayList;

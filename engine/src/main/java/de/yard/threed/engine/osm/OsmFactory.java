@@ -2,13 +2,13 @@ package de.yard.threed.engine.osm;
 
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.geometry.Shape;
 import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.NativeElement;
 import de.yard.threed.core.platform.NativeNodeList;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.engine.platform.*;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.XmlException;

@@ -1,9 +1,9 @@
 package de.yard.threed.tools.testutil;
 
-import de.yard.threed.engine.AbstractLoaderBuilder;
-import de.yard.threed.engine.loader.AbstractLoader;
-import de.yard.threed.engine.loader.InvalidDataException;
-import de.yard.threed.engine.platform.common.StringReader;
+import de.yard.threed.core.loader.AbstractLoaderBuilder;
+import de.yard.threed.core.loader.AbstractLoader;
+import de.yard.threed.core.loader.InvalidDataException;
+import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.tools.LoaderOBJ;
 
 public class LoaderOBJBuilderForTest implements AbstractLoaderBuilder {
@@ -23,7 +23,7 @@ public class LoaderOBJBuilderForTest implements AbstractLoaderBuilder {
     }
 
     @Override
-    public AbstractLoader buildAbstractLoader(byte[] data) throws InvalidDataException {
+    public AbstractLoader buildAbstractLoader(byte[] data, String filenameForInfo) throws InvalidDataException {
         return new LoaderOBJ(new StringReader(new String(data)));
     }
 }

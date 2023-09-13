@@ -1,5 +1,7 @@
 package de.yard.threed.engine.loader;
 
+import de.yard.threed.core.FloatHolder;
+
 /**
  * Created by thomass on 04.04.16.
  */

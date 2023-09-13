@@ -2,23 +2,34 @@ package de.yard.threed.engine.loader;
 
 import de.yard.threed.core.Color;
 import de.yard.threed.core.ColorType;
+import de.yard.threed.core.NumericType;
+import de.yard.threed.core.NumericValue;
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.loader.PortableMaterial;
+import de.yard.threed.core.loader.PortableModelDefinition;
+import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.NativeGeometry;
 import de.yard.threed.core.platform.NativeMaterial;
+import de.yard.threed.core.platform.NativeTexture;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
+import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.resource.ResourcePath;
+
+import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.engine.GenericGeometry;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.PerspectiveCamera;
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.Texture;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +40,7 @@ import java.util.List;
  */
 public class PortableModelBuilder {
 
-    Log logger = Platform.getInstance().getLog(PortableModelBuilder.class);
+    static Log logger = Platform.getInstance().getLog(PortableModelBuilder.class);
     // Material, das verwendet wird, wenn das eigentlich definierte nicht bekannt ist
     private NativeMaterial dummyMaterial;
 
@@ -75,7 +86,7 @@ public class PortableModelBuilder {
             rootnode.setName(pml.getName());
         }
         for (int i = 0; i < pml.getObjectCount(); i++) {
-           SceneNode newModel = buildModel(bundle, pml.getObject(i), alttexturepath);
+            SceneNode newModel = buildModel(bundle, pml.getObject(i), alttexturepath);
             String parent = pml.getParent(i);
             SceneNode destinationNode = rootnode;
             if (parent != null) {
@@ -84,7 +95,7 @@ public class PortableModelBuilder {
                 PerspectiveCamera perspectiveCamera = new PerspectiveCamera(camera);
                 destinationNode = perspectiveCamera.getCarrier();
                 // attach to carrier will propagate layer. newModel.getTransform().setLayer(perspectiveCamera.getLayer());
-                logger.debug("found parent camera with layer "+perspectiveCamera.getLayer());
+                logger.debug("found parent camera with layer " + perspectiveCamera.getLayer());
             }
             destinationNode.attach(newModel);
         }
@@ -184,7 +195,7 @@ public class PortableModelBuilder {
         if (portableMaterial != null) {
             //Auf AC zugeschnitten, denn nur die(?) haben die Textur am Object.
             //22.12.17: Darum jetzt bevorzugt den Texturename aus dem Material.
-            Material ma = PortableMaterial.buildMaterial(bundle, portableMaterial, /*3.5.19(portableMaterial.texture != null) ? */portableMaterial.texture/*3.5.19 : objtexture*/, texturebasepath, hasnormals);
+            Material ma = /*PortableMaterial.*/buildMaterial(bundle, portableMaterial, /*3.5.19(portableMaterial.texture != null) ? */portableMaterial.texture/*3.5.19 : objtexture*/, texturebasepath, hasnormals);
             if (ma == null) {
                 logger.warn("No material. Using dummy material.");
                 nmat = getDummyMaterial();
@@ -220,6 +231,82 @@ public class PortableModelBuilder {
             i++;
         }
         return mainsn;
+    }
+
+    /**
+     * 27.12.17: public static, um allgemeingueltig aus einem LoadedMaterial ein Material zu machen. War frueher in LoadedFile.
+     * 30.12.18: Um eine Textur zu laden, brauchts das Bundle, den path und den Namen. Auch einen absoluten Pfad im Texturename
+     * in Form von "bundle:/xx/yy/zz.png" zulassen.
+     * <p>
+     * Returns mull, wenn bei Texturen Bundle oder Path fehlen. Aufrufer kann DummyMaterial verwenden oder auch keins (wird dann wireframe).
+     *
+     * @param mat
+     * @param texturename
+     * @param texturebasepath
+     * @return
+     */
+    public /*10.4.17*/ static /*Native*/Material buildMaterial(Bundle bundle, PortableMaterial mat, String texturename, ResourcePath texturebasepath, boolean hasnormals) {
+        NativeMaterial nmat;
+        //SHADED ist der Defasult
+        HashMap<NumericType, NumericValue> parameters = new HashMap<NumericType, NumericValue>();
+        if (!mat.shaded) {
+            parameters.put(NumericType.SHADING, new NumericValue(NumericValue.UNSHADED));
+        } else {
+            if (!hasnormals) {
+                parameters.put(NumericType.SHADING, new NumericValue(NumericValue.FLAT));
+            }
+        }
+
+        if (texturename != null) {
+            /*21.12.16 nicht mehr noetig wegen ResourcePath if (texturebasepath == null) {
+                texturebasepath = ".";
+            }*/
+            if (StringUtils.contains(texturename, ":")) {
+                int index = StringUtils.indexOf(texturename, ":");
+                bundle = BundleRegistry.getBundle(StringUtils.substring(texturename, 0, index));
+                texturebasepath = null;
+                texturename = StringUtils.substring(texturename, index + 1);
+            } else {
+                if (texturebasepath == null) {
+                    logger.warn("no texturebasepath. Not building material.");
+                    return null;
+                }
+            }
+            Texture texture;
+            HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
+
+            if (bundle != null) {
+                BundleResource br = new BundleResource(texturebasepath, texturename);
+                br.bundle = bundle;
+                texture = Texture.buildBundleTexture(br, mat.wraps, mat.wrapt);
+                if (texture.texture == null) {
+                    // 13.9.23: Better to log this
+                    logger.warn("failed to build texture from " + texturename + " at " + texturebasepath);
+                    texturename = texturename;
+                }
+                map.put("basetex", texture.texture);
+
+            } else {
+                // 26.4.17: Das bundle muss gesetzt sein.
+                logger.error("bundle not set");
+                NativeResource textureresource;
+                //textureresource = new FileSystemResource(texturebasepath, texturename);
+                //texture = new Texture(textureresource, mat.wraps, mat.wrapt);
+            }
+            //map.put("normalmap",normalmap.texture);
+            //TODO die anderen Materialparameter
+            nmat = Platform.getInstance().buildMaterial(null, null, map, parameters, null);
+        } else {
+            HashMap<ColorType, Color> color = new HashMap<ColorType, Color>();
+            color.put(ColorType.MAIN, mat.color);
+            //TODO die restlichen colors
+            // 25.4.19 unshaded wird oben zwar schon eingetragen, aber nicht immer. "shaded" ist eh etwas unklar. Auf jeden Fall bleibt ein Material mit Color in JME sonst schwarz.
+            //Darum erstmal immer setzen, bis klar ist, was mit Property "shaded" ist. 28.4.19: Das ist aber doof, nur weil JME die combination shaded/ambientLight schwarz darstellt.
+            //Evtl. wegen Normale?
+            //parameters.put(NumericType.UNSHADED, new NumericValue(1));
+            nmat = Platform.getInstance().buildMaterial(null, color, null, parameters, null);
+        }
+        return new Material(nmat);
     }
 
     /**

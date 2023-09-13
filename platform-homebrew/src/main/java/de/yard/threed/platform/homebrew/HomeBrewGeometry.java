@@ -3,7 +3,7 @@ package de.yard.threed.platform.homebrew;
 import de.yard.threed.core.Vector2Array;
 import de.yard.threed.core.Vector3Array;
 import de.yard.threed.core.platform.NativeGeometry;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 /**
  * Created by thomass on 29.01.16.

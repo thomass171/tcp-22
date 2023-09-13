@@ -5,9 +5,9 @@ import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 
 import de.yard.threed.engine.apps.WoodenToyPmlFactory;
-import de.yard.threed.engine.loader.PortableMaterial;
-import de.yard.threed.engine.loader.PortableModelDefinition;
-import de.yard.threed.engine.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableMaterial;
+import de.yard.threed.core.loader.PortableModelDefinition;
+import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.Color;
 
 

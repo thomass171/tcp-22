@@ -116,13 +116,19 @@ public class BundleResource implements NativeResource {
 
     public String getFullQualifiedName() {
         String b = bundlename;
-        if (b == null) {
+        if (b == null && bundle != null) {
             b = bundle.name;
         }
-        if (path != null && path.path != null && StringUtils.length(path.path) > 0) {
-            return b + ":" + path.path + "/" + name;
+        if (b == null) {
+            // neither set ??
+            b = "";
+        } else {
+            b += ":";
         }
-        return b + ":" + name;
+        if (path != null && path.path != null && StringUtils.length(path.path) > 0) {
+            return b + path.path + "/" + name;
+        }
+        return b + name;
     }
 
     /**

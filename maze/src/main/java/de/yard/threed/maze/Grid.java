@@ -2,10 +2,8 @@ package de.yard.threed.maze;
 
 
 import de.yard.threed.core.Point;
-import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.platform.common.StringReader;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -3,14 +3,19 @@ package de.yard.threed.engine.apps;
 
 
 import de.yard.threed.core.*;
+import de.yard.threed.core.geometry.Face;
+import de.yard.threed.core.geometry.Face3;
+import de.yard.threed.core.geometry.Face3List;
+import de.yard.threed.core.geometry.FaceList;
+import de.yard.threed.core.loader.PmlFactory;
+import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.geometry.GeometryHelper;
+import de.yard.threed.core.geometry.GeometryHelper;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.loader.PortableMaterial;
-import de.yard.threed.engine.loader.PortableModelDefinition;
-import de.yard.threed.engine.loader.PortableModelList;
-import de.yard.threed.engine.platform.common.*;
+import de.yard.threed.core.loader.PortableMaterial;
+import de.yard.threed.core.loader.PortableModelDefinition;
+import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.NativeMaterial;
 

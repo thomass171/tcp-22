@@ -3,9 +3,9 @@ package de.yard.threed.engine.gui;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.engine.geometry.Primitives;
+import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.core.Color;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 /**
  * A green/red indicator light that can be switched on/off

@@ -56,7 +56,7 @@ public class Setup {
         //18.11.19: NearView geht in VR eh nicht, darum damit üblicherweise auch sonst nicht arbeiten.
         //properties.put("argv.enableNearView", "true");
         properties.put("initialMaze", "skbn/SokobanWikipedia.txt");
-        //properties.put("initialMaze", "maze/Maze-P-Simple.txt");
+        properties.put("initialMaze", "maze/Maze-P-Simple.txt");
         //properties.put("initialMaze", "maze/Maze-D-80x25.txt");
         //properties.put("initialMaze", mazeshost + "/mazes/mazes/1");
         //properties.put("argv.initialMaze", "maze/Maze-P-60x20.txt");
@@ -68,7 +68,7 @@ public class Setup {
         //properties.put("server", "localhost:5890");
         //properties.put("server", "192.168.98.151:5890");
 
-        properties.put("theme", "dungeon");
+        //properties.put("theme", "dungeon");
         //properties.put("theme", "dungeon-art");
         //properties.put("teamSize", "1");
 
@@ -80,10 +80,10 @@ public class Setup {
 
         properties.put("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
         //System.setProperty("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
-        //properties.put("scene", "de.yard.threed.maze.MazeScene");
+        properties.put("scene", "de.yard.threed.maze.MazeScene");
         //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
         //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
-        properties.put("scene", "de.yard.threed.engine.apps.FirstPersonScene");
+       // properties.put("scene", "de.yard.threed.engine.apps.FirstPersonScene");
 
         boolean testFireTargetMarker = false;
         if (testFireTargetMarker) {

@@ -1,6 +1,8 @@
 package de.yard.threed.engine.gui;
 
 import de.yard.threed.core.*;
+import de.yard.threed.core.geometry.ProportionalUvMap;
+import de.yard.threed.core.geometry.UvMap1;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;

@@ -67,9 +67,10 @@ package de.yard.threed.engine;
 
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.engine.platform.common.Face;
-import de.yard.threed.engine.platform.common.FaceList;
-import de.yard.threed.engine.platform.common.FaceN;
+import de.yard.threed.core.geometry.CustomGeometry;
+import de.yard.threed.core.geometry.Face;
+import de.yard.threed.core.geometry.FaceList;
+import de.yard.threed.core.geometry.FaceN;
 import de.yard.threed.core.MathUtil2;
 
 import java.util.ArrayList;

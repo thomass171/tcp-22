@@ -3,18 +3,21 @@ package de.yard.threed.engine;
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.geometry.Shape;
+import de.yard.threed.core.geometry.Surface;
+import de.yard.threed.core.geometry.UvMap1;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.engine.geometry.ShapeSurface;
+import de.yard.threed.core.geometry.ShapeSurface;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
-import de.yard.threed.engine.platform.common.Face;
-import de.yard.threed.engine.platform.common.Face3;
-import de.yard.threed.engine.platform.common.Face3List;
-import de.yard.threed.engine.platform.common.FaceN;
+import de.yard.threed.core.geometry.Face;
+import de.yard.threed.core.geometry.Face3;
+import de.yard.threed.core.geometry.Face3List;
+import de.yard.threed.core.geometry.FaceN;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 
 
-import de.yard.threed.engine.geometry.GeometryHelper;
+import de.yard.threed.core.geometry.GeometryHelper;
 import de.yard.threed.engine.test.testutil.ShapedGeometryTestHelper;
 import de.yard.threed.engine.test.testutil.TestUtil;
 import de.yard.threed.engine.test.testutil.TinyPlane;

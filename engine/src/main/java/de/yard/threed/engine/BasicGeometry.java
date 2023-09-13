@@ -2,8 +2,9 @@ package de.yard.threed.engine;
 
 
 import de.yard.threed.core.Vector3;
-import de.yard.threed.engine.platform.common.FaceList;
-import de.yard.threed.engine.platform.common.SmartArrayList;
+import de.yard.threed.core.geometry.CustomGeometry;
+import de.yard.threed.core.geometry.FaceList;
+import de.yard.threed.core.SmartArrayList;
 
 import java.util.List;
 

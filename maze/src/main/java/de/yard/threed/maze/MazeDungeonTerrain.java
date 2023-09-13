@@ -6,8 +6,8 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
-import de.yard.threed.engine.platform.common.SimpleGeometryBuilder;
+import de.yard.threed.core.geometry.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometryBuilder;
 
 /**
  * 3D visualization of a maze. This is a dungeon grid where

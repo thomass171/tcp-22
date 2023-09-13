@@ -4,7 +4,7 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.platform.common.StringReader;
+import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.core.StringUtils;
 
 import java.util.ArrayList;

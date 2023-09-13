@@ -23,13 +23,14 @@ import de.yard.threed.engine.SceneMode;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.avatar.AvatarPmlFactory;
 import de.yard.threed.engine.avatar.VehiclePmlFactory;
-import de.yard.threed.engine.geometry.Primitives;
+import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.gui.Hud;
-import de.yard.threed.engine.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.engine.loader.PortableModelBuilder;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 /**
  * A simple model preview scene.
@@ -198,7 +199,7 @@ public class ModelPreviewScene extends Scene {
                 } else {
                     throw new RuntimeException("unknown pcm model " + modelname);
                 }
-                SceneNode node = pml.createPortableModelBuilder().buildModel(null, null);
+                SceneNode node = new PortableModelBuilder(pml).buildModel(null, null);
                 result = new BuildResult(node.nativescenenode);
             } else {
                 Bundle bundle = BundleRegistry.getBundle(bundlename);

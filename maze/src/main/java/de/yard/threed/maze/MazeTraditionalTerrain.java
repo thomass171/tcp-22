@@ -1,10 +1,7 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.*;
-import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
-import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.core.platform.Log;
 
 import java.util.HashMap;
 import java.util.Map;

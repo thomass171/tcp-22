@@ -1,14 +1,17 @@
 package de.yard.threed.engine;
 
+import de.yard.threed.core.loader.LoaderAC;
+import de.yard.threed.core.loader.PortableModelDefinition;
+import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.apps.ModelSamples;
 import de.yard.threed.engine.loader.*;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.EngineTestFactory;
-import de.yard.threed.engine.platform.common.FaceList;
-import de.yard.threed.engine.platform.common.FaceN;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
-import de.yard.threed.engine.platform.common.StringReader;
+import de.yard.threed.core.geometry.FaceList;
+import de.yard.threed.core.geometry.FaceN;
+import de.yard.threed.core.geometry.SimpleGeometry;
+import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.engine.test.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
 import org.junit.jupiter.api.Test;
@@ -92,7 +95,7 @@ public class LoaderTest {
     @Test
     public void testPortableModelList() {
         PortableModelList needle = ModelSamples.buildCompassNeedle(20, 30);
-        SceneNode n = needle.createPortableModelBuilder().buildModel(null);
+        SceneNode n = new PortableModelBuilder(needle).buildModel(null);
         TestUtil.assertEquals("needle.name", "CompassNeedle", n.getName());
     }
 

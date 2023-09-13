@@ -1,8 +1,9 @@
 package de.yard.threed.engine;
 
+import de.yard.threed.core.geometry.CustomGeometry;
 import de.yard.threed.core.platform.*;
 
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 /**
  * Ein Mesh entsteht aus einer Geometry und darauf gelegten Oberflaechen/Materialien.

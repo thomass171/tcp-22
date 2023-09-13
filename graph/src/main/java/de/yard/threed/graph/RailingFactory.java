@@ -6,14 +6,14 @@ import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.engine.CustomGeometry;
+import de.yard.threed.core.geometry.CustomGeometry;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
-import de.yard.threed.engine.ProportionalUvMap;
+import de.yard.threed.core.geometry.ProportionalUvMap;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.engine.Shape;
+import de.yard.threed.core.geometry.Shape;
 import de.yard.threed.engine.Texture;
-import de.yard.threed.engine.UvMap1;
+import de.yard.threed.core.geometry.UvMap1;
 import de.yard.threed.engine.avatar.VehicleFactory;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 

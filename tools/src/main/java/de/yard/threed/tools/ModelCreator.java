@@ -2,10 +2,10 @@ package de.yard.threed.tools;
 
 
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.ModelCreateException;
-import de.yard.threed.engine.ProceduralModelCreator;
+import de.yard.threed.core.geometry.ModelCreateException;
+import de.yard.threed.core.geometry.ProceduralModelCreator;
 
-import de.yard.threed.engine.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.platform.Log;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

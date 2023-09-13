@@ -3,10 +3,11 @@ package de.yard.threed.engine;
 
 import de.yard.threed.core.Vector3;
 
-import de.yard.threed.engine.geometry.GeometryHelper;
+import de.yard.threed.core.geometry.CustomGeometry;
+import de.yard.threed.core.geometry.GeometryHelper;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.engine.platform.EngineHelper;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 import java.util.List;
 

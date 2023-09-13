@@ -3,15 +3,15 @@ package de.yard.threed.engine.avatar;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.engine.Shape;
-import de.yard.threed.engine.apps.PmlFactory;
+import de.yard.threed.core.geometry.Shape;
+import de.yard.threed.core.loader.PmlFactory;
 import de.yard.threed.engine.apps.WoodenToyPmlFactory;
-import de.yard.threed.engine.geometry.Primitives;
+import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.engine.loader.PortableMaterial;
-import de.yard.threed.engine.loader.PortableModelDefinition;
-import de.yard.threed.engine.loader.PortableModelList;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.loader.PortableMaterial;
+import de.yard.threed.core.loader.PortableModelDefinition;
+import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 /**
  * Factory for building avatar models as PML.
@@ -59,7 +59,7 @@ public class AvatarPmlFactory {
         shape.addPoint(new Vector2(bottomRadius, -height2), true);
         shape.addPoint(new Vector2(0, -height2), false);
         ShapeGeometry geo = ShapeGeometry.buildByCircleRotation(shape, 64);
-        PortableModelDefinition e = PmlFactory.buildElement(geo, matname);
+        PortableModelDefinition e = de.yard.threed.engine.loader.PmlFactory.buildElement(geo, matname);
         e.setName("Body");
         return e;
     }

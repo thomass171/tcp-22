@@ -3,9 +3,9 @@ package de.yard.threed.engine.gui;
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleRegistry;
-import de.yard.threed.engine.ProportionalUvMap;
+import de.yard.threed.core.geometry.ProportionalUvMap;
 import de.yard.threed.engine.Texture;
-import de.yard.threed.engine.UvMap1;
+import de.yard.threed.core.geometry.UvMap1;
 import de.yard.threed.core.platform.Log;
 
 import java.util.HashMap;

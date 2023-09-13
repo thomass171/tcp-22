@@ -3,24 +3,21 @@ package de.yard.threed.engine.loader;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.ParsingHelper;
 import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Vector2Array;
-import de.yard.threed.core.Vector3Array;
-import de.yard.threed.core.buffer.NativeByteBuffer;
-import de.yard.threed.core.platform.Config;
+import de.yard.threed.core.loader.AsciiLoader;
+import de.yard.threed.core.loader.InvalidDataException;
+import de.yard.threed.core.loader.PortableMaterial;
+import de.yard.threed.core.loader.PortableModelDefinition;
+import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeJsonArray;
 import de.yard.threed.core.platform.NativeJsonObject;
 import de.yard.threed.core.platform.NativeJsonString;
 import de.yard.threed.core.platform.NativeJsonValue;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.ResourcePath;
-import de.yard.threed.engine.geometry.Primitives;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.Primitives;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * AsciiLoader just because the origin is ASCII. Needs a JSON Parser and lineno likely cannot be used.

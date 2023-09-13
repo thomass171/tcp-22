@@ -1,10 +1,10 @@
 package de.yard.threed.tools;
 
+import de.yard.threed.core.loader.LoaderGLTF;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
 
-import de.yard.threed.engine.loader.InvalidDataException;
-import de.yard.threed.engine.loader.LoaderGLTF;
+import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.platform.NativeJsonValue;
 import de.yard.threed.core.testutil.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -24,7 +24,7 @@ public class ModelCreatorTest {
         for (String primitive : new String[]{"plane", "sphere"}) {
             GltfBuilderResult result = null;
             try {
-                result = ModelCreator.createModel("plane-darkGreen", "de.yard.threed.engine.geometry.PrimitiveCreator", new String[]{primitive, "darkGreen"});
+                result = ModelCreator.createModel("plane-darkGreen", "de.yard.threed.core.geometry.PrimitiveCreator", new String[]{primitive, "darkGreen"});
             } catch (Exception e) {
                 e.printStackTrace();
                 Assert.fail(e.getMessage());

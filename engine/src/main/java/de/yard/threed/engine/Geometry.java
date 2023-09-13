@@ -1,7 +1,7 @@
 package de.yard.threed.engine;
 
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.geometry.Primitives;
+import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeGeometry;
 import de.yard.threed.core.MathUtil2;

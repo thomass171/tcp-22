@@ -39,6 +39,7 @@ import java.util.List;
  * Or the class hierarchy is confusing? Jme extends it and replaces may things. Maybe a component based approavh is better
  * for sharing coommon Java elements like {@link JavaSocket}.
  * Because its used for testing in "engine", a simple node tree (incl mesh) is useful indeed.
+ * 13.9.23: Also material and texture.
  * <p>
  * Created on 05.12.18.
  */
@@ -121,7 +122,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     public NativeMesh buildNativeMesh(NativeGeometry nativeGeometry, NativeMaterial material, boolean castShadow, boolean receiveShadow) {
-        return new DummyMesh();
+        return new DummyMesh(material);
     }
 
     @Override
@@ -143,6 +144,16 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     @Override
     public NativeCamera buildPerspectiveCamera(double fov, double aspect, double near, double far) {
         return new DummyCamera(fov, aspect, near, far);
+    }
+
+    @Override
+    public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameters, Object effect) {
+        return new DummyMaterial(name);
+    }
+
+    @Override
+    public NativeTexture buildNativeTexture(BundleResource filename, HashMap<NumericType, NumericValue> parameters) {
+        return new DummyTexture(filename.getFullQualifiedName());
     }
 
     @Override
@@ -263,6 +274,7 @@ class DummySceneNode implements NativeSceneNode {
     String name;
     private static int uniqueId = 1000;
     private int id = uniqueId++;
+    private NativeMesh mesh;
 
     DummySceneNode() {
         transform = new DummyTransform(this);
@@ -271,12 +283,12 @@ class DummySceneNode implements NativeSceneNode {
 
     @Override
     public void setMesh(NativeMesh mesh) {
-
+        this.mesh = mesh;
     }
 
     @Override
     public NativeMesh getMesh() {
-        return null;
+        return mesh;
     }
 
     @Override
@@ -449,9 +461,15 @@ class DummyTransform implements NativeTransform {
 
 class DummyMesh implements NativeMesh {
 
+    NativeMaterial material;
+
+    DummyMesh(NativeMaterial material) {
+        this.material = material;
+    }
+
     @Override
     public NativeMaterial getMaterial() {
-        return null;
+        return material;
     }
 
     @Override
@@ -590,7 +608,47 @@ class DummyScene implements NativeScene {
         //return new Dimension(300,200);
         return null;
     }
+}
 
+class DummyMaterial implements NativeMaterial {
 
+    String name;
+
+    DummyMaterial(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void setTransparency(boolean enabled) {
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public NativeTexture[] getMaps() {
+        return new NativeTexture[0];
+    }
+}
+
+class DummyTexture implements NativeTexture {
+
+    String name;
+
+    DummyTexture(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }
 

@@ -2,26 +2,23 @@ package de.yard.threed.engine;
 
 
 import de.yard.threed.core.*;
+import de.yard.threed.core.geometry.Face;
+import de.yard.threed.core.geometry.Face3;
+import de.yard.threed.core.geometry.Face3List;
+import de.yard.threed.core.geometry.FaceList;
+import de.yard.threed.core.geometry.GeometryHelper;
+import de.yard.threed.core.geometry.Primitives;
+import de.yard.threed.core.geometry.Shape;
+import de.yard.threed.core.geometry.SimpleGeometry;
+import de.yard.threed.core.geometry.SmoothingHelper;
+import de.yard.threed.core.geometry.SmoothingMap;
+import de.yard.threed.core.geometry.Surface;
+import de.yard.threed.core.loader.LoadedObject;
+import de.yard.threed.core.loader.LoaderAC;
+import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.apps.WoodenToyFactory;
 import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.engine.geometry.Primitives;
-
-
-import de.yard.threed.engine.loader.*;
-
-
-import de.yard.threed.engine.platform.common.Face;
-import de.yard.threed.engine.platform.common.Face3;
-import de.yard.threed.engine.platform.common.Face3List;
-import de.yard.threed.engine.platform.common.FaceList;
-import de.yard.threed.engine.geometry.GeometryHelper;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
-import de.yard.threed.engine.platform.common.SmartArrayList;
-import de.yard.threed.engine.geometry.SmoothingHelper;
-import de.yard.threed.engine.geometry.SmoothingMap;
-
-import de.yard.threed.engine.platform.common.StringReader;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.test.testutil.TestUtil;

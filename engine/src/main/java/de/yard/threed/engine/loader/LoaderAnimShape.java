@@ -4,10 +4,13 @@ package de.yard.threed.engine.loader;
  * Created by thomass on 08.03.16.
  */
 
+import de.yard.threed.core.loader.AcToken;
+import de.yard.threed.core.loader.AsciiLoader;
+import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.Shape;
+import de.yard.threed.core.geometry.Shape;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.platform.common.StringReader;
+import de.yard.threed.core.loader.StringReader;
 
 import java.util.HashMap;
 

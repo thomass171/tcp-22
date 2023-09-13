@@ -1,8 +1,9 @@
 package de.yard.threed.engine.loader;
 
 import de.yard.threed.core.Vector2;
-import de.yard.threed.engine.platform.common.Face;
-import de.yard.threed.engine.platform.common.Face3;
+import de.yard.threed.core.geometry.Face;
+import de.yard.threed.core.geometry.Face3;
+import de.yard.threed.core.loader.LoadedObject;
 
 import java.util.ArrayList;
 import java.util.List;

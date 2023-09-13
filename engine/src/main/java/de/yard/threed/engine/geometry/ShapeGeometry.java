@@ -1,29 +1,32 @@
 package de.yard.threed.engine.geometry;
 
 
+import de.yard.threed.core.SmartArrayList;
+import de.yard.threed.core.geometry.CustomGeometry;
+import de.yard.threed.core.geometry.Face;
+import de.yard.threed.core.geometry.Face3;
+import de.yard.threed.core.geometry.FaceList;
+import de.yard.threed.core.geometry.FaceN;
+import de.yard.threed.core.geometry.ShapeSurface;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.CircleExtruder;
-import de.yard.threed.engine.CustomGeometry;
+
 import de.yard.threed.core.Degree;
 import de.yard.threed.engine.Extruder;
 import de.yard.threed.engine.GridSurface;
 import de.yard.threed.engine.Path;
 import de.yard.threed.engine.PathExtruder;
 import de.yard.threed.engine.SegmentedPath;
-import de.yard.threed.engine.Shape;
+import de.yard.threed.core.geometry.Shape;
 import de.yard.threed.engine.ShapeFactory;
-import de.yard.threed.engine.Surface;
+import de.yard.threed.core.geometry.Surface;
 import de.yard.threed.core.Util;
-import de.yard.threed.engine.UvMap1;
+import de.yard.threed.core.geometry.UvMap1;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.engine.platform.common.Face;
-import de.yard.threed.engine.platform.common.Face3;
-import de.yard.threed.engine.platform.common.FaceN;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.platform.common.FaceList;
 import de.yard.threed.core.MathUtil2;
-import de.yard.threed.engine.platform.common.SmartArrayList;
+
 
 import java.util.ArrayList;
 import java.util.List;

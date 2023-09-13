@@ -8,12 +8,12 @@ import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.NativeNodeList;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.BasicGeometry;
-import de.yard.threed.engine.CustomGeometry;
+import de.yard.threed.core.geometry.CustomGeometry;
 import de.yard.threed.engine.XmlDocument;
-import de.yard.threed.engine.geometry.IndexList;
+import de.yard.threed.core.geometry.IndexList;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.platform.common.Face3;
-import de.yard.threed.engine.platform.common.FaceList;
+import de.yard.threed.core.geometry.Face3;
+import de.yard.threed.core.geometry.FaceList;
 import de.yard.threed.engine.util.XmlHelper;
 
 

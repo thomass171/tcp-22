@@ -1,6 +1,9 @@
 package de.yard.threed.engine;
 
 import de.yard.threed.core.Vector2;
+import de.yard.threed.core.geometry.ProportionalUvMap;
+import de.yard.threed.core.geometry.Rectangle;
+import de.yard.threed.core.geometry.UvMap1;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.gui.Icon;

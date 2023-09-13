@@ -9,7 +9,7 @@ import de.yard.threed.core.platform.NativeJsonValue;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.DataProvider;
 import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.engine.platform.common.StringReader;
+import de.yard.threed.core.loader.StringReader;
 
 import java.util.List;
 

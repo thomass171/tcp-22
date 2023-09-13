@@ -2,7 +2,7 @@ package de.yard.threed.engine.test.testutil;
 
 
 import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.engine.UvMap1;
+import de.yard.threed.core.geometry.UvMap1;
 
 /**
  * Date: 31.05.14

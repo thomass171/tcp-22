@@ -1,9 +1,9 @@
 package de.yard.threed.engine.apps;
 
 
-import de.yard.threed.engine.ProceduralModelCreator;
+import de.yard.threed.core.geometry.ProceduralModelCreator;
 import de.yard.threed.engine.avatar.VehiclePmlFactory;
-import de.yard.threed.engine.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModelList;
 
 /**
  * Used by reflection!

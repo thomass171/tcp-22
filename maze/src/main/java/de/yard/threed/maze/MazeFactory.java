@@ -1,11 +1,6 @@
 package de.yard.threed.maze;
 
 import de.yard.threed.core.Point;
-import de.yard.threed.engine.SceneNode;
-import de.yard.threed.engine.avatar.AvatarPmlFactory;
-import de.yard.threed.engine.loader.PortableMaterial;
-import de.yard.threed.engine.loader.PortableModelDefinition;
-import de.yard.threed.engine.loader.PortableModelList;
 
 import java.util.ArrayList;
 import java.util.List;

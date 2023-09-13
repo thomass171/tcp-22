@@ -5,8 +5,8 @@ import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.core.Vector3Array;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.testutil.RuntimeTestUtil;
-import de.yard.threed.engine.platform.common.Face3;
-import de.yard.threed.engine.platform.common.FaceN;
+import de.yard.threed.core.geometry.Face3;
+import de.yard.threed.core.geometry.FaceN;
 
 
 /**

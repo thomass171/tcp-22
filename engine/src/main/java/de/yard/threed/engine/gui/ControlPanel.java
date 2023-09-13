@@ -3,13 +3,14 @@ package de.yard.threed.engine.gui;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.geometry.ProportionalUvMap;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
-import de.yard.threed.engine.geometry.Primitives;
+import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.core.platform.NativeCollision;
 import de.yard.threed.core.DimensionF;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 import java.util.ArrayList;
 import java.util.List;

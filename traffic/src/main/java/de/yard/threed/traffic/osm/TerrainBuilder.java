@@ -1,10 +1,9 @@
 package de.yard.threed.traffic.osm;
 
 import de.yard.threed.core.MathUtil2;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.BasicGeometry;
-import de.yard.threed.engine.CustomGeometry;
+import de.yard.threed.core.geometry.CustomGeometry;
 import de.yard.threed.core.Degree;
 import de.yard.threed.engine.GenericGeometry;
 import de.yard.threed.engine.Material;
@@ -21,8 +20,8 @@ import de.yard.threed.graph.GraphPathSegment;
 import de.yard.threed.core.platform.Log;
 
 import de.yard.threed.core.Color;
-import de.yard.threed.engine.platform.common.FaceList;
-import de.yard.threed.engine.platform.common.FaceN;
+import de.yard.threed.core.geometry.FaceList;
+import de.yard.threed.core.geometry.FaceN;
 
 import java.util.ArrayList;
 import java.util.List;

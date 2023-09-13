@@ -1,5 +1,6 @@
 package de.yard.threed.engine.apps;
 
+import de.yard.threed.core.geometry.Shape;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.core.Color;

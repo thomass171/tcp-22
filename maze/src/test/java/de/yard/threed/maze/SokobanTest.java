@@ -6,7 +6,7 @@ import de.yard.threed.maze.testutils.MazeTestUtils;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 
-import de.yard.threed.engine.platform.common.StringReader;
+import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.engine.testutil.TestHelper;
 import org.junit.jupiter.api.Assertions;

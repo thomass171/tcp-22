@@ -2,9 +2,10 @@ package de.yard.threed.engine;
 
 import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector2;
+import de.yard.threed.core.geometry.Surface;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.engine.platform.common.Face;
+import de.yard.threed.core.geometry.Face;
 import de.yard.threed.core.platform.Log;
 
 import java.util.List;

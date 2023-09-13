@@ -6,10 +6,10 @@ import de.yard.threed.engine.apps.ModelSamples;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.*;
-import de.yard.threed.engine.geometry.Primitives;
+import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Color;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 /**
  * Erstmal als Prototyp.

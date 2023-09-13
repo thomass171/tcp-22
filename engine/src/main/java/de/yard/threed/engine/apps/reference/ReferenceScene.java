@@ -1,6 +1,8 @@
 package de.yard.threed.engine.apps.reference;
 
 import de.yard.threed.core.*;
+import de.yard.threed.core.geometry.ProportionalUvMap;
+import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
@@ -8,8 +10,9 @@ import de.yard.threed.core.platform.*;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.apps.ModelSamples;
 import de.yard.threed.engine.apps.WoodenToyFactory;
-import de.yard.threed.engine.geometry.Primitives;
+import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.gui.*;
+import de.yard.threed.engine.loader.PortableModelBuilder;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.*;
 
@@ -22,8 +25,6 @@ import java.util.List;
 import de.yard.threed.engine.test.AsyncTest;
 import de.yard.threed.engine.test.Base3DTest;
 import de.yard.threed.engine.test.MainTest;
-import de.yard.threed.core.testutil.Assert;
-import de.yard.threed.core.testutil.RuntimeTestUtil;
 
 /**
  * Fuer die Reference Scene.
@@ -518,11 +519,11 @@ public class ReferenceScene extends Scene {
         // Earth hat radius 1
         earth = ModelSamples.buildEarth();
         // eine unrotierte Needle, auf die man direkt sieht
-        SceneNode needle = ModelSamples.buildCompassNeedle(0.3f, 0.1f).createPortableModelBuilder().buildModel(null);
+        SceneNode needle = new PortableModelBuilder(ModelSamples.buildCompassNeedle(0.3f, 0.1f)).buildModel(null);
         needle.getTransform().setPosition(new Vector3(0, 0, 1.01f));
         earth.attach(needle);
         // und eine links halbhoch, wo manchmal Europa ist.
-        needle = ModelSamples.buildCompassNeedle(0.3f, 0.1f).createPortableModelBuilder().buildModel(null);
+        needle = new PortableModelBuilder(ModelSamples.buildCompassNeedle(0.3f, 0.1f)).buildModel(null);
         Vector3 pos = new Vector3(-0.75f, 0.75f, 0);
         needle.getTransform().setPosition(pos);
         // Warum man die direction nicht negieren muss, ist nicht ganz klar. Klappt aber.

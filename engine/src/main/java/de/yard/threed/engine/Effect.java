@@ -2,7 +2,7 @@ package de.yard.threed.engine;
 
 
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.loader.PortableMaterial;
+import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.EffectShader;
 

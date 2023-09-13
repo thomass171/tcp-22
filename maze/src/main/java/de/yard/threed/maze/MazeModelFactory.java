@@ -7,17 +7,18 @@ import de.yard.threed.engine.*;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.engine.apps.WoodenToyFactory;
 import de.yard.threed.engine.avatar.AvatarPmlFactory;
-import de.yard.threed.engine.geometry.Primitives;
+import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.core.Vector3;
 
 import de.yard.threed.engine.gui.Icon;
 import de.yard.threed.engine.imaging.NormalMap;
 import de.yard.threed.core.Color;
-import de.yard.threed.engine.loader.PortableMaterial;
-import de.yard.threed.engine.loader.PortableModelDefinition;
-import de.yard.threed.engine.loader.PortableModelList;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.loader.PortableMaterial;
+import de.yard.threed.core.loader.PortableModelDefinition;
+import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.geometry.SimpleGeometry;
+import de.yard.threed.engine.loader.PortableModelBuilder;
 
 /**
  *
@@ -158,7 +159,7 @@ public class MazeModelFactory implements ModelBuilderRegistry {
         pml.addModel(head);
         pml.addMaterial(faceMaterial);
 
-        SceneNode model = pml.createPortableModelBuilder().buildModel(null, null);
+        SceneNode model = new PortableModelBuilder(pml).buildModel(null, null);
         model.setName("Monster");
         return new SceneNode(model);
     }

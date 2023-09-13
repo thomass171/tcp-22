@@ -2,7 +2,7 @@ package de.yard.threed.engine.test.testutil;
 
 
 import de.yard.threed.core.Degree;
-import de.yard.threed.engine.Shape;
+import de.yard.threed.core.geometry.Shape;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 
 /**

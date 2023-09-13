@@ -6,6 +6,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.loader.LoaderGLTF;
+import de.yard.threed.core.loader.PortableMaterial;
+import de.yard.threed.core.loader.PortableModelDefinition;
+import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.loader.*;
@@ -13,11 +17,10 @@ import de.yard.threed.core.Vector2Array;
 
 import de.yard.threed.core.Vector3Array;
 import de.yard.threed.core.Color;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.javacommon.JAOutputStream;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Optional;
 
 /**
  * Build a gltf like blender export does, eg. using similar namings.

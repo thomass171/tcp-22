@@ -8,14 +8,14 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.GenericGeometry;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
-import de.yard.threed.engine.ProportionalUvMap;
+import de.yard.threed.core.geometry.ProportionalUvMap;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.engine.Shape;
+import de.yard.threed.core.geometry.Shape;
 import de.yard.threed.engine.ShapeFactory;
-import de.yard.threed.engine.UvMap1;
-import de.yard.threed.engine.geometry.Primitives;
+import de.yard.threed.core.geometry.UvMap1;
+import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.geometry.ShapeGeometry;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 public class MazeTraditionalModelFactory extends MazeModelFactory {
 

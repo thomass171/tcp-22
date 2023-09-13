@@ -4,12 +4,16 @@ package de.yard.threed.engine;
 import de.yard.threed.core.Util;
 
 
+import de.yard.threed.core.loader.AbstractLoader;
+import de.yard.threed.core.loader.InvalidDataException;
+import de.yard.threed.core.loader.LoaderAC;
+import de.yard.threed.core.loader.LoaderGLTF;
+import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.loader.*;
 import de.yard.threed.core.resource.BundleData;
-import de.yard.threed.engine.platform.common.StringReader;
+import de.yard.threed.core.loader.StringReader;
 
 /**
  *

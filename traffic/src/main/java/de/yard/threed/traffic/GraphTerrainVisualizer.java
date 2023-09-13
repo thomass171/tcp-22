@@ -1,14 +1,9 @@
 package de.yard.threed.traffic;
 
 
-import de.yard.threed.core.Degree;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.Material;
-import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.core.Vector3;
 import de.yard.threed.traffic.geodesy.MapProjection;
-import de.yard.threed.engine.geometry.Primitives;
 import de.yard.threed.graph.DefaultGraphVisualizer;
 import de.yard.threed.graph.Graph;
 import de.yard.threed.graph.GraphEdge;
@@ -16,7 +11,6 @@ import de.yard.threed.graph.GraphNode;
 import de.yard.threed.graph.GraphOrientation;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Color;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
 import de.yard.threed.traffic.osm.TerrainBuilder;
 
 import java.util.HashMap;

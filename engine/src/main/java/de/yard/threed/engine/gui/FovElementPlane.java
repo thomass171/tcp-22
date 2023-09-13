@@ -6,10 +6,10 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.engine.UvMap1;
-import de.yard.threed.engine.geometry.Primitives;
+import de.yard.threed.core.geometry.UvMap1;
+import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.core.DimensionF;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 
 /**

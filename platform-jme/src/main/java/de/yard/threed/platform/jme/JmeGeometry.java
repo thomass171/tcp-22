@@ -13,7 +13,7 @@ import de.yard.threed.core.Vector2;
 import de.yard.threed.core.platform.NativeGeometry;
 import de.yard.threed.core.Vector2Array;
 import de.yard.threed.core.Vector3Array;
-import de.yard.threed.engine.platform.common.SimpleGeometry;
+import de.yard.threed.core.geometry.SimpleGeometry;
 
 
 /**
