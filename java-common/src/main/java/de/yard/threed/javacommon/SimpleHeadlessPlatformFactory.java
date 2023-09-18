@@ -10,7 +10,7 @@ import de.yard.threed.core.platform.PlatformInternals;
 import java.util.HashMap;
 
 /**
- * 27.7.21 Primaer fuer Tests, aber auch gut fuer manche tools und andere desktop Anwendungen
+ * 27.7.21 Primarily for tests, but also for some tools or desktop apps.
  */
 public class SimpleHeadlessPlatformFactory implements PlatformFactory {
 

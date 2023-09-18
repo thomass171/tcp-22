@@ -23,9 +23,10 @@ import java.util.HashMap;
 
 /**
  * 10.9.21:TODO check: Why not SimpleHeadless?
- *
+ * 18.9.23: deprecated in favor of SimpleHeadlessPlatformFactory
  * Created on 10.12.18.
  */
+@Deprecated
 public class ToolsPlatform extends DefaultPlatform {
     NativeLogFactory logfactory;
     HashMap<String, String> properties = new HashMap<String, String>();

@@ -38,12 +38,17 @@ import java.util.Optional;
  * Created by thomass on 11.04.17.
  */
 public class GltfProcessor {
-    public static Platform platform = ToolsPlatform.init();
-    static Log logger = Platform.getInstance().getLog(GltfProcessor.class);
+
+    private Log logger = Platform.getInstance().getLog(GltfProcessor.class);
+
+    public GltfProcessor(){
+
+    }
 
     public static void main(String[] argv) {
+        ToolsPlatform.init();
         try {
-            runMain(argv);
+            new GltfProcessor().runMain(argv);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -54,7 +59,7 @@ public class GltfProcessor {
     /**
      * Extracted to be testable without calling exit()
      */
-    public static void runMain(String[] argv) throws Exception {
+    public void runMain(String[] argv) throws Exception {
 
         if (argv.length == 2 && argv[0].equals("-dump")) {
             dumpGltf(argv[1]);
@@ -76,7 +81,12 @@ public class GltfProcessor {
                     }
                     loaderClass = Optional.ofNullable(argv[5]);
                 }
-                convertToGltf(argv[3], outdir, loaderClass);
+                String inputfile = argv[3];
+                GltfBuilderResult gltf = convertToGltf(inputfile, loaderClass);
+                String basepath = StringUtils.substringBeforeLast(inputfile, "/");
+                String basename = StringUtils.substringAfterLast(inputfile, "/");
+                basename = StringUtils.substringBeforeLast(basename, ".");
+                writeGltfOutput(outdir, basename, gltf.gltfstring, gltf.bin);
             } else {
                 usage();
             }
@@ -89,11 +99,7 @@ public class GltfProcessor {
         System.exit(1);
     }
 
-    private static void convertToGltf(String inputfile, String outdir, Optional<String> loaderClass) throws
-            IOException {
-        String basepath = StringUtils.substringBeforeLast(inputfile, "/");
-        String basename = StringUtils.substringAfterLast(inputfile, "/");
-        basename = StringUtils.substringBeforeLast(basename, ".");
+    public GltfBuilderResult convertToGltf(String inputfile, Optional<String> loaderClass) throws IOException {
         GltfBuilder gltfbuilder = new GltfBuilder();
         GltfBuilderResult gltf = null;
         try {
@@ -105,12 +111,12 @@ public class GltfProcessor {
             gltf = gltfbuilder.process(loadBySuffix(inputfile, true, customLoader));
         } catch (InvalidDataException e) {
             System.out.println("InvalidDataException:" + e.getMessage());
-            return;
+            return gltf;
         }
-        writeGltfOutput(outdir, basename, gltf.gltfstring, gltf.bin);
+        return gltf;
     }
 
-    private static void dumpGltf(String gltffilename) throws ResourceNotFoundException, IOException {
+    private void dumpGltf(String gltffilename) throws ResourceNotFoundException, IOException {
         String basepath = StringUtils.substringBeforeLast(gltffilename, "/");
         String basename = StringUtils.substringAfterLast(gltffilename, "/");
         basename = StringUtils.substringBeforeLast(basename, ".");
@@ -131,7 +137,7 @@ public class GltfProcessor {
         }
     }
 
-    private static void dumpObject(PortableModelDefinition obj) {
+    private void dumpObject(PortableModelDefinition obj) {
         System.out.println("Node " + obj.name);
         for (int j = 0; j < obj.geolist.size(); j++) {
             dumpGeo(obj.geolist.get(j), obj.geolistmaterial.get(j));
@@ -172,7 +178,7 @@ public class GltfProcessor {
      * @param bindata
      * @throws IOException
      */
-    public static void writeGltfOutput(String outdir, String basename, String json, byte[] bindata) throws
+    public void writeGltfOutput(String outdir, String basename, String json, byte[] bindata) throws
             IOException {
         String destinationpath = outdir;//basepath + "/" + basename + "-gltf";
         String destfile = destinationpath + "/" + basename + ".gltf";
@@ -184,7 +190,7 @@ public class GltfProcessor {
 
     }
 
-    private static AbstractLoaderBuilder buildDynamicLoader(String loaderClass) {
+    private AbstractLoaderBuilder buildDynamicLoader(String loaderClass) {
         try {
             logger.debug("Building loader from " + loaderClass);
             Class clazz = Class.forName(loaderClass);
@@ -204,8 +210,8 @@ public class GltfProcessor {
      *
      * @throws InvalidDataException
      */
-    private static PortableModelList loadBySuffix(String filename, boolean ignoreacworld, AbstractLoaderBuilder customLoader) throws
-            InvalidDataException {
+    private PortableModelList loadBySuffix(String filename, boolean ignoreacworld, AbstractLoaderBuilder customLoader) throws
+            InvalidDataException, IOException {
         //String filename = file.getName();
         String extension;// = file.getExtension();
         extension = StringUtils.substringAfterLast(filename, ".");
@@ -213,7 +219,7 @@ public class GltfProcessor {
         try {
             ins = new DefaultResourceReader().loadBinaryFile(filename);
         } catch (ResourceNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }
         if (customLoader != null && customLoader.supports(extension)) {
             AbstractLoader loader = customLoader.buildAbstractLoader(ins, filename);

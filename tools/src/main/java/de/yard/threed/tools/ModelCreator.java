@@ -61,7 +61,7 @@ public class ModelCreator {
         String remaingArgs[] = cmd.getArgs();
         try {
             GltfBuilderResult gltf = createModel(name, classname, remaingArgs);
-            GltfProcessor.writeGltfOutput(outputdir, name, gltf.gltfstring, gltf.bin);
+            new GltfProcessor().writeGltfOutput(outputdir, name, gltf.gltfstring, gltf.bin);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

@@ -20,7 +20,7 @@ public class GltfProcessorTest {
         String[] argv = new String[]{
                 "-gltf", "-o", "src/test/resources/tmp", "src/test/resources/twosided-rectangle.ac"
         };
-        GltfProcessor.runMain(argv);
+        new GltfProcessor().runMain(argv);
     }
 
     @Test
@@ -32,7 +32,7 @@ public class GltfProcessorTest {
                 "-gltf", "-o", "src/test/resources/tmp", "src/test/resources/cube.obj",
                 "-l", "de.yard.threed.tools.testutil.LoaderOBJBuilderForTest"
         };
-        GltfProcessor.runMain(argv);
+        new GltfProcessor().runMain(argv);
 
         // make sure dynamic loader was used
         assertEquals(instances + 1, LoaderOBJBuilderForTest.instanceCount);
