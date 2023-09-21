@@ -1,6 +1,9 @@
 package de.yard.threed.javacommon;
 
 
+import org.apache.commons.io.FileUtils;
+import org.apache.hc.client5.http.utils.Base64;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -41,4 +44,19 @@ public class FileUtil {
     public static void saveToPngFile(HeightMap img, String filename) {
         saveToPngFile(img.image, filename);
     }*/
+
+    /**
+     * Moved here from jme main.
+     */
+    private static void encodeBase64(String path, String filename) {
+        try {
+            byte[] buf = FileUtils.readFileToByteArray(new File(path + "/" + filename));
+            buf = Base64.encodeBase64(buf);
+            File outfile = new File(path + "/" + filename + ".b64");
+            FileUtils.writeByteArrayToFile(outfile, buf);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

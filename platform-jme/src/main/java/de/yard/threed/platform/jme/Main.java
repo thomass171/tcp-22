@@ -1,34 +1,27 @@
 package de.yard.threed.platform.jme;
 
-import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.Setup;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
 import java.util.HashMap;
 
 
 /**
  * Main for platform JME (not OpenGL, that leads to Classpath problems when loading eg. shader)
  * <p/>
- * Warum gibt es die Scene eigentlich nicht mehr als Property? 28.10.15: Vielleicht wegen der Klasse ScenePool?
- * 22.1.16: Vielleicht weil GWT eine solche Klasse nicht per Reflection instatieeren kann?
+ * 20.9.23: Now with instance of main to be ready to be extended in other modules/projects.
  * <p/>
  * Created by thomass on 30.05.15.
  */
 public class Main {
     static Log logger;
 
-    public static void main(String[] args) {
+    public Main(String[] args) {
 
-        JmeSceneRunner nsr = JmeSceneRunner.init(ConfigurationByEnv.buildDefaultConfigurationWithArgsAndEnv(args, Setup.setUp()));
+        JmeSceneRunner nsr = JmeSceneRunner.init(ConfigurationByEnv.buildDefaultConfigurationWithArgsAndEnv(args, getInitialProperties()));
 
         logger = Platform.getInstance().getLog(Main.class);
         logger.info("Loading JME Client");
@@ -66,34 +59,14 @@ public class Main {
         // no exit() here. It will terminate process immediately. But main thread is in ...
     }
 
-
-    private static void encodeBase64(String path, String filename) {
-        try {
-            byte[] buf = FileUtils.readFileToByteArray(new File(path + "/" + filename));
-            buf = Base64.encodeBase64(buf);
-            File outfile = new File(path + "/" + filename + ".b64");
-            FileUtils.writeByteArrayToFile(outfile, buf);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public static void main(String[] args) {
+        new Main(args);
     }
 
-
-}
-
-/**
- * Nurmal ein Versuch. Muss im Prinzip in die Platform.
- */
-class GaCo extends Thread {
-    @Override
-    public void run() {
-        while (true) {
-            System.gc();
-            try {
-                sleep(200);
-            } catch (InterruptedException e) {
-
-            }
-        }
+    /**
+     * Ready to be overridden.
+     */
+    public HashMap<String, String> getInitialProperties(){
+        return Setup.setUp();
     }
 }

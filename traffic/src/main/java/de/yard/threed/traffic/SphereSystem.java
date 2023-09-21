@@ -47,9 +47,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Steht initial am Anfang. Hier wird 2D/3D unterschieden. Darum ist das auch ein guter Platz fuer die Projection.
+ * A draft for now. Features are (possibly just an idea):
+ * - load/init of a sphere
+ * - handling 2D/3D, so its a good location for projection.
+ * - manage multiple concurrent spheres (server mode)
  * <p>
- * Optionally triggers loading of a tile.
+ * Optionally triggers loading of a (static?) tile. There might also be a TerrainSystem.
  * Provider for a projection fitting to the Sphere and a world node.
  * <p>
  * 07.10.21
