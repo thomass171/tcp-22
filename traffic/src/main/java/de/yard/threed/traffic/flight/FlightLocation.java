@@ -4,7 +4,7 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.traffic.RoundBodyCalculations;
+import de.yard.threed.traffic.EllipsoidCalculations;
 import de.yard.threed.traffic.TrafficHelper;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 
@@ -45,7 +45,7 @@ public class FlightLocation {
         this.pitch = new Degree(0);
     }
 
-    public LocalTransform toPosRot(RoundBodyCalculations rbcp) {
+    public LocalTransform toPosRot(EllipsoidCalculations rbcp) {
         return new LocalTransform(rbcp.toCart(coordinates,null), rbcp.buildRotation(coordinates, heading, pitch));
     }
 
@@ -56,7 +56,7 @@ public class FlightLocation {
      * 10.3.18: Das deprecated scheint mir berechtigt, denn ein zurueckrechnen von Quaternion auf heading/pich scheint nicht moeglich.
      * Oder nur eingeschraenkt. Wenn ueberhaupt macht das nur in Nähe der Erdoberfläche Sinn. Und was fuer ein Heading hat ein senkrecht nach unten
      * fliegendes Objekt?
-     *
+     * 22.9.23: Agreed to above. Calculating back from rotation to heading/pitch cannot be reliable. There should be no use case for this method.
      * @param posRot
      * @return
      */
@@ -67,7 +67,7 @@ public class FlightLocation {
         //System.out.println("x=" + Degree.buildFromRadians(a[0]));
         //System.out.println("y=" + Degree.buildFromRadians(a[1]));
         //System.out.println("z=" + Degree.buildFromRadians(a[2]));
-        RoundBodyCalculations rbcp = TrafficHelper.getRoundBodyConversionsProviderByDataprovider();
+        EllipsoidCalculations rbcp = TrafficHelper.getRoundBodyConversionsProviderByDataprovider();
         FlightLocation fl = new FlightLocation(rbcp.fromCart(posRot.position), Degree.buildFromRadians(a[2]), Degree.buildFromRadians(a[1]));
         return fl;
     }

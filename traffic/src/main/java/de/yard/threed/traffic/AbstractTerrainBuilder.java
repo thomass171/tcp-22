@@ -7,7 +7,10 @@ import de.yard.threed.graph.GraphNode;
 import de.yard.threed.traffic.geodesy.MapProjection;
 
 /**
- * Terrain might be projected?
+ * Might be more than just terrain but full scenery.
+ *
+ * Terrain might be projected? Hmm, maybe.
+ * NoNoNo, 'Flat'/Tile20 has no on-demand terrain loading, so no projection here.
  */
 public interface AbstractTerrainBuilder {
 
@@ -16,7 +19,7 @@ public interface AbstractTerrainBuilder {
     /**
      * Optional.
      */
-    void initProjection(MapProjection projection);
+    //void initProjection(MapProjection projection);
 
     void updateForPosition(Vector3 position, Vector3 direction);
 

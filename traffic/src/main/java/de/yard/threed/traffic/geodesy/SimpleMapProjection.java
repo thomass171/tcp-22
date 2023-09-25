@@ -5,7 +5,7 @@ import de.yard.threed.graph.Graph;
 import de.yard.threed.graph.GraphEdge;
 import de.yard.threed.graph.GraphNode;
 import de.yard.threed.graph.GraphOrientation;
-import de.yard.threed.traffic.RoundBodyCalculations;
+import de.yard.threed.traffic.EllipsoidCalculations;
 import de.yard.threed.traffic.flight.FlightLocation;
 
 /**
@@ -56,7 +56,7 @@ public class SimpleMapProjection extends OriginMapProjection {
         return new Vector3(v.getX(), v.getY(), altitude);
     }
 
-    public static void projectGraph(Graph graph, MapProjection projection, RoundBodyCalculations rbcp ) {
+    public static void projectGraph(Graph graph, MapProjection projection, EllipsoidCalculations rbcp ) {
         for (int i=0;i<graph.getNodeCount();i++){
             GraphNode n = graph.getNode(i);
             projectLocation(graph,n,projection,rbcp);
@@ -70,7 +70,7 @@ public class SimpleMapProjection extends OriginMapProjection {
      *
      * @param projection
      */
-    public static void projectLocation(Graph graph, GraphNode node, MapProjection projection, RoundBodyCalculations rbcp ) {
+    public static void projectLocation(Graph graph, GraphNode node, MapProjection projection, EllipsoidCalculations rbcp ) {
         // elevation kommt nach Z. Das passt aber nicht fuer Bodenhoehe, bei der z 0 sein sollte. TODO
         //RoundBodyConversions rbcp = TrafficHelper.getRoundBodyConversionsProviderByDataprovider();
         //SGGeod coor = SGGeod.fromCart(node.getLocation());

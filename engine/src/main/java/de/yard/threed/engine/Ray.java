@@ -48,7 +48,11 @@ public class Ray {
      * Be careful with parents/children. These are only tested with 'recursive'.
      * <p>
      * 30.3.22: Different approach to avoid deprecated native methods (MA22).
+     * 24.9.23: Why do we search from world here? Probably because there is no platfrom independent way
+     * to check a single geometry for intersection. But this method makes the impression it is possible.
+     * For that reason deprecated. At least it should be renamed to something like getIntersectionsFromWorld/Top.
      */
+    @Deprecated
     public List<NativeCollision> getIntersections(SceneNode model, boolean recursive) {
         List<NativeCollision> collisions = ray.getIntersections();
         return extractModelsHit(model, collisions, recursive);

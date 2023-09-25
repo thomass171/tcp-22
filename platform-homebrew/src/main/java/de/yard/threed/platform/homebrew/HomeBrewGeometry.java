@@ -14,12 +14,12 @@ public class HomeBrewGeometry implements NativeGeometry {
     public OpenGlElementArray ea;
     // vorhalten der vertices/faces fuer collision detection (optimieren mit VBO, fuer alle Platformen, nur bestimmte Geos).
     Vector3Array vertices;
-    int[] faces;
+    int[] indices;
 
-    HomeBrewGeometry(OpenGlIndexedVBO ivbo, Vector3Array vertices, int[] faces, OpenGlElementArray ea) {
+    HomeBrewGeometry(OpenGlIndexedVBO ivbo, Vector3Array vertices, int[] indices, OpenGlElementArray ea) {
         this.ivbo = ivbo;
         this.vertices = vertices;
-        this.faces = faces;
+        this.indices = indices;
         this.ea = ea;
     }
 

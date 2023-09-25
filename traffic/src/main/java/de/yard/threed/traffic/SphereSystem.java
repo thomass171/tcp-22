@@ -73,7 +73,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     public SimpleMapProjection projection;
 
     private boolean needsBackProjection = false;
-    RoundBodyCalculations/*Flight3D*/ backProjectionProvider;
+    EllipsoidCalculations/*Flight3D*/ backProjectionProvider;
     GraphBackProjectionProvider backProjection;
 
     // Das was mal world in TravelScenes war. Eine destination node an der alles(?) haengt, zumindest statischer Content(terrain), der
@@ -96,7 +96,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
      *
      * 27.12.21: SceneConfig (das ist NUR der scene sub Part) und center mal reinstecken.
      */
-    public SphereSystem(RoundBodyCalculations/*Flight3D*/ backProjectionProvider, GraphBackProjectionProvider backProjection,GeoCoordinate center, SceneConfig sceneConfig) {
+    public SphereSystem(EllipsoidCalculations/*Flight3D*/ backProjectionProvider, GraphBackProjectionProvider backProjection,GeoCoordinate center, SceneConfig sceneConfig) {
         super(new String[]{}, new RequestType[]{USER_REQUEST_SPHERE}, new EventType[]{});
         //??updatepergroup = false;
         this.backProjectionProvider = backProjectionProvider;
@@ -489,8 +489,8 @@ class SphereViewPointProvider implements DataProvider {
 }
 
 class RoundBodyConversionsProvider implements DataProvider{
-    RoundBodyCalculations roundBodyCalculations;
-    public RoundBodyConversionsProvider(RoundBodyCalculations roundBodyCalculations){
+    EllipsoidCalculations roundBodyCalculations;
+    public RoundBodyConversionsProvider(EllipsoidCalculations roundBodyCalculations){
         this.roundBodyCalculations = roundBodyCalculations;
 
     }

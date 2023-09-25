@@ -9,3 +9,5 @@ On the glcontext level GlImplDummyForTests can be used if no opengl is used
 
 Known issues:
 - in ReferenceScene the picking ray only works from start position. not after 't'.
+
+Not suited for (unit) testing because that leads to module cycles.

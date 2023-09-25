@@ -2,15 +2,15 @@ package de.yard.threed.traffic;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.LatLon;
-import de.yard.threed.traffic.RoundBodyCalculations;
+import de.yard.threed.traffic.EllipsoidCalculations;
 import de.yard.threed.trafficcore.model.Runway;
 
 public class RunwayHelper {
 
     Runway runway;
-    RoundBodyCalculations rbc;
+    EllipsoidCalculations rbc;
 
-    public RunwayHelper(Runway runway, RoundBodyCalculations rbc) {
+    public RunwayHelper(Runway runway, EllipsoidCalculations rbc) {
         this.runway = runway;
         this.rbc = rbc;
     }

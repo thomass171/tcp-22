@@ -4,6 +4,7 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.NativeTransform;
+import de.yard.threed.core.platform.TransformNodeVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -168,21 +169,6 @@ public class Transform implements SimpleTransform {
     public void setPosRot(LocalTransform posRot) {
         setPosition(posRot.position);
         setRotation(posRot.rotation);
-    }
-
-    /**
-     * Also calls visitor for itself.
-     *
-     * @param childVisitor
-     */
-    public void traverse(TransformNodeVisitor childVisitor) {
-        childVisitor.handleNode(this);
-        List<NativeTransform> children = transform.getChildren();
-        for (int i = 0; i < children.size(); i++) {
-            Transform child = new Transform(children.get(i));
-            childVisitor.handleNode(child);
-            child.traverse(childVisitor);
-        }
     }
 
     public void setLayer(int layer) {

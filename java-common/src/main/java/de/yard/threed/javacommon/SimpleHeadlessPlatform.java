@@ -3,6 +3,7 @@ package de.yard.threed.javacommon;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.geometry.GeometryHelper;
 import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
@@ -31,7 +32,8 @@ import java.util.List;
  * - has no dependency to a 3D library/engine, so has no renderer (headless!)
  * - uses typical Java implementations (eg. log4j for logging, GsonBuilder for json)
  * Therefore it resides in java-common. Not for C#.
- *
+ * <p>
+ * The main difference to homebrew is, that homebrew is not suited for (unit) testing because that leads to module cycles.
  * <p>
  * Provides a logger and StringHelper. ResourceManager must be added later because it might need the LogFactory.
  * <p>
@@ -40,6 +42,7 @@ import java.util.List;
  * for sharing coommon Java elements like {@link JavaSocket}.
  * Because its used for testing in "engine", a simple node tree (incl mesh) is useful indeed.
  * 13.9.23: Also material and texture.
+ * 23.9.23: Also geometry and ray (intersections).
  * <p>
  * Created on 05.12.18.
  */
@@ -121,8 +124,14 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         delegate.modelBuilt(new BuildResult(new DummySceneNode()));
     }
 
+    @Override
+    public NativeGeometry buildNativeGeometry(Vector3Array vertices, int[] indices, Vector2Array uvs, Vector3Array normals) {
+        return new DummyGeometry(vertices, indices, uvs, normals);
+    }
+
+    @Override
     public NativeMesh buildNativeMesh(NativeGeometry nativeGeometry, NativeMaterial material, boolean castShadow, boolean receiveShadow) {
-        return new DummyMesh(material);
+        return new DummyMesh((DummyGeometry) nativeGeometry, material);
     }
 
     @Override
@@ -189,8 +198,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
 
     @Override
     public NativeRay buildRay(Vector3 origin, Vector3 direction) {
-        // inform caller
-        throw new RuntimeException("no ray");
+        return new DummyRay(origin, direction);
     }
 
     @Override
@@ -462,8 +470,10 @@ class DummyTransform implements NativeTransform {
 class DummyMesh implements NativeMesh {
 
     NativeMaterial material;
+    DummyGeometry geometry;
 
-    DummyMesh(NativeMaterial material) {
+    DummyMesh(DummyGeometry geometry, NativeMaterial material) {
+        this.geometry = geometry;
         this.material = material;
     }
 
@@ -649,6 +659,127 @@ class DummyTexture implements NativeTexture {
     @Override
     public String getName() {
         return name;
+    }
+}
+
+class DummyGeometry implements NativeGeometry {
+    Vector3Array vertices;
+    int[] indices;
+
+    DummyGeometry(Vector3Array vertices, int[] indices, Vector2Array uvs, Vector3Array normals) {
+        this.vertices = vertices;
+        this.indices = indices;
+    }
+
+    @Override
+    public String getId() {
+        throw new RuntimeException("not yet");
+        // return "";
+    }
+}
+
+class DummyCollision implements NativeCollision {
+    private final DummySceneNode node;
+    Vector3 point;
+
+    DummyCollision(DummySceneNode node, Vector3 point) {
+        this.node = node;
+        this.point = point;
+    }
+
+    @Override
+    public NativeSceneNode getSceneNode() {
+        return node;
+    }
+
+    @Override
+    public Vector3 getPoint() {
+        return point;
+    }
+}
+
+/**
+ * Copied from OpenGlRay. Not nice copyPaste, but the attempt to have a common IntersectionHelper in core
+ * leads to nasty dependencies.
+ */
+class DummyRay implements NativeRay {
+    Vector3 origin, direction;
+
+    public DummyRay(Vector3 origin, Vector3 direction) {
+        this.origin = origin;
+        this.direction = direction;
+    }
+
+    @Override
+    public Vector3 getDirection() {
+        return direction;
+    }
+
+    @Override
+    public Vector3 getOrigin() {
+        return origin;
+    }
+
+    @Override
+    public String toString() {
+        return "origin=" + origin + ",direction=" + direction;
+    }
+
+    @Override
+    public List<NativeCollision> getIntersections() {
+        // Scene and world are not available here. Assume first node to be world.
+        NativeSceneNode world;//= Scene.getWorld().nativescenenode;
+        world = DummySceneNode.sceneNodes.get(0);
+        if (!world.getName().equals("World")) {
+            throw new RuntimeException("first node not world??");
+        }
+        return intersects(world);
+    }
+
+    public List<NativeCollision> intersects(NativeSceneNode model) {
+        //DummySceneNode n = (DummySceneNode) model;
+        List<NativeCollision> na = new ArrayList<NativeCollision>();
+        TransformNodeVisitor nodeVisitor = new TransformNodeVisitor() {
+
+            @Override
+            public void handleNode(NativeTransform node) {
+                DummySceneNode n = (DummySceneNode) node.getSceneNode();
+                DummyMesh mesh = (DummyMesh) n.getMesh();
+                if (mesh != null) {
+                    List<Vector3> results = getIntersection(mesh.geometry, n.getTransform().getWorldModelMatrix());
+                    for (Vector3 p : results) {
+                        na.add(new DummyCollision(n, p));
+                    }
+                }
+            }
+        };
+        //intersects(n, na);
+        PlatformHelper.traverseTransform(model.getTransform(), nodeVisitor);
+        return na;
+    }
+
+    /**
+     * Order of intersection points is non deterministic.
+     * <p/>
+     * 26.8.2016: Requires vertex data, which in this platform is retained. Commonly these reside in the GPU.
+     * <p>
+     * Vertex data is in local space. Ray is transformed to that space.
+     * 22.3.18: Is that all correct?
+     *
+     * @return
+     */
+    private List<Vector3> getIntersection(DummyGeometry geo, Matrix4 worldModelMatrix) {
+        Matrix4 worldModelMatrixInverse = MathUtil2.getInverse(worldModelMatrix);
+        Vector3 lorigin = worldModelMatrixInverse.transform(origin);
+        //Why is direction not transformed?
+        //Vector3 ldirection = worldModelMatrixInverse.transform(direction);
+        List<Vector3> intersections = GeometryHelper.getRayIntersections(geo.vertices, geo.indices, lorigin, direction);
+        // transform intersections back to world space of ray.
+        List<Vector3> transformeedIntersections = new ArrayList<Vector3>();
+        for (Vector3 intersection : intersections) {
+            transformeedIntersections.add(worldModelMatrix.transform(intersection));
+        }
+        return transformeedIntersections;
     }
 }
 

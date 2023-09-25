@@ -9,9 +9,9 @@ import de.yard.threed.platform.homebrew.PlatformHomeBrew;
 
 import java.util.HashMap;
 
-public class PlatformSceneServerFactoryForTesting implements PlatformFactory {
+/*replaced with HomeBrewPlatformFactory public class PlatformSceneServerFactoryForTesting implements PlatformFactory {
     @Override
     public PlatformInternals createPlatform(Configuration configuration) {
         return PlatformHomeBrew.init(configuration, new SimpleEventBusForTesting());
     }
-}
+}*/

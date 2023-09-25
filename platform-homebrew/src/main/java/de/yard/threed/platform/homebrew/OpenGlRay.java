@@ -2,6 +2,7 @@ package de.yard.threed.platform.homebrew;
 
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.geometry.GeometryHelper;
 import de.yard.threed.core.platform.*;
 
 import de.yard.threed.core.MathUtil2;
@@ -12,6 +13,8 @@ import java.util.List;
 
 /**
  * Ein Strahl bestimmter Laenge von einem Ausgangspunkt in eine Richtung.
+ *
+ * 23.9.23: Generic parts extracted to GeometryHelper.
  * <p/>
  * Created by thomass on 25.11.14.
  */
@@ -52,25 +55,25 @@ public class OpenGlRay implements NativeRay {
     public List<NativeCollision> intersects(NativeSceneNode model) {
         HomeBrewSceneNode n = (HomeBrewSceneNode) model;
         List<NativeCollision> na = new ArrayList<NativeCollision>();
-        intersects(n,na);
+        TransformNodeVisitor nodeVisitor = new TransformNodeVisitor() {
+
+            @Override
+            public void handleNode(NativeTransform node) {
+                HomeBrewSceneNode n = (HomeBrewSceneNode) node.getSceneNode();
+                HomeBrewMesh mesh = (HomeBrewMesh) n.getMesh();
+                if (mesh != null) {
+                    List<Vector3> results = getIntersection(mesh.geo, n.getTransform().getWorldModelMatrix());
+                    for (Vector3 p : results) {
+                        na.add(new OpenGlCollision(n, p));
+                    }
+                }
+            }
+        };
+        //intersects(n, na);
+        PlatformHelper.traverseTransform(model.getTransform(), nodeVisitor);
         return na;
     }
 
-    private void intersects(HomeBrewSceneNode n, List<NativeCollision> na) {
-        HomeBrewMesh mesh = (HomeBrewMesh) n.getMesh();
-        if (mesh != null) {
-            List<Vector3> results = getIntersection(mesh.geo,n.object3d.getWorldModelMatrix());
-            for (Vector3 p : results) {
-                na.add(new OpenGlCollision(n,p));
-            }
-        }
-        // 22.3.18:Muss ja rekursiv suchen
-        int cnt = n.getTransform().getChildCount();
-        for (int i=0;i<cnt;i++){
-            intersects((HomeBrewSceneNode) n.getTransform().getChild(i).getSceneNode(),na);
-        }
-    }
-    
     @Override
     public List<NativeCollision> getIntersections() {
        //24.9.19 return intersects(OpenGlScene.root);
@@ -79,6 +82,9 @@ public class OpenGlRay implements NativeRay {
 
 
     /**
+     *
+     * Also exists in SimpleHeadlessPlatform.
+     *
      * Liefert die Punkte, an denen sich die Geometrie mit dem Strahl schneiden.
      * Die Reihenfolge ist nicht bestimmt bzw. zufaellig.
      * <p/>
@@ -94,23 +100,13 @@ public class OpenGlRay implements NativeRay {
         Vector3 lorigin = worldModelMatrixInverse.transform(origin);
         //die direction wird nicht transformiert. Häh?
         //Vector3 ldirection = worldModelMatrixInverse.transform(direction);
-        List<Vector3> intersections = new ArrayList<Vector3>();
-        for (int i = 0; i < geo.faces.length; i += 3) {
-            Vector3 intersection = null;
-            Vector3 v0 = geo.vertices.getElement(geo.faces[i]);
-            Vector3 v1 = geo.vertices.getElement(geo.faces[i + 1]);
-            Vector3 v2 = geo.vertices.getElement(geo.faces[i + 2]);
-            intersection = MathUtil2.getTriangleIntersection(lorigin, direction, v0, v1, v2);
-            if (intersection != null) {
-                intersections.add(worldModelMatrix.transform(intersection));
-            }
-            // auch umgekehrte Richtung pruefen. Muss man wohl separat machen.
-            /*wohl nicht intersection = MathUtil2.getTriangleIntersection(origin, direction, v2, v1, v0);
-            if (intersection != null) {
-                intersections.add(intersection);
-            }*/
+        List<Vector3> intersections = GeometryHelper.getRayIntersections(geo.vertices, geo.indices, lorigin, direction);
+        // transform intersections back to world space of ray.
+        List<Vector3> transformeedIntersections = new ArrayList<Vector3>();
+        for (Vector3 intersection : intersections) {
+            transformeedIntersections.add(worldModelMatrix.transform(intersection));
         }
-        return intersections;
+        return transformeedIntersections;
     }
 
     public OpenGlRay transform(Matrix4 m) {

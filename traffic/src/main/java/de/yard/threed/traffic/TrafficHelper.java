@@ -187,14 +187,14 @@ public class TrafficHelper {
         return trafficGraph;
     }
 
-    public static RoundBodyCalculations getRoundBodyConversionsProviderByDataprovider() {
+    public static EllipsoidCalculations getRoundBodyConversionsProviderByDataprovider() {
         DataProvider provider = SystemManager.getDataProvider("roundbodyconversionprovider");
         if (provider == null) {
             logger.warn("no roundbodyconversionprovider");
             return null;
         }
 
-        RoundBodyCalculations rbcp = (RoundBodyCalculations) provider.getData(new Object[]{});
+        EllipsoidCalculations rbcp = (EllipsoidCalculations) provider.getData(new Object[]{});
         return rbcp;
     }
 

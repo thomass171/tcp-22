@@ -216,10 +216,9 @@ public class GeometryHelper {
      * @return
      */
     public static SimpleGeometry buildCubeGeometry(float width, float height, float depth) {
-        return Primitives.buildBox(width,height,depth);
+        return Primitives.buildBox(width, height, depth);
     }
 
-    
 
     /**
      * Sicherstellen, dass jedes Face eine Normale enthaelt.
@@ -246,7 +245,7 @@ public class GeometryHelper {
                         if (validnormal == null) {
                             //throw new RuntimeException("no valid normal found");
                             logger.warn("no valid normal");
-                            validnormal =new Vector3(1, 0, 0);
+                            validnormal = new Vector3(1, 0, 0);
                         }
                         face.normal = validnormal;
                     }
@@ -423,7 +422,7 @@ public class GeometryHelper {
      * @param faces3
      */
     private static void duplicateVerticesDueToUv(List</*7.2.18 Native*/Vector3> vertices, List<Face3List> faces3) {
-       List</*7.2.18 Native*/Vector3> nvertices = new ArrayList<Vector3>();
+        List</*7.2.18 Native*/Vector3> nvertices = new ArrayList<Vector3>();
         // In welchem Face wurde ein Vertex verwendet. Es mag auch noch andere Faces geben, aber da sind die uvs dieselben, daher brauchts hier nur das erste Face
         HashMap<Integer, Face3> faceofvertex = new HashMap<Integer, Face3>();
         for (Face3List fl : faces3) {
@@ -452,8 +451,8 @@ public class GeometryHelper {
         if (faceref.index0 == index && !uv.equalsVector2(faceref.uv[0])) {
             //duplizieren
             nvertices.add(vertices.get(index));
-            face.replaceIndex(index, vertices.size()+nvertices.size() - 1);
-        }else {
+            face.replaceIndex(index, vertices.size() + nvertices.size() - 1);
+        } else {
             if (faceref.index1 == index && !uv.equalsVector2(faceref.uv[1])) {
                 //duplizieren
                 nvertices.add(vertices.get(index));
@@ -566,22 +565,52 @@ public class GeometryHelper {
     public static Vector2Array buildNativeVector2Array(List<Vector2> v) {
         Vector2Array a = Platform.getInstance().buildVector2Array(v.size());
         for (int i = 0; i < v.size(); i++) {
-            a.setElement(i, (float)v.get(i).getX(), (float)v.get(i).getY());
+            a.setElement(i, (float) v.get(i).getX(), (float) v.get(i).getY());
         }
         return a;
     }
 
     /**
      * 28.12.18: Zusätzlicher Helper. Den gibt es quasi genauso schon in GenericGeometry.
-     * 
+     *
      * @param cg
      * @return
      */
-    public static List<SimpleGeometry> buildSimpleGeometry(CustomGeometry cg){
+    public static List<SimpleGeometry> buildSimpleGeometry(CustomGeometry cg) {
         // 13.7.16: Splitten duerfte nicht erforderlich sein, weil es nur ein Material gibt.
         // 01.12.16: Es kann aber Kanten geben, die Vertexduplizierung erfordern.
-        List<SimpleGeometry> geos = GeometryHelper.prepareGeometry(cg.getVertices(), cg.getFaceLists(), cg.getNormals(), false,cg.hasedges);
+        List<SimpleGeometry> geos = GeometryHelper.prepareGeometry(cg.getVertices(), cg.getFaceLists(), cg.getNormals(), false, cg.hasedges);
         return geos;
+    }
+
+    /**
+     * Ray and vertices need to be in same space. Assume indices are triangles.
+     * Order of intersection points is non deterministic. Intersection data is in
+     * same space.
+     * <p/>
+     * <p>
+     * Die Vertexdaten sind alle im local space. Der Ray muss dahin transformiert werden.
+     *
+     * @return
+     */
+    public static List<Vector3> getRayIntersections(Vector3Array vertices, int[] indices, Vector3 origin, Vector3 direction) {
+        List<Vector3> intersections = new ArrayList<Vector3>();
+        for (int i = 0; i < indices.length; i += 3) {
+            Vector3 intersection = null;
+            Vector3 v0 = vertices.getElement(indices[i]);
+            Vector3 v1 = vertices.getElement(indices[i + 1]);
+            Vector3 v2 = vertices.getElement(indices[i + 2]);
+            intersection = MathUtil2.getTriangleIntersection(origin, direction, v0, v1, v2);
+            if (intersection != null) {
+                intersections.add(intersection);
+            }
+            // backside also? Probably not.
+            /*wohl nicht intersection = MathUtil2.getTriangleIntersection(origin, direction, v2, v1, v0);
+            if (intersection != null) {
+                intersections.add(intersection);
+            }*/
+        }
+        return intersections;
     }
 }
 

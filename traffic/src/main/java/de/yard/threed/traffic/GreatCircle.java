@@ -24,7 +24,7 @@ public class GreatCircle {
     // normal vector to the orbits plane
     public Vector3 n;
 
-    public static GreatCircle fromDG(GeoCoordinate entry, Degree heading, RoundBodyCalculations rbcp) {
+    public static GreatCircle fromDG(GeoCoordinate entry, Degree heading, EllipsoidCalculations rbcp) {
         //RoundBodyConversions rbcp = TrafficHelper.getRoundBodyConversionsProviderByDataprovider();
         return new GreatCircle(rbcp.toCart(entry,null),
                 rbcp.toCart(GeoCoordinate.fromLatLon(rbcp.applyCourseDistance(entry,heading,1000),0),null).subtract(rbcp.toCart(entry,null)));

@@ -41,12 +41,12 @@ import java.util.List;
  * Aber es ist ja auch für 2D scenery. Hmm, das ist aber unguenstig. Dann braeuchte man doch ein FlatTerrainSystem
  * Gesplittet.
  * 7.10.21: For displaying single (2D) tiles (Tile2.0) in general.
- * 20.9.23: Deprecated. Should be merged with TerrainSystem(MA49) to TerrainSystem20.SphereSystem meanwhile knows the projection. And there is the idea of AbstractTerrainBuilder.
+ * SphereSystem meanwhile knows the projection. And there is the idea of AbstractTerrainBuilder (but that in not for flat).
+ * 20.9.23: Idea of merge with Terrain/ScenerySystem discarded (MA49).
  *
  * <p>
  * Created by thomass on 23.02.18.
  */
-@Deprecated
 public class FlatTerrainSystem extends DefaultEcsSystem {
     Log logger = Platform.getInstance().getLog(FlatTerrainSystem.class);
     //20.10.21SceneNode world, earth;

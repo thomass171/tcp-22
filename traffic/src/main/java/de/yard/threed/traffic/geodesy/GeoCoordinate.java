@@ -12,7 +12,6 @@ import de.yard.threed.core.Vector3;
  * <p>
  * And note the difference between geocentric and geodetic!
  *
- * Also https://stackoverflow.com/questions/1185408/converting-from-longitude-latitude-to-cartesian-coordinates
  *
  * <p>
  * This class is an independent simplification.

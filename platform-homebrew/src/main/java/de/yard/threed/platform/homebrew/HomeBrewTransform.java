@@ -278,18 +278,6 @@ public class HomeBrewTransform implements NativeTransform/*Base3D*/ {
         }
     }
 
-    @FunctionalInterface
-    interface ChildVisitor {
-        void handleChild(HomeBrewTransform child);
-    }
-
-    void traverse(ChildVisitor childVisitor) {
-        for (HomeBrewTransform child : children) {
-            childVisitor.handleChild(child);
-            child.traverse(childVisitor);
-        }
-    }
-
     private void needsUpdate() {
         worldModelMatrix = null;
         for (HomeBrewTransform child : children) {

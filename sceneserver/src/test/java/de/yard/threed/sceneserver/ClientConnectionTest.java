@@ -4,10 +4,11 @@ package de.yard.threed.sceneserver;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
+import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.ConfigurationByEnv;
-import de.yard.threed.sceneserver.testutils.PlatformSceneServerFactoryForTesting;
+import de.yard.threed.platform.homebrew.HomeBrewPlatformFactory;
 import de.yard.threed.sceneserver.testutils.TestClient;
 import de.yard.threed.sceneserver.testutils.SceneServerTestUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,7 @@ public class ClientConnectionTest {
 
         ClientListener.dropInstance();
 
-        EngineTestFactory.initPlatformForTest(new String[]{"data"}, new PlatformSceneServerFactoryForTesting(), (InitMethod) null,
+        EngineTestFactory.initPlatformForTest(new String[]{"data"}, new HomeBrewPlatformFactory(new SimpleEventBusForTesting()), (InitMethod) null,
                 ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
 
         jettyServer = JettyServer.startJettyServer(de.yard.threed.core.Server.DEFAULT_BASE_PORT + 1);

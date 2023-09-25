@@ -17,7 +17,7 @@ import de.yard.threed.traffic.GraphTerrainSystem;
 
 import de.yard.threed.traffic.LightDefinition;
 import de.yard.threed.traffic.RequestRegistry;
-import de.yard.threed.traffic.RoundBodyCalculations;
+import de.yard.threed.traffic.EllipsoidCalculations;
 import de.yard.threed.traffic.SimpleVehicleLoader;
 import de.yard.threed.traffic.SphereProjections;
 import de.yard.threed.traffic.SphereSystem;
@@ -100,6 +100,7 @@ import java.util.Map;
  * <p>
  * <p>
  * 4.10.21: MA37: Renamed TrafficCommon->BasicTravelScene und nicht mehr abstract. Auch standalone fuer tiles ohne FG.
+ * This is also super class of TravelScene.
  * Created on 28.09.18.
  */
 public class BasicTravelScene extends Scene implements RequestHandler {
@@ -716,7 +717,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         RuntimeTestUtil.assertNotNull("observer", Observer.getInstance());
     }
 
-    public RoundBodyCalculations getRbcp() {
+    public EllipsoidCalculations getRbcp() {
         return null;
     }
 

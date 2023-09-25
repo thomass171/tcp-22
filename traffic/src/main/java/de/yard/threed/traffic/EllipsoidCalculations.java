@@ -8,8 +8,18 @@ import de.yard.threed.graph.GraphProjection;
 import de.yard.threed.traffic.geodesy.ElevationProvider;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 
-
-public interface RoundBodyCalculations {
+/**
+ * geodetic calculations and geocentric and geodetic conversions.
+ * WGS-84 assumes an ellipsoid, but an implementation might also implement calculations for perfect spheres.
+ * These calculations might be very complex math and there is no 'correct' way. All are to some degree approximations.
+ * The most important point is to use always the same formulas inside a 'cluster' (e.g. 'flightgear'). Otherwise
+ * visual artifacts or other strange effects might be the result.
+ *
+ * See also https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
+ * and https://stackoverflow.com/questions/1185408/converting-from-longitude-latitude-to-cartesian-coordinates
+ *
+ */
+public interface EllipsoidCalculations {
     //22.12.21 stoert hier GraphProjection/*Flight3D*/ getGraphBackProjection();
 
     /**
@@ -27,13 +37,15 @@ public interface RoundBodyCalculations {
     public  GeoCoordinate fromCart(Vector3 cart);
 
     /**
-     * 20.12.21: Was soll hier eigenltich der ElevationProvider?
+     * A elevation provider is needed for calculating 3D coordinates from geo coordinates. Otherwise
+     * you might always be on sea level, which might be useful for perfect planets only. So this is considered deprecated.
      *
      * @param geoCoordinate
      * @param elevationprovider
      * @return
      */
     Vector3 toCart(GeoCoordinate geoCoordinate, ElevationProvider elevationprovider);
+    @Deprecated
     Vector3 toCart(GeoCoordinate geoCoordinate);
 
     LatLon applyCourseDistance(LatLon latLon, Degree coursedeg, double dist);

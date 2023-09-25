@@ -4,7 +4,7 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.ParsingHelper;
 import de.yard.threed.engine.util.XmlHelper;
-import de.yard.threed.traffic.RoundBodyCalculations;
+import de.yard.threed.traffic.EllipsoidCalculations;
 import de.yard.threed.traffic.flight.FlightLocation;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.core.platform.NativeNode;
@@ -36,7 +36,7 @@ public class PoiConfig extends ConfigNode {
         return XmlHelper.getStringAttribute(nativeNode,"sphere", null);
     }
 
-    public LocalTransform getTransform(RoundBodyCalculations rbcp) {
+    public LocalTransform getTransform(EllipsoidCalculations rbcp) {
         LocalTransform posrot = new FlightLocation(getGeod(), heading, pitch).toPosRot(rbcp);
         return posrot;
     }
