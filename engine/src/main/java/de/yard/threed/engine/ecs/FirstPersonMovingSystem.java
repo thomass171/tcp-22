@@ -4,18 +4,14 @@ package de.yard.threed.engine.ecs;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
-import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Point;
-import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.BaseRequestRegistry;
-import de.yard.threed.engine.FirstPersonController;
 import de.yard.threed.engine.Input;
-import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 
@@ -26,7 +22,7 @@ import de.yard.threed.engine.platform.common.RequestType;
 public class FirstPersonMovingSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(FirstPersonMovingSystem.class);
     public static String TAG = "FirstPersonMovingSystem";
-    boolean firstpersonmovingsystemdebuglog = true;
+    public boolean firstpersonmovingsystemdebuglog = true;
     // Mouse movement is different between platforms and hard to unify. So stay with key control
     // and focus on VR
     boolean useMouseControl = false;
@@ -39,7 +35,11 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
                         BaseRequestRegistry.TRIGGER_REQUEST_FORWARD,
                         BaseRequestRegistry.TRIGGER_REQUEST_BACK,
                         BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT,
-                        BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNUP,
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN,
+                        BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_ROLLRIGHT
                 },
                 new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED});
     }
@@ -81,7 +81,7 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
                     logger.debug("mouse move " + point);
                     int dx = point.getX() - lastpoint.getX();
                     int dy = point.getY() - lastpoint.getY();
-                    fpmc.firstPersonTransformer.mouseMove(dx, dy);
+                    fpmc.getFirstPersonTransformer().mouseMove(dx, dy);
                 }
                 lastpoint = point;
             }
@@ -93,6 +93,9 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
         if (firstpersonmovingsystemdebuglog) {
             logger.debug("got request " + request.getType());
         }
+        // update by delta time to honor defined speeds
+        double assumedDeltaTime = 0.1;
+
         if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_BACK)) {
             int userEntityId = (int) request.getUserEntityId();
 
@@ -106,8 +109,11 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
             m4 = m4.multiply(Matrix4.buildTransformationMatrix(refVector, m4.extractQuaternion()));
             //userEntity.getSceneNode().getTransform().setPosition(m4.extractPosition());
             //userEntity.getSceneNode().getTransform().setRotation(m4.extractQuaternion());
-            fpmc.moveForward(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD) ? 0.1 : -0.1);
+            fpmc.moveForwardByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD) ? assumedDeltaTime : -assumedDeltaTime);
             //  movedirection = orientation.forward +
+            if (firstpersonmovingsystemdebuglog) {
+                logger.debug("new position:" + fpmc.getFirstPersonTransformer().getTransform().getPosition());
+            }
             return true;
         }
         if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
@@ -115,9 +121,23 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
 
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
             FirstPersonMovingComponent fpmc = FirstPersonMovingComponent.getFirstPersonMovingComponent(userEntity);
+            fpmc.getFirstPersonTransformer().incHeadingByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT) ? assumedDeltaTime : -assumedDeltaTime);
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNUP) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN)) {
+            int userEntityId = (int) request.getUserEntityId();
 
+            EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
+            FirstPersonMovingComponent fpmc = FirstPersonMovingComponent.getFirstPersonMovingComponent(userEntity);
+            fpmc.getFirstPersonTransformer().incPitchByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNUP) ? assumedDeltaTime : -assumedDeltaTime);
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLRIGHT)) {
+            int userEntityId = (int) request.getUserEntityId();
 
-            fpmc.firstPersonTransformer.incHeading(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT) ? 0.1 : -0.1);
+            EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
+            FirstPersonMovingComponent fpmc = FirstPersonMovingComponent.getFirstPersonMovingComponent(userEntity);
+            fpmc.getFirstPersonTransformer().incRollByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT) ? assumedDeltaTime : -assumedDeltaTime);
             return true;
         }
 

@@ -73,7 +73,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     public SimpleMapProjection projection;
 
     private boolean needsBackProjection = false;
-    EllipsoidCalculations/*Flight3D*/ backProjectionProvider;
+    EllipsoidCalculations/*Flight3D*/ ellipsoidCalculations;
     GraphBackProjectionProvider backProjection;
 
     // Das was mal world in TravelScenes war. Eine destination node an der alles(?) haengt, zumindest statischer Content(terrain), der
@@ -96,13 +96,13 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
      *
      * 27.12.21: SceneConfig (das ist NUR der scene sub Part) und center mal reinstecken.
      */
-    public SphereSystem(EllipsoidCalculations/*Flight3D*/ backProjectionProvider, GraphBackProjectionProvider backProjection,GeoCoordinate center, SceneConfig sceneConfig) {
+    public SphereSystem(EllipsoidCalculations/*Flight3D*/ ellipsoidCalculations, GraphBackProjectionProvider backProjection,GeoCoordinate center, SceneConfig sceneConfig) {
         super(new String[]{}, new RequestType[]{USER_REQUEST_SPHERE}, new EventType[]{});
         //??updatepergroup = false;
-        this.backProjectionProvider = backProjectionProvider;
+        this.ellipsoidCalculations = ellipsoidCalculations;
         this.backProjection=backProjection;
-        if (backProjectionProvider!=null){
-            SystemManager.putDataProvider("roundbodyconversionprovider", new RoundBodyConversionsProvider(backProjectionProvider));
+        if (ellipsoidCalculations!=null){
+            SystemManager.putDataProvider("ellipsoidconversionprovider", new EllipsoidConversionsProvider(ellipsoidCalculations));
         }
         this.sceneConfig=sceneConfig;
         this.center=center;
@@ -485,19 +485,6 @@ class SphereViewPointProvider implements DataProvider {
             viewPoints.add(new ViewPoint(vcfg.name, vcfg.transform));
         }
         return viewPoints;
-    }
-}
-
-class RoundBodyConversionsProvider implements DataProvider{
-    EllipsoidCalculations roundBodyCalculations;
-    public RoundBodyConversionsProvider(EllipsoidCalculations roundBodyCalculations){
-        this.roundBodyCalculations = roundBodyCalculations;
-
-    }
-
-    @Override
-    public Object getData(Object[] parameter) {
-        return roundBodyCalculations;
     }
 }
 

@@ -16,14 +16,18 @@ import de.yard.threed.engine.platform.common.RequestType;
  */
 public class BaseRequestRegistry {
 
-    // 6 general moving requests (might be mapped to keyes w/a/s/d, CURLEFT;CURRIGHT,CURUP,CURDOWN
-    public static RequestType TRIGGER_REQUEST_FORWARD = RequestType.register(2000, "TRIGGER_REQUEST_FORWARD");
-    public static RequestType TRIGGER_REQUEST_BACK = RequestType.register(2001, "TRIGGER_REQUEST_BACK");
-    public static RequestType TRIGGER_REQUEST_TURNLEFT = RequestType.register(2002, "TRIGGER_REQUEST_TURNLEFT");
-    public static RequestType TRIGGER_REQUEST_TURNRIGHT = RequestType.register(2003, "TRIGGER_REQUEST_TURNRIGHT");
-
-    public static RequestType TRIGGER_REQUEST_LEFT = RequestType.register(2011, "TRIGGER_REQUEST_LEFT");
-    public static RequestType TRIGGER_REQUEST_RIGHT = RequestType.register(2012, "TRIGGER_REQUEST_RIGHT");
+    // 10 general moving requests (might be mapped to keys w/a/s/d, CURLEFT;CURRIGHT,CURUP,CURDOWN
+    // Values up to 1016 seem to be in use already. Start a new cycle from 1100.
+    public static RequestType TRIGGER_REQUEST_FORWARD = RequestType.register(1100, "TRIGGER_REQUEST_FORWARD");
+    public static RequestType TRIGGER_REQUEST_BACK = RequestType.register(1101, "TRIGGER_REQUEST_BACK");
+    public static RequestType TRIGGER_REQUEST_TURNLEFT = RequestType.register(1102, "TRIGGER_REQUEST_TURNLEFT");
+    public static RequestType TRIGGER_REQUEST_TURNRIGHT = RequestType.register(1103, "TRIGGER_REQUEST_TURNRIGHT");
+    public static RequestType TRIGGER_REQUEST_TURNUP = RequestType.register(1104, "TRIGGER_REQUEST_TURNUP");
+    public static RequestType TRIGGER_REQUEST_TURNDOWN = RequestType.register(1105, "TRIGGER_REQUEST_TURNDOWN");
+    public static RequestType TRIGGER_REQUEST_ROLLLEFT = RequestType.register(1106, "TRIGGER_REQUEST_ROLLLEFT");
+    public static RequestType TRIGGER_REQUEST_ROLLRIGHT = RequestType.register(1107, "TRIGGER_REQUEST_ROLLRIGHT");
+    public static RequestType TRIGGER_REQUEST_LEFT = RequestType.register(1108, "TRIGGER_REQUEST_LEFT");
+    public static RequestType TRIGGER_REQUEST_RIGHT = RequestType.register(1109, "TRIGGER_REQUEST_RIGHT");
 
     public static Request buildForwardRequest(int userEntityId) {
         return new Request(TRIGGER_REQUEST_FORWARD, new Payload(),userEntityId);

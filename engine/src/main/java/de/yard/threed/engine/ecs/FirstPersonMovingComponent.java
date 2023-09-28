@@ -15,9 +15,9 @@ import de.yard.threed.engine.Transform;
 public class FirstPersonMovingComponent extends EcsComponent {
     static Log logger = Platform.getInstance().getLog(FirstPersonMovingComponent.class);
     public static String TAG = "FirstPersonMovingComponent";
-    boolean firstpersonmovementdebuglog = true;
+    public boolean firstpersonmovementdebuglog = true;
     //LocalTransform currentposition;
-    FirstPersonTransformer firstPersonTransformer;
+    private FirstPersonTransformer firstPersonTransformer;
     boolean automove;
 
     /**
@@ -48,6 +48,18 @@ public class FirstPersonMovingComponent extends EcsComponent {
         firstPersonTransformer.moveForwardAsCamera(amount);
     }
 
+    public void moveForwardByDelta(double delta) {
+        /*if (currentposition == null) {
+            logger.error("no currentposition.");
+            return;// null;
+        }*/
+        if (firstpersonmovementdebuglog) {
+            logger.debug("moveForward: completed,delta=" + delta);
+        }
+        //return pathcompleted;
+        firstPersonTransformer.moveForwardAsCameraByDelta(delta);
+    }
+
 
     public static FirstPersonMovingComponent getFirstPersonMovingComponent(EcsEntity e) {
         return (FirstPersonMovingComponent) e.getComponent(FirstPersonMovingComponent.TAG);
@@ -57,6 +69,9 @@ public class FirstPersonMovingComponent extends EcsComponent {
         return currentposition;
     }*/
 
+    public FirstPersonTransformer getFirstPersonTransformer(){
+        return firstPersonTransformer;
+    }
 
     public boolean hasAutomove() {
         return automove;

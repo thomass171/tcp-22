@@ -67,7 +67,7 @@ public class FlightLocation {
         //System.out.println("x=" + Degree.buildFromRadians(a[0]));
         //System.out.println("y=" + Degree.buildFromRadians(a[1]));
         //System.out.println("z=" + Degree.buildFromRadians(a[2]));
-        EllipsoidCalculations rbcp = TrafficHelper.getRoundBodyConversionsProviderByDataprovider();
+        EllipsoidCalculations rbcp = TrafficHelper.getEllipsoidConversionsProviderByDataprovider();
         FlightLocation fl = new FlightLocation(rbcp.fromCart(posRot.position), Degree.buildFromRadians(a[2]), Degree.buildFromRadians(a[1]));
         return fl;
     }

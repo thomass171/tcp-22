@@ -40,16 +40,16 @@ public class FirstPersonController {
     public void update(double tpf) {
         //logger.debug("update: tpf="+tpf);
         if (Input.GetKey(KeyCode.UpArrow)) {
-            transformer.incPitch(tpf);
+            transformer.incPitchByDelta(tpf);
         }
         if (Input.GetKey(KeyCode.DownArrow)) {
-            transformer.incPitch(-tpf);
+            transformer.incPitchByDelta(-tpf);
         }
         if (Input.GetKey(KeyCode.LeftArrow)) {
-            transformer.incHeading(tpf);
+            transformer.incHeadingByDelta(tpf);
         }
         if (Input.GetKey(KeyCode.RightArrow)) {
-            transformer.incHeading(-tpf);
+            transformer.incHeadingByDelta(-tpf);
         }
         if (Input.GetKey(KeyCode.W)) {
             if (forCamera) {
@@ -75,9 +75,9 @@ public class FirstPersonController {
         if (Input.GetKey(KeyCode.R)) {
             //roll
             if (Input.GetKey(KeyCode.Shift)) {
-                transformer.incRoll(tpf);
+                transformer.incRollByDelta(tpf);
             } else {
-                transformer.incRoll(-tpf);
+                transformer.incRollByDelta(-tpf);
             }
         }
         if (moveByMouseEnabled) {
@@ -93,9 +93,9 @@ public class FirstPersonController {
                 //logger.debug("dragging offset " + offset);
                 double dragfactor = 0.003;
                 double dragtpfheading = (double) offset.getX() * dragfactor;
-                transformer.incHeading(dragtpfheading);
+                transformer.incHeadingByDelta(dragtpfheading);
                 double dragtpfpitch = -(double) offset.getY() * dragfactor;
-                transformer.incPitch(dragtpfpitch);
+                transformer.incPitchByDelta(dragtpfpitch);
                 startdrag = point;
                 possibleMoveByMouse = null;
             }

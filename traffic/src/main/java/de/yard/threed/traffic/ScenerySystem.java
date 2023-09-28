@@ -48,7 +48,7 @@ public class ScenerySystem extends DefaultEcsSystem {
     @Override
     public void process(Event evt) {
         if (terrainsystem20debuglog) {
-            logger.debug("got event " + evt.getType());
+            logger.debug("got event " + evt.getType() + ":" + evt);
         }
 
         if (evt.getType().equals(TeleporterSystem.EVENT_POSITIONCHANGED)) {

@@ -69,7 +69,7 @@ public class RequestType {
             return new RequestType(type, label);
         }
         if (!requestType.getLabel().equals(label)) {
-            throw new RuntimeException("inconsistent RequestType");
+            throw new RuntimeException("inconsistent RequestType " + requestType + "!=" + label);
         }
         return requestType;
     }

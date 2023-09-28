@@ -67,7 +67,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     private int mouseMoveMode = MOUSE_MOVE_MODE_SEGMENT;
     private List<MockedInput> mockedInputs = new ArrayList<MockedInput>();
     // Entity id of the current player (the one controlling the game). null unless not logged in
-    Integer userEntityId = null;
+    private Integer userEntityId = null;
 
     public InputToRequestSystem() {
         super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU}, new EventType[]{UserSystem.USER_EVENT_LOGGEDIN});
@@ -113,6 +113,10 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         keymapping.put(new KeyEntry(keyCode), requestType);
     }
 
+    public void addShiftKeyMapping(int keyCode, RequestType requestType) {
+        keymapping.put(new KeyEntry(keyCode, true), requestType);
+    }
+
     @Override
     public void init(EcsGroup group) {
         openCloseControlMenu();
@@ -148,10 +152,11 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
         for (KeyEntry key : keymapping.keySet()) {
             if (Input.GetKeyDown(key.keyCode)) {
-
-                if (userEntityId != null) {
-                    // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
-                    SystemManager.putRequest(new Request(keymapping.get(key), userEntityId));
+                if (key.shift == Input.GetKey(KeyCode.Shift)) {
+                    if (userEntityId != null) {
+                        // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
+                        SystemManager.putRequest(new Request(keymapping.get(key), userEntityId));
+                    }
                 }
             }
         }
@@ -365,6 +370,14 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         return userEntityId;
     }
 
+    /**
+     * Typically userEntityId is set by receiving a login event.
+     * This is an option for setting userEntityId if no login(System) is used.
+     */
+    public void setUserEntityId(int userEntityId) {
+        this.userEntityId = userEntityId;
+    }
+
     private void processPointer(Ray ray, boolean left) {
 
         for (PointerHandler pointerHandler : pointerHandlerList) {
@@ -374,7 +387,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
     private void processTrigger(Ray ray, boolean left) {
 
-        logger.debug("processTrigger, left=" + left + ",userEntityId=" + (int)userEntityId);
+        logger.debug("processTrigger, left=" + left + ",userEntityId=" + (int) userEntityId);
 
         if (userEntityId != null) {
             for (ControlPanel cp : controlPanelList) {
@@ -385,7 +398,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             }
 
             for (PointerHandler pointerHandler : pointerHandlerList) {
-                Request request = pointerHandler.getRequestByTrigger((int)userEntityId, ray, left);
+                Request request = pointerHandler.getRequestByTrigger((int) userEntityId, ray, left);
                 if (request != null) {
                     SystemManager.putRequest(request);
                 }
@@ -396,9 +409,15 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
 class KeyEntry {
     public int keyCode;
+    public boolean shift = false;
 
     KeyEntry(int keyCode) {
         this.keyCode = keyCode;
+    }
+
+    KeyEntry(int keyCode, boolean shift) {
+        this.keyCode = keyCode;
+        this.shift = shift;
     }
 }
 

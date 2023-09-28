@@ -13,7 +13,7 @@ public class FirstPersonTransformer {
     static Log logger = Platform.getInstance().getLog(FirstPersonTransformer.class);
     //the rotation around the Y axis of the camera
     // speed must fit to the scene. The default might be too high/low.
-    private double movementSpeed = 10.0f; //move 10 units per getSecond
+    private double movementSpeed = 2.0f; //move 2 units per getSecond
     private double rotationSpeed = 20.0f; //move 10 units per getSecond
     private Transform target;
     // involves all three axes
@@ -36,24 +36,24 @@ public class FirstPersonTransformer {
         this.rotateMode = rotateMode;
     }
 
-    public void incPitch(double tpf) {
-        Transform.incPitch(target, new Degree(rotationSpeed * tpf));
+    public void incPitchByDelta(double delta) {
+        Transform.incPitch(target, new Degree(rotationSpeed * delta));
     }
 
     public void incPitch(Degree inc) {
         target.rotateOnAxis(new Vector3(1, 0, 0), inc);
     }
 
-    public void incHeading(double tpf) {
-        Transform.incHeading(target, new Degree(rotationSpeed * tpf));
+    public void incHeadingByDelta(double delta) {
+        Transform.incHeading(target, new Degree(rotationSpeed * delta));
     }
 
     public void incHeading(Degree inc) {
         target.rotateOnAxis(new Vector3(0, 1, 0), inc);
     }
 
-    public void incRoll(double tpf) {
-        Transform.incRoll(target, new Degree(rotationSpeed * tpf));
+    public void incRollByDelta(double delta) {
+        Transform.incRoll(target, new Degree(rotationSpeed * delta));
     }
 
     public void incRoll(Degree inc) {
@@ -80,8 +80,16 @@ public class FirstPersonTransformer {
         Transform.moveForward(target, amount);
     }
 
+    public void moveForwardByDelta(double delta) {
+        Transform.moveForward(target, movementSpeed * delta);
+    }
+
     public void moveForwardAsCamera(double amount) {
         Transform.moveForwardAsCamera(target, amount);
+    }
+
+    public void moveForwardAsCameraByDelta(double delta) {
+        Transform.moveForwardAsCamera(target, movementSpeed * delta);
     }
 
     public void moveSidew(double amount) {
@@ -102,5 +110,9 @@ public class FirstPersonTransformer {
             Quaternion rotation = Quaternion.buildFromAngles(pitch, heading, 0);
             target.setRotation(rotation);
         }
+    }
+
+    public Transform getTransform() {
+        return target;
     }
 }
