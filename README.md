@@ -12,13 +12,18 @@ directory $HOME/Sites. Set shell variable HOSTDIR, eg.:
 ```
 export HOSTDIR=$HOME/Sites/tcp-22
 ```
-and create that base directory. Deploy static content bundles needed for building to $HOSTDIR:
+and create that base directory. 
+
+Run the following steps either manually or use the script bin/buildAndDeploy.sh for running all.
+
+Deploy static content bundles needed for building to $HOSTDIR:
 
 ```
 sh bin/deployBundle.sh data
 sh bin/deployBundle.sh corrupted
 sh bin/deployBundle.sh -m maze
 sh bin/deployBundle.sh -S -m engine
+sh bin/deployBundle.sh -m traffic
 ```
  
 The module platform-jme requires customized JMonkeyEngine build artifact files, which were built
@@ -135,7 +140,8 @@ The following properties are evaluated from the environment or system properties
 
 ADDITIONALBUNDLE
 
-This is a colon separated list of bundle locations, eg. filesystem paths or web URLs.
+This is a colon separated list of bundle locations, either filesystem paths or web URLs. The default
+  bundle location is $HOSTDIR/bundles for filesystems and 'origin'/bundles from a browser.
 
 ## Properties
 (what is the difference to 'Settings'?)

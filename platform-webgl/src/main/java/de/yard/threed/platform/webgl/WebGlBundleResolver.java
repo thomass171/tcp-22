@@ -9,6 +9,11 @@ import de.yard.threed.core.resource.ResourcePath;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A resolver that knows on which HTTP server a specific bundle can be found. The default resolver
+ * points to HostPageBaseURL(origin).
+ * Custom using a configuration like "b1,b2,b3@http://xx.yy:ppp/context".
+ */
 public class WebGlBundleResolver extends BundleResolver {
     static Log logger = Platform.getInstance().getLog(WebGlBundleResolver.class);
 
@@ -16,7 +21,7 @@ public class WebGlBundleResolver extends BundleResolver {
     String url;
 
     public WebGlBundleResolver() {
-        logger.debug("Building default WebGlBundleResolver ");
+        logger.info("Building default WebGlBundleResolver using HostPageBaseURL/origin");
 
         bundlelist = null;
         url = null;
@@ -28,7 +33,7 @@ public class WebGlBundleResolver extends BundleResolver {
      * @param path
      */
     public WebGlBundleResolver(String path) {
-        logger.debug("Building WebGlBundleResolver for " + path);
+        logger.info("Building WebGlBundleResolver for " + path);
         if (!parse(path)) {
             bundlelist = new String[]{};
             url = "";

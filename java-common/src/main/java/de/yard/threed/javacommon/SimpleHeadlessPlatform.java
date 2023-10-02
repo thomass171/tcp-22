@@ -43,6 +43,7 @@ import java.util.List;
  * Because its used for testing in "engine", a simple node tree (incl mesh) is useful indeed.
  * 13.9.23: Also material and texture.
  * 23.9.23: Also geometry and ray (intersections).
+ * 29.9.23: Also used for replacing ToolsPlatform.
  * <p>
  * Created on 05.12.18.
  */

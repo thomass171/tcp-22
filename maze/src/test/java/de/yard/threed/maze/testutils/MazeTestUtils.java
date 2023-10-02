@@ -229,7 +229,8 @@ public class MazeTestUtils {
         properties.put("initialMaze", gridname);
         properties.putAll(additionalPproperties);
         // buildDefaultConfigurationWithEnv is needed for HOSTDIR
-        SceneRunnerForTesting sceneRunner = SceneRunnerForTesting.setupForScene(initial_frames, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties), new String[]{"engine", "data", "maze"});
+        SceneRunnerForTesting sceneRunner = SceneRunnerForTesting.setupForScene(initial_frames, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties),
+                /*1.10.23 provided by scene new String[]{"engine", "data", "maze"}*/null);
         return sceneRunner;
     }
 

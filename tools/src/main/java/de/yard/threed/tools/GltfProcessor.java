@@ -7,6 +7,7 @@ import de.yard.threed.core.loader.LoaderGLTF;
 import de.yard.threed.core.loader.PortableModelDefinition;
 import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.loader.AbstractLoaderBuilder;
+import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.DefaultResourceReader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
@@ -16,6 +17,8 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.loader.StringReader;
+import de.yard.threed.javacommon.SimpleHeadlessPlatform;
+import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -23,6 +26,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Optional;
 
 /**
@@ -46,7 +50,8 @@ public class GltfProcessor {
     }
 
     public static void main(String[] argv) {
-        ToolsPlatform.init();
+        // argv do not contain platform relevant parameter, but env does (eg. HOSTDIR, ADDITIONALBUNDLE)
+        new SimpleHeadlessPlatformFactory().createPlatform(ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
         try {
             new GltfProcessor().runMain(argv);
         } catch (Exception e) {

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Deploy build artifacts from $BUILDDIR to $HOSTDIR (which might be a remote directory)
-# Only native build artifacts for now.
+# Deploy the GWT/webgl build artifacts from $BUILDDIR to $HOSTDIR (which might be a remote directory)
+# Also deploys the HTML landing page (tcp-22.html).
 #
 
 OWNDIR=`dirname $0`

@@ -84,6 +84,7 @@ public class PlatformWebGl extends Platform {
             additionalBundle = additionalBundle.replace(" ", "+");
         }
         instance.bundleResolver.addAll(WebGlBundleResolver.buildFromPath(additionalBundle));
+        // lowest priority default resolver for HostPageBaseURL(origin)
         instance.bundleResolver.add(new WebGlBundleResolver());
         return platformInternals;//(Platform) Platform.instance;
     }

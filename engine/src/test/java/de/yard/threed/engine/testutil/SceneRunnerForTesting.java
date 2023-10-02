@@ -53,6 +53,10 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
             if (sceneIinitMethod != null) {
                 throw new RuntimeException("sceneIinitMethod cannot be used on real scene");
             }
+            if (bundlelist != null) {
+                throw new RuntimeException("bundlelist cannot be used on real scene. Should have/use getPreInitBundle()");
+            }
+            bundlelist = scene.getPreInitBundle();
         }
 
         initAbstract(null/*JmeScene.getInstance(), rm*/, scene);

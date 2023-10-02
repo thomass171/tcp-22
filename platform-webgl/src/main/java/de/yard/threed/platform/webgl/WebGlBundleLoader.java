@@ -192,7 +192,7 @@ public class WebGlBundleLoader implements NativeBundleLoader {
     }
 
     /**
-     * Geht im Prinzip so wie der preload. Erst das directory, und dann den ganzen Inhalt.
+     * Like a preload. First the directory, then the content.
      *
      * @param bundlename
      * @param loadlistener

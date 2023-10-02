@@ -1,13 +1,16 @@
 #!/bin/sh
 #
-# Kopiert alle Dateien anhand der Filelist in das bundle Verzeichnis
-# in BUNDLEDIR.
+# Copies all files defined in filelist.txt from $CWD/$1 to the
+# bundle destination directory BUNDLEDIR ($HOSTDIR/bundles/$1).
+# Also does preprocess of pcm-files.
+# Each copied file from filelist.txt plus those created are added to directory.txt in destination folder.
 #
 # 14.11.18: Needs config files filelist.
 #
-# Und macht dann einen preprocess. Die Ausgabe am besten umleiten, da kommt viel.
+# Die Ausgabe am besten umleiten, da kommt viel.
 # Muesste vielleicht mal pro Preprocess gemacht werden, sonst nutzt es nicht viel.
 #
+# 30.9.23: Also used by external projects, so strictly relying on HOSTDIR, cwd and parameter
 #
 
 OWNDIR=`dirname $0`
