@@ -1,7 +1,10 @@
 package de.yard.threed.platform.jme;
 
+import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.platform.PlatformFactory;
+import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.Setup;
@@ -21,7 +24,9 @@ public class Main {
 
     public Main(String[] args) {
 
-        JmeSceneRunner nsr = JmeSceneRunner.init(ConfigurationByEnv.buildDefaultConfigurationWithArgsAndEnv(args, getInitialProperties()));
+        Configuration configuration = ConfigurationByEnv.buildDefaultConfigurationWithArgsAndEnv(args, getInitialProperties());
+        PlatformFactory platformFactory=getPlatformFactory(configuration);
+        JmeSceneRunner nsr = JmeSceneRunner.init(platformFactory.createPlatform(configuration));
 
         logger = Platform.getInstance().getLog(Main.class);
         logger.info("Loading JME Client");
@@ -59,6 +64,13 @@ public class Main {
         // no exit() here. It will terminate process immediately. But main thread is in ...
     }
 
+    /**
+     * To be overridden.
+     */
+    protected PlatformFactory getPlatformFactory(Configuration configuration) {
+        return new JmePlatformFactory();
+    }
+
     public static void main(String[] args) {
         new Main(args);
     }
@@ -66,7 +78,7 @@ public class Main {
     /**
      * Ready to be overridden.
      */
-    public HashMap<String, String> getInitialProperties(){
+    public HashMap<String, String> getInitialProperties() {
         return Setup.setUp();
     }
 }

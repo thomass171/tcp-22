@@ -10,8 +10,6 @@ public class Config {
     private static boolean asyncdebuglog = false;
     public static boolean loaderdebuglog = false;
     public static boolean modelloaddebuglog = false;
-    public static boolean terrainloaddebuglog = false;
-    public static boolean materiallibdebuglog = false;
     public static boolean animationdebuglog = false;
 
     public static void initFromArguments() {

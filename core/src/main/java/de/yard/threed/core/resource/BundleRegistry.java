@@ -20,6 +20,7 @@ public class BundleRegistry {
     static Map<String, Bundle> bundles = new HashMap<String, Bundle>();
     //Ueber Provider lassen sich relative Resourcen über Bundle hinweg suchen.
     static private List<BundleResourceProvider> providerlist = new ArrayList<BundleResourceProvider>();
+    // 3.10.23: TODO does not belong here
     public static String TERRAYSYNCPREFIX = "Terrasync-";
     public static boolean bundledebuglog = false;
 
@@ -126,6 +127,7 @@ public class BundleRegistry {
 
 
     //TODO move to resolver?
+    //3.10.23: Its no resolver task, should??? TODO does not belong here. Only for FG? Maybe move to Bundle and extend Bundle?
     public static String getDirectoryName(String bundlename, boolean b) {
         if (StringUtils.startsWith(bundlename, BundleRegistry.TERRAYSYNCPREFIX)) {
             // bucket or model bundle
