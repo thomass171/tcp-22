@@ -5,6 +5,8 @@ import de.yard.threed.core.platform.NativeEventBus;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
+import de.yard.threed.core.resource.BundleResolver;
+import de.yard.threed.core.resource.BundleResolverFactory;
 
 
 import java.util.HashMap;
@@ -15,6 +17,7 @@ import java.util.HashMap;
 public class SimpleHeadlessPlatformFactory implements PlatformFactory {
 
     NativeEventBus optionalEventbus = null;
+    BundleResolverFactory[] customBundleResolverfactories = null;
 
     public SimpleHeadlessPlatformFactory() {
     }
@@ -23,8 +26,23 @@ public class SimpleHeadlessPlatformFactory implements PlatformFactory {
         this.optionalEventbus = eventBus;
     }
 
+    public SimpleHeadlessPlatformFactory(NativeEventBus eventBus, BundleResolverFactory... customBundleResolverfactories) {
+        this.optionalEventbus = eventBus;
+        this.customBundleResolverfactories = customBundleResolverfactories;
+    }
+
+    public SimpleHeadlessPlatformFactory(BundleResolverFactory... customBundleResolverfactories) {
+        this.customBundleResolverfactories = customBundleResolverfactories;
+    }
+
     @Override
     public PlatformInternals createPlatform(Configuration configuration) {
-        return SimpleHeadlessPlatform.init(configuration, optionalEventbus);
+        PlatformInternals platformInternals = SimpleHeadlessPlatform.init(configuration, optionalEventbus);
+        if (customBundleResolverfactories != null) {
+            for (BundleResolverFactory brf : customBundleResolverfactories) {
+                Platform.getInstance().addBundleResolver(brf.build());
+            }
+        }
+        return platformInternals;
     }
 }
