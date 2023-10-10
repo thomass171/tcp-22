@@ -17,7 +17,7 @@ public class FirstPersonMovingComponent extends EcsComponent {
     public static String TAG = "FirstPersonMovingComponent";
     public boolean firstpersonmovementdebuglog = true;
     private FirstPersonTransformer firstPersonTransformer;
-    private boolean autoForward;
+    private boolean autoForward, autoBack, autoTurnleft, autoTurnright, autoTurnup, autoTurndown, autoRollleft, autoRollright;
 
     /**
      *
@@ -52,6 +52,34 @@ public class FirstPersonMovingComponent extends EcsComponent {
         firstPersonTransformer.moveForwardAsCameraByDelta(delta);
     }
 
+    public void autoMoveByDelta(double delta) {
+
+        if (autoForward) {
+            firstPersonTransformer.moveForwardAsCameraByDelta(delta);
+        }
+        if (autoBack) {
+            firstPersonTransformer.moveForwardAsCameraByDelta(-delta);
+        }
+        if (autoTurnleft) {
+            firstPersonTransformer.incHeadingByDelta(delta);
+        }
+        if (autoTurnright) {
+            firstPersonTransformer.incHeadingByDelta(-delta);
+        }
+        if (autoTurnup) {
+            firstPersonTransformer.incPitchByDelta(delta);
+        }
+        if (autoTurndown) {
+            firstPersonTransformer.incPitchByDelta(-delta);
+        }
+        if (autoRollleft) {
+            firstPersonTransformer.incRollByDelta(delta);
+        }
+        if (autoRollright) {
+            firstPersonTransformer.incRollByDelta(-delta);
+        }
+    }
+
     public static FirstPersonMovingComponent getFirstPersonMovingComponent(EcsEntity e) {
         return (FirstPersonMovingComponent) e.getComponent(FirstPersonMovingComponent.TAG);
     }
@@ -66,5 +94,33 @@ public class FirstPersonMovingComponent extends EcsComponent {
 
     public void toggleAutoForward() {
         autoForward = !autoForward;
+    }
+
+    public void toggleAutoBack() {
+        autoBack = !autoBack;
+    }
+
+    public void toggleAutoTurnleft() {
+        autoTurnleft = !autoTurnleft;
+    }
+
+    public void toggleAutoTurnright() {
+        autoTurnright = !autoTurnright;
+    }
+
+    public void toggleAutoTurnup() {
+        autoTurnup = !autoTurnup;
+    }
+
+    public void toggleAutoTurndown() {
+        autoTurndown = !autoTurndown;
+    }
+
+    public void toggleAutoRollleft() {
+        autoRollleft = !autoRollleft;
+    }
+
+    public void toggleAutoRollright() {
+        autoRollright = !autoRollright;
     }
 }

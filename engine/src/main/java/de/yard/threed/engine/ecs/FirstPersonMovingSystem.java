@@ -26,6 +26,8 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
     // Mouse movement is different between platforms and hard to unify. So stay with key control
     // and focus on VR
     boolean useMouseControl = false;
+    // update by delta time to honor defined speeds
+    static public double assumedDeltaTimeWhenStepping = 0.1;
 
     /**
      *
@@ -41,8 +43,22 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
                         BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT,
                         BaseRequestRegistry.TRIGGER_REQUEST_ROLLRIGHT,
                         //
-                        BaseRequestRegistry.TRIGGER_REQUEST_STARTFORWARD,
-                        BaseRequestRegistry.TRIGGER_REQUEST_STOPFORWARD
+                        BaseRequestRegistry.TRIGGER_REQUEST_START_FORWARD,
+                        BaseRequestRegistry.TRIGGER_REQUEST_STOP_FORWARD,
+                        BaseRequestRegistry.TRIGGER_REQUEST_START_BACK,
+                        BaseRequestRegistry.TRIGGER_REQUEST_STOP_BACK,
+                        BaseRequestRegistry.TRIGGER_REQUEST_START_TURNLEFT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNLEFT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_START_TURNRIGHT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNRIGHT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_START_TURNUP,
+                        BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNUP,
+                        BaseRequestRegistry.TRIGGER_REQUEST_START_TURNDOWN,
+                        BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNDOWN,
+                        BaseRequestRegistry.TRIGGER_REQUEST_START_ROLLLEFT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLLEFT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_START_ROLLRIGHT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLRIGHT
                 },
                 new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED});
     }
@@ -71,9 +87,7 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
 
         FirstPersonMovingComponent fpmc = (FirstPersonMovingComponent) group.cl.get(0);
 
-        if (fpmc.hasAutoForward()) {
-            fpmc.moveForwardByDelta(delta);
-        }
+        fpmc.autoMoveByDelta(delta);
 
         if (useMouseControl) {
             Point point = Input.getMouseMove();
@@ -95,8 +109,6 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
         if (firstpersonmovingsystemdebuglog) {
             logger.debug("got request " + request.getType());
         }
-        // update by delta time to honor defined speeds
-        double assumedDeltaTime = 0.1;
 
         if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_BACK)) {
             int userEntityId = (int) request.getUserEntityId();
@@ -111,7 +123,7 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
             m4 = m4.multiply(Matrix4.buildTransformationMatrix(refVector, m4.extractQuaternion()));
             //userEntity.getSceneNode().getTransform().setPosition(m4.extractPosition());
             //userEntity.getSceneNode().getTransform().setRotation(m4.extractQuaternion());
-            fpmc.moveForwardByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD) ? assumedDeltaTime : -assumedDeltaTime);
+            fpmc.moveForwardByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD) ? assumedDeltaTimeWhenStepping : -assumedDeltaTimeWhenStepping);
             //  movedirection = orientation.forward +
             if (firstpersonmovingsystemdebuglog) {
                 logger.debug("new position:" + fpmc.getFirstPersonTransformer().getTransform().getPosition());
@@ -123,7 +135,7 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
 
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
             FirstPersonMovingComponent fpmc = FirstPersonMovingComponent.getFirstPersonMovingComponent(userEntity);
-            fpmc.getFirstPersonTransformer().incHeadingByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT) ? assumedDeltaTime : -assumedDeltaTime);
+            fpmc.getFirstPersonTransformer().incHeadingByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT) ? assumedDeltaTimeWhenStepping : -assumedDeltaTimeWhenStepping);
             return true;
         }
         if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNUP) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN)) {
@@ -131,7 +143,7 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
 
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
             FirstPersonMovingComponent fpmc = FirstPersonMovingComponent.getFirstPersonMovingComponent(userEntity);
-            fpmc.getFirstPersonTransformer().incPitchByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNUP) ? assumedDeltaTime : -assumedDeltaTime);
+            fpmc.getFirstPersonTransformer().incPitchByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNUP) ? assumedDeltaTimeWhenStepping : -assumedDeltaTimeWhenStepping);
             return true;
         }
         if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLRIGHT)) {
@@ -139,11 +151,39 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
 
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
             FirstPersonMovingComponent fpmc = FirstPersonMovingComponent.getFirstPersonMovingComponent(userEntity);
-            fpmc.getFirstPersonTransformer().incRollByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT) ? assumedDeltaTime : -assumedDeltaTime);
+            fpmc.getFirstPersonTransformer().incRollByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT) ? assumedDeltaTimeWhenStepping : -assumedDeltaTimeWhenStepping);
             return true;
         }
-        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STARTFORWARD) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOPFORWARD)) {
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_FORWARD) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_FORWARD)) {
             firstPersonMovingComponent(request, fpmc -> fpmc.toggleAutoForward());
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_BACK) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_BACK)) {
+            firstPersonMovingComponent(request, fpmc -> fpmc.toggleAutoBack());
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_TURNLEFT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNLEFT)) {
+            firstPersonMovingComponent(request, fpmc -> fpmc.toggleAutoTurnleft());
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_TURNRIGHT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNRIGHT)) {
+            firstPersonMovingComponent(request, fpmc -> fpmc.toggleAutoTurnright());
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_TURNUP) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNUP)) {
+            firstPersonMovingComponent(request, fpmc -> fpmc.toggleAutoTurnup());
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_TURNDOWN) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNDOWN)) {
+            firstPersonMovingComponent(request, fpmc -> fpmc.toggleAutoTurndown());
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_ROLLLEFT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLLEFT)) {
+            firstPersonMovingComponent(request, fpmc -> fpmc.toggleAutoRollleft());
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_ROLLRIGHT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLRIGHT)) {
+            firstPersonMovingComponent(request, fpmc -> fpmc.toggleAutoRollright());
             return true;
         }
         return false;

@@ -297,6 +297,12 @@ public class WebGlSceneRenderer implements AnimationController {
             int pressedkey = jspressedkeys.get(i);
             AbstractSceneRunner.getInstance().pressedkeys.add(pressedkey);
         }
+        JsArrayInteger jsreleasedkeys = WebGlInput.getUpKeys();
+        //logger.debug(""+jsreleasedkeys+" keys pressed");
+        for (int i = 0; i < jsreleasedkeys.length(); i++) {
+            int releasedkey = jsreleasedkeys.get(i);
+            AbstractSceneRunner.getInstance().releasedkeys.add(releasedkey);
+        }
         // attach model load by platform internal (GLTF)loader.
         List<WebGlLoaderData> loadedmodel = WebGlInput.getLoadedmodelList();
         for (WebGlLoaderData ld : loadedmodel) {

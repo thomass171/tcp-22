@@ -130,6 +130,10 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         keymapping.put(new KeyEntry(keyCode, false, true), requestType);
     }
 
+    public void addShiftKeyReleaseMapping(int keyCode, RequestType requestType) {
+        keymapping.put(new KeyEntry(keyCode, true, true), requestType);
+    }
+
     @Override
     public void init(EcsGroup group) {
         openCloseControlMenu();
@@ -173,12 +177,12 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 }
             }
             if (key.release && Input.getKeyUp(key.keyCode)) {
-                logger.debug("release");
-                if (userEntityId != null) {
-                    // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
-                    SystemManager.putRequest(new Request(keymapping.get(key), userEntityId));
+                if (key.shift == Input.getKey(KeyCode.Shift)) {
+                    if (userEntityId != null) {
+                        // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
+                        SystemManager.putRequest(new Request(keymapping.get(key), userEntityId));
+                    }
                 }
-
             }
         }
 

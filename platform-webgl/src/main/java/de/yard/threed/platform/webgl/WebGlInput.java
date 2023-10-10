@@ -18,11 +18,6 @@ import java.util.List;
  */
 public class WebGlInput {
 
-    /*public static boolean isKeyDown(int code){
-        int i = getKeyDown();
-        return(i == code);
-
-    }*/
     static List<Integer> stillpressed = new ArrayList();
 
     public static JsArrayInteger getPressedKeys() {
@@ -49,8 +44,7 @@ public class WebGlInput {
     }
 
     /**
-     * Alle gespeicherten Inputevents wieder loeschen und die gedrückten
-     * speichern, um die immer noch gedrueckten ermitteln zu koennen.
+     * Delete all saved input events and collect new for pressed keys.
      *
      * @param pressedkeys
      * @param upkeys

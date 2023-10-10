@@ -402,6 +402,11 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
+    public boolean getKeyUp(int keycode) {
+        return AbstractSceneRunner.getInstance().keyReleased(keycode);
+    }
+
+    @Override
     public Point getMouseClick() {
         return AbstractSceneRunner.getInstance().getMouseClick();
     }
