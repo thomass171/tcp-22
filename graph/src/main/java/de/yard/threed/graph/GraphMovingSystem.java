@@ -74,20 +74,20 @@ public class GraphMovingSystem extends DefaultEcsSystem {
         // hier ist extra kein "else", weil theoretisch auch beides aktiv sein koennte (aber nicht sollte). 9.1.19: Obwohl das
         // schalten von automove darueber geht. Irgendwie nicht rund. Muesste vielleicht aus dem if raus. Oder nicht. Lassen wirs mal so.
         if (gmc.keycontrolled) {
-            if (Input.GetKey(KeyCode.W)) {
+            if (Input.getKey(KeyCode.W)) {
                 moveForward(entity, gmc, vc, vc.maximumSpeed * tpf);
             }
-            if ((Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.Shift)) || Input.GetKey(KeyCode.S)) {
+            if ((Input.getKey(KeyCode.W) && Input.getKey(KeyCode.Shift)) || Input.getKey(KeyCode.S)) {
                 moveForward(entity, gmc, vc, vc.maximumSpeed * (-tpf));
             }
             // Die speed Steuerung hier kommt sich doch mit adjustSpeed in die Quere. Velocity braucht auch einen auto...TODO
-            if (Input.GetKey(KeyCode.Plus)) {
+            if (Input.getKey(KeyCode.Plus)) {
                 vc.incMovementSpeed(1);
             }
-            if (Input.GetKey(KeyCode.Minus)) {
+            if (Input.getKey(KeyCode.Minus)) {
                 vc.incMovementSpeed(-1);
             }
-            if (Input.GetKeyDown(KeyCode.A)) {
+            if (Input.getKeyDown(KeyCode.A)) {
                 gmc.setAutomove(!gmc.hasAutomove());
                 if (!gmc.hasAutomove()) {
                     // zuruecksetzen

@@ -446,7 +446,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
     }
 
     @Override
-    public boolean GetKeyDown(int keycode) {
+    public boolean getKeyDown(int keycode) {
         return AbstractSceneRunner.getInstance().keyPressed(keycode);
     }
 
@@ -466,7 +466,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
      * @return
      */
     @Override
-    public boolean GetKey(int keycode) {
+    public boolean getKey(int keycode) {
         return AbstractSceneRunner.getInstance().keyStillPressed(keycode);
     }
 

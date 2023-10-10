@@ -61,6 +61,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     //19.10.18: Superklasse auch hier rein, weils einfach praktisch ist.
     public Scene ascene;
     public ArrayList<Integer> pressedkeys = new ArrayList<Integer>();
+    public ArrayList<Integer> releasedkeys = new ArrayList<Integer>();
     public ArrayList<Integer> stillpressedkeys = new ArrayList<Integer>();
     public static AbstractSceneRunner instance = null;
     public Point mousemove, mousepress, mouseclick, mousedrag;
@@ -230,6 +231,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
         ascene.update();
 
         pressedkeys.clear();
+        releasedkeys.clear();
         mousemove = null;
         mouseclick = null;
         mousepress = null;
@@ -273,6 +275,10 @@ public class AbstractSceneRunner implements NativeSceneRunner {
         return pressedkeys.contains(keycode);
     }
 
+    public boolean keyReleased(int keycode) {
+        return releasedkeys.contains(keycode);
+    }
+
     //@Override
     public boolean keyStillPressed(int keycode) {
         // if (renderer != null) {
@@ -299,8 +305,11 @@ public class AbstractSceneRunner implements NativeSceneRunner {
         return mousepress;
     }
 
+    /**
+     * A key was pressed or released (down or up).
+     */
     public void addKey(int k, boolean pressed) {
-        //logger.debug("Key " + key + ", pressed=" + pressed);
+        //logger.debug("addKey: key " + k + ", pressed=" + pressed);
         if (pressed) {
             // Bei Android kommen bei gehaltener Taste staendig PRESS Events.
             if (!pressedkeys.contains(k)) {
@@ -311,6 +320,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
             }
         } else {
             stillpressedkeys.remove(new Integer(k));
+            releasedkeys.add(k);
         }
     }
 

@@ -39,42 +39,42 @@ public class FirstPersonController {
      */
     public void update(double tpf) {
         //logger.debug("update: tpf="+tpf);
-        if (Input.GetKey(KeyCode.UpArrow)) {
+        if (Input.getKey(KeyCode.UpArrow)) {
             transformer.incPitchByDelta(tpf);
         }
-        if (Input.GetKey(KeyCode.DownArrow)) {
+        if (Input.getKey(KeyCode.DownArrow)) {
             transformer.incPitchByDelta(-tpf);
         }
-        if (Input.GetKey(KeyCode.LeftArrow)) {
+        if (Input.getKey(KeyCode.LeftArrow)) {
             transformer.incHeadingByDelta(tpf);
         }
-        if (Input.GetKey(KeyCode.RightArrow)) {
+        if (Input.getKey(KeyCode.RightArrow)) {
             transformer.incHeadingByDelta(-tpf);
         }
-        if (Input.GetKey(KeyCode.W)) {
+        if (Input.getKey(KeyCode.W)) {
             if (forCamera) {
                 transformer.moveForwardAsCamera(tpf);
             } else {
                 transformer.moveForward(tpf);
             }
         }
-        if (Input.GetKey(KeyCode.S)) {
+        if (Input.getKey(KeyCode.S)) {
             if (forCamera) {
                 transformer.moveForwardAsCamera(-tpf);
             } else {
                 transformer.moveForward(-tpf);
             }
         }
-        if (Input.GetKey(KeyCode.A)) {
+        if (Input.getKey(KeyCode.A)) {
             transformer.moveSidew(-tpf);
         }
-        if (Input.GetKey(KeyCode.D)) {
+        if (Input.getKey(KeyCode.D)) {
             transformer.moveSidew(tpf);
         }
         // Is 'R' a common standard for rolling?
-        if (Input.GetKey(KeyCode.R)) {
+        if (Input.getKey(KeyCode.R)) {
             //roll
-            if (Input.GetKey(KeyCode.Shift)) {
+            if (Input.getKey(KeyCode.Shift)) {
                 transformer.incRollByDelta(tpf);
             } else {
                 transformer.incRollByDelta(-tpf);

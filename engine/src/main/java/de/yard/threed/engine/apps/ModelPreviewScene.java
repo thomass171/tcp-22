@@ -255,45 +255,45 @@ public class ModelPreviewScene extends Scene {
     public void update() {
         double tpf = getDeltaTime();
 
-        if (Input.GetKeyDown(KeyCode.Alpha1)) {
+        if (Input.getKeyDown(KeyCode.Alpha1)) {
             logger.debug("3 key was pressed. currentdelta=" + tpf);
             cycleMajor(1, modellist.length);
             //doppelt newModel();
         }
-        if (Input.GetKeyDown(KeyCode.Alpha2)) {
+        if (Input.getKeyDown(KeyCode.Alpha2)) {
             logger.debug("4 key was pressed. currentdelta=" + tpf);
             cycleMajor(-1, modellist.length);
             //doppelt newModel();
         }
-        if (Input.GetKeyDown(KeyCode.Plus)) {
+        if (Input.getKeyDown(KeyCode.Plus)) {
             scale *= 1.5f;
             //logger.debug("scale=" + scale);
             redraw();
         }
-        if (Input.GetKeyDown(KeyCode.Minus)) {
+        if (Input.getKeyDown(KeyCode.Minus)) {
             scale *= 1f / 1.5f;
             //logger.debug("scale=" + scale);
             redraw();
         }
-        if (Input.GetKeyDown(KeyCode.KEY_G)) {
+        if (Input.getKeyDown(KeyCode.KEY_G)) {
             toggleGround();
         }
-        if (Input.GetKeyDown(KeyCode.KEY_D)) {
+        if (Input.getKeyDown(KeyCode.KEY_D)) {
             logger.info("model tree:" + model.dump("", 1));
         }
-        if (Input.GetKey(KeyCode.KEY_LEFT)) {
+        if (Input.getKey(KeyCode.KEY_LEFT)) {
             model.getTransform().rotateZ(new Degree(rotationspeed * 1f));
         }
-        if (Input.GetKey(KeyCode.KEY_RIGHT)) {
+        if (Input.getKey(KeyCode.KEY_RIGHT)) {
             model.getTransform().rotateZ(new Degree(rotationspeed * -1f));
         }
-        if (Input.GetKey(KeyCode.KEY_UP)) {
+        if (Input.getKey(KeyCode.KEY_UP)) {
             model.getTransform().rotateX(new Degree(rotationspeed * 1f));
         }
-        if (Input.GetKey(KeyCode.KEY_DOWN)) {
+        if (Input.getKey(KeyCode.KEY_DOWN)) {
             model.getTransform().rotateX(new Degree(rotationspeed * -1f));
         }
-        if (Input.GetKeyDown(KeyCode.KEY_R)) {
+        if (Input.getKeyDown(KeyCode.KEY_R)) {
             // mal als Test wegen memory
             BundleRegistry.clear();
         }

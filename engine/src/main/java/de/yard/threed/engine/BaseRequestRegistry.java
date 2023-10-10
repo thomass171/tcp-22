@@ -29,6 +29,9 @@ public class BaseRequestRegistry {
     public static RequestType TRIGGER_REQUEST_LEFT = RequestType.register(1108, "TRIGGER_REQUEST_LEFT");
     public static RequestType TRIGGER_REQUEST_RIGHT = RequestType.register(1109, "TRIGGER_REQUEST_RIGHT");
 
+    public static RequestType TRIGGER_REQUEST_STARTFORWARD = RequestType.register(1110, "TRIGGER_REQUEST_STARTFORWARD");
+    public static RequestType TRIGGER_REQUEST_STOPFORWARD = RequestType.register(1111, "TRIGGER_REQUEST_STOPFORWARD");
+
     public static Request buildForwardRequest(int userEntityId) {
         return new Request(TRIGGER_REQUEST_FORWARD, new Payload(),userEntityId);
     }

@@ -1,9 +1,9 @@
 package de.yard.threed.engine.ecs;
 
 
-import de.yard.threed.core.Degree;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
@@ -39,7 +39,10 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
                         BaseRequestRegistry.TRIGGER_REQUEST_TURNUP,
                         BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN,
                         BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT,
-                        BaseRequestRegistry.TRIGGER_REQUEST_ROLLRIGHT
+                        BaseRequestRegistry.TRIGGER_REQUEST_ROLLRIGHT,
+                        //
+                        BaseRequestRegistry.TRIGGER_REQUEST_STARTFORWARD,
+                        BaseRequestRegistry.TRIGGER_REQUEST_STOPFORWARD
                 },
                 new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED});
     }
@@ -64,13 +67,12 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
      *
      */
     @Override
-    final public void update(EcsEntity entity, EcsGroup group, double tpf) {
+    final public void update(EcsEntity entity, EcsGroup group, double delta) {
 
         FirstPersonMovingComponent fpmc = (FirstPersonMovingComponent) group.cl.get(0);
 
-        if (fpmc.hasAutomove()) {
-            //moveForward(entity, gmc, vc, tpf * vc.movementSpeed);
-            //logger.debug("new position of "+entity.getName()+entity.getId()+" isType "+gmc.getPosition());
+        if (fpmc.hasAutoForward()) {
+            fpmc.moveForwardByDelta(delta);
         }
 
         if (useMouseControl) {
@@ -140,7 +142,10 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
             fpmc.getFirstPersonTransformer().incRollByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT) ? assumedDeltaTime : -assumedDeltaTime);
             return true;
         }
-
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STARTFORWARD) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOPFORWARD)) {
+            firstPersonMovingComponent(request, fpmc -> fpmc.toggleAutoForward());
+            return true;
+        }
         return false;
     }
 
@@ -154,6 +159,16 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
 
             userEntity.addComponent(new FirstPersonMovingComponent(userEntity.getSceneNode().getTransform()));
+        }
+    }
+
+    private void firstPersonMovingComponent(Request request, GeneralParameterHandler<FirstPersonMovingComponent> handler) {
+        int userEntityId = (int) request.getUserEntityId();
+
+        EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
+        FirstPersonMovingComponent fpmc = FirstPersonMovingComponent.getFirstPersonMovingComponent(userEntity);
+        if (fpmc != null) {
+            handler.handle(fpmc);
         }
     }
 }

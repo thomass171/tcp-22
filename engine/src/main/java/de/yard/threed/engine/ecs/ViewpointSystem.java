@@ -72,7 +72,7 @@ public class ViewpointSystem extends DefaultEcsSystem {
             warned = true;
         }
         // Darf nur einmal pro Frame gemacht werden, sonst steppe ich zu weit.         
-        if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.V)/*fuer Android || Input.GetKeyDown(KeyCode.RightArrow)*/) {
+        if (Input.getKeyDown(KeyCode.Tab) || Input.getKeyDown(KeyCode.V)/*fuer Android || Input.GetKeyDown(KeyCode.RightArrow)*/) {
             //logger.debug("tab key was pressed. currentdelta=" + tpf);
             //ViewpointComponent vc = (ViewpointComponent) group.cl.get(0);
             //int poscnt=vc.stepposition.size();

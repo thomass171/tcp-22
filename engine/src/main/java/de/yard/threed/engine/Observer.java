@@ -126,27 +126,27 @@ public class Observer implements SimpleTransform {
      */
     public void update() {
         // Feinjustierung über Buttons. Der "main move" should occur automatically when VR isType enabled.
-        if (Input.GetKeyDown(KeyCode.X)) {
+        if (Input.getKeyDown(KeyCode.X)) {
             //toggleVR();
-            if (Input.GetKey(KeyCode.Shift)) {
+            if (Input.getKey(KeyCode.Shift)) {
                 fineTuneOffset = fineTuneOffset.add(new Vector3(offsetstep, 0, 0));
             } else {
                 fineTuneOffset = fineTuneOffset.add(new Vector3(-offsetstep, 0, 0));
             }
             adjustVR();
         }
-        if (Input.GetKeyDown(KeyCode.Y)) {
+        if (Input.getKeyDown(KeyCode.Y)) {
             //toggleVR();
-            if (Input.GetKey(KeyCode.Shift)) {
+            if (Input.getKey(KeyCode.Shift)) {
                 fineTuneOffset = fineTuneOffset.add(new Vector3(0, offsetstep, 0));
             } else {
                 fineTuneOffset = fineTuneOffset.add(new Vector3(0, -offsetstep, 0));
             }
             adjustVR();
         }
-        if (Input.GetKeyDown(KeyCode.Z)) {
+        if (Input.getKeyDown(KeyCode.Z)) {
             //toggleVR();
-            if (Input.GetKey(KeyCode.Shift)) {
+            if (Input.getKey(KeyCode.Shift)) {
                 fineTuneOffset = fineTuneOffset.add(new Vector3(0, 0, offsetstep));
             } else {
                 fineTuneOffset = fineTuneOffset.add(new Vector3(0, 0, -offsetstep));

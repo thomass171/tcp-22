@@ -26,7 +26,7 @@ public class MenuCycler {
      *
      */
     public boolean update(Point mouseClickLocation) {
-        if (Input.GetKeyDown(KeyCode.M)) {
+        if (Input.getKeyDown(KeyCode.M)) {
             //logger.debug("m key was pressed. currentdelta=" + tpf);
             cycle();
         }
@@ -40,11 +40,11 @@ public class MenuCycler {
         //rechts macht irgendwas (z.B.markiert rote Box) und auch menu.
 
         //eine menuausführung koennte 'menu' auf null setzen. Darum ist das nicht unten im Block
-        if (Input.GetKeyDown(KeyCode.Alpha3) && menu!=null) {
+        if (Input.getKeyDown(KeyCode.Alpha3) && menu!=null) {
             logger.debug("3 key was pressed. ");
             menu.checkForSelectionByKey(3);
         }
-        if (Input.GetKeyDown(KeyCode.Alpha2)&& menu!=null) {
+        if (Input.getKeyDown(KeyCode.Alpha2)&& menu!=null) {
             logger.debug("2 key was pressed. ");
             menu.checkForSelectionByKey(2);
         }

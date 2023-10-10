@@ -65,23 +65,31 @@ public class FirstPersonScene extends Scene {
 
         InputToRequestSystem inputToRequestSystem = null;
         if (sceneMode.isClient()) {
+            boolean continuousMovement = true;
             inputToRequestSystem = new InputToRequestSystem();
             inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_CONTROLMENU);
-            inputToRequestSystem.addKeyMapping(KeyCode.W, BaseRequestRegistry.TRIGGER_REQUEST_FORWARD);
-            inputToRequestSystem.addKeyMapping(KeyCode.S, BaseRequestRegistry.TRIGGER_REQUEST_BACK);
 
-            inputToRequestSystem.addKeyMapping(KeyCode.LeftArrow, BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT);
-            inputToRequestSystem.addKeyMapping(KeyCode.RightArrow, BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
-            inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_TURNUP);
-            inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN);
-            inputToRequestSystem.addKeyMapping(KeyCode.R, BaseRequestRegistry.TRIGGER_REQUEST_ROLLRIGHT);
-            inputToRequestSystem.addShiftKeyMapping(KeyCode.R, BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT);
+            if (continuousMovement) {
+                inputToRequestSystem.addKeyMapping(KeyCode.W, BaseRequestRegistry.TRIGGER_REQUEST_STARTFORWARD);
+                inputToRequestSystem.addKeyReleaseMapping(KeyCode.W, BaseRequestRegistry.TRIGGER_REQUEST_STOPFORWARD);
 
-            inputToRequestSystem.setSegmentRequest(0, BaseRequestRegistry.TRIGGER_REQUEST_LEFT);
-            inputToRequestSystem.setSegmentRequest(2, BaseRequestRegistry.TRIGGER_REQUEST_RIGHT);
-            inputToRequestSystem.setSegmentRequest(3, BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT);
-            inputToRequestSystem.setSegmentRequest(5, BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
-            inputToRequestSystem.setSegmentRequest(7, BaseRequestRegistry.TRIGGER_REQUEST_FORWARD);
+            } else {
+                inputToRequestSystem.addKeyMapping(KeyCode.W, BaseRequestRegistry.TRIGGER_REQUEST_FORWARD);
+                inputToRequestSystem.addKeyMapping(KeyCode.S, BaseRequestRegistry.TRIGGER_REQUEST_BACK);
+
+                inputToRequestSystem.addKeyMapping(KeyCode.LeftArrow, BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT);
+                inputToRequestSystem.addKeyMapping(KeyCode.RightArrow, BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+                inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_TURNUP);
+                inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN);
+                inputToRequestSystem.addKeyMapping(KeyCode.R, BaseRequestRegistry.TRIGGER_REQUEST_ROLLRIGHT);
+                inputToRequestSystem.addShiftKeyMapping(KeyCode.R, BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT);
+
+                inputToRequestSystem.setSegmentRequest(0, BaseRequestRegistry.TRIGGER_REQUEST_LEFT);
+                inputToRequestSystem.setSegmentRequest(2, BaseRequestRegistry.TRIGGER_REQUEST_RIGHT);
+                inputToRequestSystem.setSegmentRequest(3, BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT);
+                inputToRequestSystem.setSegmentRequest(5, BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
+                inputToRequestSystem.setSegmentRequest(7, BaseRequestRegistry.TRIGGER_REQUEST_FORWARD);
+            }
             SystemManager.addSystem(inputToRequestSystem);
 
             ObserverSystem observerSystem = new ObserverSystem();

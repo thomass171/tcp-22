@@ -109,12 +109,25 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
     }
 
+    /**
+     * Mapping for 'key went down'.
+     */
     public void addKeyMapping(int keyCode, RequestType requestType) {
         keymapping.put(new KeyEntry(keyCode), requestType);
     }
 
+    /**
+     * Mapping for 'key went down' with shift modifier pressed.
+     */
     public void addShiftKeyMapping(int keyCode, RequestType requestType) {
         keymapping.put(new KeyEntry(keyCode, true), requestType);
+    }
+
+    /**
+     * Mapping for 'key went up'.
+     */
+    public void addKeyReleaseMapping(int keyCode, RequestType requestType) {
+        keymapping.put(new KeyEntry(keyCode, false, true), requestType);
     }
 
     @Override
@@ -131,15 +144,15 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
         // Keyboard input
 
-        //26.10.18: 'T' statt P, damit P fuer Pause ist.
-        if (Input.GetKeyDown(KeyCode.T)) {
+        //26.10.18: 'T' instead P for teleport for having 'P' for Pause. TODO:should be configured by keymappings
+        if (Input.getKeyDown(KeyCode.T)) {
             IntHolder option = new IntHolder(0);
             Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{option}));
-            if (Input.GetKey(KeyCode.Shift)) {
+            if (Input.getKey(KeyCode.Shift)) {
                 //cyclePosition(tc, (false));
                 option.setValue(1);
             } else {
-                if (Input.GetKey(KeyCode.Ctrl)) {
+                if (Input.getKey(KeyCode.Ctrl)) {
                     //dann wird der naechste beim naechsten update() gesetzt.
                     //return;
                     option.setValue(2);
@@ -151,13 +164,21 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         }
 
         for (KeyEntry key : keymapping.keySet()) {
-            if (Input.GetKeyDown(key.keyCode)) {
-                if (key.shift == Input.GetKey(KeyCode.Shift)) {
+            if (!key.release && Input.getKeyDown(key.keyCode)) {
+                if (key.shift == Input.getKey(KeyCode.Shift)) {
                     if (userEntityId != null) {
                         // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
                         SystemManager.putRequest(new Request(keymapping.get(key), userEntityId));
                     }
                 }
+            }
+            if (key.release && Input.getKeyUp(key.keyCode)) {
+                logger.debug("release");
+                if (userEntityId != null) {
+                    // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
+                    SystemManager.putRequest(new Request(keymapping.get(key), userEntityId));
+                }
+
             }
         }
 
@@ -177,7 +198,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 // emulate VR controller (left by holding ctrl key)
                 Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseMovelocation);
                 // ctrl geht nicht in JME mit click, darum shift.
-                processPointer(ray, Input.GetKey(KeyCode.Shift));
+                processPointer(ray, Input.getKey(KeyCode.Shift));
             }
         }
         // now check mouse clicks. Be aware of multiple possible targets, eg. segment and control menu.
@@ -217,7 +238,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
                         Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseClicklocation);
                         // ctrl geht nicht in JME mit click, darum shift
-                        processTrigger(ray, Input.GetKey(KeyCode.Shift));
+                        processTrigger(ray, Input.getKey(KeyCode.Shift));
                     }
                 }
             }
@@ -410,6 +431,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 class KeyEntry {
     public int keyCode;
     public boolean shift = false;
+    public boolean release = false;
 
     KeyEntry(int keyCode) {
         this.keyCode = keyCode;
@@ -418,6 +440,12 @@ class KeyEntry {
     KeyEntry(int keyCode, boolean shift) {
         this.keyCode = keyCode;
         this.shift = shift;
+    }
+
+    KeyEntry(int keyCode, boolean shift, boolean release) {
+        this.keyCode = keyCode;
+        this.shift = shift;
+        this.release = release;
     }
 }
 

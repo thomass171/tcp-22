@@ -8,22 +8,20 @@ import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 /**
  * Created by thomass on 19.01.16.
  * <p/>
- * In der Nutzung an Unity angelehnt. Ausserdem kann man so noch
- * ein paar Conveniencefunktionen zu denen von Unity dazubauen.
- * statisch lasse ich es aber erstmal.
+ * Inspired by Unity. And provides option for adding convenience methods.
+ * static is good.
  * <p>
  * Die Unity Methode getAxis() mit -1..1 Wertebreich ignoriere ich erstmal, bis der Nutzen geklärt ist.
  */
 public class Input {
     static Platform platform = Platform.getInstance();
 
-    /**
-     * Kann nur in einem einzigen Frame (update()) abgefragt werden.
-     *
-     * @return
-     */
-    public static boolean GetKeyDown(int keycode) {
-        return platform.GetKeyDown(keycode);
+    public static boolean getKeyDown(int keycode) {
+        return platform.getKeyDown(keycode);
+    }
+
+    public static boolean getKeyUp(int keycode) {
+        return platform.getKeyUp(keycode);
     }
 
     /**
@@ -31,8 +29,8 @@ public class Input {
      *
      * @return
      */
-    public static boolean GetKey(int keycode) {
-        return platform.GetKey(keycode);
+    public static boolean getKey(int keycode) {
+        return platform.getKey(keycode);
     }
 
     public static Point getMouseMove() {

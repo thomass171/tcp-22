@@ -618,7 +618,7 @@ public class ReferenceScene extends Scene {
             controlPanel.checkForClickedArea(mousePickingRay);
         }
 
-        if (Input.GetKeyDown(KeyCode.A)) {
+        if (Input.getKeyDown(KeyCode.A)) {
             // erstmal nur so Q&D. Kann/Soll noch ausgebaut werden. Genielamp ist z.Z. Bundled.
             // MA31: genie lamp soll raus. lieber was eigenes, aber im selben Modul?
             String name = "ToggleNode";
@@ -642,14 +642,14 @@ public class ReferenceScene extends Scene {
                 SceneNode.removeSceneNode(n);
             }
         }
-        if (Input.GetKeyDown(KeyCode.B)) {
+        if (Input.getKeyDown(KeyCode.B)) {
             logger.debug("b key was pressed. currentdelta=" + tpf);
             moveBox();
         }
         menuCycler.update(mouselocation);
 
         //(V)alidate statt (T)est
-        if (Input.GetKeyDown(KeyCode.V)) {
+        if (Input.getKeyDown(KeyCode.V)) {
             // Order doesn't matter. Can be changed arbitrary.
             // 23.1.18: Maintest added
             // LayerTest runs twice to see where it breaks.
@@ -680,7 +680,7 @@ public class ReferenceScene extends Scene {
             new AsyncTest().runtest(this);
 
         }
-        if (Input.GetKeyDown(KeyCode.F)) {
+        if (Input.getKeyDown(KeyCode.F)) {
             if (fps == null) {
                 fps = new FirstPersonController(getMainCamera().getCarrier().getTransform(), true);
             } else {
@@ -690,7 +690,7 @@ public class ReferenceScene extends Scene {
         if (fps != null) {
             fps.update(tpf);
         }
-        if (Input.GetKeyDown(KeyCode.C)) {
+        if (Input.getKeyDown(KeyCode.C)) {
             //white box FPC
             if (fpswb == null) {
                 SceneNode wb = tower2.get(1);
@@ -710,11 +710,11 @@ public class ReferenceScene extends Scene {
         checkForPickingRay();
 
 
-        if (Input.GetKeyDown(KeyCode.E)) {
+        if (Input.getKeyDown(KeyCode.E)) {
             cycleEffects();
         }
-        if (Input.GetKeyDown(KeyCode.L)) {
-            if (Input.GetKey(KeyCode.Shift)) {
+        if (Input.getKeyDown(KeyCode.L)) {
+            if (Input.getKey(KeyCode.Shift)) {
                 //cycle lightNode
                 lightIndex++;
                 if (lightIndex >= lightCycle.length) {
@@ -728,10 +728,10 @@ public class ReferenceScene extends Scene {
                 hiddencube.getTransform().setLayer(((layer == HIDDENCUBELAYER)) ? 0 : HIDDENCUBELAYER);
             }
         }
-        if (Input.GetKeyDown(KeyCode.S)) {
+        if (Input.getKeyDown(KeyCode.S)) {
             cycleShading();
         }
-        if (Input.GetKeyDown(KeyCode.R)) {
+        if (Input.getKeyDown(KeyCode.R)) {
             cycleRendering();
         }
     }

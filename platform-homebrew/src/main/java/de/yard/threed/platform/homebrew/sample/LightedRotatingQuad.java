@@ -92,7 +92,7 @@ public class LightedRotatingQuad extends Scene {
     @Override
     public void update() {
         //logger.debug("update");
-        if (Input.GetKeyDown(KeyCode.R)) {
+        if (Input.getKeyDown(KeyCode.R)) {
             logger.debug("r key was pressed. currentdelta=");
 
             isrotating = !isrotating;

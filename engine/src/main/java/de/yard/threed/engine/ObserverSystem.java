@@ -43,18 +43,18 @@ public class ObserverSystem extends DefaultEcsSystem {
     public void update(EcsEntity entity, EcsGroup group, double tpf) {
         ObserverComponent oc = (ObserverComponent) group.cl.get(0);
 
-        if (!Input.GetKey(KeyCode.Shift)) {
+        if (!Input.getKey(KeyCode.Shift)) {
 
-            if (Input.GetKey(KeyCode.RightArrow)) {
+            if (Input.getKey(KeyCode.RightArrow)) {
                 oc.incHeading(-tpf);
             }
-            if (Input.GetKey(KeyCode.LeftArrow)) {
+            if (Input.getKey(KeyCode.LeftArrow)) {
                 oc.incHeading(tpf);
             }
-            if (Input.GetKey(KeyCode.UpArrow)) {
+            if (Input.getKey(KeyCode.UpArrow)) {
                 oc.incPitch(tpf);
             }
-            if (Input.GetKey(KeyCode.DownArrow)) {
+            if (Input.getKey(KeyCode.DownArrow)) {
                 oc.incPitch(-tpf);
             }
         }

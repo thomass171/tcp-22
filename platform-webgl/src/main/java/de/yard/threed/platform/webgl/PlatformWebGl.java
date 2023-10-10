@@ -397,7 +397,7 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
-    public boolean GetKeyDown(int keycode) {
+    public boolean getKeyDown(int keycode) {
         return AbstractSceneRunner.getInstance().keyPressed(keycode);
     }
 
@@ -412,7 +412,7 @@ public class PlatformWebGl extends Platform {
      * @return
      */
     @Override
-    public boolean GetKey(int keycode) {
+    public boolean getKey(int keycode) {
         return AbstractSceneRunner.getInstance().keyStillPressed(keycode);
     }
 

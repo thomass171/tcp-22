@@ -16,15 +16,14 @@ public class FirstPersonMovingComponent extends EcsComponent {
     static Log logger = Platform.getInstance().getLog(FirstPersonMovingComponent.class);
     public static String TAG = "FirstPersonMovingComponent";
     public boolean firstpersonmovementdebuglog = true;
-    //LocalTransform currentposition;
     private FirstPersonTransformer firstPersonTransformer;
-    boolean automove;
+    private boolean autoForward;
 
     /**
      *
      */
     public FirstPersonMovingComponent(Transform transform) {
-        firstPersonTransformer=new FirstPersonTransformer(transform, FirstPersonTransformer.ROTATE_MODE_PERAXIS);
+        firstPersonTransformer = new FirstPersonTransformer(transform, FirstPersonTransformer.ROTATE_MODE_PERAXIS);
     }
 
     @Override
@@ -37,10 +36,6 @@ public class FirstPersonMovingComponent extends EcsComponent {
      * @param amount
      */
     public void moveForward(double amount) {
-        /*if (currentposition == null) {
-            logger.error("no currentposition.");
-            return;// null;
-        }*/
         if (firstpersonmovementdebuglog) {
             logger.debug("moveForward: completed,amount=" + amount);
         }
@@ -49,10 +44,7 @@ public class FirstPersonMovingComponent extends EcsComponent {
     }
 
     public void moveForwardByDelta(double delta) {
-        /*if (currentposition == null) {
-            logger.error("no currentposition.");
-            return;// null;
-        }*/
+
         if (firstpersonmovementdebuglog) {
             logger.debug("moveForward: completed,delta=" + delta);
         }
@@ -60,20 +52,19 @@ public class FirstPersonMovingComponent extends EcsComponent {
         firstPersonTransformer.moveForwardAsCameraByDelta(delta);
     }
 
-
     public static FirstPersonMovingComponent getFirstPersonMovingComponent(EcsEntity e) {
         return (FirstPersonMovingComponent) e.getComponent(FirstPersonMovingComponent.TAG);
     }
 
-    /*public LocalTransform getCurrentposition() {
-        return currentposition;
-    }*/
-
-    public FirstPersonTransformer getFirstPersonTransformer(){
+    public FirstPersonTransformer getFirstPersonTransformer() {
         return firstPersonTransformer;
     }
 
-    public boolean hasAutomove() {
-        return automove;
+    public boolean hasAutoForward() {
+        return autoForward;
+    }
+
+    public void toggleAutoForward() {
+        autoForward = !autoForward;
     }
 }

@@ -3,7 +3,6 @@ package de.yard.threed.core.platform;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourcePath;
@@ -267,18 +266,23 @@ public abstract class Platform {
     public abstract long currentTimeMillis();
 
     /**
-     * Kann nur in einem einzigen Frame (update()) abgefragt werden.
-     *
-     * @return
+     * Returns true when a key went down.
+     * Only available in exactly one frame (update().
      */
-    public abstract boolean GetKeyDown(int keycode);
+    public abstract boolean getKeyDown(int keycode);
+
+    /**
+     * Returns true when a key went up (was released).
+     * Only available in exactly one frame (update().
+     */
+    public abstract boolean getKeyUp(int keycode);
 
     /**
      * Kann solange abgefragt werden, wie die Taste gedrückt ist.
      *
      * @return
      */
-    public abstract boolean GetKey(int keycode);
+    public abstract boolean getKey(int keycode);
 
     /**
      * Returns absolute position ((0,0) lower left) to where mouse moved, but only when there was a movement.

@@ -452,8 +452,13 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
     }
 
     @Override
-    public boolean GetKeyDown(int keycode) {
+    public boolean getKeyDown(int keycode) {
         return AbstractSceneRunner.getInstance().keyPressed(keycode);
+    }
+
+    @Override
+    public boolean getKeyUp(int keycode) {
+        return AbstractSceneRunner.getInstance().keyReleased(keycode);
     }
 
     @Override
@@ -472,7 +477,7 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
      * @return
      */
     @Override
-    public boolean GetKey(int keycode) {
+    public boolean getKey(int keycode) {
         return AbstractSceneRunner.getInstance().keyStillPressed(keycode);
     }
 

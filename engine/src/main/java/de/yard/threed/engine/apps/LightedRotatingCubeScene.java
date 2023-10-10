@@ -71,7 +71,7 @@ public class LightedRotatingCubeScene extends Scene {
     @Override
     public void update() {
         double tpf = getDeltaTime();
-        if (Input.GetKeyDown(KeyCode.R)) {
+        if (Input.getKeyDown(KeyCode.R)) {
             logger.debug("r key was pressed. currentdelta=" + tpf);
             isrotating = !isrotating;
         }

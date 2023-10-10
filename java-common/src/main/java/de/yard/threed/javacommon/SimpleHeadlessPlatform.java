@@ -264,7 +264,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
-    public boolean GetKeyDown(int keycode) {
+    public boolean getKeyDown(int keycode) {
         // no real input, but can be used for testing
         boolean found = mockedKeyInput.remove(new Integer(keycode));
         return found;

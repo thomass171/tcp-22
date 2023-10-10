@@ -108,17 +108,17 @@ public class MazeMovingAndStateSystem extends DefaultEcsSystem {
         }*/
         boolean debugcontrols = true;
         if (debugcontrols && mover.isPlayer()) {
-            if (Input.GetKeyDown(KeyCode.PageUp)) {
+            if (Input.getKeyDown(KeyCode.PageUp)) {
                 entity.getSceneNode().getTransform().rotateX(new Degree(-5));
                 //logger.debug("Rotation now"+maze.get)
             }
-            if (Input.GetKeyDown(KeyCode.PageDown)) {
+            if (Input.getKeyDown(KeyCode.PageDown)) {
                 entity.getSceneNode().getTransform().rotateX(new Degree(5));
             }
-            if (Input.GetKeyDown(KeyCode.Plus)) {
+            if (Input.getKeyDown(KeyCode.Plus)) {
                 entity.getSceneNode().getTransform().translateY(0.5f);
             }
-            if (Input.GetKeyDown(KeyCode.Minus)) {
+            if (Input.getKeyDown(KeyCode.Minus)) {
                 entity.getSceneNode().getTransform().translateY(-0.5f);
             }
         }

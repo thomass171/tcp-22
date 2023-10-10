@@ -482,7 +482,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
                 // 26.10.18: ein menu geht manchmal (z.B. in VR oder bei Bewegung) noch nicht so gut. Darum erstmal nur mit key 's' starten.
             }
         }*/
-        if (Input.GetKeyDown(KeyCode.L)) {
+        if (Input.getKeyDown(KeyCode.L)) {
             //20.3.19: Ueber AppRequest loadNextConfiguredVehicle(null);
             Request request;
             request = new Request(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE);
@@ -494,18 +494,18 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             //11.5.21avatar.update();
         }*/
 
-        if (Input.GetKeyDown(KeyCode.H)) {
+        if (Input.getKeyDown(KeyCode.H)) {
             // 11.10.18: hier auch die Statistik ausgeben
             //MA36 Statistics statistics = ( Platform.getInstance()).getStatistics();
             //MA36 getLog().info(statistics.geometries + " geometries, " + statistics.vertices + " vertices, " + statistics.textures + " textures," + statistics.calcGeometryMBs() + " MBs for geos total");
             help();
         }
 
-        if (Input.GetKeyDown(KeyCode.R)) {
+        if (Input.getKeyDown(KeyCode.R)) {
             report();
         }
         //26.10.18: 'T' ist jetzt teleport. 23.10.21: Einheitlich wie sonst 'V' statt 'E'
-        if (Input.GetKeyDown(KeyCode.V)) {
+        if (Input.getKeyDown(KeyCode.V)) {
             runTests();
         }
 

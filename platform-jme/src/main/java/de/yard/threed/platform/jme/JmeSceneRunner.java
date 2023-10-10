@@ -147,12 +147,10 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
 
                 // ob die keys besser vor oder nach dem scene init erfolgen, ist noch unklar.
                 // Na, doch wohl nachher, denn im init() werden sie ja eingerichtet.
-                // Einen Handler fuer alle in Unity definierten Keys einrichten.
+                // Add handler for all defined keys (inspired by Unity).
                 int actionindex = 1;
                 for (int keycode : KeyCode.unitykeys) {
-                    //NativeActionListener lis = sc.actionlistener.get(keycodes);
-                    //for (int keycode : keycodes) {
-                    //der actionname muss wohl eindeutig sein 
+                    // actionname must be unique(?)
                     int[] keys = getKeyInput(keycode);
                     for (int k : keys) {
                         String actionname = "" + actionindex + "-" + keycode;
@@ -352,19 +350,19 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
         return new int[]{0};
     }
 
-
+    /**
+     * listener for KeyDown/KeyUp events
+     */
     class CustomActionListener implements ActionListener {
-        //NativeActionListener al;
         int keycode;
 
-        CustomActionListener(/*NativeActionListener al,*/ int keycode) {
-            //this.al = al;
+        CustomActionListener(int keycode) {
             this.keycode = keycode;
         }
 
         @Override
         public void onAction(String s, boolean keypressed, float tpf) {
-            /*runnerhelper.*/
+            //logger.debug("onAction: " + s + ":" + keypressed);
             addKey(keycode, keypressed);
         }
     }

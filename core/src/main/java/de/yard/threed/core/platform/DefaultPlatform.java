@@ -133,12 +133,17 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public boolean GetKeyDown(int keycode) {
+    public boolean getKeyDown(int keycode) {
         return false;
     }
 
     @Override
-    public boolean GetKey(int keycode) {
+    public boolean getKeyUp(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean getKey(int keycode) {
         return false;
     }
 
@@ -163,7 +168,9 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public Configuration getConfiguration() { return null; }
+    public Configuration getConfiguration() {
+        return null;
+    }
 
     @Override
     public NativeEventBus getEventBus() {
@@ -236,7 +243,7 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public void httpGet(String url, List<Pair<String,String>> parameter, List<Pair<String,String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
+    public void httpGet(String url, List<Pair<String, String>> parameter, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
         throw new RuntimeException(("not implemented"));
     }
 

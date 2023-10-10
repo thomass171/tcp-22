@@ -92,9 +92,9 @@ public class StepController {
     }
 
     public void update(double tpf) {
-        if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.T)/*fuer Android || Input.GetKeyDown(KeyCode.RightArrow)*/) {
+        if (Input.getKeyDown(KeyCode.Tab) || Input.getKeyDown(KeyCode.T)/*fuer Android || Input.GetKeyDown(KeyCode.RightArrow)*/) {
             //logger.debug("tab key was pressed. currentdelta=" + tpf);
-            if (Input.GetKey(KeyCode.Shift)) {
+            if (Input.getKey(KeyCode.Shift)) {
                 step(false);
             } else {
                 step(true);
