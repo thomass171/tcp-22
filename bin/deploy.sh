@@ -3,6 +3,8 @@
 # Deploy the GWT/webgl build artifacts from $BUILDDIR to $HOSTDIR (which might be a remote directory)
 # Also deploys the HTML landing page (tcp-22.html).
 #
+# Also used by external projects via different parameter and envs (eg. HOSTDIR).
+#
 
 OWNDIR=`dirname $0`
 source $OWNDIR/common.sh || exit 1
@@ -42,7 +44,7 @@ if [ ! -d $BUILDDIR ]; then
     error "no directory " $BUILDDIR
 fi
 
-echo Ready to deploy to $HOSTDIR. Hit CR
+echo Ready to deploy from $BUILDDIR to $HOSTDIR. Hit CR
 read
 
 # rsync copy will delete deprecated files
@@ -51,8 +53,9 @@ $COPYCMD $BUILDDIR/webgl $HOSTDIR
 $COPYCMD $BUILDDIR/threejs $HOSTDIR
 $COPYCMD $BUILDDIR/webgl.html $HOSTDIR
 $COPYCMD $BUILDDIR/.htaccess $HOSTDIR
-$COPYCMD docs/tcp-22.html $HOSTDIR
-$COPYCMD docs/tcp-22.js $HOSTDIR
+# be prepared for other projects using similar files
+$COPYCMD docs/tcp-*.html $HOSTDIR
+$COPYCMD docs/tcp-*.js $HOSTDIR
 $COPYCMD docs/util.js $HOSTDIR
 $COPYCMD docs/sceneutil.js $HOSTDIR
 $COPYCMD $BUILDDIR/version.html $HOSTDIR
