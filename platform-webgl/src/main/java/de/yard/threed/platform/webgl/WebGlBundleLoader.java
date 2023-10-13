@@ -298,7 +298,7 @@ public class WebGlBundleLoader implements NativeBundleLoader {
                             }
                             loadlistener.onLoad(new BundleData(new WebGlByteBuffer(buffer), false));
                         } else {
-                            logger.error("XHR Status code " + xhr.getStatus() + " for resource " + ressource.getFullName() + "with url " + url);
+                            logger.error("XHR Status code " + xhr.getStatus() + " for resource '" + ressource.getFullName() + "' with url " + url);
                             // Der onload und muss immer aufgerufen werden, sonst bleibt er im preload.
                             //21.4.17: Jetzt muss der Aufrufer Fehler nachhalten.
                             loadlistener.onError(xhr.getStatus());

@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Window;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.platform.PlatformFactory;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
@@ -67,8 +68,11 @@ public class Main implements EntryPoint {
         if (PlatformWebGl.isDevmode) {
             setDevmode();
         }
-        // devmode should be set before init.
-        PlatformInternals platformInternals = PlatformWebGl.init(new ConfigurationByProperties(properties));
+        // devmode should be set before init. Otherwise early setup of platform for having a logger.
+        Configuration configuration = new ConfigurationByProperties(properties);
+        PlatformFactory platformFactory=getPlatformFactory(configuration);
+        PlatformInternals platformInternals = platformFactory.createPlatform(configuration);
+
         Log logger = Platform.getInstance().getLog(Main.class);
 
         logger.info("Loading GWT Client from " + href + ", devmode=" + Platform.getInstance().isDevmode());
@@ -114,6 +118,19 @@ public class Main implements EntryPoint {
             t.printStackTrace();
             GWT.log("Throwable occured:", t);
         }*/
+    }
+
+    /**
+     * To be overridden.
+     */
+    protected PlatformFactory getPlatformFactory(Configuration configuration) {
+        return new PlatformFactory() {
+            @Override
+            public PlatformInternals createPlatform(Configuration conf) {
+                PlatformInternals platformInternals = PlatformWebGl.init(conf);
+                return platformInternals;
+            }
+        };
     }
 
     private void testAufruf() {
