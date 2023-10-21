@@ -23,6 +23,8 @@ import de.yard.threed.core.loader.StringReader;
  * 8.9.23: Using a LoaderRegistry only sounds good. Model loader might have complex setup
  * (eg. ac texturepath, btg matlib) and the use case often needs to know what type of model
  * it is loading for providing all needed information.
+ * 18.10.23: TODO Maybe only tools should have a LoaderRegistry. And the engine itself always uses GLTF. Currrently only "ac" and "gltf" are handled here. And ac shouldn't
+ * be needed any more as it is converted to "gltf".
  * <p>
  * Created by thomass on 21.12.16.
  */
@@ -48,6 +50,7 @@ public class LoaderRegistry {
             return ppfile;
         }*/
         if (extension.equals( "ac")) {
+            // 18.10.23: Only used by tools? But tools has its own loadBySuffix.
             if (!ins.isText()) {
                 logger.error("no string data for " + file.getFullName());
                 return null;

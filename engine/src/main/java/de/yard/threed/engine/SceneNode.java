@@ -79,7 +79,6 @@ public class SceneNode {
     /**
      * For convenience. In principle (analog Unity) just setting the parent.
      * Node is detached from current parent, however, there is no explicit detach().
-     *
      */
     public void attach(SceneNode n) {
         n.nativescenenode.getTransform().setParent(nativescenenode.getTransform());
@@ -153,7 +152,7 @@ public class SceneNode {
      */
     public List<NativeSceneNode> findNodeByName(String name, boolean recursive) {
         List<NativeSceneNode> l;
-        if (nativescenenode.getName().equals(name)) {
+        if (name.equals(nativescenenode.getName())) {
             l = new ArrayList<NativeSceneNode>();
             l.add(nativescenenode);
         } else {

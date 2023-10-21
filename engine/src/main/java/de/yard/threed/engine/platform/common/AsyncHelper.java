@@ -3,6 +3,8 @@ package de.yard.threed.engine.platform.common;
 import de.yard.threed.core.BuildResult;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.buffer.NativeByteBuffer;
+import de.yard.threed.core.loader.AbstractLoader;
+import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.loader.LoaderGLTF;
 import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
@@ -157,7 +159,7 @@ public class AsyncHelper {
      * scheiterte, wird trotzdem ein wenn auch leeres Result geliefert.
      * <p>
      * Das geht aber doch wohl nur fuer "einfache", nicht XML Model.
-     *
+     * 18.10.23: No more 'ac', so only gltf any more.
      * @param file
      * @param opttexturepath
      * @param loaderoptions
@@ -204,7 +206,7 @@ public class AsyncHelper {
 
         PortableModelList lr;
         try {
-            lr = ModelLoader.readModelFromBundle(file, true, loaderoptions);
+            lr = readGltfModelFromBundle(file, true, loaderoptions);
             if (lr == null) {
                 // Fehler. Ist bereits gelogged.
                 return new BuildResult((new SceneNode()).nativescenenode);
@@ -264,6 +266,53 @@ public class AsyncHelper {
     public static int getModelbuildvaluesSize() {
         return modelbuildvalues.size();
     }
+
+    /**
+     * Ein natives Model (ac,obj etc, nicht FG xml) aus einem Bundle einlesen.
+     * Muss wegen btg eigentlich den Loader liefern, weil das doof ist aber jetzt das preprocessed model.
+     * 21.4.17: Wenn das Bundle in file nicht eingetragen ist, koennte hier ein resolve gwemacht werden??
+     * Liefert null bei Fehler (already logged).
+     * 15.9.17: Soll nur aus Platform verwendet werden, wird jetzt aber noch von aussen aufgerufen. Das hat für
+     * Analysezwecke und Tests aber durchaus seine Berechtigung. Aber nur dann.
+     * Liest das Model nur ein, ohne es als 3D Objekt anzulegen.
+     * 21.12.17: Wenn mal auf gltf umgestellt ist und die obj Loader nicht mehr da sind, wird das zur Laufzeit ueber die
+     * Platform auch nicht mehr ladbar sein.
+     *
+     * This is a direct sync loading. No engine/platform involved. Use case is internal usage from inside async.
+     * 18.10.23: No more 'ac', so only gltf any more.
+     *
+     * @return
+     */
+    public static PortableModelList readGltfModelFromBundle(BundleResource file, boolean preferpp, int loaderoptions) {
+        if (file.bundle == null) {
+            logger.warn("no bundle set");
+            return null;
+        }
+
+        // file = mapFilename(file,preferpp,loaderoptions);
+
+        // special handling of btg.gz files. Irgendwie Driss
+        // 12.6.17: Andererseits werden pp files hier auch transparent geladen. Aber das macht eh schon der Bundleloader, damit der unzip in der platform ist.
+        // 23.12.17:TODO ins erst im Loader selber lesen, wie GLTF es macht.
+        BundleData ins = file.bundle.getResource(file);
+        if (ins == null) {
+            logger.error(file.getName() + " not found in bundle " + file);
+            return null;
+        }
+
+        try {
+            //18.10.23: Should only be gltf these days. So skip registry.
+            //PortableModelList processor = LoaderRegistry.loadBySuffix(file, (ins), false);
+            AbstractLoader loader = LoaderGLTF.buildLoader(file,/*i/*ns.s,*/  file.path);
+            PortableModelList processor = loader.preProcess();
+            return processor;
+        } catch (InvalidDataException e) {
+            //7.4.17: Es gibt schon mal Fehler in Modelfiles. Das wird gelogged (auch tiefer mit Zeilennummer). Auf den Stacktrace verzichten wir mal.
+            logger.error("loader threw InvalidDataException " + e.getMessage() + " for file " + file.getFullName());
+        }
+        return null;
+    }
+
 }
 
 class ModelBuildData {

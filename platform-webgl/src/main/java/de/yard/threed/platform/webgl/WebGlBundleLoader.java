@@ -202,6 +202,8 @@ public class WebGlBundleLoader implements NativeBundleLoader {
         String bundlebasedir = BundleResolver.resolveBundle(bundlename, Platform.getInstance().bundleResolver).getPath();
         String directoryresource = bundlebasedir + "/" + BundleRegistry.getDirectoryName(bundlename, true);
 
+        logger.debug("bundlebasedir="+bundlebasedir);
+        logger.debug("directoryresource="+directoryresource);
         // TODO race conditioin? Koennte das selbe Bundle mehrfach laden?
         LoadingBundle lb = new LoadingBundle(bundlename, loadlistener, delayed);
         loadingbundle.add(lb);
@@ -332,7 +334,7 @@ public class WebGlBundleLoader implements NativeBundleLoader {
                         currentlyloading.remove(key);
                         String responsedata = response.getText();
                         if (response.getStatusCode() != 200) {
-                            logger.error("Status code " + response.getStatusCode() + " for resource " + ressource.getFullName() + "with url " + resname);
+                            logger.error("Status code " + response.getStatusCode() + " for resource '" + ressource.getFullName() + "' with url " + resname);
                             // Der onload und muss immer aufgerufen werden, sonst bleibt er im preload.
                             //21.4.17: Jetzt muss der Aufrufer Fehler nachhalten.
                             loadlistener.onError(response.getStatusCode());

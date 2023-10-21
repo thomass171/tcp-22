@@ -120,8 +120,8 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
 
     @Override
     public void buildNativeModelPlain(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
-        // No access to SceneRunner/AsyncHelper here. According to the idea of headless: Just create a dummy node
-        // for the model to continue the workflow.
+        // No access to SceneRunner/AsyncHelper here from java-common. According to the idea of headless: Just create a dummy node
+        // for the model to continue the workflow. See AdvancedHeadlessPlatform if more is needed.
         delegate.modelBuilt(new BuildResult(new DummySceneNode()));
     }
 
@@ -312,7 +312,7 @@ class DummySceneNode implements NativeSceneNode {
 
     @Override
     public void destroy() {
-
+        sceneNodes.remove(this);
     }
 
     @Override
@@ -729,10 +729,19 @@ class DummyRay implements NativeRay {
     @Override
     public List<NativeCollision> getIntersections() {
         // Scene and world are not available here. Assume first node to be world.
-        NativeSceneNode world;//= Scene.getWorld().nativescenenode;
-        world = DummySceneNode.sceneNodes.get(0);
-        if (!world.getName().equals("World")) {
-            throw new RuntimeException("first node not world??");
+        // But especially in tests there might be multiple 'worlds' causing difficult to track failed tests.
+        // So look for world and also check to have only one world.
+        NativeSceneNode world = null;
+        for (NativeSceneNode n : DummySceneNode.sceneNodes) {
+            if ("World".equals(n.getName())) {
+                if (world != null) {
+                    throw new RuntimeException("multiple 'world' found");
+                }
+                world = n;
+            }
+        }
+        if (world == null) {
+            throw new RuntimeException("no 'world' found");
         }
         return intersects(world);
     }

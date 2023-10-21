@@ -29,7 +29,7 @@ public class ModelFactory {
      * 7.6.18: Ich glaube, das ist jetzt DIE Convenience Methode, ein Model zu laden. Zumindest eine davon, wenn
      * destination so ok ist und man den Delegte selber nicht braucht.
      * 29.12.18: Geht aber auch nicht mit XML.
-     * 
+     * 18.10.23: No more 'ac', so only gltf any more.
      * @param br
      * @param loaderoptions
      * @return

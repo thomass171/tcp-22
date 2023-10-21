@@ -45,7 +45,7 @@ public abstract class Platform {
 
     /**
      * 16.9.16: Die Object3D Komponente wird immer direkt mit erstellt.
-     *
+     * 18.10.23: TODO Rename to buildSceneNode.
      * @return
      */
     public abstract NativeSceneNode buildModel();
@@ -56,10 +56,10 @@ public abstract class Platform {
      * 15.9.17: Ueber die Platform ein Model laden. Das kann sehr effizient sein. Und weil threejs/gltf hier
      * das Mass der Dinge ist, asynchron. Ob das aus bundle Sicht preloaded sein wird, ist hier unerheblich.
      * Ist Nachfolger fure ModelFactory.buildModelFromBundle().
-     * Geht aber nicht mit FG XML model!
+     * Not for FG XML model!
      * Eine Exception bei einem Fehler gibt es hieraus dann auch nicht, sondern nur eine FM über den Delegate.
      * 04.10.2018: Das ist trotz async aber nicht multithreaded.
-     *
+     * 18.10.23: No more 'ac', so only gltf any more.
      * @param filename
      * @return
      */
@@ -463,6 +463,10 @@ public abstract class Platform {
 
     public void addBundleResolver(BundleResolver bundleResolver) {
         this.bundleResolver.add(bundleResolver);
+    }
+
+    public void addBundleResolver(BundleResolver bundleResolver, boolean before) {
+        this.bundleResolver.add(0, bundleResolver);
     }
 
     /**

@@ -33,6 +33,7 @@ public class SimpleVehicleLoader implements VehicleLoader {
             BundleResource br = BundleResource.buildFromFullString(config.getModelfile());
             br.bundle = bundle;
 
+            // 18.10.23: No more 'ac', so only gltf any more.
             EngineHelper.buildNativeModel(br, null, (BuildResult result) -> {
                 if (result.getNode() != null) {
 

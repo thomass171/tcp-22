@@ -83,6 +83,9 @@ public class MainTest {
             logger.info("Running JsonTest.testSampleJson()");
             jsonTest.testSampleJson();*/
 
+            SceneNodeTest sceneNodeTest = new SceneNodeTest();
+            sceneNodeTest.testRemove();
+
         } catch (RuntimeException e) {
             logger.error("Exception:" + e.getMessage() + e.toString());
             e.printStackTrace();

@@ -13,6 +13,7 @@ import java.util.List;
 
 /**
  * Created by thschonh on 14.07.2015.
+ * 18.10.23: No longer used inside platform but only in tools for converting. TODO move to tools.
  */
 public class LoaderAC extends AsciiLoader {
     static public int flagSurfaceTypePolygon = 0,

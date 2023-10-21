@@ -49,15 +49,19 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
 
     /**
      * MA36: Only convenience? Made static
+     * 18.10.23: core loader no more 'ac', so only gltf any more. ac file mapping extracted to tcp-flightgear.
+     *
      */
     public static void buildNativeModel(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate, int options) {
         // die ACPolicy nutze ich wegen Einheitlichkeit immer, nicht nur in FG
         // 10.4.21: Brauchts die Option noch? Es gibt doch ein Plugin
         if (filename.getExtension().equals("ac")) {
             options |= LOADER_APPLYACPOLICY;
+            // 18.10.23
+            Util.nomore();
         }
         // Das Filemapping greift nur, wenn das acpp/gltf auch existiert.
-        Platform.getInstance().buildNativeModelPlain(ModelLoader.mapFilename(filename, true, options), opttexturepath, modeldelegate, options);
+        Platform.getInstance().buildNativeModelPlain(filename, opttexturepath, modeldelegate, options);
     }
 
     /**
