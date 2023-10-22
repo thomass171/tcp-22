@@ -25,6 +25,9 @@ import java.util.Map;
 
 /**
  * AsciiLoader just because the origin is ASCII. Needs a JSON Parser and lineno likely cannot be used.
+ * Used inside platforms that have no own GLTF reader or from an app that cannot use an platform internal
+ * loader, eg. because external material definition is used (eg. FG scenery).
+ * The 'bin' file is split into Vector3Array and int[].
  * <p>
  * Created by thschonh on 08.12.17.
  */
@@ -34,7 +37,7 @@ public class LoaderGLTF extends AsciiLoader {
     private NativeJsonObject gltfo;
     private NativeByteBuffer binbuffer;
     ResourcePath texturebasepath;
-    public PortableModelList ppfile;
+    private PortableModelList ppfile;
     // TODO boese static Kruecke wegen Zugriff aus Unterklassen in C#
     static NativeJsonArray textures, images, samplers;
     String source;
@@ -46,9 +49,9 @@ public class LoaderGLTF extends AsciiLoader {
     public static final int REPEAT = 10497;
 
     /**
-     * Read a GLTF.
-     * Bekommt doch wieder json und bin diskret, um sich nicht um das Vorhandensein im Bundle sorgen zu muessen. Macht die Nutzung auch leichter, z.B. in WebGL
-     * bzw. mit async nachgeladenen Bundle Daten.
+     * Read a GLTF. json and 'bin' are parameter to be independent from bundle loading.
+     * Makes using easier, eg. in WebGL
+     * and with async delayed loaded Bundle data.
      */
     public LoaderGLTF(String json, NativeByteBuffer binbuffer, ResourcePath texturebasepath, String source) throws InvalidDataException {
         this.binbuffer = binbuffer;
@@ -60,7 +63,7 @@ public class LoaderGLTF extends AsciiLoader {
         }
         gltfo = gltf.isObject();
         this.texturebasepath = texturebasepath;
-        if (binbuffer == null){
+        if (binbuffer == null) {
             // 6.3.21: Das macht doch keinen Sinn, oder?
             logger.warn("no bin. Intended?");
         }
@@ -195,6 +198,10 @@ public class LoaderGLTF extends AsciiLoader {
         return logger;
     }
 
+    public PortableModelList getPortableModelList() {
+        return ppfile;
+    }
+
     private PortableModelDefinition loadObject(NativeJsonObject node, List<PortableMaterial> materials) throws InvalidDataException {
         PortableModelDefinition lo = new PortableModelDefinition();
         GltfNode gltfnode = new GltfNode(node);
@@ -225,7 +232,7 @@ public class LoaderGLTF extends AsciiLoader {
                 //3.1.19: normals are be optional. These are not expected to be part of a GLTF model.
                 accessor = mesh.getPrimitive(k, "NORMAL", gltfo, binbuffer, false);
                 Vector3Array lnormals = null;
-                if (accessor!=null) {
+                if (accessor != null) {
                     if (accessor.vec3array != null) {
                         lnormals = accessor.vec3array;
                         //das ist Quatsch, weil nicht allgemeingültig. Bestenfalls zur analyse. logger.warn("overwriting normals with default");

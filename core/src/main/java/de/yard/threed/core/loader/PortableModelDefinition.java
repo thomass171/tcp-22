@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 06.03.21: A universal intermediate format of a model specification.
+ *
  * Created by thomass on 12.02.16.
  * 7.6.18: PreprocessedLoadedObject->PortableModelDefinition
  */
@@ -36,56 +38,6 @@ public class PortableModelDefinition /*extends CustomGeometry */{
     public PortableModelDefinition() {
         geolist = new ArrayList<SimpleGeometry>();
     }
-
-    /**
-     * acpp reader? deprecated?
-     * 
-     */
-    /*3.5.19 public PortableModelDefinition(ByteArrayInputStream ins) {
-        name = ins.readString();
-
-        int geocnt = ins.readInt();
-        geolist = new ArrayList<SimpleGeometry>();       
-        for (int k = 0; k < geocnt; k++) {
-            int cnt = ins.readInt();
-            Vector3Array lvertices = ((Platform)Platform.getInstance()).buildVector3Array(cnt);
-            for (int i = 0; i < cnt; i++) {
-                lvertices.setElement(i, ins.readFloat(), ins.readFloat(), ins.readFloat());
-            }
-            int normalcnt = ins.readInt();
-            Vector3Array lnormals = ((Platform)Platform.getInstance()).buildVector3Array(normalcnt);
-            for (int i = 0; i < normalcnt; i++) {
-                lnormals.setElement(i, ins.readFloat(), ins.readFloat(), ins.readFloat());
-            }
-            int indexcnt = ins.readInt();
-            int[] indices = new int[indexcnt];
-            for (int i = 0; i < indexcnt; i++) {
-                indices[i] = ins.readInt();
-            }
-            int uvcnt = ins.readInt();
-            Vector2Array uvs = ((Platform)Platform.getInstance()).buildVector2Array(uvcnt);
-            for (int j = 0; j < uvcnt; j++) {
-                uvs.setElement(j, ins.readFloat(), ins.readFloat());
-            }
-            geolist.add(new SimpleGeometry(lvertices, indices, uvs, lnormals));
-        }
-        int kidcnt = ins.readInt();
-        for (int i = 0; i < kidcnt; i++) {
-            kids.add(new PortableModelDefinition(ins));
-        }
-        int facelistmaterialcnt = ins.readInt();
-        for (int i = 0; i < facelistmaterialcnt; i++) {
-            geolistmaterial.add(ins.readString());
-        }
-        texture = ins.readString();
-        location = new Vector3(ins.readFloat(), ins.readFloat(), ins.readFloat());
-        /*int hascrease = ins.readInt();
-        if (hascrease != 0) {
-            crease = new Degree(ins.readFloat());
-        }* /
-       
-
-    }*/
 
     public void addGeoMat(SimpleGeometry geo, String material) {
         geolist.add(geo);

@@ -109,9 +109,10 @@ public class PlatformWebGl extends Platform {
     }
 
     /**
-     * 12.1.18: Der Abzweig fuer den internen Loader ist hier schon ganz gut, denn
-     * fuer den internen Loader brauchen die Daten nicht im Bundle sein, weil sie eh neu gelaen werden.
-     * Von daher bringt der asyncHelper dafuer nichts.
+     * 12.1.18: Has a branch for threejs internal GLTF loader and our custom.
+     * This is a good location, because for threejs data doesn't need to be in a bundle,
+     * because data is reloaded anyway. Thus AsyncHelper doesn't help here.
+     * 18.10.23: No more 'ac', so only gltf any more.
      */
     @Override
     public void buildNativeModelPlain(BundleResource file, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
@@ -127,7 +128,10 @@ public class PlatformWebGl extends Platform {
         //28.3.18: Der interne bleibt aber fuer Vergleichstests wichtig
         //4.4.18: Beim internen scheine auch die AGAnimations nicht zu gehen.
         boolean usethreejsgltfloader = false;
-        if ((file.getExtension().equals("ac") || file.getExtension().equals("gltf")) && usethreejsgltfloader) {
+        if (!file.getExtension().equals("gltf")) {
+            Util.nomore();
+        }
+        if (usethreejsgltfloader) {
             String basename = file.getBasename();
             BundleResource gltfile = new BundleResource(file.bundle, file.path, basename + ".gltf");
             logger.debug("probing " + gltfile);
@@ -143,6 +147,7 @@ public class PlatformWebGl extends Platform {
                 logger.debug("" + gltfile + " not found");
             }
         }
+        // build model like in all other platforms.
         AsyncHelper.asyncModelBuild(file, opttexturepath, options, delegateid);
     }
 
@@ -577,7 +582,7 @@ public class PlatformWebGl extends Platform {
 
     @Override
     public NativeAudio buildNativeAudio(NativeAudioClip audioClip) {
-        WebGlAudio audio = WebGlAudio.createAudio((WebGlAudioClip)audioClip);
+        WebGlAudio audio = WebGlAudio.createAudio((WebGlAudioClip) audioClip);
         return audio;
     }
 }

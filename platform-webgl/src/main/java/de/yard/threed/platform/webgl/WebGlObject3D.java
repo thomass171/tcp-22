@@ -360,7 +360,7 @@ public class WebGlObject3D implements NativeTransform {
 
     public boolean isCarrier() {
         // might need a more reliable way to detect this. TODO use custom property
-        return getName().toLowerCase().endsWith("carrier");
+        return getName() != null && getName().toLowerCase().endsWith("carrier");
     }
 
     protected static native JavaScriptObject buildObject3D()  /*-{
