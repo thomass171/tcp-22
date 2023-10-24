@@ -16,6 +16,8 @@ public abstract class Configuration {
 
     public abstract String getPropertyString(String property);
 
+    public abstract List<String> getProperties();
+
     public String getString(String property) {
 
         String s;

@@ -39,6 +39,9 @@ public abstract class Platform {
     // Might help to hide AbstractSceneRunner.getInstance() to apps.
     public NativeSceneRunner sceneRunner;
 
+    // 24.10.23 now here
+    public Log logger;
+
     public static Platform getInstance() {
         return instance;
     }
@@ -415,7 +418,7 @@ public abstract class Platform {
     public abstract void addRenderProcessor(NativeRenderProcessor renderProcessor);
 
 
-    protected abstract Log getLog();
+   //25.10.23 try without protected abstract Log getLog();
 
     public abstract Log getLog(Class clazz);
 
@@ -476,7 +479,7 @@ public abstract class Platform {
     public static String PLATFORM_OPTION_RENDEREDLAYER = "PLATFORM_OPTION_RENDEREDLAYER";
 
     public void setOption(String option, String value) {
-        getLog().warn("setOption not implemented: " + option);
+        logger/*24.10.23 getLog()*/.warn("setOption not implemented: " + option);
     }
 
     public abstract NativeAudioClip buildNativeAudioClip(BundleResource filename);

@@ -5,18 +5,14 @@ import de.yard.threed.core.platform.Log;
 
 /**
  * A very simple logger instead of the problematic GWT logger or similar cumbersome popup loggings.
- *
+ * <p>
  * Created by thomass on 20.04.15.
  */
 public class WebGlLog implements Log {
-    String name, label;
-    boolean enabled = true;//false;
+    String label;
+    private boolean enabled = true;//false;
 
     public WebGlLog(String name) {
-        /*if (name==null){
-            name="";
-        }*/
-        this.name = name;
         this.label = name;
         // StringUtils neither available yet nor required
         int len = name.length();
@@ -28,10 +24,7 @@ public class WebGlLog implements Log {
     public void debug(String msg) {
         if (!enabled)
             return;
-        // no debug log in Production
-        if (PlatformWebGl.isDevmode) {
-            debugNative(buildMessage(msg));
-        }
+        debugNative(buildMessage(msg));
     }
 
     public void info(String msg) {
@@ -50,7 +43,7 @@ public class WebGlLog implements Log {
         errorNative(buildMessage(msg));
     }
 
-    public static void logNative(String msg){
+    public static void logNative(String msg) {
         logConsoleNative(msg);
     }
 
@@ -86,7 +79,7 @@ public class WebGlLog implements Log {
         console.error(msg);
     }-*/;
 
-    private static native void logConsoleNative( String msg ) /*-{
+    private static native void logConsoleNative(String msg) /*-{
         console.log(msg);
     }-*/;
 }

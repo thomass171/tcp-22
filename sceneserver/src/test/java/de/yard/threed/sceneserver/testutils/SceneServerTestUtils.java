@@ -10,6 +10,7 @@ import de.yard.threed.core.Server;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.BaseEventRegistry;
+import de.yard.threed.engine.Texture;
 import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.SystemState;
 import de.yard.threed.engine.testutil.PayloadHook;
@@ -109,6 +110,7 @@ public class SceneServerTestUtils {
         MazeDataProvider.reset();
         // reset of Grid Instance not needed
         SystemState.state = 0;
+        Texture.resetTexturePool();
 
 
         SceneServer sceneServer = new SceneServer("subdir", sceneclass, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties));

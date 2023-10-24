@@ -12,7 +12,11 @@ import java.util.List;
  * Analog zu Apache Commons
  */
 public class StringUtils {
-    static NativeStringHelper sh = Platform.getInstance().buildStringHelper();
+    static NativeStringHelper sh;
+
+    public static void init(NativeStringHelper shp) {
+        sh = shp;
+    }
 
     public static String substringBefore(String str, String separator) {
         if (separator == null)

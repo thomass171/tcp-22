@@ -3,6 +3,7 @@ package de.yard.threed.tools;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
@@ -35,6 +36,7 @@ public class ToolsPlatform extends DefaultPlatform {
     private ToolsPlatform(/*ResourceManager resourceManager,*/ NativeLogFactory logfactory) {
         //this.resourcemanager = resourceManager;
         this.logfactory = logfactory;
+        StringUtils.init(buildStringHelper());
         //matlib braucht bundles
 
         String hostdir = System.getProperty("HOSTDIR");

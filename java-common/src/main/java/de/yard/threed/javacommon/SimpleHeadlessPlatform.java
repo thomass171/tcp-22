@@ -49,7 +49,6 @@ import java.util.List;
  */
 public class SimpleHeadlessPlatform extends DefaultPlatform {
     public String hostdir;
-    static Log logger = new JALog(/*LogFactory.getLog(*/SimpleHeadlessPlatform.class);
     public static String PROPERTY_PREFIX = "tcp22.";
     public static List<Integer> mockedKeyInput = new ArrayList<Integer>();
     protected Configuration configuration;
@@ -59,12 +58,14 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
      */
     public SimpleHeadlessPlatform(NativeEventBus optionalEventbus, Configuration configuration) {
 
+        StringUtils.init(buildStringHelper());
         if (optionalEventbus == null) {
             eventBus = new JAEventBus();
         } else {
             eventBus = optionalEventbus;
         }
-        logfactory = new JALogFactory();
+        logfactory = new LevelLogFactory(configuration, new JALogFactory(), getDefaultLogLevel());
+        logger = logfactory.getLog(SimpleHeadlessPlatform.class);
         nativeScene = new DummyScene();
         this.configuration = configuration;
 
@@ -72,6 +73,13 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         if (hostdir == null) {
             throw new RuntimeException("HOSTDIR not set");
         }
+    }
+
+    /**
+     * For overriding. DEBUG because common use case is testing.
+     */
+    public int getDefaultLogLevel() {
+        return DefaultLog.LEVEL_DEBUG;
     }
 
     public SimpleHeadlessPlatform(Configuration configuration) {
@@ -98,7 +106,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
         instance.bundleLoader = new AsyncBundleLoader(resourceReader);
 
-        logger.info("SimpleHeadlessPlatform created");
+        instance.logger.info("SimpleHeadlessPlatform created");
         return /*MA36 (EnginePlatform)* /instance*/platformInternals;
     }
 
@@ -194,7 +202,6 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     @Override
     public Log getLog(Class clazz) {
         return logfactory.getLog(clazz);
-
     }
 
     @Override

@@ -11,7 +11,6 @@ import de.yard.threed.core.platform.Platform;
  * Created by thomass on 01.04.16.
  */
 public class JavaStringHelper implements NativeStringHelper {
-    Log logger = Platform.getInstance().getLog(JavaStringHelper.class);
 
     @Override
     public String trim(String s) {
@@ -71,13 +70,13 @@ public class JavaStringHelper implements NativeStringHelper {
     public String buildString(byte[] buf) {
         String s;
        
-        try {
+        //try {
             s = new String(buf);
-        } catch (java.lang.Exception e) {
+        /*} catch (java.lang.Exception e) {
             // eg. Encoding/CHARSetExcpetion
             logger.error("buildString:" + e.getMessage());
             throw e;
-        }
+        }*/
         return s;
     }
 

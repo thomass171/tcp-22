@@ -207,10 +207,10 @@ public class DefaultPlatform extends Platform {
 
     }
 
-    @Override
+    /*24.10.23 try without @Override
     protected Log getLog() {
         return null;
-    }
+    }*/
 
     @Override
     public Log getLog(Class clazz) {

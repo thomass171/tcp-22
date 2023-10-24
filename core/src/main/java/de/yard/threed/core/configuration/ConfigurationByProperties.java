@@ -4,7 +4,9 @@ import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleResource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,5 +34,10 @@ public class ConfigurationByProperties extends Configuration {
     @Override
     public String getPropertyString(String property) {
         return properties.get(property);
+    }
+
+    @Override
+    public List<String> getProperties() {
+        return new ArrayList<String>(properties.keySet());
     }
 }

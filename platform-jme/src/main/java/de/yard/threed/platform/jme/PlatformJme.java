@@ -47,19 +47,25 @@ import java.util.List;
 
 
 /**
- * 5.7.21: Jetzt mal als Erweiterung der SimpleHeadlessPlatform.
+ * 5.7.21: Now extending SimpleHeadlessPlatform.
  * 25.1.23: Why? This doesn't really make sense.
  * <p>
  * Created by thomass on 20.04.15.
  */
-public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
-    // kann nicht ueber die Factory gebaut werden, weil die gerade noch initialisiert wird
-    Log logger = new JALog(/*LogFactory.getLog(*/PlatformJme.class);
+public class PlatformJme extends SimpleHeadlessPlatform {
     JmeResourceManager jmeResourceManager;
 
     private PlatformJme(Configuration configuration) {
+        // Stringhelper and logfactory are build in super
         super(null, configuration);
         this.configuration = configuration;
+        // replace super logger
+        logger = getLog(PlatformJme.class);
+    }
+
+    @Override
+    public int getDefaultLogLevel() {
+        return DefaultLog.LEVEL_INFO;
     }
 
     /**
@@ -72,12 +78,6 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
      * @return
      */
     public static PlatformInternals init(Configuration configuration) {
-        //if (EngineHelper.instance == null || !(EngineHelper.instance instanceof PlatformJme)) {
-        /*if (properties != null) {
-            for (String key : properties.keySet()) {
-                System.setProperty(key, properties.get(key));
-            }
-        }*/
         instance = new PlatformJme(configuration);
         //  Als default texture sowas wie void.png o.ae. nehmen
         //((EngineHelper)EngineHelper.instance).defaulttexture = JmeTexture.loadFromFile(new BundleResource("FontMap.png"));
@@ -356,11 +356,6 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
         return JmeSceneRunner.getInstance();
     }*/
 
-    @Override
-    public Log getLog(Class clazz) {
-        return new JALog(clazz);
-    }
-
     /*@Override
     public ResourceManager getRessourceManager() {
         return JmeResourceManager.getInstance();
@@ -516,10 +511,10 @@ public class PlatformJme extends SimpleHeadlessPlatform/*EngineHelper*/ {
         return true;
     }
 
-    @Override
+    /*24.10.23 try without @Override
     protected Log getLog() {
         return logger;
-    }
+    }*/
 
     @Override
     public NativeVRController getVRController(int index) {

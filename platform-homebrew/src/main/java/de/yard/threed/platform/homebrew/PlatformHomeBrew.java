@@ -53,8 +53,6 @@ import java.util.Map;
  * Created by thomass on 20.07.15.
  */
 public class PlatformHomeBrew extends DefaultPlatform {
-    // Set in constructor. Cannot be used before factory is set.
-    private Log logger;
     public NativeResourceReader resourcemanager;
     // 31.10.17: Texturelist for really found/loaded textures.
     public Map<String, NativeTexture> texturemap = new HashMap<>();
@@ -66,10 +64,11 @@ public class PlatformHomeBrew extends DefaultPlatform {
     private Configuration configuration;
 
     private PlatformHomeBrew(Configuration configuration) {
+        this.configuration = configuration;
+        StringUtils.init(buildStringHelper());
         //21.7.21 jetzt hier
         eventBus = new JAEventBus();
-        logfactory = new JALogFactory();
-        this.configuration = configuration;
+        logfactory = new LevelLogFactory(configuration, new JALogFactory(), DefaultLog.LEVEL_DEBUG);
         logger = logfactory.getLog(PlatformHomeBrew.class);
     }
 
@@ -353,10 +352,10 @@ public class PlatformHomeBrew extends DefaultPlatform {
         return true;
     }
 
-    @Override
+    /*24.10.23 try without @Override
     protected Log getLog() {
         return logger;
-    }
+    }*/
 
     @Override
     public NativeVRController getVRController(int index) {

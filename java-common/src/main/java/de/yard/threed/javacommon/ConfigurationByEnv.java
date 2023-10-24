@@ -4,6 +4,8 @@ import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.configuration.ConfigurationByArgs;
 import de.yard.threed.core.configuration.ConfigurationByProperties;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,5 +42,10 @@ public class ConfigurationByEnv extends Configuration {
     public static Configuration buildDefaultConfigurationWithEnv(Map<String, String> properties) {
         return new ConfigurationByEnv().addConfiguration(
                 new ConfigurationByProperties(properties), true);
+    }
+
+    @Override
+    public List<String> getProperties() {
+        return new ArrayList<String>(System.getenv().keySet());
     }
 }

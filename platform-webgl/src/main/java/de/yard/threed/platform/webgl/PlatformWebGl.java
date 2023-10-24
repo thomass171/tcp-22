@@ -18,7 +18,6 @@ import com.google.gwt.xml.client.XMLParser;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
@@ -40,7 +39,6 @@ import de.yard.threed.core.platform.TestPdfDoc;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by thomass on 20.04.15.
@@ -59,6 +57,8 @@ public class PlatformWebGl extends Platform {
 
     private PlatformWebGl(Configuration configuration) {
         this.configuration = configuration;
+        StringUtils.init(buildStringHelper());
+        logfactory = new LevelLogFactory(configuration, clazz -> new WebGlLog(clazz.getName()), isDevmode ? DefaultLog.LEVEL_DEBUG : DefaultLog.LEVEL_INFO);
     }
 
     /**
@@ -324,7 +324,7 @@ public class PlatformWebGl extends Platform {
 
     @Override
     public Log getLog(Class clazz) {
-        return new WebGlLog(clazz.getName());
+        return logfactory.getLog(clazz);
     }
 
     @Override
@@ -487,10 +487,10 @@ public class PlatformWebGl extends Platform {
         return isDevmode;
     }
 
-    @Override
+   /* @Override
     protected Log getLog() {
         return logger;
-    }
+    }*/
 
     @Override
     public NativeVRController getVRController(int index) {

@@ -18,8 +18,9 @@ import java.util.HashMap;
  * Date: 26.03.14
  * <p/>
  * Textures are loaded once into GPU memory. This is via NativeTexture just a reference to it.
- *
+ * <p>
  * There is also a TexturePool.
+ * 24.10.23: But this is nasty. Texture should be shared on the GPU level, not here. But currently without causes OOM.
  */
 public class Texture {
     Log logger = Platform.getInstance().getLog(Texture.class);
@@ -39,7 +40,7 @@ public class Texture {
         //MA36 no longer cache. Doch cachen, sonst droht OOM.
         //texture = ((Platform) Platform.getInstance()).loadTexture( filename, param);
         //texture = Platform.getInstance().buildNativeTexture( filename, param);
-        texture =  texturePool.loadTexture(  filename, param);
+        texture = texturePool.loadTexture(filename, param);
     }
 
     private Texture(/*Bundle dummywegensigbundle,*/ BundleResource filename) {
@@ -47,7 +48,7 @@ public class Texture {
         //MA36 no longer cache. Doch cachen, sonst droht OOM.
         //texture = ((Platform) Platform.getInstance()).loadTexture(  filename, param);
         //texture = Platform.getInstance().buildNativeTexture( filename, param);
-        texture =  texturePool.loadTexture(  filename, param);
+        texture = texturePool.loadTexture(filename, param);
     }
 
     /**
@@ -95,5 +96,12 @@ public class Texture {
      */
     public static Texture buildBundleTexture(BundleResource br, boolean wraps, boolean wrapt) {
         return new Texture(br, wraps, wrapt);
+    }
+
+    /**
+     * Needed in tests when platforms are mixed and eg. DummyTexture and OpenglTexture interfere.
+     */
+    public static void resetTexturePool() {
+        texturePool = new TexturePool();
     }
 }

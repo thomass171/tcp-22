@@ -1,7 +1,9 @@
 package de.yard.threed.core.configuration;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,5 +40,10 @@ public class ConfigurationByArgs extends Configuration {
 
         //5.2.23 return  Platform.getInstance().getSystemProperty("argv." + property);
         return argProperties.get(property);
+    }
+
+    @Override
+    public List<String> getProperties() {
+        return new ArrayList<String>(argProperties.keySet());
     }
 }
