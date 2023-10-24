@@ -292,7 +292,7 @@ public class WebGlSceneRenderer implements AnimationController {
         // VR controller events are added to the array for keyboard input.
         WebGlInput.collectVrControllerEvents(renderer);
         JsArrayInteger jspressedkeys = WebGlInput.getPressedKeys();
-        //logger.debug(""+jspressedkeys+" keys pressed");
+        //logger.debug(""+jspressedkeys.length()+" keys pressed");
         for (int i = 0; i < jspressedkeys.length(); i++) {
             int pressedkey = jspressedkeys.get(i);
             AbstractSceneRunner.getInstance().pressedkeys.add(pressedkey);
@@ -330,6 +330,7 @@ public class WebGlSceneRenderer implements AnimationController {
 
         // Alle gespeicherten Inputevents wieder loeschen und die gedrückten
         // speichern, um die immer noch gedrueckten ermitteln zu koennen.
+        // Also fills 'stillpressed'.
         WebGlInput.close(jspressedkeys, upkeys);
 
         AbstractSceneRunner.getInstance().stillpressedkeys = new ArrayList(WebGlInput.getStillPressedKeys());

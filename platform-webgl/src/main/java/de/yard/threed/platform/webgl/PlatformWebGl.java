@@ -416,11 +416,6 @@ public class PlatformWebGl extends Platform {
         return AbstractSceneRunner.getInstance().getMouseClick();
     }
 
-    /**
-     * Kann solange abgefragt werden, wie die Taste gedrückt ist.
-     *
-     * @return
-     */
     @Override
     public boolean getKey(int keycode) {
         return AbstractSceneRunner.getInstance().keyStillPressed(keycode);

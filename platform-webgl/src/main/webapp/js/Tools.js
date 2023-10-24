@@ -6,6 +6,8 @@
 
 var lastkeydown = new Array();
 var lastkeyup = new Array();
+// if a key is hold down, keydown events are fired endlessly by JS/browser. So keep track of received down events.
+var gotkeydown = new Map();
 var stats = null;
 // Overridden in Main. This is NOT the GWT devmode
 var isDevmode = 0;
@@ -20,12 +22,16 @@ function setDebuginfo(s) {
  * TODO KeyboardEvent.keyCode is deprecated (https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode)
  */
 function ThreedonDocumentKeyDown(event) {
-    //logger.debug("KeyDownEvent keycode=" + event.keyCode);
-    lastkeydown.push(event.keyCode);
+    //console.log("KeyDownEvent keycode=" + event.keyCode);
+    if (!gotkeydown.has(event.keyCode)) {
+        lastkeydown.push(event.keyCode);
+        gotkeydown.set(event.keyCode,null);
+    }
 }
 function ThreedonDocumentKeyUp(event) {
     //logger.debug("KeyUpEvent keycode=" + event.keyCode);
     lastkeyup.push(event.keyCode);
+    gotkeydown.delete(event.keyCode);
 }
 
 //die async geladenenen GLTF model
@@ -87,6 +93,9 @@ vrControllerEventMap.set("left-stick-right", function () {lastkeydown.push(39)})
 vrControllerEventMap.set("left-stick-up", function () {lastkeydown.push(38)});
 vrControllerEventMap.set("left-stick-down", function () {lastkeydown.push(40)});
 
+/**
+ *
+ */
 function pollVrControllerEvents(renderer) {
   var handedness = "unknown";
 

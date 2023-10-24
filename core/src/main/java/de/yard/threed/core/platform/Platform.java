@@ -281,9 +281,7 @@ public abstract class Platform {
     public abstract boolean getKeyUp(int keycode);
 
     /**
-     * Kann solange abgefragt werden, wie die Taste gedrückt ist.
-     *
-     * @return
+     * Available as long as the key is pressed (also in following frames (update())).
      */
     public abstract boolean getKey(int keycode);
 

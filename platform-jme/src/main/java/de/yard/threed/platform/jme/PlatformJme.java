@@ -466,11 +466,6 @@ public class PlatformJme extends SimpleHeadlessPlatform {
         return AbstractSceneRunner.getInstance().getMousePress();
     }
 
-    /**
-     * Kann solange abgefragt werden, wie die Taste gedrückt ist.
-     *
-     * @return
-     */
     @Override
     public boolean getKey(int keycode) {
         return AbstractSceneRunner.getInstance().keyStillPressed(keycode);
