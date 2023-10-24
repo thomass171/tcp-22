@@ -46,7 +46,6 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     public static RequestType USER_REQUEST_MENU = RequestType.register(1006, "USER_REQUEST_MENU");
     public static RequestType USER_REQUEST_CONTROLMENU = RequestType.register(1007, "USER_REQUEST_CONTROLMENU");
 
-    boolean keytorequestsystemdebuglog = true;
     private Menu menu = null;
     MenuProvider menuProvider;
     ControlMenuBuilder controlMenuProvider;
@@ -169,6 +168,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
         for (KeyEntry key : keymapping.keySet()) {
             if (!key.release && Input.getKeyDown(key.keyCode)) {
+                logger.debug("key down detected ");
                 if (key.shift == Input.getKey(KeyCode.Shift)) {
                     if (userEntityId != null) {
                         // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
@@ -177,6 +177,8 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 }
             }
             if (key.release && Input.getKeyUp(key.keyCode)) {
+                logger.debug("key up detected ");
+
                 if (key.shift == Input.getKey(KeyCode.Shift)) {
                     if (userEntityId != null) {
                         // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
@@ -283,9 +285,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
     @Override
     public boolean processRequest(Request request) {
-        if (keytorequestsystemdebuglog) {
-            logger.debug("got request " + request.getType());
-        }
+        logger.debug("got request " + request.getType());
 
         if (request.getType().equals(USER_REQUEST_MENU)) {
             //if (menu != null) {
@@ -305,9 +305,8 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
     @Override
     public void process(Event evt) {
-        if (keytorequestsystemdebuglog) {
-            logger.debug("got event " + evt.getType());
-        }
+        logger.debug("got event " + evt.getType());
+
         if (evt.getType().equals(UserSystem.USER_EVENT_LOGGEDIN)) {
             String username = (String) evt.getPayload().get("username");
             String clientid = (String) evt.getPayload().get("clientid");

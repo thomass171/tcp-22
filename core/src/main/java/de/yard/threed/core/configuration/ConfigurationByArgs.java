@@ -43,7 +43,7 @@ public class ConfigurationByArgs extends Configuration {
     }
 
     @Override
-    public List<String> getProperties() {
+    public List<String> getPropertiesList() {
         return new ArrayList<String>(argProperties.keySet());
     }
 }

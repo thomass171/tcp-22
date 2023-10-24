@@ -45,7 +45,7 @@ public class ConfigurationByEnv extends Configuration {
     }
 
     @Override
-    public List<String> getProperties() {
+    public List<String> getPropertiesList() {
         return new ArrayList<String>(System.getenv().keySet());
     }
 }

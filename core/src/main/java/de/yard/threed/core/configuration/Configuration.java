@@ -16,7 +16,7 @@ public abstract class Configuration {
 
     public abstract String getPropertyString(String property);
 
-    public abstract List<String> getProperties();
+    public abstract List<String> getPropertiesList();
 
     public String getString(String property) {
 
@@ -95,6 +95,16 @@ public abstract class Configuration {
      */
     public int size() {
         return 1 + configurationList.size();
+    }
+
+    public List<String> getProperties() {
+
+        List<String> properties=new ArrayList<String>();
+        properties.addAll(getPropertiesList());
+        for (Configuration configuration : configurationList) {
+            properties.addAll(configuration.getPropertiesList());
+        }
+        return properties;
     }
 
     public static Configuration buildDefaultConfigurationWithArgs(String[] args, Map<String, String> properties) {

@@ -37,7 +37,7 @@ public class ConfigurationByProperties extends Configuration {
     }
 
     @Override
-    public List<String> getProperties() {
+    public List<String> getPropertiesList() {
         return new ArrayList<String>(properties.keySet());
     }
 }
