@@ -56,11 +56,15 @@ document.addEventListener("keyup", ThreedonDocumentKeyUp, false);
  * Tracking of non standard VR controller actions. Only the main trigger is standard,
  * permitting only one action per controller.
  *
+ * defines commonly used keys (space/fire is covered by standard trigger)
+ * temporary solution until configurable from app.
+
  * derived from https://codepen.io/jason-buchheim/details/zYqYGXM
  * without speedfactor and hapticActuators
  *
  * Button map for Oculus Rift
- * 0 Trigger
+ * 0 Trigger (seems to be a button with value range 0.0-1.0)
+ * 1 Grabber (seems to be a button with value range 0.0-1.0)
  * 4 -> 'X' on left and 'A' on right
  * 5 -> 'Y' on left and 'B' on right
  *
@@ -73,29 +77,40 @@ document.addEventListener("keyup", ThreedonDocumentKeyUp, false);
 
 const prevGamePads = new Map();
 
-var debugLog = true;
-var axisThreshold = 0.7;
+var debugLog = false;
+var axisThresholdUpper = 0.7;
+var axisThresholdLower = 0.2;
 var stickFired = [];
-stickFired['right2'] = false;
-stickFired['right3'] = false;
-stickFired['left2'] = false;
-stickFired['left3'] = false;
 
 const vrControllerEventMap = new Map();
-vrControllerEventMap.set("right-button-4", function () {console.log("A pressed")});
-vrControllerEventMap.set("right-button-5", function () {console.log("B pressed")});
+// 84=t(eleport),77=m(enu), further not known??
+vrControllerEventMap.set("left-button-4-down", function () {lastkeydown.push(77)});
+vrControllerEventMap.set("left-button-4-up", function () {lastkeyup.push(77)});
+vrControllerEventMap.set("left-button-5-down", function () {lastkeydown.push(84)});
+vrControllerEventMap.set("left-button-5-up", function () {lastkeyup.push(84)});
+vrControllerEventMap.set("right-button-4-down", function () {lastkeydown.push(77)});
+vrControllerEventMap.set("right-button-4-up", function () {lastkeyup.push(77)});
+vrControllerEventMap.set("right-button-5-down", function () {lastkeydown.push(84)});
+vrControllerEventMap.set("right-button-5-up", function () {lastkeyup.push(84)});
+// 37=curleft, 38=curup ,39=curright,40=curdown
 vrControllerEventMap.set("right-stick-left", function () {lastkeydown.push(37)});
+vrControllerEventMap.set("right-stick-left-center", function () {lastkeyup.push(37)});
 vrControllerEventMap.set("right-stick-right", function () {lastkeydown.push(39)});
+vrControllerEventMap.set("right-stick-right-center", function () {lastkeyup.push(39)});
 vrControllerEventMap.set("right-stick-up", function () {lastkeydown.push(38)});
+vrControllerEventMap.set("right-stick-up-center", function () {lastkeyup.push(38)});
 vrControllerEventMap.set("right-stick-down", function () {lastkeydown.push(40)});
-vrControllerEventMap.set("left-stick-left", function () {lastkeydown.push(37)});
-vrControllerEventMap.set("left-stick-right", function () {lastkeydown.push(39)});
-vrControllerEventMap.set("left-stick-up", function () {lastkeydown.push(38)});
-vrControllerEventMap.set("left-stick-down", function () {lastkeydown.push(40)});
+vrControllerEventMap.set("right-stick-down-center", function () {lastkeyup.push(40)});
+// 87=w,83=s,65=a,68=d
+vrControllerEventMap.set("left-stick-left", function () {lastkeydown.push(65)});
+vrControllerEventMap.set("left-stick-left-center", function () {lastkeyup.push(65)});
+vrControllerEventMap.set("left-stick-right", function () {lastkeydown.push(68)});
+vrControllerEventMap.set("left-stick-right-center", function () {lastkeyup.push(68)});
+vrControllerEventMap.set("left-stick-up", function () {lastkeydown.push(87)});
+vrControllerEventMap.set("left-stick-up-center", function () {lastkeyup.push(87)});
+vrControllerEventMap.set("left-stick-down", function () {lastkeydown.push(83)});
+vrControllerEventMap.set("left-stick-down-center", function () {lastkeyup.push(83)});
 
-/**
- *
- */
 function pollVrControllerEvents(renderer) {
   var handedness = "unknown";
 
@@ -129,34 +144,49 @@ function pollVrControllerEvents(renderer) {
               if (debugLog) console.log(data.handedness + " button " + button + " value changed from " + old.buttons[button] + " to " + value);
               //check if it is 'all the way pushed'
               if (value === 1) {
-                if (debugLog) console.log("Button" + button + "Down");
-                checkVrControllerEvent(data.handedness + "-button-" + button);
+                if (debugLog) console.log("Button " + button + " down");
+                checkVrControllerEvent(data.handedness + "-button-" + button + "-down");
               } else {
-                 if (debugLog) console.log("Button" + button + "Up");
-                 // No action currently for releasing a button
+                if (debugLog) console.log("Button " + button + " up");
+                checkVrControllerEvent(data.handedness + "-button-" + button + "-up");
               }
             }
           });
           data.axes.forEach((value, axis) => {
             // handlers for thumbsticks
             // convert thumbstick action to button event
-            if (Math.abs(value) > axisThreshold) {
-              if (debugLog) console.log(data.handedness + " axis " + axis + " values exceeds threshold:", value);
+            if (Math.abs(value) > axisThresholdUpper) {
+              if (debugLog) console.log(data.handedness + " axis " + axis + " value exceeds threshold " + value);
               // avoid repeated events for one movement
               if (!stickFired[data.handedness+axis]) {
                   if (axis == 2) {
                     //left and right axis on thumbsticks
-                    checkVrControllerEvent(data.handedness + "-stick-" + ((value<0)?"left":"right"));
-                    stickFired[data.handedness+axis] = true;
+                    var dir = (value<0)?"left":"right";
+                    checkVrControllerEvent(data.handedness + "-stick-" + dir);
+                    stickFired[data.handedness+axis] = dir;
                   }
                   if (axis == 3) {
                     //up and down axis on thumbsticks
-                    checkVrControllerEvent(data.handedness + "-stick-" + ((value<0)?"up":"down"));
-                    stickFired[data.handedness+axis] = true;
+                    var dir = (value<0)?"up":"down";
+                    checkVrControllerEvent(data.handedness + "-stick-" + dir);
+                    stickFired[data.handedness+axis] = dir;
                   }
               }
-            } else {
-              stickFired[data.handedness+axis] = false;
+            }
+            if (Math.abs(value) < axisThresholdLower) {
+              if (stickFired[data.handedness+axis] != null) {
+                var firedDir = stickFired[data.handedness+axis];
+                if (debugLog) console.log(data.handedness + " axis " + axis + " value back below threshold " + value, firedDir);
+                if (axis == 2) {
+                  //left and right axis on thumbsticks
+                  checkVrControllerEvent(data.handedness + "-stick-" + firedDir + "-center");
+                }
+                if (axis == 3) {
+                  //up and down axis on thumbsticks
+                  checkVrControllerEvent(data.handedness + "-stick-" + firedDir + "-center");
+                }
+                stickFired[data.handedness+axis] = null;
+              }
             }
           });
         }
@@ -175,6 +205,8 @@ function isIterable(obj) {
 }
 
 function checkVrControllerEvent(eventKey) {
+    if (debugLog) console.log("checkVrControllerEvent for " + eventKey);
+
     var eventFunction = vrControllerEventMap.get(eventKey);
     if (eventFunction != null) {
         eventFunction();
