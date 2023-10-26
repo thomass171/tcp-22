@@ -10,7 +10,9 @@
 # Die Ausgabe am besten umleiten, da kommt viel.
 # Muesste vielleicht mal pro Preprocess gemacht werden, sonst nutzt es nicht viel.
 #
-# 30.9.23: Also used by external projects, so strictly relying on HOSTDIR, cwd and parameter
+# 30.09.23: Also used by external projects, so strictly relying on HOSTDIR, cwd and parameter
+#
+# 26.10.23: Also model conversion here (eg. 'ac'->'gltf')
 #
 
 OWNDIR=`dirname $0`
@@ -21,8 +23,9 @@ source $OWNDIR/common.sh || exit 1
 validateHOSTDIR
 
 usage() {
-	echo "$0: [--nopp] <bundlename>"
-	echo "$0: [--nopp] -m <modulename>"
+	echo "$0: [-S] [-s] <bundlename>"
+	echo "$0: [-S] [-s] -m <modulename>"
+	echo "option -S for skipping pcm files."
 	exit 1
 }
 
@@ -71,7 +74,6 @@ while getopts "Ssm" o; do
 done
 shift $((OPTIND-1))
 
-NOPP=0
 
 if [ -z "$1" ]
 then
@@ -151,20 +153,28 @@ do
   then
     #single file
     SUFFIX="${FNAME##*.}"
-    #replace pcm file by creating models
-    if [ "$SUFFIX" = "pcm" ]
-    then
-      if [ "$STATIC" = "1" ]; then
-        echo "Skipping pcm"
-      else
-        processPcm $FNAME $DESTDIR $DIRECTORY $filename
-        checkrc processPcm
-      fi
-    else
-      cp -p $FNAME $DESTDIR/$filename
-      checkrc cp
-      echo $filename >> $DIRECTORY
-    fi
+    case $SUFFIX in
+      "ac")
+        # nasty dependency for FG. Will only be possible from tcp-flightgear.
+        if [ ! -r $DESTDIR/$BASENAME.gltf -o "$FORCE" = "1" ]
+        then
+          sh $TCP22DIR/../tcp-flightgear/bin/convertModel.sh $FNAME $DESTDIR/$DIRNAME
+          relax
+        fi
+        ;;
+      "pcm")
+        if [ "$STATIC" = "1" ]; then
+          echo "Skipping pcm"
+        else
+          processPcm $FNAME $DESTDIR $DIRECTORY $filename
+          checkrc processPcm
+        fi
+        ;;
+      *)
+        cp -p $FNAME $DESTDIR/$filename
+        checkrc cp
+        echo $filename >> $DIRECTORY
+    esac
   else
     error "unknown file type of file $FNAME"
   fi
