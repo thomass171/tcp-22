@@ -45,6 +45,12 @@
             <artifactId>module-graph</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+        <!-- traffic added for LocomotivecCreator test-->
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-traffic</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
         <!-- tests wegen z.B. ModelAssertions-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>

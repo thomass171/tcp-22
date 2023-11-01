@@ -51,8 +51,9 @@ public interface VehicleConfig  {
 
     /**
      * Returns number of vehicles to create initially
-     * @return
+     * 27.10.23: Deprecated because this is not a vehicle but a scenery setup property.
      */
+    @Deprecated
     public int getInitialCount() ;
 
     /**

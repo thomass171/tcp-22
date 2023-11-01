@@ -9,6 +9,7 @@ import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.ecs.EcsHelper;
+import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.vr.VrInstance;
 
@@ -28,15 +29,20 @@ public class ObserverSystem extends DefaultEcsSystem {
     public static String TAG = "ObserverSystem";
     // workaround for attaching the observer only once to the main/first player, but not to further bots.
     private boolean isFirstJoin = true;
-    private boolean observersystemdebuglog = true;
     // offset to attachment (player,avatar etc)
     private LocalTransform viewTransform;
+    public boolean withComponent = false;
 
     /**
      *
      */
-    public ObserverSystem() {
+    public ObserverSystem(boolean withComponent) {
         super(new String[]{"ObserverComponent"}, new RequestType[]{}, new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED/*UserSystem.USER_EVENT_JOINED*/});
+        this.withComponent = withComponent;
+    }
+
+    public ObserverSystem() {
+        this(false);
     }
 
     @Override
@@ -62,11 +68,11 @@ public class ObserverSystem extends DefaultEcsSystem {
 
     @Override
     public void process(Event evt) {
-        if (observersystemdebuglog) {
-            logger.debug("got event " + evt.getType());
-        }
+
+        logger.debug("got event " + evt.getType());
+
         if (evt.getType().equals(BaseEventRegistry.EVENT_USER_ASSEMBLED)) {
-            int userEntityId = (int)((Integer) evt.getPayload().get("userentityid"));
+            int userEntityId = (int) ((Integer) evt.getPayload().get("userentityid"));
             EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
 
             if (userEntity == null || userEntity.getSceneNode() == null) {
@@ -78,6 +84,31 @@ public class ObserverSystem extends DefaultEcsSystem {
                 if (attachObserver(forLogin, isFirstJoin, userEntity, viewTransform)) {
                     isFirstJoin = false;
                 }
+
+                //31.10.23: The following from TrafficWorldSystem. But its a good location here to add ObserverComponent
+                //21.10.19 optional
+                //das stammt aus railing
+                //if (isRailing) {
+                Transform slave = null;
+                    /*31.10.23: nearview probably needs some refactoring
+                    if (enableNearView) {
+                        nearView = new NearView(Scene.getCurrent().getDefaultCamera(), 0.01, 20, Scene.getCurrent());
+                        //damit man erkennt, ob alles an home attached ist weg von (0,0,0) und etwas höher
+                        nearView.setPosition(new Vector3(-30, 10, -10));
+                    }
+
+                    //Camera bekommt auch ein ProxyTransform
+
+                    if (nearView != null) {
+                        //wirklich??slave = nearView.getCamera().getCarrier().getTransform();
+                    }*/
+                if (withComponent) {
+                    // cannot be done always. In maze eg. its not needed and breaks Observer.
+                    ObserverComponent oc = new ObserverComponent(new ProxyTransform(Scene.getCurrent().getDefaultCamera().getCarrier().getTransform().transform, slave));
+                    oc.setRotationSpeed(40);
+                    UserSystem.getInitialUser().addComponent(oc);
+                }
+
             }
         }
     }

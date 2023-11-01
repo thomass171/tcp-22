@@ -40,4 +40,28 @@ public class ModelCreatorTest {
             }
         }
     }
+
+    /**
+     *
+     */
+    @Test
+    public void testLocomotive() {
+
+        GltfBuilderResult result = null;
+        try {
+            result = ModelCreator.createModel("loc", "de.yard.threed.traffic.railing.LocomotiveCreator", new String[]{});
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+        NativeJsonValue gltf = platform.parseJson(result.gltfstring);
+        Assertions.assertNotNull( gltf,"parsedgltf");
+        BundleResource gltfbr = new BundleResource(new GltfMemoryBundle("loc", result.gltfstring, result.bin), "loc.gltf");
+        try {
+            LoaderGLTF lf1 = LoaderGLTF.buildLoader(gltfbr, null);
+
+        } catch (InvalidDataException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
 }

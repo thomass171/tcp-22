@@ -38,12 +38,14 @@ public class VehicleLauncher {
     private static Log logger = Platform.getInstance().getLog(VehicleLauncher.class);
 
     /**
-     * Das ist DIE Methode, um ein Vehicle zu laden, builden, ECS einzurichten und auf einem Graph zu positionieren. Für
+     * This is THE main method for loading and building a vehicle, setup ECS and position it on a graph.
+     * For
      * 1) Avatars aircraft
      * 2) GroundService
      * 3) AI aircraft
      * 4) Railing
      * Das Bundle muss noch nicht geladen sein. Hier wird die Entity angelegt.
+     * Typically triggered via TRAFFIC_REQUEST_LOADVEHICLE_NG (formerly TRAFFIC_REQUEST_LOADVEHICLE2) and TRAFFIC_REQUEST_LOADVEHICLES
      * <p>
      * * Nur die AI Aircrafts aus FG_Root(fgdata) rotieren um main gears.
      * Das Vehicle kommt aus den Beginn der Edge (from) in Richtung "to".
@@ -164,16 +166,6 @@ public class VehicleLauncher {
     }
 
     /**
-     * Convenience method for multiple delegates
-     * 27.12.21
-     */
-    public static void launchVehicle(Vehicle vehicle, VehicleConfig config, TrafficGraph graph, GraphPosition position, @Deprecated TeleportComponent avatarpc, SceneNode destinationnode, GraphProjection projectionforbackprojection,
-                                     LocalTransform vehiclebasetransform, NearView nearView, VehicleBuiltDelegate vehicleBuiltDelegate, VehicleLoader vehicleLoader) {
-        launchVehicle(vehicle, config, graph, position, avatarpc, destinationnode, projectionforbackprojection,
-                vehiclebasetransform, nearView, (vehicleBuiltDelegate == null) ? null : new VehicleBuiltDelegate[]{vehicleBuiltDelegate}, vehicleLoader);
-    }
-
-    /**
      * Ein graphgebundenes Vehicle mit den Vehicle typischen Components als ECS Entity bauen.
      * Moving- und Velocity Components sind mandatory. Vehicle optional.
      * type ist der
@@ -250,7 +242,7 @@ public class VehicleLauncher {
         }
         //27.12.21VehicleConfig config = tw.getVehicleConfig(name);
         GraphPosition start = new GraphPosition(ed/*, ed.getLength() , true*/);
-        VehicleLauncher.launchVehicle(new Vehicle(name), config, trafficGraph, start, tc, destination, projectionforbackprojection, sceneConfig.getBaseTransformForVehicleOnGraph(), nearView, vehicleBuiltDelegate, vehicleLoader);
+        VehicleLauncher.launchVehicle(new Vehicle(name), config, trafficGraph, start, tc, destination, projectionforbackprojection, sceneConfig.getBaseTransformForVehicleOnGraph(), nearView, new VehicleBuiltDelegate[]{vehicleBuiltDelegate}, vehicleLoader);
     }
 
 

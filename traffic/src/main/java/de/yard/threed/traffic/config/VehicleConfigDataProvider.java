@@ -8,19 +8,26 @@ public class VehicleConfigDataProvider implements DataProvider {
     //27.12.21TrafficWorldConfig tw;
     NativeDocument tw;
 
-    public VehicleConfigDataProvider(NativeDocument tw){
-        this.tw=tw;
+    public VehicleConfigDataProvider(NativeDocument tw) {
+        this.tw = tw;
     }
 
     @Override
     public Object getData(Object[] parameter) {
         String vehicleName = (String) parameter[0];
 
-        if (tw==null){
+        if (tw == null) {
             return new LocConfig();
         }
         //27.12.21 VehicleConfig vconfig = tw.getVehicleConfig(vehicleName);
-        VehicleConfig vconfig = ConfigHelper.getVehicleConfig(tw,vehicleName);
+
+        //30.10.23: xsd layout getter
+        VehicleConfig vconfig = ConfigHelper.getVehicleDefinition(tw, vehicleName);
+        if (vconfig != null) {
+            return vconfig;
+        }
+        //30.10.23: Legacy getter
+        vconfig = ConfigHelper.getVehicleConfig(tw, vehicleName);
         return vconfig;
     }
 }

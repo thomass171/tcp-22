@@ -8,6 +8,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ViewPoint;
 import de.yard.threed.engine.ecs.DataProvider;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.EcsHelper;
 import de.yard.threed.engine.ecs.EcsService;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.TeleportComponent;
@@ -65,7 +66,7 @@ public class TrafficHelper {
     public static void launchVehicles(/*ConfigNodeList*/List<Vehicle> vehiclelist, TrafficContext trafficContext/*27.12.21GroundNet groundnet*/, TrafficGraph graph, TeleportComponent avatarpc, SceneNode destinationnode,
                                                         GraphProjection projection /*27.12.21AirportConfig airport*/, LocalTransform baseTransformForVehicleOnGraph/* SceneConfig sceneConfig*/,
                                                         VehicleLoader vehicleLoader, VehicleBuiltDelegate genericVehicleBuiltDelegate) {
-        logger.debug("launchVehicles groundnet=" +  ",graph=" + graph);
+        logger.debug("launchVehicles groundnet=" + ",graph=" + graph);
         //27.12.21 TrafficWorldConfig tw = TrafficWorldConfig.getInstance();
         for (int i = 0; i < vehiclelist.size()/*tw.getVehicleCount()*/; i++) {
             //for (GroundServiceVehicleConfig c : config.vehicles) {
@@ -81,7 +82,7 @@ public class TrafficHelper {
                     GraphPosition graphposition = null;
 
                     if (/*27.12.21groundnet*/trafficContext != null) {
-                        graphposition=trafficContext.getStartPosition(vconfig);
+                        graphposition = trafficContext.getStartPosition(vconfig);
 
                     } else {
                         if (graph == null || graph.getBaseGraph().getEdgeCount() == 0) {
@@ -103,8 +104,8 @@ public class TrafficHelper {
                             graphposition = new GraphPosition(graph.getBaseGraph().getEdge((int) (millis % graph.getBaseGraph().getEdgeCount())));
                         }
                     }
-                    VehicleLauncher.launchVehicle(vehicle,vconfig, graph/*groundnet.groundnetgraph*/, graphposition, avatarpc, destinationnode, projection,
-                            /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, genericVehicleBuiltDelegate, vehicleLoader);
+                    VehicleLauncher.launchVehicle(vehicle, vconfig, graph/*groundnet.groundnetgraph*/, graphposition, avatarpc, destinationnode, projection,
+                            /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, (genericVehicleBuiltDelegate == null) ? new VehicleBuiltDelegate[]{} : new VehicleBuiltDelegate[]{genericVehicleBuiltDelegate}, vehicleLoader);
                 }
             } else {
                 logger.debug("Skipping delayload vehicle " + vehicle.getName());
@@ -122,7 +123,7 @@ public class TrafficHelper {
                 SmartLocation location = vconf.getLocation();
                 //buildArrivedAircraft(config, gsw.groundnet.getParkPos(location.getParkPos()));
                 //VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()),config, groundnet.groundnetgraph, groundnet.getParkingPosition(groundnet.getParkPos(location.getParkPos())), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, null, vehicleLoader);
-                VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()), config, trafficContext.getGraph(), trafficContext.getStartPositionFromLocation(location), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, (VehicleBuiltDelegate) null, vehicleLoader);
+                VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()), config, trafficContext.getGraph(), trafficContext.getStartPositionFromLocation(location), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, new VehicleBuiltDelegate[]{}, vehicleLoader);
             }
         }
         //}
@@ -214,5 +215,21 @@ public class TrafficHelper {
 
     public static boolean isRailer(VehicleConfig config) {
         return config.getType().equals(VehicleComponent.VEHICLE_RAILER);
+    }
+
+    public static EcsEntity findVehicleByName(String name) {
+        List<EcsEntity> aircrafts = EcsHelper.findEntitiesByComponent(VehicleComponent.TAG);
+        EcsEntity found = null;
+        int i;
+        for (i = 0; i < aircrafts.size(); i++) {
+            if (aircrafts.get(i).getName().equals(name/**/)) {
+                if (found != null) {
+                    //besser erstmal abbrechen. Das gibt sonst schwer erkennbare Fehlfunktionen
+                    throw new RuntimeException("duplicate " + name);
+                }
+                found = aircrafts.get(i);
+            }
+        }
+        return found;
     }
 }

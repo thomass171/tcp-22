@@ -302,3 +302,9 @@ The UI is then available on 'http://localhost:8080/servermanager.html'.
 
 ## Bundles
 
+Bundles are a well defined set of resources (files) that reside somewhere.
+They are identified by a name. Lookup is done by bundle resolver which
+check whether they know how to load a bundle. The first resolver wins.
+
+Alternatively, a bundle can be loaded with a full qualified name ('bundle@location'), which
+doesn't need a resolver.

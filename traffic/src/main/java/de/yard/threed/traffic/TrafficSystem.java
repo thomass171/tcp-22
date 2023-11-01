@@ -15,11 +15,12 @@ import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.avatar.AvatarComponent;
-import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.graph.*;
 import de.yard.threed.engine.platform.common.*;
+import de.yard.threed.traffic.config.ConfigNode;
+import de.yard.threed.traffic.config.ConfigNodeList;
 import de.yard.threed.traffic.config.SceneConfig;
 import de.yard.threed.traffic.config.VehicleConfig;
 
@@ -27,6 +28,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.util.NearView;
 
 
+import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
 
 import java.util.HashMap;
@@ -34,11 +36,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Logically handles all traffic. Movement of vehicles isType controlled by the GraphMovingSystem.
- * Singleton?. EcsSystem. Warum? Damit es jemanden gibt, der zum Abschluss von Movements neue auslösen kann.
+ * Logically handles all generic traffic (but no advanced like ground services). Movement of vehicles is controlled by the GraphMovingSystem.
+ * <p>
+ * Provides:
+ * - loading of graphs, eg. from Tiles (Tile20)
+ * - pooling all known traffic graphs and serving these as DataProvider
+ * - load vehicles (why not TRAFFIC_REQUEST_LOADVEHICLE2?)
+ * <p>
+ * Warum? Damit es jemanden gibt, der zum Abschluss von Movements neue auslösen kann.
  * 9.5.17: Einer muss ja die Trafficsteuerung übernehmen. Und der muss updaten() und auch auf Events reagieren (z.B. Vehicle hat Ziel erreicht).
- * Warum dann kein System? Es könnte auch GroundTraficSystem heissen, aber sagen wir erstmal ist ja auch Traffic.
- * Kann man immer noch aufdröseln.
+ *
  * <p>
  * Die Requests (z.B. Followme Anforderung) können hier als Event reinkommen.
  * Hier werden auch die Entities angelegt (über buildVehicle(), aber nicht die Model) und vorgehalten. Wobei vorgehalten werden muessen sie ja doch nicht wirklich.
@@ -87,32 +94,45 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     @Deprecated
     public static LocalTransform baseTransformForVehicleOnGraph;
 
-    VehicleLoader vehicleLoader;
+    VehicleLoader vehicleLoader = new SimpleVehicleLoader();
 
     Map<String, TrafficGraph> trafficgraphs = new HashMap<String, TrafficGraph>();
 
     // 27.12.21 Not possible as parameter aslong as groundnet and airport are unknown
     public static TrafficContext trafficContext;
 
+    private Map<String, AbstractTrafficGraphFactory> graphFactories = new HashMap<String, AbstractTrafficGraphFactory>();
+    int nextlocationindex = 0;
+
+    /**
+     * 31.10.23: After moving processing of TRAFFIC_REQUEST_LOADVEHICLE from BasicTravelScene to here,
+     * data is missing. These are the fields formerly in BasicTravelScene with null values.
+     */
+    public ConfigNodeList locationList;
+    public TrafficGraph groundNet;
+    public SceneNode destinationNode;
+    public NearView nearView;
+
     /**
      * weil er neue Pfade im Graph hinzufuegt, lauscht er auch auf GRAPH_EVENT_PATHCOMPLETED, um diese wieder aus dem
      * Graph zu entfernen.(20.3.18:immer noch, wirklich ??)
      * 8.5.19: Die Layerentfernung macht jetzt der EventSender
      */
-    public TrafficSystem( /*GraphVisualizer visualizer*/VehicleLoader vehicleLoader) {
+    public TrafficSystem() {
         super(new String[]{VehicleComponent.TAG},
                 new RequestType[]{
                         RequestRegistry.TRAFFIC_REQUEST_VEHICLE_MOVE,
+                        RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE,
                         RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLES},
                 new EventType[]{
                         GraphEventRegistry.GRAPH_EVENT_PATHCOMPLETED,
                         TrafficEventRegistry.TRAFFIC_EVENT_VEHICLELOADED,
-                        TrafficEventRegistry.EVENT_LOCATIONCHANGED});
+                        TrafficEventRegistry.EVENT_LOCATIONCHANGED,
+                        BaseEventRegistry.EVENT_USER_ASSEMBLED});
         //this.visualizer = visualizer;
 
         instance = this;
         this.name = "TrafficSystem";
-        this.vehicleLoader = vehicleLoader;
     }
 
     /**
@@ -261,13 +281,89 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 // In server mode no user might be logged in yet, so maybe there is no TeleportComponent
                 TrafficHelper.launchVehicles(TrafficSystem.vehiclelist,
                         trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
-                         (UserSystem.getInitialUser() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
+                        (UserSystem.getInitialUser() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
                         SphereSystem.getSphereNode()/*getWorld()*/, sphereProjections.backProjection,
                         /*27.12.21airportConfig,*/ baseTransformForVehicleOnGraph, vehicleLoader, genericVehicleBuiltDelegate);
                 return true;
             }
         }
+        if (request.getType().equals(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE)) {
+            // 31.10.23:moved here from BasicTravelScene
+            // Loads a specific vehicle by name or the next not yet loaded from a the vehicle list
+            logger.debug("Processing TRAFFIC_REQUEST_LOADVEHICLE request " + request);
+            // Nicht zu frueh laden, bevor es einen Graph zur Positionierung gibt.
+            // 26.3.20 Erstmal pruefen, wo das Vehicle hinsoll und dann evtl. das Groundnet vorab per Request laden.
+            //if (getGroundNet() == null) {
+            //  return false;
+            //}
+            // Zugriff auf Asynchelper ist nicht ganz sauber, but make sure alle scenery isType loaded before placing a vehicle.
+            if (AsyncHelper.getModelbuildvaluesSize() > 0) {
+                return false;
+            }
+            String vehiclename = (String) request.getPayload().get("name");
+            // TODO decode smartlocation
+            SmartLocation smartLocation = (SmartLocation) request.getPayload().get("location");
+            if (smartLocation == null) {
+                // 26.3.20 Was ware denn die naechste Location? Das ist ja jetzt alles EDDK lastig. TODO
+                String icao = "EDDK";
+                //27.12.21  DefaultTrafficWorld.getInstance().getConfiguration().getLocationListByName(icao).get(nextlocationindex);
+                ConfigNode location = locationList/*getLocationList()*/.get(nextlocationindex);
+                ;
+                smartLocation = new SmartLocation(icao, XmlHelper.getStringValue(location.nativeNode));
 
+                // 27.21.21 das ist jetzt schwierig zu pruefen. Es ist auch unklar, ob es wirklich noch noetig ist. Mal weglassen.
+                /*if (DefaultTrafficWorld.getInstance().getGroundNetGraph(icao) == null) {
+                    SystemManager.putRequest(new Request(RequestRegistry.TRAFFIC_REQUEST_LOADGROUNDNET, new Payload(icao)));
+                    // warten und nochmal versuchen
+                    return false;
+                }*/
+                nextlocationindex++;
+            }
+            /**
+             * load eines Vehicle, z.B. per TRAFFIC_REQUEST_LOADVEHICLE. 24.11.20: Dafuer ist jetzt TRAFFIC_REQUEST_LOADVEHICLE2.
+             * Das muss nicht unbedingt fuer Travel mit Avatar geeignet sein. Obs das ist, ist abhaengig vom Vehicle.
+             * Wird erst auf Anforderung gemacht, weil
+             * ein Vehicle viele Resourcen braucht und abhaengig von delayedload in der config (mit "initialVehicle" aber automatisch nach kurzer Zeit).
+             * Geht nicht mehr ueber Index, sondern prüft was das nächste ist bzw. welces noch nicht geladen wurde
+             * Es wird auch nicht unbedingt das naechste, sondern einfach das uebergebene geladen.
+             * 26.3.20
+             */
+            String name = vehiclename;
+
+            //DefaultTrafficWorld.getInstance().vehiclelist
+            /*ConfigNodeList*/
+            List<Vehicle> vehiclelist = TrafficSystem.vehiclelist;
+
+            if (name == null) {
+                for (int i = 0; i < vehiclelist.size(); i++) {
+                    //SceneVehicle sv = sceneConfig.getVehicle(i);
+                    if (TrafficHelper.findVehicleByName(vehiclelist.get(i).getName()) == null) {
+                        name = vehiclelist.get(i).getName();
+                        logger.debug("found unloaded vehicle " + name);
+                        break;
+                    }
+                }
+            }
+            if (name == null) {
+                logger.error("no unloaded vehicle found");
+                //set request to done
+                return true;
+            }
+
+            SphereProjections sphereProjections = TrafficHelper.getProjectionByDataprovider();
+            //lauch c172p (or 777)
+            //TrafficSystem.loadVehicles(tw, avataraircraftindex);
+
+            VehicleConfig config = TrafficHelper.getVehicleConfigByDataprovider(name);// tw.getVehicleConfig(name);
+            EcsEntity avatar = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
+            VehicleLauncher.lauchVehicleByName(groundNet/*getGroundNet()*/, config, name, smartLocation, TeleportComponent.getTeleportComponent(avatar),
+                    destinationNode/*getDestinationNode()*/, sphereProjections.backProjection, sceneConfig, nearView, TrafficSystem.genericVehicleBuiltDelegate,
+                    vehicleLoader/*getVehicleLoader()*/);
+            //aus flight: GroundServicesScene.lauchVehicleByIndex(gsw.groundnet, tw, 2, TeleportComponent.getTeleportComponent(avatar.avatarE), world, gsw.groundnet.projection);
+
+
+            return true;
+        }
         return false;
     }
 
@@ -338,6 +434,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 */
             //}
             if (tileResource != null) {
+                logger.debug("tileResource=" + tileResource);
                 // Tile 2.0
                 if (tileResource.getExtension().equals("xml")) {
                     loadTileGraphByConfigFile(tileResource);
@@ -351,7 +448,29 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
             }
         }
+        if (evt.getType().equals(BaseEventRegistry.EVENT_USER_ASSEMBLED)) {
+            // 31.10.23 From TrafficWorldSystem
+            //nearView soll nur die Lok abdecken.
+            //21.10.19 optional
+            NearView nearView = null;
+            //das stammt aus railing
+            /*31.10.23: nearview probably needs some refactoring if (isRailing) {
 
+                if (enableNearView) {
+                    nearView = new NearView(Scene.getCurrent().getDefaultCamera(), 0.01, 20, Scene.getCurrent());
+                    //damit man erkennt, ob alles an home attached ist weg von (0,0,0) und etwas höher
+                    nearView.setPosition(new Vector3(-30, 10, -10));
+                }
+
+                //Camera bekommt auch ein ProxyTransform
+                Transform slave = null;
+                if (nearView != null) {
+                    //wirklich??slave = nearView.getCamera().getCarrier().getTransform();
+                }
+            }*/
+
+            TrafficSystem.attachNewAvatarToAllVehicles(UserSystem.getInitialUser(), nearView);
+        }
     }
 
     @Override
@@ -359,6 +478,9 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         return trafficgraphs.get((String) parameter[0]);
     }
 
+    public void setVehicleLoader(VehicleLoader vehicleLoader) {
+        this.vehicleLoader = vehicleLoader;
+    }
 
     private static void attachAllAvatarsToNewVehicle(EcsEntity vehicleEntity, VehicleConfig config, SceneNode teleportParentNode, NearView nearView) {
 
@@ -404,6 +526,32 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
     }
 
+    public void addGraphFactory(String name, AbstractTrafficGraphFactory graphFactory) {
+        graphFactories.put(name, graphFactory);
+    }
+
+    /**
+     * 31.10.23: Moved here from TrafficWorldSystem.
+     */
+    public static void attachNewAvatarToAllVehicles(EcsEntity avatar, NearView nearView) {
+
+        logger.debug("attaching new avatar to all existing vehicles");
+
+        // Ob das der beste Weg ist, vehicles zu finden, muss sich noch zeigen. Aber der schlechteste wird es nicht sein
+        List<EcsEntity> vehicles = EcsHelper.findEntitiesByComponent(GraphMovingComponent.TAG);
+        for (EcsEntity vehicle : vehicles) {
+
+            VehicleComponent vc = VehicleComponent.getVehicleComponent(vehicle);
+            if (vc == null) {
+                logger.warn("vehicle without VehicleComponent?");
+            } else {
+                VehicleConfig config = vc.config;
+
+                TrafficSystem.attachAvatarToVehicle(avatar, vehicle, config, vc.teleportParentNode, nearView);
+            }
+        }
+    }
+
     /**
      * 30.11.21: Still independent from FlatTerrainSystem to have graph working even without terrain.
      * 16.12.21 Ueberhaupt ist byConvention Murks. So viel convention kann es doch gar nicht geben, z.B. vehicleList. Darum deprecated
@@ -427,7 +575,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         } else*/
             {
                 BundleData bundleData = bundle.getResource(new BundleResource(gnet));
-                if (loadGraphFromBundleData(bundleData, cluster)) {
+                if (loadGraph(bundleData, cluster, null)) {
                     logger.debug(" graph found for tile " + fullBasename);
                 } else {
                     logger.debug("no graph found for tile " + fullBasename);
@@ -440,11 +588,14 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         }
     }
 
-    private boolean loadGraphFromBundleData(BundleData bundleData, String cluster) {
+    private boolean loadGraph(BundleData bundleData, String cluster, AbstractTrafficGraphFactory factory) {
         TrafficGraph graph = null;
         if (bundleData == null) {
-            logger.debug("no graph found ");
-            return false;
+            if (factory == null) {
+                logger.debug("neither graph nor factory found ");
+                return false;
+            }
+            graph = factory.buildGraph();
         } else {
             logger.debug(" graph found ");
             //Graph osm = TrafficGraphFactory.buildfromXML(bundleData.getContentAsString()).getBaseGraph();
@@ -477,20 +628,32 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
     public void loadTileGraphByConfigFile(BundleResource tile) {
 
+        logger.debug("loadTileGraphByConfigFile");
+
         NativeDocument xmlConfig = Tile.loadConfigFile(tile);
         if (xmlConfig == null) {
             //already logged
             return;
         }
         List<NativeNode> xmlGraphs = XmlHelper.getChildren(xmlConfig, "trafficgraph");
+        logger.debug("" + xmlGraphs.size() + " xml graphs found");
         for (NativeNode nn : xmlGraphs) {
             String graphfile = XmlHelper.getStringAttribute(nn, "graphfile", null);
             if (graphfile == null) {
-                logger.error("graphfile not set");
+                String factory = XmlHelper.getStringAttribute(nn, "graphfactory", null);
+                if (factory == null) {
+                    logger.error("neither graphfile nor graphfactory set");
+                } else {
+                    if (graphFactories.containsKey(factory)) {
+                        loadGraph(null, TrafficGraph.RAILWAY, graphFactories.get(factory));
+                    } else {
+                        logger.error("unknown graphfactory " + factory);
+                    }
+                }
             } else {
                 BundleResource br = BundleResource.buildFromFullQualifiedString(graphfile);
                 BundleData bd = BundleHelper.loadDataFromBundle(br);
-                loadGraphFromBundleData(bd, TrafficGraph.RAILWAY);
+                loadGraph(bd, TrafficGraph.RAILWAY, null);
             }
         }
 

@@ -7,7 +7,7 @@ export VERBOSELOG=0
 MR=$HOME/.m2/repository
 VERSION=1.0.0-SNAPSHOT
 
-for module in core java-common java-native engine maze outofbrowser-common tools
+for module in core java-common java-native engine maze outofbrowser-common tools traffic
 do
   CLASSPATH=$CLASSPATH:$MR/de/yard/tcp-22/module-$module/$VERSION/module-$module-$VERSION.jar
 done

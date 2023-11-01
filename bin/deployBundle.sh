@@ -36,20 +36,21 @@ processPcm() {
 	destdir=$2
 	dirfile=$3
 	filename=$4
-	echo "Processing PCM $pcmfile to $destdir. directory is $dirfile"
+	subdir=$5
+	echo "Processing PCM $pcmfile to $destdir. directory is $dirfile. filename=$filename. subdir=$subdir"
 	#echo $CLASSPATH
 	#set -x
 	cat $pcmfile | while read basename classnameAndArgs
 	do
 		echo "ModelCreator for " $basename $classnameAndArgs
-		java -Djava.awt.headless=true de.yard.threed.tools.ModelCreator -n $basename -o $destdir -c $classnameAndArgs
+		java -Djava.awt.headless=true de.yard.threed.tools.ModelCreator -n $basename -o $destdir/$subdir -c $classnameAndArgs
 		if [ $? != 0 ]
 		then
 			echo "ModelCreator failed"
 			return 1
 		fi
-		echo $basename.bin >> $dirfile
-		echo $basename.gltf >> $dirfile
+		echo $subdir/$basename.bin >> $dirfile
+		echo $subdir/$basename.gltf >> $dirfile
 	done
 	return 0
 }
@@ -139,6 +140,7 @@ do
 
   # create destination target dir
   DIRNAME=`dirname $filename`
+  BASENAME=`basename $filename | cut -d'.' -f1`
   if [ ! -z "$DIRNAME" -a ! -d "$DESTDIR/$DIRNAME" ]
   then
     mkdir -p $DESTDIR/$DIRNAME
@@ -161,12 +163,16 @@ do
           sh $TCP22DIR/../tcp-flightgear/bin/convertModel.sh $FNAME $DESTDIR/$DIRNAME
           relax
         fi
+        # keep suffix 'ac' in directory? 31.10.23: No, was never that way and BundleRegistry.exists() is aware of that and checks for gltf
+        echo $DIRNAME/$BASENAME.gltf >> $DIRECTORY
+        echo $DIRNAME/$BASENAME.bin >> $DIRECTORY
         ;;
       "pcm")
         if [ "$STATIC" = "1" ]; then
           echo "Skipping pcm"
         else
-          processPcm $FNAME $DESTDIR $DIRECTORY $filename
+          # destdir also needs DIRNAME subdir
+          processPcm $FNAME $DESTDIR $DIRECTORY $filename $DIRNAME
           checkrc processPcm
         fi
         ;;

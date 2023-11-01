@@ -63,11 +63,13 @@ public class ConfigHelper {
 
     /**
      * From global vehicle list.
+     * 30.10.23: Deprecated because related to legacy non xsd xml layout.
      *
      * @return
      */
+    @Deprecated
     public static VehicleConfig getVehicleConfig(NativeDocument tw, String name) {
-        List<NativeNode>  vehicles = XmlHelper.getChildNodeList(tw, "vehicles", "vehicle");
+        List<NativeNode> vehicles = XmlHelper.getChildNodeList(tw, "vehicles", "vehicle");
         for (int i = 0; i < vehicles.size(); i++) {
             if (name.equals(XmlHelper.getStringAttribute(vehicles.get(i), "name", null))) {
                 return new XmlVehicleConfig(vehicles.get(i));
@@ -76,15 +78,39 @@ public class ConfigHelper {
         return null;
     }
 
+    /**
+     * 30.10.23: Deprecated because related to legacy non xsd xml layout.
+     */
+    @Deprecated
     public static VehicleConfig getVehicleConfig(NativeDocument tw, int index) {
-        List<NativeNode>  vehicles = XmlHelper.getChildNodeList(tw, "vehicles", "vehicle");
+        List<NativeNode> vehicles = XmlHelper.getChildNodeList(tw, "vehicles", "vehicle");
 
         return new XmlVehicleConfig(vehicles.get(index));
     }
 
     public static int getVehicleCount(NativeDocument tw) {
-        List<NativeNode>  vehicles = XmlHelper.getChildNodeList(tw, "vehicles", "vehicle");
+        List<NativeNode> vehicles = XmlHelper.getChildNodeList(tw, "vehicles", "vehicle");
         return vehicles.size();
     }
 
+    /**
+     *
+     */
+    public static VehicleConfig getVehicleDefinition(NativeDocument tw, String name) {
+        List<NativeNode> vehicleDefinitions = XmlHelper.getChildren(tw, "vehicledefinition");
+        for (NativeNode n : vehicleDefinitions) {
+            if (name.equals(XmlHelper.getStringAttribute(n, "name"))) {
+                return new XmlVehicleConfig(n);
+            }
+        }
+        return null;
+    }
+
+    public static LocalTransform getBaseTransformForVehicleOnGraph(NativeDocument tw) {
+        List<NativeNode> d = XmlHelper.getChildren(tw, "BaseTransformForVehicleOnGraph");
+        if (d.size()>0){
+            return ConfigHelper.getTransform(d.get(0));
+        }
+        return null;
+    }
 }

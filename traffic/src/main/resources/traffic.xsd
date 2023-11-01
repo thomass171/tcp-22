@@ -15,7 +15,8 @@
             <element name="trafficgraph" type="c:TrafficGraphType"/>
             <element name="vehicle" type="c:VehicleType"/>
             <element name="viewpoint" type="c:ViewpointType"/>
-
+            <element name="vehicledefinition" type="c:VehicleDefinitionType"/>
+            <element name="BaseTransformForVehicleOnGraph" type="c:BaseTransformForVehicleOnGraphType"/>
         </choice>
         <attribute name="name" type="string"/>
 
@@ -23,6 +24,7 @@
 
     <complexType name="TrafficGraphType">
         <attribute name="graphfile" type="string"/>
+        <attribute name="graphfactory" type="string"/>
 
     </complexType>
 
@@ -31,6 +33,11 @@
             <element name="transform" type="c:TransformType" minOccurs="0" maxOccurs="1"/>
         </sequence>
         <attribute name="name" type="string"/>
+    </complexType>
+    <complexType name="ViewpointListType">
+        <sequence>
+            <element name="viewpoint" type="c:ViewpointType" minOccurs="0" maxOccurs="1"/>
+        </sequence>
     </complexType>
 
     <complexType name="LightType">
@@ -78,7 +85,7 @@
 
     </complexType>
 
-    <!-- A vehicle list entry, not a vehicle definition. That should be VehicleDefinitionType-->
+    <!-- A vehicle list entry, not a vehicle definition. That is VehicleDefinitionType-->
     <complexType name="VehicleType">
 
         <attribute name="name" type="string"/>
@@ -90,6 +97,36 @@
 
     </complexType>
 
+    <complexType name="VehicleDefinitionType">
+
+        <sequence>
+            <element name="bundlename" type="string" minOccurs="0" maxOccurs="1"/>
+            <element name="modelfile" type="string" minOccurs="0" maxOccurs="1"/>
+            <element name="lowresfile" type="string" minOccurs="0" maxOccurs="1"/>
+            <element name="zoffset" type="double" minOccurs="0" maxOccurs="1"/>
+            <element name="unscheduledmoving" type="boolean" minOccurs="0" maxOccurs="1"/>
+            <element name="maximumspeed" type="double" minOccurs="0" maxOccurs="1"/>
+            <element name="acceleration" type="double" minOccurs="0" maxOccurs="1"/>
+            <element name="viewpoints" type="c:ViewpointListType" minOccurs="0" maxOccurs="1"/>
+            <!-- doesn't really belong here, but currently its used -->
+            <element name="initialcount" type="int" minOccurs="0" maxOccurs="1"/>
+
+        </sequence>
+
+        <attribute name="name" type="string"/>
+        <attribute name="modeltype" type="string"/>
+        <attribute name="ai" type="boolean"/>
+        <attribute name="type" type="string"/>
+
+    </complexType>
+
+    <!-- until we have a better idea where to put this we keep it here-->
+    <complexType name="BaseTransformForVehicleOnGraphType">
+        <sequence>
+            <element name="transform" type="c:TransformType" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+        <attribute name="name" type="string"/>
+    </complexType>
 
     <!-- Type for hex integers -->
     <simpleType name="hex-integer">

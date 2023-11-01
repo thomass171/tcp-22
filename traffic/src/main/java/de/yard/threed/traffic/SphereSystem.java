@@ -3,7 +3,6 @@ package de.yard.threed.traffic;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.EventType;
-import de.yard.threed.core.LatLon;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
@@ -36,7 +35,6 @@ import de.yard.threed.traffic.config.SceneConfig;
 
 import de.yard.threed.traffic.config.ViewpointConfig;
 import de.yard.threed.traffic.config.XmlVehicleConfig;
-import de.yard.threed.traffic.flight.FlightLocation;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 
 import de.yard.threed.traffic.geodesy.SimpleMapProjection;
@@ -93,19 +91,19 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
     /**
      * backprojection needed for 3D, otherwise null.
-     *
+     * <p>
      * 27.12.21: SceneConfig (das ist NUR der scene sub Part) und center mal reinstecken.
      */
-    public SphereSystem(EllipsoidCalculations/*Flight3D*/ ellipsoidCalculations, GraphBackProjectionProvider backProjection,GeoCoordinate center, SceneConfig sceneConfig) {
+    public SphereSystem(EllipsoidCalculations/*Flight3D*/ ellipsoidCalculations, GraphBackProjectionProvider backProjection, GeoCoordinate center, SceneConfig sceneConfig) {
         super(new String[]{}, new RequestType[]{USER_REQUEST_SPHERE}, new EventType[]{});
         //??updatepergroup = false;
         this.ellipsoidCalculations = ellipsoidCalculations;
-        this.backProjection=backProjection;
-        if (ellipsoidCalculations!=null){
+        this.backProjection = backProjection;
+        if (ellipsoidCalculations != null) {
             SystemManager.putDataProvider("ellipsoidconversionprovider", new EllipsoidConversionsProvider(ellipsoidCalculations));
         }
-        this.sceneConfig=sceneConfig;
-        this.center=center;
+        this.sceneConfig = sceneConfig;
+        this.center = center;
     }
 
     @Override
@@ -205,7 +203,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                 // Das ist nur erstmal so ungefähr für Terrain. Wird das noch erreicht? Wann?
                 //27.12.21 wegen dependency kopiert initialPosition = WorldGlobal.eddkoverviewfar.location.coordinates;
                 // SGGeod.fromLatLon(gsw.getAirport("EDDK").getCenter());
-                initialPosition = new GeoCoordinate(new Degree(50.843675),new Degree(7.109709),1150);
+                initialPosition = new GeoCoordinate(new Degree(50.843675), new Degree(7.109709), 1150);
 
             }
             if (lds != null) {
@@ -262,11 +260,11 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
         logger.debug("activateTile " + tile);
         //27.12.21 AirportConfig nearestairport1 = null;
         //das ist ja voelliger Quatsch. Geht nur, weil alles 0 basiert ist, verzerrt nur etwas. TODO 27.12.21 aber mal wirklich
-        GeoCoordinate center = /*WorldGlobal.elsdorf0*/new GeoCoordinate( new Degree(50.937770f),new Degree(6.580982f), 0);;
+        GeoCoordinate center = /*WorldGlobal.elsdorf0*/new GeoCoordinate(new Degree(50.937770f), new Degree(6.580982f), 0);
 
         if (tile.getName().equals("EDDK")) {
             // korrektes center ist wichtig für die Projection
-            center = new GeoCoordinate(new Degree(50.86538f), new Degree(7.139103f),0);
+            center = new GeoCoordinate(new Degree(50.86538f), new Degree(7.139103f), 0);
             // Traditional groundservices scene. Use config if it exists, otherwise use service. 27.12.21 not for now; always assume EDDK
             if (false /*27.12.21 DefaultTrafficWorld.getInstance() == null*/) {
                 logger.debug("tile via service");

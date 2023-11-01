@@ -14,11 +14,12 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.Payload;
 
 /**
- * Bewegung entlang eines Graphen.
+ * Movement of an entity with a GraphMovingComponent along a graph(path).
+ * This is only for simple/standard movement. More advanced graph related features
+ * need dedicated Systems, eg. GroundServicesSystem.
  * <p>
  * Created by thomass on 16.09.16.
  */
-
 public class GraphMovingSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(GraphMovingSystem.class);
     //MA31 Kruecke zur Entkopplung von SGGeod.

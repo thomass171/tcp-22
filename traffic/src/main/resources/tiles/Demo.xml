@@ -50,7 +50,7 @@
         </transform>
     </viewpoint>
 
-
+    <!-- loc is found in bundle data via hard coded config in LocConfig-->
     <vehicle name="loc" delayedload="false" automove="true" location="*:firstEdge"/>
 
 

@@ -75,6 +75,7 @@ public class Setup {
         //properties.put("argv.vehiclelist","GenericRoad");
 
         properties.put("logging.level.de.yard.threed.engine.ecs.InputToRequestSystem","DEBUG");
+        properties.put("logging.level.de.yard.threed","DEBUG");
 
         //13.3.19: Scene doch mal wieder aus Property, um nicht so viele Run Configurations zu haben. Nur, wenn sie
         //nicht schon von aussen gesetzt ist.
@@ -101,7 +102,7 @@ public class Setup {
             properties.put("enableAutomove", "true");
             properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
-        boolean demo = false;
+        boolean demo = true;
         if (demo) {
             properties.put("basename", "traffic:tiles/Demo.xml");
             // automove is enabled in Demo.xml.

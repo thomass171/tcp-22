@@ -1,5 +1,7 @@
 package de.yard.threed.traffic;
 
+import de.yard.threed.core.Payload;
+import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 
 /**
@@ -12,16 +14,20 @@ public class RequestRegistry {
     /**
      * Ein (noch nicht geladenes?) Vehicle aus der Configuration laden. Entweder ein spezielles über den Namen oder einfach das nächste.
      * 26.3.20: Die Location ist auch eine uebergebene oder die naechste.
-     * 24.11.20: Deprecated, weil der nicht in einem System läuft. Stattdessen gibts den 2er.
+     * 24.11.20: TRAFFIC_REQUEST_LOADVEHICLE is deprecated, weil der nicht in einem System läuft.
      * 29.10.21: Und ein Request to load all vehicles for a single graph (payload0,groundnet payload1). Needs to wait unitl
      * everything is ready, eg. Elevation available.(// 27.3.20: Und die Vehicles brauchen ja auch Terrain wegen der Elevation. Das soll bei client/server aber nicht mehr so sein.
      *             // 12.5.20: Doch, die brauchen ja auch ein richtige Elevation, also passend zum Client
-     * 18.1.23: TRAFFIC_REQUEST_LOADVEHICLES loads vehicles from a list (additional to initial vehicle? No! There is only one load vehicles when terrain is available!)
+     * 18.1.23: TRAFFIC_REQUEST_LOADVEHICLES loads vehicles from a list (additional to initial vehicle? No! There is only
+     * one load vehicles when terrain is available!). Typically TRAFFIC_REQUEST_LOADVEHICLES is used to set up a scene.
+     * 31.10.23: TRAFFIC_REQUEST_LOADVEHICLE no longer deprecated.
      */
-    @Deprecated
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLE = RequestType.register(4001, "TRAFFIC_REQUEST_LOADVEHICLE");
-    //used in other projects:
-    public static RequestType TRAFFIC_REQUEST_LOADVEHICLE2 = RequestType.register(4002, "TRAFFIC_REQUEST_LOADVEHICLE2");
+
+    public static Request buildLoadVehicle(int userEntityId, String name, String smartLocation) {
+        return new Request(TRAFFIC_REQUEST_LOADVEHICLE, new Payload().add("name",name).add("location",smartLocation));
+    }
+
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLES = RequestType.register(4003, "TRAFFIC_REQUEST_LOADVEHICLES");
 
     /**

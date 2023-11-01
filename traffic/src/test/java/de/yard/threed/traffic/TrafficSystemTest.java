@@ -35,7 +35,7 @@ public class TrafficSystemTest {
             @Override
             public void init() {
                 world = new SceneNode();
-                SystemManager.addSystem(new TrafficSystem(new SimpleVehicleLoader()));
+                SystemManager.addSystem(new TrafficSystem());
             }
         };
 

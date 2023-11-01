@@ -209,4 +209,8 @@ public class TestUtils {
             Thread.sleep(100);
         }
     }
+
+    public static String locatedTestFile(String relFilenameToProjectHome) {
+        return System.getProperty("user.dir") + "/../" + relFilenameToProjectHome;
+    }
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Extracted from "Railing.xml". Used in tcp-flightgear. Duplicated and extended in tcp-22 for earlier testing. Not suitable for real. TODO Move to test/resources?-->
+
+<c:config xmlns:c="http://www.example.org/tcp-22" name="a">
+
+    <vehicledefinition name="Locomotive" modeltype="747-400XX" ai="true" type="aircraftXX">
+        <bundlename>traffic-fg</bundlename>
+        <modelfile>loc.xml</modelfile>
+        <lowresfile>loc-lowres.xml</lowresfile>
+        <zoffset>0</zoffset>
+        <unscheduledmoving>0</unscheduledmoving>
+        <!-- 42 kmh -->
+        <maximumspeed>11.7</maximumspeed>
+        <acceleration>0.9</acceleration>
+        <viewpoints>
+            <viewpoint name="Driver">
+                <transform>
+                    <position>1, 1, 0</position>
+                    <angle>0,90,0</angle>
+                </transform>
+            </viewpoint>
+        </viewpoints>
+    </vehicledefinition>
+
+    <!-- only here for testing -->
+    <BaseTransformForVehicleOnGraph>
+        <transform>
+            <!-- Die Loc muss auf den Schienenkopf. Das war frueher im Visualizer. -->
+            <position>0,0.16666667,0</position>
+            <angle>0,-90,0</angle>
+        </transform>
+    </BaseTransformForVehicleOnGraph>
+
+</c:config>

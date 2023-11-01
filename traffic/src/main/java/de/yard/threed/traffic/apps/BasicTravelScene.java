@@ -103,7 +103,7 @@ import java.util.Map;
  * This is also super class of TravelScene.
  * Created on 28.09.18.
  */
-public class BasicTravelScene extends Scene implements RequestHandler {
+public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler */ {
     //Die instance loggt über getLog()
     static Log logger = Platform.getInstance().getLog(BasicTravelScene.class);
     // The default TravelScene has no hud.
@@ -112,14 +112,13 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     protected boolean enableFPC = false, enableNearView = false;
     protected SceneConfig sceneConfig;
     //Manche Requests können wegen zu spezieller Abhängigkeiten nicht von ECS bearbeitet werden, sondern müssen aber auf App Ebene laufen.
-    public RequestQueue requestQueue = new RequestQueue();
 
     // nur bei Flat, in 3D null! 7.10.21 static bis es wegkommt
     //25.9.20 protected DefaultTrafficWorld trafficWorld;
     //22.10.21 wird noch einmal gebraucht
     protected TeleporterSystem teleporterSystem;
     RandomIntProvider rand = new RandomIntProvider();
-    int nextlocationindex = 0;
+
     protected String vehiclelistname = "GroundServices";
     /*31.1.22 RequestType REQUEST_RESET = RequestType.register("Reset");
     RequestType REQUEST_HELP = RequestType.register("Help");
@@ -136,6 +135,7 @@ public class BasicTravelScene extends Scene implements RequestHandler {
     Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
     ControlPanel leftControllerPanel = null;
     public static String DEFAULT_USER_NAME = "Freds account name";
+    public TrafficSystem trafficSystem;
 
     @Override
     public void init(SceneMode sceneMode) {
@@ -144,7 +144,8 @@ public class BasicTravelScene extends Scene implements RequestHandler {
 
         vrInstance = VrInstance.buildFromArguments();
 
-        SystemManager.addSystem(new TrafficSystem(getVehicleLoader()));
+        trafficSystem = new TrafficSystem();
+        SystemManager.addSystem(trafficSystem);
 
         SystemManager.addSystem(new SphereSystem(getRbcp(), getGraphBackProjectionProvider(), getCenter(), getSceneConfig()));
         ((SphereSystem) SystemManager.findSystem(SphereSystem.TAG)).setDefaultLightDefinition(getLight());
@@ -235,8 +236,9 @@ public class BasicTravelScene extends Scene implements RequestHandler {
                 logger.info("Ignoring initialVehicle due to FPC");
             } else {
                 Request request;
-                request = new Request(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE, new Payload(new Object[]{argv_initialVehicle}));
-                requestQueue.addRequest(request);
+                // no userid known. Might not be user related. TODO Maybe the request via parameter isn't used any more.
+                request = RequestRegistry.buildLoadVehicle(-1, argv_initialVehicle, null);
+                SystemManager.putRequest(request);
             }
         }
 
@@ -342,10 +344,6 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         //6.10.21 buildToggleMenu();
         //menuCycler = new MenuCycler(new MenuProvider[]{new TravelMainMenuBuilder(this)});
 
-        requestQueue.addHandler(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE, this);
-        //Geht per FlightSystem requestQueue.addHandler(RequestRegistry.TRAFFIC_REQUEST_AIRCRAFTDEPARTING, this);
-
-
     }
 
     public ProcessPolicy getProcessPolicy() {
@@ -360,10 +358,6 @@ public class BasicTravelScene extends Scene implements RequestHandler {
                     SystemManager.putRequest(request);
                 })
         };
-    }
-
-    public VehicleLoader getVehicleLoader() {
-        return new SimpleVehicleLoader();
     }
 
     public AbstractTerrainBuilder getTerrainBuilder() {
@@ -383,10 +377,6 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         List<Vehicle> vehicleList = new ArrayList<Vehicle>();
         //15.12.21 vehicleList.add(new Vehicle("loc", false,true));
         return vehicleList;//null;
-    }
-
-    public ConfigNodeList getLocationList() {
-        return null;
     }
 
     @Override
@@ -483,10 +473,9 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             }
         }*/
         if (Input.getKeyDown(KeyCode.L)) {
-            //20.3.19: Ueber AppRequest loadNextConfiguredVehicle(null);
-            Request request;
-            request = new Request(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE);
-            requestQueue.addRequest(request);
+            // load next not yet loaded vehicle.
+            Request request = RequestRegistry.buildLoadVehicle(UserSystem.getInitialUser().getId(), null, null);
+            SystemManager.putRequest(request);
         }
 
         /*24.10.21if (avatar != null) {
@@ -509,8 +498,6 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             runTests();
         }
 
-        requestQueue.process(SystemManager.getBusConnector());
-
         //for x/y/z. Only in debug mode (MazeSettings.getSettings().debug)? Better location??
         if (Observer.getInstance() != null) {
             Observer.getInstance().update();
@@ -527,84 +514,6 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             InputToRequestSystem inputToRequestSystem = (InputToRequestSystem) SystemManager.findSystem(InputToRequestSystem.TAG);
             inputToRequestSystem.addControlPanel(leftControllerPanel);
         }
-    }
-
-    @Override
-    public boolean processRequest(Request request) {
-        if (request.getType().equals(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE)) {
-            // Nicht zu frueh laden, bevor es einen Graph zur Positionierung gibt.
-            // 26.3.20 Erstmal pruefen, wo das Vehicle hinsoll und dann evtl. das Groundnet vorab per Request laden.
-            //if (getGroundNet() == null) {
-            //  return false;
-            //}
-            // Zugriff auf Asynchelper ist nicht ganz sauber, but make sure alle scenery isType loaded before placing a vehicle.
-            if (AsyncHelper.getModelbuildvaluesSize() > 0) {
-                return false;
-            }
-            String vehiclename = (String) request.getPayloadByIndex(0);
-            SmartLocation smartLocation = (SmartLocation) request.getPayloadByIndex(1);
-            if (smartLocation == null) {
-                // 26.3.20 Was ware denn die naechste Location? Das ist ja jetzt alles EDDK lastig. TODO
-                String icao = "EDDK";
-                //27.12.21  DefaultTrafficWorld.getInstance().getConfiguration().getLocationListByName(icao).get(nextlocationindex);
-                ConfigNode location = getLocationList()/*ByName(icao)*/.get(nextlocationindex);
-                ;
-                smartLocation = new SmartLocation(icao, XmlHelper.getStringValue(location.nativeNode));
-
-                // 27.21.21 das ist jetzt schwierig zu pruefen. Es ist auch unklar, ob es wirklich noch noetig ist. Mal weglassen.
-                /*if (DefaultTrafficWorld.getInstance().getGroundNetGraph(icao) == null) {
-                    SystemManager.putRequest(new Request(RequestRegistry.TRAFFIC_REQUEST_LOADGROUNDNET, new Payload(icao)));
-                    // warten und nochmal versuchen
-                    return false;
-                }*/
-                nextlocationindex++;
-            }
-            /**
-             * load eines Vehicle, z.B. per TRAFFIC_REQUEST_LOADVEHICLE. 24.11.20: Dafuer ist jetzt TRAFFIC_REQUEST_LOADVEHICLE2.
-             * Das muss nicht unbedingt fuer Travel mit Avatar geeignet sein. Obs das ist, ist abhaengig vom Vehicle.
-             * Wird erst auf Anforderung gemacht, weil
-             * ein Vehicle viele Resourcen braucht und abhaengig von delayedload in der config (mit "initialVehicle" aber automatisch nach kurzer Zeit).
-             * Geht nicht mehr ueber Index, sondern prüft was das nächste ist bzw. welces noch nicht geladen wurde
-             * Es wird auch nicht unbedingt das naechste, sondern einfach das uebergebene geladen.
-             * 26.3.20
-             */
-            String name = vehiclename;
-
-            //DefaultTrafficWorld.getInstance().vehiclelist
-            /*ConfigNodeList*/
-            List<Vehicle> vehiclelist = TrafficSystem.vehiclelist;
-
-            if (name == null) {
-                for (int i = 0; i < vehiclelist.size(); i++) {
-                    //SceneVehicle sv = sceneConfig.getVehicle(i);
-                    if (findVehicleByName(vehiclelist.get(i).getName()) == null) {
-                        name = vehiclelist.get(i).getName();
-                        getLog().debug("found unloaded vehicle " + name);
-                        break;
-                    }
-                }
-            }
-            if (name == null) {
-                getLog().error("no unloaded vehicle found");
-                //set request to done
-                return true;
-            }
-
-            SphereProjections sphereProjections = TrafficHelper.getProjectionByDataprovider();
-            //lauch c172p (or 777)
-            //TrafficSystem.loadVehicles(tw, avataraircraftindex);
-
-            VehicleConfig config = TrafficHelper.getVehicleConfigByDataprovider(name);// tw.getVehicleConfig(name);
-            EcsEntity avatar = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
-            VehicleLauncher.lauchVehicleByName(getGroundNet(), config/*27.12.21DefaultTrafficWorld.getInstance().getConfiguration()*/, name, smartLocation, TeleportComponent.getTeleportComponent(avatar),
-                    getDestinationNode(), sphereProjections.backProjection/*getBackProjection()*/, sceneConfig, nearView, TrafficSystem.genericVehicleBuiltDelegate, getVehicleLoader());
-            //aus flight: GroundServicesScene.lauchVehicleByIndex(gsw.groundnet, tw, 2, TeleportComponent.getTeleportComponent(avatar.avatarE), world, gsw.groundnet.projection);
-
-
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -655,25 +564,11 @@ public class BasicTravelScene extends Scene implements RequestHandler {
             logger.warn("no target entity in TC");
             return null;
         }
-        return findVehicleByName(name);
+        return TrafficHelper.findVehicleByName(name);
 
     }
 
-    public static EcsEntity findVehicleByName(String name) {
-        List<EcsEntity> aircrafts = EcsHelper.findEntitiesByComponent(VehicleComponent.TAG);
-        EcsEntity found = null;
-        int i;
-        for (i = 0; i < aircrafts.size(); i++) {
-            if (aircrafts.get(i).getName().equals(name/**/)) {
-                if (found != null) {
-                    //besser erstmal abbrechen. Das gibt sonst schwer erkennbare Fehlfunktionen
-                    throw new RuntimeException("duplicate " + name);
-                }
-                found = aircrafts.get(i);
-            }
-        }
-        return found;
-    }
+
 
     /**
      * Der Default
@@ -688,18 +583,11 @@ public class BasicTravelScene extends Scene implements RequestHandler {
         getLog().debug("reset");
     }
 
-    // 7.10.21 Die 8 naechsten waren mal abstract
-    protected TrafficGraph/*8.5.19 GroundNet*/ getGroundNet() {
-        return null;
-    }
+    // 7.10.21 Die 8/7 naechsten waren mal abstract
 
     /*29.10.21 protected GraphProjectionFlight3D getBackProjection() {
         return null;
     }*/
-
-    protected SceneNode getDestinationNode() {
-        return null;
-    }
 
     protected void help() {
     }
