@@ -1,6 +1,7 @@
 package de.yard.threed.tools;
 
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.tools.testutil.Loader3DSBuilderForTest;
 import de.yard.threed.tools.testutil.LoaderOBJBuilderForTest;
 import org.junit.jupiter.api.Test;
 
@@ -36,5 +37,20 @@ public class GltfProcessorTest {
 
         // make sure dynamic loader was used
         assertEquals(instances + 1, LoaderOBJBuilderForTest.instanceCount);
+    }
+
+    @Test
+    public void test3DSByDynamicLoader() throws Exception {
+
+        int instances = Loader3DSBuilderForTest.instanceCount;
+
+        String[] argv = new String[]{
+                "-gltf", "-o", "src/test/resources/tmp", "src/test/resources/shut.3ds",
+                "-l", "de.yard.threed.tools.testutil.Loader3DSBuilderForTest"
+        };
+        new GltfProcessor().runMain(argv);
+
+        // make sure dynamic loader was used
+        assertEquals(instances + 1, Loader3DSBuilderForTest.instanceCount);
     }
 }
