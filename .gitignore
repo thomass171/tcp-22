@@ -24,3 +24,6 @@ sceneserver/build
 /platform-jme/jmonkeyengine-3.2.4-stable.tar.gz
 /platform-jme/liblwjgl.dylib
 /platform-jme/libopenal.dylib
+
+# exclude files created during tests
+/*/src/test/resources/tmp/

@@ -2,7 +2,9 @@
 
 A cross platform 3D graphics meta engine for Java, but still WiP!
 
-See https://thomass171.github.io/tcp-22/tcp-22.html and https://thomass171.github.io/maze-games/web/mazegames.html.
+See https://thomass171.github.io/tcp-22/tcp-22.html for examples 
+and https://thomass171.github.io/maze-games/mazegames.html and
+https://thomass171.github.io/tcp-flightgear/tcp-flightgear.html for use cases.
 
 # Building And Deploying
 
