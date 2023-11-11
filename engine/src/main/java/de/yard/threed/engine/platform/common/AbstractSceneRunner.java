@@ -8,6 +8,7 @@ import de.yard.threed.core.Packet;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Server;
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Config;
@@ -22,6 +23,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleLoadDelegate;
+import de.yard.threed.engine.HttpBundleLoader;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneAnimationController;
 import de.yard.threed.engine.SceneMode;
@@ -89,7 +91,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     //23.3.23: And one more solution for real MTs Futures
     // ("<Object>" for C#. In C# a list of generic delegates cannot contain abstract delegates
     // (See https://stackoverflow.com/questions/3319447/add-generic-actiont-delegates-to-a-list).
-    public List<Pair<NativeFuture,AsyncJobDelegate>> futures = new ArrayList();
+    public List<Pair<NativeFuture, AsyncJobDelegate>> futures = new ArrayList();
     // C# public List<Object> futures = new ArrayList<Object>();
 
     //2.8.21 public TreeMap<Integer, Bundle> bundledelegateresult = new TreeMap<Integer, Bundle>();
@@ -176,6 +178,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
      * Statt ueber platform
      * 10.7.21
      * See Platform.httpget()!
+     *
      * @return
      */
     public NativeHttpClient getHttpClient() {
@@ -255,9 +258,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
                 //Platform.getInstance().executeAsyncJobNurFuerRunnerhelper(job.job);
                 try {
                     String msg = job.job.execute();
-                    if (Config.isAsyncdebuglog()) {
                         logger.debug("job completed. " + newJobList.size() + " remaining");
-                    }
                     addCompletedJob(new CompletedJob(job.job, msg));
                 } catch (java.lang.Exception e) {
                     addCompletedJob(new CompletedJob(job.job, e.getMessage()));
@@ -361,9 +362,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
         List<CompletedJob> ascyncallbacklist = completedJobList.getCompletedJobs();
         while (ascyncallbacklist.size() > 0) {
             CompletedJob ac = ascyncallbacklist.get(0);
-            if (Config.isAsyncdebuglog()) {
                 logger.debug("found completed job " + ac.job.getName());
-            }
             AsyncJobCallback callback = ac.job.getCallback();
             if (callback != null) {
                 if (ac.e == null) {
@@ -387,9 +386,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
             //blocks webgl log. logger.debug("check processing delegate");
             Integer d = delegateids.get(i);
             if (delegateresult.get(d) != null) {
-                if (Config.isAsyncdebuglog()) {
                     logger.debug(" processing build delegate id " + d);
-                }
 
                 delegates.get(d).modelBuilt(delegateresult.get(d));
                 delegates.remove(d);
@@ -406,9 +403,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
                 //blocks webgl log. logger.debug("check processing delegate");
                 //Integer d = bundledelegateids.get(i);
                 //ist ja immer null if (bundledelegateresult.get(d) != null) {
-                if (Config.isAsyncdebuglog()) {
                     logger.debug(" processing bundle delegate");
-                }
 
                 //bundledelegates.get(d).bundleLoad(bundledelegateresult.get(d));
                 //bundledelegates.remove(d);
@@ -484,8 +479,8 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     }
 
     @Override
-    public  <T,D> void addFuture  (NativeFuture<T> future, AsyncJobDelegate<D> asyncJobDelegate) {
-        futures.add(new Pair(future,asyncJobDelegate));
+    public <T, D> void addFuture(NativeFuture<T> future, AsyncJobDelegate<D> asyncJobDelegate) {
+        futures.add(new Pair(future, asyncJobDelegate));
         //C# futures.add(new Pair<NativeFuture<T>,AsyncJobDelegate<D>>(future,asyncJobDelegate));
     }
 
@@ -545,17 +540,23 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     }
 
     /**
-     * Das Bundle wird in jedem Fall asynchron, aber nicht multithreaded ueber die Platform geladen.
-     * async analog zu Modeln
+     * The main mathod for an app to load a bundle. Loading is always async (like model) via the platform, but not multithreaded.
      * 20.2.18: Wenn ein Bundle schon geladen wurde, wird es nicht doppelt geladen (Eine Race Condition gibt es aber trotzdem).
      * Das Verhalten ist unabhaengig davon, ob das Model schon geladen wurde oder nicht.
      * <p>
-     * 22.7.21: Aus Platform hier hin. Nicht static. Muss von webgl overrided werden!
-     * GHenerell async aber ohne MT.
+     * 22.7.21: Moved from Platform to here. Not static. Muss von webgl overrided werden!
+     * In general async but without MT.
+     * 10.11.23: Deprecated to get rid of 'delayed'.
      */
-    public void /*Bundle*/ loadBundle(String bundlename, /*AsyncJobCallback*/BundleLoadDelegate bundleLoadDelegate, boolean delayed) {
+    @Deprecated
+    public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed) {
         //2.8.21 AsyncHelper.asyncBundleLoad(bundlename, AbstractSceneRunner.getInstance().invokeLater(bundleLoadDelegate), delayed);
-        Platform.getInstance().bundleLoader.asyncBundleLoad(bundlename, bundleLoadDelegate, delayed);
+        if (StringUtils.startsWith(bundlename, "http")) {
+            // full qualified bundle
+            new HttpBundleLoader().asyncBundleLoad(bundlename, bundleLoadDelegate, delayed);
+        } else {
+            Platform.getInstance().bundleLoader.asyncBundleLoad(bundlename, bundleLoadDelegate, delayed);
+        }
     }
 
     public void loadBundle(String bundlename, BundleLoadDelegate loadlistener) {

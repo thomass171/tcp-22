@@ -36,9 +36,8 @@ public class AsyncBundleLoader implements NativeBundleLoader {
      * MA18: Fuer ein Bundle.
      */
     public void asyncBundleLoad(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed) {
-        if (Config.isAsyncdebuglog()) {
-            logger.debug("scheduling async bundle load for " + bundlename);
-        }
+        logger.debug("scheduling async bundle load for " + bundlename);
+
         //Sicherheitshalber mal prefen.
         if (Platform.getInstance().hasOwnAsync()) {
             throw new RuntimeException("invalid usage of AsyncHelper");
@@ -63,15 +62,11 @@ public class AsyncBundleLoader implements NativeBundleLoader {
         for (int i = 0; i < bundleloadvalues.size(); i++) {
             BundleLoadData d = bundleloadvalues.get(i);
             String bundlename = d.bundlename;
-            if (Config.isAsyncdebuglog()) {
-                logger.debug("processing async bundle load for " + bundlename);
-            }
+            logger.debug("processing async bundle load for " + bundlename);
             Bundle b;
             if ((b = BundleRegistry.getBundle(bundlename)) != null) {
                 //dann nicht mehrfach laden
-                if (Config.isAsyncdebuglog()) {
-                    logger.debug("Bundle already loaded");
-                }
+                logger.debug("Bundle already loaded");
             } else {
                 /*rm.  3.8.21 ging mal ueber BundleLoaderExceptGwt*/
                 //5.8.21 loadBundle(bundlename, d.delayed, rm);

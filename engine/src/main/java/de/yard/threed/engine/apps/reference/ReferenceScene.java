@@ -4,9 +4,11 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.geometry.ProportionalUvMap;
 import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.resource.Bundle;
+import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.*;
+import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.apps.ModelSamples;
 import de.yard.threed.engine.apps.WoodenToyFactory;
@@ -54,22 +56,18 @@ import de.yard.threed.engine.test.MainTest;
  * r: cycle layer renedered
  * s: cycle shading of earth (nicht fertig)
  * <p>
- * 9.3.16: Jetzt auch mit einschaltbarem FPS Controller. Dann geht aber je nach Einstellung im FPS z.B. Pickingray nicht (wegen Mausmovehandling)
+ * 9.3.16: Toggable FPS Controller added. Dann geht aber je nach Einstellung im FPS z.B. Pickingray nicht (wegen Mausmovehandling)
  * 22.7,16: Ein Zugriff auf externe Resourcen (z.B. ueber ModelSamples) soll von hier nicht erfolgen, nur Bundled. Externe gibts im Showroom.
  * 15.9.16: Jetzt auch mit FPS Controller für die weisse Box (unabhaengig von Camera). Die Box bleibt in ihrem local space.
- * 23.9.17: Hinten links eine Lok (MA31 "Loc" statt "windturbine")
- * 23.9.17: Hud zeigt bei hit des picking ray den object name.
+ * 23.9.17: Backround left 'loc' added (instead of "windturbine")
+ * 23.9.17: Hud shows picking ray den object name on hit.
  * 5.12.18: VR Controller können hier nicht verwendet werden, weil es keine Avatar gibt/geben soll. ISt aber doof. TODO Controller ohne Avatar.
- * 2.5.19: linker Tower flat shaded.
+ * 2.5.19: left tower flat shaded.
  */
-
-
 public class ReferenceScene extends Scene {
     static Log logger = Platform.getInstance().getLog(ReferenceScene.class);
     public ArrayList<SceneNode> towerrechts = new ArrayList<SceneNode>();
     public ArrayList<SceneNode> tower2 = new ArrayList<SceneNode>();
-    public ArrayList<SceneNode> zftowerblue = new ArrayList<SceneNode>();
-    public ArrayList<SceneNode> zftowerred = new ArrayList<SceneNode>();
 
     public SceneNode flasche;
     public SceneNode pyramideblf;
@@ -116,6 +114,7 @@ public class ReferenceScene extends Scene {
     // far needs to cover hiddencube position in world space (its not attached)
     double DEFERRED_CAMERA_FAR = 15.0;
     Audio elevatorPing;
+    boolean remoteShuttleTriggered = false;
 
     @Override
     public void init(SceneMode sceneMode) {
@@ -167,7 +166,11 @@ public class ReferenceScene extends Scene {
         tl.addEntryForLookat(new Vector3(-0.5f, 0, 2), new Vector3(0, 0, 0));
         // weit weg wie in FG mit Blick Richtung (0,0,0) für Test picking ray.
         tl.addEntryForLookat(new Vector3(50000, 30000, 20000), new Vector3(0, 0, 0));
-        // als letztes wieder zum Anfang
+        // shuttle back
+        tl.addEntryForLookat(new Vector3(-9.5, 2.9, -10), new Vector3(-8, 2, -10));
+        // shuttle front
+        tl.addEntryForLookat(new Vector3(-2, 3.9, -10), new Vector3(-8, 2, -10));
+        // and now back to beginning
         tl.addEntryForLookat(new Vector3(0, 5, 11), new Vector3(0, 0, 0));
 
         if (!vrEnabled) {
@@ -185,10 +188,7 @@ public class ReferenceScene extends Scene {
     }
 
     /**
-     * "railing" fuer loc.
-     * 13.6.21: loc GLTF liegt jetzt in "data". "core" gibt es nicht mehr, stattdessen "engine"
-     *
-     * @return
+     * 13.6.21: loc GLTF resides in "data". "engine" instead of "core", which no longer exists.
      */
     @Override
     public String[] getPreInitBundle() {
@@ -276,8 +276,7 @@ public class ReferenceScene extends Scene {
         buildPhotoalbumPage();
 
         // loc nur zum Test des async gltf Ladens, aber ohne Animation um keine Abhaengigkeit zu FG zu haben.
-        // 5.1.17: das Laden geht hier erstmal mit dem eigenen Loader. Den Platform Loader verwendet nachher das Laden ueber key a.
-        // Eine Rotation or scale of loc isType not needed.
+        // A rotation or scale of loc is not needed.
         EngineHelper.buildNativeModel(new BundleResource(BundleRegistry.getBundle("data"), "models/loc.gltf"), null, (result) -> {
             locomotive = new SceneNode(result.getNode());
             if (locomotive != null) {
@@ -360,11 +359,8 @@ public class ReferenceScene extends Scene {
             rs.elevatorPing.play();
 
         }).setIcon(Icon.ICON_POSITION);
-
-
         return cp;
     }
-
 
     private void addOrReplaceEarth() {
         if (earth != null) {
@@ -374,7 +370,6 @@ public class ReferenceScene extends Scene {
         buildEarth(1.2f);
         earth.getTransform().setPosition(new Vector3(2, 2, -6));
         addToWorld(earth);
-
     }
 
     private void setLight() {
@@ -498,7 +493,6 @@ public class ReferenceScene extends Scene {
         hiddencube.attach(hiddencubechild);
         //setlayer is recursive
         hiddencube.getTransform().setLayer(HIDDENCUBELAYER);
-
     }
 
     /**
@@ -619,14 +613,12 @@ public class ReferenceScene extends Scene {
         }
 
         if (Input.getKeyDown(KeyCode.A)) {
-            // erstmal nur so Q&D. Kann/Soll noch ausgebaut werden. Genielamp ist z.Z. Bundled.
-            // MA31: genie lamp soll raus. lieber was eigenes, aber im selben Modul?
+            //
             String name = "ToggleNode";
             SceneNode n = SceneNode.findFirst(name);
             if (n == null) {
                 switch (modelindex) {
                     case 0:
-                        //15.6.21 n = ModelSamples.buildGenieLamp();
                         n = ModelSamples.buildEarth();
                         break;
                 }
@@ -733,6 +725,31 @@ public class ReferenceScene extends Scene {
         }
         if (Input.getKeyDown(KeyCode.R)) {
             cycleRendering();
+        }
+        if (!remoteShuttleTriggered) {
+            AbstractSceneRunner.getInstance().loadBundle("http://ts171.de/bundlepool/nasa", new BundleLoadDelegate() {
+                @Override
+                public void bundleLoad(Bundle bundle) {
+                    // don't load via platform (which finally would be similar, but with possible waiting for bundle data).
+                    BundleResource file = new BundleResource(bundle, "shuttle-hi-res/shut.gltf");
+                    ResourcePath opttexturepath = null;
+                    int loaderoptions = 0;
+
+                    BuildResult r = ModelLoader.buildModelFromBundle(file, opttexturepath, loaderoptions);
+
+                    if (r.getNode() != null) {
+                        SceneNode shuttle = new SceneNode(r.getNode());
+
+                        Vector3 scale=new Vector3(0.003, 0.003, -0.003);
+                        shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(180)));
+                        shuttle.getTransform().setScale(scale);
+                        shuttle.getTransform().setPosition(new Vector3(-8, 2, -10));
+                        addToWorld(shuttle);
+                        logger.debug("shuttle node added");
+                    }
+                }
+            });
+            remoteShuttleTriggered=true;
         }
     }
 

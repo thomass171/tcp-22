@@ -50,8 +50,9 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
     /**
      * MA36: Only convenience? Made static
      * 18.10.23: core loader no more 'ac', so only gltf any more. ac file mapping extracted to tcp-flightgear.
-     *
+     * 10.11.23: This wrapper seems useless now. Set to deprecated.
      */
+    @Deprecated
     public static void buildNativeModel(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate, int options) {
         // die ACPolicy nutze ich wegen Einheitlichkeit immer, nicht nur in FG
         // 10.4.21: Brauchts die Option noch? Es gibt doch ein Plugin

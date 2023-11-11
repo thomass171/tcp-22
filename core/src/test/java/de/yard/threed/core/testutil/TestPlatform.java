@@ -12,11 +12,12 @@ import java.util.HashMap;
  * Simple Platform implementation eg. for unit tests.
  * <p>
  * Just provides a logger und StringHelper.
+ * SimpleHeadlessPlatform is not available in core because it depends on core (would cause a cyclic dependency)
  * <p>
  * <p>
  * Created on 05.12.18.
  */
-public class TestPlatform extends /*16.6.21 SimpleHeadless*/DefaultPlatform {
+public class TestPlatform extends DefaultPlatform {
     
     TestPlatform( NativeLogFactory logfactory) {
         this.logfactory=logfactory;

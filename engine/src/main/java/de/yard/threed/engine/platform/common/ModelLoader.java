@@ -24,7 +24,8 @@ import de.yard.threed.engine.platform.ProcessPolicy;
  * 15.9.17: Build a model from a model definition 'file'. Splitted into two steps:
  * 1) Read model and convert to PortableModelList
  * 2) Build model from PortableModelList
- * This is an alternative to building a model in the platform natively.
+ * This is an alternative to building a model in the platform natively. However, a platform  might internally also use this
+ * via AsyncHelper.
  * <p>
  * War vorher in der ModelFactory.
  */
@@ -35,16 +36,84 @@ public class ModelLoader {
     public static ProcessPolicy processPolicy;
 
     /**
+     * 10.11.23: Code section extracted from AsyncHelper.
+     * Do the two steps read and build.
+     */
+    public static BuildResult buildModelFromBundle( BundleResource file, ResourcePath opttexturepath, int loaderoptions) {
+
+        PortableModelList lr;
+        try {
+            lr = readGltfModelFromBundle(file, true, loaderoptions);
+            if (lr == null) {
+                // Fehler. Ist bereits gelogged.
+                return new BuildResult((new SceneNode()).nativescenenode);
+            }
+        } catch (java.lang.Exception e) {
+            logger.error("Exception caught:", e);
+            return new BuildResult(e.getMessage());
+        }
+        logger.debug("gltf loaded");
+        BuildResult r = ModelLoader.buildModelFromPortableModelList/*Bundle*/(lr, file, opttexturepath, loaderoptions);
+        return r;
+    }
+
+    /**
+     * Ein natives Model (ac,obj etc, nicht FG xml) aus einem Bundle einlesen.
+     * Muss wegen btg eigentlich den Loader liefern, weil das doof ist aber jetzt das preprocessed model.
+     * 21.4.17: Wenn das Bundle in file nicht eingetragen ist, koennte hier ein resolve gwemacht werden??
+     * Liefert null bei Fehler (already logged).
+     * 15.9.17: Soll nur aus Platform verwendet werden, wird jetzt aber noch von aussen aufgerufen. Das hat für
+     * Analysezwecke und Tests aber durchaus seine Berechtigung. Aber nur dann.
+     * Liest das Model nur ein, ohne es als 3D Objekt anzulegen.
+     * 21.12.17: Wenn mal auf gltf umgestellt ist und die obj Loader nicht mehr da sind, wird das zur Laufzeit ueber die
+     * Platform auch nicht mehr ladbar sein.
+     * <p>
+     * This is a direct sync loading. No engine/platform involved. Use case is internal usage from inside async.
+     * 18.10.23: No more 'ac', so only gltf any more.
+     * 10.11.23: Moved from AsyncHelper to here.
+     * @return
+     */
+    public static PortableModelList readGltfModelFromBundle(BundleResource file, boolean preferpp, int loaderoptions) {
+        if (file.bundle == null) {
+            logger.warn("no bundle set");
+            return null;
+        }
+
+        // file = mapFilename(file,preferpp,loaderoptions);
+
+        // special handling of btg.gz files. Irgendwie Driss
+        // 12.6.17: Andererseits werden pp files hier auch transparent geladen. Aber das macht eh schon der Bundleloader, damit der unzip in der platform ist.
+        // 23.12.17:TODO ins erst im Loader selber lesen, wie GLTF es macht.
+        BundleData ins = file.bundle.getResource(file);
+        if (ins == null) {
+            logger.error(file.getName() + " not found in bundle " + file);
+            return null;
+        }
+
+        try {
+            //18.10.23: Should only be gltf these days. So skip registry.
+            //PortableModelList processor = LoaderRegistry.loadBySuffix(file, (ins), false);
+            AbstractLoader loader = LoaderGLTF.buildLoader(file,/*i/*ns.s,*/  file.path);
+            PortableModelList processor = loader.preProcess();
+            return processor;
+        } catch (InvalidDataException e) {
+            //7.4.17: Es gibt schon mal Fehler in Modelfiles. Das wird gelogged (auch tiefer mit Zeilennummer). Auf den Stacktrace verzichten wir mal.
+            logger.error("loader threw InvalidDataException " + e.getMessage() + " for file " + file.getFullName());
+        }
+        return null;
+    }
+    /**
      * 21.12.17: Soll auch nur aus Platform (AsyncHelper) verwendet werden, wird jetzt aber noch von aussen aufgerufen.
      * Ist nur fuer simple Model, nicht XML.
      * 22.12.17: Jetzt auch mit catch gekapselt, damit bei einem Fehler nicht ein async Loader besetehn bleibt und ewig wieder aufgerufen wird.
      * Ein Fehler steht dann im Result.
      * Never returns null. Oder besser: Liefert null, wenn die Daten im Bundle nicht vorliegen. Dann kann der Aufrufer sie
      * nachladen. Oder der Aufrufer besorgt die Daten.
+     * 10.11.23: Method name 'buildModelFromBundle' moved up.
      *
      * @return
      */
-    public static BuildResult buildModelFromBundle(PortableModelList lr, BundleResource modelfile, ResourcePath opttexturepath, int loaderoptions) {
+    public static BuildResult buildModelFromPortableModelList/*Bundle*/(PortableModelList lr, BundleResource modelfile, ResourcePath opttexturepath, int loaderoptions) {
         String extension = modelfile.getExtension();
 
         if (lr == null) {
@@ -107,7 +176,6 @@ public class ModelLoader {
         /*}*/
         return new BuildResult(model.nativescenenode);
     }
-
 
 
 }

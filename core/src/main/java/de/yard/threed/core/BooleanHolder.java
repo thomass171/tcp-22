@@ -6,6 +6,13 @@ package de.yard.threed.core;
 public class BooleanHolder {
     public boolean v = false;
 
+    public BooleanHolder() {
+    }
+
+    public BooleanHolder(boolean value) {
+        v = value;
+    }
+
     public void setValue(boolean i) {
         v = i;
     }

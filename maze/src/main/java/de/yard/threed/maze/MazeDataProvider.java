@@ -60,7 +60,7 @@ public class MazeDataProvider implements DataProvider {
             Platform.getInstance().httpGet(initialMaze, null, null, response -> {
                 getLogger().debug("Got http response " + response);
                 if (response.getStatus() == 200) {
-                    NativeJsonValue json = Platform.getInstance().parseJson(response.responseText);
+                    NativeJsonValue json = Platform.getInstance().parseJson(response.getContentAsString());
                     NativeJsonObject mazeObject = json.isObject();
                     String rawGrid = JsonHelper.getString(mazeObject, "grid");
                     Grid grid = GridReader.readWithModificatorFromRaw(rawGrid, teamSize);
@@ -87,7 +87,7 @@ public class MazeDataProvider implements DataProvider {
                 title = StringUtils.substringAfterLast(initialMaze, ":");
             }
             //loadLevel(fileContent, title);
-            Grid grid = loadGrids(fileContent, title,teamSize);
+            Grid grid = loadGrids(fileContent, title, teamSize);
 
             instance = new MazeDataProvider(initialMaze, grid);
             SystemManager.putDataProvider(PROVIDER_NAME, instance);

@@ -56,13 +56,16 @@ public abstract class Platform {
     public abstract NativeSceneNode buildModel(String name);
 
     /**
-     * 15.9.17: Ueber die Platform ein Model laden. Das kann sehr effizient sein. Und weil threejs/gltf hier
-     * das Mass der Dinge ist, asynchron. Ob das aus bundle Sicht preloaded sein wird, ist hier unerheblich.
-     * Ist Nachfolger fure ModelFactory.buildModelFromBundle().
+     * 15.9.17: Let the platform load a model async. This might be very efficient. Threejs/gltfloader is a good reference.
+     * If data is needed from a bundle (depending on the platform), it might wait for the bundle until it is available.
+     * Successor of ModelFactory.buildModelFromBundle().
      * Not for FG XML model!
      * Eine Exception bei einem Fehler gibt es hieraus dann auch nicht, sondern nur eine FM über den Delegate.
      * 04.10.2018: Das ist trotz async aber nicht multithreaded.
      * 18.10.23: No more 'ac', so only gltf any more.
+     * 10.11.23: The threejs gltf loader currently is the only platform provided loader abd is disabled by default because
+     * it cannot handle external material (FG terrain). So
+     * this method might be useless at the moment. But it might be an option in the future.
      * @param filename
      * @return
      */

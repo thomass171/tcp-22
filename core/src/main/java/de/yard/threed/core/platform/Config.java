@@ -7,20 +7,12 @@ import de.yard.threed.core.Util;
  */
 public class Config {
 
-    private static boolean asyncdebuglog = false;
     public static boolean loaderdebuglog = false;
     public static boolean modelloaddebuglog = false;
     public static boolean animationdebuglog = false;
 
     public static void initFromArguments() {
-        String arg = Platform.getInstance().getConfiguration().getString("config.asyncdebuglog");
-        if (arg != null) {
-            asyncdebuglog = Util.isTrue(arg);
-        }
 
     }
 
-    public static boolean isAsyncdebuglog() {
-        return asyncdebuglog;
-    }
 }

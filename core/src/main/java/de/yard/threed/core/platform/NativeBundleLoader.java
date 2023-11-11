@@ -8,9 +8,17 @@ import de.yard.threed.core.resource.BundleResource;
 import java.util.List;
 
 /**
- * Wenn beim Lesen eines einzelnen Elements ein Fehler auftritt, bleibt das im Bundle halt leer. Es erfolgt aber kein Abbruch.
+ *
+ * 7.11.23: The phrase 'Native' is confusing here, because a bundle loader isn't implemented by a platform like other 'Native' objects.
  */
 public interface NativeBundleLoader {
+
+    /**
+     * In case of a severe error the loading might just abort and the delegate isn't called at all (but it should).
+     * In case of an error during loading a single element, the element will just be missing in the bundle (7.11.23 is this a good idea?).
+     * So at the end a bundle might be empty.
+     * 8.11.23: delayed should no longer be an option?
+     */
     void asyncBundleLoad(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed);
 
     /**

@@ -6,10 +6,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.typedarrays.client.JsUtils;
 import com.google.gwt.typedarrays.shared.ArrayBuffer;
-import com.google.gwt.typedarrays.shared.TypedArrays;
-import com.google.gwt.typedarrays.shared.Uint8Array;
 import com.google.gwt.xhr.client.ReadyStateChangeHandler;
 import com.google.gwt.xhr.client.XMLHttpRequest;
 import de.yard.threed.core.Pair;
@@ -23,12 +20,16 @@ import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.LoadingBundle;
 import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.engine.platform.ResourceLoadingListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 10.11.23: Might use HttpBundleLoader one day.
+ */
 public class WebGlBundleLoader implements NativeBundleLoader {
     Log logger = Platform.getInstance().getLog(WebGlBundleLoader.class);
 
@@ -394,7 +395,7 @@ public class WebGlBundleLoader implements NativeBundleLoader {
             if (preloadError == null) {
                 preloadError = "Loading failed for (baseurl=" + GWT.getHostPageBaseURL() + "):";
             }
-            for (String f : lb.failurelist) {
+            for (String f : lb.getFailurelist()) {
                 preloadError += f + ",";
             }
 

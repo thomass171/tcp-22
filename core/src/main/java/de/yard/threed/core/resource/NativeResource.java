@@ -25,7 +25,7 @@ package de.yard.threed.core.resource;
 public interface NativeResource {
 
     /**
-     * 21.12.16: Liefert den Pfad im Bundle, seit es den bundlepath gibt.
+     * 21.12.16: Returns path in a logical unit. bundlepath is for location of the logical unit.
      * @return
      */
     public ResourcePath getPath();
@@ -39,7 +39,7 @@ public interface NativeResource {
     boolean isBundled();
 
     /**
-     * Liefert den uebergeordneten Pfad zu dem "buindle", oder jar, oder sonst was.
+     * Returns location of logical unit.
      * @return
      */
     ResourcePath getBundlePath();

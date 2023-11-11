@@ -1,6 +1,8 @@
 package de.yard.threed.sceneserver;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.http.RequestListener;
+import com.github.tomakehurst.wiremock.http.Response;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
@@ -54,6 +56,7 @@ public class MazeSceneTest {
     @BeforeEach
     public void setup() {
         wireMockServer = new WireMockServer(wireMockConfig().port(8089));
+        wireMockServer.addMockServiceRequestListener((request, response) -> log.debug("got request"));
         wireMockServer.start();
     }
 

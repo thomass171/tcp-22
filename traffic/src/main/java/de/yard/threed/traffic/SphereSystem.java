@@ -269,9 +269,9 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
             if (false /*27.12.21 DefaultTrafficWorld.getInstance() == null*/) {
                 logger.debug("tile via service");
                 AbstractSceneRunner.getInstance().getHttpClient().sendHttpRequest("http://localhost/airport/icao=EDDK", "POST", new String[]{}, (response) -> {
-                    logger.debug("HTTP returned airport. status=" + response.getStatus() + ", response=" + response.responseText);
+                    logger.debug("HTTP returned airport. status=" + response.getStatus() + ", response=" + response.getContentAsString());
                     if (response.getStatus() == 0) {
-                        Airport airport = JsonUtil.toAirport(response.responseText);
+                        Airport airport = JsonUtil.toAirport(response.getContentAsString());
                         //12.10.21 elevation?
                         GeoCoordinate ctr = GeoCoordinate.fromLatLon(airport.getCenter(), 0);
                         sendInitialEvents(ctr, tile);

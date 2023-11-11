@@ -174,6 +174,17 @@ public class Bundle {
         return 't';
     }
 
+    public static boolean isBinary(String filename) {
+        if (isImage(filename)) {
+            return true;
+        }
+        if (StringUtils.endsWith(filename, ".bin") || StringUtils.endsWith(filename, ".3ds") || StringUtils.endsWith(filename, ".btg")) {
+            return true;
+        }
+        //otherwise its text
+        return false;
+    }
+
     private static boolean isImage(String filename) {
         return StringUtils.endsWith(filename, ".png") || StringUtils.endsWith(filename, ".jpg") || StringUtils.endsWith(filename, ".JPG") || StringUtils.endsWith(filename, ".tif");
     }

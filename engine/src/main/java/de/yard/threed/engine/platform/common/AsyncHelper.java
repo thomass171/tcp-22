@@ -17,7 +17,6 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.SceneNode;
 
 
-
 import de.yard.threed.core.loader.PortableModelList;
 
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ public class AsyncHelper {
     //2.8.21 static Vector<BundleLoadData> bundleloadvalues = new Vector<BundleLoadData>();
 
     /**
-     * Fuer ein Model.
+     * Emulate an async model build inside the platform (gltf only) if there is no native model load.
      *
      * @param value
      * @param delegateid
@@ -95,9 +94,7 @@ public class AsyncHelper {
                 modelbuildvalues.remove(i);
             } else {
                 //no warning
-                if (Config.isAsyncdebuglog()) {
-                    logger.debug("no bundle content yet for " + modelresource.getFullName());
-                }
+                logger.debug("no bundle content yet for " + modelresource.getFullName());
             }
 
         }
@@ -136,20 +133,20 @@ public class AsyncHelper {
         }
         AbstractSceneRunner.getInstance().invokedLater.clear();
 
-        //TODO make whole block  MT safe
         // "<Object>" for C# (See "futures" definition
-        List<Pair<NativeFuture, AsyncJobDelegate>> remainingFutures = new ArrayList<>();
-        //C# List<Object> remainingFutures = new ArrayList<Object>();
+        // the complete callback might add additional futures. Avoid ConcurrentModificationException and don't loose the new.
+        List<Pair<NativeFuture, AsyncJobDelegate>> futures = new ArrayList<>(AbstractSceneRunner.getInstance().futures);
+        //C# List<Object> futures = new ArrayList<Object>();
         //C# foreach (Object p1 in AbstractSceneRunner.getInstance().futures) {
-        for (Pair<NativeFuture, AsyncJobDelegate> p : AbstractSceneRunner.getInstance().futures) {
+        for (Pair<NativeFuture, AsyncJobDelegate> p : futures) {
             //C# Pair<NativeFuture<Object>, AsyncJobDelegate<Object>> p = (Pair<NativeFuture<Object>, AsyncJobDelegate<Object>>) p1;
             if (p.getFirst().isDone()) {
                 p.getSecond().completed(p.getFirst().get());
-            } else {
-                remainingFutures.add(p);
+                // mark completed for below remove
+                p.setSecond(null);
             }
         }
-        AbstractSceneRunner.getInstance().futures = remainingFutures;
+        AbstractSceneRunner.getInstance().futures.removeIf(e -> e.getSecond() == null);
     }
 
     /**
@@ -160,15 +157,14 @@ public class AsyncHelper {
      * <p>
      * Das geht aber doch wohl nur fuer "einfache", nicht XML Model.
      * 18.10.23: No more 'ac', so only gltf any more.
+     *
      * @param file
      * @param opttexturepath
      * @param loaderoptions
      * @return
      */
     private static BuildResult attemptModelLoad(/*ResourceManager rm,*/ BundleResource file, ResourcePath opttexturepath, int loaderoptions, int delegateid, NativeBundleLoader bundleLoader) {
-        if (Config.isAsyncdebuglog()) {
-            logger.debug("processing async model build for " + file);
-        }
+        logger.debug("processing async model build for " + file);
         if (file.bundle == null) {
             logger.error("bundle not set for file " + file.getName());
             return new BuildResult("failure");
@@ -176,9 +172,7 @@ public class AsyncHelper {
         // wenn die Daten im Bundle (noch) nicht vorliegen, diesen Request skippen
         BundleData ins = file.bundle.getResource(file);
         if (ins == null) {
-            if (Config.isAsyncdebuglog()) {
-                logger.debug(file.getName() + " not found in bundle " + file.bundle.name);
-            }
+            logger.debug(file.getName() + " not found in bundle " + file.bundle.name);
             if (delayedContentload(/*rm,*/ file, bundleLoader)) {
                 return new BuildResult("failure");
             }
@@ -193,9 +187,7 @@ public class AsyncHelper {
             if (file.bundle.exists(binres) && !file.bundle.contains(binres)) {
                 // muesste drin sein, ist aber nicht. 10.10.18: Warum muesste es schon geladen sein?
                 // Ist wohl nur verwirrend. Natürlich kann es delayed sein und wird nachgeladen. Darum hier auch kein Warning.
-                if (Config.isAsyncdebuglog()) {
-                    logger.debug("binres " + binres.getName() + " not found in bundle " + file.bundle.name);
-                }
+                logger.debug("binres " + binres.getName() + " not found in bundle " + file.bundle.name);
                 // Content evtl. async nachladen
                 if (delayedContentload(/*rm,*/ binres, bundleLoader)) {
                     return new BuildResult("failure");
@@ -204,21 +196,11 @@ public class AsyncHelper {
             }
         }
 
-        PortableModelList lr;
-        try {
-            lr = readGltfModelFromBundle(file, true, loaderoptions);
-            if (lr == null) {
-                // Fehler. Ist bereits gelogged.
-                return new BuildResult((new SceneNode()).nativescenenode);
-            }
-        } catch (java.lang.Exception e) {
-            logger.error("Exception caught:", e);
-            return new BuildResult(e.getMessage());
-        }
-        BuildResult r = ModelLoader.buildModelFromBundle(lr, file, opttexturepath, loaderoptions);
+        BuildResult r = ModelLoader.buildModelFromBundle(file, opttexturepath, loaderoptions);
+
         // 16.1.18: The one and only info log for building a model.
         String nodeisnull = (r.getNode() == null) ? " but node isType null." : "";
-        logger.info("Model " + file.getFullName() + " built. Loading took " + lr.loaddurationms + " ms." + nodeisnull + " delegateid=" + delegateid);
+        logger.info("Model " + file.getFullName() + " built. Loading took ?" + /*lr.loaddurationms +*/ " ms." + nodeisnull + " delegateid=" + delegateid);
         // Den Bundleinhalt evtl. wieder freigeben. 25.1.18: Erstmal rausgenommen bis klar ist, ob das bei shared modeln nicht zu built Fehlern führt.
         // Wegen Resourcen doch wieder.
         file.bundle.releaseDelayedResource(file, binres);
@@ -234,7 +216,8 @@ public class AsyncHelper {
      * @param file
      * @return
      */
-    private static boolean delayedContentload(/*ResourceManager rm, */BundleResource file, NativeBundleLoader bundleLoader) {
+    private static boolean delayedContentload(/*ResourceManager rm, */BundleResource file, NativeBundleLoader
+            bundleLoader) {
         // Content evtl. async nachladen. Aber nicht, wenn er schon mal auf einen Fehler lief.
         if (file.bundle.failed(file)) {
             logger.warn("prevoius error detected for bundle content " + file.getFullName());
@@ -245,9 +228,7 @@ public class AsyncHelper {
             //logger.warn("still waiting for " + file.getFullName());
             return false;
         }
-        if (Config.isAsyncdebuglog()) {
-            logger.debug("completing bundle with " + file.getFullName());
-        }
+        logger.debug("completing bundle with " + file.getFullName());
         bundleLoader.completeBundle(file/*,rm*/);
         return false;
     }
@@ -267,51 +248,6 @@ public class AsyncHelper {
         return modelbuildvalues.size();
     }
 
-    /**
-     * Ein natives Model (ac,obj etc, nicht FG xml) aus einem Bundle einlesen.
-     * Muss wegen btg eigentlich den Loader liefern, weil das doof ist aber jetzt das preprocessed model.
-     * 21.4.17: Wenn das Bundle in file nicht eingetragen ist, koennte hier ein resolve gwemacht werden??
-     * Liefert null bei Fehler (already logged).
-     * 15.9.17: Soll nur aus Platform verwendet werden, wird jetzt aber noch von aussen aufgerufen. Das hat für
-     * Analysezwecke und Tests aber durchaus seine Berechtigung. Aber nur dann.
-     * Liest das Model nur ein, ohne es als 3D Objekt anzulegen.
-     * 21.12.17: Wenn mal auf gltf umgestellt ist und die obj Loader nicht mehr da sind, wird das zur Laufzeit ueber die
-     * Platform auch nicht mehr ladbar sein.
-     *
-     * This is a direct sync loading. No engine/platform involved. Use case is internal usage from inside async.
-     * 18.10.23: No more 'ac', so only gltf any more.
-     *
-     * @return
-     */
-    public static PortableModelList readGltfModelFromBundle(BundleResource file, boolean preferpp, int loaderoptions) {
-        if (file.bundle == null) {
-            logger.warn("no bundle set");
-            return null;
-        }
-
-        // file = mapFilename(file,preferpp,loaderoptions);
-
-        // special handling of btg.gz files. Irgendwie Driss
-        // 12.6.17: Andererseits werden pp files hier auch transparent geladen. Aber das macht eh schon der Bundleloader, damit der unzip in der platform ist.
-        // 23.12.17:TODO ins erst im Loader selber lesen, wie GLTF es macht.
-        BundleData ins = file.bundle.getResource(file);
-        if (ins == null) {
-            logger.error(file.getName() + " not found in bundle " + file);
-            return null;
-        }
-
-        try {
-            //18.10.23: Should only be gltf these days. So skip registry.
-            //PortableModelList processor = LoaderRegistry.loadBySuffix(file, (ins), false);
-            AbstractLoader loader = LoaderGLTF.buildLoader(file,/*i/*ns.s,*/  file.path);
-            PortableModelList processor = loader.preProcess();
-            return processor;
-        } catch (InvalidDataException e) {
-            //7.4.17: Es gibt schon mal Fehler in Modelfiles. Das wird gelogged (auch tiefer mit Zeilennummer). Auf den Stacktrace verzichten wir mal.
-            logger.error("loader threw InvalidDataException " + e.getMessage() + " for file " + file.getFullName());
-        }
-        return null;
-    }
 
 }
 

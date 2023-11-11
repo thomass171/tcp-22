@@ -1,9 +1,7 @@
-package de.yard.threed.platform.webgl;
+package de.yard.threed.core.resource;
 
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.Bundle;
-import de.yard.threed.core.resource.BundleLoadDelegate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +14,14 @@ public class LoadingBundle {
     // set after directory load
     public Bundle bundle;
     //public int failure = 0;
-    List<String> failurelist = new ArrayList<>();
+    private List<String> failurelist = new ArrayList<>();
     public BundleLoadDelegate callback;
     public String bundlename;
     //timestamp when requesting all bundle content isType done. Might still be running in background.
     public long doneloading = 0;
     public boolean delayed;
 
-    LoadingBundle(String bundlename, BundleLoadDelegate loadlistener, boolean delayed) {
+    public LoadingBundle(String bundlename, BundleLoadDelegate loadlistener, boolean delayed) {
         this.bundlename = bundlename;
         callback = loadlistener;
         this.delayed = delayed;
@@ -70,6 +68,8 @@ public class LoadingBundle {
         return failurelist.size() > 0;
     }
 
-
+    public List<String> getFailurelist(){
+        return failurelist;
+    }
 }
 

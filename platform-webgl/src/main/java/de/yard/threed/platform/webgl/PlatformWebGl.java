@@ -18,6 +18,7 @@ import com.google.gwt.xml.client.XMLParser;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
@@ -156,37 +157,31 @@ public class PlatformWebGl extends Platform {
         WebGlResourceManager.getInstance().loadBundlePlatformInternal(bundlename, delegate, delayed);
     }*/
 
+    /**
+     * Uses AsyncHelper similar to other platforms for forwarding the result to have a consistent program flow.
+     */
     @Override
     public void httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
 
-        // Using a name 'requestBuilder' instead of 'rb' apparently causes strange runtime errors(??).
-        RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, url);
-        //not valid in CORS. Useless anyway? requestBuilder.setHeader("Mime-Type", "text/plain");
-        //Might cause code 406 rb.setHeader("Accept", "text/plain");
-        try {
-            rb.sendRequest(null, new RequestCallback() {
-                public void onError(Request request, Throwable exception) {
-                    logger.error("onError" + exception.getMessage());
-                }
-
-                public void onResponseReceived(Request request, Response response) {
-
-                    String responsedata = response.getText();
-                    if (response.getStatusCode() != 200) {
-                        logger.error("Status code " + response.getStatusCode() + " for url " + url);
-                    }
-                    // hier kommt man auch hin, wenn der Server eine Fehlerseite schickt (z.b: Jetty im Dev mode)
-                    AsyncHttpResponse r = new AsyncHttpResponse(response.getStatusCode(), null, responsedata);
+        // 10.11.23: RequestBuilder only returns text data (internal pre conversion?). So prefer the low level XMLHttpRequest
+        XMLHttpRequest request = XMLHttpRequest.create();
+        request.open("GET", url);
+        request.setResponseType(XMLHttpRequest.ResponseType.ArrayBuffer);
+        request.setOnReadyStateChange(xhr -> {
+            if (xhr.getReadyState() == XMLHttpRequest.DONE) {
+                // 2xx is considered ok
+                if (xhr.getStatus() >= 300) {
+                    logger.error("XHR Status code " + xhr.getStatus() + " for url " + url);
+                } else {
+                    ArrayBuffer buffer = xhr.getResponseArrayBuffer();
+                    logger.debug("onReadyStateChange. size=" + buffer.byteLength());
+                    AsyncHttpResponse r = new AsyncHttpResponse(xhr.getStatus(), null, new WebGlByteBuffer(buffer));
                     NativeFuture<AsyncHttpResponse> future = new WebGlFuture<AsyncHttpResponse>(r);
                     sceneRunner.addFuture(future, asyncJobDelegate);
-
                 }
-            });
-        } catch (RequestException e) {
-            e.printStackTrace();
-            //TODO Fehlerhandling
-            logger.error("loadRessource" + e.getMessage());
-        }
+            }
+        });
+        request.send();
     }
 
     @Override
@@ -524,6 +519,8 @@ public class PlatformWebGl extends Platform {
     /**
      * Mal etwas zeitgemaesser? Z.B. fuer REST.
      * Das ist aber nicht mehr fuer binary.
+     * 10.11.23: Shouldn't this be a 'httpPost'?
+     * TODO: use AsyncHelper for forwarding the result for consistent program flow and merge with httpGet
      * <p>
      * 17.5.2020
      */
@@ -552,12 +549,12 @@ public class PlatformWebGl extends Platform {
                         }
                         Uint8Array array = TypedArrays.createUint8Array(buffer);
 
-                        loadlistener.completed(new AsyncHttpResponse(0, HttpHelper.buildHeaderList(), xhr.getResponseText()));
+                        loadlistener.completed(new AsyncHttpResponse(xhr.getStatus(), HttpHelper.buildHeaderList(), new WebGlByteBuffer(buffer)));
 
 
                     } else {
                         //logger.error("XHR Status code " + xhr.getStatus() + " for resource with url " + url);
-                        loadlistener.completed(new AsyncHttpResponse(xhr.getStatus(), HttpHelper.buildHeaderList(), ""));
+                        loadlistener.completed(new AsyncHttpResponse(xhr.getStatus(), HttpHelper.buildHeaderList()));
                     }
                 }
             }
