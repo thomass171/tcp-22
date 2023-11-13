@@ -727,7 +727,7 @@ public class ReferenceScene extends Scene {
             cycleRendering();
         }
         if (!remoteShuttleTriggered) {
-            AbstractSceneRunner.getInstance().loadBundle("http://ts171.de/bundlepool/nasa", new BundleLoadDelegate() {
+            AbstractSceneRunner.getInstance().loadBundle("http://yard.de/bundlepool/nasa", new BundleLoadDelegate() {
                 @Override
                 public void bundleLoad(Bundle bundle) {
                     // don't load via platform (which finally would be similar, but with possible waiting for bundle data).

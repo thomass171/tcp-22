@@ -166,6 +166,9 @@ public class PlatformWebGl extends Platform {
         // 10.11.23: RequestBuilder only returns text data (internal pre conversion?). So prefer the low level XMLHttpRequest
         XMLHttpRequest request = XMLHttpRequest.create();
         request.open("GET", url);
+        // Add a header to prevent the browser from deciding no preflight is needed
+        // because of allegedly standard request. These might fail later due to some 'who knows what browser think'.
+        request.setRequestHeader("X-forcecpreflight","v");
         request.setResponseType(XMLHttpRequest.ResponseType.ArrayBuffer);
         request.setOnReadyStateChange(xhr -> {
             if (xhr.getReadyState() == XMLHttpRequest.DONE) {
@@ -174,10 +177,14 @@ public class PlatformWebGl extends Platform {
                     logger.error("XHR Status code " + xhr.getStatus() + " for url " + url);
                 } else {
                     ArrayBuffer buffer = xhr.getResponseArrayBuffer();
-                    logger.debug("onReadyStateChange. size=" + buffer.byteLength());
-                    AsyncHttpResponse r = new AsyncHttpResponse(xhr.getStatus(), null, new WebGlByteBuffer(buffer));
-                    NativeFuture<AsyncHttpResponse> future = new WebGlFuture<AsyncHttpResponse>(r);
-                    sceneRunner.addFuture(future, asyncJobDelegate);
+                    if (buffer == null) {
+                        logger.error("no data (CORS problem?) from url " + url);
+                    } else {
+                        logger.debug("onReadyStateChange. size=" + buffer.byteLength());
+                        AsyncHttpResponse r = new AsyncHttpResponse(xhr.getStatus(), null, new WebGlByteBuffer(buffer));
+                        NativeFuture<AsyncHttpResponse> future = new WebGlFuture<AsyncHttpResponse>(r);
+                        sceneRunner.addFuture(future, asyncJobDelegate);
+                    }
                 }
             }
         });
