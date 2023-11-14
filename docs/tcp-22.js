@@ -3,7 +3,8 @@
  */
 
 var mazeScenes = ["skbn/SokobanWikipedia.txt","skbn/Sokoban10x10.txt","skbn/SokobanTrivial.txt","maze/Maze15x10.txt"];
-var host = "https://ts171.de/tcp-22";
+// was ts171.de once
+var host = "https://yard.de/tcp-22";
 
 function addPanel(label, contentProvider, optionalElement) {
     //console.log("addPanel " + label);
