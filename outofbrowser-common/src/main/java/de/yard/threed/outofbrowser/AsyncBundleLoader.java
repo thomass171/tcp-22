@@ -48,6 +48,7 @@ public class AsyncBundleLoader implements NativeBundleLoader {
 
     /**
      * public for tests
+     * 15.11.23: The returned pairs might contain value null for failed bundles.
      */
     @Override
     public List<Pair<BundleLoadDelegate, Bundle>> processAsync() {
@@ -71,11 +72,17 @@ public class AsyncBundleLoader implements NativeBundleLoader {
                 /*rm.  3.8.21 ging mal ueber BundleLoaderExceptGwt*/
                 //5.8.21 loadBundle(bundlename, d.delayed, rm);
                 ResourcePath bundlebasedir = BundleResolver.resolveBundle(bundlename, Platform.getInstance().bundleResolver);
-                SyncBundleLoader.loadBundleSyncInternal(bundlename, null, d.delayed, resourceReader, bundlebasedir);
-                // TODO MT sicher machen und Fehlerbehandlung
-                // Es gibt keine PArameter. Das Bundle ist einfach da, oder nicht.
-                // 2.3.18: Wenns in der Signatur steht, erwartet man das aber, darum doch.
-                b = BundleRegistry.getBundle(bundlename);
+                if (bundlebasedir == null) {
+                    // could not be resolved. Unlikely it will be possible later
+                    logger.error("Bundle couldn't be resolved:" + bundlename);
+                    b = null;
+                } else {
+                    SyncBundleLoader.loadBundleSyncInternal(bundlename, null, d.delayed, resourceReader, bundlebasedir);
+                    // TODO MT sicher machen und Fehlerbehandlung
+                    // Es gibt keine PArameter. Das Bundle ist einfach da, oder nicht.
+                    // 2.3.18: Wenns in der Signatur steht, erwartet man das aber, darum doch.
+                    b = BundleRegistry.getBundle(bundlename);
+                }
             }
             //3.8.21 AbstractSceneRunner.getInstance().bundledelegateresult.put(d.delegateid, b);
             result.add(new Pair<BundleLoadDelegate, Bundle>(d.delegateid, b));

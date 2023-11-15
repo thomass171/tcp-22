@@ -1,5 +1,7 @@
 package de.yard.threed.core.resource;
 
+import de.yard.threed.core.platform.Platform;
+
 import java.util.List;
 
 /**
@@ -11,10 +13,7 @@ public abstract class BundleResolver {
 
     /**
      * Liefert das "Verzeichnis", in dem das Directory erwartet wird.
-     * 
-     * @param bundleName
-     * @param bundleResolverList
-     * @return
+     * Returns null if bundle couldn't be resolved (was RuntimeException until 15.11.23).
      */
     public static ResourcePath resolveBundle(String bundleName, List<BundleResolver> bundleResolverList) {
 
@@ -24,6 +23,7 @@ public abstract class BundleResolver {
                 return rp;
             }
         }
-        throw new RuntimeException("bundle " + bundleName + " not found with " + bundleResolverList.size() + " resolver");
+        Platform.getInstance().getLog(BundleResolver.class).warn("bundle " + bundleName + " not found with " + bundleResolverList.size() + " resolver");
+        return null;
     }
 }
