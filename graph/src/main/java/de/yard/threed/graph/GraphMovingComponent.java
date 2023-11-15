@@ -32,6 +32,7 @@ public class GraphMovingComponent extends EcsComponent {
     // keycontrolled sollte nicht gleichzeitig zu automove an sein.
     // 9.10.19: Sollte nicht key bezogen sein sondern eher Request (wegen gui). Evtl. ist das ganze obsolet
     // zugunsten pick animation/menu.
+    // 15.11.23: deprecated
     public boolean keycontrolled = false;
 
     //1.3.18 GraphVisualizer visualizer;

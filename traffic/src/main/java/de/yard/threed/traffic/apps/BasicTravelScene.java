@@ -76,17 +76,14 @@ import java.util.Map;
  *
  * <p>
  * Usermode
- * 26.10.18: Jetzt mal einheitlich für Traffic definierte Keycodes (vor allem usermode):
- * (P)ause
+ * 26.10.18: Generic traffic keycodes (vor allem usermode):
  * (S)tart Einen DefaultTravel startem, in der Regel ein Rundflug
- * (M)enu
- * (R)eset
- * (H)elp. Brauchts vielleicht nicht mehr seit Toggle/Browsemenü?
+ * (M)TouchSegment1: Open/Toggle optional menu in (VR has control panel at left writst)
  * (L)oad vehicle. Das naechste aus der Config das noch nicht geladen wurde. Sollte erst nicht mehr dabei sein und wird im UserMode nicht unbedingt gebraucht.
  * Seit controlmenu weg ist aber ganz praktisch.
  * (V) run tests. internal.
- * (CursorTasten) für View Left/Right/Up/Down, ohne vorher F drücken zu müssen. Geht über ObserverSystem.
- * (X/Y/Z) für tuning der Avatarposition
+ * (CursorKeys) for view Left/Right/Up/Down in non VR (via ObserverSystem).
+ * (X/Y/Z) for fine tuning of avatar position
  * <p>
  * Folgende KEys sind da bewusst nicht bei: ,
  * <p>
@@ -101,6 +98,7 @@ import java.util.Map;
  * <p>
  * 4.10.21: MA37: Renamed TrafficCommon->BasicTravelScene und nicht mehr abstract. Auch standalone fuer tiles ohne FG.
  * This is also super class of TravelScene.
+ * 14.11.23: never really existing 'help' and 'reset' removed. Could be added to menu.
  * Created on 28.09.18.
  */
 public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler */ {
@@ -120,8 +118,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     RandomIntProvider rand = new RandomIntProvider();
 
     protected String vehiclelistname = "GroundServices";
-    /*31.1.22 RequestType REQUEST_RESET = RequestType.register("Reset");
-    RequestType REQUEST_HELP = RequestType.register("Help");
+    /*31.1.22
     RequestType REQUEST_MENU = RequestType.register("Menu");
     RequestType REQUEST_CYCLE = RequestType.register("Cycle");
     RequestType REQUEST_LOAD = RequestType.register("Load");
@@ -160,6 +157,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             teleporterSystem.setAnimated(false);
             SystemManager.addSystem(teleporterSystem);
 
+            // ObserverSystem also in VR?
             SystemManager.addSystem(new ObserverSystem(), 0);
         }
         SystemManager.addSystem(new UserSystem());
@@ -281,9 +279,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
 
     protected void commoninit() {
 
-        buttonDelegates.put("reset", () -> {
-            logger.info("reset");
-        });
         buttonDelegates.put("info", () -> {
             VrInstance.getInstance().dumpDebugInfo();
             Observer.getInstance().dumpDebugInfo();
@@ -478,18 +473,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             SystemManager.putRequest(request);
         }
 
-        /*24.10.21if (avatar != null) {
-            //Util.nomore();
-            //11.5.21avatar.update();
-        }*/
-
-        if (Input.getKeyDown(KeyCode.H)) {
-            // 11.10.18: hier auch die Statistik ausgeben
-            //MA36 Statistics statistics = ( Platform.getInstance()).getStatistics();
-            //MA36 getLog().info(statistics.geometries + " geometries, " + statistics.vertices + " vertices, " + statistics.textures + " textures," + statistics.calcGeometryMBs() + " MBs for geos total");
-            help();
-        }
-
         if (Input.getKeyDown(KeyCode.R)) {
             report();
         }
@@ -579,18 +562,11 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         return new VehicleConfigDataProvider(null);
     }
 
-    protected void reset() {
-        getLog().debug("reset");
-    }
-
     // 7.10.21 Die 8/7 naechsten waren mal abstract
 
     /*29.10.21 protected GraphProjectionFlight3D getBackProjection() {
         return null;
     }*/
-
-    protected void help() {
-    }
 
     protected Log getLog() {
         return null;
