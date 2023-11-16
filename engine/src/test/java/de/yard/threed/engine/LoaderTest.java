@@ -1,6 +1,8 @@
 package de.yard.threed.engine;
 
+import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.loader.LoaderAC;
+import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
 import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.platform.Platform;
@@ -15,6 +17,8 @@ import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.engine.test.testutil.TestUtil;
 import de.yard.threed.engine.testutil.TestHelper;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**
@@ -112,4 +116,42 @@ public class LoaderTest {
 
     }
 
+    @Test
+    public void testAC_RGB2PNG() throws InvalidDataException {
+
+        String sampleWithRgb = "AC3Db\n" +
+                "MATERIAL \"\" rgb 1 1 1  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.5 0.5 0.5  shi 10  trans 0\n" +
+                "OBJECT world\n" +
+                "kids 1\n" +
+                "OBJECT poly\n" +
+                "name \"rect\"\n" +
+                "texture \"sample.rgb\"\n" +
+                "numvert 4\n" +
+                "-1 0.5 0\n" +
+                "1 0.5 0\n" +
+                "1 -0.5 0\n" +
+                "-1 -0.5 0\n" +
+                "numsurf 1\n" +
+                "SURF 0x20\n" +
+                "mat 0\n" +
+                "refs 4\n" +
+                "3 0 0\n" +
+                "2 1 0\n" +
+                "1 1 1\n" +
+                "0 0 1\n" +
+                "kids 0\n";
+
+        LoaderAC ac = new LoaderAC(new StringReader(sampleWithRgb), false);
+        TestUtil.assertEquals("", 1, ac.loadedfile.objects.size());
+        TestUtil.assertEquals("", 1, ac.loadedfile.objects.get(0).kids.size());
+        TestUtil.assertEquals("materials", 2, ac.loadedfile.materials.size());
+        TestUtil.assertTrue("shaded", ac.loadedfile.materials.get(0).shaded);
+        TestUtil.assertFalse("shaded", ac.loadedfile.materials.get(1).shaded);
+
+        PortableModelList portableModelList = ac.preProcess();
+        assertEquals(2, portableModelList.materials.size());
+        PortableMaterial unshaded = portableModelList.materials.get(1);
+        // rgb should have been mapped to png
+        assertEquals("sample.png", unshaded.texture);
+    }
 }

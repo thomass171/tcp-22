@@ -99,6 +99,13 @@ public class Texture {
     }
 
     /**
+     * Only for tests
+     */
+    public static boolean hasTexture(String name) {
+        return texturePool.hasTexture(name);
+    }
+
+    /**
      * Needed in tests when platforms are mixed and eg. DummyTexture and OpenglTexture interfere.
      */
     public static void resetTexturePool() {

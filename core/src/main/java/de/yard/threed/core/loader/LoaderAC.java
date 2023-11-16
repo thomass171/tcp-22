@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * Created by thschonh on 14.07.2015.
  * 18.10.23: No longer used inside platform but only in tools for converting. TODO move to tools.
+ * 16.11.23: Now has auto mapping of 'rgb' to 'png'.
  */
 public class LoaderAC extends AsciiLoader {
     static public int flagSurfaceTypePolygon = 0,
@@ -320,6 +321,10 @@ public class LoaderAC extends AsciiLoader {
                             if (token[0].isTexture()) {
                                 //AC hat die Textur am Object, nicht am Material.
                                 currentobject.texture = token[1].stringvalue;
+                                // 16.11.23: auto map rgbs to png
+                                if (StringUtils.endsWith(currentobject.texture, ".rgb")) {
+                                    currentobject.texture = StringUtils.substringBeforeLast(currentobject.texture, ".rgb") + ".png";
+                                }
                             } else {
                                 if (token[0].isCrease()) {
                                     currentobject.setCrease(new Degree(token[1].getValueAsFloat()));
@@ -487,9 +492,7 @@ public class LoaderAC extends AsciiLoader {
             throw new InvalidAcDataException("OBJECT without kids tag");*/
         // System.out.println("lines found: " + lines);
         // dumpAC(this, System.out);
-        if (currentobject == null)
-
-        {
+        if (currentobject == null) {
             // Das kann schon mal vorkommen, wenn es ueberraschend doch keine kids mehr gibt.
             logger.warn("currentobject isType null");
         }
