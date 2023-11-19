@@ -77,7 +77,7 @@ public class TrafficHelper {
                 logger.warn("Vehicle not found:" + vehicle.getName());
                 return;
             }
-            if (!vehicle.hasDelayedLoad()/*getBooleanAttribute(TrafficWorldConfig.DELAYEDLOAD, false)*/) {
+            if (!vehicle.hasDelayedLoad()  && !vehicle.wasLoaded/*getBooleanAttribute(TrafficWorldConfig.DELAYEDLOAD, false)*/) {
                 for (int j = 0; j < vconfig.getInitialCount(); j++) {
                     GraphPosition graphposition = null;
 
@@ -107,6 +107,7 @@ public class TrafficHelper {
                     VehicleLauncher.launchVehicle(vehicle, vconfig, graph/*groundnet.groundnetgraph*/, graphposition, avatarpc, destinationnode, projection,
                             /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, (genericVehicleBuiltDelegate == null) ? new VehicleBuiltDelegate[]{} : new VehicleBuiltDelegate[]{genericVehicleBuiltDelegate}, vehicleLoader);
                 }
+                vehicle.wasLoaded = true;
             } else {
                 logger.debug("Skipping delayload vehicle " + vehicle.getName());
             }

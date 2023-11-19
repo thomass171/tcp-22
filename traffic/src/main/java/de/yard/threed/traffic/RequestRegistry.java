@@ -19,7 +19,8 @@ public class RequestRegistry {
      * everything is ready, eg. Elevation available.(// 27.3.20: Und die Vehicles brauchen ja auch Terrain wegen der Elevation. Das soll bei client/server aber nicht mehr so sein.
      *             // 12.5.20: Doch, die brauchen ja auch ein richtige Elevation, also passend zum Client
      * 18.1.23: TRAFFIC_REQUEST_LOADVEHICLES loads vehicles from a list (additional to initial vehicle? No! There is only
-     * one load vehicles when terrain is available!). Typically TRAFFIC_REQUEST_LOADVEHICLES is used to set up a scene.
+     * one load vehicles when terrain is available!). Might also be triggered multiple when several graphs are loaded.
+     * Typically TRAFFIC_REQUEST_LOADVEHICLES is used to set up a scene.
      * 31.10.23: TRAFFIC_REQUEST_LOADVEHICLE no longer deprecated.
      */
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLE = RequestType.register(4001, "TRAFFIC_REQUEST_LOADVEHICLE");

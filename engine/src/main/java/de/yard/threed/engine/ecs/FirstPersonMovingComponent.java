@@ -18,6 +18,7 @@ public class FirstPersonMovingComponent extends EcsComponent {
     public boolean firstpersonmovementdebuglog = true;
     private FirstPersonTransformer firstPersonTransformer;
     private boolean autoForward, autoBack, autoTurnleft, autoTurnright, autoTurnup, autoTurndown, autoRollleft, autoRollright;
+    public boolean initialLocated = false;
 
     /**
      *

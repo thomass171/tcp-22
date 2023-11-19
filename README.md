@@ -266,6 +266,17 @@ Events and Requests are the main elements for inter system communication. But wh
 For example in client/server mode a "UserSystem" runs on the server not the client. But the client needs to
 send LOGIN requests and might process LoggedIn events. This suggests to decouple event/request registration from specific systems.
 
+### Data Flow
+Data available in one system might also be needed in other systems. The options are
+
+- other systems read data again
+- data is transferred via events
+- data is available by a DataProvider
+
+Anyway, data units should be fine granular and specific for avoiding
+coupling and dependencies.
+The event option with small packets is currently the preferred option.
+
 ## Authentication
 
 Authentication is useful when data is shared across several user.

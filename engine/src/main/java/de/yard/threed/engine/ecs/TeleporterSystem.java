@@ -25,6 +25,7 @@ import de.yard.threed.engine.platform.common.*;
 public class TeleporterSystem extends DefaultEcsSystem {
     Log logger = Platform.getInstance().getLog(TeleporterSystem.class);
     private boolean animated = true;
+    public static String TAG = "TeleporterSystem";
     boolean cycleActive = false;
     //ein Request muss im update() gemacht werden, weils nur das die TCs gibt.
     IntHolder pendingRequest = null;
@@ -89,6 +90,7 @@ public class TeleporterSystem extends DefaultEcsSystem {
         }*/
         if (pendingRequest != null) {
             int option = pendingRequest.v;
+            logger.debug("pendingRequest.option=" + option);
             if (option == 4) {
                 //wird woanders gemacht.
             } else {
@@ -148,7 +150,7 @@ public class TeleporterSystem extends DefaultEcsSystem {
                 SystemManager.processEntityGroups(this.getGroupId(), (entity, group) -> {
                     TeleportComponent tc = (TeleportComponent) group.cl.get(0);
                     int index = tc.findPoint(destination);
-                    logger.debug("teleport request 4 for entity " + entity.getName()+",index="+index);
+                    logger.debug("teleport request 4 for entity " + entity.getName() + ",index=" + index);
                     if (index != -1) {
                         tc.stepTo(index);
                     }
@@ -160,8 +162,12 @@ public class TeleporterSystem extends DefaultEcsSystem {
         return false;
     }
 
+    @Override
+    public String getTag() {
+        return TAG;
+    }
+
     /**
-     *
      * Tatsaechlich der Teleport an die Position des CURRENT index.
      * Inkl. Event des Position Change.
      *
@@ -219,7 +225,9 @@ public class TeleporterSystem extends DefaultEcsSystem {
 
     private void cyclePosition(TeleportComponent tc, boolean forward) {
         //positioncontroller.step(true, 0, forward);
+
         LocalTransform newpos = step(tc, 0, forward);
+        logger.debug("cyclePosition to" + newpos);
         if (newpos != null) {
             /*FlightLocation fl = FlightLocation.fromPosRot(newpos);
             PositionInit.initPositionFromGeod(fl);
@@ -232,6 +240,7 @@ public class TeleporterSystem extends DefaultEcsSystem {
 
     /**
      * 7.7.20: Ist das wirklich sinnvoll? Oder eine Kruecke?
+     *
      * @param activetc
      */
     public void setActivetc(TeleportComponent activetc) {

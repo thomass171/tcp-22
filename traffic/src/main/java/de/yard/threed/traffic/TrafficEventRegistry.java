@@ -46,8 +46,15 @@ public class TrafficEventRegistry {
      * Groundnet geht jetzt aber ueber Request, weil ja nicht bekannt ist, wann Terrain wirklich da ist. Request kann dann warten.
      */
     //In TeleporterSystem public static EventType EVENT_POSITIONCHANGED = new EventType("EVENT_POSITIONCHANGED");
+    @Deprecated
     public static EventType EVENT_LOCATIONCHANGED = EventType.register(4005,"EVENT_LOCATIONCHANGED");
 
+    /**
+     * GeoCoordinate is the most generic position information, suitable for all currently known tiles. For 2D projected tiles the GeoCoordinate
+     * might be the center?
+     * 16.11.23: Deprecated for TRAFFIC_EVENT_SPHERE_LOADED
+     */
+    @Deprecated
     public static Event buildLOCATIONCHANGED(GeoCoordinate sgGeod, /*27.21.21AirportConfig airportConfig,*/ Tile tilename, BundleResource tileResource) {
         return new Event(EVENT_LOCATIONCHANGED, new Payload(sgGeod, /*airportConfig,*/ tilename, tileResource));
     }
@@ -57,4 +64,17 @@ public class TrafficEventRegistry {
      */
     public static EventType TRAFFIC_EVENT_AIRPORT_LOADED = EventType.register(4006, "TRAFFIC_EVENT_AIRPORT_LOADED");
 
+    /**
+     * Successor of EVENT_LOCATIONCHANGED
+     * 16.11.23: The tile name is needed by other systems for optionally loading the config file itself. Or do we add a provider? But
+     * a big data provider leads to coupling. See README.md#DataFlow
+     *
+     */
+    public static EventType TRAFFIC_EVENT_SPHERE_LOADED = EventType.register(4007, "TRAFFIC_EVENT_SPHERE_LOADED");
+
+    public static Event buildSPHERELOADED(BundleResource tileName) {
+        return new Event(TRAFFIC_EVENT_SPHERE_LOADED, new Payload()
+                .add("tilename",tileName==null?"null":tileName.getFullQualifiedName())
+        );
+    }
 }

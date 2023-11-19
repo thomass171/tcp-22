@@ -115,7 +115,6 @@ public class FirstPersonScene extends Scene {
             SystemManager.addSystem(inputToRequestSystem);
 
             ObserverSystem observerSystem = new ObserverSystem();
-            //observerSystem.setViewTransform(getViewTransform(st));
             SystemManager.addSystem(observerSystem);
         }
         if (sceneMode.isServer()) {

@@ -52,7 +52,7 @@ public class Setup {
         //properties.put("argv.basename", "Zieverich-Sued");
         //properties.put("argv.basename", "Desdorf");
         //properties.put("argv.basename","3056443");
-        //properties.put("argv.enableFPC", "true");
+        //properties.put("enableFPC", "true");
         //18.11.19: NearView geht in VR eh nicht, darum damit üblicherweise auch sonst nicht arbeiten.
         //properties.put("argv.enableNearView", "true");
         properties.put("initialMaze", "skbn/SokobanWikipedia.txt");
@@ -86,7 +86,7 @@ public class Setup {
         //properties.put("scene", "de.yard.threed.maze.MazeScene");
         //System.setProperty("scene", "de.yard.threed.engine.apps.vr.VrScene");
         //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
-       //properties.put("scene", "de.yard.threed.engine.apps.FirstPersonScene");
+        //properties.put("scene", "de.yard.threed.engine.apps.FirstPersonScene");
 
         boolean testFireTargetMarker = false;
         if (testFireTargetMarker) {
@@ -102,7 +102,7 @@ public class Setup {
             properties.put("enableAutomove", "true");
             properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
-        boolean demo = false;
+        boolean demo = true;
         if (demo) {
             properties.put("basename", "traffic:tiles/Demo.xml");
             // automove is enabled in Demo.xml.

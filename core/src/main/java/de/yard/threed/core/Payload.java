@@ -16,6 +16,11 @@ import java.util.Map;
  */
 public class Payload {
 
+    public static String KEY_NAME = "name";
+    public static String KEY_POSITION = "position";
+    public static String KEY_ROTATION = "rotation";
+    public static String KEY_SCALE = "scale";
+
     // by index
     @Deprecated
     public Object[] o = null;
@@ -78,10 +83,31 @@ public class Payload {
         return this;
     }
 
+    public Payload addName(String value) {
+        values.put(KEY_NAME, value);
+        return this;
+    }
+
+    public Payload addPosition(Vector3 value) {
+        values.put(KEY_POSITION, value);
+        return this;
+    }
+
+    public Payload addScale(Vector3 value) {
+        values.put(KEY_SCALE, value);
+        return this;
+    }
+
     public Payload add(String key, Quaternion value) {
         values.put(key, value);
         return this;
     }
+
+    public Payload addRotation(Quaternion value) {
+        values.put(KEY_ROTATION, value);
+        return this;
+    }
+
     /*public boolean isByIndex() {
         return o != null;
     }
@@ -103,6 +129,22 @@ public class Payload {
             throw new RuntimeException("no name based payload");
         }
         return values.get(name);
+    }
+
+    public String getName() {
+        return (String) get(KEY_NAME);
+    }
+
+    public Vector3 getPosition() {
+        return (Vector3) get(KEY_POSITION);
+    }
+
+    public Quaternion getRotation() {
+        return (Quaternion) get(KEY_ROTATION);
+    }
+
+    public Vector3 getScale() {
+        return (Vector3) get(KEY_SCALE);
     }
 
     public void encode(Packet packet) {

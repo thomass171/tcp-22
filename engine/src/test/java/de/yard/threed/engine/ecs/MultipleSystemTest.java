@@ -60,8 +60,9 @@ public class MultipleSystemTest {
         assertNotNull(playerEntity, "player");
         assertNotNull("Player", playerEntity.getName());
         assertEquals(testUserName, playerEntity.getName());
-        assertEquals(4, playerEntity.getComponentCount());
-        assertNotNull(TeleportComponent.getTeleportComponent(playerEntity));
+        // 17.11.23: 4->3 because TeleportComponent no longer when TeleporterSystem doesn't exist
+        assertEquals(3, playerEntity.getComponentCount());
+        assertNull(TeleportComponent.getTeleportComponent(playerEntity));
         assertNotNull(AvatarComponent.getAvatarComponent(playerEntity));
         assertNotNull(UserComponent.getUserComponent(playerEntity));
         assertNotNull(JoinComponent.getJoinComponent(playerEntity));

@@ -49,9 +49,9 @@ public class ClientSystem extends DefaultEcsSystem {
             Payload payload = evt.getPayload();
             Integer entityid = (Integer) payload.get("entityid");
             String buildername = (String) payload.get("buildername");
-            Vector3 position = (Vector3) payload.get("position");
-            Vector3 scale = (Vector3) payload.get("scale");
-            Quaternion rotation = (Quaternion) payload.get("rotation");
+            Vector3 position = payload.getPosition();
+            Vector3 scale = payload.getScale();
+            Quaternion rotation =  payload.getRotation();
 
             EcsEntity entity = EcsHelper.findEntityById((int)entityid);
             if (entity == null) {

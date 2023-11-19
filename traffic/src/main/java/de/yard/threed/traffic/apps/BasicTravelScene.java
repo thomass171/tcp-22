@@ -65,6 +65,11 @@ import java.util.Map;
  * - Standalone und als MP Server
  * - Keine Dependency zu FG bzw GPL. FG Modelle müssen von einer ableitenden Scene verwendet werden mit einer Art FG Plugin.
  * - Teleport zu POIs und in Vehivles, Cockpits. Alternativ auch Moving (Helikopter like?).
+ *
+ * <p>
+ * Options:
+ * enableFPC: FPC movement, no Teleporting, no Observer, no initialVehicle(why?),no Avatar (to avoid attaching to vehicles?).
+ *
  * <p>
  * Funktionsweise:
  * 1) wie gehabt löst ein EVENT_LOCATIONCHANGED das Laden von Terrain und Graphen aus (innerhalb einer Sphere).
@@ -93,17 +98,13 @@ import java.util.Map;
  * - When vehicle is available fadeout, teleport, fadein.
  * - "Click for Start" Button. Das ist dann quasi der 's' Key.
  * <p>
- * <p>
- * <p>
- * <p>
  * 4.10.21: MA37: Renamed TrafficCommon->BasicTravelScene und nicht mehr abstract. Auch standalone fuer tiles ohne FG.
  * This is also super class of TravelScene.
  * 14.11.23: never really existing 'help' and 'reset' removed. Could be added to menu.
  * Created on 28.09.18.
  */
 public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler */ {
-    //Die instance loggt über getLog()
-    static Log logger = Platform.getInstance().getLog(BasicTravelScene.class);
+    Log logger = getLog();
     // The default TravelScene has no hud.
     protected Hud hud;
     protected boolean visualizeTrack = false;
@@ -150,6 +151,9 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         SystemManager.addSystem(new GraphTerrainSystem(getTerrainBuilder()));
         //SystemManager.addSystem(new GroundServicesSystem());
         if (enableFPC) {
+            FirstPersonMovingSystem firstPersonMovingSystem = FirstPersonMovingSystem.buildFromConfiguration();
+            SystemManager.addSystem(firstPersonMovingSystem);
+            // key bindings are done below
         } else {
             // Verhalten aus FltaTravelScene. Wenn FPC, dann keine Teleport. TravelScene hatte dafuer freecam?
             teleporterSystem = new TeleporterSystem();
@@ -157,9 +161,10 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             teleporterSystem.setAnimated(false);
             SystemManager.addSystem(teleporterSystem);
 
-            // ObserverSystem also in VR?
-            SystemManager.addSystem(new ObserverSystem(), 0);
+
         }
+        // ObserverSystem is needed for attaching observer (not conflicting with FPC due to disabled components). But also in VR?
+        SystemManager.addSystem(new ObserverSystem(), 0);
         SystemManager.addSystem(new UserSystem());
         SystemManager.addSystem(new AvatarSystem(sceneMode.isClient()), 0);
 
@@ -178,7 +183,69 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             Observer.buildForDefaultCamera();
         }
 
-        commoninit();
+        buttonDelegates.put("info", () -> {
+            VrInstance.getInstance().dumpDebugInfo();
+            Observer.getInstance().dumpDebugInfo();
+        });
+        buttonDelegates.put("up", () -> {
+            logger.info("up");
+            Observer.getInstance().fineTune(true);
+        });
+        buttonDelegates.put("down", () -> {
+            logger.info("down");
+            Observer.getInstance().fineTune(false);
+        });
+        buttonDelegates.put("speedup", () -> {
+        });
+        buttonDelegates.put("speeddown", () -> {
+        });
+        buttonDelegates.put("teleport", () -> {
+            IntHolder option = new IntHolder(0);
+            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{option}));
+            SystemManager.putRequest(request);
+        });
+
+        // Kruecke zur Entkopplung des Modelload von AC policy.
+        ModelLoader.processPolicy = getProcessPolicy();
+
+        InputToRequestSystem inputToRequestSystem = new InputToRequestSystem(new DefaultMenuProvider(getDefaultCamera(), () -> {
+            /**
+             * 18.2.22 Locate menu at near plane like it was when FovElement was used. That should help to avoid menu coverage by cockpits.
+             */
+            double width = 0.07;
+            double zpos = -getDefaultCamera().getNear() - 0.001;
+            double buttonzpos = 0.0001;
+
+            ControlPanel m = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(width, width * 0.7), zpos, buttonzpos, /*sc.*/getMenuItems(), Color.GREEN);
+            ControlPanelMenu menu = new ControlPanelMenu(m);
+            return menu;
+
+        }));
+        inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
+        //toggle auto move
+        inputToRequestSystem.addKeyMapping(KeyCode.Alpha9, UserSystem.USER_REQUEST_AUTOMOVE);
+
+        if (enableFPC){
+            FirstPersonMovingSystem.addDefaultKeyBindings(inputToRequestSystem);
+        }
+
+        if (vrInstance != null) {
+            // Even in VR the observer will be attached to avatar later
+            // Observer was inited before
+            Observer observer = Observer.getInstance();
+            // 1.4.22 Probably still the need to change yoffsetvr here as long as green box avatar is used?
+            observer.initFineTune(vrInstance.getOffsetVR());
+            observer.attach(vrInstance.getController(0));
+            observer.attach(vrInstance.getController(1));
+
+        } else {
+            // nothing special (menu,hud,controlpanel) for non VR?
+        }
+
+
+        SystemManager.addSystem(inputToRequestSystem, 0);
+        //6.10.21 buildToggleMenu();
+        //menuCycler = new MenuCycler(new MenuProvider[]{new TravelMainMenuBuilder(this)});
 
         customInit();
         postInit(sceneMode);
@@ -208,7 +275,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         return new EcsSystem[]{new FlatTerrainSystem(/*20.10.21null, null*/)};
     }
 
-
     protected void processArguments() {
        /*21.3.19  String argv_enableusermode = ((Platform) Platform.getInstance()).getSystemProperty("enableUsermode");
         //argv_enableusermode="1";
@@ -224,12 +290,13 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
 
         Boolean b;
         if ((b = Platform.getInstance().getConfiguration().getBoolean("enableFPC")) != null) {
-            //FPC heisst: kein Teleporting, kein Observer, kein initialVehicle,kein Avatar.
             enableFPC = (boolean) b;
+            logger.info("Setting enableFPC");
         }
 
         String argv_initialVehicle = Platform.getInstance().getConfiguration().getString("initialVehicle");
         if (argv_initialVehicle != null) {
+            // 16.11.23: Why shouldn't we load the vehicle?
             if (enableFPC) {
                 logger.info("Ignoring initialVehicle due to FPC");
             } else {
@@ -277,74 +344,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         }
     }
 
-    protected void commoninit() {
-
-        buttonDelegates.put("info", () -> {
-            VrInstance.getInstance().dumpDebugInfo();
-            Observer.getInstance().dumpDebugInfo();
-        });
-        buttonDelegates.put("up", () -> {
-            logger.info("up");
-            Observer.getInstance().fineTune(true);
-        });
-        buttonDelegates.put("down", () -> {
-            logger.info("down");
-            Observer.getInstance().fineTune(false);
-        });
-        buttonDelegates.put("speedup", () -> {
-        });
-        buttonDelegates.put("speeddown", () -> {
-        });
-        buttonDelegates.put("teleport", () -> {
-            IntHolder option = new IntHolder(0);
-            Request request = new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{option}));
-            SystemManager.putRequest(request);
-        });
-
-        // Kruecke zur Entkopplung des Modelload von AC policy.
-        ModelLoader.processPolicy = getProcessPolicy();
-
-        InputToRequestSystem inputToRequestSystem = new InputToRequestSystem(new DefaultMenuProvider(getDefaultCamera(), () -> {
-            /**
-             * 18.2.22 Locate menu at near plane like it was when FovElement was used. That should help to avoid menu coverage by cockpits.
-             */
-            double width = 0.07;
-            double zpos = -getDefaultCamera().getNear() - 0.001;
-            double buttonzpos = 0.0001;
-
-            ControlPanel m = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(width, width * 0.7), zpos, buttonzpos, /*sc.*/getMenuItems(), Color.GREEN);
-            ControlPanelMenu menu = new ControlPanelMenu(m);
-            return menu;
-
-        }));
-        inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
-        //toggle auto move
-        inputToRequestSystem.addKeyMapping(KeyCode.Alpha9, UserSystem.USER_REQUEST_AUTOMOVE);
-
-        if (vrInstance != null) {
-            // Even in VR the observer will be attached to avatar later
-            // Observer was inited before
-            Observer observer = Observer.getInstance();
-            // 1.4.22 Probably still the need to change yoffsetvr here as long as green box avatar is used?
-            observer.initFineTune(vrInstance.getOffsetVR());
-            observer.attach(vrInstance.getController(0));
-            observer.attach(vrInstance.getController(1));
-
-        } else {
-            // nothing special (menu,hud,controlpanel) for non VR?
-        }
-
-
-        SystemManager.addSystem(inputToRequestSystem, 0);
-        //6.10.21 buildToggleMenu();
-        //menuCycler = new MenuCycler(new MenuProvider[]{new TravelMainMenuBuilder(this)});
-
-    }
-
-    public ProcessPolicy getProcessPolicy() {
-        return null;
-    }
-
     public MenuItem[] getMenuItems() {
         return new MenuItem[]{
                 new MenuItem("teleport", () -> {
@@ -353,25 +352,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
                     SystemManager.putRequest(request);
                 })
         };
-    }
-
-    public AbstractTerrainBuilder getTerrainBuilder() {
-        return null;
-    }
-
-
-    /**
-     * Should be null as default? List could come from a tile?
-     * For now "lok" like in OsmScenery.
-     * <p>
-     * 28.10.21
-     *
-     * @return
-     */
-    public List<Vehicle> getVehicleList() {
-        List<Vehicle> vehicleList = new ArrayList<Vehicle>();
-        //15.12.21 vehicleList.add(new Vehicle("loc", false,true));
-        return vehicleList;//null;
     }
 
     @Override
@@ -444,7 +424,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     public void customUpdate(double tpf) {
     }
 
-    protected void commonUpdate() {
+    private void commonUpdate() {
 
 
         /*7.10.21 jetzt im postinit
@@ -551,25 +531,21 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
 
     }
 
-
+    @Override
+    public void initSettings(Settings settings) {
+        settings.vrready = true;
+    }
 
     /**
-     * Der Default
-     *
-     * @return
+     * 7.10.21: Some defaults instead of using abstract. Defaults fit to 2D tiles.
+     * and should be overridden by 3D and projecting scenes.
      */
     public VehicleConfigDataProvider getVehicleConfigDataProvider() {
         return new VehicleConfigDataProvider(null);
     }
 
-    // 7.10.21 Die 8/7 naechsten waren mal abstract
-
-    /*29.10.21 protected GraphProjectionFlight3D getBackProjection() {
-        return null;
-    }*/
-
     protected Log getLog() {
-        return null;
+        return Platform.getInstance().getLog(BasicTravelScene.class);
     }
 
     protected void initSpheres() {
@@ -589,8 +565,25 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         return null;
     }
 
-    @Override
-    public void initSettings(Settings settings) {
-        settings.vrready = true;
+    public ProcessPolicy getProcessPolicy() {
+        return null;
+    }
+
+    public AbstractTerrainBuilder getTerrainBuilder() {
+        return null;
+    }
+
+    /**
+     * Should be null as default? List could come from a tile?
+     * For now "lok" like in OsmScenery.
+     * <p>
+     * 28.10.21
+     *
+     * @return
+     */
+    public List<Vehicle> getVehicleList() {
+        List<Vehicle> vehicleList = new ArrayList<Vehicle>();
+        //15.12.21 vehicleList.add(new Vehicle("loc", false,true));
+        return vehicleList;//null;
     }
 }

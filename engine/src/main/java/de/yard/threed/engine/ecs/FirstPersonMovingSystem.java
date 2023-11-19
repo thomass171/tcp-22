@@ -4,7 +4,9 @@ package de.yard.threed.engine.ecs;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.GeneralParameterHandler;
+import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Matrix4;
+import de.yard.threed.core.Payload;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
@@ -12,10 +14,17 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.BaseRequestRegistry;
 import de.yard.threed.engine.Input;
+import de.yard.threed.engine.KeyCode;
+import de.yard.threed.engine.ViewPoint;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
+ * First person movement of an entity. This typically should have the observer attached.
+ * Start position is unset, so on (0,0,0).
  * <p>
  * Created by thomass on 26.08.23.
  */
@@ -28,6 +37,7 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
     boolean useMouseControl = false;
     // update by delta time to honor defined speeds
     static public double assumedDeltaTimeWhenStepping = 0.1;
+    public List<ViewPoint> viewPoints = new ArrayList<ViewPoint>();
 
     /**
      *
@@ -60,7 +70,8 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
                         BaseRequestRegistry.TRIGGER_REQUEST_START_ROLLRIGHT,
                         BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLRIGHT
                 },
-                new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED});
+                new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED,
+                        BaseEventRegistry.USER_EVENT_VIEWPOINT});
     }
 
     public static FirstPersonMovingSystem buildFromConfiguration() {
@@ -87,6 +98,12 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
 
         FirstPersonMovingComponent fpmc = (FirstPersonMovingComponent) group.cl.get(0);
 
+        if (!fpmc.initialLocated && viewPoints.size() > 0) {
+            // Set initial position to first viewpoint
+            fpmc.getFirstPersonTransformer().getTransform().setPosition(viewPoints.get(0).transform.position);
+            fpmc.getFirstPersonTransformer().getTransform().setRotation(viewPoints.get(0).transform.rotation);
+            fpmc.initialLocated = true;
+        }
         fpmc.autoMoveByDelta(delta);
 
         if (useMouseControl) {
@@ -200,6 +217,42 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
 
             userEntity.addComponent(new FirstPersonMovingComponent(userEntity.getSceneNode().getTransform()));
         }
+        if (evt.getType().equals(BaseEventRegistry.USER_EVENT_VIEWPOINT)) {
+            Payload payload = evt.getPayload();
+            LocalTransform localTransform = new LocalTransform(payload.getPosition(), payload.getRotation(), payload.getScale());
+            ViewPoint viewPoint = new ViewPoint(payload.getName(), localTransform);
+            viewPoints.add(viewPoint);
+        }
+    }
+
+    @Override
+    public String getTag() {
+        return TAG;
+    }
+
+    public static void addDefaultKeyBindings(InputToRequestSystem inputToRequestSystem) {
+        // use continuous movement
+        inputToRequestSystem.addKeyMapping(KeyCode.W, BaseRequestRegistry.TRIGGER_REQUEST_START_FORWARD);
+        inputToRequestSystem.addKeyReleaseMapping(KeyCode.W, BaseRequestRegistry.TRIGGER_REQUEST_STOP_FORWARD);
+
+        inputToRequestSystem.addKeyMapping(KeyCode.S, BaseRequestRegistry.TRIGGER_REQUEST_START_BACK);
+        inputToRequestSystem.addKeyReleaseMapping(KeyCode.S, BaseRequestRegistry.TRIGGER_REQUEST_STOP_BACK);
+
+        inputToRequestSystem.addKeyMapping(KeyCode.LeftArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNLEFT);
+        inputToRequestSystem.addKeyReleaseMapping(KeyCode.LeftArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNLEFT);
+        inputToRequestSystem.addKeyMapping(KeyCode.RightArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNRIGHT);
+        inputToRequestSystem.addKeyReleaseMapping(KeyCode.RightArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNRIGHT);
+
+        inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNUP);
+        inputToRequestSystem.addKeyReleaseMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNUP);
+        inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNDOWN);
+        inputToRequestSystem.addKeyReleaseMapping(KeyCode.DownArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNDOWN);
+
+        // use a/d for rolling, which will also be available in VR by default
+        inputToRequestSystem.addKeyMapping(KeyCode.A, BaseRequestRegistry.TRIGGER_REQUEST_START_ROLLLEFT);
+        inputToRequestSystem.addKeyReleaseMapping(KeyCode.A, BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLLEFT);
+        inputToRequestSystem.addKeyMapping(KeyCode.D, BaseRequestRegistry.TRIGGER_REQUEST_START_ROLLRIGHT);
+        inputToRequestSystem.addKeyReleaseMapping(KeyCode.D, BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLRIGHT);
     }
 
     private void firstPersonMovingComponent(Request request, GeneralParameterHandler<FirstPersonMovingComponent> handler) {

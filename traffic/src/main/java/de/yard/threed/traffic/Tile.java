@@ -35,7 +35,7 @@ public class Tile {
      * But for now the XML file must already be loaded.
      * @return
      */
-    public static NativeDocument loadConfigFile(BundleResource tile) {
+    public static TrafficConfig loadConfigFile(BundleResource tile) {
         // XML only sync for now
         BundleData xml = BundleHelper.loadDataFromBundle(tile);
 
@@ -51,8 +51,8 @@ public class Tile {
         }
         if (config == null) {
             logger.error("parsing xml failed:" + xml);
-            return config;
+            return null;
         }
-        return config;
+        return new TrafficConfig(config);
     }
 }

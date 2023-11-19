@@ -31,10 +31,11 @@ public class Event {
 
     /**
      * Basiert auf der Annahme, dass PAyload ein Array ist.
-     *
+     * 16.11.23: Also deprecated.
      * @param index
      * @return
      */
+    @Deprecated
     public Object getPayloadByIndex(int index) {
 
         if (payload == null) {

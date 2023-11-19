@@ -41,6 +41,9 @@ public class ObserverSystem extends DefaultEcsSystem {
         this.withComponent = withComponent;
     }
 
+    /**
+     * Default constructor setting up for not adding a ObserverComponent to a new user.
+     */
     public ObserverSystem() {
         this(false);
     }

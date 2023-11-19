@@ -2,6 +2,7 @@ package de.yard.threed.engine;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
 import de.yard.threed.engine.ecs.EcsEntity;
 
@@ -43,5 +44,15 @@ public class BaseEventRegistry {
 
     public static Event buildUserJoinFailedEvent(EcsEntity userEntity, String msg) {
         return new Event(USER_EVENT_JOINFAILED, new Payload().add("userentityid", userEntity.getId()).add("message", msg));
+    }
+
+    public static EventType USER_EVENT_VIEWPOINT = EventType.register(1013, "USER_EVENT_VIEWPOINT");
+
+    public static Event buildViewpointEvent(String name, LocalTransform transform) {
+        return new Event(USER_EVENT_VIEWPOINT, new Payload()
+                .addName(name)
+                .addPosition(transform.position)
+                .addRotation(transform.rotation)
+                .addScale(transform.scale));
     }
 }

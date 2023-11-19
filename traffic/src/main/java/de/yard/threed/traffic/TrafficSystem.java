@@ -73,6 +73,7 @@ import java.util.Map;
  * Created by thomass on 31.03.17.
  */
 public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
+    public static String TAG = "TrafficSystem";
 
     //27.2.18:Kruecke
     private static TrafficSystem instance = null;
@@ -88,7 +89,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     //27.10.21 die vehiclelist aus DefaultTrafficWorld hierhin. Erstmal static, spaeter ueber event?
     public static /*ConfigNodeList*/ List<Vehicle> vehiclelist;
     public static VehicleBuiltDelegate genericVehicleBuiltDelegate = null;
-
+    // 19.11.23 ugly workaround for testing until we have requests in eventqueue
+    public int vehiclesLoaded = 0;
     @Deprecated
     public static SceneConfig sceneConfig;
     @Deprecated
@@ -279,11 +281,13 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     logger.warn("no trafficContext");
                 }
                 // In server mode no user might be logged in yet, so maybe there is no TeleportComponent
+                // 19.11.23: TeleportComponent should be removed here in favor of EVENT_VIEWPOINT
                 TrafficHelper.launchVehicles(TrafficSystem.vehiclelist,
                         trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
                         (UserSystem.getInitialUser() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
                         SphereSystem.getSphereNode()/*getWorld()*/, sphereProjections.backProjection,
                         /*27.12.21airportConfig,*/ baseTransformForVehicleOnGraph, vehicleLoader, genericVehicleBuiltDelegate);
+                vehiclesLoaded++;
                 return true;
             }
         }
@@ -474,6 +478,11 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     }
 
     @Override
+    public String getTag() {
+        return TAG;
+    }
+
+    @Override
     public Object getData(Object[] parameter) {
         return trafficgraphs.get((String) parameter[0]);
     }
@@ -630,12 +639,12 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
         logger.debug("loadTileGraphByConfigFile");
 
-        NativeDocument xmlConfig = Tile.loadConfigFile(tile);
+        TrafficConfig xmlConfig = Tile.loadConfigFile(tile);
         if (xmlConfig == null) {
             //already logged
             return;
         }
-        List<NativeNode> xmlGraphs = XmlHelper.getChildren(xmlConfig, "trafficgraph");
+        List<NativeNode> xmlGraphs = XmlHelper.getChildren(xmlConfig.tw, "trafficgraph");
         logger.debug("" + xmlGraphs.size() + " xml graphs found");
         for (NativeNode nn : xmlGraphs) {
             String graphfile = XmlHelper.getStringAttribute(nn, "graphfile", null);

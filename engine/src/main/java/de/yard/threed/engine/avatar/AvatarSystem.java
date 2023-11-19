@@ -113,7 +113,7 @@ public class AvatarSystem extends DefaultEcsSystem {
         }
         if (evt.getType().equals(BaseEventRegistry.USER_EVENT_JOINED)) {
 
-            int userEntityId = (int)(Integer) evt.getPayload().get("userentityid");
+            int userEntityId = (int) (Integer) evt.getPayload().get("userentityid");
             EcsEntity userEntity = assembleJoinedUser(userEntityId);
             SystemManager.sendEvent(BaseEventRegistry.buildUserAssembledEvent(userEntity));
 
@@ -138,7 +138,7 @@ public class AvatarSystem extends DefaultEcsSystem {
      * The login process created the user entity.
      */
     private EcsEntity assembleJoinedUser(int userEntityId) {
-        logger.debug("assembling joined user userEntityId" + userEntityId);
+        logger.debug("assembling joined user userEntity with id " + userEntityId);
 
         EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
         SceneNode avatarNode = buildAvatarForUserEntity(userEntity);
@@ -194,7 +194,11 @@ public class AvatarSystem extends DefaultEcsSystem {
         mainNode.setName("Avatar");
 
         user.scenenode = mainNode;
-        user.addComponent(new TeleportComponent(mainNode));
+        // TeleportComponent isn't added in TeleporterSystem because other systems might expect
+        // it already created when 'user assembled' arrives.
+        if (SystemManager.findSystem(TeleporterSystem.TAG) != null) {
+            user.addComponent(new TeleportComponent(mainNode));
+        }
 
         Scene.getCurrent().addToWorld(mainNode);
         return mainNode;

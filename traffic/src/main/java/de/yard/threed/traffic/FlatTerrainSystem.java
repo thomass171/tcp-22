@@ -165,9 +165,9 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
     }
 
     private void loadTileByConfigFile(BundleResource tileResource) {
-        NativeDocument xmlConfig = Tile.loadConfigFile(tileResource);
-        loadObjects(XmlHelper.getChildren(xmlConfig, "object"));
-        List<NativeNode> xmlTerrains = XmlHelper.getChildren(xmlConfig, "terrain");
+        TrafficConfig xmlConfig = Tile.loadConfigFile(tileResource);
+        loadObjects(XmlHelper.getChildren(xmlConfig.tw, "object"));
+        List<NativeNode> xmlTerrains = XmlHelper.getChildren(xmlConfig.tw, "terrain");
         for (NativeNode nn : xmlTerrains) {
             loadObjects(XmlHelper.getChildren(nn, "object"));
         }

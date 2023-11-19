@@ -2,6 +2,7 @@ package de.yard.threed.engine.ecs;
 
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Packet;
+import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeEventBus;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ModelBuilderRegistry;
@@ -20,6 +21,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static de.yard.threed.core.testutil.TestUtils.assertVector3;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Really needed? 16.2.23: Since its getting extended further: yes.
@@ -114,5 +119,15 @@ public class EcsTestHelper {
             }
         }
         return result;
+    }
+
+    public static void assertTeleportComponent(EcsEntity entity, int expectedPoints, int expectedIndex, Vector3 expectedPosition) {
+        TeleportComponent tc = TeleportComponent.getTeleportComponent(entity);
+        assertNotNull(tc);
+        assertEquals(expectedPoints, tc.getPointCount(), "teleport destinations");
+        assertEquals(expectedIndex, tc.getIndex(), "teleport index");
+        if (expectedPosition != null) {
+            // not sure what parent is here assertVector3(expectedPosition, tc.getParent().getPosition());
+        }
     }
 }

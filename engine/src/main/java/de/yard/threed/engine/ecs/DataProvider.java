@@ -5,6 +5,7 @@ package de.yard.threed.engine.ecs;
  *
  * Created on 19.03.18.
  */
+@FunctionalInterface
 public interface DataProvider {
     Object getData(Object[] parameter);
 }

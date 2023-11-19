@@ -90,6 +90,7 @@ public class FirstPersonTransformer {
 
     public void moveForwardAsCameraByDelta(double delta) {
         Transform.moveForwardAsCamera(target, movementSpeed * delta);
+        logger.debug("new position:" + getTransform().getPosition());
     }
 
     public void moveSidew(double amount) {

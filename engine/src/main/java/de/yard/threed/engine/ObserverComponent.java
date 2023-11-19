@@ -4,7 +4,6 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.Util;
 import de.yard.threed.engine.ecs.EcsComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
-import de.yard.threed.engine.ecs.TeleportComponent;
 
 /**
  * A component for an entity with cursor key view direction changing (See {@link ObserverSystem}).

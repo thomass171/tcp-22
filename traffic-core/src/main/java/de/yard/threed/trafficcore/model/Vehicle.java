@@ -5,6 +5,8 @@ public class Vehicle {
     public SmartLocation location = null;
     private boolean delayedLoad = false;
     private boolean automove = false;
+    // flag to avoid multiple loading when several graphs are loaded
+    public boolean wasLoaded = false;
 
     public Vehicle(String name, boolean delayedLoad, boolean automove, String location) {
         this.name = name;

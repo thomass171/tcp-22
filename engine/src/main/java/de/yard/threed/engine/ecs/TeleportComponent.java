@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class TeleportComponent extends EcsComponent {
     Log logger = Platform.getInstance().getLog(TeleportComponent.class);
-    ViewpointList teleportlist = new ViewpointList();
+    private ViewpointList teleportlist = new ViewpointList();
     public static String TAG = "TeleportComponent";
     private SceneNode observer;
     public boolean needsupdate = false;

@@ -1,19 +1,17 @@
 package de.yard.threed.traffic;
 
-import de.yard.threed.core.Color;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.AmbientLight;
+import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.DirectionalLight;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneNode;
@@ -52,6 +50,8 @@ import java.util.List;
  * <p>
  * Optionally triggers loading of a (static?) tile. There might also be a TerrainSystem.
  * Provider for a projection fitting to the Sphere and a world node.
+ * 16.11.23: Might also provide a provider for the full configuration, so other systems do not
+ * need to read it again. See {@link README.md#DataFlow}.
  * <p>
  * 07.10.21
  */
@@ -161,25 +161,12 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                 if (initialTile.getExtension().equals("xml")) {
                     // XML only sync for now
 
-                    NativeDocument xmlConfig = Tile.loadConfigFile(initialTile);
+                    TrafficConfig xmlConfig = Tile.loadConfigFile(initialTile);
                     if (xmlConfig != null) {
-                        xmlVPs = XmlHelper.getChildren(xmlConfig, "viewpoint");
-                        List<NativeNode> xmlLights = XmlHelper.getChildren(xmlConfig, "light");
-                        if (xmlLights.size() > 0) {
-                            lds = new LightDefinition[xmlLights.size()];
-                        }
-                        int index = 0;
-                        for (NativeNode nn : xmlLights) {
-                            Color color = Color.parseString(XmlHelper.getStringAttribute(nn, "color"));
-                            String direction = XmlHelper.getStringAttribute(nn, "direction");
-                            if (direction != null) {
-                                lds[index] = new LightDefinition(color, Util.parseVector3(direction));
-                            } else {
-                                lds[index] = new LightDefinition(color, null);
-                            }
-                            index++;
-                        }
-                        List<NativeNode> xmlVehicles = XmlHelper.getChildren(xmlConfig, "vehicle");
+                        xmlVPs = xmlConfig.getViewpoints();
+                        lds = xmlConfig.getLights();
+
+                        List<NativeNode> xmlVehicles = XmlHelper.getChildren(xmlConfig.tw, "vehicle");
                         if (xmlVehicles.size() > 0) {
                             logger.info("Replacing vehiclelist with list from config file");
                             TrafficSystem.vehiclelist = new ArrayList<Vehicle>();
@@ -191,7 +178,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                                         XmlHelper.getStringAttribute(nn, XmlVehicleConfig.LOCATION)));
                             }
                         }
-                        List<NativeNode> xmlTerrains = XmlHelper.getChildren(xmlConfig, "terrain");
+                        List<NativeNode> xmlTerrains = XmlHelper.getChildren(xmlConfig.tw, "terrain");
                         if (xmlTerrains.size() > 0) {
                             // We have terrain, so no graph visualization needed.
                             ((GraphTerrainSystem) SystemManager.findSystem(GraphTerrainSystem.TAG)).disable();
@@ -225,8 +212,16 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
             // 24.10.21: Das kommt jetzt erstmal einfach hier hin.
             // Viewpoints koennte auch TeleporterSystem kennen, aber irgendwo muss ein neu dazugekommener Player sie ja herholen können.
+            // 17.11.23: But TeleporterSystem can collect these. Additionally send traffic independent event
             SystemManager.putDataProvider("viewpoints", new SphereViewPointProvider(this, xmlVPs));
-
+            if (xmlVPs != null) {
+                // viewpoints from XML
+                for (NativeNode nn : xmlVPs) {
+                    LocalTransform transform = ConfigHelper.getTransform(nn);
+                    SystemManager.sendEvent(BaseEventRegistry.buildViewpointEvent(
+                            XmlHelper.getStringAttribute(nn, "name"), transform));
+                }
+            }
             return true;
         }
 
@@ -326,6 +321,8 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
         //27.3.20: Groundnet jetzt eigenstaendig ueber request, damit es auf terrain warten kann. Das mit der projection ist aber doof.
         SystemManager.sendEvent(TrafficEventRegistry.buildLOCATIONCHANGED(initialPosition, /*27.3.20 projection,*/ /*14.10.21 DefaultTrafficWorld.getInstance().currentairport,*/ null/*initialTile*/,
                 (initialTile)));
+        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(initialTile));
+
         //24.5.20 Event fuer Ground wird nicht mehr gebraucht, weil Airport per Init da ist und der Rest ueber Pending groundnet geht.
         //wird doch gebraucht, um groundnetXML zu lesen.
         // 16.10.21:Aber initial doch nur, wenn ein icao geladen wird. Zumindest solange tiles so simple sind wie jetzt.Aber 3D immer. Irgendwie frickelig.
@@ -433,6 +430,10 @@ class TileKram {
     }
 }
 
+/**
+ * 18.11.23: Deprecated in favor of USER_EVENT_VIEWPOINT
+ */
+@Deprecated
 class SphereViewPointProvider implements DataProvider {
 
     Log logger = Platform.getInstance().getLog(SphereViewPointProvider.class);
@@ -450,7 +451,7 @@ class SphereViewPointProvider implements DataProvider {
             List<ViewPoint> vps = new ArrayList<ViewPoint>();
             for (NativeNode nn : xmlVPs) {
                 LocalTransform transform = ConfigHelper.getTransform(nn);
-                vps.add(new ViewPoint("oben2", transform));
+                vps.add(new ViewPoint(XmlHelper.getStringAttribute(nn, "name"), transform));
             }
             return vps;
         }
