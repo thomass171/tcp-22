@@ -69,7 +69,7 @@ public class MazeScene extends Scene {
             logger.info("cam carrier pos=" + getDefaultCamera().getCarrierPosition());
             logger.info("cam carrier parent=" + getDefaultCamera().getCarrier().getTransform().getParent());
             logger.info("observer pos, finetune=" + observer.getPosition() + "," + observer.getFinetune());
-            logger.info("world pos=" + Scene.getWorld().getTransform().getPosition());
+            logger.info("world pos=" + Scene.getCurrent().getWorld().getTransform().getPosition());
 
             //avatar.dumpDebugInfo();
         });

@@ -1,0 +1,255 @@
+<!--for testing only-->
+<c:config xmlns:c="http://www.example.org/tcp-22" name="a">
+
+    <vehicledefinition name="747 KLM" modeltype="747-400" ai="true" type="aircraft">
+        <bundlename>fgdatabasicmodel</bundlename>
+        <modelfile>AI/Aircraft/747/744-KLM.xml</modelfile>
+        <zoffset>0</zoffset>
+        <unscheduledmoving>0</unscheduledmoving>
+        <wingspread>64.4</wingspread>
+        <wingpassingpoint>-3,40</wingpassingpoint>
+        <leftwingapproachpoint>13,-16</leftwingapproachpoint>
+        <door>-20.38,-2.89,-0.24</door>
+
+    </vehicledefinition>
+    <vehicledefinition name="737-800 AB" modeltype="738" ai="true" type="aircraft">
+        <bundlename>fgdatabasicmodel</bundlename>
+        <modelfile>AI/Aircraft/737/737-AirBerlin.xml</modelfile>
+        <zoffset>3</zoffset>
+        <unscheduledmoving>0</unscheduledmoving>
+        <wingspread>35.79</wingspread>
+        <wingpassingpoint>4,19</wingpassingpoint>
+        <leftwingapproachpoint>8,-8.9475</leftwingapproachpoint>
+        <door>-9.49,-1.6024,3</door>
+    </vehicledefinition>
+    <vehicledefinition name="738" modeltype="738" ai="true" type="aircraft">
+        <bundlename>fgdatabasicmodel</bundlename>
+        <modelfile>AI/Aircraft/738/738-AirBerlin.xml</modelfile>
+        <zoffset>0</zoffset>
+        <unscheduledmoving>0</unscheduledmoving>
+        <maximumspeed>11.7</maximumspeed>
+        <acceleration>0.9</acceleration>
+        <viewpoint name="BackSide">
+            <transform>
+                <position>90,20,15</position>
+                <angle>0, 90, 90</angle>
+            </transform>
+        </viewpoint>
+    </vehicledefinition>
+    <vehicledefinition name="simpleShuttle" modeltype="shuttle" ai="true" type="aircraft">
+        <bundlename>data</bundlename>
+        <modelfile>flusi/shuttle-hi-res/shut.3ds</modelfile>
+        <zoffset>0</zoffset>
+        <unscheduledmoving>0</unscheduledmoving>
+    </vehicledefinition>
+
+    <vehicledefinition name="c172p" type="aircraft">
+        <bundlename>c172p</bundlename>
+        <modelfile>Models/c172p.xml</modelfile>
+        <zoffset>1.2</zoffset>
+        <unscheduledmoving>0</unscheduledmoving>
+        <maximumspeed>64.7</maximumspeed>
+        <acceleration>14.5</acceleration>
+        <viewpoint name="Captain">
+            <transform>
+                <position>0.36, -0.14, 0.236</position>
+                <angle>90, 0, 90</angle>
+            </transform>
+        </viewpoint>
+        <viewpoint name="BackSide">
+            <transform>
+                <position>90,20,15</position>
+                <angle>0, 90, 90</angle>
+            </transform>
+        </viewpoint>
+        <aircraftdir>c172p</aircraftdir>
+        <optional>TaxiLightCone</optional>
+        <optional>LandingLightCone</optional>
+        <optional>nav-light-right</optional>
+        <optional>nav-light-left</optional>
+        <optional>nav-light-tail</optional>
+        <optional>BeaconOff</optional>
+        <optional>BeaconOffX</optional>
+        <optional>strobe1</optional>
+        <optional>strobe2</optional>
+        <optional>glas</optional>
+        <optional>glas_interior</optional>
+        <optional>glas_interior_sides</optional>
+        <optional>leftwindow</optional>
+        <optional>leftwindow_interior</optional>
+        <optional>rightwindow</optional>
+        <optional>rightwindow_interior</optional>
+    </vehicledefinition>
+    <vehicledefinition name="777" type="aircraft">
+        <bundlename>777</bundlename>
+        <modelfile>Models/777-200.xml</modelfile>
+        <zoffset>6</zoffset>
+        <unscheduledmoving>0</unscheduledmoving>
+
+
+        <viewpoint name="Captain">
+            <transform>
+                <position>-22.60, -0.5, 0.8</position>
+                <angle>90, 0, 90</angle>
+            </transform>
+        </viewpoint>
+        <aircraftdir>777</aircraftdir>
+
+        <optional>TaxiLightCone</optional>
+        <optional>LandingLightCone</optional>
+        <optional>Dome light</optional>
+        <optional>LandingLightCone_R</optional>
+        <optional>LandingLightCone_L</optional>
+        <optional>LandingLightCone_C</optional>
+        <optional>LandingLights</optional>
+        <optional>LHLND.spot</optional>
+        <optional>RHLND.spot</optional>
+    </vehicledefinition>
+    <vehicledefinition name="bluebird" type="aircraft">
+        <bundlename>bluebird</bundlename>
+        <modelfile>Models/bluebird.xml</modelfile>
+        <zoffset>1.2</zoffset>
+        <unscheduledmoving>0</unscheduledmoving>
+        <maximumspeed>64.7</maximumspeed>
+        <acceleration>14.5</acceleration>
+        <viewpoint name="Captain">
+            <!-- -->
+            <transform>
+                <position>-7.26, 0, 1.45</position>
+                <angle>90, 0, 90</angle>
+            </transform>
+        </viewpoint>
+        <aircraftdir>bluebird</aircraftdir>
+        <optional>nav_sphere_L1</optional>
+        <optional>nav_sphere_L2</optional>
+        <optional>nav_sphere_R1</optional>
+        <optional>nav_sphere_R2</optional>
+        <optional>strobe_sphere_L</optional>
+        <optional>strobe_sphere_R</optional>
+        <optional>Shadow</optional>
+
+    </vehicledefinition>
+    <vehicledefinition name="Goldhofert" type="car" modeltype="pushback">
+        <bundlename>fgdatabasicmodel</bundlename>
+        <modelfile>Models/Airport/Pushback/Goldhofert.xml</modelfile>
+        <maximumspeed>11.7</maximumspeed>
+        <acceleration>0.9</acceleration>
+        <approachoffset>0</approachoffset>
+        <initialcount>1</initialcount>
+    </vehicledefinition>
+
+    <vehicledefinition name="FollowMe" type="car" modeltype="followme">
+        <bundlename>fgdatabasicmodel</bundlename>
+        <modelfile>fgaddon/followme.xml</modelfile>
+        <maximumspeed>21.3</maximumspeed>
+        <acceleration>4.5</acceleration>
+        <viewpoint name="Captain">
+            <transform>
+                <position>1.91, -0.33, 1.3</position>
+                <angle>90, 0, 90</angle>
+            </transform>
+        </viewpoint>
+        <aircraftdir>followme</aircraftdir>
+    </vehicledefinition>
+
+    <vehicledefinition name="VolvoFuel" type="car" modeltype="fueltruck">
+        <bundlename>fgdatabasicmodel</bundlename>
+        <modelfile>FuelTruck/Fuel_Truck_Short_VolvoFM.xml</modelfile>
+        <!-- 56 kmh-->
+        <maximumspeed>15.5</maximumspeed>
+        <acceleration>1.3</acceleration>
+        <approachoffset>0</approachoffset>
+        <initialcount>2</initialcount>
+    </vehicledefinition>
+
+    <vehicledefinition name="LSG" type="car" modeltype="catering">
+        <bundlename>fgdatabasicmodel</bundlename>
+        <modelfile>Catering6620KopiertAusTerrasync/catruckmed-lsg1.xml</modelfile>
+        <!-- 63 kmh-->
+        <maximumspeed>17.5</maximumspeed>
+        <acceleration>1.5</acceleration>
+        <approachoffset>2.9</approachoffset>
+        <viewpoint name="BackSide">
+            <transform>
+                <position>90,20,15</position>
+                <angle>0, 90, 90</angle>
+            </transform>
+        </viewpoint>
+        <initialcount>2</initialcount>
+    </vehicledefinition>
+
+    <vehicledefinition name="Douglas" type="car" modeltype="pushback">
+        <bundlename>fgdatabasicmodel</bundlename>
+        <modelfile>Models/Airport/Pushback/Douglas.xml</modelfile>
+        <maximumspeed>13</maximumspeed>
+        <acceleration>1.1</acceleration>
+        <approachoffset>0</approachoffset>
+        <initialcount>1</initialcount>
+    </vehicledefinition>
+
+    <vehicledefinition name="Bravo" type="aircraft">
+        <bundlename>fgdatabasicmodel</bundlename>
+        <modelfile>AI/Aircraft/Citation-Bravo/Models/Bravo-ai.xml</modelfile>
+        <zoffset>0</zoffset>
+        <!-- 42 kmh-->
+        <maximumspeed>11.7</maximumspeed>
+        <acceleration>0.9</acceleration>
+        <initialcount>1</initialcount>
+    </vehicledefinition>
+
+    <vehicledefinition name="Navigator" modeltype="747-400XX" ai="false" type="aircraftXX">
+        <bundlename>engine</bundlename>
+        <!--5.10.21 <modelfile>navigator.xml</modelfile>-->
+        <modelfile>navigator.gltf</modelfile>
+        <zoffset>0</zoffset>
+        <unscheduledmoving>0</unscheduledmoving>
+        <viewpoint name="p1">
+            <transform>
+                <position>2,0,1</position>
+                <angle>90, 0, 90</angle>
+            </transform>
+        </viewpoint>
+        <viewpoint name="p2">
+            <transform>
+                <position>10,0,1</position>
+                <angle>90, 0, 90</angle>
+            </transform>
+        </viewpoint>
+        <viewpoint name="p3">
+            <transform>
+                <position>10,3,1</position>
+                <angle>90, 0, 90</angle>
+            </transform>
+        </viewpoint>
+    </vehicledefinition>
+
+    <vehicledefinition name="A320" modeltype="A320" ai="true" type="aircraft">
+        <wingspread>34.10</wingspread>
+        <wingpassingpoint>-3,25</wingpassingpoint>
+        <leftwingapproachpoint>13,-8.5</leftwingapproachpoint>
+        <!--first door is expected to be front left-->
+        <door>-5,-1.6,0.11</door>
+    </vehicledefinition>
+
+    <vehicles name="GenericRoad">
+        <vehicle name="FollowMe" initialcount="2"/>
+        <vehicle name="LSG" initialcount="2"/>
+    </vehicles>
+    <vehicles name="VehiclesWithCockpit">
+        <vehicle name="c172p"></vehicle>
+        <vehicle name="bluebird" initialcount="3"></vehicle>
+        <vehicle name="777"></vehicle>
+        <vehicle name="FollowMe"></vehicle>
+        <vehicle name="Locomotive"></vehicle>
+    </vehicles>
+    <vehicles name="GroundServices">
+        <vehicle name="c172p" delayedload="true"/>
+        <vehicle name="777" delayedload="true"/>
+        <vehicle name="FollowMe"/>
+        <vehicle name="VolvoFuel"/>
+        <vehicle name="LSG"/>
+        <vehicle name="Goldhofert"/>
+        <vehicle name="Douglas"/>
+        <vehicle name="Bravo"/>
+    </vehicles>
+</c:config>

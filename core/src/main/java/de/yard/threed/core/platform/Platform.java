@@ -6,6 +6,7 @@ import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourcePath;
+import de.yard.threed.core.resource.URL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,8 +30,6 @@ public abstract class Platform {
 
     public NativeScene nativeScene;
 
-    public NativeBundleLoader bundleLoader;
-
     public List<BundleResolver> bundleResolver = new ArrayList<BundleResolver>();
 
     protected static Platform instance;
@@ -49,6 +48,7 @@ public abstract class Platform {
     /**
      * 16.9.16: Die Object3D Komponente wird immer direkt mit erstellt.
      * 18.10.23: TODO Rename to buildSceneNode.
+     *
      * @return
      */
     public abstract NativeSceneNode buildModel();
@@ -66,6 +66,7 @@ public abstract class Platform {
      * 10.11.23: The threejs gltf loader currently is the only platform provided loader abd is disabled by default because
      * it cannot handle external material (FG terrain). So
      * this method might be useless at the moment. But it might be an option in the future.
+     *
      * @param filename
      * @return
      */
@@ -172,7 +173,7 @@ public abstract class Platform {
      * 3.1.19: Das mit der Standardtextur ist doch eine doofe FehlerKaschierung. Das soll der Aufrufer doch pruefen und
      * im Zweifel ohne Material (wireframe) anlegen. Also, liefert jetzt null im Fehlerfall.
      */
-    public abstract NativeTexture buildNativeTexture(BundleResource filename, HashMap<NumericType, NumericValue> parameters);
+    public abstract NativeTexture buildNativeTexture(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> parameters);
 
     /**
      * Etwas doof: Unity muss wissen, ob die Textur eine NormalMap ist, weil die anders gespeichert wird.
@@ -486,4 +487,12 @@ public abstract class Platform {
     public abstract NativeAudioClip buildNativeAudioClip(BundleResource filename);
 
     public abstract NativeAudio buildNativeAudio(NativeAudioClip audioClip);
+
+    /**
+     * bundlename to make clear its for bundle content loading with resolver (or abs HTTP).
+     * if location is null, the resolver will be used.
+     * Should location end with bundlename or not? Probably not, because bundlename is standalone parameter.
+     */
+    public abstract NativeBundleResourceLoader buildResourceLoader(String bundlename, String location);
+
 }

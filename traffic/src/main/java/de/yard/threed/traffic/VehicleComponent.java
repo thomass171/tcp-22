@@ -6,7 +6,7 @@ import de.yard.threed.engine.ecs.DefaultEcsComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.graph.GraphNode;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.traffic.config.VehicleConfig;
+import de.yard.threed.traffic.config.VehicleDefinition;
 
 
 /**
@@ -26,7 +26,7 @@ public class VehicleComponent extends DefaultEcsComponent {
     // 14.12.21: Don't know a better name
     public static String VEHICLE_RAILER = "railer";
     // type,modeltype stehen in config
-    public VehicleConfig config;
+    public VehicleDefinition config;
     public static String TAG = "VehicleComponent";
     //public long statechangetimestamp = 0;
     public GraphNode lastdestination = null;
@@ -39,7 +39,7 @@ public class VehicleComponent extends DefaultEcsComponent {
     // 29.8.23
     public SceneNode teleportParentNode;
 
-    public VehicleComponent(VehicleConfig config/*String type,String modeltype*/) {
+    public VehicleComponent(VehicleDefinition config/*String type,String modeltype*/) {
         this.config=config;
     }
 

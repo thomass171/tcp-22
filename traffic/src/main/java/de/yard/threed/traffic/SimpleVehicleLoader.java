@@ -11,7 +11,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
-import de.yard.threed.traffic.config.VehicleConfig;
+import de.yard.threed.traffic.config.VehicleDefinition;
 import de.yard.threed.trafficcore.model.Vehicle;
 
 /**
@@ -25,7 +25,7 @@ public class SimpleVehicleLoader implements VehicleLoader {
      * @return
      */
     @Override
-    public void loadVehicle(Vehicle vehicle, VehicleConfig config, VehicleLoadedDelegate loaddelegate) {
+    public void loadVehicle(Vehicle vehicle, VehicleDefinition config, VehicleLoadedDelegate loaddelegate) {
         logger.debug("Load vehicle " + config.getName());
 
         AbstractSceneRunner.instance.loadBundle(config.getBundlename(), (Bundle bundle) -> {

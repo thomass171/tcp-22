@@ -5,16 +5,18 @@ public class Vehicle {
     public SmartLocation location = null;
     private boolean delayedLoad = false;
     private boolean automove = false;
+    public int initialCount;
     // flag to avoid multiple loading when several graphs are loaded
     public boolean wasLoaded = false;
 
-    public Vehicle(String name, boolean delayedLoad, boolean automove, String location) {
+    public Vehicle(String name, boolean delayedLoad, boolean automove, String location, int initialCount) {
         this.name = name;
         this.delayedLoad = delayedLoad;
         this.automove = automove;
         if (location != null) {
             this.location = new SmartLocation(location);
         }
+        this.initialCount = initialCount;
     }
 
     public Vehicle(String name) {

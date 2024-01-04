@@ -53,13 +53,13 @@ public class ConfigNodeList extends ConfigNode {
         return null;
     }
 
-    public static List<ConfigNodeList> build(NativeDocument tw, String maintag, String tag, String subtag, ConfigAttributeFilter filter){
+    public static List<ConfigNodeList> build(List<NativeNode> topNodes/*NativeDocument tw*/, String maintag, String tag, ConfigAttributeFilter filter){
         List<ConfigNodeList> lists = new ArrayList<ConfigNodeList>();
-        List<NativeNode> vehiclelists = (XmlHelper.getChildren(tw, maintag));
-        List<NativeNode> nodes = XmlHelper.getChildNodeList(tw, maintag, tag);
+        //List<NativeNode> vehiclelists = (XmlHelper.getChildren(topNodes, maintag));
+        List<NativeNode> nodes = XmlHelper.getChildren(topNodes, maintag);
         for (NativeNode nn:nodes) {
             if (new ConfigNode(nn).complies(filter)) {
-                ConfigNodeList configNodeList = new ConfigNodeList(nn, subtag);
+                ConfigNodeList configNodeList = new ConfigNodeList(nn, tag);
                 lists.add(configNodeList);
             }
         }

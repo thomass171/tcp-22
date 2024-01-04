@@ -245,10 +245,12 @@ public class ReferenceScene extends Scene {
         // 28.4.21: Outside VR inventory is a FovElement at deferredcamera.
         if (deferredcamera != null) {
             inventory = ControlPanelHelper.buildInventoryForDeferredCamera(deferredcamera, getDimension(), controlPanelBackground, new Dimension(300, 20));
-            // occupy mid third of inventory
-            TextTexture textTexture = new TextTexture(Color.LIGHTGRAY);
-            ControlPanelArea area1884 = inventory.addArea("area1884", new Vector2(0, 0), new DimensionF(inventory.getSize().getWidth() / 3, inventory.getSize().getHeight()), null);
-            area1884.setTexture(textTexture.getTextureForText("1884", Color.RED));
+            // occupy mid third of inventory. check for headless.
+            if (inventory != null) {
+                TextTexture textTexture = new TextTexture(Color.LIGHTGRAY);
+                ControlPanelArea area1884 = inventory.addArea("area1884", new Vector2(0, 0), new DimensionF(inventory.getSize().getWidth() / 3, inventory.getSize().getHeight()), null);
+                area1884.setTexture(textTexture.getTextureForText("1884", Color.RED));
+            }
         }
         controlPanel = buildControlPanel(controlPanelBackground, this);
         // in front of left box, dami man mit einem teleport gut davorsteht zur Bedienung
@@ -322,8 +324,10 @@ public class ReferenceScene extends Scene {
 
         AudioClip elevatorPingClip = AudioClip.buildAudioClipFromBundle("data", "audio/elevator-ping-01.wav");
         elevatorPing = Audio.buildAudio(elevatorPingClip);
-        elevatorPing.setVolume(0.5);
-        elevatorPing.setLooping(false);
+        if (elevatorPingClip != null && elevatorPing != null) {
+            elevatorPing.setVolume(0.5);
+            elevatorPing.setLooping(false);
+        }
         logger.debug("setupScene completed");
     }
 
@@ -727,21 +731,29 @@ public class ReferenceScene extends Scene {
             cycleRendering();
         }
         if (!remoteShuttleTriggered) {
-            AbstractSceneRunner.getInstance().loadBundle("http://yard.de/bundlepool/nasa", new BundleLoadDelegate() {
+            // use ... temporarily until shuttle uses textures (for testing remote texture loading)
+            //String bundleUrl="http://yard.de/bundlepool/nasa";
+            //String remoteModel = "shuttle-hi-res/shut.gltf";
+            //Vector3 scale = new Vector3(0.003, 0.003, -0.003);
+            String bundleUrl = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/publicweb/bundlepool/fgdatabasicmodel";
+            String remoteModel = "Models/Airport/Pushback/Goldhofert.gltf";
+            Vector3 scale = new Vector3(0.1, 0.1, -0.1);
+            AbstractSceneRunner.getInstance().loadBundle(bundleUrl, new BundleLoadDelegate() {
                 @Override
                 public void bundleLoad(Bundle bundle) {
                     // don't load via platform (which finally would be similar, but with possible waiting for bundle data).
-                    BundleResource file = new BundleResource(bundle, "shuttle-hi-res/shut.gltf");
+                    BundleResource file = new BundleResource(bundle, remoteModel);
                     ResourcePath opttexturepath = null;
                     int loaderoptions = 0;
 
+                    logger.debug("Bundle " + bundle.name + " loaded");
                     BuildResult r = ModelLoader.buildModelFromBundle(file, opttexturepath, loaderoptions);
 
                     if (r.getNode() != null) {
                         SceneNode shuttle = new SceneNode(r.getNode());
 
-                        Vector3 scale=new Vector3(0.003, 0.003, -0.003);
-                        shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(180)));
+                        //shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(180)));
+                        shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(0)));
                         shuttle.getTransform().setScale(scale);
                         shuttle.getTransform().setPosition(new Vector3(-8, 2, -10));
                         addToWorld(shuttle);
@@ -749,7 +761,7 @@ public class ReferenceScene extends Scene {
                     }
                 }
             });
-            remoteShuttleTriggered=true;
+            remoteShuttleTriggered = true;
         }
     }
 

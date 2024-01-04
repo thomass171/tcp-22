@@ -36,18 +36,20 @@ public abstract class Scene {
     // obwohl es ja auch mehrere Trees geben koennte?
     // sollte eigentlich private sein, aber machmal zu Tests ganz praktisch. Und auch fuer "scene.add".
     // 7.5.21: Wird für VR in den VR space verschoben.
-    public static World world;
+    private World world;
     //7.5.21 doppelt zu world in platform. jetzt nicht mehr. Doch besser hier statt in Platform
     // static World world;
-    static Scene current;
+    static private Scene current;
 
 
     public Scene() {
         // die scene muss in JME von aussen kommen scene = PlatformFactory.getInstance().buildScene();
         // die Defaaultcamera auch
         current = this;
+        // 29.12.23: So far world was set in the scenerunner init. Might need
+        // some static in scenerunner impls (eg. JmeScene.instance).
+        world = new World();
     }
-
 
     public Camera getDefaultCamera() {
         return getMainCamera();
@@ -82,10 +84,10 @@ public abstract class Scene {
     }
 
     /**
-     *
      * See {@link Light}
      * 30.4.19: Bei JME(DirectionalLightShadowRenderer?) noch nicht richtig
      * 25.2.22: This is just a convenience method. Maybe there can be a better location (in Light?).
+     *
      * @param light
      * @return
      */
@@ -94,13 +96,14 @@ public abstract class Scene {
 
         SceneNode sn = new SceneNode();
         sn.setLight(light);
+        // The name might be used in tests for checking light!
         sn.setName("Scene Light");
         //scene.add(light.light);
         addToWorld(sn);
         return sn;
     }
 
-    public static String dumpSceneGraph() {
+    public String dumpSceneGraph() {
         String s = world/*((Platform)Platform.getInstance()).getWorld()*/.dump("", 0);
         return s;
     }
@@ -226,7 +229,7 @@ public abstract class Scene {
      *
      * @return
      */
-    public static World getWorld() {
+    public World getWorld() {
         if (world == null) {
             throw new RuntimeException("world not set");
         }
@@ -236,5 +239,5 @@ public abstract class Scene {
     /**
      * Instead of SceneUpdater interface
      */
-    public abstract void update() ;
+    public abstract void update();
 }

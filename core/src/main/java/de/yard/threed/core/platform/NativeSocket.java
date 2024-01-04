@@ -22,4 +22,6 @@ public interface NativeSocket {
     Packet getPacket();
 
     void close();
+
+    boolean isPending();
 }

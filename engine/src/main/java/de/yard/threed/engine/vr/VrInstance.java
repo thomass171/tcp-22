@@ -108,7 +108,7 @@ public class VrInstance {
     }
 
     private void raiseWorld(double offset) {
-        World world = Scene./*((EngineHelper) Platform.getInstance()).*/getWorld();
+        World world = Scene./*((EngineHelper) Platform.getInstance()).*/getCurrent().getWorld();
         Vector3 p = world.getTransform().getPosition();
         logger.info("raising world pos " + p + " by " + offset);
         p = new Vector3(p.getX(), p.getY() + offset, p.getZ());
@@ -218,7 +218,7 @@ public class VrInstance {
         Camera camera = Scene.getCurrent().getDefaultCamera();
         logger.info("offsetVR=" + ((VrInstance.getInstance() != null) ? ("" + VrInstance.getInstance().getOffsetVR()) : ""));
         logger.info("cam vr pos=" + camera.getVrPosition(true));
-        logger.info("world pos=" + Scene.getWorld().getTransform().getPosition());
+        logger.info("world pos=" + Scene.getCurrent().getWorld().getTransform().getPosition());
         Transform carrier = camera.getCarrier().getTransform();
         logger.info("observer set pos=" + Observer.getInstance().getPosition());
         logger.info("observer finetune=" + Observer.getInstance().getFinetune());

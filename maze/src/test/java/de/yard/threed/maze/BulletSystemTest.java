@@ -19,6 +19,7 @@ import java.util.List;
 import static de.yard.threed.maze.MazeTheme.THEME_TRADITIONAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import de.yard.threed.engine.BaseRequestRegistry;
 
 public class BulletSystemTest {
@@ -31,11 +32,13 @@ public class BulletSystemTest {
         MazeDataProvider.reset();
 
         EcsTestHelper.setup(() -> {
-            MazeTheme st = MazeTheme.buildFromIdentifier(THEME_TRADITIONAL);
+                    MazeTheme st = MazeTheme.buildFromIdentifier(THEME_TRADITIONAL);
 
-            SystemManager.addSystem(new MazeMovingAndStateSystem(st));
-            SystemManager.addSystem(new BulletSystem());
-        }, "engine", "maze");
+                    SystemManager.addSystem(new MazeMovingAndStateSystem(st));
+                    SystemManager.addSystem(new BulletSystem());
+                },
+                // 2.1.24: "data" added. Strange, why wasn't it a problem before? Maybe it was but not revealed.
+                "engine", "maze", "data");
 
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
     }
@@ -71,7 +74,7 @@ public class BulletSystemTest {
         assertEquals(3, MazeUtils.getBullets(userEntity).size());
 
         // targetDirection is only optional
-        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(userEntity.getId(),null));
+        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(userEntity.getId(), null));
         EcsTestHelper.processSeconds(1);
 
         // user still on home field.
@@ -81,9 +84,9 @@ public class BulletSystemTest {
         assertEquals("fire from home field ignored", failEvent.getPayload().get("message"));
 
         // move and fire again
-        SystemManager.putRequest(new Request(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD,userEntity.getId()));
+        SystemManager.putRequest(new Request(BaseRequestRegistry.TRIGGER_REQUEST_FORWARD, userEntity.getId()));
         EcsTestHelper.processSeconds(1);
-        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(userEntity.getId(),null));
+        SystemManager.putRequest(MazeRequestRegistry.buildFireRequest(userEntity.getId(), null));
         EcsTestHelper.processSeconds(1);
         // one bullet is gone
         assertEquals(2, MazeUtils.getBullets(userEntity).size());

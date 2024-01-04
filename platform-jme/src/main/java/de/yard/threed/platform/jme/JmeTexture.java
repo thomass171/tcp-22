@@ -77,38 +77,26 @@ public class JmeTexture implements NativeTexture {
      *
      * @return
      */
-    static JmeTexture loadFromFile(NativeResource textureresource) {
+    static JmeTexture loadFromFile(String/*NativeResource*/ textureresource, BufferedImage li) {
         long starttime = System.currentTimeMillis();
         //4.5.16: Ohne Zwischenschritt ImageData versuchen. Erscheint aber nicht wirklich schneller
         //JmeTexture tex = buildFromImage(ImageUtil.loadImageFromFile(new File(filename)));
         JmeTexture tex = null;
-        // AwtLoader/ImageIO is slow.
-        // 16.10.18: jpg is also slow, but caching it bloats the cache tremendously. So only use cache for 'png'.
-        // 26.8.23: Try again jpg.
-        if (textureresource.getName().toUpperCase().endsWith(".PNG") || textureresource.getName().toUpperCase().endsWith(".JPG")) {
-            // optionally use cache
-            BufferedImage li = ImageUtil.loadCachableImage(textureresource);
-            if (li == null) {
-                return null;
-            }
-            // 5.9.16: LoadedImage already has a bytebuffer, but Jme needs a BufferedImage for converting it back to bytebuffer.
-            // Thats inefficient, but currently no other option. There is no way without JMEs AWTLoader to get it into one of JMEs formats.
-            //logger.debug("loaded image from cache "+textureresource.getName()+" "+ ((li.width*li.height)/1024)+" kB");
-            // 28.8.23: Since there is no longer an intermediate LoadedImage (which contained a unintended flip conversion),
-            // flip needs to be done here.
-            Image img = new AWTLoader().load(li/*Image.Format.BGRA8,li.width,li.height,li.buffer*/, true);
-            tex = new JmeTexture(new Texture2D(img), textureresource.getName());
-        } else {
-            try {
-                tex = buildFromInputStream(FileReader.getInputStream(FileReader.getFileStream(textureresource)));
-            } catch (IOException e) {
-                //2.10.19: Kein Stacktrace, kann bei rgb Textures (bluebird) schon mal sein.
-                logger.error("IO Exception", e/*+ e.getMessage()/*2.10.19, e*/);
-                return null;
-            }
+
+        //BufferedImage li = ImageUtils.loadAndCacheImage(textureresource);
+        if (li == null) {
+            return null;
         }
+
+        // 5.9.16: LoadedImage already has a bytebuffer, but Jme needs a BufferedImage for converting it back to bytebuffer.
+        // Thats inefficient, but currently no other option. There is no way without JMEs AWTLoader to get it into one of JMEs formats.
+        //logger.debug("loaded image from cache "+textureresource.getName()+" "+ ((li.width*li.height)/1024)+" kB");
+        // 28.8.23: Since there is no longer an intermediate LoadedImage (which contained a unintended flip conversion),
+        // flip needs to be done here.
+        Image img = new AWTLoader().load(li/*Image.Format.BGRA8,li.width,li.height,li.buffer*/, true);
+        tex = new JmeTexture(new Texture2D(img), textureresource/*.getName()*/);
         logger.debug(String.format("building JmeTexture for %s took %d ms",
-                textureresource.getFullName(), System.currentTimeMillis() - starttime));
+                textureresource/*.getFullName()*/, System.currentTimeMillis() - starttime));
 
         return tex;
     }

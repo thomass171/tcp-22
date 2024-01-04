@@ -1,7 +1,7 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.graph.*;
-import de.yard.threed.traffic.config.VehicleConfig;
+import de.yard.threed.traffic.config.VehicleDefinition;
 
 
 import java.util.ArrayList;
@@ -58,27 +58,27 @@ public class TrafficGraph /*MA31 extends Graph */ {
         baseGraph = new Graph();
     }
 
-    public GraphPath createPathFromGraphPosition(GraphPosition from, GraphNode to, GraphWeightProvider graphWeightProvider, VehicleConfig vehicleConfig) {
+    public GraphPath createPathFromGraphPosition(GraphPosition from, GraphNode to, GraphWeightProvider graphWeightProvider, VehicleDefinition vehicleConfig) {
         int layer = newLayer();
         return createPathFromGraphPosition(from, to, graphWeightProvider, true, layer, vehicleConfig);
     }
 
-    public GraphPath createPathFromGraphPosition(GraphPosition from, GraphNode to, GraphWeightProvider graphWeightProvider, boolean withsmooth, VehicleConfig vehicleConfig) {
+    public GraphPath createPathFromGraphPosition(GraphPosition from, GraphNode to, GraphWeightProvider graphWeightProvider, boolean withsmooth, VehicleDefinition vehicleConfig) {
         GraphPathConstraintProvider graphPathConstraintProvider = new DefaultGraphPathConstraintProvider(MINIMUMPATHSEGMENTLEN, (vehicleConfig != null) ? vehicleConfig.getTurnRadius() : SMOOTHINGRADIUS);
         return GraphUtils.createPathFromGraphPosition(baseGraph, from, to, graphWeightProvider, graphPathConstraintProvider, newLayer(), withsmooth, false, getLaneInfo(vehicleConfig));
     }
 
-    public GraphPath createPathFromGraphPosition(GraphPosition from, GraphNode to, GraphWeightProvider graphWeightProvider, boolean withsmooth, boolean allowrelocation, VehicleConfig vehicleConfig) {
+    public GraphPath createPathFromGraphPosition(GraphPosition from, GraphNode to, GraphWeightProvider graphWeightProvider, boolean withsmooth, boolean allowrelocation, VehicleDefinition vehicleConfig) {
         GraphPathConstraintProvider graphPathConstraintProvider = new DefaultGraphPathConstraintProvider(MINIMUMPATHSEGMENTLEN, (vehicleConfig != null) ? vehicleConfig.getTurnRadius() : SMOOTHINGRADIUS);
         return GraphUtils.createPathFromGraphPosition(baseGraph, from, to, graphWeightProvider, graphPathConstraintProvider, newLayer(), withsmooth, allowrelocation, getLaneInfo(vehicleConfig));
     }
 
-    public GraphPath createPathFromGraphPosition(GraphPosition from, GraphNode to, GraphWeightProvider graphWeightProvider, boolean withsmooth, int layer, VehicleConfig vehicleConfig) {
+    public GraphPath createPathFromGraphPosition(GraphPosition from, GraphNode to, GraphWeightProvider graphWeightProvider, boolean withsmooth, int layer, VehicleDefinition vehicleConfig) {
         GraphPathConstraintProvider graphPathConstraintProvider = new DefaultGraphPathConstraintProvider(MINIMUMPATHSEGMENTLEN, (vehicleConfig != null) ? vehicleConfig.getTurnRadius() : SMOOTHINGRADIUS);
         return GraphUtils.createPathFromGraphPosition(baseGraph, from, to, graphWeightProvider, graphPathConstraintProvider, layer, withsmooth, false, getLaneInfo(vehicleConfig));
     }
 
-    public GraphPath createBackPathFromGraphPosition(GraphNode startnode, GraphEdge startedge, TurnExtension backturn, GraphNode to, GraphWeightProvider graphWeightProvider, boolean withsmooth, VehicleConfig vehicleConfig) {
+    public GraphPath createBackPathFromGraphPosition(GraphNode startnode, GraphEdge startedge, TurnExtension backturn, GraphNode to, GraphWeightProvider graphWeightProvider, boolean withsmooth, VehicleDefinition vehicleConfig) {
         int layer = newLayer();
         //TurnExtension backturn = GraphUtils.createBack(groundnetgraph, startnode, startedge, successor, layer);
         GraphPathConstraintProvider graphPathConstraintProvider = new DefaultGraphPathConstraintProvider(MINIMUMPATHSEGMENTLEN, SMOOTHINGRADIUS);
@@ -114,7 +114,7 @@ public class TrafficGraph /*MA31 extends Graph */ {
      * @param vehicleConfig
      * @return
      */
-    private GraphLane getLaneInfo(VehicleConfig vehicleConfig) {
+    private GraphLane getLaneInfo(VehicleDefinition vehicleConfig) {
         GraphLane laneinfo = null;
         if (multilaneenabled && (vehicleConfig == null || !vehicleConfig.getType().equals(VehicleComponent.VEHICLE_AIRCRAFT))) {
             //7 statt 17, denn je groesser der Abstand umso wahrscheinlicher Problem mit shorties smoothing

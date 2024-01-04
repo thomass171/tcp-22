@@ -8,10 +8,15 @@ import de.yard.threed.engine.util.XmlNode;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Used in pre XSD layouts. In XSD there are no "vehicles","viewpoints" tag any more.
+ * Set deprecated (and private)
+ */
+@Deprecated
 public class SceneConfig extends XmlNode {
     List<SceneVehicle> scenevehicles;
 
-    public SceneConfig(NativeNode nativeNode) {
+    private SceneConfig(NativeNode nativeNode) {
         super(nativeNode);
         scenevehicles = new ArrayList<SceneVehicle>();
         if (XmlHelper.getChildren(nativeNode, "vehicles").size() > 0) {
@@ -22,11 +27,11 @@ public class SceneConfig extends XmlNode {
         }
     }
 
-    public List<ViewpointConfig> getViewpoints() {
+    private List<ViewpointConfig> getViewpoints() {
         return getViewpoints(null);
     }
 
-    public List<ViewpointConfig> getViewpoints(ConfigAttributeFilter configAttributeFilter) {
+    private List<ViewpointConfig> getViewpoints(ConfigAttributeFilter configAttributeFilter) {
         List<NativeNode> xmlviewpoints = XmlHelper.getChildNodeList(nativeNode, "viewpoints", "viewpoint");
         List<ViewpointConfig> viewpoints = new ArrayList<ViewpointConfig>();
         for (int i = 0; i < xmlviewpoints.size(); i++) {
@@ -43,15 +48,15 @@ public class SceneConfig extends XmlNode {
         return viewpoints;
     }
 
-    public int getVehicleCount() {
+    private int getVehicleCount() {
         return scenevehicles.size();
     }
 
-    public SceneVehicle getVehicle(int index) {
+    private SceneVehicle getVehicle(int index) {
         return (scenevehicles.get(index));
     }
 
-    public SceneVehicle getVehicleByName(String name) {
+    private SceneVehicle getVehicleByName(String name) {
         for (SceneVehicle v : scenevehicles) {
             if (v.getName().equals(name)) {
                 return v;
@@ -60,7 +65,7 @@ public class SceneConfig extends XmlNode {
         return null;
     }
 
-    public LocalTransform getBaseTransformForVehicleOnGraph() {
+    private LocalTransform getBaseTransformForVehicleOnGraph() {
         List<NativeNode> t = XmlHelper.getChildNodeList(nativeNode, "BaseTransformForVehicleOnGraph", "transform");
         LocalTransform transform = ConfigHelper.getTransform(t);
         return transform;

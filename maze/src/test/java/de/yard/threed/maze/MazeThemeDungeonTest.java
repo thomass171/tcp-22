@@ -14,7 +14,8 @@ import static de.yard.threed.maze.MazeTheme.THEME_DUNGEON;
  * Created by thomass on 15.07.23.
  */
 public class MazeThemeDungeonTest {
-    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new PlatformFactoryHeadless());
+    // 2.1.24: "data" added. Strange, why wasn't it a problem before? Maybe it was but not revealed.
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze", "data"}, new PlatformFactoryHeadless());
     MazeTheme mazeTheme;
 
     //no good idea to define statics here because it restarts platform init

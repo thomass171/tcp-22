@@ -101,7 +101,7 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
         carrier = new JmeSceneNode("Main Camera Carrier");
         attach(carrier.getTransform());
         //rootnode.attachChild(carrier.object3d.spatial);
-        carrier.getTransform().setParent(Scene.getWorld().getTransform().transform);
+        carrier.getTransform().setParent(Scene.getCurrent().getWorld().getTransform().transform);
         //Platform.getInstance().addCamera(this);
         AbstractSceneRunner.getInstance().addCamera(this);
 

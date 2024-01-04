@@ -33,7 +33,7 @@ import java.util.List;
  * Created by thomass on 08.02.16.
  */
 public class GeometryHelperTest {
-    static Platform platform = EngineTestFactory.initPlatformForTest( new String[] {"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest( new String[] {"engine", "data"}, new PlatformFactoryHeadless());
 
     /**
      * Skizze 19 (so ähnlich)

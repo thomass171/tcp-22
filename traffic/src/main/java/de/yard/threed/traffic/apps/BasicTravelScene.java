@@ -8,32 +8,23 @@ import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.gui.*;
 import de.yard.threed.engine.platform.ProcessPolicy;
-import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.traffic.AbstractTerrainBuilder;
 import de.yard.threed.traffic.FlatTerrainSystem;
 import de.yard.threed.traffic.GraphBackProjectionProvider;
 import de.yard.threed.traffic.GraphTerrainSystem;
 
+import de.yard.threed.traffic.GraphVisualizationSystem;
 import de.yard.threed.traffic.LightDefinition;
 import de.yard.threed.traffic.RequestRegistry;
 import de.yard.threed.traffic.EllipsoidCalculations;
-import de.yard.threed.traffic.SimpleVehicleLoader;
-import de.yard.threed.traffic.SphereProjections;
 import de.yard.threed.traffic.SphereSystem;
-import de.yard.threed.traffic.TrafficGraph;
 import de.yard.threed.traffic.TrafficHelper;
 import de.yard.threed.traffic.TrafficSystem;
 import de.yard.threed.traffic.TrafficVrControlPanel;
 import de.yard.threed.traffic.VehicleComponent;
-import de.yard.threed.traffic.VehicleLauncher;
-import de.yard.threed.traffic.VehicleLoader;
-import de.yard.threed.traffic.config.ConfigNode;
-import de.yard.threed.traffic.config.ConfigNodeList;
 import de.yard.threed.traffic.config.SceneConfig;
-import de.yard.threed.traffic.config.VehicleConfig;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
-import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.graph.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
@@ -104,7 +95,7 @@ import java.util.Map;
  * Created on 28.09.18.
  */
 public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler */ {
-    Log logger = getLog();
+    // Don't define a logger here by getLog(). Might result in NPE.
     // The default TravelScene has no hud.
     protected Hud hud;
     protected boolean visualizeTrack = false;
@@ -137,7 +128,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
 
     @Override
     public void init(SceneMode sceneMode) {
-        logger.debug("init BasicTravelScene with scene mode " + sceneMode.getMode());
+        getLog().debug("init BasicTravelScene with scene mode " + sceneMode.getMode());
         processArguments();
 
         vrInstance = VrInstance.buildFromArguments();
@@ -169,9 +160,10 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         SystemManager.addSystem(new AvatarSystem(sceneMode.isClient()), 0);
 
         //visualizeTrack soll auch im usermode verfuegbar sein.
-        /*if (visualizeTrack) {
-            SystemManager.addSystem(new GraphVisualizationSystem(new SimpleGraphVisualizer(world)));
-        }*/
+        /*29.12.23 was commented, but back now with abstract provider for visualizer*/
+        if (visualizeTrack) {
+            SystemManager.addSystem(new GraphVisualizationSystem(getGraphVisualizer()));
+        }
         for (EcsSystem ecsSystem : getCustomTerrainSystems()) {
             SystemManager.addSystem(ecsSystem);
         }
@@ -188,11 +180,11 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             Observer.getInstance().dumpDebugInfo();
         });
         buttonDelegates.put("up", () -> {
-            logger.info("up");
+            getLog().info("up");
             Observer.getInstance().fineTune(true);
         });
         buttonDelegates.put("down", () -> {
-            logger.info("down");
+            getLog().info("down");
             Observer.getInstance().fineTune(false);
         });
         buttonDelegates.put("speedup", () -> {
@@ -251,6 +243,13 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         postInit(sceneMode);
     }
 
+    /**
+     * 29.12.23 Not hardcoded but can be overridden.
+     */
+    public GraphVisualizer getGraphVisualizer(){
+        return new SimpleGraphVisualizer(getWorld());
+    }
+
     public SceneConfig getSceneConfig() {
         return null;
     }
@@ -291,14 +290,14 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         Boolean b;
         if ((b = Platform.getInstance().getConfiguration().getBoolean("enableFPC")) != null) {
             enableFPC = (boolean) b;
-            logger.info("Setting enableFPC");
+            getLog().info("Setting enableFPC");
         }
 
         String argv_initialVehicle = Platform.getInstance().getConfiguration().getString("initialVehicle");
         if (argv_initialVehicle != null) {
             // 16.11.23: Why shouldn't we load the vehicle?
             if (enableFPC) {
-                logger.info("Ignoring initialVehicle due to FPC");
+                getLog().info("Ignoring initialVehicle due to FPC");
             } else {
                 Request request;
                 // no userid known. Might not be user related. TODO Maybe the request via parameter isn't used any more.
@@ -324,11 +323,13 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         if (tilename == null) {
             tilename = getDefaultTilename();
         }
-        logger.debug("using tilename " + tilename);
+        getLog().debug("using tilename " + tilename);
     }
 
     /**
      * To be overridden by extending class.
+     * This default is used when no tilename is passed by parameter.
+     * Tile name needs to be a full qualified bundle name.
      */
     public String getDefaultTilename() {
         // null leads to 3D
@@ -366,19 +367,21 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         SystemManager.addSystem(new InputToRequestSystem());
 
         //29.10.21: Damit lauchVehicles noch geht. TODO anders.
-        TrafficSystem.sceneConfig = sceneConfig;
+        //28.11.23 scenconfig is no longer used. 'baseTransformForVehicleOnGraph' is now set in SphereSystem for now.
+        /*28.11.23 TrafficSystem.sceneConfig = sceneConfig;
         if (sceneConfig != null) {
             TrafficSystem.baseTransformForVehicleOnGraph = sceneConfig.getBaseTransformForVehicleOnGraph();
         } else {
             //8.11.21: position part apparently ignored
+            //28.11.23:For what is this fix value? Seems not to be any known rotation. Its for Demo/Wayland.
             TrafficSystem.baseTransformForVehicleOnGraph = new LocalTransform(new Vector3(0, 0, 0), Quaternion.buildFromAngles(new Degree(0), new Degree(-90), new Degree(0)));
-        }
+        }*/
 
         //erst jetzt, wenn ECS schon inited ist? Nee, muesste auch schon vorher gehen. Ist aber auch egal. Obwohl die Darstellung richtiger ist
         //als wenn man es im commoninit macht.
         initSpheres();
 
-        SystemManager.putDataProvider("vehicleconfig", getVehicleConfigDataProvider());
+        //27.11.23 Now in TrafficSystem SystemManager.putDataProvider("vehicleconfig", getVehicleConfigDataProvider());
 
         //7.10.21:Jetzt hier statt als erstes im Update. Aber fuer die Initialposition muss man das tile kennen. Darum als erstes Tile per
         //Sphere laden. Von da wird dann das alte "sendInitialEvents" gemacht.
@@ -498,7 +501,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             if (e.isLocked()) {
                 lockinfo = ", locked by " + e.getLockOwner();
             }
-            logger.debug("name=" + e.getName() + lockinfo);
+            getLog().debug("name=" + e.getName() + lockinfo);
         }
     }
 
@@ -524,7 +527,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         */
         String name = tc.getTargetEntity();
         if (name == null) {
-            logger.warn("no target entity in TC");
+            getLog().warn("no target entity in TC");
             return null;
         }
         return TrafficHelper.findVehicleByName(name);
@@ -552,7 +555,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     }
 
     protected void runTests() {
-        logger.debug("Running tests");
+        getLog().debug("Running tests");
         // When there was a user starting tests there should also be an observer.
         RuntimeTestUtil.assertNotNull("observer", Observer.getInstance());
     }

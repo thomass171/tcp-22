@@ -18,14 +18,13 @@ import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.traffic.config.SceneConfig;
 import de.yard.threed.trafficcore.model.SmartLocation;
 
-import de.yard.threed.traffic.config.VehicleConfig;
+import de.yard.threed.traffic.config.VehicleDefinition;
 
 import de.yard.threed.engine.util.NearView;
 
 import de.yard.threed.trafficcore.model.Vehicle;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Abgrenzung zu TrafficHelper ist...:
@@ -80,7 +79,7 @@ public class VehicleLauncher {
      *                             vehiclespezifisch geben.
      * @return
      */
-    public static void launchVehicle(Vehicle vehicle, VehicleConfig config, TrafficGraph graph, GraphPosition position, @Deprecated TeleportComponent avatarpc, SceneNode destinationnode, GraphProjection projectionforbackprojection,
+    public static void launchVehicle(Vehicle vehicle, VehicleDefinition config, TrafficGraph graph, GraphPosition position, @Deprecated TeleportComponent avatarpc, SceneNode destinationnode, GraphProjection projectionforbackprojection,
                                      LocalTransform vehiclebasetransform, NearView nearView, VehicleBuiltDelegate[] vehicleBuiltDelegate, VehicleLoader vehicleLoader) {
         vehicleLoader.loadVehicle(vehicle, config, (SceneNode offsetNode, VehicleLoaderResult loaderResult/*9.11.21List<SGAnimation> animationList, SGPropertyNode rootpropertyNode*/, SceneNode lowresNode) -> {
             SceneNode modelNode = getModelNodeFromVehicleNode(offsetNode);
@@ -173,7 +172,7 @@ public class VehicleLauncher {
      * TODO: Die projection ist die totale Kruecke. Die koennte vielleicht mit dem Graph zusammen in einen "GraphContext".
      * 29.8.23: teleportParentNode added
      */
-    public static EcsEntity buildVehicleOnGraph(SceneNode node, TrafficGraph graph, GraphPosition position, VehicleConfig config,
+    public static EcsEntity buildVehicleOnGraph(SceneNode node, TrafficGraph graph, GraphPosition position, VehicleDefinition config,
             /*Map*/GraphProjection projection, EntityBuilder entityBuilder,SceneNode teleportParentNode ) {
         GraphMovingComponent gmc = new GraphMovingComponent(node.getTransform());
         //MA31: navigator hat keinen graph
@@ -227,8 +226,8 @@ public class VehicleLauncher {
      * erfolgt hier nicht.
      * Hier sind noch zu viele Abhaengigkeiten drin, oder?
      */
-    public static void lauchVehicleByName(TrafficGraph trafficGraph, VehicleConfig config/*27.12.21TrafficWorldConfig tw*/, String name, SmartLocation location,
-                                          TeleportComponent tc, SceneNode destination, GraphProjection projectionforbackprojection, SceneConfig sceneConfig, NearView nearView,
+    public static void lauchVehicleByName(TrafficGraph trafficGraph, VehicleDefinition config/*27.12.21TrafficWorldConfig tw*/, String name, SmartLocation location,
+                                          TeleportComponent tc, SceneNode destination, GraphProjection projectionforbackprojection,/*27.11.23 SceneConfig sceneConfig*/LocalTransform baseTransformForVehicleOnGraph, NearView nearView,
                                           VehicleBuiltDelegate vehicleBuiltDelegate, VehicleLoader vehicleLoader) {
         //SceneVehicle vconf = /*tw.getScene("GroundServices")*/sceneConfig.getVehicleByName(name);
         //GraphEdge ed = groundnet.groundnetgraph.findEdgeByName("128-129");
@@ -242,7 +241,7 @@ public class VehicleLauncher {
         }
         //27.12.21VehicleConfig config = tw.getVehicleConfig(name);
         GraphPosition start = new GraphPosition(ed/*, ed.getLength() , true*/);
-        VehicleLauncher.launchVehicle(new Vehicle(name), config, trafficGraph, start, tc, destination, projectionforbackprojection, sceneConfig.getBaseTransformForVehicleOnGraph(), nearView, new VehicleBuiltDelegate[]{vehicleBuiltDelegate}, vehicleLoader);
+        VehicleLauncher.launchVehicle(new Vehicle(name), config, trafficGraph, start, tc, destination, projectionforbackprojection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, nearView, new VehicleBuiltDelegate[]{vehicleBuiltDelegate}, vehicleLoader);
     }
 
 

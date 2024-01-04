@@ -1,21 +1,28 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.core.Color;
+import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.XmlException;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.NativeNode;
+import de.yard.threed.core.platform.NativeNodeList;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleData;
-import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.engine.util.XmlHelper;
+import de.yard.threed.traffic.config.VehicleDefinition;
+import de.yard.threed.traffic.config.XmlAirportDefinition;
+import de.yard.threed.trafficcore.config.AirportDefinition;
 import de.yard.threed.traffic.config.ConfigAttributeFilter;
+import de.yard.threed.traffic.config.ConfigHelper;
 import de.yard.threed.traffic.config.ConfigNodeList;
 import de.yard.threed.traffic.config.PoiConfig;
 import de.yard.threed.traffic.config.SceneConfig;
-import de.yard.threed.traffic.config.XmlVehicleConfig;
+import de.yard.threed.traffic.config.XmlVehicleDefinition;
 import de.yard.threed.trafficcore.model.Vehicle;
 
 import java.util.ArrayList;
@@ -27,41 +34,57 @@ import java.util.List;
  */
 public class TrafficConfig {
 
-    Log logger = Platform.getInstance().getLog(TrafficConfig.class);
-    List<NativeNode> /*27.12.21vehicles,*/ airports, scenes, pois;
-    public NativeDocument tw;
+    static Log logger = Platform.getInstance().getLog(TrafficConfig.class);
+    List<NativeNode> /*27.12.21vehicles,*/ airports, scenes/*, pois*/;
+    //public NativeDocument tw;
+    private List<NativeNode> topNodes;
 
-    public TrafficConfig(NativeDocument tw) {
-        this.tw = tw;
+    private TrafficConfig(List<NativeNode> topNodes/*NativeDocument tw*/) {
+        this.topNodes = topNodes;
+    }
+
+    public static TrafficConfig buildFromBundle(Bundle bundle, BundleResource configfile) {
+
+        if (bundle == null) {
+            logger.error("bundle is null");
+            return null;
+        }
+        //BundleData data = bundle.getResource(configfile);
+        List<NativeNode> data = readFromBundle(bundle, configfile.getPath(), configfile.getName());
+        if (data == null) {
+            return null;
+        }
+        return new TrafficConfig(data);
+    }
+
+    private static List<NativeNode> readFromBundle(Bundle bnd, ResourcePath currentPath, String configfile) {
+        String pathPrefix = "";
+        if (!currentPath.getPath().equals("")) {
+            pathPrefix = currentPath.path + "/";
+        }
+        BundleData xml = bnd.getResource(pathPrefix + configfile);
+        if (xml == null) {
+            logger.error("config not found: " + configfile + ",path=" + currentPath);
+            return null;
+        }
+        return readFromXml(bnd, currentPath, xml.getContentAsString());
     }
 
     /**
-     *
+     * currentBundle is needed for resolving relative includes, that point to the origin bundle.
      */
-    public TrafficConfig(String bundle, String configfile) {
-
-        Bundle bnd = BundleRegistry.getBundle(bundle);
-        if (bnd == null) {
-            logger.error("bundle not found:" + bundle);
-            // andere Fehlerbehdnalung?
-            return;
-        }
-        if (!bnd.contains(configfile)) {
-            logger.error("config file not found:" + configfile);
-            // andere Fehlerbehdnalung?
-            return;
-        }
-        BundleData xml = bnd.getResource(configfile);
-
-
+    private static List<NativeNode> readFromXml(Bundle currentBundle, ResourcePath currentPath, String xml) {
+        NativeDocument tw = null;
         try {
-            tw = Platform.getInstance().parseXml(xml.getContentAsString());
+            tw = Platform.getInstance().parseXml(xml);
         } catch (XmlException e) {
+            logger.error("parsing xml failed:" + e.getMessage());
             e.printStackTrace();
+            return null;
         }
         if (tw == null) {
             logger.error("parsing xml failed:" + xml);
-            return;
+            return null;
         }
 
         /*airports = XmlHelper.getChildNodeList(tw, "airports", "airport");
@@ -74,107 +97,52 @@ public class TrafficConfig {
             String type = XmlHelper.getChildValue(n, "type");
             aircrafts.put(type, new GroundServiceAircraftConfig(n));
         }*/
-    }
-
-
-    /*public static TrafficConfig readDefault() {
-        return readConfig("data-old","TrafficWorld.xml"/*"Cockpit"* /);
-    }*/
-
-    public static TrafficConfig readConfig(String bundle, String configfile) {
-        return new TrafficConfig(bundle, configfile);
-    }
-
-    /**
-     * From global aircraft list.
-     * @return
-     */
-    /*1.3.18 public AircraftConfig getAircraftConfig(String name) {
-        for (int i=0;i< aircrafts.size();i++){
-            if (name.equals(XmlHelper.getAttribute(aircrafts.get(i),"name"))){
-                return new AircraftConfig(aircrafts.get(i));
+        List<NativeNode> resultingNodeList = new ArrayList<NativeNode>();
+        //List<NativeNode> includes = XmlHelper.getChildren(tw, "include");
+        NativeNodeList nodeList = tw.getRootElement().getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            //if (includes != null){
+            //for (NativeNode include:includes) {
+            NativeNode nn = nodeList.getItem(i);
+            if (nn.getNodeName().equals("include")) {
+                String ref = nn.getTextValue();
+                // TODO resolve other bundle
+                List<NativeNode> includeNodes = readFromBundle(currentBundle, currentPath, ref);
+                if (includeNodes == null) {
+                    logger.error("include failed: " + ref);
+                    return null;
+                }
+                resultingNodeList.addAll(includeNodes);
+            } else {
+                resultingNodeList.add(nn);
             }
         }
-        return null;
-    }*/
 
-
-    /**
-     * From global vehicle list.
-     * Das ist noch mischmasch mit metadaten.
-     *
-     * @return
-     */
-
-
-    /**
-     * From current scene.
-     * @return
-     */
-   /* public int getAircraftCount() {
-        return sceneaircrafts.size();
-    }*/
-
-    /**
-     * From current scene.
-     *
-     * @return
-     */
-    /*
-
-    public SceneVehicle getSceneVehicle(int index) {
-        return new SceneVehicle(scenevehicles.get(index));
-    }*/
-
-    /**
-     * From current scene.
-     * @return
-     */
-    /*public SmartLocation getVehicleLocation(int index) {
-        //     for (int i=0;i<sceneaircrafts.size();i++){
-        //        if (sceneaircrafts.get(i).isObject().getString("name").equals(aircraftname)){
-        List<NativeNode> locations = XmlHelper.getChildren(scenevehicles.get(index), "location");
-        if (locations.size() == 0) {
-            return null;
-        }
-        NativeNode location = locations.get(0);
-        return new SmartLocation(location.getNodeValue());
-      /*      }
-        }
-        return null;* /
-    }*/
-
-    /*public String getAircraftName(int index) {
-        return XmlHelper.getAttribute(sceneaircrafts.get(index), "name");
-    }*/
-
-    /**
-     * Nicht sauber modelliert, aber flexibel.
-     *
-     * @return
-     */
-   /* public Map<String,String> getVehicleAttributes(int index) {
-        return getVehicleAttributes(scenevehicles,index);
-        
+        return resultingNodeList;
     }
 
-    public static Map<String,String> getVehicleAttributes( List<NativeNode> vehicles, int index) {
-        Map<String, String> attributes = new HashMap<String, String>();
-        attributes.put("name", XmlHelper.getAttribute(vehicles.get(index), "name"));
-        attributes.put("delayedload", XmlHelper.getAttribute(vehicles.get(index), "delayedload"));
-        List<NativeNode> locations = XmlHelper.getChildren(vehicles.get(index), "location");
-        if (locations.size() != 0) {
-            NativeNode location = locations.get(0);
-            attributes.put("location", location.getTextValue());
-        }
-        return attributes;
+
+    public List<NativeNode> getObjects() {
+        return XmlHelper.getChildren(topNodes, "object");
     }
 
-    public static SmartLocation getVehicleLocation(List<NativeNode> vehicles, int index){
-        Map<String, String> attributes = getVehicleAttributes(vehicles,index);
-        return new SmartLocation(attributes.get("location"));
-    }*/
-    public SceneConfig getScene(String scenename) {
+    public List<NativeNode> getTerrains() {
+        return XmlHelper.getChildren(topNodes, "terrain");
+    }
+
+    public List<NativeNode> getTrafficgraphs() {
+        return XmlHelper.getChildren(topNodes, "trafficgraph");
+    }
+
+    public List<NativeNode> getVehicles() {
+        return XmlHelper.getChildren(topNodes, "vehicle");
+    }
+
+    public List<NativeNode> getPois() {
+        return XmlHelper.getChildren(topNodes, "poi");
+    }
+
+    /*27.11.23 no scene" in XSD currently. public SceneConfig getScene(String scenename) {
         SceneConfig sceneconfig = null;
         if (scenes == null) {
             logger.error("no scenes");
@@ -186,16 +154,15 @@ public class TrafficConfig {
         }
         sceneconfig = new SceneConfig(scene);
         return sceneconfig;
-    }
+    }*/
 
-    public PoiConfig getPoi(String scenename) {
-        SceneConfig sceneconfig = null;
-        NativeNode scene = getNodeByName(scenename, pois);
-        if (scene == null) {
+    public PoiConfig getPoiByName(String scenename) {
+        NativeNode p = getNodeByName(scenename, getPois());
+        if (p == null) {
             //already logged
             return null;
         }
-        return new PoiConfig(scene);
+        return new PoiConfig(p);
 
     }
 
@@ -230,39 +197,41 @@ public class TrafficConfig {
 
     public /*ConfigNodeList*/List<Vehicle> getVehicleListByName(String name) {
         ConfigAttributeFilter filter = new ConfigAttributeFilter("name", name, false);
-        List<ConfigNodeList> vehiclelists = ConfigNodeList.build(tw, "vehiclelists", "vehicles", "vehicle", filter);
+        List<ConfigNodeList> vehiclelists = ConfigNodeList.build(topNodes, "vehicles", "vehicle", filter);
         if (vehiclelists.size() == 0) {
             return null;
         }
-        //28.10.21 Entkoppeln von XML
+        //28.10.21 Prefer model
         ConfigNodeList cnl = vehiclelists.get(0);
         List<Vehicle> vl = new ArrayList<Vehicle>();
         for (int i = 0; i < cnl.size(); i++) {
             vl.add(new Vehicle(cnl.get(i).getName(),
-                    XmlHelper.getBooleanAttribute(cnl.get(i).nativeNode, XmlVehicleConfig.DELAYEDLOAD, false),
-                    XmlHelper.getBooleanAttribute(cnl.get(i).nativeNode, XmlVehicleConfig.AUTOMOVE, false),
-                    XmlHelper.getStringAttribute(cnl.get(i).nativeNode, XmlVehicleConfig.LOCATION)));
+                    XmlHelper.getBooleanAttribute(cnl.get(i).nativeNode, XmlVehicleDefinition.DELAYEDLOAD, false),
+                    XmlHelper.getBooleanAttribute(cnl.get(i).nativeNode, XmlVehicleDefinition.AUTOMOVE, false),
+                    XmlHelper.getStringAttribute(cnl.get(i).nativeNode, XmlVehicleDefinition.LOCATION),
+                    XmlHelper.getIntAttribute(cnl.get(i).nativeNode, XmlVehicleDefinition.INITIALCOUNT, 0)));
         }
         return vl;
     }
 
+    /**30.11.23 no longer exists this way?
     public ConfigNodeList getLocationListByName(String name) {
         ConfigAttributeFilter filter = new ConfigAttributeFilter("name", name, false);
-        List<ConfigNodeList> locationlists = ConfigNodeList.build(tw, "locationlists", "locations", "location", filter);
+        List<ConfigNodeList> locationlists = ConfigNodeList.build(topNodes, /*"locationlists", * /"locations", "location", filter);
         if (locationlists.size() == 0) {
             return null;
         }
         return locationlists.get(0);
-    }
+    }*/
 
 
     public List<NativeNode> getViewpoints() {
-        List<NativeNode> xmlVPs = XmlHelper.getChildren(tw, "viewpoint");
+        List<NativeNode> xmlVPs = XmlHelper.getChildren(topNodes, "viewpoint");
         return xmlVPs;
     }
 
     public LightDefinition[] getLights() {
-        List<NativeNode> xmlLights = XmlHelper.getChildren(tw, "light");
+        List<NativeNode> xmlLights = XmlHelper.getChildren(topNodes, "light");
 
         LightDefinition[] lds = null;
         if (xmlLights.size() > 0) {
@@ -281,4 +250,72 @@ public class TrafficConfig {
         }
         return lds;
     }
+
+    /*??public List<XmlVehicleConfig> getVehicleDefinitions() {
+        return ConfigHelper.getVehicleDefinitions(tw);
+    }*/
+
+    /*27.11.23:what is this? Is is needed?public int getVehicleCount() {
+        List<NativeNode> vehicles = XmlHelper.getChildNodeList(topNodes, "vehicles", "vehicle");
+        return vehicles.size();
+    }*/
+
+    public int getVehicleDefinitionCount() {
+        List<NativeNode> vehicles = XmlHelper.getChildren(topNodes, "vehicledefinition");
+
+        return vehicles.size();
+    }
+
+    public VehicleDefinition getVehicleDefinition(int index) {
+        List<NativeNode> vehicles = XmlHelper.getChildren(topNodes, "vehicledefinition");
+
+        return new XmlVehicleDefinition(vehicles.get(index));
+    }
+
+
+    public List<AirportDefinition> findAirportDefinitionsByIcao(String icao) {
+        List<NativeNode> result = XmlHelper.filter(getAirportDefinitions(topNodes),
+                n -> icao.equals(XmlHelper.getStringAttribute(n, "icao")));
+        return convertAirportDefinitions(result);
+    }
+
+    public LocalTransform getBaseTransformForVehicleOnGraph() {
+        List<NativeNode> d = XmlHelper.getChildren(topNodes, "BaseTransformForVehicleOnGraph");
+        if (d.size() > 0) {
+            return ConfigHelper.getTransform(d.get(0));
+        }
+        return null;
+    }
+
+    public List<NativeNode> getVehicleDefinitions() {
+        return XmlHelper.getChildren(topNodes, "vehicledefinition");
+    }
+
+    public List<VehicleDefinition> findVehicleDefinitionsByName(String name) {
+        List<NativeNode> result = XmlHelper.filter(getVehicleDefinitions(topNodes),
+                n -> name.equals(XmlHelper.getStringAttribute(n, "name")));
+        return XmlVehicleDefinition.convertVehicleDefinitions(result);
+    }
+
+    /**
+     * For internal use only.
+     */
+    private static List<NativeNode> getVehicleDefinitions(List<NativeNode> topNodes) {
+        List<NativeNode> vehicleDefinitions = XmlHelper.getChildren(topNodes, "vehicledefinition");
+        return vehicleDefinitions;
+    }
+
+    private static List<NativeNode> getAirportDefinitions(List<NativeNode> topNodes) {
+        return XmlHelper.getChildren(topNodes, "airportdefinition");
+    }
+
+
+    private static List<AirportDefinition> convertAirportDefinitions(List<NativeNode> vehicleDefinitions) {
+        List<AirportDefinition> result = new ArrayList<AirportDefinition>();
+        for (int i = 0; i < vehicleDefinitions.size(); i++) {
+            result.add(new XmlAirportDefinition(vehicleDefinitions.get(i)));
+        }
+        return result;
+    }
+
 }

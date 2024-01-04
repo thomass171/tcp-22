@@ -2,6 +2,7 @@ package de.yard.threed.platform.webgl;
 
 import com.google.gwt.xml.client.Document;
 import de.yard.threed.core.platform.NativeDocument;
+import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.NativeNodeList;
 
 /**
@@ -20,5 +21,10 @@ public class GwtDocument extends GwtElement implements NativeDocument{
         return new GwtNodeList(doc.getElementsByTagName(name));
     }
 
-   
+    @Override
+    public NativeNode getRootElement() {
+        return new GwtNode(doc.getDocumentElement());
+    }
+
+
 }

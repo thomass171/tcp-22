@@ -1,19 +1,17 @@
 package de.yard.threed.traffic.config;
 
 import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.platform.NativeNode;
-import de.yard.threed.engine.util.XmlHelper;
+import de.yard.threed.core.Vector3;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Konfiguration eines Vehicle. Wird im Moment aus XML gelesen.
+ * Konfiguration eines Vehicle. Currently only for XML.
  * 24.4.18: Soll wirklich nur ein Datencontainer ohne grosse Logik sein, weil es Attribut im VehicleComponent ist.
  * 29.10.21:Jetzt das interface dazu zur Abstraktion..
+ * renamed from VehicleConfig to VehicleDefinition to better meet naming convetions.
  */
-public interface VehicleConfig  {
+public interface VehicleDefinition {
 
 
 
@@ -65,4 +63,14 @@ public interface VehicleConfig  {
     public double getTurnRadius() ;
 
     public String getLowresFile();
+
+    Float getWingspread();
+
+    Vector3 getWingPassingPoint();
+
+    Vector3 getLeftWingApproachPoint();
+
+    Vector3 getCateringDoorPosition();
+
+    Vector3 getRearPoint();
 }

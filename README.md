@@ -321,3 +321,23 @@ check whether they know how to load a bundle. The first resolver wins.
 
 Alternatively, a bundle can be loaded with a full qualified name ('bundle@location'), which
 doesn't need a resolver.
+
+Additionally a bundle can be loaded by a HTTP URL. The path must point to
+a directory where a file directory.txt must exist, eg.:
+
+```
+https://yard.de/bundlepool/fgdatabasicmodel
+```
+The bundle name will be derived from the last segment of the URL.
+
+## Async Operations
+These occur when blocking operations (network IO) use a callback. Multithreading
+related asyncs are not considered as MT isn't used at all. Game engines
+do not like MT.
+
+Some of the async operations are capsuled inside the platform, eg. loading
+a texture. These are not of further interest to the app.
+
+Other async operations that are of interest to the app (like bundle loading) are capsuled
+in AbstractSceneRunner, that cares for a consistent program flow 
+by executing all pending callbacks while preparing a frame.

@@ -56,10 +56,12 @@ public class MazeMovingAndStateSystemTest {
         wireMockServer.start();
 
         EcsTestHelper.setup(() -> {
-            MazeTheme st = MazeTheme.buildFromIdentifier(THEME_TRADITIONAL);
-            SystemManager.addSystem(new MazeMovingAndStateSystem(st));
+                    MazeTheme st = MazeTheme.buildFromIdentifier(THEME_TRADITIONAL);
+                    SystemManager.addSystem(new MazeMovingAndStateSystem(st));
 
-        }, "engine", "maze");
+                },
+                // 2.1.24: "data" added. Strange, why wasn't it a problem before? Maybe it was but not revealed.
+                "engine", "maze", "data");
 
         sceneRunner = (SceneRunnerForTesting) AbstractSceneRunner.instance;
         mazeMovingAndStateSystem = (MazeMovingAndStateSystem) SystemManager.findSystem(MazeMovingAndStateSystem.TAG);
@@ -105,7 +107,7 @@ public class MazeMovingAndStateSystemTest {
         // shows wiremock log message 'url does not match'
         String url = "http://localhost:" + wireMockServer.port() + "/mazes/99";
 
-        MazeDataProvider.init(url,null);
+        MazeDataProvider.init(url, null);
 
         sceneRunner.runLimitedFrames(10, 0.1, 100);
     }
@@ -128,7 +130,7 @@ public class MazeMovingAndStateSystemTest {
         MoverComponent mc = MoverComponent.getMoverComponent(userEntity);
         assertNotNull(mc);
         // should be on start position
-        TestUtils.assertPoint(new Point(6,1), mc.getLocation());
+        TestUtils.assertPoint(new Point(6, 1), mc.getLocation());
         // but has no scenenode yet (not yet assembled)
         assertNull(userEntity.getSceneNode());
         assertNull(mc.getMovable());

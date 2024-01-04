@@ -11,6 +11,8 @@ import java.util.List;
  * a string if the encoding is known.
  * "response" will be null in case of network error (ie. no network connection and thus no response)
  * So the status here is the HTTP code returned or -1 if no response was received (any kind of exception).
+ *
+ * 11.12.23: No longer limited to HTTP, so should be renamed some time. Hmm, but header? lets see.
  */
 public class AsyncHttpResponse {
     int status;

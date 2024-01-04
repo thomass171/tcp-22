@@ -12,9 +12,8 @@ import de.yard.threed.engine.platform.common.AsyncHelper;
 import de.yard.threed.javacommon.DefaultResourceReader;
 import de.yard.threed.javacommon.JALog;
 import de.yard.threed.javacommon.SimpleHeadlessPlatform;
-import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.outofbrowser.SimpleBundleResolver;
-import de.yard.threed.outofbrowser.SyncBundleLoader;
+
 
 /**
  * 19.10.23
@@ -36,8 +35,7 @@ public class AdvancedHeadlessPlatform extends SimpleHeadlessPlatform {
         PlatformInternals platformInternals = new PlatformInternals();
         DefaultResourceReader resourceReader = new DefaultResourceReader();
         instance.bundleResolver.add(new SimpleBundleResolver(shpInstance.hostdir + "/bundles", resourceReader));
-        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
-        instance.bundleLoader = new AsyncBundleLoader(resourceReader);
+        instance.bundleResolver.addAll(SimpleBundleResolver.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
 
         logger.info("AdvancedHeadlessPlatform created");
         return platformInternals;

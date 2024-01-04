@@ -2,7 +2,6 @@ package de.yard.threed.traffic;
 
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ViewPoint;
@@ -18,6 +17,7 @@ import de.yard.threed.graph.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Payload;
+import de.yard.threed.trafficcore.config.LocatedVehicle;
 import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
 
@@ -72,7 +72,7 @@ public class TrafficHelper {
             //for (GroundServiceVehicleConfig c : config.vehicles) {
             Vehicle/*ConfigNode*/ vehicle = vehiclelist.get(i);
             //29.10.21 VehicleConfig vconfig = tw.getVehicleConfig(vehicle.getName());
-            VehicleConfig vconfig = getVehicleConfigByDataprovider(vehicle.getName());
+            VehicleDefinition vconfig = getVehicleConfigByDataprovider(vehicle.getName(), null);
             if (vconfig == null) {
                 logger.warn("Vehicle not found:" + vehicle.getName());
                 return;
@@ -118,9 +118,9 @@ public class TrafficHelper {
         /*27.12.21groundnet if (groundnet != null) {*/
         if (trafficContext != null) {
             for (int i = 0; i < /*27.12.21airport*/trafficContext.getVehicleCount(); i++) {
-                SceneVehicle vconf = /*27.12.21airport*/trafficContext.getVehicle(i);
-                VehicleConfig config = null;// 27.12.21 tw.getVehicleConfig(vconf.getName());
-                config = getVehicleConfigByDataprovider(vconf.getName());
+                LocatedVehicle vconf = /*27.12.21airport*/trafficContext.getVehicle(i);
+                VehicleDefinition config = null;// 27.12.21 tw.getVehicleConfig(vconf.getName());
+                config = getVehicleConfigByDataprovider(vconf.getName(), null);
                 SmartLocation location = vconf.getLocation();
                 //buildArrivedAircraft(config, gsw.groundnet.getParkPos(location.getParkPos()));
                 //VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()),config, groundnet.groundnetgraph, groundnet.getParkingPosition(groundnet.getParkPos(location.getParkPos())), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, null, vehicleLoader);
@@ -163,14 +163,17 @@ public class TrafficHelper {
         return StringUtils.startsWith(tilename, "E") && StringUtils.length(tilename) == 4;
     }
 
-    public static VehicleConfig getVehicleConfigByDataprovider(String vehicleName) {
+    /**
+     * 24.11.23: Parameter 'type' added. 'name' is optional now.
+     */
+    public static VehicleDefinition getVehicleConfigByDataprovider(String vehicleName, String type) {
         DataProvider vehicleConfigDataProvider = SystemManager.getDataProvider("vehicleconfig");
         if (vehicleConfigDataProvider == null) {
             logger.warn("no vehicleConfigDataProvider");
             return null;
         }
 
-        VehicleConfig vehicleConfig = (VehicleConfig) vehicleConfigDataProvider.getData(new String[]{vehicleName});
+        VehicleDefinition vehicleConfig = (VehicleDefinition) vehicleConfigDataProvider.getData(new String[]{vehicleName, type});
         return vehicleConfig;
     }
 
@@ -200,7 +203,7 @@ public class TrafficHelper {
         return rbcp;
     }
 
-    public static EntityBuilder getVehicleEntityBuilderByService(VehicleConfig config) {
+    public static EntityBuilder getVehicleEntityBuilderByService(VehicleDefinition config) {
         EcsService p = SystemManager.getService("vehicleentitybuilder");
         if (p == null) {
             logger.warn("no vehicleentitybuilder");
@@ -210,11 +213,11 @@ public class TrafficHelper {
         return entityBuilder;
     }
 
-    public static boolean isAircraft(VehicleConfig config) {
+    public static boolean isAircraft(VehicleDefinition config) {
         return config.getType().equals(VehicleComponent.VEHICLE_AIRCRAFT);
     }
 
-    public static boolean isRailer(VehicleConfig config) {
+    public static boolean isRailer(VehicleDefinition config) {
         return config.getType().equals(VehicleComponent.VEHICLE_RAILER);
     }
 

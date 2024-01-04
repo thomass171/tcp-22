@@ -2,6 +2,7 @@ package de.yard.threed.javacommon;
 
 
 import de.yard.threed.core.platform.NativeDocument;
+import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.NativeNodeList;
 import org.w3c.dom.Document;
 
@@ -19,5 +20,10 @@ public class JavaXmlDocument extends JavaXmlElement/*Node*/ implements NativeDoc
     @Override
     public NativeNodeList getElementsByTagName(String name) {
         return new JavaXmlNodeList(doc.getElementsByTagName(name));
+    }
+
+    @Override
+    public NativeNode getRootElement() {
+        return new JavaXmlNode(doc.getDocumentElement());
     }
 }

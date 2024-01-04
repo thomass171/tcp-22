@@ -12,6 +12,7 @@ import de.yard.threed.core.platform.NativeMaterial;
 import de.yard.threed.core.platform.NativeMesh;
 
 import de.yard.threed.core.platform.NativeSceneNode;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.javacommon.JALog;
 
 import java.util.HashMap;
@@ -78,7 +79,7 @@ public class JmeMesh /*15.6.16 extends JmeObject3D*/ implements NativeMesh {
         if (isLine){
             mesh.setMode(Mesh.Mode.Lines);
         }
-        Geometry geom = new Geometry(JmeScene.getInstance().getUniqueName(), mesh);
+        Geometry geom = new Geometry(((PlatformJme) Platform.getInstance()).getUniqueName(), mesh);
         geom.setMaterial(mat.material);
         if (castShadow) {
             if (receiveShadow) {

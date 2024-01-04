@@ -15,7 +15,9 @@ import de.yard.threed.engine.World;
 import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
+import de.yard.threed.engine.platform.common.InitExecutor;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import static de.yard.threed.javanative.JavaUtil.sleepMs;
 
@@ -24,6 +26,7 @@ import static de.yard.threed.javanative.JavaUtil.sleepMs;
  * is not available here. And SimpleHeadless has no scene runner.
  * Anyway, its somehow weird because logically its a copy of runner like JME and webgl.
  */
+@Slf4j
 public class SceneRunnerForTesting extends AbstractSceneRunner {
     //private HomeBrewRenderer renderer;
 
@@ -61,11 +64,11 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
 
         initAbstract(null/*JmeScene.getInstance(), rm*/, scene);
 
-        World world = new World();
+        /*29.12.23 World world = new World();
         //((EngineHelper) PlatformJme.getInstance()).setWorld(new World());
 
         //10.7.21: Camera geht erst, wenn world in der Scene ist
-        Scene.world = world;
+        Scene.setWorld(world);*/
 
         // 20.11.21 even though testing is quite headless, a (dummy) camera is helpful for testing, eg. Observer.
         NativeCamera camera = Platform.getInstance().buildPerspectiveCamera(45, 800 / 600, 0.1, 1000);
@@ -75,25 +78,27 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         }
 
         Platform pl = Platform.getInstance();
-        scene.setSceneAndCamera(pl.getScene()/*AbstractSceneRunner.getInstance().scene*/, world);
+        scene.setSceneAndCamera(pl.getScene()/*AbstractSceneRunner.getInstance().scene*/, scene.getWorld());
 
         // 13.4.17: Die Bundle laden. Ausnahmesweise synchron wegen Test. Doof vor allem bei Einzeltests weil es so lange braucht.
         if (bundlelist != null) {
-            for (String bundlename : bundlelist) {
-                EngineTestFactory.loadBundleSync(bundlename);
-            }
+            /*15.12.23 for (String bundlename : bundlelist) {
+                //EngineTestFactory.loadBundleSync(bundlename);
+            }*/
+            //16.12.23 preLoad(bundlelist);
+            enterInitChain(bundlelist);
         }
 
         // 10.4.21: MannMannMann: das ist hier jetzt so reingefriemelt.
-        TestHelper.cleanupAsync();
+        //18.12.23 no longer. If this is really needed this way, it should be an other location. TestHelper.cleanupAsync();
 
         // For better analyzing use a more verbose system tracker for now
         SystemManager.setSystemTracker(systemTracker);
 
         //27.3.20 dann doch vorher auch den Sceneinit fuer ein paar Systems
-        initScene();
+        //18.12.23initScene();
         // 9.1.17: Der Vollstaendigkeithalber auch der postinit
-        postInit();
+        //18.12.23postInit();
     }
 
     /**
@@ -114,7 +119,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
             try {
                 scene = (Scene) Class.forName(configuration.getString("scene")).newInstance();
             } catch (Exception e) {
-                //TODO log
+                log.error("Scene not found",e);
             }
         }
         instance = new SceneRunnerForTesting(pl, sceneIinitMethod, bundlelist, scene);
@@ -181,5 +186,19 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
 
     public LoggingSystemTracker getSystemTracker() {
         return systemTracker;
+    }
+
+    @Override
+    public void startRenderLoop() {
+        // nothing to do here. Just fall back to caller.
+    }
+
+    @Override
+    public void sleepMs(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -5,6 +5,7 @@ import de.yard.threed.core.NumericValue;
 import de.yard.threed.core.platform.NativeTexture;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.URL;
 
 import java.util.HashMap;
 
@@ -35,12 +36,17 @@ public class TexturePool {
      * <p>
      * TODO texturepool ueber bundle.
      * 27.7.21: Ohne so einen Pool ist memory usage viel zu gross. In backyard gibts sowas auch noch.
-     *
+     * 2.1.24: Returns (and ever did) null when the texture couldn't be created.
      * @return
      */
     public NativeTexture loadTexture(BundleResource name, HashMap<NumericType, NumericValue> parameters) {
         if (loadedtexture.get(name.getName()) == null) {
-            NativeTexture nt = Platform.getInstance().buildNativeTexture(name, parameters);
+            URL url = URL.fromBundleResource(name);
+            if (url == null) {
+                Platform.getInstance().getLog(TexturePool.class).error("no URL");
+                return null;
+            }
+            NativeTexture nt = Platform.getInstance().buildNativeTexture(url, parameters);
             if (nt == null) {
                 //statistics.texturefailures++;
                 return null;

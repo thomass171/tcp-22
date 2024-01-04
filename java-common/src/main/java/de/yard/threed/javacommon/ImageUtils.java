@@ -2,6 +2,7 @@ package de.yard.threed.javacommon;
 
 import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.resource.NativeResource;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -69,7 +70,28 @@ public class ImageUtils {
      *
      * @return
      */
-    public int loadAndCacheImage() {
-        return 0;
+    public static BufferedImage loadAndCacheImage(NativeResource textureresource) {
+        // AwtLoader/ImageIO is slow.
+        // 16.10.18: jpg is also slow, but caching it bloats the cache tremendously. So only use cache for 'png'.
+        // 26.8.23: Try again jpg.
+        BufferedImage li;
+        if (textureresource.getName().toUpperCase().endsWith(".PNG") || textureresource.getName().toUpperCase().endsWith(".JPG")) {
+            // optionally use cache
+            li = ImageUtil.loadCachableImage(textureresource);
+            if (li == null) {
+                return null;
+            }
+
+        } else {
+            li = ImageUtil.loadImageFromFile(textureresource);
+            //try {
+            //     tex = buildFromInputStream(FileReader.getInputStream(FileReader.getFileStream(textureresource)));
+            // } catch (IOException e) {
+            //2.10.19: Kein Stacktrace, kann bei rgb Textures (bluebird) schon mal sein.
+            //    logger.error("IO Exception", e/*+ e.getMessage()/*2.10.19, e*/);
+            return null;
+            // }
+        }
+        return li;
     }
 }

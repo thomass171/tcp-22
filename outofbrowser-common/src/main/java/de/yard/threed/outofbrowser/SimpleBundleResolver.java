@@ -1,8 +1,12 @@
 package de.yard.threed.outofbrowser;
 
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.ResourcePath;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleBundleResolver extends BundleResolver {
 
@@ -24,5 +28,17 @@ public class SimpleBundleResolver extends BundleResolver {
             return new ResourcePath(basedir);
         }
         return null;
+    }
+
+    public static List<BundleResolver> buildFromPath(String bundlepathFromEnv, NativeResourceReader resourceReader) {
+        List<BundleResolver> l = new ArrayList<BundleResolver>();
+
+        if (bundlepathFromEnv != null) {
+            String[] parts = StringUtils.split(bundlepathFromEnv, ":");
+            for (int i = 0; i < parts.length; i++) {
+                l.add(new SimpleBundleResolver(parts[i], resourceReader));
+            }
+        }
+        return l;
     }
 }

@@ -5,7 +5,6 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
-import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
@@ -22,7 +21,8 @@ import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.traffic.config.ConfigNode;
 import de.yard.threed.traffic.config.ConfigNodeList;
 import de.yard.threed.traffic.config.SceneConfig;
-import de.yard.threed.traffic.config.VehicleConfig;
+import de.yard.threed.traffic.config.VehicleConfigDataProvider;
+import de.yard.threed.traffic.config.VehicleDefinition;
 
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.util.NearView;
@@ -31,6 +31,7 @@ import de.yard.threed.engine.util.NearView;
 import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,8 +92,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     public static VehicleBuiltDelegate genericVehicleBuiltDelegate = null;
     // 19.11.23 ugly workaround for testing until we have requests in eventqueue
     public int vehiclesLoaded = 0;
-    @Deprecated
-    public static SceneConfig sceneConfig;
+    //27.11.23 public static SceneConfig sceneConfig;
     @Deprecated
     public static LocalTransform baseTransformForVehicleOnGraph;
 
@@ -110,10 +110,14 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
      * 31.10.23: After moving processing of TRAFFIC_REQUEST_LOADVEHICLE from BasicTravelScene to here,
      * data is missing. These are the fields formerly in BasicTravelScene with null values.
      */
-    public ConfigNodeList locationList;
+    public /*4.12.23ConfigNodeList*/List<SmartLocation> locationList;
     public TrafficGraph groundNet;
     public SceneNode destinationNode;
     public NearView nearView;
+
+    // 27.11.23: Knows vehicle already, should also no vehicle definitions and provide these. static for now, but
+    // should be per event.
+    public static List<VehicleDefinition> knownVehicles=new ArrayList<VehicleDefinition>();
 
     /**
      * weil er neue Pfade im Graph hinzufuegt, lauscht er auch auf GRAPH_EVENT_PATHCOMPLETED, um diese wieder aus dem
@@ -152,6 +156,9 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     @Override
     public void init() {
         SystemManager.putDataProvider("trafficgraph", this);
+
+        //27.11.23: Knows defs and should provide these
+        SystemManager.putDataProvider("vehicleconfig", new VehicleConfigDataProvider(knownVehicles));
     }
 
     @Override
@@ -311,9 +318,9 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 // 26.3.20 Was ware denn die naechste Location? Das ist ja jetzt alles EDDK lastig. TODO
                 String icao = "EDDK";
                 //27.12.21  DefaultTrafficWorld.getInstance().getConfiguration().getLocationListByName(icao).get(nextlocationindex);
-                ConfigNode location = locationList/*getLocationList()*/.get(nextlocationindex);
-                ;
-                smartLocation = new SmartLocation(icao, XmlHelper.getStringValue(location.nativeNode));
+                /*4.12.23 ConfigNode location = locationList/*getLocationList()* /.get(nextlocationindex);
+                smartLocation = new SmartLocation(icao, XmlHelper.getStringValue(location.nativeNode));*/
+                smartLocation = locationList.get(nextlocationindex);
 
                 // 27.21.21 das ist jetzt schwierig zu pruefen. Es ist auch unklar, ob es wirklich noch noetig ist. Mal weglassen.
                 /*if (DefaultTrafficWorld.getInstance().getGroundNetGraph(icao) == null) {
@@ -358,10 +365,10 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             //lauch c172p (or 777)
             //TrafficSystem.loadVehicles(tw, avataraircraftindex);
 
-            VehicleConfig config = TrafficHelper.getVehicleConfigByDataprovider(name);// tw.getVehicleConfig(name);
+            VehicleDefinition config = TrafficHelper.getVehicleConfigByDataprovider(name, null);// tw.getVehicleConfig(name);
             EcsEntity avatar = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
             VehicleLauncher.lauchVehicleByName(groundNet/*getGroundNet()*/, config, name, smartLocation, TeleportComponent.getTeleportComponent(avatar),
-                    destinationNode/*getDestinationNode()*/, sphereProjections.backProjection, sceneConfig, nearView, TrafficSystem.genericVehicleBuiltDelegate,
+                    destinationNode/*getDestinationNode()*/, sphereProjections.backProjection, baseTransformForVehicleOnGraph, nearView, TrafficSystem.genericVehicleBuiltDelegate,
                     vehicleLoader/*getVehicleLoader()*/);
             //aus flight: GroundServicesScene.lauchVehicleByIndex(gsw.groundnet, tw, 2, TeleportComponent.getTeleportComponent(avatar.avatarE), world, gsw.groundnet.projection);
 
@@ -403,7 +410,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             //if (evt.getType().equals(EventRegistry.TRAFFIC_EVENT_VEHICLELOADED)) {
 
             EcsEntity vehicleEntity = (EcsEntity) evt.getPayloadByIndex(0);
-            VehicleConfig config = (VehicleConfig) evt.getPayloadByIndex(2);
+            VehicleDefinition config = (VehicleDefinition) evt.getPayloadByIndex(2);
             SceneNode teleportParentNode = (SceneNode) evt.getPayloadByIndex(3);
             NearView nearView = (NearView) evt.getPayloadByIndex(4);
 
@@ -491,7 +498,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         this.vehicleLoader = vehicleLoader;
     }
 
-    private static void attachAllAvatarsToNewVehicle(EcsEntity vehicleEntity, VehicleConfig config, SceneNode teleportParentNode, NearView nearView) {
+    private static void attachAllAvatarsToNewVehicle(EcsEntity vehicleEntity, VehicleDefinition config, SceneNode teleportParentNode, NearView nearView) {
 
         logger.debug("attaching all existing avatars to new vehicle");
 
@@ -508,11 +515,10 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     /**
      * MA31: Moved here from AvatarSystem
      */
-    public static void attachAvatarToVehicle(EcsEntity avatar, EcsEntity vehicleEntity, VehicleConfig config, SceneNode teleportParentNode, NearView nearView) {
+    public static void attachAvatarToVehicle(EcsEntity avatar, EcsEntity vehicleEntity, VehicleDefinition config, SceneNode teleportParentNode, NearView nearView) {
         // 24.11.20: aus VehicleHelper.launchVehicle()
 
         TeleportComponent avatarpc = TeleportComponent.getTeleportComponent(avatar);
-        logger.debug("Adding teleport locations to avatar for vehicle " + vehicleEntity.getName());
 
         // die Viewpoints zum Avatar teleport ergaenzen. Obacht, dass das nicht schon im launchVehicle gemacht wurde!
         // die alten müssen nicht hier gelöscht werden, sondern erst bei Löschen des Vehicle. Die Locations für dieses Vehicle kommen
@@ -523,6 +529,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         //denn Avatra hat hier ja nun mal eine andere Defaultorientierung.
         //pc.addPosition("Captain", currentaircraft, new PosRot(aircraft.getPilotPosition(), aircraft.orientation));
         Map<String, LocalTransform> viewpoints = config.getViewpoints();
+        logger.debug("Adding " + viewpoints.size() + " teleport locations to avatar for vehicle " + vehicleEntity.getName());
         for (String key : viewpoints.keySet()) {
             //24.10.19: Der Parameter hier war immer schon die base node, also die ohne offset.
             avatarpc.addPosition(key, teleportParentNode.getTransform(), new LocalTransform(viewpoints.get(key).position, viewpoints.get(key).rotation), vehicleEntity.getName(), nearView);
@@ -554,7 +561,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             if (vc == null) {
                 logger.warn("vehicle without VehicleComponent?");
             } else {
-                VehicleConfig config = vc.config;
+                VehicleDefinition config = vc.config;
 
                 TrafficSystem.attachAvatarToVehicle(avatar, vehicle, config, vc.teleportParentNode, nearView);
             }
@@ -639,12 +646,12 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
         logger.debug("loadTileGraphByConfigFile");
 
-        TrafficConfig xmlConfig = Tile.loadConfigFile(tile);
+        TrafficConfig xmlConfig = Tile.loadConfigFile(BundleRegistry.getBundle(tile.bundlename), tile);
         if (xmlConfig == null) {
             //already logged
             return;
         }
-        List<NativeNode> xmlGraphs = XmlHelper.getChildren(xmlConfig.tw, "trafficgraph");
+        List<NativeNode> xmlGraphs = xmlConfig.getTrafficgraphs();
         logger.debug("" + xmlGraphs.size() + " xml graphs found");
         for (NativeNode nn : xmlGraphs) {
             String graphfile = XmlHelper.getStringAttribute(nn, "graphfile", null);

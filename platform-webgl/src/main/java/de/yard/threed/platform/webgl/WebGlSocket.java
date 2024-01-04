@@ -58,6 +58,7 @@ public class WebGlSocket implements NativeSocket {
 //        Util.notyet();
     }
 
+    @Override
     public boolean isPending() {
         logger.debug("isPending:state= " + state);
         return state < STATE_OPEN;

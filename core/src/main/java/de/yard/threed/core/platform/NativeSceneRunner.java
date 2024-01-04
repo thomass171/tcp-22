@@ -13,6 +13,9 @@ package de.yard.threed.core.platform;
 public interface NativeSceneRunner {
    // needed/useful? public void runScene(NativeScene scene);
 
+   /**
+    * Executes delegate when future is complete.
+    */
    <T,D> void addFuture  (NativeFuture<T> future, AsyncJobDelegate<D> asyncJobDelegate);
   
 }

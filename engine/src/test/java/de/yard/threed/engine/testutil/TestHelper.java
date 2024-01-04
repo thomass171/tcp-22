@@ -65,9 +65,17 @@ public class TestHelper {
      * Das, was sonst im Runnerhelper laeuft.
      */
     public static void processAsync() {
+        /*13.12.23 not sure whether still needed. But AsyncHelper should trigger BundleLoadDelegate
         AsyncHelper.processAsync(AbstractSceneRunner.getInstance().getBundleLoader());
         List<Pair<BundleLoadDelegate, Bundle>> loadresult = Platform.getInstance().bundleLoader.processAsync();
-        AbstractSceneRunner.getInstance().processDelegates(loadresult);
+        AbstractSceneRunner.getInstance().processDelegates(loadresult);*/
+        AbstractSceneRunner.getInstance().processDelegates();
+
+        // trigger BundleLoadDelegate.
+        AsyncHelper.processAsync();
+        // 15.12.23 Those extracted from AsyncHelper
+        AbstractSceneRunner.getInstance().processFutures();
+        AbstractSceneRunner.getInstance().processInvokeLaters();
     }
 
     /**

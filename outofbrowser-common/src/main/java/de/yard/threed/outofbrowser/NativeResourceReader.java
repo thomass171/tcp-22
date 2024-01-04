@@ -17,9 +17,11 @@ import de.yard.threed.core.resource.ResourceNotFoundException;
  * höherern Abstraktionsebene arbeitet. Also: ContentProvider verwendet ResourceManager.
  * 
  * 09.04.2017: Bundlekonzept soll Einzeldateien ablösen.
- *
+ * 11.12.2023: Has the option to decouple bundle loading from platform. Bundle loader can use this. But only async!
+ * So set to deprecated in favor of NativeResourceLoader.
  * Date: 05.08.21
  */
+@Deprecated
 public abstract class NativeResourceReader {
 
     /**

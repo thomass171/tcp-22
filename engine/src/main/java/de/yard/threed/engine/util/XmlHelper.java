@@ -67,6 +67,17 @@ public class XmlHelper {
         return children;
     }
 
+    public static List<NativeNode> getChildren(List<NativeNode> nodeList, String tag) {
+        List<NativeNode> children = new ArrayList<NativeNode>();
+        for (int i = 0; i < nodeList.size(); i++) {
+            NativeNode item = nodeList.get(i);
+            if (tag.equals(item.getNodeName())) {
+                children.add(item);
+            }
+        }
+        return children;
+    }
+
     public static List<NativeNode> getChildNodeList(NativeNode node, String maintag, String subtag) {
         List<NativeNode> mainlist = XmlHelper.getChildren(node, maintag);
         if (mainlist.size() == 0) {
@@ -115,6 +126,14 @@ public class XmlHelper {
         return Util.parseFloat(s);
     }
 
+    public static Boolean getBooleanValue(NativeNode nativeNode) {
+        String s = nativeNode.getTextValue();
+        if (s == null) {
+            return null;
+        }
+        return Util.parseBoolean(s);
+    }
+
     public static String getStringValue(NativeNode nativeNode) {
         return nativeNode.getTextValue();
     }
@@ -136,5 +155,15 @@ public class XmlHelper {
         return new Vector3(Util.parseFloat(p[0]), Util.parseFloat(p[1]), Util.parseFloat(p[2]));
     }
 
+    public static List<NativeNode> filter(List<NativeNode>  nodes, XmlFilter filter) {
+        List<NativeNode> result = new ArrayList<NativeNode>();
+        for (int i = 0; i < nodes.size(); i++) {
+            NativeNode n = nodes.get(i);
+            if (filter.matches(n)) {
+                result.add(n);
+            }
+        }
+        return result;
+    }
 
 }

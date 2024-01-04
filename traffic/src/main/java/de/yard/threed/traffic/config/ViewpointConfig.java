@@ -11,6 +11,7 @@ import de.yard.threed.engine.util.XmlHelper;
  * eine Description hat. Viewpoiont als "Captain" am Vehicle ist zwar nicht über geocoord definierbar, aber trotzdem.
  * Tja, oder?
  * 2.12.21:Deprecaated, weil ich keine XML Modelklassen mehr verwenden moechte.
+ * 28.11.23: We also have class Viewpoint, but without 'icao'.
  */
 @Deprecated
 public class ViewpointConfig extends ConfigNode {

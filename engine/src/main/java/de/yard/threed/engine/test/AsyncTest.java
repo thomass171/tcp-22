@@ -37,7 +37,7 @@ public class AsyncTest {
         BundleRegistry.unregister(BUNDLECORRUPTED);
         RuntimeTestUtil.assertNull("", BundleRegistry.getBundle(BUNDLECORRUPTED));
         AbstractSceneRunner.instance.loadBundle(BUNDLECORRUPTED, (r) -> {
-            logger.debug("bundle load completed");
+            logger.debug("bundle " + BUNDLECORRUPTED + " load completed");
 
             Bundle cb = BundleRegistry.getBundle(BUNDLECORRUPTED);
             RuntimeTestUtil.assertNotNull("", cb);
@@ -51,12 +51,13 @@ public class AsyncTest {
             RuntimeTestUtil.assertTrue("exists", cb.exists(readme));
             BundleResource controllight = new BundleResource(cb, "ControlLight.gltf");
             RuntimeTestUtil.assertFalse("failure", cb.failed(controllight));
-            RuntimeTestUtil.assertFalse("contains", cb.contains(controllight));
+            // 15.12.23: After removing 'delayed' three value changed
+            RuntimeTestUtil.assertTrue/*False*/("contains", cb.contains(controllight));
             RuntimeTestUtil.assertTrue("exists", cb.exists(controllight));
             BundleResource controllightbin = new BundleResource(cb, "ControlLight.bin");
-            RuntimeTestUtil.assertFalse("failure", cb.failed(controllightbin));
+            RuntimeTestUtil.assertTrue/*False*/("failure", cb.failed(controllightbin));
             RuntimeTestUtil.assertFalse("contains", cb.contains(controllightbin));
-            RuntimeTestUtil.assertTrue("exists", cb.exists(controllightbin));
+            RuntimeTestUtil.assertFalse/*True*/("exists", cb.exists(controllightbin));
             EngineHelper.buildNativeModel(controllight, null, (r1) -> {
                 // das fehlende bin muss jetzt aufgefallen sein.
                 logger.debug("model build completed");
@@ -69,11 +70,8 @@ public class AsyncTest {
                 success = true;
                 //green/red cube sind als Indikator wichtig, nicht die message, denn die kann einfach fehlen bei Fehler.
                 logger.debug("testCorrupted successfully completed.");
-                
-
             });
-
-        }, true);
+        });
 
     }
 

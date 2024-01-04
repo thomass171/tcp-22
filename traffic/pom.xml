@@ -72,6 +72,14 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+        <!-- graph contains some utils like GraphTest.returnkreis-->
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-graph</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 

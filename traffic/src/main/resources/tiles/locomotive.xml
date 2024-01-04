@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 25.11.23 Extracted from LocConfig.java to make that obselete. -->
+
+<c:config xmlns:c="http://www.example.org/tcp-22" name="a">
+
+    <vehicledefinition name="loc" type="railer">
+        <bundlename>data</bundlename>
+        <modelfile>models/loc.gltf</modelfile>
+
+        <zoffset>0</zoffset>
+        <unscheduledmoving>true</unscheduledmoving>
+        <maximumspeed>21</maximumspeed>
+        <acceleration>4</acceleration>
+        <approachoffset>0</approachoffset>
+        <turnradius>0</turnradius>
+
+        <!-- rotation is needed because of default camera orientation along z-axis? -->
+        <viewpoint name="Driver">
+            <transform>
+                <position>1, 1, 0</position>
+                <angle>0,90,0</angle>
+            </transform>
+        </viewpoint>
+        <viewpoint name="BackSide">
+            <transform>
+                <position>9, 4, 0</position>
+                <angle>0,90,0</angle>
+            </transform>
+        </viewpoint>
+        <initialcount>1</initialcount>
+
+
+    </vehicledefinition>
+
+</c:config>

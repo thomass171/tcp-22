@@ -6,6 +6,8 @@
 
 <c:config xmlns:c="http://www.example.org/tcp-22" name="a">
 
+    <include>locomotive.xml</include>
+
     <terrain>
         <object name="Ground" modelfile="traffic:tiles/Wayland.gltf"/>
     </terrain>
@@ -42,6 +44,11 @@
         </transform>
     </viewpoint>
 
-    <vehicle name="loc" delayedload="false" automove="true" location="*:firstEdge"/>
+    <vehicle name="loc" delayedload="false" automove="true" location="*:firstEdge" initialcount="1"/>
 
+    <BaseTransformForVehicleOnGraph>
+        <transform>
+            <angle>0,-90,0</angle>
+        </transform>
+    </BaseTransformForVehicleOnGraph>
 </c:config>

@@ -12,7 +12,6 @@ import de.yard.threed.engine.Scene;
 import de.yard.threed.core.platform.NativeSceneRunner;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
-import de.yard.threed.outofbrowser.SyncBundleLoader;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 
@@ -95,7 +94,7 @@ public class HomeBrewSceneRunner extends AbstractSceneRunner implements NativeSc
         float far = (scsettings.far == null) ? Settings.defaultfar : scsettings.far;
 
         ((PlatformHomeBrew) PlatformHomeBrew.getInstance()).renderer.init(dimension);
-        Scene.world = new World();
+        //29.12.23 Scene.setWorld(new World());
         //HomeBrewScene openglscene = new HomeBrewScene();
         initAbstract(null, scene);
         Platform.getInstance().sceneRunner = instance;
@@ -106,25 +105,25 @@ public class HomeBrewSceneRunner extends AbstractSceneRunner implements NativeSc
             cameraToRender.getCarrier().setName("Main Camera Carrier");
         }
 
-        scene.setSceneAndCamera(((Platform) PlatformHomeBrew.getInstance()).nativeScene, Scene.world/* ((EngineHelper) Platform.getInstance()).getWorld()*/);
-        /*BundleLoaderExceptGwt*/
-        SyncBundleLoader.preLoad(scene.getPreInitBundle(), new DefaultResourceReader(), Platform.getInstance().bundleResolver);
-
-        scene.init(sceneMode);
-
-        postInit();
-
-        startRenderloop();
+        scene.setSceneAndCamera(((Platform) PlatformHomeBrew.getInstance()).nativeScene, Scene.getCurrent().getWorld()/* ((EngineHelper) Platform.getInstance()).getWorld()*/);
+        enterInitChain(scene.getPreInitBundle());
 
         // Only reached with framelimit
         logger.info("runScene completed");
         ((PlatformHomeBrew) PlatformHomeBrew.getInstance()).renderer.close();
     }
 
+    @Override
+    public SceneMode getSceneMode(){
+        return sceneMode;
+    }
+
     /**
      * Endless loop. For testing a framelimit can be used and called multiple times.
+     * 20.12.23: Will run inside init chain. Maybe replace with some invokeLater?
      */
-    public void startRenderloop() {
+    @Override
+    public void startRenderLoop() {
 
         HomeBrewRenderer renderer = ((PlatformHomeBrew) PlatformHomeBrew.getInstance()).renderer;
         long firstFrame = getFrameCount();
@@ -151,6 +150,15 @@ public class HomeBrewSceneRunner extends AbstractSceneRunner implements NativeSc
             }
         }
         logger.debug("render loop completed " + frameLimit + " frames");
+    }
+
+    @Override
+    public void sleepMs(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
 

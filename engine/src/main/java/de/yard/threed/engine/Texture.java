@@ -1,6 +1,7 @@
 package de.yard.threed.engine;
 
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.NativeCanvas;
@@ -77,7 +78,13 @@ public class Texture {
     }
 
     public static Texture buildBundleTexture(String bundlename, String filename) {
-        BundleResource br = new BundleResource(BundleRegistry.getBundle(bundlename), filename);
+        Bundle bundle = BundleRegistry.getBundle(bundlename);
+        if (bundle == null) {
+            Platform.getInstance().getLog(Texture.class).error("bundle not registered: " + bundlename);
+            // 2.1.24 questionable, but probably was done that way similar in the past
+            return new Texture((NativeTexture) null);
+        }
+        BundleResource br = new BundleResource(bundle, filename);
         return new Texture(br);
     }
 

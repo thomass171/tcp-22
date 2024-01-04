@@ -14,8 +14,8 @@ public class LoadingBundle {
     // set after directory load
     public Bundle bundle;
     //public int failure = 0;
-    private List<String> failurelist = new ArrayList<>();
-    public BundleLoadDelegate callback;
+    private List<String> failurelist = new ArrayList<String>();
+    public List<BundleLoadDelegate> callbacks = new ArrayList<BundleLoadDelegate>();
     public String bundlename;
     //timestamp when requesting all bundle content isType done. Might still be running in background.
     public long doneloading = 0;
@@ -23,7 +23,7 @@ public class LoadingBundle {
 
     public LoadingBundle(String bundlename, BundleLoadDelegate loadlistener, boolean delayed) {
         this.bundlename = bundlename;
-        callback = loadlistener;
+        callbacks.add(loadlistener);
         this.delayed = delayed;
     }
 
@@ -37,10 +37,13 @@ public class LoadingBundle {
      * @return
      */
     public boolean isReady() {
+
         if (bundle == null) {
+            logger.debug("isReady false");
             return false;
         }
         if (bundle.getExpectedSize() == bundle.getSize() + bundle.getFailuredSize()) {
+            logger.debug("isReady true");
             return true;
         }
         //TODO config. Beim Laden auf Jupiter über WLAN dauert das auch noch länger. Darum 200 statt 100. Besser 400
@@ -56,6 +59,7 @@ public class LoadingBundle {
 
             return true;
         }
+        //logger.debug("isReady false: "+ bundle.getExpectedSize() +","+ bundle.getSize() + "," + bundle.getFailuredSize());
         return false;
     }
 
@@ -70,6 +74,10 @@ public class LoadingBundle {
 
     public List<String> getFailurelist(){
         return failurelist;
+    }
+
+    public void addDelegate(BundleLoadDelegate bundleLoadDelegate) {
+        this.callbacks.add(bundleLoadDelegate);
     }
 }
 

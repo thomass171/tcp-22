@@ -32,7 +32,6 @@ public class JmeScene implements NativeScene {
     private boolean enableModelCameracalled;
     private static JmeScene instance;
     private String uniqueName;
-    private static int uniqueid = 1;
 
     private JmeScene(SimpleApplication app, FlyByCamera flyCam) {
         this.app = app;
@@ -171,9 +170,5 @@ public class JmeScene implements NativeScene {
 
     com.jme3.scene.Node getRootNode() {
         return app.getRootNode();
-    }
-
-    synchronized public String getUniqueName() {
-        return "name" + uniqueid++;
     }
 }

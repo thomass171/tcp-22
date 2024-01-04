@@ -69,6 +69,12 @@ public class ServerUnixSocket implements NativeSocket {
         }
     }
 
+    @Override
+    public boolean isPending() {
+        // not sure false is correct.
+        return false;
+    }
+
     /**
      * Do we need this?
      */

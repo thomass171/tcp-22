@@ -1,0 +1,24 @@
+<!--for testing only-->
+
+<c:config xmlns:c="http://www.example.org/tcp-22" name="a">
+
+    <airportdefinition icao="EDDK">
+        <home>A20</home>
+        <parking>C_4</parking>
+        <vehicle name="747 KLM">
+            <location>parkpos:B_2</location>
+        </vehicle>
+        <vehicle name="737-800 AB">
+            <location>parkpos:B_8</location>
+        </vehicle>
+        <vehicle name="738">
+            <location>parkpos:C_4</location>
+        </vehicle>
+
+        <location>groundnet:184-183</location>
+        <location>groundnet:128-129</location>
+    </airportdefinition>
+
+    <poi name="pname1" description="description">7.109709,50.843675,1150,25,-15</poi>
+    <poi name="pname2" description="description">6.580982,50.937770, 700,67,0</poi>
+</c:config>

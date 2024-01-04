@@ -38,6 +38,7 @@ public class ControlPanelHelper {
         logger.debug("worldBackplaneSize=" + worldBackplaneSize);
         if (worldBackplaneSize == null) {
             // headless?
+            logger.warn("Not building ControlPanel probably due to missing screen dimensions in headless");
             return null;
         }
         // zoffset needs to be lower than 0.01 to have no visual gap between the backplane and the component

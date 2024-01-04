@@ -6,6 +6,7 @@ import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeFuture;
+import de.yard.threed.core.platform.NativeHttpClient;
 import de.yard.threed.core.platform.Platform;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.HttpResponseException;
@@ -16,6 +17,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.util.TimeValue;
 
 import java.util.List;
@@ -23,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class JavaWebClient {
+public class JavaWebClient implements NativeHttpClient {
 
     /**
      * From https://hc.apache.org/httpcomponents-client-5.2.x/quickstart.html
@@ -31,8 +33,9 @@ public class JavaWebClient {
      * which is not what async intends.
      * One more reason to use our own async (AsyncHelper) is to avoid MT effects when the http client callback suddenly executes. Many platforms
      * really don't like MT.
+     * 28.12.23 no longer static
      */
-    public static NativeFuture<AsyncHttpResponse> httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
+    public NativeFuture<AsyncHttpResponse> httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header) {
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -59,7 +62,11 @@ public class JavaWebClient {
 
                 int statusCode = r.getCode();
                 if (statusCode >= 300) {
-                    getLogger().warn("url=" + url + ",statusCode=" + statusCode + ",header=" + r.getHeaders());
+                    String h = "";
+                    for (Header s : r.getHeaders()) {
+                        h += s.getName() + "=" + s.getValue() + ",";
+                    }
+                    getLogger().warn("url=" + url + ",statusCode=" + statusCode + ",header=" + h);
                 }
                 byte[] buffer = FileReader.readFully(r.getEntity().getContent());
                 r.close();

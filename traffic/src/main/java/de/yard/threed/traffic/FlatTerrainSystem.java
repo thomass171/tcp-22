@@ -116,13 +116,15 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
             //projection = (SimpleMapProjection) evt.getPayloadByIndex(1);
             Tile initialTile = (Tile) evt.getPayloadByIndex(/*16.10.21 2 mal 1 doch wider 2*/1);
             BundleResource tileResource = (BundleResource) evt.getPayloadByIndex(2);
+            // 27.11.23 nasty workaround until we have proper bundle payload
+            Bundle trafficBundle=BundleRegistry.getBundle("traffic");
 
             SceneNode destinationNode = SphereSystem.getSphereNode();
             if (tileResource != null) {
                 logger.debug("Loading tile 2.0 " + tileResource);
                 // Tile 2.0
                 if (tileResource.getExtension().equals("xml")) {
-                    loadTileByConfigFile(tileResource);
+                    loadTileByConfigFile(trafficBundle, tileResource);
                 } else {
                     // 29.11.21 Das mit dem Bundle ist doch noch Murks wegen preload needed.
                     // 16.12.21 Ueberhaupt ist byConvetion Murks. So viel convention kann es doch gar nicht geben, z.B. vehicleList, light
@@ -164,10 +166,10 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
         }
     }
 
-    private void loadTileByConfigFile(BundleResource tileResource) {
-        TrafficConfig xmlConfig = Tile.loadConfigFile(tileResource);
-        loadObjects(XmlHelper.getChildren(xmlConfig.tw, "object"));
-        List<NativeNode> xmlTerrains = XmlHelper.getChildren(xmlConfig.tw, "terrain");
+    private void loadTileByConfigFile(Bundle bundle, BundleResource tileResource) {
+        TrafficConfig xmlConfig = Tile.loadConfigFile(bundle, tileResource);
+        loadObjects(xmlConfig.getObjects());
+        List<NativeNode> xmlTerrains = xmlConfig.getTerrains();
         for (NativeNode nn : xmlTerrains) {
             loadObjects(XmlHelper.getChildren(nn, "object"));
         }
@@ -176,13 +178,13 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
     private void loadObjects(List<NativeNode> xmlObjects) {
 
         for (NativeNode nn : xmlObjects) {
-            String modelfile = XmlHelper.getStringAttribute(nn,"modelfile",null);
-            if (modelfile!=null){
+            String modelfile = XmlHelper.getStringAttribute(nn, "modelfile", null);
+            if (modelfile != null) {
 
-                logger.debug("Loading modelfile "+modelfile);
+                logger.debug("Loading modelfile " + modelfile);
                 BundleResource br = BundleResource.buildFromFullQualifiedString(modelfile);
-                br = new BundleResource(BundleRegistry.getBundle(br.bundlename),br.getFullName());
-                SceneNode destinationNode=ModelFactory.asyncModelLoad(br);
+                br = new BundleResource(BundleRegistry.getBundle(br.bundlename), br.getFullName());
+                SceneNode destinationNode = ModelFactory.asyncModelLoad(br);
                 //TODO set name, but on which node?
                 LocalTransform transform = ConfigHelper.getTransform(nn);
                 destinationNode.getTransform().setPosition(transform.position);

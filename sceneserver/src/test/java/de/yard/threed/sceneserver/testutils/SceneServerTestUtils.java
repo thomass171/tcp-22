@@ -132,7 +132,7 @@ public class SceneServerTestUtils {
     public static void runAdditionalFrames(HomeBrewSceneRunner sceneRunner, int frames) {
         long before = sceneRunner.getFrameCount();
         sceneRunner.frameLimit = frames;
-        sceneRunner.startRenderloop();
+        sceneRunner.startRenderLoop();
         assertEquals(before + frames, sceneRunner.getFrameCount());
     }
 

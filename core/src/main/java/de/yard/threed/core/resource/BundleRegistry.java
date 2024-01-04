@@ -33,21 +33,22 @@ public class BundleRegistry {
      * @param bundlename
      * @param bundle
      */
-    public static void registerBundle(String bundlename, Bundle bundle, boolean delayed) {
+    public static void registerBundle(String bundlename, Bundle bundle/*15.12.23, boolean delayed*/) {
         if (logger == null) {
             logger = Platform.getInstance().getLog(BundleRegistry.class);
         }
+        if (!bundle.isCompleted()) {
+            throw new RuntimeException("bundle must be completed before register: " + bundlename);
+        }
         bundles.put(bundlename, bundle);
-        logger.info("Bundle load complete: " + bundle.name + "(" + (bundle.getSizeInBytes() / 1000000) + " MB),delayed=" + delayed);
+        logger.info("Bundle registered: " + bundle.name + "(" + (bundle.getSizeInBytes() / 1000000) + " MB)");
 
     }
-
 
 
     public static String[] getBundleNames() {
         return (String[]) bundles.keySet().toArray(new String[0]);
     }
-
 
 
     static public boolean bundleexists(Bundle b, BundleResource br) {

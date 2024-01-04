@@ -18,4 +18,9 @@ public class SocketMock implements NativeSocket {
     public void close() {
 
     }
+
+    @Override
+    public boolean isPending() {
+        return false;
+    }
 }

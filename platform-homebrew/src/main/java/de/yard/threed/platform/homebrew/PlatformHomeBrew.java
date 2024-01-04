@@ -17,11 +17,10 @@ import de.yard.threed.core.buffer.SimpleByteBuffer;
 import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.javacommon.*;
 
-import de.yard.threed.outofbrowser.AsyncBundleLoader;
+
 import de.yard.threed.outofbrowser.FileSystemResource;
 import de.yard.threed.outofbrowser.NativeResourceReader;
 import de.yard.threed.outofbrowser.SimpleBundleResolver;
-import de.yard.threed.outofbrowser.SyncBundleLoader;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -96,8 +95,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
         }
         ((PlatformHomeBrew) instance).resourcemanager = new DefaultResourceReader();
         instance.bundleResolver.add(new SimpleBundleResolver(((PlatformHomeBrew) instance).hostdir + "/bundles", ((PlatformHomeBrew) instance).resourcemanager));
-        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), ((PlatformHomeBrew) instance).resourcemanager));
-        instance.bundleLoader = new AsyncBundleLoader(new DefaultResourceReader());
+        instance.bundleResolver.addAll(SimpleBundleResolver.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), ((PlatformHomeBrew) instance).resourcemanager));
 
         instance.nativeScene = new HomeBrewScene();
         ((PlatformHomeBrew) instance).logger.info("PlatformHomeBrew created. Working Directory = " + System.getProperty("user.dir"));
@@ -139,8 +137,8 @@ public class PlatformHomeBrew extends DefaultPlatform {
     }*/
 
     @Override
-    public void httpGet(String url, List<Pair<String,String>> params, List<Pair<String,String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
-        NativeFuture<AsyncHttpResponse> future = JavaWebClient.httpGet(url, params, header, asyncJobDelegate);
+    public void httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
+        NativeFuture<AsyncHttpResponse> future = new JavaWebClient().httpGet(url, params, header);
         sceneRunner.addFuture(future, asyncJobDelegate);
     }
 
@@ -246,18 +244,18 @@ public class PlatformHomeBrew extends DefaultPlatform {
     }
 
     @Override
-    public NativeTexture buildNativeTexture(BundleResource filename, HashMap<NumericType, NumericValue> parameters) {
-        if (filename.bundle == null) {
+    public NativeTexture buildNativeTexture(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> parameters) {
+        /*if (filename.bundle == null) {
             logger.error("buildNativeTexture:bundle not set for file " + filename.getFullName());
             return null;
-        }
+        }*/
         //String bundlebasedir = BundleRegistry.getBundleBasedir(filename.bundle.name, false);
-        String bundlebasedir = BundleResolver.resolveBundle(filename.bundle.name, Platform.instance.bundleResolver).getPath();
+        //String bundlebasedir = BundleResolver.resolveBundle(filename.bundle.name, Platform.instance.bundleResolver).getPath();
         //4.7.21: TODO fix FileSystemResource dependency.
         // 23.7.21: Wird der Zwischenschritt ueberhaupt gebraucht? 2
         // 6.7.21: Eigentlich wohl nicht, z.Z. aber schon. Zieht sich total durch.
 
-        FileSystemResource resource = FileSystemResource.buildFromFullString(bundlebasedir + "/" + filename.getFullName());
+        FileSystemResource resource = FileSystemResource.buildFromFullString(filename.getUrl()/*bundlebasedir + "/" + filename.getFullName()*/);
         NativeTexture t = buildNativeTextureOpenGL(resource, parameters);
         return t;
     }
@@ -509,6 +507,11 @@ public class PlatformHomeBrew extends DefaultPlatform {
     @Override
     public NativeScene getScene() {
         return nativeScene;
+    }
+
+    @Override
+    public NativeBundleResourceLoader buildResourceLoader(String bundlename, String location) {
+        return JavaBundleResolverFactory.buildResourceLoader(bundlename, location, bundleResolver);
     }
 }
 

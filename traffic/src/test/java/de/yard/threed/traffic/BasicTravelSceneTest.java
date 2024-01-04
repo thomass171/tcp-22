@@ -2,6 +2,8 @@ package de.yard.threed.traffic;
 
 
 import de.yard.threed.core.Event;
+import de.yard.threed.core.LocalTransform;
+import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.engine.Observer;
@@ -31,6 +33,7 @@ import de.yard.threed.graph.GraphMovingComponent;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static de.yard.threed.engine.testutil.TestUtils.assertViewPoint;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -106,16 +109,16 @@ public class BasicTravelSceneTest {
             assertEquals("oben5", ((FirstPersonMovingSystem) SystemManager.findSystem(FirstPersonMovingSystem.TAG)).viewPoints.get(4).name);
         } else {
             // 'loc' has two viewpoints. TODO check why is position
-            EcsTestHelper.assertTeleportComponent(userEntity, 5+2,6,new Vector3());
+            EcsTestHelper.assertTeleportComponent(userEntity, 5 + 2, 6, new Vector3());
         }
 
         List<ViewPoint> vps = TrafficHelper.getViewpointsByDataprovider();
         assertNotNull(vps);
         assertEquals(5, vps.size());
-        assertEquals("oben5", vps.get(4).name);
-        assertEquals(4000.0, vps.get(4).transform.position.getZ());
+        assertViewPoint("oben5",new LocalTransform(new Vector3(0, 0, 4000),new Quaternion()), vps.get(4));
 
-
+        assertNotNull(TrafficHelper.getVehicleConfigByDataprovider("loc", null));
+        assertNull(TrafficHelper.getVehicleConfigByDataprovider("xx", null));
     }
 
     @Test
@@ -145,12 +148,12 @@ public class BasicTravelSceneTest {
 
         EcsEntity player = UserSystem.getInitialUser();
         // vehicle not yet loaded. So only 1 outside viewpoints.
-        EcsTestHelper.assertTeleportComponent(player, 1,0,null);
+        EcsTestHelper.assertTeleportComponent(player, 1, 0, null);
 
         sceneRunner.runLimitedFrames(50);
         // now 'loc' should have been loaded.
         // should start at externel overview point. For now its in vehicle. TODO: Check why 0,0,0 is correct position
-        EcsTestHelper.assertTeleportComponent(player, 1+2,2,new Vector3());
+        EcsTestHelper.assertTeleportComponent(player, 1 + 2, 2, new Vector3());
 
         EcsEntity userEntity = SystemManager.findEntities(e -> BasicTravelScene.DEFAULT_USER_NAME.equals(e.getName())).get(0);
         assertNotNull(userEntity, "user entity");
@@ -164,6 +167,8 @@ public class BasicTravelSceneTest {
         double xdiff = Math.abs(xpos0 - xpos1);
         log.debug("xdiff={}", xdiff);
         assertTrue(xdiff > 3.0);
+
+        // 28.11.23: would be nice to test effect of 'baseTransformForVehicleOnGraph' But how, hmm?
     }
 
     /**

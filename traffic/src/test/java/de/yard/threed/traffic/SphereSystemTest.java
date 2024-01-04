@@ -4,7 +4,10 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.LatLon;
+import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
+import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Vector3;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ViewPoint;
@@ -23,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static de.yard.threed.engine.testutil.TestUtils.assertViewPoint;
 import static de.yard.threed.traffic.SphereSystem.USER_REQUEST_SPHERE;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,6 +61,7 @@ public class SphereSystemTest {
         // 9 "oben*" viewpoints from osmscenery". Vehicle not loaded because of missing system.
         assertEquals(9, viewpoints.size(), "viewpoints");
         ViewPoint viewPoint = viewpoints.get(0);
+        assertViewPoint("oben1", new LocalTransform(new Vector3(0, 0, 137), Quaternion.buildRotationX(new Degree(0))), viewPoint);
     }
 
 

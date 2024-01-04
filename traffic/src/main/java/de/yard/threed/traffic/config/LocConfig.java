@@ -12,8 +12,9 @@ import java.util.Map;
 
 /**
  * Extracted from railing.xml. Really needed.
+ * 25.11.23: Moved to locomotive.xml
  */
-public class LocConfig implements VehicleConfig {
+/*public class LocConfig implements VehicleDefinition {
     @Override
     public String getBundlename() {
         return "data";
@@ -98,4 +99,30 @@ public class LocConfig implements VehicleConfig {
     public String getLowresFile() {
         return null;
     }
+
+    @Override
+    public Float getWingspread() {
+        return null;
+    }
+
+    @Override
+    public Vector3 getWingPassingPoint() {
+        return null;
+    }
+
+    @Override
+    public Vector3 getLeftWingApproachPoint() {
+        return null;
+    }
+
+    @Override
+    public Vector3 getCateringDoorPosition() {
+        return null;
+    }
+
+    @Override
+    public Vector3 getRearPoint() {
+        return null;
+    }
 }
+*/

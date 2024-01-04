@@ -81,4 +81,10 @@ public class ClientWebSocket implements NativeSocket {
         webSocket.sendCloseFrame();
         webSocket = null;
     }
+
+    @Override
+    public boolean isPending() {
+        // not sure false is correct always
+        return false;
+    }
 }

@@ -60,6 +60,12 @@ public class ServerWebSocket implements NativeSocket {
         session = null;
     }
 
+    @Override
+    public boolean isPending() {
+        // not sure false is correct.
+        return false;
+    }
+
     public boolean isClosed() {
         return session == null;
     }

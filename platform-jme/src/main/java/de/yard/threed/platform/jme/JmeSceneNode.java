@@ -27,7 +27,7 @@ public class JmeSceneNode /*16.9.16 extends JmeSpatial*/ implements NativeSceneN
 
     JmeSceneNode(String name) {
         /*super*/
-        object3d = new JmeSpatial(new Node((name != null) ? name : JmeScene.getInstance().getUniqueName()), this, false);
+        object3d = new JmeSpatial(new Node((name != null) ? name : ((PlatformJme)Platform.getInstance()).getUniqueName()), this, false);
         // protect against 'IllegalStateException issue' by making sure there is a root node in the parent hierarchy. The correct 'world' top node
         // will be set later by the application.
         JmeScene.getInstance().getRootNode().attachChild(object3d.spatial);

@@ -6,6 +6,7 @@ import de.yard.threed.core.ImageData;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeTexture;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.resource.URL;
 import de.yard.threed.engine.platform.common.Settings;
 
 /**
@@ -57,9 +58,11 @@ public class WebGlTexture implements NativeTexture {
     }
 
     /**
-     * "filename" is a complete URL here.
+     * "filename" is a complete URL here. 2.1.24: This seems only true with full qualified bundle.
+     * Otherwise its only a path starting with "/bundles".
      */
-    public static WebGlTexture loadTexture(String filename) {
+    public static WebGlTexture loadTexture(/*2.1.24BundleResource*/URL url) {
+        String filename=url.getUrl();
         logger.debug("Loading texture " + filename);
         return new WebGlTexture(loadTextureNative(filename));
     }

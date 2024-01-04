@@ -5,4 +5,5 @@ tiles/Wayland.bin
 tiles/Wayland.xml
 tiles/Wayland-railway.xml
 tiles/Wayland-road.xml
+tiles/locomotive.xml
 traffic.xsd

@@ -44,4 +44,9 @@ public class JavaSocket implements NativeSocket {
             return null;
         }
     }
+
+    public boolean isPending(){
+        // connect() is blocking, so there is no pending.
+        return false;
+    }
 }

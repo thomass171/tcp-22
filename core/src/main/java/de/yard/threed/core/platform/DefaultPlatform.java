@@ -3,11 +3,10 @@ package de.yard.threed.core.platform;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourcePath;
+import de.yard.threed.core.resource.URL;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -63,7 +62,7 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public NativeTexture buildNativeTexture(BundleResource filename, HashMap<NumericType, NumericValue> parameters) {
+    public NativeTexture buildNativeTexture(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> parameters) {
         return null;
     }
 
@@ -254,13 +253,18 @@ public class DefaultPlatform extends Platform {
 
     @Override
     public NativeAudioClip buildNativeAudioClip(BundleResource filename) {
-        throw new RuntimeException(("not implemented"));
+        logger.warn("NativeAudioClip not implemented");
+        return null;
     }
 
     @Override
     public NativeAudio buildNativeAudio(NativeAudioClip audioClip) {
-        throw new RuntimeException(("not implemented"));
+        logger.warn("NativeAudio not implemented");
+        return null;
     }
+
+    @Override
+    public NativeBundleResourceLoader buildResourceLoader(String basedir, String location) {throw new RuntimeException("not implemented"); };
 
     /*@Override
     public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed) {

@@ -1,6 +1,7 @@
 package de.yard.threed.platform.jme;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.FlyByCamera;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -16,28 +17,16 @@ import com.jme3.renderer.Camera;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
-import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.platform.NativeSocket;
-import de.yard.threed.engine.SceneMode;
-import de.yard.threed.engine.ecs.ClientBusConnector;
-import de.yard.threed.engine.ecs.DefaultBusConnector;
-import de.yard.threed.engine.ecs.LoggingSystemTracker;
-import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.Dimension;
 import de.yard.threed.core.platform.NativeSceneRunner;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.KeyCode;
 import de.yard.threed.core.Point;
 import de.yard.threed.engine.Scene;
-import de.yard.threed.engine.World;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.platform.NativeHttpClient;
+import de.yard.threed.core.platform.NativeHttpClient;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.engine.platform.common.*;
-import de.yard.threed.outofbrowser.SyncBundleLoader;
-
-import java.util.HashMap;
 
 /**
  * Rahmenklasse um eine Scene (Applikation) laufen zu lassen.
@@ -90,123 +79,8 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
         scsettings = new Settings();
         scene.initSettings(scsettings);
 
-        SimpleApplication app = new SimpleApplication() {
-
-            @Override
-            public void simpleInitApp() {
-                logger.info("simpleInitApp");
-                simpleApplication = this;
-                // Es ist wichtig, dass der AssetManager vor dem init() Aufruf der Scene gesetzt ist.
-                JmeResourceManager rm = new JmeResourceManager(assetManager);
-                ((PlatformJme) Platform.getInstance()).postInit(rm);
-
-                // Starten mit Standardcamera. Die Camera bleibt aber wohl auch bei Cahe und CameraNode immer dieselbe.
-                // Das Setzen des aspect hier duerfte redundant sein.
-                // 14.10.15: Defaultwerte aus Scene übernehmen. Aspect wird aus width/height berechnet.
-                Camera defaultcamera = getCamera();
-                //viewport = viewPort;
-                float width = defaultcamera.getWidth();
-                float height = defaultcamera.getHeight();
-                float aspect = width / height;
-                //logger.debug("aspect isType " + aspect);
-                float fov = (scsettings.fov == null) ? Settings.defaultfov : scsettings.fov;
-                float near = (scsettings.near == null) ? Settings.defaultnear : scsettings.near;
-                float far = (scsettings.far == null) ? Settings.defaultfar : scsettings.far;
-                //26.11.18 in jmecamera defaultcamera.setFrustumPerspective(fov, aspect, near, far);
-                JmeScene.init(this, this.flyCam);
-                // 23.2.16: Die FPS Camera jetzt defaultmaessig ausschalten (siehe Wiki)
-                this.flyCam.setEnabled(false);
-
-                Platform.getInstance().nativeScene = JmeScene.getInstance();
-                initAbstract(null/*JmeScene.getInstance(), rm*/, scene);
-                Platform.getInstance().sceneRunner = instance;
-
-                World world = new World();
-                //((EngineHelper) PlatformJme.getInstance()).setWorld(new World());
-
-                //10.7.21: Camera geht erst, wenn world in der Scene ist
-                Scene.world = world;
-                rootnode = getRootNode();
-                jmecamera = new JmeCamera(defaultcamera, getRootNode(), fov, aspect, near, far, Settings.backgroundColor, viewPort);
-                jmecamera.camera.setName("Main Camera");
-
-                //JavaSceneRunnerHelper.prepareScene(scene, JmeScene.getInstance(),world);
-                scene.setSceneAndCamera(JmeScene.getInstance(), world/* ((EngineHelper) Platform.getInstance()).getWorld()*/);
-
-                SyncBundleLoader.preLoad(scene.getPreInitBundle(), rm, Platform.getInstance().bundleResolver);
-
-                initScene();
-
-
-                postInit();
-                // Wenn die Scene sich keine Camera eingerichtet hat, wird jetzt Default FPS einregichtet
-                /*24.2.16 if (sc.enableModelCameracalled) {
-                    // Da ist bei JME aber z.Z. nicht zu machen, weil eh FPS der Default ist
-                }*/
-
-
-                // ob die keys besser vor oder nach dem scene init erfolgen, ist noch unklar.
-                // Na, doch wohl nachher, denn im init() werden sie ja eingerichtet.
-                // Add handler for all defined keys (inspired by Unity).
-                int actionindex = 1;
-                for (int keycode : KeyCode.unitykeys) {
-                    // actionname must be unique(?)
-                    int[] keys = getKeyInput(keycode);
-                    for (int k : keys) {
-                        String actionname = "" + actionindex + "-" + keycode;
-                        inputManager.addMapping(actionname, new KeyTrigger(k));
-                        inputManager.addListener(new CustomActionListener(keycode), actionname);
-                        actionindex++;
-                    }
-                }
-                /*2.3.16 for (int keycode : sc.analoglistener.keySet()) {
-                    //der actionname muss wohl eindeutig sein TODO anders machen
-                    String actionname = "" + keycode;
-                    inputManager.addMapping(actionname, new KeyTrigger(getKeyInput(keycode)));
-                    inputManager.addListener(new CustomAnalogListener(sc.analoglistener.get(keycode)), actionname);
-                }*/
-                //for (NativeMouseMoveListener nmml : sc.mousemovelistener) {
-
-                CustomMouseListener cml = new CustomMouseListener(inputManager, scene);
-                inputManager.addMapping("MouseRight", new MouseAxisTrigger(MouseInput.AXIS_X, false));
-                inputManager.addListener(cml, "MouseRight");
-                inputManager.addMapping("MouseLeft", new MouseAxisTrigger(MouseInput.AXIS_X, true));
-                inputManager.addListener(cml, "MouseLeft");
-                inputManager.addMapping("MouseUp", new MouseAxisTrigger(MouseInput.AXIS_Y, false));
-                inputManager.addListener(cml, "MouseUp");
-                inputManager.addMapping("MouseDown", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
-                inputManager.addListener(cml, "MouseDown");
-
-                // Mausclick aehnlich wie einen key behandeln.
-                inputManager.addMapping("MouseClick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-                inputManager.addListener(new MouseActionListener(inputManager), "MouseClick");
-
-                // }
-
-                boolean secondcam = false;
-                if (secondcam) {
-                    // Setup getSecond, smaller PiP viewer
-                    Camera cam2 = getCamera().clone();
-                    cam2.setViewPort(.4f, .6f, 0.8f, 1f);
-                    cam2.setLocation(new Vector3f(7.50f, 2.01f, 3.81f));
-                    cam2.setRotation(new Quaternion(0.00f, 0.99f, -0.04f, 0.02f));
-                    ViewPort viewPort2 = renderManager.createMainView("PiP", cam2);
-                    viewPort2.setClearFlags(true, true, true);
-                    viewPort2.attachScene(rootNode);
-                }
-                //28.11.18 geht nicht in JmeCamera weil man nicht an den Viewport kommt.
-                viewPort.setBackgroundColor(PlatformJme.buildColor(Settings.backgroundColor));
-            }
-
-            @Override
-            public void simpleUpdate(float tpf) {
-                //logger.info("simpleUpdate. tpf=" + tpf);
-
-                scene.deltaTime = tpf;
-                prepareFrame(tpf);
-                jmecamera.updateCameraModel();
-            }
-        };
+        JmeSimpleApplication app = ((PlatformJme) Platform.getInstance()).app;
+        app.setScene(scene, this);
 
         //7.4.17: Warum disablen? War das nur mal ein Test?
         //ImageUtil.pngcache.disable();
@@ -237,9 +111,173 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
 
     }
 
+    @Override
+    public void startRenderLoop() {
+        // nothing to do here. Just fall back to caller.
+    }
+
+    @Override
+    public void sleepMs(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     /*public ViewPort getDefaultViewPort() {
         return viewport;
     }*/
+
+
+
+
+    /*class CustomAnalogListener implements AnalogListener {
+        NativeAnalogListener al;
+
+        CustomAnalogListener(NativeAnalogListener al) {
+            this.al = al;
+        }
+
+        @Override
+        public void onAnalog(String s, float keypressed, float tpf) {
+            al.onAnalog(keypressed, tpf);
+        }
+    }*/
+
+
+}
+
+/**
+ * 29.12.23 Extracted from above runScene to init JmeScene earlier (for creating world)
+ */
+class JmeSimpleApplication extends SimpleApplication {
+
+    JmeSceneRunner jsr;
+    Scene scene;
+
+    JmeSimpleApplication() {
+    }
+
+    void setScene(Scene scene, JmeSceneRunner jsr) {
+        this.scene = scene;
+        this.jsr = jsr;
+    }
+
+    @Override
+    public void simpleInitApp() {
+        jsr.logger.info("simpleInitApp");
+        jsr.simpleApplication = this;
+        // Es ist wichtig, dass der AssetManager vor dem init() Aufruf der Scene gesetzt ist.
+        JmeResourceManager rm = new JmeResourceManager(assetManager);
+        ((PlatformJme) Platform.getInstance()).postInit(rm);
+
+        // Starten mit Standardcamera. Die Camera bleibt aber wohl auch bei Cahe und CameraNode immer dieselbe.
+        // Das Setzen des aspect hier duerfte redundant sein.
+        // 14.10.15: Defaultwerte aus Scene übernehmen. Aspect wird aus width/height berechnet.
+        Camera defaultcamera = getCamera();
+        //viewport = viewPort;
+        float width = defaultcamera.getWidth();
+        float height = defaultcamera.getHeight();
+        float aspect = width / height;
+        //logger.debug("aspect isType " + aspect);
+        float fov = (jsr.scsettings.fov == null) ? Settings.defaultfov : jsr.scsettings.fov;
+        float near = (jsr.scsettings.near == null) ? Settings.defaultnear : jsr.scsettings.near;
+        float far = (jsr.scsettings.far == null) ? Settings.defaultfar : jsr.scsettings.far;
+        //26.11.18 in jmecamera defaultcamera.setFrustumPerspective(fov, aspect, near, far);
+        //29.12.23 Moved to PlatformJme JmeScene.init(this, this.flyCam);
+        // 23.2.16: Die FPS Camera jetzt defaultmaessig ausschalten (siehe Wiki)
+        this.flyCam.setEnabled(false);
+
+        Platform.getInstance().nativeScene = JmeScene.getInstance();
+        jsr.initAbstract(null/*JmeScene.getInstance(), rm*/, scene);
+        Platform.getInstance().sceneRunner = jsr.instance;
+
+                /*29.12.23 World world = new World();
+                //((EngineHelper) PlatformJme.getInstance()).setWorld(new World());
+
+                //10.7.21: Camera geht erst, wenn world in der Scene ist
+                Scene.setWorld(world);*/
+        jsr.rootnode = getRootNode();
+        jsr.jmecamera = new JmeCamera(defaultcamera, getRootNode(), fov, aspect, near, far, Settings.backgroundColor, viewPort);
+        jsr.jmecamera.camera.setName("Main Camera");
+
+        //JavaSceneRunnerHelper.prepareScene(scene, JmeScene.getInstance(),world);
+        scene.setSceneAndCamera(JmeScene.getInstance(), scene.getWorld()/* ((EngineHelper) Platform.getInstance()).getWorld()*/);
+
+        //15.12.23 preload, init, postInit moved to InitChain
+
+
+        // Wenn die Scene sich keine Camera eingerichtet hat, wird jetzt Default FPS einregichtet
+                /*24.2.16 if (sc.enableModelCameracalled) {
+                    // Da ist bei JME aber z.Z. nicht zu machen, weil eh FPS der Default ist
+                }*/
+
+
+        // ob die keys besser vor oder nach dem scene init erfolgen, ist noch unklar.
+        // Na, doch wohl nachher, denn im init() werden sie ja eingerichtet.
+        // Add handler for all defined keys (inspired by Unity).
+        int actionindex = 1;
+        for (int keycode : KeyCode.unitykeys) {
+            // actionname must be unique(?)
+            int[] keys = getKeyInput(keycode);
+            for (int k : keys) {
+                String actionname = "" + actionindex + "-" + keycode;
+                inputManager.addMapping(actionname, new KeyTrigger(k));
+                inputManager.addListener(new CustomActionListener(keycode), actionname);
+                actionindex++;
+            }
+        }
+                /*2.3.16 for (int keycode : sc.analoglistener.keySet()) {
+                    //der actionname muss wohl eindeutig sein TODO anders machen
+                    String actionname = "" + keycode;
+                    inputManager.addMapping(actionname, new KeyTrigger(getKeyInput(keycode)));
+                    inputManager.addListener(new CustomAnalogListener(sc.analoglistener.get(keycode)), actionname);
+                }*/
+        //for (NativeMouseMoveListener nmml : sc.mousemovelistener) {
+
+        CustomMouseListener cml = new CustomMouseListener(inputManager, scene);
+        inputManager.addMapping("MouseRight", new MouseAxisTrigger(MouseInput.AXIS_X, false));
+        inputManager.addListener(cml, "MouseRight");
+        inputManager.addMapping("MouseLeft", new MouseAxisTrigger(MouseInput.AXIS_X, true));
+        inputManager.addListener(cml, "MouseLeft");
+        inputManager.addMapping("MouseUp", new MouseAxisTrigger(MouseInput.AXIS_Y, false));
+        inputManager.addListener(cml, "MouseUp");
+        inputManager.addMapping("MouseDown", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
+        inputManager.addListener(cml, "MouseDown");
+
+        // Mausclick aehnlich wie einen key behandeln.
+        inputManager.addMapping("MouseClick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(new MouseActionListener(inputManager), "MouseClick");
+
+        // }
+
+        boolean secondcam = false;
+        if (secondcam) {
+            // Setup getSecond, smaller PiP viewer
+            Camera cam2 = getCamera().clone();
+            cam2.setViewPort(.4f, .6f, 0.8f, 1f);
+            cam2.setLocation(new Vector3f(7.50f, 2.01f, 3.81f));
+            cam2.setRotation(new Quaternion(0.00f, 0.99f, -0.04f, 0.02f));
+            ViewPort viewPort2 = renderManager.createMainView("PiP", cam2);
+            viewPort2.setClearFlags(true, true, true);
+            viewPort2.attachScene(rootNode);
+        }
+        //28.11.18 geht nicht in JmeCamera weil man nicht an den Viewport kommt.
+        viewPort.setBackgroundColor(PlatformJme.buildColor(Settings.backgroundColor));
+
+        // 16.12.23: MA51 Enter callback chain. Moved here from above.
+        jsr.enterInitChain(scene.getPreInitBundle());
+    }
+
+    @Override
+    public void simpleUpdate(float tpf) {
+        //logger.info("simpleUpdate. tpf=" + tpf);
+
+        scene.deltaTime = tpf;
+        jsr.prepareFrame(tpf);
+        jsr.jmecamera.updateCameraModel();
+    }
 
     /**
      * Mapping des JS keycodesa auf den JME keycode.
@@ -346,7 +384,7 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
             case KeyCode.Ctrl:
                 return new int[]{KeyInput.KEY_LCONTROL, KeyInput.KEY_RCONTROL};
         }
-        logger.error("unknown keycode " + keycode);
+        jsr.logger.error("unknown keycode " + keycode);
         return new int[]{0};
     }
 
@@ -363,7 +401,7 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
         @Override
         public void onAction(String s, boolean keypressed, float tpf) {
             //logger.debug("onAction: " + s + ":" + keypressed);
-            addKey(keycode, keypressed);
+            jsr.addKey(keycode, keypressed);
         }
     }
 
@@ -381,26 +419,13 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
         @Override
         public void onAction(String s, boolean keypressed, float tpf) {
             if (!keypressed) {
-                mouseclick = getMousePositionFromCursorPosition(inputManager);
+                jsr.mouseclick = getMousePositionFromCursorPosition(inputManager);
             } else {
-                mousepress = getMousePositionFromCursorPosition(inputManager);
+                jsr.mousepress = getMousePositionFromCursorPosition(inputManager);
                 // logger.debug("mouse click action. keypressed=" + keypressed + ", location=" + mousepress);
             }
         }
     }
-
-    /*class CustomAnalogListener implements AnalogListener {
-        NativeAnalogListener al;
-
-        CustomAnalogListener(NativeAnalogListener al) {
-            this.al = al;
-        }
-
-        @Override
-        public void onAnalog(String s, float keypressed, float tpf) {
-            al.onAnalog(keypressed, tpf);
-        }
-    }*/
 
     class CustomMouseListener implements AnalogListener {
         // NativeMouseMoveListener lis;
@@ -416,7 +441,7 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
         @Override
         public void onAnalog(String s, float keypressed, float tpf) {
             /*runnerhelper.*/
-            mousemove = getMousePositionFromCursorPosition(inputManager);
+            jsr.mousemove = getMousePositionFromCursorPosition(inputManager);
         }
     }
 
@@ -430,7 +455,9 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
         return new Point((int) Math.round(pos.getX()), y);
     }
 
-
+    public FlyByCamera getFlyCam() {
+        return this.flyCam;
+    }
 }
 
 

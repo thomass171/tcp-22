@@ -434,7 +434,7 @@ public class ReferenceTests {
     public static void testFindNodeByName(ReferenceScene referenceScene) {
         logger.info("testFindNodeByName");
         // Einfach erstmal etwas suchen, was es nicht gibt). Vorher einen Dump.
-        String graph = ReferenceScene.dumpSceneGraph();
+        String graph = ReferenceScene.getCurrent().dumpSceneGraph();
         logger.debug("\n" + graph);
         RuntimeTestUtil.assertTrue("World", StringUtils.startsWith(graph, "World"));
         for (SceneNode n : referenceScene.towerrechts) {

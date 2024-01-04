@@ -9,13 +9,14 @@ import de.yard.threed.core.Pair;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Server;
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.platform.AsyncDelegator;
 import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
-import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.platform.NativeBundleLoader;
 import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.NativeFuture;
+import de.yard.threed.core.platform.NativeBundleResourceLoader;
+import de.yard.threed.core.platform.NativeHttpClient;
 import de.yard.threed.core.platform.NativeScene;
 import de.yard.threed.core.platform.NativeSceneRunner;
 import de.yard.threed.core.platform.NativeSocket;
@@ -23,7 +24,8 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleLoadDelegate;
-import de.yard.threed.engine.HttpBundleLoader;
+import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.engine.platform.PlatformBundleLoader;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneAnimationController;
 import de.yard.threed.engine.SceneMode;
@@ -34,7 +36,6 @@ import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.engine.loader.PortableModelBuilder;
 import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.engine.loader.SceneLoader;
-import de.yard.threed.engine.platform.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,10 +55,11 @@ import java.util.TreeMap;
  * 16.2.21: Shouldn't the class be abstract?
  * 08.04.21: No main-loop here, because some platforms like JME have no.
  * 26.03.23: Now implements interface from core to have Scenerunner available in all platforms (like SimpleHeadlessPlatform)
+ * 10.12.23: Made abstract to enable platform specific implementations that cannot be in Platform (MA51).
  * <p>
  * Created by thomass on 22.03.16.
  */
-public class AbstractSceneRunner implements NativeSceneRunner {
+public abstract class AbstractSceneRunner implements NativeSceneRunner {
     Log logger = Platform.getInstance().getLog(AbstractSceneRunner.class);
     //23.7.21 NativeScene is in platform
     //19.10.18: Superklasse auch hier rein, weils einfach praktisch ist.
@@ -82,21 +84,20 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     // wird noch nicht verwendet.
     private List<AsyncJobInfo> newJobList = new ArrayList<AsyncJobInfo>();
     SceneAnimationController sceneAnimationController;
+    // three delegates for async model building
     int delegateid = 1;
-    TreeMap<Integer, ModelBuildDelegate> delegates = new TreeMap<Integer, ModelBuildDelegate>();
+    private TreeMap<Integer, ModelBuildDelegate> delegates = new TreeMap<Integer, ModelBuildDelegate>();
     public TreeMap<Integer, BuildResult> delegateresult = new TreeMap<Integer, BuildResult>();
-    TreeMap<Integer, BundleLoadDelegate> bundledelegates = new TreeMap<Integer, BundleLoadDelegate>();
+    private List<AsyncDelegator> invokeLaters = new ArrayList<AsyncDelegator>();
     //20.5.20: Und noch eine Lösung fur invokeLater. <AsyncHttpResponse> wegen C#. Driss.
-    public List<AsyncInvoked<AsyncHttpResponse>> invokedLater = new ArrayList<AsyncInvoked<AsyncHttpResponse>>();
+    //21.12.23 not needed/used? External usage.
+    //4.1.24 public List<AsyncInvoked<AsyncHttpResponse>> invokedLater = new ArrayList<AsyncInvoked<AsyncHttpResponse>>();
     //23.3.23: And one more solution for real MTs Futures
     // ("<Object>" for C#. In C# a list of generic delegates cannot contain abstract delegates
     // (See https://stackoverflow.com/questions/3319447/add-generic-actiont-delegates-to-a-list).
     public List<Pair<NativeFuture, AsyncJobDelegate>> futures = new ArrayList();
     // C# public List<Object> futures = new ArrayList<Object>();
 
-    //2.8.21 public TreeMap<Integer, Bundle> bundledelegateresult = new TreeMap<Integer, Bundle>();
-    // ResourceManager hier, damit er nicht mehr über die Platform zugreifbar ist (wegen Architektur)
-    //5.8.21 private ResourceManager resourceManager = null;
     // cameras might also be stored in the scene or the platform (which not really fits).
     // And why should the platform know cameras? In any case there will be dependency conflicts.
     // These appear minimal here, because in Scene the list needs to be public.
@@ -106,6 +107,8 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     PlatformInternals platformInternals;
     // Only in client mode, null otherwise. Use protected for now even though it might cause C# problems.
     protected ClientBusConnector clientBusConnector = null;
+    // 13.12.23: New loader and here instead of platform.
+    public PlatformBundleLoader bundleLoader = new PlatformBundleLoader();
 
     /**
      * 28.4.20: Warum ist der deperecated. Der scheint jetzt ein vielleicht zeitgemaesser constructor.
@@ -135,13 +138,6 @@ public class AbstractSceneRunner implements NativeSceneRunner {
         this.platformInternals = platformInternals;
     }
 
-
-    @Deprecated
-    public static AbstractSceneRunner init(NativeScene scene/*, ResourceManager resourceManager*/, Scene ascene) {
-        instance = new AbstractSceneRunner(scene, /*resourceManager,*/ ascene);
-        return instance;
-    }
-
     /**
      * das soll der Einstieg sein, weil es per
      * constructor unhandlich ist.
@@ -154,6 +150,8 @@ public class AbstractSceneRunner implements NativeSceneRunner {
         sceneAnimationController = SceneAnimationController.getInstance();
         instance = this;
 
+        // 21.12.23: help to avoid need for getInstance.
+        Platform.getInstance().sceneRunner = this;
     }
 
     /**
@@ -175,20 +173,6 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     }
 
     /**
-     * Statt ueber platform
-     * 10.7.21
-     * See Platform.httpget()!
-     *
-     * @return
-     */
-    public NativeHttpClient getHttpClient() {
-        if (httpClient != null) {
-            return httpClient;
-        }
-        throw new RuntimeException("abstract! Needs to be implemented");
-    }
-
-    /**
      * Everything before drawing.
      *
      * @param tpf
@@ -199,19 +183,17 @@ public class AbstractSceneRunner implements NativeSceneRunner {
 
         processCompletedJobs();
         //2.8.21: Den extrahierten bundleloader vor asnyhelper
-        List<Pair<BundleLoadDelegate, Bundle>> loadresult = null;
-        if (!Platform.getInstance().hasOwnAsync()) {
-            // die Abfrgae hasOwnAsync() ist eigentlich redundant. Warum die Results gesammelt und die Delegates erst staeter ausgefuehrt werden, ist
-            //nicht mehr ganz klar.Wahrscheinlich um Aufrufe von irgendwo aus der Tiefe zu vermeiden.
-            loadresult = Platform.getInstance().bundleLoader.processAsync();
-        }
         // Der AsynHelper wird fuer jede Platform verwendet, auch WebGl. Obwohl die auch wirklich async laden kann, macht sie es nicht unbedingt.
-        AsyncHelper.processAsync(/*getResourceManager(),*/Platform.getInstance().bundleLoader);
+        // 15.12.23: futures moved from AsyncHelper to here. Also new invokelaters are here. seems more consistent.
+        AsyncHelper.processAsync(/*13.12.23Platform.getInstance().bundleLoader*/);
+        processFutures();
+        processInvokeLaters();
+
         for (GeneralHandler handler : platformInternals.beforeFrameHandler) {
             handler.handle();
         }
 
-        processDelegates(loadresult);
+        processDelegates(/*21.12.23loadresult*/);
 
         // Is this the best moment to get packets?
         int cnt = 0;
@@ -258,7 +240,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
                 //Platform.getInstance().executeAsyncJobNurFuerRunnerhelper(job.job);
                 try {
                     String msg = job.job.execute();
-                        logger.debug("job completed. " + newJobList.size() + " remaining");
+                    logger.debug("job completed. " + newJobList.size() + " remaining");
                     addCompletedJob(new CompletedJob(job.job, msg));
                 } catch (java.lang.Exception e) {
                     addCompletedJob(new CompletedJob(job.job, e.getMessage()));
@@ -362,7 +344,7 @@ public class AbstractSceneRunner implements NativeSceneRunner {
         List<CompletedJob> ascyncallbacklist = completedJobList.getCompletedJobs();
         while (ascyncallbacklist.size() > 0) {
             CompletedJob ac = ascyncallbacklist.get(0);
-                logger.debug("found completed job " + ac.job.getName());
+            logger.debug("found completed job " + ac.job.getName());
             AsyncJobCallback callback = ac.job.getCallback();
             if (callback != null) {
                 if (ac.e == null) {
@@ -376,7 +358,12 @@ public class AbstractSceneRunner implements NativeSceneRunner {
 
     }
 
-    public void processDelegates(List<Pair<BundleLoadDelegate, Bundle>> loadresult) {
+    /**
+     * Don't remember what this is. Probably a delegate processing for detached model building (after a bundle was loaded?).
+     * <p>
+     * Goodness, get rid of this or make it more clear.
+     */
+    public void processDelegates(/*21.10.23 no longer with new bundle loader List<Pair<BundleLoadDelegate, Bundle>> loadresult*/) {
         //TODO threadsafe machen?
         //for (int i=0;i< modelbuilddelegates.size();i++){
         //C# kann keine iterator
@@ -386,34 +373,14 @@ public class AbstractSceneRunner implements NativeSceneRunner {
             //blocks webgl log. logger.debug("check processing delegate");
             Integer d = delegateids.get(i);
             if (delegateresult.get(d) != null) {
-                    logger.debug(" processing build delegate id " + d);
+                logger.debug(" processing build delegate id " + d);
 
                 delegates.get(d).modelBuilt(delegateresult.get(d));
                 delegates.remove(d);
                 delegateresult.remove(d);
             }
         }
-        //modelbuilddelegates.clear();
-        //modelbuildvalues.clear();
-        //3.8.21 geht jetzt uber das loadresult
-        if (loadresult != null) {
-            // List<Integer> bundledelegateids = new ArrayList<Integer>(bundledelegates.keySet());
-            //for (int i = bundledelegateids.size() - 1; i >= 0; i--) {
-            for (Pair<BundleLoadDelegate, Bundle> result : loadresult) {
-                //blocks webgl log. logger.debug("check processing delegate");
-                //Integer d = bundledelegateids.get(i);
-                //ist ja immer null if (bundledelegateresult.get(d) != null) {
-                    logger.debug(" processing bundle delegate");
-
-                //bundledelegates.get(d).bundleLoad(bundledelegateresult.get(d));
-                //bundledelegates.remove(d);
-                //bundledelegateresult.remove(d);
-                result.getFirst().bundleLoad(result.getSecond());
-                //}
-            }
-        }
     }
-
 
     /**
      * Default implementation doing nothing.
@@ -468,16 +435,18 @@ public class AbstractSceneRunner implements NativeSceneRunner {
         return id;
     }
 
-    public int invokeLater(BundleLoadDelegate modeldelegate) {
-        int id = ++delegateid;
-        bundledelegates.put(delegateid, modeldelegate);
-        return id;
-    }
-
-    public void invokeLater(AsyncInvoked<AsyncHttpResponse> asyncInvoked) {
+    //21.12.23 not needed/used? External usage.
+    /*4.1.24 public void invokeLater(AsyncInvoked<AsyncHttpResponse> asyncInvoked) {
         invokedLater.add(asyncInvoked);
+    }*/
+
+    public void invokeLater(AsyncDelegator asyncInvoked) {
+        invokeLaters.add(asyncInvoked);
     }
 
+    /**
+     * Executes delegate when future is complete.
+     */
     @Override
     public <T, D> void addFuture(NativeFuture<T> future, AsyncJobDelegate<D> asyncJobDelegate) {
         futures.add(new Pair(future, asyncJobDelegate));
@@ -490,8 +459,6 @@ public class AbstractSceneRunner implements NativeSceneRunner {
     public void cleanup() {
         delegates.clear();
         delegateresult.clear();
-        bundledelegates.clear();
-        //bundledelegateresult.clear();
         newJobList.clear();
         completedJobList.getCompletedJobs().clear();
         if (clientBusConnector != null) {
@@ -541,36 +508,45 @@ public class AbstractSceneRunner implements NativeSceneRunner {
 
     /**
      * The main mathod for an app to load a bundle. Loading is always async (like model) via the platform, but not multithreaded.
+     * After loaded the bundle is added to the BundleRegistry and the delegate delegated to Asynchelper invokelater for consistent program flow
      * 20.2.18: Wenn ein Bundle schon geladen wurde, wird es nicht doppelt geladen (Eine Race Condition gibt es aber trotzdem).
      * Das Verhalten ist unabhaengig davon, ob das Model schon geladen wurde oder nicht.
      * <p>
      * 22.7.21: Moved from Platform to here. Not static. Muss von webgl overrided werden!
      * In general async but without MT.
-     * 10.11.23: Deprecated to get rid of 'delayed'.
+     * 10.11.23: 'delayed' removed.
+     * 15.12.23: also used in preload.
      */
-    @Deprecated
-    public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed) {
+    public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate) {
         //2.8.21 AsyncHelper.asyncBundleLoad(bundlename, AbstractSceneRunner.getInstance().invokeLater(bundleLoadDelegate), delayed);
+
+        NativeBundleResourceLoader resourceLoader;
         if (StringUtils.startsWith(bundlename, "http")) {
             // full qualified bundle
-            new HttpBundleLoader().asyncBundleLoad(bundlename, bundleLoadDelegate, delayed);
+            //new HttpBundleLoader().asyncBundleLoad(bundlename, bundleLoadDelegate, delayed);
+            //String bundlebasedir = BundleResolver.resolveBundle(bundlename, Platform.getInstance().bundleResolver).getPath();
+            String bundlebasedir = StringUtils.substringBeforeLast(bundlename, "/");
+            resourceLoader = Platform.getInstance().buildResourceLoader(StringUtils.substringAfterLast(bundlename, "/"), bundlebasedir);
+            bundlename = StringUtils.substringAfterLast(bundlename, "/");
+
+            //bundleLoader/*new PlatformBundleLoader()*/.loadBundle(bundlename, bundleLoadDelegate, resourceLoader);
         } else {
-            Platform.getInstance().bundleLoader.asyncBundleLoad(bundlename, bundleLoadDelegate, delayed);
+            //13.12.23 Platform.getInstance().bundleLoader.asyncBundleLoad(bundlename, bundleLoadDelegate, delayed);
+            resourceLoader = Platform.getInstance().buildResourceLoader(bundlename, null);
+
         }
-    }
 
-    public void loadBundle(String bundlename, BundleLoadDelegate loadlistener) {
-        loadBundle(bundlename, loadlistener, false);
-    }
-
-    /**
-     * 2.8.21 direkt deprecated wegen doofen coupling
-     *
-     * @return
-     */
-    @Deprecated
-    public NativeBundleLoader getBundleLoader() {
-        return Platform.getInstance().bundleLoader;
+        String loadBundlename = bundlename;
+        bundleLoader.loadBundle(loadBundlename, bundle -> {
+            // the loader doesn't register the bundle
+            if (bundle == null) {
+                logger.error("Bundle load failed");
+            } else {
+                BundleRegistry.registerBundle(loadBundlename, bundle);
+            }
+            // delegate via Asynchelper for consistent program flow.
+            invokeLater(() -> bundleLoadDelegate.bundleLoad(bundle));
+        }, resourceLoader);
     }
 
     /**
@@ -586,10 +562,10 @@ public class AbstractSceneRunner implements NativeSceneRunner {
      * platform-webgl needs it public.
      */
     public void initScene() {
-        // decide scene mode monolith or client/server
+        // decide scene mode monolith or client/server. 20.12.23 or server
         String server = Platform.getInstance().getConfiguration().getString("server");
         if (server == null) {
-            ascene.init(SceneMode.forMonolith());
+            ascene.init(getSceneMode());
         } else {
             logger.info("Connecting to server " + server);
             NativeSocket socket = Platform.getInstance().connectToServer(new Server(server));
@@ -599,6 +575,92 @@ public class AbstractSceneRunner implements NativeSceneRunner {
             ascene.init(SceneMode.forClient());
         }
     }
+
+    // to be overridden in server mode
+    public SceneMode getSceneMode() {
+        return SceneMode.forMonolith();
+    }
+
+    /**
+     * 15.12.23 Moved here from AsyncHelper.
+     * public for testing?
+     */
+    public void processFutures() {
+
+        // "<Object>" for C# (See "futures" definition
+        // the complete callback might add additional futures. Avoid ConcurrentModificationException and don't loose the new.
+        List<Pair<NativeFuture, AsyncJobDelegate>> futures = new ArrayList<>(AbstractSceneRunner.getInstance().futures);
+        //C# List<Object> futures = new ArrayList<Object>();
+        //C# foreach (Object p1 in AbstractSceneRunner.getInstance().futures) {
+        for (Pair<NativeFuture, AsyncJobDelegate> p : futures) {
+            //C# Pair<NativeFuture<Object>, AsyncJobDelegate<Object>> p = (Pair<NativeFuture<Object>, AsyncJobDelegate<Object>>) p1;
+            if (p.getFirst().isDone()) {
+                p.getSecond().completed(p.getFirst().get());
+                // mark completed for below remove
+                p.setSecond(null);
+            }
+        }
+        AbstractSceneRunner.getInstance().futures.removeIf(e -> e.getSecond() == null);
+
+    }
+
+    public void processInvokeLaters() {
+
+        for (AsyncDelegator delegator : invokeLaters) {
+            delegator.run();
+        }
+        invokeLaters.clear();
+    }
+
+    public void enterInitChain(String[] bundleNames) {
+
+        List<Bundle> loadedBundle = new ArrayList();
+
+        for (String bundlename : bundleNames) {
+            /*15.12.23 this is old stuff boolean delayed = false;
+            //wegen C#
+            String bname = bundlename;
+            if (StringUtils.endsWith(bname, "-delayed")) {
+                //TODO das mit delay ist ne kruecke
+                bname = StringUtils.replaceAll(bname, "-delayed", "");
+                delayed = true;
+            }
+            ResourcePath bundlebasedir = BundleResolver.resolveBundle(bundlename, bundleResolver);
+            //3.8.21 hier kam fruehe bei einem Fehler ueber AsyncJobCallbackImpl eine Exception
+            /*BundleLoaderExceptGwt.* /
+            String e = loadBundleSyncInternal(bname,  /*13.12.23 null,* / delayed, /*2.8.21 new AsyncJobCallbackImpl(),* / rm, bundlebasedir);
+            if (e != null) {
+                throw new RuntimeException(e);
+            }end old stuff */
+
+            // loading might be async using futures. InitChain will process futures.
+            AbstractSceneRunner.getInstance().loadBundle(bundlename, new BundleLoadDelegate() {
+                @Override
+                public void bundleLoad(Bundle bundle) {
+                    logger.debug("BundleLoadDelegate for bundle " + bundlename);
+                    loadedBundle.add(bundle);
+                }
+            });
+        }
+        NativeInitChain initChain = buildInitChain(new PreloadCallback(bundleNames, loadedBundle));
+        initChain.execute();
+    }
+
+    /**
+     * Default implementation.
+     */
+    public NativeInitChain buildInitChain(InitExecutor initExecutor) {
+        return new DefaultInitChain(initExecutor);
+    }
+
+    public abstract void startRenderLoop();
+
+    /**
+     * Workaround until we have it in initchain.
+     */
+    @Deprecated
+    public abstract void sleepMs(int millis);
+
 }
 
 class AsyncJobInfo {

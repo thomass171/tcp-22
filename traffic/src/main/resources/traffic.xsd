@@ -16,7 +16,11 @@
             <element name="vehicle" type="c:VehicleType"/>
             <element name="viewpoint" type="c:ViewpointType"/>
             <element name="vehicledefinition" type="c:VehicleDefinitionType"/>
+            <element name="vehicles" type="c:VehicleListType"/>
+            <element name="airportdefinition" type="c:AirportDefinitionType"/>
             <element name="BaseTransformForVehicleOnGraph" type="c:BaseTransformForVehicleOnGraphType"/>
+            <element name="include" type="string"/>
+            <element name="poi" type="c:PoiType"/>
         </choice>
         <attribute name="name" type="string"/>
 
@@ -34,11 +38,11 @@
         </sequence>
         <attribute name="name" type="string"/>
     </complexType>
-    <complexType name="ViewpointListType">
-        <sequence>
-            <element name="viewpoint" type="c:ViewpointType" minOccurs="0" maxOccurs="1"/>
-        </sequence>
-    </complexType>
+    <!--28.11.23  <complexType name="ViewpointListType">
+         <sequence>
+             <element name="viewpoint" type="c:ViewpointType" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
+     </complexType>-->
 
     <complexType name="LightType">
         <attribute name="color" type="string"/>
@@ -64,14 +68,13 @@
     <!-- position,rotation,scale,aso-->
     <complexType name="MultiValueType">
 
-            <simpleContent>
-                <extension base="string">
+        <simpleContent>
+            <extension base="string">
 
-                </extension>
-            </simpleContent>
+            </extension>
+        </simpleContent>
 
     </complexType>
-
 
 
     <complexType name="ObjectType">
@@ -94,6 +97,7 @@
         <attribute name="automove" type="boolean"/>
         <!-- a SmartLocation-->
         <attribute name="location" type="string"/>
+        <attribute name="initialcount" type="int"/>
 
     </complexType>
 
@@ -107,10 +111,20 @@
             <element name="unscheduledmoving" type="boolean" minOccurs="0" maxOccurs="1"/>
             <element name="maximumspeed" type="double" minOccurs="0" maxOccurs="1"/>
             <element name="acceleration" type="double" minOccurs="0" maxOccurs="1"/>
-            <element name="viewpoints" type="c:ViewpointListType" minOccurs="0" maxOccurs="1"/>
+            <element name="approachoffset" type="double" minOccurs="0" maxOccurs="1"/>
+            <element name="turnradius" type="double" minOccurs="0" maxOccurs="1"/>
+            <!-- 28.11.23: Its not consistent to have a sublist here. So just unbounded -->
+            <element name="viewpoint" type="c:ViewpointType" minOccurs="0" maxOccurs="unbounded"/>
             <!-- doesn't really belong here, but currently its used -->
             <element name="initialcount" type="int" minOccurs="0" maxOccurs="1"/>
-
+            <element name="aircraftdir" type="string" minOccurs="0" maxOccurs="1"/>
+            <element name="optional" type="string" minOccurs="0" maxOccurs="unbounded"/>
+            <element name="wingspread" type="double" minOccurs="0" maxOccurs="1"/>
+            <element name="wingpassingpoint" type="string" minOccurs="0" maxOccurs="1"/>
+            <element name="leftwingapproachpoint" type="string" minOccurs="0" maxOccurs="1"/>
+            <!--first door is expected to be front left-->
+            <!--14.11.17: z soll die door Unterkante im aircraft local space sein. Was hoffentlich im vom Ground ist. Ist es aber wohl nicht.-->
+            <element name="door" type="string" minOccurs="0" maxOccurs="unbounded"/>
         </sequence>
 
         <attribute name="name" type="string"/>
@@ -120,12 +134,51 @@
 
     </complexType>
 
+    <complexType name="VehicleListType">
+
+        <sequence>
+            <element name="vehicle" type="c:VehicleType" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+
+        <attribute name="name" type="string"/>
+
+    </complexType>
+
+    <complexType name="AirportDefinitionType">
+        <sequence>
+            <element name="home" type="string" minOccurs="0" maxOccurs="1"/>
+            <element name="parking" type="string" minOccurs="0" maxOccurs="1"/>
+            <element name="vehicle" type="c:LocatedVehicleType" minOccurs="0" maxOccurs="unbounded"/>
+            <!-- a SmartLocation-->
+            <element name="location" type="string" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+        <attribute name="icao" type="string"/>
+    </complexType>
+
+    <complexType name="LocatedVehicleType">
+        <sequence>
+            <!-- a SmartLocation-->
+            <element name="location" type="string" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+        <attribute name="name" type="string"/>
+    </complexType>
+
     <!-- until we have a better idea where to put this we keep it here-->
     <complexType name="BaseTransformForVehicleOnGraphType">
         <sequence>
             <element name="transform" type="c:TransformType" minOccurs="0" maxOccurs="1"/>
         </sequence>
         <attribute name="name" type="string"/>
+    </complexType>
+
+    <!-- A poi is similar to viewpoint, but uses geo coordinates -->
+    <complexType name="PoiType">
+        <simpleContent>
+            <extension base="string">
+                <attribute name="name" type="string"/>
+                <attribute name="description" type="string"/>
+            </extension>
+        </simpleContent>
     </complexType>
 
     <!-- Type for hex integers -->
@@ -139,6 +192,5 @@
     <simpleType name="dec-or-hex-integer">
         <union memberTypes="integer c:hex-integer"/>
     </simpleType>
-
 
 </schema>

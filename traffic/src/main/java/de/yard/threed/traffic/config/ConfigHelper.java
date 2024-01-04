@@ -5,12 +5,14 @@ import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.ParsingHelper;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.NativeNode;
+import de.yard.threed.engine.ViewPoint;
 import de.yard.threed.engine.util.XmlHelper;
+import de.yard.threed.trafficcore.config.AirportDefinition;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,57 +62,9 @@ public class ConfigHelper {
         return new Vector3(p[0], p[1], p[2]);
     }
 
-
-    /**
-     * From global vehicle list.
-     * 30.10.23: Deprecated because related to legacy non xsd xml layout.
-     *
-     * @return
-     */
-    @Deprecated
-    public static VehicleConfig getVehicleConfig(NativeDocument tw, String name) {
-        List<NativeNode> vehicles = XmlHelper.getChildNodeList(tw, "vehicles", "vehicle");
-        for (int i = 0; i < vehicles.size(); i++) {
-            if (name.equals(XmlHelper.getStringAttribute(vehicles.get(i), "name", null))) {
-                return new XmlVehicleConfig(vehicles.get(i));
-            }
-        }
-        return null;
+    public static ViewPoint buildViewpoint(NativeNode nn) {
+        LocalTransform transform = ConfigHelper.getTransform(nn);
+        return new ViewPoint(XmlHelper.getStringAttribute(nn, "name"), transform);
     }
 
-    /**
-     * 30.10.23: Deprecated because related to legacy non xsd xml layout.
-     */
-    @Deprecated
-    public static VehicleConfig getVehicleConfig(NativeDocument tw, int index) {
-        List<NativeNode> vehicles = XmlHelper.getChildNodeList(tw, "vehicles", "vehicle");
-
-        return new XmlVehicleConfig(vehicles.get(index));
-    }
-
-    public static int getVehicleCount(NativeDocument tw) {
-        List<NativeNode> vehicles = XmlHelper.getChildNodeList(tw, "vehicles", "vehicle");
-        return vehicles.size();
-    }
-
-    /**
-     *
-     */
-    public static VehicleConfig getVehicleDefinition(NativeDocument tw, String name) {
-        List<NativeNode> vehicleDefinitions = XmlHelper.getChildren(tw, "vehicledefinition");
-        for (NativeNode n : vehicleDefinitions) {
-            if (name.equals(XmlHelper.getStringAttribute(n, "name"))) {
-                return new XmlVehicleConfig(n);
-            }
-        }
-        return null;
-    }
-
-    public static LocalTransform getBaseTransformForVehicleOnGraph(NativeDocument tw) {
-        List<NativeNode> d = XmlHelper.getChildren(tw, "BaseTransformForVehicleOnGraph");
-        if (d.size()>0){
-            return ConfigHelper.getTransform(d.get(0));
-        }
-        return null;
-    }
 }

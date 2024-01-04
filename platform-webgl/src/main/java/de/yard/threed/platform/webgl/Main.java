@@ -155,7 +155,7 @@ public class Main implements EntryPoint {
 
             }
         };
-        ((WebGlBundleLoader) Platform.getInstance().bundleLoader).loadRessource(resource, listener, true);
+        //15.12.23 ((WebGlBundleLoader) Platform.getInstance().bundleLoader).loadRessource(resource, listener, true);
     }
 
     /**

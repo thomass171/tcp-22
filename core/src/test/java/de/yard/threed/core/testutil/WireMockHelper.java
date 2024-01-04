@@ -1,4 +1,4 @@
-package de.yard.threed.engine.testutil;
+package de.yard.threed.core.testutil;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 

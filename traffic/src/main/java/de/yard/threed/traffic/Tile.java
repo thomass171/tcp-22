@@ -33,26 +33,12 @@ public class Tile {
      * More advanced. Not only a single GLTF from bundle "osmscenery" but optional a config file
      * and optional several bundle.
      * But for now the XML file must already be loaded.
+     *
      * @return
      */
-    public static TrafficConfig loadConfigFile(BundleResource tile) {
+    public static TrafficConfig loadConfigFile(Bundle bundle, BundleResource tile) {
         // XML only sync for now
-        BundleData xml = BundleHelper.loadDataFromBundle(tile);
 
-        if (xml == null) {
-            logger.error("XML file not found:"+tile.getName());
-            return null;
-        }
-       NativeDocument config = null;
-        try {
-            config = Platform.getInstance().parseXml(xml.getContentAsString());
-        } catch (XmlException e) {
-            e.printStackTrace();
-        }
-        if (config == null) {
-            logger.error("parsing xml failed:" + xml);
-            return null;
-        }
-        return new TrafficConfig(config);
+        return TrafficConfig.buildFromBundle(bundle, tile);
     }
 }

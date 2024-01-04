@@ -77,7 +77,7 @@ public class OpenGlRay implements NativeRay {
     @Override
     public List<NativeCollision> getIntersections() {
        //24.9.19 return intersects(OpenGlScene.root);
-        return intersects(Scene.getWorld().nativescenenode);
+        return intersects(Scene.getCurrent().getWorld().nativescenenode);
     }
 
 

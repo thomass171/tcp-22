@@ -185,6 +185,7 @@ public class MazeSceneTest {
         testClient1.assertConnectAndLogin(sceneServer);
 
         // client0 should be informed about entity of second. Count of 4 entity state events seems plausibel.
+        // 15.12.23 not absolut deterministic? 4->5 and 3->4 for unknown reason, and back to old values
         List<Event> evs = testClient0.getAllEventsEntityState(testClient1.userEntityId);
         assertEquals(4, evs.size());
         List<Event> entityEventsWithBuilderName = EcsTestHelper.filterEventList(evs, (e) -> !StringUtils.isBlank((String) e.getPayload().get("buildername")));

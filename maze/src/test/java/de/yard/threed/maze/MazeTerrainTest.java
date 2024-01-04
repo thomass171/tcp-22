@@ -32,7 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * Created by thomass on 15.07.15.
  */
 public class MazeTerrainTest {
-    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()));
+    // 2.1.24: "data" added. Strange, why wasn't it a problem before? Maybe it was but not revealed.
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "maze", "data"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()));
     MazeTheme mazeTheme;
 
     //no good idea to define statics here because it restarts platform init

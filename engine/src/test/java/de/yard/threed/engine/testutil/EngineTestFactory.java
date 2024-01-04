@@ -1,9 +1,13 @@
 package de.yard.threed.engine.testutil;
 
 import de.yard.threed.core.configuration.Configuration;
+import de.yard.threed.core.resource.Bundle;
+import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.testutil.Assert;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.Observer;
+import de.yard.threed.engine.platform.PlatformBundleLoader;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.DefaultResourceReader;
@@ -16,10 +20,11 @@ import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.javacommon.SimpleHeadlessPlatform;
-import de.yard.threed.outofbrowser.SyncBundleLoader;
+import de.yard.threed.outofbrowser.FileSystemBundleResourceLoader;
 
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.function.BooleanSupplier;
 
 /**
  * Has access to ConfigurationByEnv, other than CoreTestFactory.
@@ -31,7 +36,7 @@ import java.util.Properties;
 public class EngineTestFactory {
 
     public static Platform initPlatformForTest(String[] bundlelist, PlatformFactory platformFactory) {
-        return initPlatformForTest(bundlelist, platformFactory, (InitMethod)null, ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        return initPlatformForTest(bundlelist, platformFactory, (InitMethod) null, ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
     }
 
     /**
@@ -67,34 +72,31 @@ public class EngineTestFactory {
         return pl;
     }*/
 
-
-    public static void loadBundleSync(String bundlename) {
-        loadBundleSync(bundlename, null, false);
+    /**
+     * 22.12.23
+     */
+    public static void loadBundleAndWait(String bundlename) {
+        AbstractSceneRunner.getInstance().loadBundle(bundlename, new BundleLoadDelegate() {
+            @Override
+            public void bundleLoad(Bundle bundle) {
+                BundleRegistry.registerBundle(bundlename, bundle);
+            }
+        });
+        try {
+            TestUtils.waitUntil(new BooleanSupplier() {
+                @Override
+                public boolean getAsBoolean() {
+                    return BundleRegistry.getBundle(bundlename) != null;
+                }
+            }, 2000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public static void loadBundleSync(String bundlename, String registername, boolean delayed) {
-
-        // Doppelt laden vermeiden, es sei denn es soll unter anderem Namen registiriert werrden
-        if (BundleRegistry.getBundle(bundlename) == null || registername != null) {
-            /*BundleLoaderExceptGwt*/
-            ResourcePath bundlebasedir = BundleResolver.resolveBundle(bundlename, Platform.getInstance().bundleResolver);
-            String e = SyncBundleLoader.loadBundleSyncInternal(bundlename, registername, delayed,/* new AsyncJobCallback() {
-                @Override
-                public void onSuccess() {
-                    // was sync, nothing to do:
-                }
-
-                @Override
-                public void onFailure(String e) {
-                    // das mal als Fehler werten
-                    Assert.fail("Bundle failed:" + bundlename);
-                }
-            },*/ new DefaultResourceReader(), bundlebasedir);
-            if (e != null) {
-                // das mal als Fehler werten
-                Assert.fail("Bundle failed:" + bundlename);
-            }
-        }
+    @Deprecated
+    public static void loadBundleSync(String bundlename) {
+        loadBundleAndWait(bundlename);
     }
 
     /**
@@ -108,7 +110,7 @@ public class EngineTestFactory {
         // Try to remove old system properties. Might be difficult to find all, so rely on prefix
         // 6.2.23 deprecated since using configuration
         Properties properties = System.getProperties();
-        for (String p :properties.stringPropertyNames()) {
+        for (String p : properties.stringPropertyNames()) {
             if (p.startsWith(SimpleHeadlessPlatform.PROPERTY_PREFIX)) {
                 System.clearProperty(p);
             }
@@ -126,6 +128,45 @@ public class EngineTestFactory {
             SceneAnimationController.instance = null;
             //4.5.20 das muss jetzt doch auch sein.
             AbstractSceneRunner.instance = null;
+        }
+    }
+
+    /**
+     * Loaded from local module working dir.
+     */
+    public static void addTestResourcesBundle() {
+        if (BundleRegistry.getBundle("test-resources") == null) {
+            ResourcePath bundlebasedir = new ResourcePath("src/test/resources");
+            //15.12.23 SyncBundleLoader.loadBundleSyncInternal("test-resources",  /*13.12.23 null,*/ false, new DefaultResourceReader(), bundlebasedir);
+            // bundleLoader in SceneRunner is hidden. So use a new one for this special case.
+            PlatformBundleLoader bundleLoader = new PlatformBundleLoader();
+            bundleLoader.loadBundle("test-resources", new BundleLoadDelegate() {
+                @Override
+                public void bundleLoad(Bundle bundle) {
+                    BundleRegistry.registerBundle("test-resources", bundle);
+                }
+            }, new FileSystemBundleResourceLoader(bundlebasedir));
+        }
+    }
+
+
+    /**
+     * Loaded from local module working/project dir.
+     * Also expects a directory.txt?
+     */
+    public static void addBundleFromProjectDirectory(String bundleName, String subdir) {
+        if (BundleRegistry.getBundle(bundleName) == null) {
+            ResourcePath bundlebasedir = new ResourcePath("../" + subdir);
+            /*String e = SyncBundleLoader.loadBundleSyncInternal(bundleName, null,
+                    false, new DefaultResourceReader(), bundlebasedir);*/
+            // bundleLoader in SceneRunner is hidden. So use a new one for this special case.
+            PlatformBundleLoader bundleLoader = new PlatformBundleLoader();
+            bundleLoader.loadBundle(bundleName, new BundleLoadDelegate() {
+                @Override
+                public void bundleLoad(Bundle bundle) {
+                    BundleRegistry.registerBundle(bundleName, bundle);
+                }
+            }, new FileSystemBundleResourceLoader(bundlebasedir));
         }
     }
 }

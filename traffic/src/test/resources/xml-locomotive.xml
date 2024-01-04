@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- Extracted from "Railing.xml". Used in tcp-flightgear. Duplicated and extended in tcp-22 for earlier testing. Not suitable for real. TODO Move to test/resources?-->
+<!-- Extracted from "Railing.xml". Used in tcp-flightgear. Duplicated and extended in tcp-22 for earlier testing. Not suitable for real.
+ 25.11.23: Renamed from "locomotive.xml" to "xml-locomotive.xml" to make clear it references the XML modelling. And moved to test/resources-->
 
 <c:config xmlns:c="http://www.example.org/tcp-22" name="a">
 
@@ -13,14 +14,12 @@
         <!-- 42 kmh -->
         <maximumspeed>11.7</maximumspeed>
         <acceleration>0.9</acceleration>
-        <viewpoints>
-            <viewpoint name="Driver">
-                <transform>
-                    <position>1, 1, 0</position>
-                    <angle>0,90,0</angle>
-                </transform>
-            </viewpoint>
-        </viewpoints>
+        <viewpoint name="Driver">
+            <transform>
+                <position>1, 1, 0</position>
+                <angle>0,90,0</angle>
+            </transform>
+        </viewpoint>
     </vehicledefinition>
 
     <!-- only here for testing -->

@@ -2,11 +2,6 @@ package de.yard.threed.platform.webgl;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.typedarrays.shared.ArrayBuffer;
@@ -18,12 +13,13 @@ import com.google.gwt.xml.client.XMLParser;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.HttpBundleResolver;
 import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.platform.*;
+import de.yard.threed.core.resource.URL;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.platform.common.AsyncHelper;
 import de.yard.threed.core.Color;
@@ -35,9 +31,12 @@ import de.yard.threed.core.XmlException;
 import de.yard.threed.core.NumericType;
 import de.yard.threed.core.ImageData;
 import de.yard.threed.core.NumericValue;
+import de.yard.threed.engine.platform.common.InitExecutor;
+import de.yard.threed.engine.platform.common.NativeInitChain;
 import de.yard.threed.engine.platform.common.SampleContentProvider;
 import de.yard.threed.core.platform.TestPdfDoc;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -75,7 +74,6 @@ public class PlatformWebGl extends Platform {
             // TODO: Als default texture sowas wie void.png o.ae. nehmen. 5.10.18: Hat WebGL sowas nicht?
             //Platform.instance.defaulttexture = JmeTexture.loadFromFile(new BundleResource("FontMap.png"));
             instance.nativeScene = new WebGlScene();
-            instance.bundleLoader = new WebGlBundleLoader();
         }
         PlatformInternals platformInternals = new PlatformInternals();
         // resolver order is important. most specific first.
@@ -84,9 +82,9 @@ public class PlatformWebGl extends Platform {
             // might be the result of a '+' which is valid in base64
             additionalBundle = additionalBundle.replace(" ", "+");
         }
-        instance.bundleResolver.addAll(WebGlBundleResolver.buildFromPath(additionalBundle));
+        instance.bundleResolver.addAll(((PlatformWebGl) instance).buildBundleResolverFromPath(additionalBundle));
         // lowest priority default resolver for HostPageBaseURL(origin)
-        instance.bundleResolver.add(new WebGlBundleResolver());
+        instance.bundleResolver.add(new HttpBundleResolver());
         return platformInternals;//(Platform) Platform.instance;
     }
     
@@ -158,34 +156,43 @@ public class PlatformWebGl extends Platform {
     }*/
 
     /**
+     * Points to HostPageBaseURL(origin) without full qualified URL.
      * Uses AsyncHelper similar to other platforms for forwarding the result to have a consistent program flow.
      */
     @Override
     public void httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
 
+        logger.debug("httpGet url=" + url);
         // 10.11.23: RequestBuilder only returns text data (internal pre conversion?). So prefer the low level XMLHttpRequest
         XMLHttpRequest request = XMLHttpRequest.create();
         request.open("GET", url);
         // Add a header to prevent the browser from deciding no preflight is needed
         // because of allegedly standard request. These might fail later due to some 'who knows what browser think'.
-        request.setRequestHeader("X-forcecpreflight","v");
+        // 18.12.23: There seems to be no such header and no way to force a preflight. Instead this header leads to an error
+        // with devmode->jetty/bundle apache
+        //request.setRequestHeader("X-forcecpreflight","v");
         request.setResponseType(XMLHttpRequest.ResponseType.ArrayBuffer);
         request.setOnReadyStateChange(xhr -> {
             if (xhr.getReadyState() == XMLHttpRequest.DONE) {
                 // 2xx is considered ok
+                // response needs to be send in any case. Otherwise eg. bundle loading might wait infinitely. Codes can differ between devmode and
+                // compiled.
+                AsyncHttpResponse r;
                 if (xhr.getStatus() >= 300) {
                     logger.error("XHR Status code " + xhr.getStatus() + " for url " + url);
+                    r = new AsyncHttpResponse(xhr.getStatus(), null, null);
                 } else {
                     ArrayBuffer buffer = xhr.getResponseArrayBuffer();
                     if (buffer == null) {
                         logger.error("no data (CORS problem?) from url " + url);
+                        r = new AsyncHttpResponse(xhr.getStatus(), null, null);
                     } else {
                         logger.debug("onReadyStateChange. size=" + buffer.byteLength());
-                        AsyncHttpResponse r = new AsyncHttpResponse(xhr.getStatus(), null, new WebGlByteBuffer(buffer));
-                        NativeFuture<AsyncHttpResponse> future = new WebGlFuture<AsyncHttpResponse>(r);
-                        sceneRunner.addFuture(future, asyncJobDelegate);
+                        r = new AsyncHttpResponse(xhr.getStatus(), null, new WebGlByteBuffer(buffer));
                     }
                 }
+                NativeFuture<AsyncHttpResponse> future = new WebGlFuture<AsyncHttpResponse>(r);
+                sceneRunner.addFuture(future, asyncJobDelegate);
             }
         });
         request.send();
@@ -251,10 +258,10 @@ public class PlatformWebGl extends Platform {
         return WebGlMaterial.buildMaterial(name, color, texture, params, (Effect) effect);
     }
 
-    private NativeTexture buildNativeTextureWebGl(NativeResource filename, HashMap<NumericType, NumericValue> params) {
+    private NativeTexture buildNativeTextureWebGl(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> params) {
         //logger.debug("buildNativeTextureWebGl " + filename.getFullName());
         //20.8.23:How is bundle name handled?
-        WebGlTexture texture = WebGlTexture.loadTexture(filename.getFullName());
+        WebGlTexture texture = WebGlTexture.loadTexture(filename/*.getFullName()*/);
         NumericValue wraps = params.get(NumericType.TEXTURE_WRAP_S);
         if (wraps != null) {
             if (wraps.equals(NumericValue.REPEAT))
@@ -271,16 +278,25 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
-    public NativeTexture buildNativeTexture(BundleResource filename, HashMap<NumericType, NumericValue> parameters) {
-        if (filename.bundle == null) {
+    public NativeTexture buildNativeTexture(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> parameters) {
+        logger.debug("buildNativeTexture " + filename);
+       /* if (filename.bundle == null) {
             logger.error("buildNativeTexture:bundle not set for file " + filename.getFullName());
             return null;//defaulttexture;
-        }
+        }*/
         //String bundlebasedir = BundleRegistry.getBundleBasedir(filename.bundle.name, true);
-        // TODO don't use filename/bundlebasedir for HTTP part
-        String bundlebasedir = BundleResolver.resolveBundle(filename.bundle.name, Platform.getInstance().bundleResolver).getPath();
+        // don't use filename/bundlebasedir for HTTP part, ie. resolving again via bundle name might end in default bundle resolver point to origin.
+        /*String bundlebasedir;
+        if (filename.bundle.getBasePath().startsWith("http")) {
+            bundlebasedir = filename.bundle.getBasePath();
+        } else {
+            bundlebasedir = BundleResolver.resolveBundle(filename.bundle.name, Platform.getInstance().bundleResolver).getPath();
+        }
+        logger.debug("bundlebasedir=" + bundlebasedir);
+
         BundleResource resource = new BundleResource(bundlebasedir + "/" + filename.getFullName());
-        return buildNativeTextureWebGl(resource, parameters);
+        return buildNativeTextureWebGl(resource, parameters);*/
+        return buildNativeTextureWebGl(filename, parameters);
     }
 
     @Override
@@ -583,6 +599,45 @@ public class PlatformWebGl extends Platform {
     public NativeAudio buildNativeAudio(NativeAudioClip audioClip) {
         WebGlAudio audio = WebGlAudio.createAudio((WebGlAudioClip) audioClip);
         return audio;
+    }
+
+    @Override
+    public NativeBundleResourceLoader buildResourceLoader(String bundlename, String location) {
+        if (location != null && StringUtils.startsWith(location, "http")) {
+            return new HttpBundleResourceLoader(location + "/" + bundlename);
+        }
+        // let resolver decide to cover HOSTDIR a.s.o. instead of hard coded GWT.getHostPageBaseURL()
+        ResourcePath bundlebasedir = BundleResolver.resolveBundle(bundlename, bundleResolver);
+        logger.debug("bundlebasedir=" + bundlebasedir.path);
+        return new HttpBundleResourceLoader(bundlebasedir.path);
+    }
+
+    public NativeInitChain buildInitChain(InitExecutor initExecutor) {
+        return new WebGlInitChain(initExecutor/*,new WebGlAsyncRunner()*/);
+    }
+
+    /**
+     * Used to parse 'ADDITIONALBUNDLE'
+     */
+    private List<BundleResolver> buildBundleResolverFromPath(String bundlepathFromEnv) {
+        List<BundleResolver> l = new ArrayList<BundleResolver>();
+
+        if (bundlepathFromEnv != null) {
+            String[] parts = StringUtils.split(bundlepathFromEnv, ":");
+            for (int i = 0; i < parts.length; i++) {
+                // base64 natively uses '+','=' and '/' and might replace these by URL conform letters like '-'. Very confusing
+                // and finally not very helpful. So also accept pure (URL encoded) strings. But these conflict with ':' separator.
+                // So for now stay with base64.
+                String subPart = parts[i];
+                logger.debug("Found bundle sub path " + subPart);
+                if (false && StringUtils.contains(subPart, "@http")) {
+                    l.add(new HttpBundleResolver(subPart));
+                } else {
+                    l.add(new HttpBundleResolver(WebGlCommon.atob(subPart)));
+                }
+            }
+        }
+        return l;
     }
 }
 

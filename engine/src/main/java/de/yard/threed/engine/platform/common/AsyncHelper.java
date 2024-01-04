@@ -6,10 +6,10 @@ import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.loader.AbstractLoader;
 import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.loader.LoaderGLTF;
+import de.yard.threed.core.platform.AsyncDelegator;
 import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Config;
-import de.yard.threed.core.platform.NativeBundleLoader;
 import de.yard.threed.core.platform.NativeFuture;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.*;
@@ -31,15 +31,13 @@ import java.util.Vector;
  * 3.12.18: Kann das nicht komplett in den AbstractSceneRunner?
  * 5.7.21: Ob das wirklich eine gute Idee ist? Evtl., aber nicht so dringlich.
  * 2.8.21: Bundle load extracted to AsyncBundleLoader.
+ * 21.12.23: No more for bundle loading in general.
  */
 public class AsyncHelper {
     static Log logger = Platform.getInstance().getLog(AsyncHelper.class);
     // Wird verwendet, um das einbauen der async/MT geladenen Model im Hauptthread zu machen (wegen JME).
     // kein asyncjob, weils intern ist. Koennte evtl. trozdem zusammengefuehrt werden. Schick ist das nicht
-    //static Vector<Integer> modelbuilddelegates = new Vector<Integer>();
     static Vector<ModelBuildData> modelbuildvalues = new Vector<ModelBuildData>();
-    //static Vector<Integer> bundleloaddelegates = new Vector<Integer>();
-    //2.8.21 static Vector<BundleLoadData> bundleloadvalues = new Vector<BundleLoadData>();
 
     /**
      * Emulate an async model build inside the platform (gltf only) if there is no native model load.
@@ -48,7 +46,7 @@ public class AsyncHelper {
      * @param delegateid
      */
     public static void asyncModelBuild(BundleResource value, ResourcePath opttexturepath, int loaderoptions, int delegateid) {
-        // modelbuilddelegates.add(delegateid);
+
         if (loaderoptions == 0) {
             //debug hook
             loaderoptions = 0;
@@ -58,24 +56,9 @@ public class AsyncHelper {
     }
 
     /**
-     * MA18: Fuer ein Bundle.
-     */
-    /*2.8.21 public static void asyncBundleLoad(String bundlename, int delegateid, boolean delayed) {
-        if (Config.isAsyncdebuglog()) {
-            logger.debug("scheduling async bundle load for " + bundlename);
-        }
-        //Sicherheitshalber mal prefen.
-        if (Platform.getInstance().hasOwnAsync()) {
-            throw new RuntimeException("invalid usage of AsyncHelper");
-        }
-        //bundleloaddelegates.add(delegateid);
-        bundleloadvalues.add(new BundleLoadData(bundlename, delegateid, delayed));
-    }*/
-
-    /**
      * public fuer Tests
      */
-    static public void processAsync(/*ResourceManager rm,*/ NativeBundleLoader bundleLoader) {
+    static public void processAsync(/*ResourceManager rm,*/ /*21.12.23NativeBundleLoader bundleLoader*/) {
 
         //Sicherheitshalber mal prefen. Wird aber offenbar auch in webgl verwendet.Siehe header.
         if (Platform.getInstance().hasOwnAsync()) {
@@ -87,7 +70,7 @@ public class AsyncHelper {
             ModelBuildData data = modelbuildvalues.get(i);
             BundleResource modelresource = data.value;
             ResourcePath opttexturepath = data.opttexturepath;
-            BuildResult r = attemptModelLoad(/*rm,*/ modelresource, opttexturepath, data.loaderoptions, data.delegateid, bundleLoader);
+            BuildResult r = attemptModelLoad(/*rm,*/ modelresource, opttexturepath, data.loaderoptions, data.delegateid/*21.12.23, bundleLoader*/);
             if (r != null) {
                 // MT sicher machen? ist aber eigentlich nicht MT.
                 AbstractSceneRunner.getInstance().delegateresult.put(data.delegateid, r);
@@ -98,55 +81,20 @@ public class AsyncHelper {
             }
 
         }
-        //modelbuilddelegates.clear();
+
         // modelbuildvalues.clear();
         //modelbuildopttexturepath.clear();
 
-        // bundles
-       /*2.8.21  for (int i = 0; i < bundleloadvalues.size(); i++) {
-            BundleLoadData d = bundleloadvalues.get(i);
-            String bundlename = d.bundlename;
-            if (Config.isAsyncdebuglog()) {
-                logger.debug("processing async bundle load for " + bundlename);
-            }
-            Bundle b;
-            if ((b = BundleRegistry.getBundle(bundlename)) != null) {
-                //dann nicht mehrfach laden
-                if (Config.isAsyncdebuglog()) {
-                    logger.debug("Bundle already loaded");
-                }
-            } else {
-                rm.loadBundle(bundlename, d.delayed);
-                // TODO MT sicher machen und Fehlerbehandlung
-                // Es gibt keine PArameter. Das Bundle ist einfach da, oder nicht.
-                // 2.3.18: Wenns in der Signatur steht, erwartet man das aber, darum doch.
-                b = BundleRegistry.getBundle(bundlename);
-            }
-            AbstractSceneRunner.getInstance().bundledelegateresult.put(d.delegateid, b);
 
-        }
-        //bundleloaddelegates.clear();
-        bundleloadvalues.clear();*/
-
-        for (AsyncInvoked<AsyncHttpResponse> asyncInvoked : AbstractSceneRunner.getInstance().invokedLater) {
+        //21.12.23 not needed/used? External usage
+        /*4.1.24for (AsyncInvoked<AsyncHttpResponse> asyncInvoked : AbstractSceneRunner.getInstance().invokedLater) {
             asyncInvoked.run();
         }
-        AbstractSceneRunner.getInstance().invokedLater.clear();
+        AbstractSceneRunner.getInstance().invokedLater.clear();*/
 
-        // "<Object>" for C# (See "futures" definition
-        // the complete callback might add additional futures. Avoid ConcurrentModificationException and don't loose the new.
-        List<Pair<NativeFuture, AsyncJobDelegate>> futures = new ArrayList<>(AbstractSceneRunner.getInstance().futures);
-        //C# List<Object> futures = new ArrayList<Object>();
-        //C# foreach (Object p1 in AbstractSceneRunner.getInstance().futures) {
-        for (Pair<NativeFuture, AsyncJobDelegate> p : futures) {
-            //C# Pair<NativeFuture<Object>, AsyncJobDelegate<Object>> p = (Pair<NativeFuture<Object>, AsyncJobDelegate<Object>>) p1;
-            if (p.getFirst().isDone()) {
-                p.getSecond().completed(p.getFirst().get());
-                // mark completed for below remove
-                p.setSecond(null);
-            }
-        }
-        AbstractSceneRunner.getInstance().futures.removeIf(e -> e.getSecond() == null);
+
+        // 15.12.23 Futures are now done in AbstractSceneRunner itself.
+
     }
 
     /**
@@ -163,7 +111,7 @@ public class AsyncHelper {
      * @param loaderoptions
      * @return
      */
-    private static BuildResult attemptModelLoad(/*ResourceManager rm,*/ BundleResource file, ResourcePath opttexturepath, int loaderoptions, int delegateid, NativeBundleLoader bundleLoader) {
+    private static BuildResult attemptModelLoad(BundleResource file, ResourcePath opttexturepath, int loaderoptions, int delegateid/*21.12.23 , NativeBundleLoader bundleLoader*/) {
         logger.debug("processing async model build for " + file);
         if (file.bundle == null) {
             logger.error("bundle not set for file " + file.getName());
@@ -173,9 +121,10 @@ public class AsyncHelper {
         BundleData ins = file.bundle.getResource(file);
         if (ins == null) {
             logger.debug(file.getName() + " not found in bundle " + file.bundle.name);
-            if (delayedContentload(/*rm,*/ file, bundleLoader)) {
+            // * 21.12.23: There is no longer a delayed bundle loading.
+            /*21.12.23if (delayedContentload( file, bundleLoader)) {
                 return new BuildResult("failure");
-            }
+            }*/
             return null;
         }
         // wenn es ein GLTF ist, pruefen ob das "bin" auch (schon) da ist. Dann kann das Model gebaut werden.
@@ -189,9 +138,10 @@ public class AsyncHelper {
                 // Ist wohl nur verwirrend. Natürlich kann es delayed sein und wird nachgeladen. Darum hier auch kein Warning.
                 logger.debug("binres " + binres.getName() + " not found in bundle " + file.bundle.name);
                 // Content evtl. async nachladen
-                if (delayedContentload(/*rm,*/ binres, bundleLoader)) {
+                // * 21.12.23: There is no longer a delayed bundle loading.
+                /*21.12.23 if (delayedContentload( binres, bundleLoader)) {
                     return new BuildResult("failure");
-                }
+                }*/
                 return null;
             }
         }
@@ -208,40 +158,12 @@ public class AsyncHelper {
     }
 
     /**
-     * Check for a completed delayed content
-     * Liefert true bei erkanntem Fehler. false heisst aber nicht, dass der async Load erfolgreich war, sondern nur, dass noch geladen wird.
-     * Ein evtl. schon laufender Load wird geskipped.
-     * TODO ein timeout wäre auch nicht schlecht.
-     *
-     * @param file
-     * @return
-     */
-    private static boolean delayedContentload(/*ResourceManager rm, */BundleResource file, NativeBundleLoader
-            bundleLoader) {
-        // Content evtl. async nachladen. Aber nicht, wenn er schon mal auf einen Fehler lief.
-        if (file.bundle.failed(file)) {
-            logger.warn("prevoius error detected for bundle content " + file.getFullName());
-            return true;
-        }
-        if (bundleLoader.isLoading(file)) {
-            //10.10.18: sehr oft duplicate logs bei WebGL, darum nicht mehr loggen.
-            //logger.warn("still waiting for " + file.getFullName());
-            return false;
-        }
-        logger.debug("completing bundle with " + file.getFullName());
-        bundleLoader.completeBundle(file/*,rm*/);
-        return false;
-    }
-
-    /**
      * eigentlich nur fuer Tests
      */
     public static void cleanup() {
-        // modelbuilddelegates.clear();
+
         modelbuildvalues.clear();
         //modelbuildopttexturepath.clear();
-        //bundleloaddelegates.clear();
-        //*2.8.21 bundleloadvalues.clear();
     }
 
     public static int getModelbuildvaluesSize() {

@@ -10,12 +10,12 @@ import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleResolver;
-import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.platform.PlatformInternals;
+import de.yard.threed.core.resource.URL;
 import de.yard.threed.outofbrowser.FileSystemResource;
 import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.resource.ResourcePath;
@@ -31,7 +31,6 @@ import de.yard.threed.javacommon.*;
 import de.yard.threed.javacommon.JavaXmlDocument;
 import de.yard.threed.javacommon.Util;
 import de.yard.threed.outofbrowser.SimpleBundleResolver;
-import de.yard.threed.outofbrowser.SyncBundleLoader;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.w3c.dom.Document;
@@ -39,6 +38,7 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -54,6 +54,9 @@ import java.util.List;
  */
 public class PlatformJme extends SimpleHeadlessPlatform {
     JmeResourceManager jmeResourceManager;
+    private static int uniqueid = 1;
+    // 29.12.23: Moved from JmeSceneRunner to here for having JME statics (JmeScene) inited earlier.
+    public JmeSimpleApplication app;
 
     private PlatformJme(Configuration configuration) {
         // Stringhelper and logfactory are build in super
@@ -87,13 +90,17 @@ public class PlatformJme extends SimpleHeadlessPlatform {
         PlatformInternals platformInternals = new PlatformInternals();
         DefaultResourceReader resourceReader = new DefaultResourceReader();
         instance.bundleResolver.add(new SimpleBundleResolver(((PlatformJme) instance).hostdir + "/bundles", resourceReader));
-        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
+        instance.bundleResolver.addAll(SimpleBundleResolver.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
+
+        // 29.12.23: Moved from JmeSceneRunner to here for having JME statics (JmeScene) inited earlier.
+        ((PlatformJme)instance).app = new JmeSimpleApplication();
+        JmeScene.init(((PlatformJme)instance).app, ((PlatformJme)instance).app.getFlyCam());
+
         return platformInternals/*instance*/;
     }
 
     public void postInit(JmeResourceManager rm) {
         ((PlatformJme) instance).jmeResourceManager = rm;
-        instance.bundleLoader = new AsyncBundleLoader(rm);
     }
 
     @Override
@@ -122,7 +129,7 @@ public class PlatformJme extends SimpleHeadlessPlatform {
 
     @Override
     public void httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
-        NativeFuture<AsyncHttpResponse> future = JavaWebClient.httpGet(url, params, header, asyncJobDelegate);
+        NativeFuture<AsyncHttpResponse> future = new JavaWebClient().httpGet(url, params, header);
         sceneRunner.addFuture(future, asyncJobDelegate);
     }
 
@@ -253,9 +260,9 @@ public class PlatformJme extends SimpleHeadlessPlatform {
         return JmeMaterial.buildLambertMaterialWithNormalMap(null, texture);
     }*/
 
-    private NativeTexture buildNativeTextureJme(NativeResource textureresource, HashMap<NumericType, NumericValue> params) {
+    private NativeTexture buildNativeTextureJme(/*2.1.24BundleResource*/URL textureresource, BufferedImage li, HashMap<NumericType, NumericValue> params) {
         //logger.debug("buildNativeTexture " + textureresource.getName());
-        JmeTexture tex = JmeTexture.loadFromFile(textureresource);
+        JmeTexture tex = JmeTexture.loadFromFile(textureresource.getName()/*getFullName()*/, li);
         if (tex == null) {
             logger.warn("Loading texture " + textureresource.getName() + " failed. Using default");
             return null;//defaulttexture;
@@ -274,48 +281,12 @@ public class PlatformJme extends SimpleHeadlessPlatform {
     }
 
     @Override
-    public NativeTexture buildNativeTexture(/*Bundle dummywegensigbundle, */BundleResource filename, HashMap<NumericType, NumericValue> parameters) {
-        if (filename.bundle == null) {
-            logger.error("bundle not set for file " + filename.getFullName());
-            return null;//defaulttexture;
-        }
-        String bundlebasedir;
-        FileSystemResource resource;
-        /*if (filename.bundle instanceof BtgBundle) {
-            //oh oh, das wird jetzt aber immer wüster.
-            bundlebasedir = ((BtgBundle) filename.bundle).fname;
-            // Und wenn der Pfad absolut ist, das Bundle ignorieren.
-            if (filename.getFullName().startsWith("/")) {
-                resource = FileSystemResource.buildFromFullString(filename.getFullName());
-            } else {
-                resource = FileSystemResource.buildFromFullString(bundlebasedir + "/" + filename.getFullName());
-            }
-        } else {*/
-        //bundlebasedir = Platform.getInstance().getSystemProperty("BUNDLEDIR") + "/" + filename.bundle.name;
-        //bundlebasedir = BundleRegistry.getBundleBasedir(filename.bundle.name, false);
-        bundlebasedir = BundleResolver.resolveBundle(filename.bundle.name, Platform.getInstance().bundleResolver).getPath();
-        resource = FileSystemResource.buildFromFullString(bundlebasedir + "/" + filename.getFullName());
-        //}
-        return buildNativeTextureJme(resource, parameters);
+    public NativeTexture buildNativeTexture(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> parameters) {
+        // existing code extracted to JavaBundleHelper.loadBundleTexture
+        // load texture from FS, cache or web
+        BufferedImage li = JavaBundleHelper.loadBundleTexture(filename);
+        return buildNativeTextureJme(filename, li, parameters);
     }
-
-    /*@Override
-    public void executeAsyncJobNurFuerRunnerhelper(final AsyncJob job) {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    String msg = job.execute();
-                    if (Config.isAsyncdebuglog()) {
-                        logger.debug("job completed");
-                    }
-                    RunnerHelper.getInstance().addCompletedJob(new CompletedJob(job, msg));
-                } catch (Exception e) {
-                    RunnerHelper.getInstance().addCompletedJob(new CompletedJob(job, e.getMessage()));
-                }
-            }
-        }.start();
-    }*/
 
     @Override
     public NativeTexture buildNativeTexture(ImageData imagedata, boolean fornormalmap) {
@@ -554,5 +525,12 @@ public class PlatformJme extends SimpleHeadlessPlatform {
     public NativeAudio buildNativeAudio(NativeAudioClip audioClip) {
         JmeAudio audio = JmeAudio.createAudio((JmeAudioClip)audioClip);
         return audio;
+    }
+
+    /**
+     * 29.12.23: Moved here from JmeScene to be avialable earlier (before scenerunner).
+     */
+    synchronized public String getUniqueName() {
+        return "name" + uniqueid++;
     }
 }

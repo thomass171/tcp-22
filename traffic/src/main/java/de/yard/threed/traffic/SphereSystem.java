@@ -9,6 +9,7 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.AmbientLight;
 import de.yard.threed.engine.BaseEventRegistry;
@@ -31,8 +32,9 @@ import de.yard.threed.traffic.config.ConfigAttributeFilter;
 import de.yard.threed.traffic.config.ConfigHelper;
 import de.yard.threed.traffic.config.SceneConfig;
 
+import de.yard.threed.traffic.config.VehicleDefinition;
 import de.yard.threed.traffic.config.ViewpointConfig;
-import de.yard.threed.traffic.config.XmlVehicleConfig;
+import de.yard.threed.traffic.config.XmlVehicleDefinition;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 
 import de.yard.threed.traffic.geodesy.SimpleMapProjection;
@@ -51,7 +53,7 @@ import java.util.List;
  * Optionally triggers loading of a (static?) tile. There might also be a TerrainSystem.
  * Provider for a projection fitting to the Sphere and a world node.
  * 16.11.23: Might also provide a provider for the full configuration, so other systems do not
- * need to read it again. See {@link README.md#DataFlow}.
+ * need to read it again. See README.md#DataFlow.
  * <p>
  * 07.10.21
  */
@@ -59,7 +61,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
     Log logger = Platform.getInstance().getLog(SphereSystem.class);
 
-    // contains optional tilename and optional vehiclelist
+    // contains optional full qualified tilename and optional vehiclelist
     public static RequestType USER_REQUEST_SPHERE = RequestType.register(4000, "USER_REQUEST_SPHERE");
 
     public static String TAG = "SphereSystem";
@@ -82,7 +84,6 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     private static SceneNode sphereNode;
 
     // 24.10.21:Nur gesetzt bei Nutzung der DefaultTrafficWorld. Provisorium, bis es andere configs gibt. TODO
-    @Deprecated
     public SceneConfig sceneConfig;
     GeoCoordinate center;
     //29.11.21 public Tile activeTile; Stattdessen andere Kruecke.
@@ -161,29 +162,36 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                 if (initialTile.getExtension().equals("xml")) {
                     // XML only sync for now
 
-                    TrafficConfig xmlConfig = Tile.loadConfigFile(initialTile);
+                    TrafficConfig xmlConfig = Tile.loadConfigFile(BundleRegistry.getBundle(initialTile.bundlename), initialTile);
                     if (xmlConfig != null) {
                         xmlVPs = xmlConfig.getViewpoints();
                         lds = xmlConfig.getLights();
 
-                        List<NativeNode> xmlVehicles = XmlHelper.getChildren(xmlConfig.tw, "vehicle");
+                        List<NativeNode> xmlVehicles = xmlConfig.getVehicles();
                         if (xmlVehicles.size() > 0) {
                             logger.info("Replacing vehiclelist with list from config file");
                             TrafficSystem.vehiclelist = new ArrayList<Vehicle>();
                             for (NativeNode nn : xmlVehicles) {
                                 String name = XmlHelper.getStringAttribute(nn, "name");
-                                boolean delayedload = XmlHelper.getBooleanAttribute(nn, XmlVehicleConfig.DELAYEDLOAD, false);
-                                boolean automove = XmlHelper.getBooleanAttribute(nn, XmlVehicleConfig.AUTOMOVE, false);
+                                boolean delayedload = XmlHelper.getBooleanAttribute(nn, XmlVehicleDefinition.DELAYEDLOAD, false);
+                                boolean automove = XmlHelper.getBooleanAttribute(nn, XmlVehicleDefinition.AUTOMOVE, false);
                                 TrafficSystem.vehiclelist.add(new Vehicle(name, delayedload, automove,
-                                        XmlHelper.getStringAttribute(nn, XmlVehicleConfig.LOCATION)));
+                                        XmlHelper.getStringAttribute(nn, XmlVehicleDefinition.LOCATION),
+                                        XmlHelper.getIntAttribute(nn, XmlVehicleDefinition.INITIALCOUNT, 0)));
                             }
                         }
-                        List<NativeNode> xmlTerrains = XmlHelper.getChildren(xmlConfig.tw, "terrain");
+                        List<NativeNode> xmlTerrains = xmlConfig.getTerrains();
                         if (xmlTerrains.size() > 0) {
                             // We have terrain, so no graph visualization needed.
                             ((GraphTerrainSystem) SystemManager.findSystem(GraphTerrainSystem.TAG)).disable();
                         }
                     }
+                    for (VehicleDefinition vd : XmlVehicleDefinition.convertVehicleDefinitions(
+                            xmlConfig.getVehicleDefinitions())){
+                        TrafficSystem.knownVehicles.add(vd);
+                    }
+                    // 28.11.23: Was in BasicTravelScene.customInit() before
+                    TrafficSystem.baseTransformForVehicleOnGraph = xmlConfig.getBaseTransformForVehicleOnGraph();
                 }
             } else {
                 //16.6.20 3D: request geht hier noch nicht wegen "not inited". Darum weiter vereinfacht initialposition.
@@ -194,6 +202,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
             }
             if (lds != null) {
+                logger.debug("Adding " + lds.length + " lights");
                 for (LightDefinition ld : lds) {
                     if (ld.position != null) {
                         Scene.getCurrent().addLightToWorld(new DirectionalLight(ld.color, ld.position));
@@ -257,13 +266,14 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
         //das ist ja voelliger Quatsch. Geht nur, weil alles 0 basiert ist, verzerrt nur etwas. TODO 27.12.21 aber mal wirklich
         GeoCoordinate center = /*WorldGlobal.elsdorf0*/new GeoCoordinate(new Degree(50.937770f), new Degree(6.580982f), 0);
 
-        if (tile.getName().equals("EDDK")) {
+        // 5.12.23: Now uses EDDK-flat.xml instead of just "EDDK" from "dummy:EDDK". Still this is a workaround
+        if (tile.getName().equals("EDDK") || tile.getName().equals("EDDK-flat.xml")) {
             // korrektes center ist wichtig für die Projection
             center = new GeoCoordinate(new Degree(50.86538f), new Degree(7.139103f), 0);
             // Traditional groundservices scene. Use config if it exists, otherwise use service. 27.12.21 not for now; always assume EDDK
             if (false /*27.12.21 DefaultTrafficWorld.getInstance() == null*/) {
                 logger.debug("tile via service");
-                AbstractSceneRunner.getInstance().getHttpClient().sendHttpRequest("http://localhost/airport/icao=EDDK", "POST", new String[]{}, (response) -> {
+                Platform.getInstance().httpGet("http://localhost/airport/icao=EDDK", null, null, (response) -> {
                     logger.debug("HTTP returned airport. status=" + response.getStatus() + ", response=" + response.getContentAsString());
                     if (response.getStatus() == 0) {
                         Airport airport = JsonUtil.toAirport(response.getContentAsString());
@@ -342,6 +352,10 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
             if (TrafficHelper.isIcao(initialTile.getName())) {
                 // traditional EDDK GroundServices
+                loadEDDK = true;
+            }
+            // 5.12.23: Now uses EDDK-flat.xml instead of just "EDDK" from "dummy:EDDK". Still this is a workaround
+            if (initialTile.getName().equals("EDDK-flat.xml")) {
                 loadEDDK = true;
             }
         }
@@ -450,8 +464,7 @@ class SphereViewPointProvider implements DataProvider {
         if (xmlVPs != null) {
             List<ViewPoint> vps = new ArrayList<ViewPoint>();
             for (NativeNode nn : xmlVPs) {
-                LocalTransform transform = ConfigHelper.getTransform(nn);
-                vps.add(new ViewPoint(XmlHelper.getStringAttribute(nn, "name"), transform));
+                vps.add(ConfigHelper.buildViewpoint(nn));
             }
             return vps;
         }
@@ -477,8 +490,9 @@ class SphereViewPointProvider implements DataProvider {
             }
             return null;
         }
-        // Aus FlatTravel EDDK
-        List<ViewpointConfig> viewPointConfigs = sphereSystem.sceneConfig.getViewpoints(new ConfigAttributeFilter("icao", "EDDK", true));
+        // From FlatTravel EDDK. 5.12.23: Pseudo tile "dummy:EDDK" no longer used.
+        if (true) throw new RuntimeException("needs XSD config");
+        List<ViewpointConfig> viewPointConfigs = null;//27.11.23 sphereSystem.sceneConfig.getViewpoints(new ConfigAttributeFilter("icao", "EDDK", true));
         List<ViewPoint> viewPoints = new ArrayList<ViewPoint>();
         for (ViewpointConfig vcfg : viewPointConfigs) {
             viewPoints.add(new ViewPoint(vcfg.name, vcfg.transform));

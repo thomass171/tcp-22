@@ -5,6 +5,7 @@ import de.yard.threed.core.DimensionF;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.LatLon;
+import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Matrix3;
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Pair;
@@ -15,8 +16,10 @@ import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import org.junit.jupiter.api.Assertions;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -59,6 +62,9 @@ public class TestUtils {
         Assertions.assertEquals(expected.getZ(), actual.getZ(), tolerance, label + ": v.z");
     }
 
+    /**
+     * 28.11.23: Not sure whether quaternion assertion is valid in all cases.
+     */
     public static void assertQuaternion(Quaternion expected, Quaternion actual) {
         assertQuaternion(expected, actual, "");
     }
@@ -173,8 +179,8 @@ public class TestUtils {
     }
 
     public static void assertDimensionF(DimensionF expected, DimensionF actual, double tolerance, String label) {
-        Assertions.assertEquals(expected.getWidth(), actual.getWidth(), tolerance, label);
-        Assertions.assertEquals(expected.getHeight(), actual.getHeight(), tolerance, label);
+        Assertions.assertEquals(expected.getWidth(), actual.getWidth(), tolerance, label + ".width");
+        Assertions.assertEquals(expected.getHeight(), actual.getHeight(), tolerance, label + ".height");
     }
 
     public static void assertPayload(Pair<String, String>[] expectedProperties, Payload actual, String label) {
@@ -212,5 +218,22 @@ public class TestUtils {
 
     public static String locatedTestFile(String relFilenameToProjectHome) {
         return System.getProperty("user.dir") + "/../" + relFilenameToProjectHome;
+    }
+
+    public static void assertTransform(LocalTransform expected, LocalTransform actual) {
+        assertVector3(expected.position, actual.position);
+        assertQuaternion(expected.rotation, actual.rotation);
+        assertVector3(expected.scale, actual.scale);
+    }
+
+    public static byte[] loadFileFromClasspath(String fileName) throws Exception {
+        //byte[] bytebuf = IOUtils.resourceToByteArray(fileName, Thread.currentThread().getContextClassLoader());
+        byte[] bytebuf = Files.readAllBytes(Paths.get(Thread.currentThread().getContextClassLoader().getResource(fileName).toURI()));
+        return bytebuf;
+    }
+
+    public static byte[] loadFileFromPath(Path path) throws Exception {
+        byte[] bytebuf = Files.readAllBytes(path);
+        return bytebuf;
     }
 }

@@ -4,17 +4,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.geometry.GeometryHelper;
-import de.yard.threed.outofbrowser.AsyncBundleLoader;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.platform.*;
-import de.yard.threed.javanative.JsonUtil;
-import de.yard.threed.core.resource.BundleResolver;
+import de.yard.threed.core.resource.URL;
 import de.yard.threed.outofbrowser.SimpleBundleResolver;
-import de.yard.threed.outofbrowser.SyncBundleLoader;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -52,6 +49,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     public static String PROPERTY_PREFIX = "tcp22.";
     public static List<Integer> mockedKeyInput = new ArrayList<Integer>();
     protected Configuration configuration;
+    public List<NativeSceneNode> sceneNodes = new ArrayList<>();
 
     /**
      * Needs access from extending classes.
@@ -89,7 +87,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     public static PlatformInternals init(Configuration configuration, NativeEventBus eventbus) {
         //System.out.println("PlatformOpenGL.init");
 
-        DummySceneNode.sceneNodes.clear();
+        //local now DummySceneNode.sceneNodes.clear();
 
         /*for (String key : properties.keySet()) {
             //System.out.println("transfer of propery "+key+" to system");
@@ -103,8 +101,8 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         PlatformInternals platformInternals = new PlatformInternals();
         DefaultResourceReader resourceReader = new DefaultResourceReader();
         instance.bundleResolver.add(new SimpleBundleResolver(shpInstance.hostdir + "/bundles", resourceReader));
-        instance.bundleResolver.addAll(SyncBundleLoader.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
-        instance.bundleLoader = new AsyncBundleLoader(resourceReader);
+        instance.bundleResolver.addAll(SimpleBundleResolver.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
+        //13.12.23 instance.bundleLoader = new AsyncBundleLoader(resourceReader);
 
         instance.logger.info("SimpleHeadlessPlatform created");
         return /*MA36 (EnginePlatform)* /instance*/platformInternals;
@@ -146,7 +144,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     @Override
     public List<NativeSceneNode> findSceneNodeByName(String name) {
         List<NativeSceneNode> l = new ArrayList<>();//Platform.findNodeByName(name, ((OpenGlScene) AbstractSceneRunner.getInstance().scene).getRootTransform(), true);
-        for (NativeSceneNode n : DummySceneNode.sceneNodes) {
+        for (NativeSceneNode n : sceneNodes) {
             if (n.getName() != null && n.getName().equals(name)) {
                 l.add(n);
             }
@@ -170,8 +168,8 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
-    public NativeTexture buildNativeTexture(BundleResource filename, HashMap<NumericType, NumericValue> parameters) {
-        return new DummyTexture(filename.getFullQualifiedName());
+    public NativeTexture buildNativeTexture(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> parameters) {
+        return new DummyTexture(filename.getUrl());
     }
 
     @Override
@@ -251,7 +249,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     @Override
     public void httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate) {
 
-        NativeFuture<AsyncHttpResponse> future = JavaWebClient.httpGet(url, params, header, asyncJobDelegate);
+        NativeFuture<AsyncHttpResponse> future = new JavaWebClient().httpGet(url, params, header);
         sceneRunner.addFuture(future, asyncJobDelegate);
     }
 
@@ -281,11 +279,18 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     public NativeSocket connectToServer(Server server) {
         return JavaSocket.build(server.getHost(), server.getPort());
     }
+
+    @Override
+    public NativeBundleResourceLoader buildResourceLoader(String bundlename, String location) {
+
+        return JavaBundleResolverFactory.buildResourceLoader(bundlename, location, bundleResolver);
+    }
+
+
 }
 
 class DummySceneNode implements NativeSceneNode {
 
-    static List<NativeSceneNode> sceneNodes = new ArrayList<>();
     NativeTransform transform;
     String name;
     private static int uniqueId = 1000;
@@ -294,7 +299,7 @@ class DummySceneNode implements NativeSceneNode {
 
     DummySceneNode() {
         transform = new DummyTransform(this);
-        sceneNodes.add(this);
+        ((SimpleHeadlessPlatform)Platform.getInstance()).sceneNodes.add(this);
     }
 
     @Override
@@ -319,7 +324,7 @@ class DummySceneNode implements NativeSceneNode {
 
     @Override
     public void destroy() {
-        sceneNodes.remove(this);
+        ((SimpleHeadlessPlatform)Platform.getInstance()).sceneNodes.remove(this);
     }
 
     @Override
@@ -524,7 +529,10 @@ class DummyCamera implements NativeCamera {
 
     @Override
     public Matrix4 getViewMatrix() {
-        return null;
+        // taken from HomebrewCamera
+        Matrix4 worldmatrix = carrier.getTransform().getWorldModelMatrix();
+        Matrix4 viewMatrix = MathUtil2.getInverse(worldmatrix);
+        return viewMatrix;
     }
 
     @Override
@@ -739,7 +747,7 @@ class DummyRay implements NativeRay {
         // But especially in tests there might be multiple 'worlds' causing difficult to track failed tests.
         // So look for world and also check to have only one world.
         NativeSceneNode world = null;
-        for (NativeSceneNode n : DummySceneNode.sceneNodes) {
+        for (NativeSceneNode n : ((SimpleHeadlessPlatform)Platform.getInstance()).sceneNodes) {
             if ("World".equals(n.getName())) {
                 if (world != null) {
                     throw new RuntimeException("multiple 'world' found");

@@ -51,6 +51,13 @@
             <artifactId>httpclient5-fluent</artifactId>
             <version>${hc.client5.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.20</version>
+            <!-- provided because its not needed during runtime-->
+            <scope>provided</scope>
+        </dependency>
 
         <!-- now the own project dependencies. Does/Must not depend on engine! -->
         <dependency>

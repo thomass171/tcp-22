@@ -77,7 +77,7 @@ public abstract class HomeBrewCamera /*extends OpenGlObject3D */ implements Nati
 
         //carrier name isType set later
         carrier = new HomeBrewSceneNode("");
-        carrier.getTransform().setParent(Scene.getWorld().getTransform().transform);
+        carrier.getTransform().setParent(Scene.getCurrent().getWorld().getTransform().transform);
         //Platform.getInstance().addCamera(this);
         AbstractSceneRunner.getInstance().addCamera(this);
     }

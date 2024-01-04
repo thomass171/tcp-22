@@ -76,7 +76,8 @@ File directory;
         ImageData topimage = ImageUtil.buildImageData(ImageUtil.loadImageFromFile(new FileSystemResource(directory.getAbsolutePath() + "/" + sources[0].getName())));
                 JmeTexture bottomimage = null;
         if (sources[1] != null) {
-            bottomimage = JmeTexture.loadFromFile(new FileSystemResource(directory.getAbsolutePath()+"/"+sources[1].getName()));
+            FileSystemResource r= new FileSystemResource(directory.getAbsolutePath()+"/"+sources[1].getName());
+            bottomimage = JmeTexture.loadFromFile(directory.getName(), ImageUtil.loadImageFromFile(r));
         }
         //TODO bottom
         return topimage;//new NativeTexture[]{topimage,bottomimage};

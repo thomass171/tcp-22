@@ -172,7 +172,7 @@ public class TeleportComponent extends EcsComponent {
             //einfach kein parent? Das waere doch sinnig. Ob das in Unity schadet?
             // der Aufrufer FlightScene Navigator muss aber den richtigen parent setzen. Das ist bei anderen auch wichtig. Aber im Zweifel Scene.world
             // ist doch besser als null, denn schiesslich ist das meine root node.
-            node.getTransform().setParent(Scene.getWorld().getTransform());
+            node.getTransform().setParent(Scene.getCurrent().getWorld().getTransform());
             //node.getTransform().setParent(null);
         }
         if (lastNearView != null) {

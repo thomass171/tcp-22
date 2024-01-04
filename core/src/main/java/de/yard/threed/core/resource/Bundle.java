@@ -1,6 +1,7 @@
 package de.yard.threed.core.resource;
 
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.platform.Platform;
 
 
 import java.util.HashMap;
@@ -22,23 +23,42 @@ public class Bundle {
     public String name;
     int size = 0;
     boolean delayed;
+    // basepath is location + bundlename. location might be absolute FS or HTTP, but also just unset for pointing to a default location (browser origin)
+    private String basepath;
+    long createdAt = Platform.getInstance().currentTimeMillis();
+    long completedAt = 0;
 
     /**
-     *
      * @param name
-     * @param directory Das ist die "\n" separierte Liste des Content des Bundle. TODO: als String List
-     * @param delayed
+     * @param directory
+     * @param basepath  is location + bundlename
      */
-    public Bundle(String name, String directory, boolean delayed) {
+    public Bundle(String name, String[] directory, String basepath) {
         this.name = name;
-        this.directory = StringUtils.split(directory, "\n");
-        this.delayed = delayed;
+        this.directory = directory;
+        this.delayed = false;
+        this.basepath = basepath;
+    }
+
+    /**
+     * @param name
+     * @param directory Das ist die "\n" separierte Liste des Content des Bundle.
+     * @param delayed
+     * @param basepath  is location + bundlename
+     */
+    @Deprecated
+    public Bundle(String name, String directory, boolean delayed, String basepath) {
+        this(name,StringUtils.split(directory, "\n"), basepath);
     }
 
     public void addResource(String resource, BundleData/*byte[]*/ bytes) {
         /*if (!StringUtils.startsWith(resource,"/")){
             resource = "/"+resource;
         }*/
+
+        if (isCompleted()){
+            throw new RuntimeException("add after complete");
+        }
         // Ugly handling of "btg.gz" suffix
         if (StringUtils.endsWith(resource, ".btg.gz")) {
             // Auch bei Fehler die Endung entfernen.
@@ -107,20 +127,15 @@ public class Bundle {
     }
 
     /**
-     * Returns true if data for the resource isType really available.
-     * @param r
-     * @return
+     * Returns true if data for the resource is really available.
      */
     public boolean contains(String r) {
         return resources.get(r) != null;
     }
 
     /**
-     * exists, prueft, ob es den Eintrag gibt (unabhaengig von schon geladen oder nicht). Wenn beim Laden aber ein Fehler
-     * auftrat, gilt es als nicht existierend, auch wenn es im Directory gelistet ist!
-     *
-     * @param r
-     * @return
+     * exists, prueft, ob es den Eintrag gibt (unabhaengig von schon geladen oder nicht).
+     * When it couldn't be loaded due to an error, its considered to not exist, even it is listed in the directory!
      */
     public boolean exists(String r) {
         return resources.containsKey(r);
@@ -132,11 +147,11 @@ public class Bundle {
      */
     public boolean exists(BundleResource r) {
         String key = r.getFullName();
-        if (exists(key)){
+        if (exists(key)) {
             return true;
         }
-        if (StringUtils.endsWith(key,".ac")){
-            key = StringUtils.substringBeforeLast(key,".ac") + ".gltf";
+        if (StringUtils.endsWith(key, ".ac")) {
+            key = StringUtils.substringBeforeLast(key, ".ac") + ".gltf";
             return exists(key);
         }
         return false;
@@ -146,7 +161,7 @@ public class Bundle {
      * The file type specifies when the entry isType loaded. GLTF and the corresponding bin are special cases which might be loaded delayed. So the have their own filetype:
      * - immediately: t(ext),b(inary)
      * - alternatively delayed: T(ext),B(inary)
-     * - delayed: i(mage)
+     * - delayed: i(mage),s(ound)
      * - ??bundle dependant: m(odelfile, expected to be text)
      *
      * @param filename
@@ -158,6 +173,10 @@ public class Bundle {
         }
         if (StringUtils.endsWith(filename, ".acpp") || StringUtils.endsWith(filename, ".3ds") || StringUtils.endsWith(filename, ".btg")) {
             return 'b';
+        }
+        if (StringUtils.endsWith(filename, ".wav")) {
+            // 19.12.23: avoiding immediately load.
+            return 's';
         }
         /*6.1.18 if (StringUtils.endsWith(filename,".btg.gz")) {
             //4.1.18 now model file return 'b';//wegen fehlendem uncompress browser 'z';
@@ -174,6 +193,9 @@ public class Bundle {
         return 't';
     }
 
+    /**
+     * 28.12.23: Default changed from false to true. Its a risk to assume its text and cannot be stringified later.
+     */
     public static boolean isBinary(String filename) {
         if (isImage(filename)) {
             return true;
@@ -181,8 +203,11 @@ public class Bundle {
         if (StringUtils.endsWith(filename, ".bin") || StringUtils.endsWith(filename, ".3ds") || StringUtils.endsWith(filename, ".btg")) {
             return true;
         }
-        //otherwise its text
-        return false;
+        if (StringUtils.endsWith(filename, ".gltf") || StringUtils.endsWith(filename, ".txt") || StringUtils.endsWith(filename, ".xml")) {
+            return false;
+        }
+        //otherwise its binary
+        return true;
     }
 
     private static boolean isImage(String filename) {
@@ -190,6 +215,9 @@ public class Bundle {
     }
 
     public void addFailure(String filename, String errormsg) {
+        if (isCompleted()){
+            throw new RuntimeException("add after complete");
+        }
         failure.put(filename, errormsg);
         // der null value in resources muss dann raus, damit exists nicht mehr true liefert.
         resources.remove(filename);
@@ -211,5 +239,17 @@ public class Bundle {
                 }
             }
         }
+    }
+
+    public String getBasePath() {
+        return basepath;
+    }
+
+    public void complete() {
+        completedAt = Platform.getInstance().currentTimeMillis();
+    }
+
+    public boolean isCompleted() {
+        return completedAt > 0;
     }
 }

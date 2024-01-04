@@ -18,6 +18,7 @@ import de.yard.threed.core.Util;
  * 16.8.23: Needs refactoring probably. Maybe split to a new "loaded BundledResource" class and a ResourceLocator.
  * And name sometimes contains a HTTP part. That is confusing. Probably the HTTP part shouldn't be there, because its specific to
  * the environment (like a drive name), not the resource.
+ * 27.11.23: 'bundle' set to deprecated.
  * Created by thomass on 19.04.16.
  */
 public class BundleResource implements NativeResource {
@@ -27,6 +28,7 @@ public class BundleResource implements NativeResource {
     public ResourcePath path;
     // Optional element to allow using this class *before* loading a resource.
     public String bundlename = null;
+    @Deprecated
     public Bundle bundle;
 
     public BundleResource(String name) {
@@ -144,6 +146,10 @@ public class BundleResource implements NativeResource {
         }
         // Der "." koennte auch irgendwo im Pfad sein, aber name ist ohne Pfad
         return StringUtils.substring(name, index + 1);
+    }
+
+    public String getBundlename(){
+        return bundlename;
     }
 
     @Override

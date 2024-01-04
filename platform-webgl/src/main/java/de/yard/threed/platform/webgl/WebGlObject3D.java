@@ -255,7 +255,7 @@ public class WebGlObject3D implements NativeTransform {
     public void setParent1(WebGlObject3D parent) {
         /*new WebGlBase3D(*/
         if (parent == null) {
-            setParent(object3d, ((WebGlObject3D) Scene.getWorld().getTransform().transform).object3d);
+            setParent(object3d, ((WebGlObject3D) Scene.getCurrent().getWorld().getTransform().transform).object3d);
             // don't spoil cameras related subtree
             if (!isCarrier()) {
                 //logger.debug("setParent1: set layer 0 from null parent for " + getName());
