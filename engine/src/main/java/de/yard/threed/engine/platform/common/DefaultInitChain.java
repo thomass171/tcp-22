@@ -26,7 +26,8 @@ public class DefaultInitChain extends NativeInitChain {
 
     @Override
     public void invokeLater(NativeInitChain nativeInitChain, int delay) {
-        AbstractSceneRunner.getInstance().sleepMs(10);
+        // risk of stackoverflow when bundle takes too long. sleep increased from 10 to 30.
+        AbstractSceneRunner.getInstance().sleepMs(30);
         nativeInitChain.execute();
     }
 }

@@ -168,14 +168,13 @@
                     <!--25.8.23 <jvm>/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home/bin/java</jvm>-->
                 </configuration>
             </plugin>
-            <!-- 10.10.18: Java compile (class files) wird doch gar nicht gebraucht. Der legt aber den Sparchlevel fest. Doch nicht verzichtbar?-->
+            <!-- 10.10.18: Only needed for setting language level?-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.12.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>11</release>
                 </configuration>
             </plugin>
             <!-- copy webapp -->

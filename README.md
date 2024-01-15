@@ -239,6 +239,14 @@ Major changes:
   * Ready for Java 17 (still language level 8/9 for C# parts)
   * Sound added
 
+## 2024-01-04
+  * Bundle load refactoring including remote bundle
+  * More traffic configuration including aircraft
+  * InitChain for init
+
+##
+  * upgrade of maven-compiler-plugin to 3.12 for setting java release 11 
+ 
 # Technical Details
 
 ## Architecture
@@ -341,3 +349,8 @@ a texture. These are not of further interest to the app.
 Other async operations that are of interest to the app (like bundle loading) are capsuled
 in AbstractSceneRunner, that cares for a consistent program flow 
 by executing all pending callbacks while preparing a frame.
+
+## Java Language Level
+Changed from Java 8 to Java 11 in January 24 due to ClassCastExceptions in java.nio.(Byte)Buffer flip() and clear().
+There was a kind of breaking change in the API after Java 8. Still needs care about Java 9
+limitation for C# conversion.

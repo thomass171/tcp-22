@@ -96,7 +96,7 @@ public class Setup {
             properties.put("vrFireMode", "1");
             emulateVR(properties);
         }
-        boolean wayland = true;
+        boolean wayland = false;
         if (wayland) {
             properties.put("basename", "traffic:tiles/Wayland.xml");
             properties.put("enableAutomove", "true");
