@@ -1,5 +1,6 @@
 package de.yard.threed.core.platform;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.buffer.NativeByteBuffer;
@@ -48,7 +49,7 @@ public class AsyncHttpResponse {
     /**
      * Its quite useless to pass an encoding here as the requester cannot know the encoding reliably. He just might request it via HTTP header.
      */
-    public String getContentAsString() {
+    public String getContentAsString() throws CharsetException {
         if (responseData == null) {
             return null;
         }

@@ -12,7 +12,7 @@ import de.yard.threed.core.resource.BundleData;
 public class InMemoryBundle extends Bundle {
     public InMemoryBundle(String fname, String json, byte[] bindata) {
         super("", "", false,"");
-        super.resources.put(fname + ".gltf", new BundleData(json.getBytes(), true));
+        super.resources.put(fname + ".gltf", new BundleData(new SimpleByteBuffer(json.getBytes()), true));
         super.resources.put(fname + ".bin", new BundleData(new SimpleByteBuffer(bindata), false));
         directory = new String[]{fname + ".gltf", fname + ".bin"};
     }

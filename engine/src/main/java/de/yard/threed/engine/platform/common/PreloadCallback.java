@@ -32,7 +32,7 @@ public class PreloadCallback extends InitExecutor {
 
     public boolean isComplete() {
         if (loadedBundle.size() < bundles.length) {
-            logger.debug("Waiting for bundle load. Got " + loadedBundle.size() + ", expecting " + bundles.length);
+            logger.debug("Waiting for bundle preload. Got " + loadedBundle.size() + ", expecting " + bundles.length);
             return false;
         }
         return true;

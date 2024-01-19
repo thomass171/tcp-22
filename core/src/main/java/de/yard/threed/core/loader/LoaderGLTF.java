@@ -1,5 +1,6 @@
 package de.yard.threed.core.loader;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.FloatHolder;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.loader.PortableMaterial;
@@ -83,7 +84,13 @@ public class LoaderGLTF extends AsciiLoader {
         if (file.bundle.exists(binres)) {
             binbuffer = binres.bundle.getResource(binres).b;
         }
-        return new LoaderGLTF(bd.getContentAsString(), binbuffer, texturebasepath, file.getFullName());
+        String s;
+        try {
+            s = bd.getContentAsString();
+        } catch (CharsetException e) {
+            throw new InvalidDataException("CharsetException not found in bundle " + file);
+        }
+        return new LoaderGLTF(s, binbuffer, texturebasepath, file.getFullName());
     }
 
     @Override

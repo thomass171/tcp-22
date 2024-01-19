@@ -1,5 +1,6 @@
 package de.yard.threed.traffic;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.LocalTransform;
@@ -187,7 +188,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                         }
                     }
                     for (VehicleDefinition vd : XmlVehicleDefinition.convertVehicleDefinitions(
-                            xmlConfig.getVehicleDefinitions())){
+                            xmlConfig.getVehicleDefinitions())) {
                         TrafficSystem.knownVehicles.add(vd);
                     }
                     // 28.11.23: Was in BasicTravelScene.customInit() before
@@ -274,12 +275,17 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
             if (false /*27.12.21 DefaultTrafficWorld.getInstance() == null*/) {
                 logger.debug("tile via service");
                 Platform.getInstance().httpGet("http://localhost/airport/icao=EDDK", null, null, (response) -> {
-                    logger.debug("HTTP returned airport. status=" + response.getStatus() + ", response=" + response.getContentAsString());
-                    if (response.getStatus() == 0) {
-                        Airport airport = JsonUtil.toAirport(response.getContentAsString());
-                        //12.10.21 elevation?
-                        GeoCoordinate ctr = GeoCoordinate.fromLatLon(airport.getCenter(), 0);
-                        sendInitialEvents(ctr, tile);
+                    try {
+                        logger.debug("HTTP returned airport. status=" + response.getStatus() + ", response=" + response.getContentAsString());
+                        if (response.getStatus() == 0) {
+                            Airport airport = JsonUtil.toAirport(response.getContentAsString());
+                            //12.10.21 elevation?
+                            GeoCoordinate ctr = GeoCoordinate.fromLatLon(airport.getCenter(), 0);
+                            sendInitialEvents(ctr, tile);
+                        }
+                    } catch (CharsetException e) {
+                        // TODO improved eror handling
+                        throw new RuntimeException(e);
                     }
                 });
                 // response will be async

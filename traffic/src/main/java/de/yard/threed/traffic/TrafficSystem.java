@@ -1,6 +1,7 @@
 package de.yard.threed.traffic;
 
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.LocalTransform;
@@ -615,7 +616,12 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         } else {
             logger.debug(" graph found ");
             //Graph osm = TrafficGraphFactory.buildfromXML(bundleData.getContentAsString()).getBaseGraph();
-            graph = TrafficGraphFactory.buildfromXML(bundleData.getContentAsString());
+            try {
+                graph = TrafficGraphFactory.buildfromXML(bundleData.getContentAsString());
+            } catch (CharsetException e) {
+                // TODO improved eror handling
+                throw new RuntimeException(e);
+            }
             //GraphEdge startedge = osm.getEdge(0);
             //GraphPosition startposition = new GraphPosition(startedge);
         }

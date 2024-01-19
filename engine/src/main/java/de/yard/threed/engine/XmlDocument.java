@@ -1,5 +1,6 @@
 package de.yard.threed.engine;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.Platform;
@@ -48,7 +49,12 @@ public class XmlDocument {
 
         NativeDocument tw = null;
         try {
-            tw = Platform.getInstance().parseXml(xml.getContentAsString());
+            try {
+                tw = Platform.getInstance().parseXml(xml.getContentAsString());
+            } catch (CharsetException e) {
+                // TODO improved eror handling
+                throw new RuntimeException(e);
+            }
         } catch (XmlException e) {
             e.printStackTrace();
         }

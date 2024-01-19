@@ -187,7 +187,7 @@ public class PlatformWebGl extends Platform {
                         logger.error("no data (CORS problem?) from url " + url);
                         r = new AsyncHttpResponse(xhr.getStatus(), null, null);
                     } else {
-                        logger.debug("onReadyStateChange. size=" + buffer.byteLength());
+                        logger.debug("onReadyStateChange for " + url + ". size=" + buffer.byteLength());
                         r = new AsyncHttpResponse(xhr.getStatus(), null, new WebGlByteBuffer(buffer));
                     }
                 }
@@ -411,7 +411,7 @@ public class PlatformWebGl extends Platform {
 
     @Override
     public NativeStringHelper buildStringHelper() {
-        return new JavaStringHelper();
+        return new WebGlJavaStringHelper();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package de.yard.threed.core.configuration;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleResource;
@@ -18,7 +19,13 @@ public class ConfigurationByProperties extends Configuration {
 
     public ConfigurationByProperties(BundleResource br) {
         BundleData data = br.bundle.getResource(br);
-        String[] rows = StringUtils.splitByLineBreak(data.getContentAsString());
+        String s;
+        try {
+            s = data.getContentAsString();
+        } catch (CharsetException e) {
+            throw new RuntimeException(e);
+        }
+        String[] rows = StringUtils.splitByLineBreak(s);
         for (String row : rows) {
             if (StringUtils.contains(row, "=")) {
                 String[] parts = StringUtils.split(row, "=");

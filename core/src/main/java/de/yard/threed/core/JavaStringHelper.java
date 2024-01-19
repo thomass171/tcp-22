@@ -5,12 +5,13 @@ import de.yard.threed.core.platform.NativeStringHelper;
 import de.yard.threed.core.platform.Platform;
 
 /**
- * 9.5.20: Vorsicht beim Verschieben. Ist auch für GWT. Nur nicht für C# (wird bei Konvertierung ausgenommen).
- * Jetzt aus engine nach core verschoben. Warum? Wohl wegen Tests. Aber so ganz sauber ist das nicht.
+ * 9.5.20: Also for GWT, but not C# (excluded from conversion).
+ *
+ * 16.1.24: Made abstract to have builder from byte[] platform dependent.
  *
  * Created by thomass on 01.04.16.
  */
-public class JavaStringHelper implements NativeStringHelper {
+public abstract class JavaStringHelper implements NativeStringHelper {
 
     @Override
     public String trim(String s) {
@@ -66,19 +67,12 @@ public class JavaStringHelper implements NativeStringHelper {
         return s1.equalsIgnoreCase(s2);
     }
 
+    /**
+     * The behavior of the Java constructor when the given bytes are not valid in the default charset is unspecified.
+     * If the array cannot be converted, an exception is thrown to avoid hidden malfunctioning.
+     */
     @Override
-    public String buildString(byte[] buf) {
-        String s;
-       
-        //try {
-            s = new String(buf);
-        /*} catch (java.lang.Exception e) {
-            // eg. Encoding/CHARSetExcpetion
-            logger.error("buildString:" + e.getMessage());
-            throw e;
-        }*/
-        return s;
-    }
+    public abstract String buildString(byte[] buf) throws CharsetException;
 
     @Override
     public byte[] getBytes(String s) {

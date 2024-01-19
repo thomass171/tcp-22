@@ -64,7 +64,12 @@ public class Text implements GuiTexture {
     public static ImageData buildLabelImage(String label, /*Dimension size,*/ Color textcolor, Color background) {
         if (fontmap == null) {
             // myargb ist eigentlich nur für WebGl erforderlich. Aber für Einheitlichkeit und Tests kann man es auch immer verwenden.
-            fontmap = ImageData.buildFromMyargb(BundleRegistry.getBundle("engine").getResource("FontMap.txt").getContentAsString());
+            try {
+                fontmap = ImageData.buildFromMyargb(BundleRegistry.getBundle("engine").getResource("FontMap.txt").getContentAsString());
+            } catch (CharsetException e) {
+                // TODO improved eror handling
+                throw new RuntimeException(e);
+            }
         }
         int basesize = 32;
         int width = StringUtils.length(label) * basesize / 2;

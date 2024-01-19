@@ -217,7 +217,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
      */
     @Override
     public NativeStringHelper buildStringHelper() {
-        return new JavaStringHelper();
+        return new DefaultJavaStringHelper();
     }
 
     @Override

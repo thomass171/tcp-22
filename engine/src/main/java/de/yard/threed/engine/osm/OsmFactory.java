@@ -1,5 +1,6 @@
 package de.yard.threed.engine.osm;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.geometry.Shape;
@@ -24,7 +25,13 @@ public class OsmFactory {
     public static List<SceneNode> buildWays(byte[] osmxml) {
         List<SceneNode> modellist = new ArrayList<SceneNode>();
         try {
-            NativeDocument doc = Platform.getInstance().parseXml(StringUtils.buildString(osmxml));
+            String s;
+            try {
+                s = StringUtils.buildString(osmxml);
+            } catch (CharsetException e) {
+                throw new RuntimeException(e);
+            }
+            NativeDocument doc = Platform.getInstance().parseXml(s);
             NativeNodeList xmlallnodes = doc.getElementsByTagName("node");
             HashMap<Long, Node> allnodes = new HashMap<Long, Node>();
             for (int i = 0; i < xmlallnodes.getLength(); i++) {

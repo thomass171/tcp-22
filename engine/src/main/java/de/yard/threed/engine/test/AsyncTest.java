@@ -1,5 +1,6 @@
 package de.yard.threed.engine.test;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
@@ -58,6 +59,18 @@ public class AsyncTest {
             RuntimeTestUtil.assertTrue/*False*/("failure", cb.failed(controllightbin));
             RuntimeTestUtil.assertFalse("contains", cb.contains(controllightbin));
             RuntimeTestUtil.assertFalse/*True*/("exists", cb.exists(controllightbin));
+            BundleResource nonutf8 = new BundleResource(cb, "non-utf8.txt");
+            RuntimeTestUtil.assertFalse("failure", cb.failed(nonutf8));
+            RuntimeTestUtil.assertTrue("contains", cb.contains(nonutf8));
+            RuntimeTestUtil.assertTrue("exists", cb.exists(nonutf8));
+            boolean gotException = false;
+            try {
+                cb.getResource(nonutf8).getContentAsString();
+            } catch (CharsetException e) {
+                gotException=true;
+            }
+            RuntimeTestUtil.assertTrue("gotException", gotException);
+
             EngineHelper.buildNativeModel(controllight, null, (r1) -> {
                 // das fehlende bin muss jetzt aufgefallen sein.
                 logger.debug("model build completed");

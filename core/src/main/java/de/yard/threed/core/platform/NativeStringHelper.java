@@ -1,5 +1,7 @@
 package de.yard.threed.core.platform;
 
+import de.yard.threed.core.CharsetException;
+
 /**
  * Created by thomass on 01.04.16.
  */
@@ -26,7 +28,7 @@ public interface NativeStringHelper {
 
     boolean equalsIgnoreCase(String s1, String s2);
 
-    String buildString(byte[] buf);
+    String buildString(byte[] buf) throws CharsetException;
 
     byte[] getBytes(String s);
     

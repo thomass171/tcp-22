@@ -1,5 +1,6 @@
 package de.yard.threed.maze;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.JsonHelper;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.configuration.Configuration;
@@ -60,7 +61,13 @@ public class MazeDataProvider implements DataProvider {
             Platform.getInstance().httpGet(initialMaze, null, null, response -> {
                 getLogger().debug("Got http response " + response);
                 if (response.getStatus() == 200) {
-                    NativeJsonValue json = Platform.getInstance().parseJson(response.getContentAsString());
+                    NativeJsonValue json;
+                    try {
+                        json = Platform.getInstance().parseJson(response.getContentAsString());
+                    } catch (CharsetException e) {
+                        // TODO improved eror handling
+                        throw new RuntimeException(e);
+                    }
                     NativeJsonObject mazeObject = json.isObject();
                     String rawGrid = JsonHelper.getString(mazeObject, "grid");
                     Grid grid = GridReader.readWithModificatorFromRaw(rawGrid, teamSize);

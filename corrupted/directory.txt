@@ -2,3 +2,4 @@ Readme.txt
 ControlLight.gltf
 ControlLight.bin
 missing.ac
+non-utf8.txt

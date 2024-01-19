@@ -434,7 +434,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
 
     @Override
     public NativeStringHelper buildStringHelper() {
-        return new JavaStringHelper();
+        return new DefaultJavaStringHelper();
     }
 
     @Override

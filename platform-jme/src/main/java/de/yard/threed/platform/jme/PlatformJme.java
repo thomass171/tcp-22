@@ -409,7 +409,7 @@ public class PlatformJme extends SimpleHeadlessPlatform {
 
     @Override
     public NativeStringHelper buildStringHelper() {
-        return new JavaStringHelper();
+        return new DefaultJavaStringHelper();
     }
 
     @Override

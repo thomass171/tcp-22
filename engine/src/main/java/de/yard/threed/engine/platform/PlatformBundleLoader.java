@@ -1,5 +1,6 @@
 package de.yard.threed.engine.platform;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.platform.AsyncHttpResponse;
@@ -85,9 +86,16 @@ public class PlatformBundleLoader {
                 logger.debug("Got http response " + response);
                 if (response.getStatus() == 200) {
 
-                    logger.debug("directory loaded for bundle "+ bundlename);
+                    logger.debug("directory loaded for bundle " + bundlename);
+                    String d;
+                    try {
+                        d = response.getContentAsString();
+                    } catch (CharsetException e) {
+                        // TODO improved eror handling
+                        throw new RuntimeException(e);
+                    }
 
-                    lb.bundle = new Bundle(lb.bundlename, response.getContentAsString(), false, resourceLoader.getBasePath());
+                    lb.bundle = new Bundle(lb.bundlename, d, false, resourceLoader.getBasePath());
 
                     for (String filename : lb.bundle.directory) {
                         String resource = /*13.12.23 url + "/" +*/ filename;
@@ -96,6 +104,9 @@ public class PlatformBundleLoader {
 
                 } else {
                     logger.error("Unexpected response " + response);
+                    // Assume bundle doesn't exist. Anyway we need to avoid an endless wait, so inform requester.
+                    logger.error("No directory loaded. Bundle '" + bundlename + "' not existing?");
+                    bundleLoadDelegate.bundleLoad(null);
                 }
             }
         }/*, false*/);
@@ -147,7 +158,7 @@ public class PlatformBundleLoader {
                     if (Bundle.isBinary(filename)) {
                         bundleData = new BundleData(response.getContent(), false);
                     } else {
-                        bundleData = new BundleData(response.getContentAsString());
+                        bundleData = new BundleData(response.getContent(), true);
                     }
                     if (bundle.contains(filename)) {
                         logger.error("duplicate directory entry " + filename + " or data already loaded: " + bundle.getResource(filename).getSize() + " bytes");

@@ -5,12 +5,35 @@ import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
-import java.util.function.BooleanSupplier;
-
+/**
+ * Like bundle loader used in unit tests.
+ * 4.1.24
+ */
 public class SyncBundleLoader {
 
+    /**
+     * Has no scene runner so needs to create its own.
+     * But PlatformInternals are not needed.
+     */
     public static void loadBundleAndWait(String bundlename) {
-        AbstractSceneRunner.getInstance().loadBundle(bundlename, new BundleLoadDelegate() {
+
+        AbstractSceneRunner sceneRunner = new AbstractSceneRunner(null) {
+            @Override
+            public void startRenderLoop() {
+                throw new RuntimeException("not implemented");
+            }
+
+            @Override
+            public void sleepMs(int millis) {
+                try {
+                    Thread.sleep(millis);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        sceneRunner.loadBundle(bundlename, new BundleLoadDelegate() {
             @Override
             public void bundleLoad(Bundle bundle) {
                 BundleRegistry.registerBundle(bundlename, bundle);

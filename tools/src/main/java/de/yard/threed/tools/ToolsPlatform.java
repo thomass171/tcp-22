@@ -10,6 +10,7 @@ import de.yard.threed.core.buffer.NativeByteBuffer;
 
 import java.io.StringReader;
 import de.yard.threed.core.XmlException;
+import de.yard.threed.javacommon.DefaultJavaStringHelper;
 import de.yard.threed.javacommon.JALog;
 import de.yard.threed.core.JavaStringHelper;
 import de.yard.threed.javacommon.JavaXmlDocument;
@@ -115,7 +116,7 @@ public class ToolsPlatform extends DefaultPlatform {
 
     @Override
     public NativeStringHelper buildStringHelper() {
-        return new JavaStringHelper();
+        return new DefaultJavaStringHelper();
     }
 }
 

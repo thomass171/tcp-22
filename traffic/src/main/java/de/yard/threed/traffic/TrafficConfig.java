@@ -1,5 +1,6 @@
 package de.yard.threed.traffic;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Util;
@@ -67,7 +68,12 @@ public class TrafficConfig {
             logger.error("config not found: " + configfile + ",path=" + currentPath);
             return null;
         }
-        return readFromXml(bnd, currentPath, xml.getContentAsString());
+        try {
+            return readFromXml(bnd, currentPath, xml.getContentAsString());
+        } catch (CharsetException e) {
+            // TODO improved eror handling
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -214,15 +220,17 @@ public class TrafficConfig {
         return vl;
     }
 
-    /**30.11.23 no longer exists this way?
-    public ConfigNodeList getLocationListByName(String name) {
-        ConfigAttributeFilter filter = new ConfigAttributeFilter("name", name, false);
-        List<ConfigNodeList> locationlists = ConfigNodeList.build(topNodes, /*"locationlists", * /"locations", "location", filter);
-        if (locationlists.size() == 0) {
-            return null;
-        }
-        return locationlists.get(0);
-    }*/
+    /**
+     * 30.11.23 no longer exists this way?
+     * public ConfigNodeList getLocationListByName(String name) {
+     * ConfigAttributeFilter filter = new ConfigAttributeFilter("name", name, false);
+     * List<ConfigNodeList> locationlists = ConfigNodeList.build(topNodes, /*"locationlists", * /"locations", "location", filter);
+     * if (locationlists.size() == 0) {
+     * return null;
+     * }
+     * return locationlists.get(0);
+     * }
+     */
 
 
     public List<NativeNode> getViewpoints() {

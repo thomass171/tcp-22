@@ -164,7 +164,7 @@ public class StringUtils {
         //return sh.replaceAll(input,s,s1);
     }
 
-    public static String buildString(byte[] buf) {
+    public static String buildString(byte[] buf) throws CharsetException {
         return sh.buildString(buf);
     }
 

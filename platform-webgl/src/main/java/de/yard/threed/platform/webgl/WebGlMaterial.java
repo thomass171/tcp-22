@@ -1,6 +1,7 @@
 package de.yard.threed.platform.webgl;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.ResourceNotFoundException;
 import de.yard.threed.core.platform.Log;
@@ -226,7 +227,13 @@ public class WebGlMaterial implements NativeMaterial {
         String source = null;
         //  try {
         // 20.4.17: Jetzt aus Bundle
-        String bytebuf = BundleRegistry.getBundle("engine").getResource(ressourcename).getContentAsString();
+        String bytebuf;
+        try {
+            bytebuf = BundleRegistry.getBundle("engine").getResource(ressourcename).getContentAsString();
+        } catch (CharsetException e) {
+            // TODO improved eror handling
+            throw new RuntimeException(e);
+        }
         source = bytebuf;//new String(bytebuf, "UTF-8");
        /* } catch (UnsupportedEncodingException e) {
             throw new ResourceNotFoundException(ressourcename + " UTF-8 decode failed", e);

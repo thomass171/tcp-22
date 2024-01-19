@@ -1,5 +1,6 @@
 package de.yard.threed.maze;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Point;
@@ -232,7 +233,12 @@ public class MazeUtils {
             logger.error("maze file not found:" + filename);
             return null;
         }
-        return bundleData.getContentAsString();
+        try {
+            return bundleData.getContentAsString();
+        } catch (CharsetException e) {
+            // TODO improved eror handling
+            throw new RuntimeException(e);
+        }
     }
 
     public static boolean playerHasBullets() {

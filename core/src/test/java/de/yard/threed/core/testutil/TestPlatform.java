@@ -1,5 +1,6 @@
 package de.yard.threed.core.testutil;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.JavaStringHelper;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.buffer.NativeByteBuffer;
@@ -38,7 +39,13 @@ public class TestPlatform extends DefaultPlatform {
 
     @Override
     public NativeStringHelper buildStringHelper() {
-        return new JavaStringHelper();
+        return new JavaStringHelper() {
+            @Override
+            public String buildString(byte[] buf) throws CharsetException {
+                // assume not needed
+                throw new RuntimeException("not implemented due to dependency issues");
+            }
+        };
     }
 
     @Override

@@ -1,5 +1,6 @@
 package de.yard.threed.engine.testutil;
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.platform.Platform;
@@ -92,8 +93,12 @@ public class TestHelper {
 
     public static String getDataBundleString(String bundle, String resource) {
         BundleResource br = new BundleResource(BundleRegistry.getBundle(bundle), resource);
-        return br.bundle.getResource(resource).getContentAsString();
-
+        try {
+            return br.bundle.getResource(resource).getContentAsString();
+        } catch (CharsetException e) {
+            // TODO improved eror handling
+            throw new RuntimeException(e);
+        }
     }
 
     public static String loadFileFromClasspath(String fileName) throws Exception {

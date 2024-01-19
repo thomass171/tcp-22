@@ -1,6 +1,7 @@
 package de.yard.threed.engine;
 
 
+import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Util;
 
 
@@ -55,7 +56,14 @@ public class LoaderRegistry {
                 logger.error("no string data for " + file.getFullName());
                 return null;
             }
-            AbstractLoader loader = new LoaderAC(new StringReader(ins.getContentAsString()),ignoreacworld);
+            String d;
+            try {
+                d = ins.getContentAsString();
+            } catch (CharsetException e) {
+                // TODO improved eror handling
+                throw new RuntimeException(e);
+            }
+            AbstractLoader loader = new LoaderAC(new StringReader(d),ignoreacworld);
             // Bei einem Fehler ist er schon ausgestiegen
             // TO DO Wenn das ac in einem jar lag, muss der texturepath auch noch den bundlkepfad enthalten!
             // 6.12.17: Von wann ist das denn? brauchts das wirklich? mal ohne versuchen. Nein, das geht nicht bei readerwriterstg.
