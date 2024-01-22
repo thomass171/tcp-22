@@ -280,7 +280,7 @@ public abstract class Platform {
 
     /**
      * Returns true when a key went up (was released).
-     * Only available in exactly one frame (update().
+     * Only available in exactly one frame (update()).
      */
     public abstract boolean getKeyUp(int keycode);
 
@@ -301,23 +301,20 @@ public abstract class Platform {
     public abstract Point getMouseMove();
 
     /**
-     * Liefert die Releaseposition (bzw die aktuelle Mausposition), wenn die Taste released wird. Sonst null.
-     * Release statt press, um evtl. auch Drag verwenden zu können.
-     * Kann nur in einem einzigen Frame (update()) abgefragt werden.
-     * Bewusst ohne button number wegen Smartphone.
+     * Returns the release position when the button was released. Otherwise null.
+     * Its not the 'press' to be prepared for drag handling.
+     * Only available in exactly one frame (update()).
+     * Without button number due to touchpads.
      * (0,0) ist wie bei getMouseMove() links unten.
      *
      * @return
      */
-    public abstract Point getMouseClick();
+    public abstract Point getMouseUp();
 
     /**
-     * Ergänzung zu getMouseClick(), wenn Mouse Button gedrueckt wird. Wichtig fuer Drag.
-     * Auch fuer begin touchmove.
-     *
-     * @return
+     * Important for drag and touchmove.
      */
-    public abstract Point getMousePress();
+    public abstract Point getMouseDown();
 
     public abstract String getName();
 

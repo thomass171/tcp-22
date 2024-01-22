@@ -428,12 +428,12 @@ public class PlatformJme extends SimpleHeadlessPlatform {
     }
 
     @Override
-    public Point getMouseClick() {
+    public Point getMouseUp() {
         return AbstractSceneRunner.getInstance().getMouseClick();
     }
 
     @Override
-    public Point getMousePress() {
+    public Point getMouseDown() {
         return AbstractSceneRunner.getInstance().getMousePress();
     }
 

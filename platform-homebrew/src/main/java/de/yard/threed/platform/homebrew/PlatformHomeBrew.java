@@ -448,12 +448,12 @@ public class PlatformHomeBrew extends DefaultPlatform {
     }
 
     @Override
-    public Point getMouseClick() {
+    public Point getMouseUp() {
         return AbstractSceneRunner.getInstance().mouseclick;
     }
 
     @Override
-    public Point getMousePress() {
+    public Point getMouseDown() {
         return AbstractSceneRunner.getInstance().mousepress;
     }
 

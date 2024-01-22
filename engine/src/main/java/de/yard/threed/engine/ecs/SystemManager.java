@@ -295,6 +295,7 @@ public class SystemManager {
      */
     static public synchronized void putRequest(Request request) {
         getLogger().debug("putRequest " + request);
+        systemTracker.requestPut(request);
         requestQueue.addRequest(request);
     }
 

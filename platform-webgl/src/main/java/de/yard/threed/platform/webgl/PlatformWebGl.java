@@ -430,7 +430,7 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
-    public Point getMouseClick() {
+    public Point getMouseUp() {
         return AbstractSceneRunner.getInstance().getMouseClick();
     }
 
@@ -445,7 +445,7 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
-    public Point getMousePress() {
+    public Point getMouseDown() {
         return AbstractSceneRunner.getInstance().getMousePress();
     }
 

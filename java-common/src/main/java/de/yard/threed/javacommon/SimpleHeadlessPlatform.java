@@ -47,7 +47,11 @@ import java.util.List;
 public class SimpleHeadlessPlatform extends DefaultPlatform {
     public String hostdir;
     public static String PROPERTY_PREFIX = "tcp22.";
-    public static List<Integer> mockedKeyInput = new ArrayList<Integer>();
+    public static List<Integer> mockedKeyDownInput = new ArrayList<Integer>();
+    public static List<Integer> mockedKeyUpInput = new ArrayList<Integer>();
+    public static List<Point> mockedMouseMoveInput = new ArrayList<>();
+    public static List<Point> mockedMouseDownInput = new ArrayList<>();
+    public static List<Point> mockedMouseUpInput = new ArrayList<>();
     protected Configuration configuration;
     public List<NativeSceneNode> sceneNodes = new ArrayList<>();
 
@@ -271,8 +275,33 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     @Override
     public boolean getKeyDown(int keycode) {
         // no real input, but can be used for testing
-        boolean found = mockedKeyInput.remove(new Integer(keycode));
+        boolean found = mockedKeyDownInput.remove(new Integer(keycode));
         return found;
+    }
+
+    @Override
+    public boolean getKeyUp(int keycode) {
+        // no real input, but can be used for testing
+        boolean found = mockedKeyUpInput.remove(new Integer(keycode));
+        return found;
+    }
+
+    @Override
+    public Point getMouseDown() {
+        // no real input, but can be used for testing
+        if (mockedMouseDownInput.size() == 0) {
+            return null;
+        }
+        return mockedMouseDownInput.remove(0);
+    }
+
+    @Override
+    public Point getMouseUp() {
+        // no real input, but can be used for testing
+        if (mockedMouseUpInput.size() == 0) {
+            return null;
+        }
+        return mockedMouseUpInput.remove(0);
     }
 
     @Override
@@ -286,7 +315,12 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         return JavaBundleResolverFactory.buildResourceLoader(bundlename, location, bundleResolver);
     }
 
-
+    /**
+     * 22.1.24:  Some tests really need a size, so they might set it.
+     */
+    public void setSceneDimension(Dimension dimension) {
+        ((DummyScene) nativeScene).dimension = dimension;
+    }
 }
 
 class DummySceneNode implements NativeSceneNode {
@@ -299,7 +333,7 @@ class DummySceneNode implements NativeSceneNode {
 
     DummySceneNode() {
         transform = new DummyTransform(this);
-        ((SimpleHeadlessPlatform)Platform.getInstance()).sceneNodes.add(this);
+        ((SimpleHeadlessPlatform) Platform.getInstance()).sceneNodes.add(this);
     }
 
     @Override
@@ -324,7 +358,7 @@ class DummySceneNode implements NativeSceneNode {
 
     @Override
     public void destroy() {
-        ((SimpleHeadlessPlatform)Platform.getInstance()).sceneNodes.remove(this);
+        ((SimpleHeadlessPlatform) Platform.getInstance()).sceneNodes.remove(this);
     }
 
     @Override
@@ -613,6 +647,10 @@ class DummyCamera implements NativeCamera {
 
 class DummyScene implements NativeScene {
 
+    // Use a 'dummy' dimension instead of just null because some HUD builder for example use the current screen size?
+    // But this ins't headless. new Dimension(300,200); 22.1.24: But can be set.
+    Dimension dimension = null;
+
     public DummyScene() {
         int h = 9;
     }
@@ -629,10 +667,7 @@ class DummyScene implements NativeScene {
 
     @Override
     public Dimension getDimension() {
-        // Return a 'dummy' dimension instead of just null because some HUD builder for example use the current screen size?
-        // But this ins't headless.
-        //return new Dimension(300,200);
-        return null;
+        return dimension;
     }
 }
 
@@ -747,7 +782,7 @@ class DummyRay implements NativeRay {
         // But especially in tests there might be multiple 'worlds' causing difficult to track failed tests.
         // So look for world and also check to have only one world.
         NativeSceneNode world = null;
-        for (NativeSceneNode n : ((SimpleHeadlessPlatform)Platform.getInstance()).sceneNodes) {
+        for (NativeSceneNode n : ((SimpleHeadlessPlatform) Platform.getInstance()).sceneNodes) {
             if ("World".equals(n.getName())) {
                 if (world != null) {
                     throw new RuntimeException("multiple 'world' found");

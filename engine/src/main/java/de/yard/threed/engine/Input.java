@@ -37,12 +37,12 @@ public class Input {
         return platform.getMouseMove();
     }
 
-    public static Point getMouseClick() {
-        return platform.getMouseClick();
+    public static Point getMouseUp() {
+        return platform.getMouseUp();
     }
 
-    public static Point getMousePress() {
-        return platform.getMousePress();
+    public static Point getMouseDown() {
+        return platform.getMouseDown();
     }
 
     /**

@@ -20,17 +20,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 2.4.21: Also for mouse input. In general for all inputs:
+ * Convert user input to either events/requests immediately or preprocess input for some defined standard actions (eg. menus) and derive requests from that.
+ * In general for all inputs:
  * - Keyboard (desktop)
  * - Mouse (desktop)
+ * - Touch (touchpad,tablet)
  * - (control) menu (tablet)
  * - VR controller (in VR)
  * <p>
- * And for menus, because these also trigger requests.
+ * standard actions include:
+ * - menus, because these also trigger requests.
+ * - segment control, important for touchpads
  * <p>
+ * But requests are not sent before the user logs in.
  * Previous name was KeyToRequestSystem.
- * <p>
- *
+ * 22.1.24: No longer decide mouseClickMode between segment and control panel (VR) mode. Control panel should also be avialable for mouse clicks
+ * in general.
  * <p>
  * Created by thomass on 11.10.19.
  */
@@ -57,13 +62,6 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     @Deprecated
     static String playername;
     public static String TAG = "InputToRequestSystem";
-    // 1=identity segment request (default), 2=emulate (left) VR controller trigger
-    public static int MOUSE_CLICK_MODE_SEGMENT = 1;
-    public static int MOUSE_CLICK_MODE_VR_LEFT = 2;
-    private int mouseClickMode = MOUSE_CLICK_MODE_SEGMENT;
-    public static int MOUSE_MOVE_MODE_SEGMENT = 1;
-    public static int MOUSE_MOVE_MODE_VR_LEFT = 2;
-    private int mouseMoveMode = MOUSE_MOVE_MODE_SEGMENT;
     private List<MockedInput> mockedInputs = new ArrayList<MockedInput>();
     // Entity id of the current player (the one controlling the game). null unless not logged in
     private Integer userEntityId = null;
@@ -75,11 +73,6 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         // segments 0,1,2 are reserved: 1=unused due to VR toggle area, 2=control menu toggle, besser 1? 0 und 2 auch fuer movement.
         segmentRequests = new HashMap<Integer, RequestType>();
         segmentRequests.put(1, USER_REQUEST_CONTROLMENU);
-
-        // For testing VR panel outside VR
-        if (EngineHelper.isEnabled("emulateVR")) {
-            emulateLeftVrControllerByMouse();
-        }
     }
 
     public InputToRequestSystem(MenuProvider menuProvider) {
@@ -200,15 +193,14 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         Point mouseMovelocation = Input.getMouseMove();
         if (mouseMovelocation != null) {
 
-            if (mouseMoveMode == MOUSE_MOVE_MODE_VR_LEFT) {
-                // emulate VR controller (left by holding ctrl key)
-                Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseMovelocation);
-                // ctrl geht nicht in JME mit click, darum shift.
-                processPointer(ray, Input.getKey(KeyCode.Shift));
-            }
+            // No longer just emulate VR controller but general feature. But still have a left and right pointer even with mouse (left by holding ctrl key)
+            Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseMovelocation);
+            // ctrl geht nicht in JME mit click, darum shift.
+            processPointer(ray, Input.getKey(KeyCode.Shift));
         }
         // now check mouse clicks. Be aware of multiple possible targets, eg. segment and control menu.
-        Point mouseClicklocation = Input.getMouseClick();
+        // VR has no mouse (clicks)
+        Point mouseClicklocation = Input.getMouseUp();
         if (mouseClicklocation != null) {
             logger.debug("mouseClicklocation=" + mouseClicklocation);
 
@@ -230,21 +222,18 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 // Don't consider any further action (segment,VR emulation) when a button of control menu was clicked
                 if (!controlMenuAreaClicked) {
 
-                    if (mouseClickMode == MOUSE_CLICK_MODE_SEGMENT) {
-                        // Mausclick irgendwo. Determine segment. 20.3.21: But send it only with user id.
+                    // Mouse click somewhere. Consider VR controller or mouse ray click (left by holding ctrl key)
+                    Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseClicklocation);
+                    // ctrl geht nicht in JME mit click, darum shift
+                    boolean consumed = processTrigger(ray, Input.getKey(KeyCode.Shift));
+                    if (!consumed) {
+                        // Fall through to segment control. Determine segment. 20.3.21: But send it only with user id.
                         int segment = Input.getClickSegment(mouseClicklocation, Scene.getCurrent().getDimension(), 3);
                         logger.debug("clicked segment:" + segment);
                         RequestType sr = segmentRequests.get(segment);
                         if (sr != null && userEntityId != null) {
                             SystemManager.putRequest(new Request(sr, userEntityId));
                         }
-                    }
-                    if (mouseClickMode == MOUSE_CLICK_MODE_VR_LEFT) {
-                        // Mausclick irgendwo. Consider VR controller ray click  (left by holding ctrl key)
-
-                        Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseClicklocation);
-                        // ctrl geht nicht in JME mit click, darum shift
-                        processTrigger(ray, Input.getKey(KeyCode.Shift));
                     }
                 }
             }
@@ -361,11 +350,6 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         controlPanelList.add(controlPanel);
     }
 
-    private void emulateLeftVrControllerByMouse() {
-        this.mouseClickMode = MOUSE_CLICK_MODE_VR_LEFT;
-        this.mouseMoveMode = MOUSE_MOVE_MODE_VR_LEFT;
-    }
-
     @Override
     public String getTag() {
         return TAG;
@@ -402,6 +386,17 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         this.userEntityId = userEntityId;
     }
 
+    /**
+     * Only for testing.
+     */
+    public GuiGrid getControlmenu() {
+        return controlmenu;
+    }
+
+    public void setMenuProvider(MenuProvider menuProvider) {
+        this.menuProvider = menuProvider;
+    }
+
     private void processPointer(Ray ray, boolean left) {
 
         for (PointerHandler pointerHandler : pointerHandlerList) {
@@ -409,7 +404,10 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         }
     }
 
-    private void processTrigger(Ray ray, boolean left) {
+    /**
+     * For both VR pointer and traditional mouse click rays.
+     */
+    private boolean processTrigger(Ray ray, boolean left) {
 
         logger.debug("processTrigger, left=" + left + ",userEntityId=" + (int) userEntityId);
 
@@ -417,17 +415,21 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             for (ControlPanel cp : controlPanelList) {
                 //left/right independent?
                 if (cp.checkForClickedArea(ray)) {
-                    return;
+                    return true;
                 }
             }
 
+            boolean consumed = false;
             for (PointerHandler pointerHandler : pointerHandlerList) {
                 Request request = pointerHandler.getRequestByTrigger((int) userEntityId, ray, left);
                 if (request != null) {
                     SystemManager.putRequest(request);
+                    consumed = true;
                 }
             }
+            return consumed;
         }
+        return false;
     }
 }
 

@@ -608,7 +608,7 @@ public class ReferenceScene extends Scene {
         double tpf = getDeltaTime();
         controller.update(tpf);
 
-        Point mouselocation = Input.getMouseClick();
+        Point mouselocation = Input.getMouseUp();
         if (mouselocation != null) {
             // needs to use position of main camera. Deferred cameras are attached there.
             Ray mousePickingRay = getDefaultCamera().buildPickingRay(getDefaultCamera().getCarrier().getTransform(), mouselocation);
@@ -854,7 +854,7 @@ public class ReferenceScene extends Scene {
                 }
             }
         }
-        if ((mouselocation = Input.getMouseClick()) != null) {
+        if ((mouselocation = Input.getMouseUp()) != null) {
             // Mausbutton released
             int x = mouselocation.getX();
             int y = mouselocation.getY();

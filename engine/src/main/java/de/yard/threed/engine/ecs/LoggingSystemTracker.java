@@ -3,6 +3,7 @@ package de.yard.threed.engine.ecs;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.platform.common.Request;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ public class LoggingSystemTracker implements SystemTracker {
     private List<Packet> fromNetwork = new ArrayList<Packet>();
     private List<Packet> toNetwork = new ArrayList<Packet>();
     private List<Event> eventsProcessed = new ArrayList<Event>();
+    public List<Request> requestsPut = new ArrayList<Request>();
     private Map<String, Integer> tags = new HashMap<String, Integer>();
 
     @Override
@@ -47,6 +49,11 @@ public class LoggingSystemTracker implements SystemTracker {
             Platform.getInstance().getLog(LoggingSystemTracker.class).info(msg);
             latestMessage = msg;
         }
+    }
+
+    @Override
+    public void requestPut(Request request) {
+        requestsPut.add(request);
     }
 
     public void tag() {

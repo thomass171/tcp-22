@@ -81,7 +81,7 @@ public class FirstPersonController {
             }
         }
         if (moveByMouseEnabled) {
-            Point point = Input.getMousePress();
+            Point point = Input.getMouseDown();
             if (point != null) {
                 startdrag = point;
                 possibleMoveByMouse = point;
@@ -99,7 +99,7 @@ public class FirstPersonController {
                 startdrag = point;
                 possibleMoveByMouse = null;
             }
-            point = Input.getMouseClick();
+            point = Input.getMouseUp();
             if (point != null) {
                 // mouse released
                 if (startdrag != null) {

@@ -63,7 +63,7 @@ public class VRController extends SceneNode {
         if (nativecontroller == null) {
             // dummy/emulated VR controller? Emulate VR ray by mouse position.
             // Not sure if this really works and if its needed.
-            Point p = Input.getMousePress();
+            Point p = Input.getMouseDown();
             if (p == null) {
                 p = Input.getMouseMove();
             }

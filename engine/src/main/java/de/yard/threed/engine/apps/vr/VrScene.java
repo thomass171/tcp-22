@@ -38,7 +38,8 @@ import java.util.Map;
  * 14.5.21: Avatar not really needed here, but its good for orientation.
  * 23.11.21: initialY set to 0 instead of BARYPOSITION. With that the "standing position" (Oculus 190cm)
  * is quite correct (with offset -0.9).
- * With "ReferenceSpaceType" 'local' instead of 'local-floor' -0.1 is better than -0.9
+ * With "ReferenceSpaceType" 'local' instead of 'local-floor' -0.1 is better than -0.9.
+ * 20.1.24: (Partly) migrated to ShowroomScene.
  */
 public class VrScene extends Scene {
     static Log logger = Platform.getInstance().getLog(VrScene.class);
@@ -267,7 +268,7 @@ public class VrScene extends Scene {
         // check for teleport (by mouse or left controller)
         GridTeleportDestination markerTransform = null;
 
-        Point mouseClickLocation = Input.getMouseClick();
+        Point mouseClickLocation = Input.getMouseUp();
         //menucycler.update() is also for keys!
         boolean clickConsumed = menuCycler.update(mouseClickLocation);
 

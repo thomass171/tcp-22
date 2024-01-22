@@ -143,7 +143,7 @@ public class DisplayClient extends Scene /*, BackendAdapter/*??*/ {
 
         Util.nomore();
         //11.5.21avatar.update();
-        Point mouselocation = Input.getMouseClick();
+        Point mouselocation = Input.getMouseUp();
 
 
 

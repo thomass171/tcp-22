@@ -152,12 +152,12 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public Point getMouseClick() {
+    public Point getMouseUp() {
         return null;
     }
 
     @Override
-    public Point getMousePress() {
+    public Point getMouseDown() {
         return null;
     }
 
