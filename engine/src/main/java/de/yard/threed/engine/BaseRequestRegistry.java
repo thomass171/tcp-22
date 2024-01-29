@@ -43,6 +43,8 @@ public class BaseRequestRegistry {
     public static RequestType TRIGGER_REQUEST_START_ROLLRIGHT = RequestType.register(1124, "TRIGGER_REQUEST_START_ROLLRIGHT");
     public static RequestType TRIGGER_REQUEST_STOP_ROLLRIGHT = RequestType.register(1125, "TRIGGER_REQUEST_STOP_ROLLRIGHT");
 
+    public static RequestType TRIGGER_REQUEST_START_GRABBING = RequestType.register(1126, "TRIGGER_REQUEST_START_GRABBING");
+    public static RequestType TRIGGER_REQUEST_STOP_GRABBING = RequestType.register(1127, "TRIGGER_REQUEST_STOP_GRABBING");
 
     public static Request buildForwardRequest(int userEntityId) {
         return new Request(TRIGGER_REQUEST_FORWARD, new Payload(),userEntityId);

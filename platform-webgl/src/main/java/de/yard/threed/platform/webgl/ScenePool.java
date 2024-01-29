@@ -4,6 +4,7 @@ package de.yard.threed.platform.webgl;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.apps.FirstPersonScene;
 import de.yard.threed.engine.apps.reference.ReferenceScene;
+import de.yard.threed.engine.apps.showroom.ShowroomScene;
 import de.yard.threed.engine.apps.vr.VrScene;
 import de.yard.threed.engine.apps.LightedRotatingCubeScene;
 import de.yard.threed.engine.Scene;
@@ -34,6 +35,8 @@ public class ScenePool {
             return new BasicTravelScene();
         if (name.equals("FirstPersonScene"))
             return new FirstPersonScene();
+        if (name.equals("ShowroomScene"))
+            return new ShowroomScene();
         logger.error("Scene " + name + " not found");
         return null;
     }

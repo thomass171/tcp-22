@@ -4,7 +4,6 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.NativeTransform;
-import de.yard.threed.core.platform.TransformNodeVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -232,5 +231,11 @@ public class Transform implements SimpleTransform {
         target.rotateOnAxis(new Vector3(0, 0, 1), inc);
     }
 
+    public Vector3 getWorldPosition() {
+        return getWorldModelMatrix().extractPosition();
+    }
 
+    public Quaternion getWorldRotation() {
+        return getWorldModelMatrix().extractQuaternion();
+    }
 }

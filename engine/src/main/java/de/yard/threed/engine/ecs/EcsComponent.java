@@ -23,6 +23,10 @@ public abstract class EcsComponent {
         return entityId;
     }
 
+    public EcsEntity getEntity() {
+        return EcsHelper.findEntityById(entityId);
+    }
+
     /**
      * Only for ECS internal usage.
      */

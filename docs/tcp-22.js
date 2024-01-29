@@ -21,14 +21,14 @@ function addPanel(label, contentProvider, optionalElement) {
 
 }
 
-function launchReferenceScene(vr,nearview,hud) {
+function launchSceneByName(sceneName,vr,nearview,hud) {
 
     var args = new Map();
     addCommonArgs(args, "");
     args.set("enableVR",vr);
     args.set("enableHud",hud);
     args.set("enableNearView",nearview);
-    launchScene("ReferenceScene",args);
+    launchScene(sceneName,args);
 }
 
 

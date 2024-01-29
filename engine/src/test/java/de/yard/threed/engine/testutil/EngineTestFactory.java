@@ -117,7 +117,7 @@ public class EngineTestFactory {
         }
         SystemManager.reset();
         if (Platform.getInstance() != null) {
-            // the following need the looger
+            // the following need the logger
             BundleRegistry.clear();
             Observer.reset();
             VrInstance.reset();

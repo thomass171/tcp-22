@@ -253,7 +253,7 @@ public class ReferenceScene extends Scene {
             }
         }
         controlPanel = buildControlPanel(controlPanelBackground, this);
-        // in front of left box, dami man mit einem teleport gut davorsteht zur Bedienung
+        // in front of left box for easy use after first teleport
         controlPanel.getTransform().setPosition(new Vector3(-3, 1.5, 2.5));
         addToWorld(controlPanel);
 
@@ -344,9 +344,15 @@ public class ReferenceScene extends Scene {
         ControlPanel cp = new ControlPanel(new DimensionF(PropertyControlPanelWidth, 3 * PropertyControlPanelRowHeight), mat, 0.01);
         Indicator indicator;
 
-        // top line: property yontrol
+        // top line: property control
+        IntHolder spinnedValue = new IntHolder(961);
         cp.add(new Vector2(0, PropertyControlPanelRowHeight / 2 + PropertyControlPanelRowHeight / 2),
-                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat, null));
+                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat, new NumericSpinnerHandler(1, value -> {
+                    if (value != null) {
+                        spinnedValue.setValue(value.intValue());
+                    }
+                    return Double.valueOf(spinnedValue.getValue());
+                })));
 
         // mid line: a indicator
         indicator = Indicator.buildGreen(0.03);

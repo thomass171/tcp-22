@@ -71,10 +71,10 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                 <div>
                     <div class="">
                         <button class=" w3-button  w3-round w3-khaki "
-                                onclick="launchReferenceScene(false,$('#chk_nearView').prop('checked'),$('#chk_hud').prop('checked'))">
+                                onclick="launchSceneByName('ReferenceScene',false,$('#chk_nearView').prop('checked'),$('#chk_hud').prop('checked'))">
                             Launch
                         </button>
-                        <button class=" w3-button  w3-round w3-khaki " onclick="launchReferenceScene(true,false,false)">
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchSceneByName('ReferenceScene',true,false,false)">
                             Launch VR
                         </button>
                     </div>
@@ -91,6 +91,24 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                     </div>
                 </div>
             </div>
+
+            <div class="">
+                <div class="">Showroom Scene</div>
+            </div>
+            <div id="row17" class="w3-panel">
+                <div>
+                    <div class="">
+                        <button class=" w3-button  w3-round w3-khaki "
+                                onclick="launchSceneByName('ShowroomScene',false,$('#chk_nearView').prop('checked'),$('#chk_hud').prop('checked'))">
+                            Launch
+                        </button>
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchSceneByName('ShowroomScene',true,false,false)">
+                            Launch VR
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class=" w3-padding-large w3-section w3-white">

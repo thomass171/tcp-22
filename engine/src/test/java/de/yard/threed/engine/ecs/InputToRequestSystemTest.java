@@ -123,6 +123,11 @@ public class InputToRequestSystemTest {
         EcsTestHelper.processSeconds(2);
         assertEquals(1, cp.checkForClickedAreaCalled);
 
+        // but up at different location than down is a drag but no click
+        SimpleHeadlessPlatform.mockedMouseDownInput.add(new Point(-10, -10));
+        SimpleHeadlessPlatform.mockedMouseUpInput.add(new Point(-100, -100));
+        EcsTestHelper.processSeconds(2);
+        assertEquals(1, cp.checkForClickedAreaCalled);
     }
 
     /**

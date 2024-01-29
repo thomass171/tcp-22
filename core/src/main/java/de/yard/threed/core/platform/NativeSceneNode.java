@@ -1,20 +1,11 @@
 package de.yard.threed.core.platform;
 
 /**
- * 11.3.16: Abgeleitet von Base3D oder Object3D? Es muss add/remove geben. Da Object3D wegen der Worldmatrix ein Parent
- * kennen muss, sollte er auch children kennen und damit add/remove. Damit add/remove nicht doppelt ist,
- * sollte folglich Model von Object3D ableiten statt Base3D.
- * <p>
- * 15.6.16: Umbenannt von Model nach SceneNode. Entspricht einem GameObject in Unity.
+ * 15.6.16: Like GameObject in Unity.
  * <p>
  * Created by thomass on 05.06.15.
  */
-public interface NativeSceneNode /*16.9.16 extends  NativeObject3D/*Base3D*/ {
-    /**
-     * oder Object3D?
-     */
-
-    //4.2.16 jetzt in Camera void addCamera(NativeCamera camera);
+public interface NativeSceneNode {
    /*
     * 15.6.16: Mesh ist nicht mehr Teil des Scenegraph, sondern Komponente eines SceneNodes (analog Unity)
     * Aber darf es mehrere Meshes geben? Doch eher nein. Also setter 
@@ -52,15 +43,7 @@ public interface NativeSceneNode /*16.9.16 extends  NativeObject3D/*Base3D*/ {
 
     String getName();
 
-    /**
-     * 23.12.16: Ist die Methode nicht fragwürdig im Sinne einer Unity Analogie? Muesste es stattdessen nicht ein getTransform hier geben?
-     * 26.1.17: Ja, Ersetzt jetzt durch Native?Transform .
-     *
-     * @return
-     */
-    //NativeObject3D getObject3D();
     NativeTransform getTransform();
-
 
     /**
      * Liefert nur auf dem Carrier etwas, null otherwise.
@@ -71,13 +54,9 @@ public interface NativeSceneNode /*16.9.16 extends  NativeObject3D/*Base3D*/ {
     /**
      * 5.10.17: Pruefung, ob das zugrundliegende Native Objekt das selbe ist.
      * Brauchts aber vielleicht nur intern.
-     * 2018: Das ist konzeptionell unsauber, z.B. weil es nur ein Wrapper ist. Und was heisst schon "same".
+     * 2018: Due to using wrapper its quite q&d. And what does "same" mean.
      * @return
      */
     //boolean isSame(NativeSceneNode node);
-
-    //mal langsam void setCamera(NativeCamera camera);
-
-    //mal langsam public NativeCamera getCamera();
 
 }

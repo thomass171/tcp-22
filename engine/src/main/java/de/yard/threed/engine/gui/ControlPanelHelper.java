@@ -32,7 +32,7 @@ public class ControlPanelHelper {
         double zpos = camera.getNear() + 0.1;
 
         DimensionF worldPlaneSize = camera.getPlaneSize(zpos);
-        logger.debug("worldPlaneSize=" + worldPlaneSize+ " for zpos "+ zpos);
+        logger.debug("worldPlaneSize=" + worldPlaneSize + " for zpos " + zpos);
 
         DimensionF worldBackplaneSize = buildDimensionByPixel(worldPlaneSize, screenDimensionInPixel, inventorySizeInPixel);
         logger.debug("worldBackplaneSize=" + worldBackplaneSize);
@@ -137,5 +137,18 @@ public class ControlPanelHelper {
         double wfactor = (double) expectedSizeInPixel.getWidth() / dimension.getWidth();
         double hfactor = (double) expectedSizeInPixel.getHeight() / dimension.getHeight();
         return new DimensionF(planeSize.width * wfactor, planeSize.height * hfactor);
+    }
+
+    /**
+     * row counts from bottom
+     */
+    public static double calcYoffsetForRow(int row, int rows, double rowHeight) {
+        double h2 = rowHeight / 2;
+
+        if (rows % 2 == 0) {
+            return row * rowHeight - h2 * rows / 2;
+        } else {
+            return row * rowHeight - rowHeight * (rows - 1) / 2;
+        }
     }
 }

@@ -26,10 +26,10 @@ public class ShowroomControlMenuBuilder implements ControlMenuBuilder {
         GuiGrid controlmenu = GuiGrid.buildForCamera(camera, 2, 5, 1, Color.BLACK_FULLTRANSPARENT, true);
 
         controlmenu.addButton(0, 0, 1, Icon.ICON_HORIZONTALLINE, () -> {
-            showroomScene.scale(showroomScene.box1,0.9);
+            showroomScene.scale(showroomScene.box1.getSceneNode(),0.9);
         });
         controlmenu.addButton(2, 0, 1, Icon.ICON_PLUS, () -> {
-            showroomScene.scale(showroomScene.box1,1.1);
+            showroomScene.scale(showroomScene.box1.getSceneNode(),1.1);
         });
         controlmenu.addButton(3, 0, 1, Icon.ICON_CLOSE, () -> {
             //openCloseMenu();

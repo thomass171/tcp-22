@@ -24,7 +24,7 @@ public class Payload {
     // by index
     @Deprecated
     public Object[] o = null;
-    // by name
+    // by name. TODO use string instead of object. How should type be found?
     public Map<String, Object> values = null;
 
     public Payload() {
@@ -117,6 +117,7 @@ public class Payload {
         return o.length;
     }*/
 
+    @Deprecated
     public Object get(int index) {
         if (o == null) {
             throw new RuntimeException("no index based payload");
@@ -124,11 +125,19 @@ public class Payload {
         return o[index];
     }
 
+    @Deprecated
     public Object get(String name) {
         if (values == null) {
             throw new RuntimeException("no name based payload");
         }
         return values.get(name);
+    }
+
+    public int getAsInt(String name) {
+        if (values == null) {
+            throw new RuntimeException("no name based payload");
+        }
+        return Util.atoi((String) values.get(name));
     }
 
     public String getName() {
@@ -198,7 +207,7 @@ public class Payload {
             Map<String, Object> m = new HashMap<String, Object>();
             for (String s : packet.getData()) {
                 if (StringUtils.startsWith(s, "p_")) {
-                    String[] parts = StringUtils.split(s,"=");
+                    String[] parts = StringUtils.split(s, "=");
                     m.put(StringUtils.substring(parts[0], 2), decodeObject(parts[1]));
                 }
             }

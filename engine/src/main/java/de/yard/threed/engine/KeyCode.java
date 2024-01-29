@@ -266,6 +266,10 @@ public class KeyCode {
                 return G;
             case 35:
                 return H;
+            case 36:
+                return J;
+            case 37:
+                return K;
             case 38:
                 return L;
             case 44:

@@ -5,11 +5,15 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.IntHolder;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Point;
+import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Vector3;
+import de.yard.threed.core.platform.NativeCollision;
+import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 
 import de.yard.threed.engine.gui.*;
-import de.yard.threed.engine.platform.EngineHelper;
+import de.yard.threed.engine.vr.VRController;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
@@ -37,11 +41,13 @@ import java.util.Map;
  * 22.1.24: No longer decide mouseClickMode between segment and control panel (VR) mode. Control panel should also be avialable for mouse clicks
  * in general.
  * <p>
+ * Dragging for now has no real use case. At least its no non-VR supplement for grabbing.
+ * <p>
  * Created by thomass on 11.10.19.
  */
 public class InputToRequestSystem extends DefaultEcsSystem {
     static Log logger = Platform.getInstance().getLog(InputToRequestSystem.class);
-    private Map<KeyEntry, RequestType> keymapping = new HashMap<KeyEntry, RequestType>();
+    private Map<KeyEntry, RequestBuilder> keymapping = new HashMap<KeyEntry, RequestBuilder>();
 
     //2.4.21: menu. Why not in UserSystem?
     //4.2.22: What is the difference? Apparently the only difference is a control menu is attached to a camera while
@@ -65,6 +71,8 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     private List<MockedInput> mockedInputs = new ArrayList<MockedInput>();
     // Entity id of the current player (the one controlling the game). null unless not logged in
     private Integer userEntityId = null;
+    private Point possiblestartdrag;
+    private Integer draggedEntity = null;
 
     public InputToRequestSystem() {
         super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU}, new EventType[]{UserSystem.USER_EVENT_LOGGEDIN});
@@ -105,25 +113,33 @@ public class InputToRequestSystem extends DefaultEcsSystem {
      * Mapping for 'key went down'.
      */
     public void addKeyMapping(int keyCode, RequestType requestType) {
-        keymapping.put(new KeyEntry(keyCode), requestType);
+        keymapping.put(new KeyEntry(keyCode), new RequestBuilder(requestType));
+    }
+
+    public void addKeyMapping(int keyCode, RequestType requestType, RequestPopulator requestPopulator) {
+        keymapping.put(new KeyEntry(keyCode), new RequestBuilder(requestType, requestPopulator));
     }
 
     /**
      * Mapping for 'key went down' with shift modifier pressed.
      */
     public void addShiftKeyMapping(int keyCode, RequestType requestType) {
-        keymapping.put(new KeyEntry(keyCode, true), requestType);
+        keymapping.put(new KeyEntry(keyCode, true), new RequestBuilder(requestType));
     }
 
     /**
      * Mapping for 'key went up'.
      */
     public void addKeyReleaseMapping(int keyCode, RequestType requestType) {
-        keymapping.put(new KeyEntry(keyCode, false, true), requestType);
+        keymapping.put(new KeyEntry(keyCode, false, true), new RequestBuilder(requestType));
+    }
+
+    public void addKeyReleaseMapping(int keyCode, RequestType requestType, RequestPopulator requestPopulator) {
+        keymapping.put(new KeyEntry(keyCode, false, true), new RequestBuilder(requestType, requestPopulator));
     }
 
     public void addShiftKeyReleaseMapping(int keyCode, RequestType requestType) {
-        keymapping.put(new KeyEntry(keyCode, true, true), requestType);
+        keymapping.put(new KeyEntry(keyCode, true, true), new RequestBuilder(requestType));
     }
 
     @Override
@@ -165,7 +181,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 if (key.shift == Input.getKey(KeyCode.Shift)) {
                     if (userEntityId != null) {
                         // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
-                        SystemManager.putRequest(new Request(keymapping.get(key), userEntityId));
+                        SystemManager.putRequest(buildRequestFromKeyMapping(key, userEntityId));
                     }
                 }
             }
@@ -175,7 +191,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 if (key.shift == Input.getKey(KeyCode.Shift)) {
                     if (userEntityId != null) {
                         // only create request if client/user is logged in yet. userEntityId is not a payload but a request property.
-                        SystemManager.putRequest(new Request(keymapping.get(key), userEntityId));
+                        SystemManager.putRequest(buildRequestFromKeyMapping(key, userEntityId));
                     }
                 }
             }
@@ -200,43 +216,77 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         }
         // now check mouse clicks. Be aware of multiple possible targets, eg. segment and control menu.
         // VR has no mouse (clicks)
-        Point mouseClicklocation = Input.getMouseUp();
-        if (mouseClicklocation != null) {
-            logger.debug("mouseClicklocation=" + mouseClicklocation);
-
-            if (menu != null) {
-                // open menu. Only check menu item click.
-
-                menu.checkForClickedArea(camera/*menu.getMenuCamera()*/.buildPickingRay(camera.getCarrier().getTransform(), mouseClicklocation));
-
-                // Muss erst geschlossen werden, bevor was anderes gemacht werden kann.
-                // Geht aber nicht ueber Key, der wird weiter unten erst geprueft. Naja.
-                return;
-            } else {
-                boolean controlMenuAreaClicked = false;
-                if (controlmenu != null) {
-                    controlMenuAreaClicked = controlmenu.checkForClickedArea(camera.buildPickingRay(
-                            camera.getCarrier().getTransform(), mouseClicklocation));
+        Point mouseDownLocation = Input.getMouseDown();
+        if (mouseDownLocation != null) {
+            possiblestartdrag = mouseDownLocation;
+            //logger.debug("possible drag from " + startdrag);
+        }
+        if (possiblestartdrag != null) {
+            Point mouseMoveLocation = Input.getMouseMove();
+            if (mouseMoveLocation != null) {
+                Point offset = mouseMoveLocation.subtract(possiblestartdrag);
+                logger.debug("dragging offset " + offset);
+                if (draggedEntity == null) {
+                    draggedEntity = findDraggedEntity(camera);
+                    if (draggedEntity == null) {
+                        // no entity hit. Abort drag.
+                        possiblestartdrag = null;
+                    } else {
+                        logger.debug("Dragging entity with id " + draggedEntity);
+                    }
+                }
+                // This calc is highly q&d. Dragged object should stay in its plane.
+                double dragfactor = 0.003;
+                double dragX = (double) offset.getX() * dragfactor;
+                double dragY = -(double) offset.getY() * dragfactor;
+                if (draggedEntity != null) {
+                    requestDragTransform(dragX, dragY);
                 }
 
-                // Don't consider any further action (segment,VR emulation) when a button of control menu was clicked
-                if (!controlMenuAreaClicked) {
+            }
+        }
+        Point mouseUpLocation = Input.getMouseUp();
+        // Only handle mouseUp as click when it is at the same location as mouseDown.
+        if (mouseUpLocation != null) {
+            if (possiblestartdrag == null || possiblestartdrag.equals(mouseUpLocation)) {
+                logger.debug("mouseClicklocation=" + mouseUpLocation);
 
-                    // Mouse click somewhere. Consider VR controller or mouse ray click (left by holding ctrl key)
-                    Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseClicklocation);
-                    // ctrl geht nicht in JME mit click, darum shift
-                    boolean consumed = processTrigger(ray, Input.getKey(KeyCode.Shift));
-                    if (!consumed) {
-                        // Fall through to segment control. Determine segment. 20.3.21: But send it only with user id.
-                        int segment = Input.getClickSegment(mouseClicklocation, Scene.getCurrent().getDimension(), 3);
-                        logger.debug("clicked segment:" + segment);
-                        RequestType sr = segmentRequests.get(segment);
-                        if (sr != null && userEntityId != null) {
-                            SystemManager.putRequest(new Request(sr, userEntityId));
+                if (menu != null) {
+                    // open menu. Only check menu item click.
+
+                    menu.checkForClickedArea(camera.buildPickingRay(camera.getCarrier().getTransform(), mouseUpLocation));
+
+                    // Muss erst geschlossen werden, bevor was anderes gemacht werden kann.
+                    // Geht aber nicht ueber Key, der wird weiter unten erst geprueft. Naja.
+                    return;
+                } else {
+                    boolean controlMenuAreaClicked = false;
+                    if (controlmenu != null) {
+                        controlMenuAreaClicked = controlmenu.checkForClickedArea(camera.buildPickingRay(
+                                camera.getCarrier().getTransform(), mouseUpLocation));
+                    }
+
+                    // Don't consider any further action (segment,VR emulation) when a button of control menu was clicked
+                    if (!controlMenuAreaClicked) {
+
+                        // Mouse click somewhere. Consider VR controller or mouse ray click (left by holding ctrl key)
+                        Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseUpLocation);
+                        // ctrl geht nicht in JME mit click, darum shift
+                        boolean consumed = processTrigger(ray, Input.getKey(KeyCode.Shift));
+                        if (!consumed) {
+                            // Fall through to segment control. Determine segment. 20.3.21: But send it only with user id.
+                            int segment = Input.getClickSegment(mouseUpLocation, Scene.getCurrent().getDimension(), 3);
+                            logger.debug("clicked segment:" + segment);
+                            RequestType sr = segmentRequests.get(segment);
+                            if (sr != null && userEntityId != null) {
+                                SystemManager.putRequest(new Request(sr, userEntityId));
+                            }
                         }
                     }
                 }
             }
+            // mouse up ends drag in any case
+            possiblestartdrag = null;
         }
 
         // VR controller input
@@ -270,6 +320,11 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 processPointer(mi.ray, mi.left);
             }
         }
+    }
+
+    private Request buildRequestFromKeyMapping(KeyEntry key, Integer userEntityId) {
+        Request request = keymapping.get(key).build(userEntityId);
+        return request;
     }
 
     @Override
@@ -431,6 +486,45 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         }
         return false;
     }
+
+    private Integer findDraggedEntity(Camera camera) {
+        Ray ray = camera.buildPickingRay(camera.getCarrier().getTransform(), possiblestartdrag);
+
+        if (ray == null) {
+            return null;
+        }
+        // Using intersections might be quite inefficient, but there is no other way currently
+        // until we have a collider concept.
+        List<NativeCollision> intersections = ray.getIntersections();
+        logger.debug("intersections: " + intersections.size());
+        for (int i = 0; i < intersections.size(); i++) {
+            //logger.debug("intersection: " + intersections.get(i).getSceneNode().getName());
+            NativeSceneNode intersectingNode = intersections.get(i).getSceneNode();
+            /*if (intersections.get(i).getSceneNode().getName().equals("red box")) {
+                SceneNode pickerobject = new SceneNode(intersections.get(i).getSceneNode());
+            }*/
+            for (EcsEntity entity : GrabbingSystem.getTransformables()) {
+                if (entity.getSceneNode() != null) {
+                    //TODO comparing by name is poor. Needs Id or similar.
+                    if (entity.getSceneNode().getName().equals(intersectingNode.getName())) {
+                        logger.debug("intersected entity found: " + entity.getName());
+                        return entity.getId();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private void requestDragTransform(double dragX, double dragY) {
+        // for now directly, but in future for client/server via request and additional TransformService
+        EcsEntity entity = EcsHelper.findEntityById(draggedEntity);
+        Transform transform = entity.getSceneNode().getTransform();
+        // TODO this is highly q&d. Dragged object should stay in its plane.
+        transform.setPosition(transform.getPosition().add(new Vector3(dragX, 0, dragY)));
+    }
+
+
 }
 
 class KeyEntry {

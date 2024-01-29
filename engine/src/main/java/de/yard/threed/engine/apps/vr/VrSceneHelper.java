@@ -10,6 +10,7 @@ import de.yard.threed.engine.gui.*;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.DimensionF;
 import de.yard.threed.core.geometry.SimpleGeometry;
+import de.yard.threed.engine.vr.VrOffsetWrapper;
 
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public class VrSceneHelper {
         ControlPanel cp = new ControlPanel(new DimensionF(ControlPanelWidth, rows * ControlPanelRowHeight), mat, 0.01);
 
         // top line: property control for yvroffset
-        cp.add(new Vector2(0, h + h2), new SpinnerControlPanel(rowsize, ControlPanelMargin, mat, new VrOffsetHandler()));
+        cp.add(new Vector2(0, h + h2), new SpinnerControlPanel(rowsize, ControlPanelMargin, mat, new NumericSpinnerHandler(0.1, new VrOffsetWrapper())));
 
         // top mid line
         cp.addArea(new Vector2(-midElementWidth4 - m4_2, h2), new DimensionF(midElementWidth4, ControlPanelRowHeight), buttonDelegates.get("cycleLeft")).setIcon(Icon.ICON_LEFTARROW);

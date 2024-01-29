@@ -7,7 +7,6 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.platform.PlatformHelper;
 import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.Scene;
@@ -15,8 +14,6 @@ import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.World;
 import de.yard.threed.engine.gui.ControlPanel;
 import de.yard.threed.engine.gui.ControlPanelHelper;
-import de.yard.threed.engine.gui.Hud;
-import de.yard.threed.engine.gui.TextTexture;
 import de.yard.threed.engine.platform.EngineHelper;
 
 
@@ -45,6 +42,7 @@ public class VrInstance {
     private LocalTransform cpTransform = null;
     private static VRController controller0 = null;
     private static VRController controller1 = null;
+    private Vector3 emulatedControllerPosition = new Vector3(0,0,0);
 
     private VrInstance(int mode, Vector3 offsetVR) {
         this.mode = mode;
@@ -149,8 +147,8 @@ public class VrInstance {
      */
     private void probeController() {
         if (isEmulated()) {
-            controller0 = VRController.getDummyController();
-            controller1 = VRController.getDummyController();
+            controller0 = VRController.getEmulatedController(emulatedControllerPosition);
+            controller1 = VRController.getEmulatedController(emulatedControllerPosition);
         } else {
             //zu frueh? Eigentlich wohl schon, zumindest ThreeJs liefert aber immer eine Node, die dann erst später befüllt wird.
             controller0 = VRController.getController(0);
@@ -234,4 +232,7 @@ public class VrInstance {
         }
     }
 
+    public void setEmulatedControllerPosition(Vector3 v) {
+        emulatedControllerPosition=v;
+    }
 }

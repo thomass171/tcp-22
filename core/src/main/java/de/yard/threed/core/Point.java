@@ -47,7 +47,7 @@ public class Point {
      */
     @Override
     public boolean equals(Object po) {
-        // Soll bei Falschnutzung ruhig Exception geben
+        // Should throw exception on wrong usage
         Point p = (Point) po;
         return this.x == p.x && this.y == p.y;
     }

@@ -111,6 +111,13 @@ vrControllerEventMap.set("left-stick-up-center", function () {lastkeyup.push(87)
 vrControllerEventMap.set("left-stick-down", function () {lastkeydown.push(83)});
 vrControllerEventMap.set("left-stick-down-center", function () {lastkeyup.push(83)});
 
+// grab button, or is it a stick?
+// 71=g,74=j, no idea where 73 is
+vrControllerEventMap.set("left-button-1-down", function () {lastkeydown.push(71)});
+vrControllerEventMap.set("left-button-1-up", function () {lastkeyup.push(71)});
+vrControllerEventMap.set("right-button-1-down", function () {lastkeydown.push(74)});
+vrControllerEventMap.set("right-button-1-up", function () {lastkeyup.push(74)});
+
 function pollVrControllerEvents(renderer) {
   var handedness = "unknown";
 
@@ -142,8 +149,9 @@ function pollVrControllerEvents(renderer) {
             // Buttons seems to have only values 0 and 1
             if (value !== old.buttons[button] /*|| Math.abs(value) > 0.8*/) {
               if (debugLog) console.log(data.handedness + " button " + button + " value changed from " + old.buttons[button] + " to " + value);
-              //check if it is 'all the way pushed'
-              if (value === 1) {
+              //check if it is 'all the way pushed'. 24.1.24: Grabber seems to be stick like and might not reach 1.00 at all.
+              //if (value === 1) {
+              if (value > 0.9) {
                 if (debugLog) console.log("Button " + button + " down");
                 checkVrControllerEvent(data.handedness + "-button-" + button + "-down");
               } else {

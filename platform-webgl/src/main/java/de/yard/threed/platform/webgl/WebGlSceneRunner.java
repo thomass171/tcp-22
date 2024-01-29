@@ -49,18 +49,6 @@ public class WebGlSceneRunner extends AbstractSceneRunner implements NativeScene
         canvasPanel.getElement().getStyle().setBackgroundColor("#2062B8");
         RootLayoutPanel.get().add(canvasPanel);
 
-        // 5.8.15: Das mit dem FocusPanel gefaellt mir nicht
-        /*focuspanel.addKeyDownHandler(new KeyDownHandler() {
-
-            @Override
-            public void onKeyDown(KeyDownEvent event) {
-                if (event.getNativeKeyCode() == KeyCodes.KEY_NUM_MINUS) {
-                    Window.alert("down hit");
-                    event.preventDefault();
-                }
-            }
-        });*/
-
         scsettings = new Settings();
         scene.initSettings(scsettings);
 

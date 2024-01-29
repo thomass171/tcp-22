@@ -3,7 +3,9 @@ package de.yard.threed.engine.apps.showroom;
 
 import de.yard.threed.core.Color;
 import de.yard.threed.core.DimensionF;
+import de.yard.threed.core.IntHolder;
 import de.yard.threed.core.Point;
+import de.yard.threed.core.ValueWrapper;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.configuration.Configuration;
@@ -36,6 +38,8 @@ import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.FirstPersonMovingComponent;
 import de.yard.threed.engine.ecs.FirstPersonMovingSystem;
+import de.yard.threed.engine.ecs.GrabbingComponent;
+import de.yard.threed.engine.ecs.GrabbingSystem;
 import de.yard.threed.engine.ecs.InputToRequestSystem;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.SystemState;
@@ -51,9 +55,14 @@ import de.yard.threed.engine.gui.Indicator;
 import de.yard.threed.engine.gui.MenuCycler;
 import de.yard.threed.engine.gui.MenuItem;
 import de.yard.threed.engine.gui.MenuProvider;
+import de.yard.threed.engine.gui.NumericSpinnerHandler;
+import de.yard.threed.engine.gui.PropertyPanel;
+import de.yard.threed.engine.gui.SelectSpinnerHandler;
 import de.yard.threed.engine.gui.SpinnerControlPanel;
 import de.yard.threed.engine.platform.common.Settings;
+import de.yard.threed.engine.vr.VrDebugPanel;
 import de.yard.threed.engine.vr.VrInstance;
+import de.yard.threed.engine.vr.VrOffsetWrapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -72,10 +81,8 @@ import java.util.Map;
  * Left controller teleports/moves (only?), right controller controls:
  * - scale down red cube (or mouse click). (scale up via menu/control menu)
  * - Via CP at left controller:
- * -- menu toggle
  * -- finetune up/down
- * -- info
- * -- indicator on/off
+ * -- toggle movement
  * <p>
  * Ground in y=0 layer.
  * Doesn't use gridteleporter because that is too focused on a fix grid like in maze.
@@ -85,7 +92,8 @@ import java.util.Map;
 public class ShowroomScene extends Scene {
     static Log logger = Platform.getInstance().getLog(ShowroomScene.class);
     static VrInstance vrInstance;
-    SceneNode bar, box1, ground, platform, secondBar, wall;
+    SceneNode bar, ground, platform, secondBar, wall;
+    EcsEntity box1;
     String userName = "user";
     EcsEntity avatar;
     Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
@@ -97,6 +105,7 @@ public class ShowroomScene extends Scene {
     private Audio elevatorPing;
     Color controlPanelBackground = new Color(128, 193, 255, 128);
     MenuItem[] menuitems;
+    VrDebugPanel vrDebugPanel;
 
     public ShowroomScene() {
     }
@@ -108,11 +117,11 @@ public class ShowroomScene extends Scene {
         menuitems = new MenuItem[]{
                 new MenuItem("scale up", () -> {
                     logger.debug("scale up");
-                    scale(box1, 1.1);
+                    scale(box1.getSceneNode(), 1.1);
                 }),
                 new MenuItem("scale down", () -> {
                     logger.debug("scale down");
-                    scale(box1, 0.9);
+                    scale(box1.getSceneNode(), 0.9);
                 }),
         };
 
@@ -120,7 +129,6 @@ public class ShowroomScene extends Scene {
             logger.info("up");
             /*avatar*/
             Observer.getInstance().fineTune(true);
-            //??vrInstance.increaseOffset(0.1);
         });
         buttonDelegates.put("down", () -> {
             logger.info("down");
@@ -149,15 +157,26 @@ public class ShowroomScene extends Scene {
         FirstPersonMovingSystem firstPersonMovingSystem = FirstPersonMovingSystem.buildFromConfiguration();
         SystemManager.addSystem(firstPersonMovingSystem);
 
+        GrabbingSystem grabbingSystem = GrabbingSystem.buildFromConfiguration();
+        GrabbingSystem.addDefaultKeyBindings(inputToRequestSystem);
+        SystemManager.addSystem(grabbingSystem);
+
         if (vrInstance != null) {
             // Even in VR the observer will be attached to avatar later
             observer.attach(vrInstance.getController(0));
             observer.attach(vrInstance.getController(1));
 
-            ShowroomVrControlPanel leftControllerPanel = new ShowroomVrControlPanel(buttonDelegates);
+            ControlPanel leftControllerPanel = buildVrControlPanel(buttonDelegates);
             // position and rotation of VR controlpanel is controlled by property ...
             inputToRequestSystem.addControlPanel(leftControllerPanel);
             vrInstance.attachControlPanelToController(vrInstance.getController(0), leftControllerPanel);
+
+            // VR debugPanel additionally at left controller.
+            vrDebugPanel = VrDebugPanel.buildVrDebugPanel();
+            vrDebugPanel.getTransform().setPosition(new Vector3(0, 0.4, 0.1));
+            // No need to add to inputToRequestSystem because it only displays
+            leftControllerPanel.attach(vrDebugPanel);
+
         } else {
             inputToRequestSystem.setControlMenuBuilder(new ShowroomControlMenuBuilder(this));
             inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
@@ -175,8 +194,9 @@ public class ShowroomScene extends Scene {
         addLight();
         //addCube();
 
-        box1 = VrSceneHelper.buildRedBox();
-        addToWorld(box1);
+        box1 = buildRedBox();
+        box1.addComponent(new GrabbingComponent());
+        addToWorld(box1.getSceneNode());
 
         bar = VrSceneHelper.buildBar();
         addToWorld(bar);
@@ -269,6 +289,10 @@ public class ShowroomScene extends Scene {
             if (vrInstance.getController(1) != null) {
                 toggleRedBox(vrInstance.getController(1).getRay(), false);
             }
+        }
+
+        if (vrDebugPanel != null) {
+            vrDebugPanel.update();
         }
     }
 
@@ -364,8 +388,14 @@ public class ShowroomScene extends Scene {
         Indicator indicator;
 
         // top line: property yontrol
+        IntHolder spinnedValue = new IntHolder(961);
         cp.add(new Vector2(0, PropertyControlPanelRowHeight / 2 + PropertyControlPanelRowHeight / 2),
-                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat, null));
+                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat, new NumericSpinnerHandler(1, value -> {
+                    if (value != null) {
+                        spinnedValue.setValue(value.intValue());
+                    }
+                    return Double.valueOf(spinnedValue.getValue());
+                })));
 
         // mid line: a indicator
         indicator = Indicator.buildGreen(0.03);
@@ -387,7 +417,7 @@ public class ShowroomScene extends Scene {
 
     public void scale(SceneNode node, double size) {
         logger.debug("scale " + size);
-        Vector3 scale = box1.getTransform().getScale();
+        Vector3 scale = box1.getSceneNode().getTransform().getScale();
         scale = scale.multiply(size);
         node.getTransform().setScale(scale);
     }
@@ -405,9 +435,51 @@ public class ShowroomScene extends Scene {
             //logger.debug("intersection: " + intersections.get(i).getSceneNode().getName());
             if (intersections.get(i).getSceneNode().getName().equals("red box")) {
                 SceneNode pickerobject = new SceneNode(intersections.get(i).getSceneNode());
-                scale(pickerobject,(inc) ? 1.1f : 0.9f);
+                scale(pickerobject, (inc) ? 1.1f : 0.9f);
             }
         }
     }
 
+    private EcsEntity buildRedBox() {
+        Geometry geometry = Geometry.buildCube(0.15f, 0.15f, 0.15f);
+        SceneNode box1 = new SceneNode(new Mesh(geometry, Material.buildLambertMaterial(new Color(0xFF, 00, 00))));
+        box1.setName("red box");
+        box1.getTransform().setPosition(new Vector3(-1, 1, -2));
+
+        EcsEntity entity = new EcsEntity(box1);
+        return entity;
+    }
+
+    /**
+     * A simple control panel permanently attached to the left controller. Consists of
+     * <p>
+     * <p>
+     * top line: vr y offset spinner
+     * medium: spinner for teleport toggle
+     */
+    private ControlPanel buildVrControlPanel(Map<String, ButtonDelegate> buttonDelegates) {
+        Color backGround = controlPanelBackground;
+        Material mat = Material.buildBasicMaterial(backGround, false);
+
+        double ControlPanelWidth = 0.6;
+        double ControlPanelRowHeight = 0.1;
+        double ControlPanelMargin = 0.005;
+
+        int rows = 2;
+        DimensionF rowsize = new DimensionF(ControlPanelWidth, ControlPanelRowHeight);
+
+        ControlPanel cp = new ControlPanel(new DimensionF(ControlPanelWidth, rows * ControlPanelRowHeight), mat, 0.01);
+
+        // top line: property control for yvroffset
+        cp.add(new Vector2(0, ControlPanelHelper.calcYoffsetForRow(1, rows, ControlPanelRowHeight)), new SpinnerControlPanel(rowsize, ControlPanelMargin, mat, new NumericSpinnerHandler(0.1, new VrOffsetWrapper())));
+        // mid line
+        cp.add(new Vector2(0, ControlPanelHelper.calcYoffsetForRow(0, rows, ControlPanelRowHeight)), new SpinnerControlPanel(rowsize, ControlPanelMargin, mat,
+                new SelectSpinnerHandler(new String[]{"FPS", "Teleport"}, value -> {
+                    logger.debug("Toggle teleport");
+                    //TODO
+                    return null;
+                })));
+
+        return cp;
+    }
 }

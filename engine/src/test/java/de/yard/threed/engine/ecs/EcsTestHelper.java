@@ -3,6 +3,7 @@ package de.yard.threed.engine.ecs;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.Packet;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.configuration.Properties;
 import de.yard.threed.core.platform.NativeEventBus;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ModelBuilderRegistry;
@@ -27,19 +28,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
+ * An ECS extension of the standard EngineTestFactory.initPlatformForTest().
+ *
  * Really needed? 16.2.23: Since its getting extended further: yes.
  * <p>
  * 21.3.20
  */
 public class EcsTestHelper {
 
-    public static void setup(InitMethod initMethod) {
-        setup(initMethod, new String[]{"engine"});
+    public static void setup(InitMethod initMethod, Properties properties) {
+        setup(initMethod, properties, new String[]{"engine"});
     }
 
     public static void setup(InitMethod initMethod, String... bundles) {
+        setup(initMethod, new Properties(), bundles);
+    }
+
+    public static void setup(InitMethod initMethod, Properties properties, String... bundles) {
         SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());
-        EngineTestFactory.initPlatformForTest(bundles, platformFactory, initMethod, ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        EngineTestFactory.initPlatformForTest(bundles, platformFactory, initMethod, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties));
     }
 
     /**

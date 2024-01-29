@@ -4,6 +4,7 @@ import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeTransform;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Input;
@@ -14,25 +15,29 @@ import de.yard.threed.engine.SceneNode;
 
 import de.yard.threed.core.platform.NativeVRController;
 import de.yard.threed.core.Color;
+import de.yard.threed.engine.Transform;
 
 /**
- * ob der extend so gut ist? Bis jetzt ja.
+ * Good idea to extend SceneNode? Until now it is. But the transforms are taken from nativecontroller!
  * <p>
- * zumindest ThreeJs liefert immer eine Node, die dann erst später befüllt wird.
- * Das scheint generell das WebXR Konzept zu sein. Controller sind erst dann wirklich da, wenn der
- * Benutzer VR aktiviert hat.
- *
+ * ThreeJs always returns a node that is populated later. This appears to be a general
+ * WebXR concept. Controller are not really known until the user enabled VR.
  * <p>
  * Created on 19.10.18.
  */
 public class VRController extends SceneNode {
+    static Log logger = Platform.getInstance().getLog(VRController.class);
+
+    // will be null for emulated VR
     NativeVRController nativecontroller;
+    Vector3 emulatedControllerPosition = null;
 
     /**
-     * Just a sceneNode as dummy controller.
+     * Just a sceneNode as dummy(emulated) controller.
      */
-    private VRController() {
+    private VRController(Vector3 emulatedControllerPosition) {
         this.nativecontroller = null;
+        this.emulatedControllerPosition=emulatedControllerPosition;
     }
 
     private VRController(NativeVRController nativecontroller) {
@@ -93,16 +98,30 @@ public class VRController extends SceneNode {
         }
         VRController vc = new VRController(controller);
         vc.addLine();
+        logger.debug("Building VRController with line attached");
         return vc;
     }
 
-    public static VRController getDummyController() {
+    public static VRController getEmulatedController(Vector3 emulatedControllerPosition) {
 
-        VRController vc = new VRController();
+        VRController vc = new VRController(emulatedControllerPosition);
         return vc;
     }
 
     public Vector3 getPosition() {
-        return (nativecontroller.getTransform().getPosition());
+        if (nativecontroller == null) {
+            return new Vector3();
+        }
+        Vector3 p = nativecontroller.getTransform().getPosition();
+        return p;
+    }
+
+    public Vector3 getWorldPosition() {
+        if (nativecontroller == null) {
+            return emulatedControllerPosition;
+        }
+        Vector3 p = new Transform(nativecontroller.getTransform()).getWorldPosition();
+        //logger.debug("worldposition=" + p);
+        return p;
     }
 }
