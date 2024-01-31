@@ -13,15 +13,31 @@ public class SimpleBundleResolver extends BundleResolver {
     public String bundledir;
     // needed for efficient texture loading without multiple lookup? private Map<String, ResourcePath> basedirs = new HashMap<String, ResourcePath>();
     NativeResourceReader resourceReader;
+    private String specificBundle = null;
 
     public SimpleBundleResolver(String dir, NativeResourceReader resourceReader) {
         this.resourceReader = resourceReader;
         bundledir = dir;
     }
 
+    /**
+     * Constructor for only resolving one specific bundle. Useful for overriding other bundle loader
+     * for some bundles.
+     * <p>
+     * 31.1.24
+     */
+    public SimpleBundleResolver(String dir, NativeResourceReader resourceReader, String specificBundle) {
+        this.resourceReader = resourceReader;
+        bundledir = dir;
+        this.specificBundle = specificBundle;
+    }
+
     @Override
     public ResourcePath resolveBundle(String bundleName) {
 
+        if (specificBundle != null && !specificBundle.equals(bundleName)) {
+            return null;
+        }
         String basedir = bundledir + "/" + bundleName;
         String dirfile = basedir + "/" + BundleRegistry.getDirectoryName(bundleName, false);
         if (resourceReader.exists(dirfile)) {

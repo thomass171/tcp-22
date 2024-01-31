@@ -41,8 +41,10 @@ import java.util.List;
  * Aber es ist ja auch für 2D scenery. Hmm, das ist aber unguenstig. Dann braeuchte man doch ein FlatTerrainSystem
  * Gesplittet.
  * 7.10.21: For displaying single (2D) tiles (Tile2.0) in general.
- * SphereSystem meanwhile knows the projection. And there is the idea of AbstractTerrainBuilder (but that in not for flat).
+ * SphereSystem meanwhile knows the projection. And there is the idea of AbstractTerrainBuilder (but that is not for flat).
  * 20.9.23: Idea of merge with Terrain/ScenerySystem discarded (MA49).
+ * 30.01.24: The name "flat" is confusing. It traditionally was always flat, but in principle its just static content. And
+ * probably its not needed at all as separate system but can be merged into SphereSystem.
  *
  * <p>
  * Created by thomass on 23.02.18.

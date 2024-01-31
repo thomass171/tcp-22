@@ -124,9 +124,8 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
     @Override
     public boolean processRequest(Request request) {
-        //if ( keytorequestsystemdebuglog) {
+
         logger.debug("got request " + request.getType());
-        // }
 
         if (request.getType().equals(USER_REQUEST_SPHERE)) {
 

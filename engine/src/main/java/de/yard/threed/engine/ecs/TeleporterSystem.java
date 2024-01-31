@@ -219,6 +219,9 @@ public class TeleporterSystem extends DefaultEcsSystem {
         return null;
     }
 
+    /**
+     * Might lead to stuttering, especially in large 3D universes,
+     */
     public void setAnimated(boolean animated) {
         this.animated = animated;
     }
