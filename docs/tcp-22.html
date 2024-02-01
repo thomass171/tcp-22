@@ -71,11 +71,14 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                 <div>
                     <div class="">
                         <button class=" w3-button  w3-round w3-khaki "
-                                onclick="launchSceneByName('ReferenceScene',false,$('#chk_nearView').prop('checked'),$('#chk_hud').prop('checked'))">
+                                onclick="launchSceneByName('ReferenceScene',null,$('#chk_nearView').prop('checked'),$('#chk_hud').prop('checked'))">
                             Launch
                         </button>
-                        <button class=" w3-button  w3-round w3-khaki " onclick="launchSceneByName('ReferenceScene',true,false,false)">
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchSceneByName('ReferenceScene','VR',false,false)">
                             Launch VR
+                        </button>
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchSceneByName('ReferenceScene','AR',false,false)">
+                            Launch AR
                         </button>
                     </div>
                 </div>
@@ -99,11 +102,14 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                 <div>
                     <div class="">
                         <button class=" w3-button  w3-round w3-khaki "
-                                onclick="launchSceneByName('ShowroomScene',false,$('#chk_nearView').prop('checked'),$('#chk_hud').prop('checked'))">
+                                onclick="launchSceneByName('ShowroomScene',null,$('#chk_nearView').prop('checked'),$('#chk_hud').prop('checked'))">
                             Launch
                         </button>
-                        <button class=" w3-button  w3-round w3-khaki " onclick="launchSceneByName('ShowroomScene',true,false,false)">
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchSceneByName('ShowroomScene','VR',false,false)">
                             Launch VR
+                        </button>
+                        <button class=" w3-button  w3-round w3-khaki " onclick="launchSceneByName('ShowroomScene','AR',false,false)">
+                            Launch AR
                         </button>
                     </div>
                 </div>
@@ -148,10 +154,10 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                             <p></p>
 
                             <button class=" w3-button  w3-round w3-khaki "
-                                    onclick="launchMazeScene(false,'sel_sceneBox')">Launch
+                                    onclick="launchMazeScene(null,'sel_sceneBox')">Launch
                             </button>
                             <button class=" w3-button  w3-round w3-khaki "
-                                    onclick="launchMazeScene(true,'sel_sceneBox')">Launch VR
+                                    onclick="launchMazeScene('VR','sel_sceneBox')">Launch VR
                             </button>
 
                             <p></p>
@@ -175,10 +181,10 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                             </select>
                             <p></p>
                             <button class=" w3-button  w3-round w3-khaki "
-                                    onclick="launchMazeScene(false,'sel_sceneBox1')">Launch
+                                    onclick="launchMazeScene(null,'sel_sceneBox1')">Launch
                             </button>
                             <button class=" w3-button  w3-round w3-khaki "
-                                    onclick="launchMazeScene(true,'sel_sceneBox1')">Launch VR
+                                    onclick="launchMazeScene('VR','sel_sceneBox1')">Launch VR
                             </button>
                             <p></p>
                         </div>
@@ -199,10 +205,10 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                             </select>
                             <p></p>
                             <button class=" w3-button  w3-round w3-khaki "
-                                    onclick="launchMazeScene(false,'sel_sceneBox2')">Launch
+                                    onclick="launchMazeScene(null,'sel_sceneBox2')">Launch
                             </button>
                             <button class=" w3-button  w3-round w3-khaki "
-                                    onclick="launchMazeScene(true,'sel_sceneBox2')">Launch VR
+                                    onclick="launchMazeScene('VR','sel_sceneBox2')">Launch VR
                             </button>
                             <p></p>
                         </div>
@@ -227,10 +233,10 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                             </select>
                             <p></p>
                             <button class=" w3-button  w3-round w3-khaki "
-                                    onclick="launchMazeScene(false,'sel_sceneBox3','dungeon')">Launch
+                                    onclick="launchMazeScene(null,'sel_sceneBox3','dungeon')">Launch
                             </button>
                             <button class=" w3-button  w3-round w3-khaki "
-                                    onclick="launchMazeScene(true,'sel_sceneBox3','dungeon')">Launch VR
+                                    onclick="launchMazeScene('VR','sel_sceneBox3','dungeon')">Launch VR
                             </button>
                             <p></p>
                         </div>
@@ -252,10 +258,10 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                             </select>
                             <p></p>
                             <button class=" w3-button  w3-round w3-khaki "
-                                    onclick="launchMazeScene(false,'sel_sceneBox4','dungeon-art')">Launch
+                                    onclick="launchMazeScene(null,'sel_sceneBox4','dungeon-art')">Launch
                             </button>
                             <button class=" w3-button  w3-round w3-khaki "
-                                    onclick="launchMazeScene(true,'sel_sceneBox4','dungeon-art')">Launch VR
+                                    onclick="launchMazeScene('VR','sel_sceneBox4','dungeon-art')">Launch VR
                             </button>
                             <p></p>
                         </div>
@@ -337,8 +343,8 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                                 around in non VR.
                                 VR has control panel at the left wrist.</p>
                             <p></p>
-                            <button class=" w3-button  w3-round w3-khaki " onclick="launchTrafficScene(false)">Launch</button>
-                            <button class=" w3-button  w3-round w3-khaki " onclick="launchTrafficScene(true)">Launch VR</button>
+                            <button class=" w3-button  w3-round w3-khaki " onclick="launchTrafficScene(null)">Launch</button>
+                            <button class=" w3-button  w3-round w3-khaki " onclick="launchTrafficScene('VR')">Launch VR</button>
                             <p></p>
                         </div>
                     </div>

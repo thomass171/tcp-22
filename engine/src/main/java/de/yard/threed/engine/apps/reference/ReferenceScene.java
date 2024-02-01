@@ -105,7 +105,7 @@ public class ReferenceScene extends Scene {
     ControlPanel inventory;
     ControlPanel controlPanel;
     Color controlPanelBackground = new Color(128, 193, 255, 128);
-    boolean vrEnabled = false;
+    String vrMode = null;
     int lightIndex = 0;
     GeneralHandler[] lightCycle;
     int renderedLayer = -1;
@@ -121,8 +121,8 @@ public class ReferenceScene extends Scene {
         logger.debug("init ReferenceScene");
         databundle = BundleRegistry.getBundle("data");
 
-        if (EngineHelper.isEnabled("enableVR")) {
-            vrEnabled = true;
+        vrMode = Platform.getInstance().getConfiguration().getString("vrMode");
+        if (vrMode != null) {
             usedeferred = false;
         }
 
@@ -173,7 +173,7 @@ public class ReferenceScene extends Scene {
         // and now back to beginning
         tl.addEntryForLookat(new Vector3(0, 5, 11), new Vector3(0, 0, 0));
 
-        if (!vrEnabled) {
+        if (vrMode == null) {
             logger.debug("Building controlMenu");
             // control menu with one single teleport/step button
             // deferred fov camera has near/far 5/6.
@@ -235,7 +235,7 @@ public class ReferenceScene extends Scene {
         //20.5.16: Auch ein Hud, einfach um das bei wechselnden Camerapositionen einfach mittesten zu koennen.
         //3.12.18: Jetzt mit more far near plane???
         //7.10.19: War das nicht immer eine deferred Cam? Tja, weiss nicht. Damit raucht JME aber ab. Mit Versetztem Aufruf von getDeferredCamera gehts wohl(??).
-        if (!vrEnabled) {
+        if (vrMode == null) {
             FovElement.getDeferredCamera(getDefaultCamera());
             //deferred fov camera has near/far 5/6.
             hud = Hud.buildForCameraAndAttach(FovElement.getDeferredCamera(null), 0);

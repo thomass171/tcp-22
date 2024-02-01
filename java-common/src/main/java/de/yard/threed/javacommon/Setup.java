@@ -74,8 +74,8 @@ public class Setup {
 
         //properties.put("argv.vehiclelist","GenericRoad");
 
-        properties.put("logging.level.de.yard.threed.engine.ecs.InputToRequestSystem","DEBUG");
-        properties.put("logging.level.de.yard.threed","DEBUG");
+        properties.put("logging.level.de.yard.threed.engine.ecs.InputToRequestSystem", "DEBUG");
+        properties.put("logging.level.de.yard.threed", "DEBUG");
 
         //13.3.19: Scene doch mal wieder aus Property, um nicht so viele Run Configurations zu haben. Nur, wenn sie
         //nicht schon von aussen gesetzt ist.

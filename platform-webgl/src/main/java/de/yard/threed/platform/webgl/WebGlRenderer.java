@@ -12,24 +12,26 @@ import de.yard.threed.engine.platform.common.Settings;
 import java.util.List;
 
 /**
+ * 31.1.24: boolean vrEnabled replaced by vrMode
  * Created by thomass on 25.04.15.
  */
 public class WebGlRenderer {
     static Log logger = new WebGlLog(WebGlRenderer.class.getName());
     public JavaScriptObject renderer;
     static final String canvasid = "maincanvas";
-    private boolean vrEnabled, statEnabled;
+    private boolean statEnabled;
+    private String vrMode;
 
-    private WebGlRenderer(JavaScriptObject renderer, boolean vrEnabled, boolean statEnabled) {
+    private WebGlRenderer(JavaScriptObject renderer, String vrMode, boolean statEnabled) {
         this.renderer = renderer;
-        this.vrEnabled = vrEnabled;
+        this.vrMode = vrMode;
         this.statEnabled = statEnabled;
     }
 
-    public static WebGlRenderer buildRenderer(Dimension dimension, boolean vrready, boolean antialiasing, boolean vrEnabled, boolean statEnabled) {
+    public static WebGlRenderer buildRenderer(Dimension dimension, boolean vrready, boolean antialiasing, String vrMode, boolean statEnabled) {
         //vrready=false;
         WebGlRenderer r = new WebGlRenderer(buildNativeRenderer(canvasid, dimension.getWidth(), dimension.getHeight(),
-                Settings.backgroundColor.getARGB(), vrready, antialiasing, vrEnabled), vrEnabled, statEnabled);
+                Settings.backgroundColor.getARGB(), vrready, antialiasing, vrMode), vrMode, statEnabled);
         if (statEnabled) {
             enableStatisticsNative();
         }
@@ -46,7 +48,7 @@ public class WebGlRenderer {
         boolean doLog = cnt % 200 == 0;
         cnt++;
 
-        if (vrEnabled) {
+        if (vrMode != null) {
             if (cameras.size() > 1) {
                 String msg = "";
                 for (int i = 0; i < cameras.size(); i++) {
@@ -170,17 +172,26 @@ public class WebGlRenderer {
         }
     }-*/;
 
-    private static native JavaScriptObject buildNativeRenderer(String canvasid, int width, int height, int backgroundcolor, boolean vrready, boolean antialiasing, boolean vrEnabled)  /*-{
+    /**
+     * 31.1.24: boolean vrEnabled replaced by vrMode
+     */
+    private static native JavaScriptObject buildNativeRenderer(String canvasid, int width, int height, int backgroundcolor, boolean vrready, boolean antialiasing, String vrMode)  /*-{
         //$wnd.alert(antialiasing);
         var container = $wnd.document.getElementById(canvasid);
+        var renderer;
         // AA kann man nur im Constructor setzen, nicht mehr spaeter. If it works, depends on the browser/platform combination. Safari/Macbook apparently not.
-        var renderer = new $wnd.THREE.WebGLRenderer({ antialias: antialiasing });
+        if (vrMode != null && vrMode == 'AR') {
+            // add transparent background
+            renderer = new $wnd.THREE.WebGLRenderer({ antialias: antialiasing, alpha:true });
+        } else {
+            renderer = new $wnd.THREE.WebGLRenderer({ antialias: antialiasing });
+        }
         renderer.setSize(width,height);
         renderer.shadowMap.enabled = true;
         renderer.shadowMapSoft = true;
 
         // 5.5.21 autoclear prevents multi pass rendering. But don't switch it off in VR to avoid spoiling the rendering system
-        if (!vrEnabled) {
+        if (vrMode != null) {
             renderer.autoClear = false;
         }
         renderer.setClearColor( backgroundcolor, 1);
@@ -193,10 +204,10 @@ public class WebGlRenderer {
         // otherwise the y-position will be too high. But difficult to detect. And the user might not activate it.
         // 4.5.21: So better use a argv parameter to explicitly activate it. And don't use change events. This only causes trouble.
         // var vravailable = 'getVRDisplays' in $wnd.navigator;
-        if (vrready && vrEnabled) {
+        if (vrready && vrMode != null) {
             renderer.xr.enabled = true;
             //VRButton is not available in $wnd
-            $wnd.document.body.appendChild( $wnd.createVrButton( renderer ) );
+            $wnd.document.body.appendChild( $wnd.createVrButton( renderer, vrMode ) );
             //$wnd.addEventListener( 'vrdisplaypresentchange', function ( event ) {
                 //console.log("vrdisplaypresentchange "+event.display.isPresenting);
 				//button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';

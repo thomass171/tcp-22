@@ -64,6 +64,7 @@ public class VrInstance {
 
     /**
      * Returns null if VR isn't enabled.
+     * AR is also just VR inside this context.
      *
      * @return
      */
@@ -138,7 +139,7 @@ public class VrInstance {
     }
 
     public static boolean isEnabled() {
-        return EngineHelper.isEnabled("enableVR");
+        return Platform.getInstance().getConfiguration().getString("vrMode") != null;
     }
 
     /**

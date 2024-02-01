@@ -39,7 +39,10 @@ var loadedmodel = new Array();
 var loadedaudiobuffer = new Map();
 
 // VRButton is not available from "GWT native $wnd" (because its a module?)
-function createVrButton(renderer) {
+function createVrButton(renderer,vrMode) {
+    if (vrMode == 'AR') {
+        return ARButton.createButton( renderer );
+    }
     return VRButton.createButton( renderer );
 }
 

@@ -31,7 +31,6 @@ public class Observer implements SimpleTransform {
     // Usually the carrier, but might also be a proxy node.
     private Transform observer;
     private static Observer instance = null;
-    // boolean vrEnabled = false;
     public static double offsetstep = 0.1f;
     // der Wert des finetune
     public Vector3 fineTuneOffset = new Vector3();
@@ -39,10 +38,6 @@ public class Observer implements SimpleTransform {
 
     private Observer(Transform observer) {
         this.observer = observer;
-
-     /*   if (EngineHelper.isEnabled("enableVR")) {
-            vrEnabled = true;
-        }*/
     }
 
     /**

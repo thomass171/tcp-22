@@ -25,7 +25,9 @@ function launchSceneByName(sceneName,vr,nearview,hud) {
 
     var args = new Map();
     addCommonArgs(args, "");
-    args.set("enableVR",vr);
+    if (vr != null) {
+        args.set("vrMode",vr);
+    }
     args.set("enableHud",hud);
     args.set("enableNearView",nearview);
     launchScene(sceneName,args);
@@ -36,7 +38,7 @@ function launchSceneByName(sceneName,vr,nearview,hud) {
 function launchVrScene() {
     var args = new Map();
     addCommonArgs(args, "");
-    args.set("enableVR","true");
+    args.set("vrMode","VR");
     launchScene("VrScene",args);
 }
 
@@ -45,7 +47,9 @@ function launchTrafficScene(vr) {
     var args = new Map();
     addCommonArgs(args, "tf_");
     args.set("basename","traffic:tiles/Demo.xml");
-    args.set("enableVR",vr);
+    if (vr != null) {
+        args.set("vrMode",vr);
+    }
     launchScene("BasicTravelScene",args);
 }
 

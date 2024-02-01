@@ -34,6 +34,7 @@ import java.util.List;
  * 05.05.2021: AnimationScheduler is GWTs corresponding of JSs Window.requestAnimationFrame(). But this is not allowed for ThreeJS VR.
  * Instead renderer.setAnimationLoop() needs to be used. (https://threejs.org/docs/index.html#manual/en/introduction/How-to-create-VR-content).
  * So AnimationScheduler is only used for preload and then we switch to setAnimationLoop().
+ * 31.1.24: boolean vrEnabled replaced by vrMode
  * <p>
  * <p/>
  * Date: 14.02.14
@@ -63,11 +64,11 @@ public class WebGlSceneRenderer implements AnimationController {
     private WebGlSceneRenderer(Scene scene, CanvasPanel canvasPanel, Settings scsettings) {
         boolean vrready = scsettings.vrready != null && scsettings.vrready;
         boolean antialiasing = scsettings.aasamples != null && scsettings.aasamples != 0;
-        boolean vrEnabled = EngineHelper.isEnabled("enableVR");
+        String vrMode = Platform.getInstance().getConfiguration().getString("vrMode");
         boolean statEnabled = EngineHelper.isEnabled("enableStat");
 
-        logger.debug("Building WebGlSceneRenderer: vrEnabled=" + vrEnabled + ",statEnabled=" + statEnabled);
-        renderer = WebGlRenderer.buildRenderer(AbstractSceneRunner.getInstance().dimension, vrready, antialiasing, vrEnabled, statEnabled);
+        logger.debug("Building WebGlSceneRenderer: vrMode=" + vrMode + ",statEnabled=" + statEnabled);
+        renderer = WebGlRenderer.buildRenderer(AbstractSceneRunner.getInstance().dimension, vrready, antialiasing, vrMode, statEnabled);
         setScene(scene);
         this.canvasPanel = canvasPanel;
         //target framerate

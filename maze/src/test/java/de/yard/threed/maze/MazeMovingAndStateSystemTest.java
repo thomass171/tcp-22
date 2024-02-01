@@ -86,7 +86,7 @@ public class MazeMovingAndStateSystemTest {
     public void testSimpleVR() throws Exception {
 
         Map<String, String> properties = new HashMap<>();
-        properties.put("enableVR", "true");
+        properties.put("vrMode", "VR");
         Platform.getInstance().getConfiguration().addConfiguration(new ConfigurationByProperties(properties), true);
 
         VrInstance.buildFromArguments();

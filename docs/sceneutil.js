@@ -15,7 +15,9 @@ function launchMazeScene(vr,boxname,theme) {
     var args = new Map();
     addCommonArgs(args, "");
     args.set("initialMaze",$("#" + boxname).val());
-    args.set("enableVR",vr);
+    if (vr != null) {
+        args.set("vrMode",vr);
+    }
     if (theme != null) {
         args.set("theme",theme);
     }

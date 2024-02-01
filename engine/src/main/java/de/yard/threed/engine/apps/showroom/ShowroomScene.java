@@ -106,6 +106,7 @@ public class ShowroomScene extends Scene {
     Color controlPanelBackground = new Color(128, 193, 255, 128);
     MenuItem[] menuitems;
     VrDebugPanel vrDebugPanel;
+    String vrMode = null;
 
     public ShowroomScene() {
     }
@@ -113,6 +114,8 @@ public class ShowroomScene extends Scene {
     @Override
     public void init(SceneMode sceneMode) {
         logger.info("init FirstPersonScene");
+
+        vrMode = Platform.getInstance().getConfiguration().getString("vrMode");
 
         menuitems = new MenuItem[]{
                 new MenuItem("scale up", () -> {
@@ -201,8 +204,10 @@ public class ShowroomScene extends Scene {
         bar = VrSceneHelper.buildBar();
         addToWorld(bar);
 
-        ground = buildGround();
-        addToWorld(ground);
+        if (!isAR()) {
+            ground = buildGround();
+            addToWorld(ground);
+        }
 
         platform = VrSceneHelper.buildPlatform();
         addToWorld(platform);
@@ -210,8 +215,10 @@ public class ShowroomScene extends Scene {
         secondBar = VrSceneHelper.buildSecondBar();
         addToWorld(secondBar);
 
-        wall = buildWall();
-        addToWorld(secondBar);
+        if (!isAR()) {
+            wall = buildWall();
+            addToWorld(secondBar);
+        }
 
         AudioClip elevatorPingClip = AudioClip.buildAudioClipFromBundle("data", "audio/elevator-ping-01.wav");
         elevatorPing = Audio.buildAudio(elevatorPingClip);
@@ -481,5 +488,9 @@ public class ShowroomScene extends Scene {
                 })));
 
         return cp;
+    }
+
+    private boolean isAR() {
+        return vrMode != null && vrMode.equals("AR");
     }
 }
