@@ -252,38 +252,36 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 logger.debug("mouseClicklocation=" + mouseUpLocation);
 
                 if (menu != null) {
-                    // open menu. Only check menu item click.
-
-                    menu.checkForClickedArea(camera.buildPickingRay(camera.getCarrier().getTransform(), mouseUpLocation));
-
-                    // Muss erst geschlossen werden, bevor was anderes gemacht werden kann.
-                    // Geht aber nicht ueber Key, der wird weiter unten erst geprueft. Naja.
-                    return;
-                } else {
-                    boolean controlMenuAreaClicked = false;
-                    if (controlmenu != null) {
-                        controlMenuAreaClicked = controlmenu.checkForClickedArea(camera.buildPickingRay(
-                                camera.getCarrier().getTransform(), mouseUpLocation));
+                    // menu is open. 1.2.24: Continue if no menu item was clicked. Otherwise a control panel menu button cannot close menu.
+                    if (menu.checkForClickedArea(camera.buildPickingRay(camera.getCarrier().getTransform(), mouseUpLocation))) {
+                        return;
                     }
+                }
 
-                    // Don't consider any further action (segment,VR emulation) when a button of control menu was clicked
-                    if (!controlMenuAreaClicked) {
+                boolean controlMenuAreaClicked = false;
+                if (controlmenu != null) {
+                    controlMenuAreaClicked = controlmenu.checkForClickedArea(camera.buildPickingRay(
+                            camera.getCarrier().getTransform(), mouseUpLocation));
+                }
 
-                        // Mouse click somewhere. Consider VR controller or mouse ray click (left by holding ctrl key)
-                        Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseUpLocation);
-                        // ctrl geht nicht in JME mit click, darum shift
-                        boolean consumed = processTrigger(ray, Input.getKey(KeyCode.Shift));
-                        if (!consumed) {
-                            // Fall through to segment control. Determine segment. 20.3.21: But send it only with user id.
-                            int segment = Input.getClickSegment(mouseUpLocation, Scene.getCurrent().getDimension(), 3);
-                            logger.debug("clicked segment:" + segment);
-                            RequestType sr = segmentRequests.get(segment);
-                            if (sr != null && userEntityId != null) {
-                                SystemManager.putRequest(new Request(sr, userEntityId));
-                            }
+                // Don't consider any further action (segment,VR emulation) when a button of control menu was clicked
+                if (!controlMenuAreaClicked) {
+
+                    // Mouse click somewhere. Consider VR controller or mouse ray click (left by holding ctrl key)
+                    Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseUpLocation);
+                    // ctrl geht nicht in JME mit click, darum shift
+                    boolean consumed = processTrigger(ray, Input.getKey(KeyCode.Shift));
+                    if (!consumed) {
+                        // Fall through to segment control. Determine segment. 20.3.21: But send it only with user id.
+                        int segment = Input.getClickSegment(mouseUpLocation, Scene.getCurrent().getDimension(), 3);
+                        logger.debug("clicked segment:" + segment);
+                        RequestType sr = segmentRequests.get(segment);
+                        if (sr != null && userEntityId != null) {
+                            SystemManager.putRequest(new Request(sr, userEntityId));
                         }
                     }
                 }
+
             }
             // mouse up ends drag in any case
             possiblestartdrag = null;

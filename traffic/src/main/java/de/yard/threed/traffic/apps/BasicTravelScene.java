@@ -364,7 +364,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         //27.10.21 War sonst früher
         //8.12.21 addLight();
 
-        SystemManager.addSystem(new InputToRequestSystem());
+        //1.2.24 already created in init() SystemManager.addSystem(new InputToRequestSystem());
 
         //29.10.21: Damit lauchVehicles noch geht. TODO anders.
         //28.11.23 scenconfig is no longer used. 'baseTransformForVehicleOnGraph' is now set in SphereSystem for now.
@@ -424,6 +424,9 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         customUpdate(tpf);
     }
 
+    /**
+     * To be overridden.
+     */
     public void customUpdate(double tpf) {
     }
 
@@ -451,7 +454,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             }
         }*/
         if (Input.getKeyDown(KeyCode.L)) {
-            // load next not yet loaded vehicle.
+            // load next not yet loaded vehicle. 1.2.24: What is using this? Hangar/Cockpit isn't. But FlatAirportScene does.
             Request request = RequestRegistry.buildLoadVehicle(UserSystem.getInitialUser().getId(), null, null);
             SystemManager.putRequest(request);
         }
