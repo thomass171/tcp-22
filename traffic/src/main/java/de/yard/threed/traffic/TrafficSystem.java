@@ -90,7 +90,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     //static int schedulinginterval = 2;
     //27.10.21 die vehiclelist aus DefaultTrafficWorld hierhin. Erstmal static, spaeter ueber event?
     public static /*ConfigNodeList*/ List<Vehicle> vehiclelist;
-    public static VehicleBuiltDelegate genericVehicleBuiltDelegate = null;
+    public List<VehicleBuiltDelegate> genericVehicleBuiltDelegates = new ArrayList<VehicleBuiltDelegate>();
     // 19.11.23 ugly workaround for testing until we have requests in eventqueue
     public int vehiclesLoaded = 0;
     //27.11.23 public static SceneConfig sceneConfig;
@@ -294,7 +294,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                         trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
                         (UserSystem.getInitialUser() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
                         SphereSystem.getSphereNode()/*getWorld()*/, sphereProjections.backProjection,
-                        /*27.12.21airportConfig,*/ baseTransformForVehicleOnGraph, vehicleLoader, genericVehicleBuiltDelegate);
+                        /*27.12.21airportConfig,*/ baseTransformForVehicleOnGraph, vehicleLoader, genericVehicleBuiltDelegates);
                 vehiclesLoaded++;
                 return true;
             }
@@ -369,7 +369,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             VehicleDefinition config = TrafficHelper.getVehicleConfigByDataprovider(name, null);// tw.getVehicleConfig(name);
             EcsEntity avatar = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
             VehicleLauncher.lauchVehicleByName(groundNet/*getGroundNet()*/, config, name, smartLocation, TeleportComponent.getTeleportComponent(avatar),
-                    destinationNode/*getDestinationNode()*/, sphereProjections.backProjection, baseTransformForVehicleOnGraph, nearView, TrafficSystem.genericVehicleBuiltDelegate,
+                    destinationNode/*getDestinationNode()*/, sphereProjections.backProjection, baseTransformForVehicleOnGraph, nearView, genericVehicleBuiltDelegates,
                     vehicleLoader/*getVehicleLoader()*/);
             //aus flight: GroundServicesScene.lauchVehicleByIndex(gsw.groundnet, tw, 2, TeleportComponent.getTeleportComponent(avatar.avatarE), world, gsw.groundnet.projection);
 
@@ -681,5 +681,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
     }
 
+    public void addVehicleBuiltDelegate(VehicleBuiltDelegate vehicleBuiltDelegate){
+        genericVehicleBuiltDelegates.add(vehicleBuiltDelegate);
+    }
 }
 

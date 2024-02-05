@@ -22,6 +22,7 @@ import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -65,7 +66,7 @@ public class TrafficHelper {
      */
     public static void launchVehicles(/*ConfigNodeList*/List<Vehicle> vehiclelist, TrafficContext trafficContext/*27.12.21GroundNet groundnet*/, TrafficGraph graph, TeleportComponent avatarpc, SceneNode destinationnode,
                                                         GraphProjection projection /*27.12.21AirportConfig airport*/, LocalTransform baseTransformForVehicleOnGraph/* SceneConfig sceneConfig*/,
-                                                        VehicleLoader vehicleLoader, VehicleBuiltDelegate genericVehicleBuiltDelegate) {
+                                                        VehicleLoader vehicleLoader, List<VehicleBuiltDelegate> genericVehicleBuiltDelegates) {
         logger.debug("launchVehicles groundnet=" + ",graph=" + graph);
         //27.12.21 TrafficWorldConfig tw = TrafficWorldConfig.getInstance();
         for (int i = 0; i < vehiclelist.size()/*tw.getVehicleCount()*/; i++) {
@@ -77,7 +78,7 @@ public class TrafficHelper {
                 logger.warn("Vehicle not found:" + vehicle.getName());
                 return;
             }
-            if (!vehicle.hasDelayedLoad()  && !vehicle.wasLoaded/*getBooleanAttribute(TrafficWorldConfig.DELAYEDLOAD, false)*/) {
+            if (!vehicle.hasDelayedLoad() && !vehicle.wasLoaded/*getBooleanAttribute(TrafficWorldConfig.DELAYEDLOAD, false)*/) {
                 for (int j = 0; j < vconfig.getInitialCount(); j++) {
                     GraphPosition graphposition = null;
 
@@ -105,7 +106,7 @@ public class TrafficHelper {
                         }
                     }
                     VehicleLauncher.launchVehicle(vehicle, vconfig, graph/*groundnet.groundnetgraph*/, graphposition, avatarpc, destinationnode, projection,
-                            /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, (genericVehicleBuiltDelegate == null) ? new VehicleBuiltDelegate[]{} : new VehicleBuiltDelegate[]{genericVehicleBuiltDelegate}, vehicleLoader);
+                            /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, genericVehicleBuiltDelegates, vehicleLoader);
                 }
                 vehicle.wasLoaded = true;
             } else {
@@ -124,7 +125,7 @@ public class TrafficHelper {
                 SmartLocation location = vconf.getLocation();
                 //buildArrivedAircraft(config, gsw.groundnet.getParkPos(location.getParkPos()));
                 //VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()),config, groundnet.groundnetgraph, groundnet.getParkingPosition(groundnet.getParkPos(location.getParkPos())), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, null, vehicleLoader);
-                VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()), config, trafficContext.getGraph(), trafficContext.getStartPositionFromLocation(location), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, new VehicleBuiltDelegate[]{}, vehicleLoader);
+                VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()), config, trafficContext.getGraph(), trafficContext.getStartPositionFromLocation(location), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, new ArrayList<VehicleBuiltDelegate>(), vehicleLoader);
             }
         }
         //}

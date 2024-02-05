@@ -80,7 +80,7 @@ public class VehicleLauncher {
      * @return
      */
     public static void launchVehicle(Vehicle vehicle, VehicleDefinition config, TrafficGraph graph, GraphPosition position, @Deprecated TeleportComponent avatarpc, SceneNode destinationnode, GraphProjection projectionforbackprojection,
-                                     LocalTransform vehiclebasetransform, NearView nearView, VehicleBuiltDelegate[] vehicleBuiltDelegate, VehicleLoader vehicleLoader) {
+                                     LocalTransform vehiclebasetransform, NearView nearView, List<VehicleBuiltDelegate> genericVehicleBuiltDelegates, VehicleLoader vehicleLoader) {
         vehicleLoader.loadVehicle(vehicle, config, (SceneNode offsetNode, VehicleLoaderResult loaderResult/*9.11.21List<SGAnimation> animationList, SGPropertyNode rootpropertyNode*/, SceneNode lowresNode) -> {
             SceneNode modelNode = getModelNodeFromVehicleNode(offsetNode);
             SceneNode teleportParentNode = modelNode;
@@ -123,7 +123,7 @@ public class VehicleLauncher {
             //TODO Ich glaube mittlerweile, das z offset Problem sollte nicht hierhin mitgeschleppt werden.
             //Ist dafuer nicht die basenode in der Entity? JungeJunge, das ist aber auch'n Driss.
             //31.3.20: In EDDK stehen die AI aircraft aber doch wohl richtig, scheinbar auch in der Höhe.
-            EcsEntity vehicleEntity = buildVehicleOnGraph(offsetNode, graph, position, config, projectionforbackprojection,entityBuilder,teleportParentNode);
+            EcsEntity vehicleEntity = buildVehicleOnGraph(offsetNode, graph, position, config, projectionforbackprojection, entityBuilder, teleportParentNode);
             vehicleEntity.setName(config.getName());
             GraphMovingComponent.getGraphMovingComponent(vehicleEntity).setAutomove(vehicle.hasAutomove());
             //26.10.19vehicleEntity.setBasenode(modelNode);
@@ -154,10 +154,9 @@ public class VehicleLauncher {
             /*jetzt in config if (avatarpc != null) {
                 avatarpc.addPosition("BackSide", modelNode, new LocalTransform(new Vector3(90, 20, 15), Quaternion.buildFromAngles(new Degree(0), new Degree(90), new Degree(90))));
             }*/
-            if (vehicleBuiltDelegate != null) {
-                for (VehicleBuiltDelegate d : vehicleBuiltDelegate) {
-                    d.vehicleBuilt(vehicleEntity, config);
-                }
+
+            for (VehicleBuiltDelegate d : genericVehicleBuiltDelegates) {
+                d.vehicleBuilt(vehicleEntity, config);
             }
             // 24.11.20: ein paar Parameter mehr fuer TRAFFIC_EVENT_VEHICLELOADED, um da teleportcomponent zu befuellen.
             SystemManager.sendEvent(new Event(TrafficEventRegistry.TRAFFIC_EVENT_VEHICLELOADED, new Payload(vehicleEntity, avatarpc, config, teleportParentNode, nearView)));
@@ -173,7 +172,7 @@ public class VehicleLauncher {
      * 29.8.23: teleportParentNode added
      */
     public static EcsEntity buildVehicleOnGraph(SceneNode node, TrafficGraph graph, GraphPosition position, VehicleDefinition config,
-            /*Map*/GraphProjection projection, EntityBuilder entityBuilder,SceneNode teleportParentNode ) {
+            /*Map*/GraphProjection projection, EntityBuilder entityBuilder, SceneNode teleportParentNode) {
         GraphMovingComponent gmc = new GraphMovingComponent(node.getTransform());
         //MA31: navigator hat keinen graph
         gmc.setGraph((graph == null) ? null : graph.getBaseGraph(), position, projection);
@@ -186,7 +185,7 @@ public class VehicleLauncher {
         if (config != null) {
             // 29.8.23: Why VehicleComponent only if config exists? Conatins eg. also the teleportParentNode
             VehicleComponent vhc = new VehicleComponent(config/*type,modeltype*/);
-            vhc.teleportParentNode=teleportParentNode;
+            vhc.teleportParentNode = teleportParentNode;
             e.addComponent(vhc);
             // 27.12.21: Extracted to VehicleEntityBuilder
             if (entityBuilder != null) {
@@ -228,7 +227,7 @@ public class VehicleLauncher {
      */
     public static void lauchVehicleByName(TrafficGraph trafficGraph, VehicleDefinition config/*27.12.21TrafficWorldConfig tw*/, String name, SmartLocation location,
                                           TeleportComponent tc, SceneNode destination, GraphProjection projectionforbackprojection,/*27.11.23 SceneConfig sceneConfig*/LocalTransform baseTransformForVehicleOnGraph, NearView nearView,
-                                          VehicleBuiltDelegate vehicleBuiltDelegate, VehicleLoader vehicleLoader) {
+                                          List<VehicleBuiltDelegate> genericVehicleBuiltDelegates, VehicleLoader vehicleLoader) {
         //SceneVehicle vconf = /*tw.getScene("GroundServices")*/sceneConfig.getVehicleByName(name);
         //GraphEdge ed = groundnet.groundnetgraph.findEdgeByName("128-129");
         // SmartLocation location = new SmartLocation(attr.get("location"));
@@ -242,7 +241,7 @@ public class VehicleLauncher {
         //27.12.21VehicleConfig config = tw.getVehicleConfig(name);
         GraphPosition start = new GraphPosition(ed/*, ed.getLength() , true*/);
         VehicleLauncher.launchVehicle(new Vehicle(name), config, trafficGraph, start, tc, destination, projectionforbackprojection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, nearView,
-                (vehicleBuiltDelegate == null) ? new VehicleBuiltDelegate[]{} : new VehicleBuiltDelegate[]{vehicleBuiltDelegate}, vehicleLoader);
+                genericVehicleBuiltDelegates, vehicleLoader);
     }
 
 
