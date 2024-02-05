@@ -34,10 +34,11 @@ public class TrafficVrControlPanel extends ControlPanel {
      * - speed down - up
      * - info - - finetune down
      * more to come: info, reset?, home? menu?
+     * This is the default control menu quite Railing/Demo specific.
      */
     public TrafficVrControlPanel(Map<String, ButtonDelegate> buttonDelegates) {
 
-        super(new DimensionF(ControlPanelWidth, ControlPanelRows * ControlPanelRowHeight), Material.buildBasicMaterial(controlPanelBackground, false),0.01);
+        super(new DimensionF(ControlPanelWidth, ControlPanelRows * ControlPanelRowHeight), Material.buildBasicMaterial(controlPanelBackground, false), 0.01);
 
         PanelGrid panelGrid = new PanelGrid(ControlPanelWidth, ControlPanelRowHeight, ControlPanelRows, ControlPanelColWidth);
 

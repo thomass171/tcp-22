@@ -46,6 +46,8 @@ public class WebGlSceneRunner extends AbstractSceneRunner implements NativeScene
         //p.getElement().setId(WebGlRenderer.canvasid);
         //FocusPanel focuspanel = new FocusPanel(p);
         CanvasPanel canvasPanel = new CanvasPanel(WebGlRenderer.canvasid);
+        //Not sure whether this is needed or what the effect is. Maybe only when threejs panel is smaller
+        //than tab?
         canvasPanel.getElement().getStyle().setBackgroundColor("#2062B8");
         RootLayoutPanel.get().add(canvasPanel);
 
@@ -110,6 +112,7 @@ public class WebGlSceneRunner extends AbstractSceneRunner implements NativeScene
         // don't continue using AnimationScheduler but switch to ThreeJs animationloop
         // updateRender(canvaspanel, cameras);
         logger.info("Switch to ThreeJs animationloop");
+        GwtUtil.showStatus("");
         sceneRenderer.renderer.activeAnimationLoop();
 
     }

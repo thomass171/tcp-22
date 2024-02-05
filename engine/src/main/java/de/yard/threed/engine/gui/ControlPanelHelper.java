@@ -140,7 +140,7 @@ public class ControlPanelHelper {
     }
 
     /**
-     * row counts from bottom
+     * row counts from bottom. Redundant to panelGrid.getPosition().
      */
     public static double calcYoffsetForRow(int row, int rows, double rowHeight) {
         double h2 = rowHeight / 2;

@@ -15,6 +15,7 @@ import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.testutil.TestHelper;
 import de.yard.threed.core.testutil.WireMockHelper;
 import de.yard.threed.engine.util.BooleanMethod;
+import de.yard.threed.javacommon.JavaWebClient;
 import de.yard.threed.javacommon.SimpleHeadlessPlatform;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,8 @@ public class PlatformBundleLoaderTest {
     void setup() {
         wireMockServer = new WireMockServer(wireMockConfig().port(8089));
         wireMockServer.start();
+
+        JavaWebClient.close();
     }
 
     @AfterEach
@@ -120,6 +123,32 @@ public class PlatformBundleLoaderTest {
         assertEquals("http://host.org/httpBundle",httpBundleResourceLoader.getBasePath());
     }
 
+    /**
+     * Loads external bundle. Nasty dependency, but useful for testing larger bundle performance.
+     */
+    @Test
+    public void testExternalBundle() throws Exception {
+
+        PlatformBundleLoader bundleLoader = new PlatformBundleLoader();
+
+        String bundleName="fgdatabasic";
+        List<Bundle> loadedBundle = new ArrayList();
+        String baseUrl = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/publicweb/bundlepool";
+        NativeBundleResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, baseUrl);
+
+        bundleLoader.loadBundle(bundleName, bundle -> {
+            log.debug("got it");
+            loadedBundle.add(bundle);
+        }, resourceLoader);
+
+        TestUtils.waitUntil(() -> {
+            TestHelper.processAsync();
+            return loadedBundle.size() > 0;
+        }, 30000);
+
+        assertEquals(1, loadedBundle.size());
+    }
+
     public void continueWith(BooleanMethod m, Runnable runnable) {
         if (m.isTrue()) {
             runnable.run();
@@ -167,6 +196,9 @@ public class PlatformBundleLoaderTest {
         return bundle;
     }
 
+    /**
+     * mock bundle with two files + directory.
+     */
     public static void mockWebBundle(WireMockServer wireMockServer, String bundleName, boolean gltfFails) {
         String gltfData = "gltf data";
         byte[] binData = "bin data".getBytes(StandardCharsets.UTF_8);

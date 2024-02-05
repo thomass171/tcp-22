@@ -25,7 +25,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * The default connection pooling is a risk in unit tests causing socket errors on wiremock restart.
+ * So close() should be used to close all pooled connection during test startup.
+ */
 public class JavaWebClient implements NativeHttpClient {
+
+    static ExecutorService executor = Executors.newFixedThreadPool(16);
+
+    static PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = null;
+    static PoolingHttpClientConnectionManager connectionManager = null;
+    static private CloseableHttpClient client;
 
     /**
      * From https://hc.apache.org/httpcomponents-client-5.2.x/quickstart.html
@@ -35,28 +45,30 @@ public class JavaWebClient implements NativeHttpClient {
      * really don't like MT.
      * 28.12.23 no longer static
      */
-    public NativeFuture<AsyncHttpResponse> httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header) {
+    synchronized public NativeFuture<AsyncHttpResponse> httpGet(String url, List<Pair<String, String>> params, List<Pair<String, String>> header) {
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        if (connectionManager == null) {
+            connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder
+                    .create()
+                    .useSystemProperties()
+                    .setMaxConnPerRoute(16)
+                    .setMaxConnTotal(16)
+                    // The ValidateAfterInactivity value seems to effect the time for ending a process, eg. after a single test or after
+                    // pressing ESC to end a scene.
+                    .setDefaultConnectionConfig(ConnectionConfig.custom().setValidateAfterInactivity(TimeValue.ofSeconds(1L)).build());
+            connectionManager = connectionManagerBuilder.build();
+            client = HttpClientBuilder.create().setConnectionManager(connectionManager).build();//.useSystemProperties().evictExpiredConnections().evictIdleConnections(TimeValue.ofMinutes(1L)).build();
+
+        }
 
         Future<AsyncHttpResponse> future = executor.submit(() -> {
-            CloseableHttpClient client = null;
-            PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = null;
-            PoolingHttpClientConnectionManager connectionManager = null;
+
             try {
                 // BTW: Apache httpclient 5 is annoying.
-                // The default connection pooling is a pain in unit tests causing socket errors on wiremock restart. So reinit a client for each
-                // request for now. The code is extracted from Request.get(url).execute().
+                // The code is extracted from Request.get(url).execute().
                 // The Java 11 httpclient is even more pain. It might return a 400 with body '<h1>Bad Message 400</h1><pre>reason: Bad Request</pre>' from nowhere(??).
                 // The Java 11 httpclient is really a 'no go'. Debugging is hard and logging (by '-Djdk.httpclient.HttpClient.log=requests') is useless.
-                connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder
-                        .create()
-                        .useSystemProperties()
-                        .setMaxConnPerRoute(1)
-                        .setMaxConnTotal(1)
-                        .setDefaultConnectionConfig(ConnectionConfig.custom().setValidateAfterInactivity(TimeValue.ofSeconds(10L)).build());
-                connectionManager = connectionManagerBuilder.build();
-                client = HttpClientBuilder.create().setConnectionManager(connectionManager).useSystemProperties().evictExpiredConnections().evictIdleConnections(TimeValue.ofMinutes(1L)).build();
+                long startMillis = System.currentTimeMillis();
 
                 CloseableHttpResponse r = client.execute(new HttpGet(url));
 
@@ -70,7 +82,7 @@ public class JavaWebClient implements NativeHttpClient {
                 }
                 byte[] buffer = FileReader.readFully(r.getEntity().getContent());
                 r.close();
-                return new AsyncHttpResponse(statusCode, null, new SimpleByteBuffer(buffer));
+                return new AsyncHttpResponse(statusCode, null, new SimpleByteBuffer(buffer), System.currentTimeMillis() - startMillis);
             } catch (HttpResponseException e) {
                 getLogger().error("Got HttpResponseException:" + e.getMessage());
                 return new AsyncHttpResponse(e.getStatusCode(), e.getMessage());
@@ -78,15 +90,24 @@ public class JavaWebClient implements NativeHttpClient {
                 getLogger().error("Got " + e.getClass().getName() + ":" + e.getMessage() + " for url " + url);
                 return new AsyncHttpResponse(-1, e.getMessage());
             } finally {
-                IOUtils.closeQuietly(connectionManager);
-                IOUtils.closeQuietly(client);
-                if (executor != null) {
-                    executor.shutdown();
-                }
             }
         });
 
         return new JavaFuture(future);
+    }
+
+    synchronized public static void close() {
+        //not reliable getLogger().debug("Closing");
+        if (connectionManager != null) {
+            connectionManager.close();
+        }
+        if (client != null) {
+            IOUtils.closeQuietly(client);
+        }
+
+        client = null;
+        connectionManager = null;
+        connectionManagerBuilder = null;
     }
 
     private static Log getLogger() {

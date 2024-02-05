@@ -41,7 +41,7 @@ public class BundleRegistry {
             throw new RuntimeException("bundle must be completed before register: " + bundlename);
         }
         bundles.put(bundlename, bundle);
-        logger.info("Bundle registered: " + bundle.name + "(" + (bundle.getSizeInBytes() / 1000000) + " MB)");
+        logger.debug("Bundle registered: " + bundle.name);
 
     }
 

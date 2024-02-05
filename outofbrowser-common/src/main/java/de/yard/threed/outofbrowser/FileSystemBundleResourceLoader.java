@@ -27,11 +27,11 @@ public class FileSystemBundleResourceLoader implements NativeBundleResourceLoade
         try {
             bytebuf = Files.readAllBytes(Paths.get(basedir.getPath() + "/" + resource));
             // code 200 to be HTTP compatible. Not nice.
-            asyncJobDelegate.completed(new AsyncHttpResponse(200, null, new SimpleByteBuffer(bytebuf)));
+            asyncJobDelegate.completed(new AsyncHttpResponse(200, null, new SimpleByteBuffer(bytebuf), -1));
         } catch (IOException e) {
             Platform.getInstance().getLog(FileSystemBundleResourceLoader.class).error("Failed to read " + resource + "," + e.getMessage());
             // code 400 to be HTTP compatible. Not nice. Well, -1 isn't really better.
-            asyncJobDelegate.completed(new AsyncHttpResponse(400, null, null));
+            asyncJobDelegate.completed(new AsyncHttpResponse(400, null, null, -1));
         }
 
     }

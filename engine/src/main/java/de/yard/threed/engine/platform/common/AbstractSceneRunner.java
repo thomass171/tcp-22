@@ -450,6 +450,7 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
     @Override
     public <T, D> void addFuture(NativeFuture<T> future, AsyncJobDelegate<D> asyncJobDelegate) {
         futures.add(new Pair(future, asyncJobDelegate));
+        //logger.debug("added future. Now " + futures.size());
         //C# futures.add(new Pair<NativeFuture<T>,AsyncJobDelegate<D>>(future,asyncJobDelegate));
     }
 
@@ -587,6 +588,7 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
      */
     public void processFutures() {
 
+        //logger.debug("Processing futures from " + futures.size());
         // "<Object>" for C# (See "futures" definition
         // the complete callback might add additional futures. Avoid ConcurrentModificationException and don't loose the new.
         List<Pair<NativeFuture, AsyncJobDelegate>> futures = new ArrayList<>(AbstractSceneRunner.getInstance().futures);
@@ -602,6 +604,22 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
         }
         AbstractSceneRunner.getInstance().futures.removeIf(e -> e.getSecond() == null);
 
+    }
+
+    public boolean hasCompletedFutures() {
+
+        // "<Object>" for C# (See "futures" definition
+        // the complete callback might add additional futures. Avoid ConcurrentModificationException and don't loose the new.
+        List<Pair<NativeFuture, AsyncJobDelegate>> futures = new ArrayList<>(AbstractSceneRunner.getInstance().futures);
+        //C# List<Object> futures = new ArrayList<Object>();
+        //C# foreach (Object p1 in AbstractSceneRunner.getInstance().futures) {
+        for (Pair<NativeFuture, AsyncJobDelegate> p : futures) {
+            //C# Pair<NativeFuture<Object>, AsyncJobDelegate<Object>> p = (Pair<NativeFuture<Object>, AsyncJobDelegate<Object>>) p1;
+            if (p.getFirst().isDone()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void processInvokeLaters() {

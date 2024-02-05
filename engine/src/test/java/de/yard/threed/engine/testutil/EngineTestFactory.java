@@ -19,6 +19,7 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.InitMethod;
 import de.yard.threed.core.resource.BundleResolver;
+import de.yard.threed.javacommon.JavaWebClient;
 import de.yard.threed.javacommon.SimpleHeadlessPlatform;
 import de.yard.threed.outofbrowser.FileSystemBundleResourceLoader;
 
@@ -129,6 +130,7 @@ public class EngineTestFactory {
             //4.5.20 das muss jetzt doch auch sein.
             AbstractSceneRunner.instance = null;
         }
+        JavaWebClient.close();
     }
 
     /**

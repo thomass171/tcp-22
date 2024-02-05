@@ -261,7 +261,9 @@ public class PlatformBundleLoader {
 
     private void checkCompleted(LoadingBundle lb, Bundle bundle) {
         if (lb.isReady()) {
-            logger.debug("bundle " + bundle.name + " load complete");
+            logger.info("bundle " + bundle.name + " load complete(" + (bundle.getSizeInBytes() / 1000000) + " MB," + bundle.getSize() + " files,took " +
+                    (Platform.getInstance().currentTimeMillis() - lb.started) + " ms)");
+
             bundle.complete();
             for (BundleLoadDelegate delegate : lb.callbacks) {
                 delegate.bundleLoad(bundle);

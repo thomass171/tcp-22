@@ -121,7 +121,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     // 17.10.21: per argument oder default EDDK
     String tilename = null;
     VrInstance vrInstance;
-    Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
+    public Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
     ControlPanel leftControllerPanel = null;
     public static String DEFAULT_USER_NAME = "Freds account name";
     public TrafficSystem trafficSystem;
@@ -217,7 +217,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         //toggle auto move
         inputToRequestSystem.addKeyMapping(KeyCode.Alpha9, UserSystem.USER_REQUEST_AUTOMOVE);
 
-        if (enableFPC){
+        if (enableFPC) {
             FirstPersonMovingSystem.addDefaultKeyBindings(inputToRequestSystem);
         }
 
@@ -246,7 +246,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     /**
      * 29.12.23 Not hardcoded but can be overridden.
      */
-    public GraphVisualizer getGraphVisualizer(){
+    public GraphVisualizer getGraphVisualizer() {
         return new SimpleGraphVisualizer(getWorld());
     }
 
@@ -324,6 +324,13 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             tilename = getDefaultTilename();
         }
         getLog().debug("using tilename " + tilename);
+        customProcessArguments();
+    }
+
+    /**
+     * To be overridden by extending class.
+     */
+    protected void customProcessArguments() {
     }
 
     /**
@@ -476,7 +483,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         // they are found.
         if (vrInstance != null && vrInstance.getController(0) != null && leftControllerPanel == null) {
 
-            leftControllerPanel = new TrafficVrControlPanel(buttonDelegates);
+            leftControllerPanel = buildVrControlPanel();
 
             vrInstance.attachControlPanelToController(vrInstance.getController(0), leftControllerPanel);
 
@@ -577,6 +584,13 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
 
     public AbstractTerrainBuilder getTerrainBuilder() {
         return null;
+    }
+
+    /**
+     * The default. Might be overridden.
+     */
+    public ControlPanel buildVrControlPanel() {
+        return new TrafficVrControlPanel(buttonDelegates);
     }
 
     /**

@@ -191,11 +191,12 @@ public class WebGlRenderer {
         renderer.shadowMapSoft = true;
 
         // 5.5.21 autoclear prevents multi pass rendering. But don't switch it off in VR to avoid spoiling the rendering system
-        if (vrMode != null) {
+        if (vrMode == null) {
             renderer.autoClear = false;
         }
-        renderer.setClearColor( backgroundcolor, 1);
-
+        if (vrMode == null || vrMode != 'AR') {
+            renderer.setClearColor( backgroundcolor, 1);
+        }
         //renderer.shadowMapEnabled = true;
         //renderer.shadowMapType = $wnd.THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);

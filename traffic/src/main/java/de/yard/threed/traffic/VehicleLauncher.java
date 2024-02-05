@@ -241,7 +241,8 @@ public class VehicleLauncher {
         }
         //27.12.21VehicleConfig config = tw.getVehicleConfig(name);
         GraphPosition start = new GraphPosition(ed/*, ed.getLength() , true*/);
-        VehicleLauncher.launchVehicle(new Vehicle(name), config, trafficGraph, start, tc, destination, projectionforbackprojection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, nearView, new VehicleBuiltDelegate[]{vehicleBuiltDelegate}, vehicleLoader);
+        VehicleLauncher.launchVehicle(new Vehicle(name), config, trafficGraph, start, tc, destination, projectionforbackprojection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, nearView,
+                (vehicleBuiltDelegate == null) ? new VehicleBuiltDelegate[]{} : new VehicleBuiltDelegate[]{vehicleBuiltDelegate}, vehicleLoader);
     }
 
 

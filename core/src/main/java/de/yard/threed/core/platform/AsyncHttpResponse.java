@@ -12,16 +12,18 @@ import java.util.List;
  * a string if the encoding is known.
  * "response" will be null in case of network error (ie. no network connection and thus no response)
  * So the status here is the HTTP code returned or -1 if no response was received (any kind of exception).
- *
+ * <p>
  * 11.12.23: No longer limited to HTTP, so should be renamed some time. Hmm, but header? lets see.
  */
 public class AsyncHttpResponse {
     int status;
     private NativeByteBuffer responseData;
+    long duration;
 
-    public AsyncHttpResponse(int status, List<Pair<String, String>> responseHeader, NativeByteBuffer responseData) {
+    public AsyncHttpResponse(int status, List<Pair<String, String>> responseHeader, NativeByteBuffer responseData, long duration) {
         this.status = status;
         this.responseData = responseData;
+        this.duration = duration;
     }
 
     /**
@@ -59,6 +61,6 @@ public class AsyncHttpResponse {
 
     @Override
     public String toString() {
-        return "status=" + status + ",body size=" + ((responseData == null) ? 0 : responseData.getSize());
+        return "status=" + status + ",body size=" + ((responseData == null) ? 0 : responseData.getSize()) + ",duration=" + duration + " ms";
     }
 }

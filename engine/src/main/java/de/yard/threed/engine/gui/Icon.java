@@ -84,8 +84,8 @@ public class Icon implements GuiTexture {
     }
 
     /**
-     * Liefert das Icon für einen Buchstaben A-Z.
-     * ab 1
+     * Returns icon for character A-Z.
+     * 11=L
      * Mal ohne cache, das bringt doch ncihts,oder?
      *
      * @param index

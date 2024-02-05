@@ -20,6 +20,7 @@ public class LoadingBundle {
     //timestamp when requesting all bundle content isType done. Might still be running in background.
     public long doneloading = 0;
     public boolean delayed;
+    public long started = Platform.getInstance().currentTimeMillis();
 
     public LoadingBundle(String bundlename, BundleLoadDelegate loadlistener, boolean delayed) {
         this.bundlename = bundlename;

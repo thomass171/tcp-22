@@ -119,7 +119,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
             try {
                 scene = (Scene) Class.forName(configuration.getString("scene")).newInstance();
             } catch (Exception e) {
-                log.error("Scene not found",e);
+                log.error("Scene not found", e);
             }
         }
         instance = new SceneRunnerForTesting(pl, sceneIinitMethod, bundlelist, scene);

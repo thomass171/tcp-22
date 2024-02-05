@@ -180,15 +180,15 @@ public class PlatformWebGl extends Platform {
                 AsyncHttpResponse r;
                 if (xhr.getStatus() >= 300) {
                     logger.error("XHR Status code " + xhr.getStatus() + " for url " + url);
-                    r = new AsyncHttpResponse(xhr.getStatus(), null, null);
+                    r = new AsyncHttpResponse(xhr.getStatus(), null, null, -1);
                 } else {
                     ArrayBuffer buffer = xhr.getResponseArrayBuffer();
                     if (buffer == null) {
                         logger.error("no data (CORS problem?) from url " + url);
-                        r = new AsyncHttpResponse(xhr.getStatus(), null, null);
+                        r = new AsyncHttpResponse(xhr.getStatus(), null, null, -1);
                     } else {
                         logger.debug("onReadyStateChange for " + url + ". size=" + buffer.byteLength());
-                        r = new AsyncHttpResponse(xhr.getStatus(), null, new WebGlByteBuffer(buffer));
+                        r = new AsyncHttpResponse(xhr.getStatus(), null, new WebGlByteBuffer(buffer), -1);
                     }
                 }
                 NativeFuture<AsyncHttpResponse> future = new WebGlFuture<AsyncHttpResponse>(r);
@@ -572,7 +572,7 @@ public class PlatformWebGl extends Platform {
                         }
                         Uint8Array array = TypedArrays.createUint8Array(buffer);
 
-                        loadlistener.completed(new AsyncHttpResponse(xhr.getStatus(), HttpHelper.buildHeaderList(), new WebGlByteBuffer(buffer)));
+                        loadlistener.completed(new AsyncHttpResponse(xhr.getStatus(), HttpHelper.buildHeaderList(), new WebGlByteBuffer(buffer), -1));
 
 
                     } else {
