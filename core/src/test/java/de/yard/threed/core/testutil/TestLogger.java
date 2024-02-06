@@ -15,6 +15,11 @@ public class TestLogger implements Log {
     }
 
     @Override
+    public void trace(String msg) {
+        dolog("TRACE",msg);
+    }
+
+    @Override
     public void debug(String msg) {
         dolog("DEBUG",msg);
     }

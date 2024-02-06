@@ -149,10 +149,8 @@ public class PlatformBundleLoader {
         AsyncJobDelegate listener = new AsyncJobDelegate<AsyncHttpResponse>() {
             @Override
             public void completed(AsyncHttpResponse response) {
-                logger.debug("Got response " + response);
                 if (response.getStatus() == 200) {
-
-                    logger.debug(resource.getFullName() + " loaded");
+                    logger.trace(resource.getFullName() + " loaded with response " + response);
 
                     BundleData bundleData;
                     if (Bundle.isBinary(filename)) {
@@ -165,7 +163,7 @@ public class PlatformBundleLoader {
                     }
                     bundle.addResource(filename, bundleData);
                 } else {
-                    logger.error("response with fail status " + response.getStatus());
+                    logger.error(resource.getFullName() + " failed with response " + response);
                     if (bundle.contains(filename)) {
                         logger.error("onError, but data exists for " + filename);
                     }
@@ -273,7 +271,7 @@ public class PlatformBundleLoader {
     }
 
     public void loadRessource(final NativeResource ressource, final AsyncJobDelegate loadlistener, boolean binary, NativeBundleResourceLoader resourceLoader) {
-        logger.debug("loadRessource:" + ressource.getFullName());
+        //logger.debug("loadRessource:" + ressource.getFullName());
 
         resourceLoader.loadFile(ressource.getFullName(), loadlistener);
 

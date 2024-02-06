@@ -6,6 +6,8 @@ package de.yard.threed.core.platform;
  */
 public interface Log {
     
+    void trace(String msg);
+
     void debug(String msg);
 
     void info(String msg);

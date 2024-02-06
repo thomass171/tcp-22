@@ -6,6 +6,7 @@ public class DefaultLog implements Log {
     static public int LEVEL_WARN = 300;
     static public int LEVEL_INFO = 400;
     static public int LEVEL_DEBUG = 500;
+    static public int LEVEL_TRACE = 600;
 
     private Log nativeLog;
     private int level;
@@ -13,6 +14,13 @@ public class DefaultLog implements Log {
     public DefaultLog(int level, Log nativeLog) {
         this.level = level;
         this.nativeLog = nativeLog;
+    }
+
+    @Override
+    public void trace(String msg) {
+        if (level >= LEVEL_TRACE) {
+            nativeLog.trace(msg);
+        }
     }
 
     @Override

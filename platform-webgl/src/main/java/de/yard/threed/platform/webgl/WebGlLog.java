@@ -21,6 +21,13 @@ public class WebGlLog implements Log {
         }
     }
 
+    public void trace(String msg) {
+        if (!enabled)
+            return;
+        // Log level is handled by LevelLogFactory wrapper, so this isn't reached when trace isn't enabled.
+        debugNative(buildMessage(msg));
+    }
+
     public void debug(String msg) {
         if (!enabled)
             return;

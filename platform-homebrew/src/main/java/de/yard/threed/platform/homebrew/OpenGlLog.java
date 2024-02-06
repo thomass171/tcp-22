@@ -14,6 +14,11 @@ public class OpenGlLog implements Log {
      }
 
     @Override
+    public void trace(String msg) {
+        System.out.println(msg);
+    }
+
+    @Override
     public void debug(String msg) {
         System.out.println(msg);
     }

@@ -17,6 +17,11 @@ public class JALog implements Log {
     }
 
     @Override
+    public void trace(String msg) {
+        logger.trace(msg);
+    }
+
+    @Override
     public void debug(String msg) {
         logger.debug(msg);
     }
