@@ -83,6 +83,7 @@ public class SimpleVehicleLoader implements VehicleLoader {
         p = new Vector3(p.getX(), p.getY(), p.getZ() + zoffset);
         node.getTransform().setPosition(p);
         SceneNode nn = new SceneNode(node);
+        nn.setName("vehicle-container");
         return nn;
     }
 
