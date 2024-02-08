@@ -44,8 +44,8 @@ import java.util.List;
  * Created by thomass on 20.04.15.
  */
 public class PlatformWebGl extends Platform {
-    // kann nicht ueber die Factory gebaut werden, weil die gerade noch initialisiert wird
-    Log logger = new WebGlLog(/*LogFactory.getLog(*/PlatformWebGl.class.getName());
+    // Should be set by factory to consider log level
+    Log logger;
     //Scenerunner ist Singleton
     //31.7.21 private WebGlSceneRunner scenerunner = null;
     //6.7.17: Der Simple muesste es hier eigentlich vorerst auch tun.
@@ -59,6 +59,7 @@ public class PlatformWebGl extends Platform {
         this.configuration = configuration;
         StringUtils.init(buildStringHelper());
         logfactory = new LevelLogFactory(configuration, clazz -> new WebGlLog(clazz.getName()), isDevmode ? DefaultLog.LEVEL_DEBUG : DefaultLog.LEVEL_INFO);
+        logger = logfactory.getLog(PlatformWebGl.class);
     }
 
     /**
