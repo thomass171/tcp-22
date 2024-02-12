@@ -21,6 +21,7 @@ public class LoggingSystemTracker implements SystemTracker {
     private List<Event> eventsProcessed = new ArrayList<Event>();
     public List<Request> requestsPut = new ArrayList<Request>();
     private Map<String, Integer> tags = new HashMap<String, Integer>();
+    private List<String> modelsBuilt = new ArrayList<String>();
 
     @Override
     public void eventsSentToClients() {
@@ -56,6 +57,11 @@ public class LoggingSystemTracker implements SystemTracker {
         requestsPut.add(request);
     }
 
+    @Override
+    public List<Request> getRequests() {
+        return requestsPut;
+    }
+
     public void tag() {
         long current = Platform.getInstance().currentTimeMillis();
         tags.put("eventsProcessed", eventsProcessed.size());
@@ -69,10 +75,12 @@ public class LoggingSystemTracker implements SystemTracker {
         return eventsProcessed.subList((int)tags.get("eventsProcessed"), eventsProcessed.size());
     }
 
+    @Override
     public List<Event> getEventsProcessed() {
         return eventsProcessed;
     }
 
+    @Override
     public List<Packet> getPacketsReceivedFromNetwork() {
         return fromNetwork;
     }
@@ -80,4 +88,15 @@ public class LoggingSystemTracker implements SystemTracker {
     public List<Packet> getPacketsSentToNetwork() {
         return toNetwork;
     }
+
+    @Override
+    public void modelBuilt(String fullName) {
+        modelsBuilt.add(fullName);
+    }
+
+    @Override
+    public List<String> getModelsBuilt() {
+        return modelsBuilt;
+    }
+
 }

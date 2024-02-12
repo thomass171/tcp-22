@@ -141,13 +141,13 @@ public class InputToRequestSystemTest {
         // nothing should happen when button does down
         SimpleHeadlessPlatform.mockedMouseDownInput.add(segment1Location);
         EcsTestHelper.processSeconds(2);
-        assertEquals(0, sceneRunner.getSystemTracker().requestsPut.size(), "requests");
+        assertEquals(0, sceneRunner.getSystemTracker().getRequests().size(), "requests");
 
         // USER_REQUEST_CONTROLMENU is sent and consumed
         SimpleHeadlessPlatform.mockedMouseUpInput.add(segment1Location);
         EcsTestHelper.processSeconds(2);
-        assertEquals(1, sceneRunner.getSystemTracker().requestsPut.size(), "requests");
-        assertEquals(InputToRequestSystem.USER_REQUEST_CONTROLMENU, sceneRunner.getSystemTracker().requestsPut.get(0).getType());
+        assertEquals(1, sceneRunner.getSystemTracker().getRequests().size(), "requests");
+        assertEquals(InputToRequestSystem.USER_REQUEST_CONTROLMENU, sceneRunner.getSystemTracker().getRequests().get(0).getType());
         assertEquals(0, SystemManager.getRequestCount(), "pending requests");
     }
 

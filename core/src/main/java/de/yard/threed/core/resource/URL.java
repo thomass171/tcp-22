@@ -6,6 +6,7 @@ import de.yard.threed.core.platform.Platform;
 /**
  *
  * An absolute or relative URL of a resource. Relative relies on some platform default (eg. browser origin).
+ * Independent from bundles.
  * 2.1.24: Renamed from UrlResource.
  * <p>
  * Created by thomass on 07.11.23.

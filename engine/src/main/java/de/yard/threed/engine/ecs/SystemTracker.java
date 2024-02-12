@@ -4,6 +4,8 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.Packet;
 import de.yard.threed.engine.platform.common.Request;
 
+import java.util.List;
+
 /**
  * Track information about whats happening
  */
@@ -24,4 +26,13 @@ public interface SystemTracker {
     void report();
 
     void requestPut(Request request);
+
+    List<Request> getRequests();
+
+    List<Packet> getPacketsReceivedFromNetwork();
+    List<Event> getEventsProcessed();
+
+    void modelBuilt(String fullName);
+
+    List<String> getModelsBuilt();
 }

@@ -30,13 +30,13 @@ import static de.yard.threed.javanative.JavaUtil.sleepMs;
 public class SceneRunnerForTesting extends AbstractSceneRunner {
     //private HomeBrewRenderer renderer;
 
-    private LoggingSystemTracker systemTracker = new LoggingSystemTracker();
-
     /**
      * 2.8.21: Jetzt mit den PlatformInternals
      */
     private SceneRunnerForTesting(PlatformInternals platformInternals, InitMethod sceneIinitMethod, String[] bundlelist, Scene scene) {
         super(platformInternals);
+
+        systemTracker = new LoggingSystemTracker();
 
         if (scene == null) {
             scene = new Scene() {
@@ -182,10 +182,6 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         SceneRunnerForTesting sceneRunner = (SceneRunnerForTesting) SceneRunnerForTesting.getInstance();
         sceneRunner.runLimitedFrames(initialFrames);
         return sceneRunner;
-    }
-
-    public LoggingSystemTracker getSystemTracker() {
-        return systemTracker;
     }
 
     @Override

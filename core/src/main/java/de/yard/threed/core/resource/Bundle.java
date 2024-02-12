@@ -1,6 +1,7 @@
 package de.yard.threed.core.resource;
 
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
 
@@ -14,7 +15,7 @@ import java.util.Map;
  * Created by thomass on 09.04.17.
  */
 public class Bundle {
-
+    Log logger = Platform.getInstance().getLog(Bundle.class);
     public String[] directory;
     //Wenn eine Resource noch nicht geladen ist, ist value null. Was nicht drinsteht hatte Fehler, gibts es nicht
     //oder wurde entladen(?).
@@ -40,23 +41,12 @@ public class Bundle {
         this.basepath = basepath;
     }
 
-    /**
-     * @param name
-     * @param directory Das ist die "\n" separierte Liste des Content des Bundle.
-     * @param delayed
-     * @param basepath  is location + bundlename
-     */
-    @Deprecated
-    public Bundle(String name, String directory, boolean delayed, String basepath) {
-        this(name,StringUtils.split(directory, "\n"), basepath);
-    }
-
     public void addResource(String resource, BundleData/*byte[]*/ bytes) {
         /*if (!StringUtils.startsWith(resource,"/")){
             resource = "/"+resource;
         }*/
 
-        if (isCompleted()){
+        if (isCompleted()) {
             throw new RuntimeException("add after complete");
         }
         // Ugly handling of "btg.gz" suffix
@@ -152,7 +142,11 @@ public class Bundle {
         }
         if (StringUtils.endsWith(key, ".ac")) {
             key = StringUtils.substringBeforeLast(key, ".ac") + ".gltf";
-            return exists(key);
+            boolean exists = exists(key);
+            if (exists) {
+                logger.debug("Confirmed gltf existing as ac for " + r.getFullName() + " in bundle " + name);
+            }
+            return exists;
         }
         return false;
     }
@@ -215,7 +209,7 @@ public class Bundle {
     }
 
     public void addFailure(String filename, String errormsg) {
-        if (isCompleted()){
+        if (isCompleted()) {
             throw new RuntimeException("add after complete");
         }
         failure.put(filename, errormsg);

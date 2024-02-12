@@ -25,6 +25,8 @@ import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.engine.ecs.DefaultSystemTracker;
+import de.yard.threed.engine.ecs.SystemTracker;
 import de.yard.threed.engine.platform.PlatformBundleLoader;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneAnimationController;
@@ -109,6 +111,7 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
     protected ClientBusConnector clientBusConnector = null;
     // 13.12.23: New loader and here instead of platform.
     public PlatformBundleLoader bundleLoader = new PlatformBundleLoader();
+    public SystemTracker systemTracker = new DefaultSystemTracker();
 
     /**
      * 28.4.20: Warum ist der deperecated. Der scheint jetzt ein vielleicht zeitgemaesser constructor.
@@ -679,6 +682,9 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
     @Deprecated
     public abstract void sleepMs(int millis);
 
+    public SystemTracker getSystemTracker() {
+        return systemTracker;
+    }
 }
 
 class AsyncJobInfo {

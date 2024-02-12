@@ -2,9 +2,11 @@ package de.yard.threed.engine.testutil;
 
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.Bundle;
+import de.yard.threed.core.resource.BundleFactory;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.testutil.Assert;
+import de.yard.threed.core.testutil.TestBundle;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.platform.PlatformBundleLoader;
@@ -142,6 +144,12 @@ public class EngineTestFactory {
             //15.12.23 SyncBundleLoader.loadBundleSyncInternal("test-resources",  /*13.12.23 null,*/ false, new DefaultResourceReader(), bundlebasedir);
             // bundleLoader in SceneRunner is hidden. So use a new one for this special case.
             PlatformBundleLoader bundleLoader = new PlatformBundleLoader();
+            bundleLoader.setBundleFactory(new BundleFactory() {
+                @Override
+                public Bundle createBundle(String name, String[] directory, String basepath) {
+                    return new TestBundle(name, directory, basepath);
+                }
+            });
             bundleLoader.loadBundle("test-resources", new BundleLoadDelegate() {
                 @Override
                 public void bundleLoad(Bundle bundle) {

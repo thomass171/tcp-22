@@ -226,6 +226,13 @@ public class TestUtils {
         assertVector3(expected.scale, actual.scale);
     }
 
+    /**
+     * 10.2.24: Deprecated in favor of loadFileFromTestResources because classpath isn't src/test/resources but target directory(?).
+     * @param fileName
+     * @return
+     * @throws Exception
+     */
+    @Deprecated
     public static byte[] loadFileFromClasspath(String fileName) throws Exception {
         //byte[] bytebuf = IOUtils.resourceToByteArray(fileName, Thread.currentThread().getContextClassLoader());
         byte[] bytebuf = Files.readAllBytes(Paths.get(Thread.currentThread().getContextClassLoader().getResource(fileName).toURI()));
@@ -235,5 +242,9 @@ public class TestUtils {
     public static byte[] loadFileFromPath(Path path) throws Exception {
         byte[] bytebuf = Files.readAllBytes(path);
         return bytebuf;
+    }
+
+    public static byte[] loadFileFromTestResources(String relFilename) throws Exception {
+        return loadFileFromPath(Paths.get(System.getProperty("user.dir") + "/src/test/resources/" + relFilename));
     }
 }

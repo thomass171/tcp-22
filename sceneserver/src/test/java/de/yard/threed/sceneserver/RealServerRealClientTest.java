@@ -12,6 +12,7 @@ import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.LoggingSystemTracker;
 import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.engine.ecs.SystemTracker;
 import de.yard.threed.engine.ecs.UserSystem;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.javanative.JavaUtil;
@@ -66,7 +67,7 @@ public class RealServerRealClientTest {
         HashMap<String, String> additionalProperties = new HashMap<String, String>();
         additionalProperties.put("server", "localhost");
         SceneRunnerForTesting sceneRunner = MazeTestUtils.buildSceneRunnerForMazeScene("skbn/SokobanWikipedia.txt", additionalProperties, 10);
-        LoggingSystemTracker systemTracker = sceneRunner.getSystemTracker();
+        SystemTracker systemTracker = sceneRunner.getSystemTracker();
 
         // a client mode scene has a system state? For sending login request?.
         //??assertTrue(SystemState.readyToJoin());
@@ -127,7 +128,7 @@ public class RealServerRealClientTest {
         HashMap<String, String> additionalProperties = new HashMap<String, String>();
         additionalProperties.put("server", "localhost");
         SceneRunnerForTesting sceneRunner = MazeTestUtils.buildSceneRunnerForMazeScene("maze/Maze-D-80x25.txt", additionalProperties, 10);
-        LoggingSystemTracker systemTracker = sceneRunner.getSystemTracker();
+        SystemTracker systemTracker = sceneRunner.getSystemTracker();
 
         assertInitialLoadAndLogin(sceneRunner, systemTracker);
 
@@ -156,7 +157,7 @@ public class RealServerRealClientTest {
     /**
      *
      */
-    private void assertInitialLoadAndLogin(SceneRunnerForTesting sceneRunner, LoggingSystemTracker systemTracker) throws Exception {
+    private void assertInitialLoadAndLogin(SceneRunnerForTesting sceneRunner, SystemTracker systemTracker) throws Exception {
         assertNotNull(sceneRunner.getBusConnector());
 
         assertNull(SystemManager.findSystem(UserSystem.TAG));

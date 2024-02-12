@@ -74,6 +74,7 @@ public class AsyncHelper {
             if (r != null) {
                 // MT sicher machen? ist aber eigentlich nicht MT.
                 AbstractSceneRunner.getInstance().delegateresult.put(data.delegateid, r);
+                AbstractSceneRunner.getInstance().systemTracker.modelBuilt(modelresource.getFullQualifiedName());
                 modelbuildvalues.remove(i);
             } else {
                 //no warning
@@ -120,7 +121,7 @@ public class AsyncHelper {
         // wenn die Daten im Bundle (noch) nicht vorliegen, diesen Request skippen
         BundleData ins = file.bundle.getResource(file);
         if (ins == null) {
-            logger.debug(file.getName() + " not found in bundle " + file.bundle.name);
+            logger.debug(file.getName() + " not found (or null) in bundle " + file.bundle.name);
             // * 21.12.23: There is no longer a delayed bundle loading.
             /*21.12.23if (delayedContentload( file, bundleLoader)) {
                 return new BuildResult("failure");

@@ -164,6 +164,7 @@ do
           relax
         fi
         # keep suffix 'ac' in directory? 31.10.23: No, was never that way and BundleRegistry.exists() is aware of that and checks for gltf
+        # 9.2.24: BTW: Thats not true. Two old aircraft bundles have ac listed
         echo $DIRNAME/$BASENAME.gltf >> $DIRECTORY
         echo $DIRNAME/$BASENAME.bin >> $DIRECTORY
         ;;

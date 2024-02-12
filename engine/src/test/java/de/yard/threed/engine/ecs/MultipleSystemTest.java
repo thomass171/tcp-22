@@ -33,7 +33,7 @@ public class MultipleSystemTest {
     public void testLoginProcess() throws Exception {
 
         setup(new String[]{"AvatarSystem", "UserSystem", "ObserverSystem"});
-        LoggingSystemTracker systemTracker = ((SceneRunnerForTesting) AbstractSceneRunner.getInstance()).getSystemTracker();
+        SystemTracker systemTracker = ((SceneRunnerForTesting) AbstractSceneRunner.getInstance()).getSystemTracker();
 
         Observer.buildForDefaultCamera();
         assertNotNull(Observer.getInstance(), "observer");

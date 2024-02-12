@@ -10,6 +10,7 @@ import de.yard.threed.core.platform.NativeBundleResourceLoader;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleData;
+import de.yard.threed.core.resource.BundleFactory;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
@@ -43,9 +44,11 @@ public class PlatformBundleLoader {
     private Map<String, LoadingBundle> loadingbundles = new HashMap<String, LoadingBundle>();
     // From WebGlBundleLoader: currently active async loadings. Hier kommt nur der einfache Namen rein, weil die Resource teilweise "bundles" enthält. Das dürfte aber eciehn um paralleladen zu verhindern.
     public List<String> currentlyloading = new ArrayList<String>();
+    private BundleFactory bundleFactory;
 
     public PlatformBundleLoader() {
         this.url = url;
+        bundleFactory = (name, directory, basepath) -> new Bundle(name, directory, basepath);
     }
 
     /**
@@ -95,7 +98,7 @@ public class PlatformBundleLoader {
                         throw new RuntimeException(e);
                     }
 
-                    lb.bundle = new Bundle(lb.bundlename, d, false, resourceLoader.getBasePath());
+                    lb.bundle = bundleFactory.createBundle(lb.bundlename, StringUtils.split(d, "\n"), resourceLoader.getBasePath());
 
                     for (String filename : lb.bundle.directory) {
                         String resource = /*13.12.23 url + "/" +*/ filename;
@@ -141,6 +144,10 @@ public class PlatformBundleLoader {
      */
     public boolean isLoading(BundleResource file) {
         return false;
+    }
+
+    public void setBundleFactory(BundleFactory bundleFactory) {
+        this.bundleFactory = bundleFactory;
     }
 
     private void loadBundleData(Bundle bundle, BundleResource resource, String filename, boolean delayed, LoadingBundle lb/*, String bundlebasedir*/,
