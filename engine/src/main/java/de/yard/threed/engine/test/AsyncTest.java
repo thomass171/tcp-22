@@ -11,6 +11,7 @@ import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.EngineHelper;
+import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.core.testutil.RuntimeTestUtil;
 
@@ -71,7 +72,7 @@ public class AsyncTest {
             }
             RuntimeTestUtil.assertTrue("gotException", gotException);
 
-            EngineHelper.buildNativeModel(controllight, null, (r1) -> {
+            Platform.getInstance().buildNativeModelPlain(new ResourceLoaderFromBundle(controllight), null, (r1) -> {
                 // das fehlende bin muss jetzt aufgefallen sein.
                 logger.debug("model build completed");
                 RuntimeTestUtil.assertFalse("failure", cb.failed(controllight));
@@ -83,7 +84,7 @@ public class AsyncTest {
                 success = true;
                 //green/red cube sind als Indikator wichtig, nicht die message, denn die kann einfach fehlen bei Fehler.
                 logger.debug("testCorrupted successfully completed.");
-            });
+            }, 0);
         });
 
     }

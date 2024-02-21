@@ -12,6 +12,7 @@ public class InMemoryBundle extends TestBundle {
         super("", new String[]{}, "");
         super.resources.put(fname + ".gltf", new BundleData(new SimpleByteBuffer(json.getBytes()), true));
         super.resources.put(fname + ".bin", new BundleData(new SimpleByteBuffer(bindata), false));
-        directory = new String[]{fname + ".gltf", fname + ".bin"};
+        directory.add(fname + ".gltf");
+        directory.add(fname + ".bin");
     }
 }

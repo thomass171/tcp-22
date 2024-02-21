@@ -103,7 +103,7 @@ public class Setup {
             properties.put("enableAutomove", "true");
             properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
-        boolean demo = true;
+        boolean demo = false;
         if (demo) {
             properties.put("basename", "traffic:tiles/Demo.xml");
             // automove is enabled in Demo.xml.

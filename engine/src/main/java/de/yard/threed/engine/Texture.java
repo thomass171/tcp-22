@@ -10,6 +10,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeTexture;
 import de.yard.threed.core.NumericType;
 import de.yard.threed.core.NumericValue;
+import de.yard.threed.core.resource.URL;
 
 import java.util.HashMap;
 
@@ -30,7 +31,12 @@ public class Texture {
     // texture pool jetzt hier statt in platform
     static TexturePool texturePool = new TexturePool();
 
-    private Texture(BundleResource filename, boolean wraps, boolean wrapt) {
+    /**
+     * 13.2.24: Deprecated in favor of below URL based.
+     * No need to change to NativeResource because URL is more generic,
+     */
+    @Deprecated
+    public Texture(BundleResource filename, boolean wraps, boolean wrapt) {
         HashMap<NumericType, NumericValue> param = new HashMap<NumericType, NumericValue>();
         if (wraps) {
             param.put(NumericType.TEXTURE_WRAP_S, NumericValue.REPEAT);
@@ -42,6 +48,20 @@ public class Texture {
         //texture = ((Platform) Platform.getInstance()).loadTexture( filename, param);
         //texture = Platform.getInstance().buildNativeTexture( filename, param);
         texture = texturePool.loadTexture(filename, param);
+    }
+
+    /**
+     * 13.2.24: Successor of above
+     */
+    public Texture(URL url, boolean wraps, boolean wrapt) {
+        HashMap<NumericType, NumericValue> param = new HashMap<NumericType, NumericValue>();
+        if (wraps) {
+            param.put(NumericType.TEXTURE_WRAP_S, NumericValue.REPEAT);
+        }
+        if (wrapt) {
+            param.put(NumericType.TEXTURE_WRAP_T, NumericValue.REPEAT);
+        }
+        texture = texturePool.loadTexture(url, param);
     }
 
     private Texture(/*Bundle dummywegensigbundle,*/ BundleResource filename) {
@@ -117,5 +137,9 @@ public class Texture {
      */
     public static void resetTexturePool() {
         texturePool = new TexturePool();
+    }
+
+    public static int texturePoolSize() {
+        return texturePool.size();
     }
 }

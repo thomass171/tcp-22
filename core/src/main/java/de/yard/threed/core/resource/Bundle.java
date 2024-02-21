@@ -5,7 +5,9 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,7 +18,7 @@ import java.util.Map;
  */
 public class Bundle {
     Log logger = Platform.getInstance().getLog(Bundle.class);
-    public String[] directory;
+    public List<String> directory;
     //Wenn eine Resource noch nicht geladen ist, ist value null. Was nicht drinsteht hatte Fehler, gibts es nicht
     //oder wurde entladen(?).
     protected Map<String, BundleData> resources = new HashMap<String, BundleData/*byte[]*/>();
@@ -36,9 +38,19 @@ public class Bundle {
      */
     public Bundle(String name, String[] directory, String basepath) {
         this.name = name;
-        this.directory = directory;
+        this.directory = new ArrayList<>();
         this.delayed = false;
         this.basepath = basepath;
+        // 14.2.24: Be more consistent with path names and do not allow leading "./" or "/".
+        for (String d : directory) {
+            // Consider comments in directory
+            if (!StringUtils.startsWith(d,"#")) {
+                if (StringUtils.startsWith(d, ".") || StringUtils.startsWith(d, "./")) {
+                    throw new RuntimeException("invalid prefix in directory entry");
+                }
+                this.directory.add(d);
+            }
+        }
     }
 
     public void addResource(String resource, BundleData/*byte[]*/ bytes) {
@@ -90,7 +102,7 @@ public class Bundle {
     }
 
     public int getExpectedSize() {
-        return directory.length;
+        return directory.size();
     }
 
     public int getFailuredSize() {

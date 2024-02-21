@@ -41,6 +41,7 @@ public class PortableModelList {
     // Die Texturen werden dort erwartet, also in dem ResourcePAth, wo auch das Model liegt.
     // wird nicht mit serialisiert. Ist NativeResoure um zu erkennen, ob bundled. Auch nicht schoen.
     // 30.12.18: Und eine Bundleinformation ist nicht unbedingt eine Eigenschaft der Models, nur ein Pfad, wo Texturen zu finden sind.
+    // 13.2.24: Again, just the path, eg.: "engine:cesiumbox"
     public ResourcePath defaulttexturebasepath;
     //public Bundle bundle;
     //ResourcePath rpath;

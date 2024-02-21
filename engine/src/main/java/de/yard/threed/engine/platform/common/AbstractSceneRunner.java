@@ -378,7 +378,9 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
             if (delegateresult.get(d) != null) {
                 logger.debug(" processing build delegate id " + d);
 
-                delegates.get(d).modelBuilt(delegateresult.get(d));
+                if (delegates.get(d) != null) {
+                    delegates.get(d).modelBuilt(delegateresult.get(d));
+                }
                 delegates.remove(d);
                 delegateresult.remove(d);
             }

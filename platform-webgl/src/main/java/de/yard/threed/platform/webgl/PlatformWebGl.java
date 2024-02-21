@@ -19,6 +19,7 @@ import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.HttpBundleResolver;
 import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.platform.*;
+import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.URL;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.platform.common.AsyncHelper;
@@ -32,6 +33,7 @@ import de.yard.threed.core.NumericType;
 import de.yard.threed.core.ImageData;
 import de.yard.threed.core.NumericValue;
 import de.yard.threed.engine.platform.common.InitExecutor;
+import de.yard.threed.engine.platform.common.ModelLoader;
 import de.yard.threed.engine.platform.common.NativeInitChain;
 import de.yard.threed.engine.platform.common.SampleContentProvider;
 import de.yard.threed.core.platform.TestPdfDoc;
@@ -115,7 +117,7 @@ public class PlatformWebGl extends Platform {
      * 18.10.23: No more 'ac', so only gltf any more.
      */
     @Override
-    public void buildNativeModelPlain(BundleResource file, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
+    public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
         int delegateid = AbstractSceneRunner.getInstance().invokeLater(delegate);
 
         //logger.debug("buildNativeModel " + file + ", delegateid=" + delegateid);
@@ -128,10 +130,12 @@ public class PlatformWebGl extends Platform {
         //28.3.18: Der interne bleibt aber fuer Vergleichstests wichtig
         //4.4.18: Beim internen scheine auch die AGAnimations nicht zu gehen.
         boolean usethreejsgltfloader = false;
-        if (!file.getExtension().equals("gltf")) {
+        if (!resourceLoader.nativeResource.getExtension().equals("gltf")) {
             Util.nomore();
         }
         if (usethreejsgltfloader) {
+            logger.error("17.2.24: Branch needs fix for resourceloader");
+            BundleResource file=null;
             String basename = file.getBasename();
             BundleResource gltfile = new BundleResource(file.bundle, file.path, basename + ".gltf");
             logger.debug("probing " + gltfile);
@@ -148,7 +152,7 @@ public class PlatformWebGl extends Platform {
             }
         }
         // build model like in all other platforms.
-        AsyncHelper.asyncModelBuild(file, opttexturepath, options, delegateid);
+        ModelLoader.buildModelFromBundle(resourceLoader, opttexturepath, options, delegate);
     }
 
     /*MA36 now in SceneRunner
@@ -609,8 +613,8 @@ public class PlatformWebGl extends Platform {
         }
         // let resolver decide to cover HOSTDIR a.s.o. instead of hard coded GWT.getHostPageBaseURL()
         ResourcePath bundlebasedir = BundleResolver.resolveBundle(bundlename, bundleResolver);
-        logger.debug("bundlebasedir=" + bundlebasedir.path);
-        return new HttpBundleResourceLoader(bundlebasedir.path);
+        logger.debug("bundlebasedir=" + bundlebasedir.getPath());
+        return new HttpBundleResourceLoader(bundlebasedir.getPath());
     }
 
     public NativeInitChain buildInitChain(InitExecutor initExecutor) {

@@ -2,22 +2,23 @@ package de.yard.threed.core.loader;
 
 import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.FloatHolder;
+import de.yard.threed.core.GeneralParameterHandler;
+import de.yard.threed.core.ModelBuildDelegate;
 import de.yard.threed.core.Quaternion;
-import de.yard.threed.core.loader.PortableMaterial;
-import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.platform.*;
+import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.Vector2Array;
 import de.yard.threed.core.Vector3Array;
-import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.platform.Config;
+import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.resource.URL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,20 +29,28 @@ import java.util.Map;
  * AsciiLoader just because the origin is ASCII. Needs a JSON Parser and lineno likely cannot be used.
  * Used inside platforms that have no own GLTF reader or from an app that cannot use an platform internal
  * loader, eg. because external material definition is used (eg. FG scenery).
+ * Resides in core to be available in tools(?).
  * The 'bin' file is split into Vector3Array and int[].
+ * 13.02.24: The name of the bin file might be part of the GLTF. So it might not be known until parsing. This leads to resource
+ * fetching during parsing considering an original path, probably also for textures. And all this could be async.
+ * So use a more flexible solution via ResourceLoader. It also means:
+ * - no longer InvalidDataException is thrown
+ * - no longer extend AsciiLoader
  * <p>
  * Created by thschonh on 08.12.17.
  */
-public class LoaderGLTF extends AsciiLoader {
+public class LoaderGLTF {
 
     static Log logger = Platform.getInstance().getLog(LoaderGLTF.class);
     private NativeJsonObject gltfo;
     private NativeByteBuffer binbuffer;
-    ResourcePath texturebasepath;
-    private PortableModelList ppfile;
+    // 13.2.24: Again, just the path, eg.: "engine:cesiumbox"
+    private ResourcePath texturebasepath;
+    //private PortableModelList ppfile;
     // TODO boese static Kruecke wegen Zugriff aus Unterklassen in C#
     static NativeJsonArray textures, images, samplers;
-    String source;
+    // source is important for setting node name
+    private String source;
     boolean flipy = false;
     //
     // 
@@ -51,8 +60,7 @@ public class LoaderGLTF extends AsciiLoader {
 
     /**
      * Read a GLTF. json and 'bin' are parameter to be independent from bundle loading.
-     * Makes using easier, eg. in WebGL
-     * and with async delayed loaded Bundle data.
+     * Textures are loaded async on the fly.
      */
     public LoaderGLTF(String json, NativeByteBuffer binbuffer, ResourcePath texturebasepath, String source) throws InvalidDataException {
         this.binbuffer = binbuffer;
@@ -68,11 +76,11 @@ public class LoaderGLTF extends AsciiLoader {
             // 6.3.21: Das macht doch keinen Sinn, oder?
             logger.warn("no bin. Intended?");
         }
-        load();
     }
 
     /**
      * Helper, um den Loader fuer eine BundleResource zu bauen.
+     * 14.2.24: Only for tools,
      */
     public static LoaderGLTF buildLoader(BundleResource file, ResourcePath texturebasepath) throws InvalidDataException {
         BundleData bd = file.bundle.getResource(file);
@@ -93,8 +101,64 @@ public class LoaderGLTF extends AsciiLoader {
         return new LoaderGLTF(s, binbuffer, texturebasepath, file.getFullName());
     }
 
-    @Override
-    protected void doload() throws InvalidDataException {
+    /**
+     * New async trigger point
+     */
+    public static void load(ResourceLoader resourceLoader, GeneralParameterHandler<PortableModelList> delegate) {
+        logger.debug("Launching gltf load");
+        resourceLoader.loadResource(new AsyncJobDelegate<AsyncHttpResponse>() {
+            @Override
+            public void completed(AsyncHttpResponse response) {
+                String json;
+                logger.debug("got gltf");
+                try {
+                    json = response.getContentAsString();
+                    /*NativeJsonValue gltf = Platform.getInstance().parseJson(json);
+                    if (gltf == null) {
+                        //TODO        throw new InvalidDataException("parsing json failed:" + json);
+                    }
+                    gltfo = gltf.isObject();*/
+                    // TODO get bin file name from gltf
+                    //BundleResource binres = LoaderGLTF.getBinResource(file);
+                    logger.debug("Launching bin load");
+                    ResourceLoader binLoader = resourceLoader.fromReference(LoaderGLTF.getBinResource(resourceLoader.getUrl()));
+                    binLoader.loadResource(new AsyncJobDelegate<AsyncHttpResponse>() {
+                        @Override
+                        public void completed(AsyncHttpResponse response) {
+                            NativeByteBuffer binbuffer = response.getContent();
+                            if (binbuffer!=null) {
+                                logger.debug("got bin with size " + binbuffer.getSize());
+                            }else{
+                                logger.error("no bin found from " + binLoader.getUrl());
+                            }
+
+                            /* if (file.bundle.exists(binres)) {
+                                binbuffer = binres.bundle.getResource(binres).b;
+                            }*/
+                            try {
+
+                                LoaderGLTF loaderGLTF = new LoaderGLTF(json,binbuffer, resourceLoader.getUrl().getPath(),
+                            // source is important for setting node name
+                                        resourceLoader.nativeResource.getFullName());
+                                PortableModelList ploadedfile =loaderGLTF.doload();
+                                delegate.handle(ploadedfile);
+                            } catch (InvalidDataException e) {
+                                // problem was already logged
+                                delegate.handle(null);
+                            }
+                        }
+                    });
+
+                } catch (Exception e) {
+                    //TODO throw new InvalidDataException("CharsetException not found");
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public PortableModelList doload() throws InvalidDataException {
+        //logger.debug("Start building");
         textures = (gltfo.get("textures") != null) ? gltfo.get("textures").isArray() : null;
         images = (gltfo.get("images") != null) ? gltfo.get("images").isArray() : null;
         samplers = (gltfo.get("samplers") != null) ? gltfo.get("samplers").isArray() : null;
@@ -108,8 +172,8 @@ public class LoaderGLTF extends AsciiLoader {
             }
         }
 
-        ppfile = new PortableModelList(texturebasepath);
-        ploadedfile = ppfile;
+        PortableModelList ppfile = new PortableModelList(texturebasepath);
+
         //ppfile.root = new PreprocessedLoadedObject();
         //ppfile.root.geolist = new ArrayList<SimpleGeometry>();
         //ppfile.name = file.getBasename();
@@ -188,24 +252,7 @@ public class LoaderGLTF extends AsciiLoader {
             throw new InvalidDataException(msg, e);
         }
         ppfile = ppfile;
-    }
-
-    /**
-     * Der Loader laedt schon quasi preprocessed. Da ist nichts mehr zu tun.
-     *
-     * @return
-     */
-    @Override
-    public PortableModelList preProcess() {
-        return ploadedfile;
-    }
-
-    @Override
-    protected Log getLog() {
-        return logger;
-    }
-
-    public PortableModelList getPortableModelList() {
+        logger.debug("GLTF completed");
         return ppfile;
     }
 
@@ -312,6 +359,14 @@ public class LoaderGLTF extends AsciiLoader {
     public static BundleResource getBinResource(BundleResource gltfresource) {
         return new BundleResource(gltfresource.bundle, gltfresource.getPath(), gltfresource.getBasename() + ".bin");
     }
+
+    /**
+     * For now the convention is that both have the same base name.
+     */
+    public static String getBinResource(URL gltfresource) {
+        return /*new URL*/(gltfresource.getBasename() + ".bin");
+    }
+
 }
 
 class GltfNode {

@@ -247,4 +247,8 @@ public class TestUtils {
     public static byte[] loadFileFromTestResources(String relFilename) throws Exception {
         return loadFileFromPath(Paths.get(System.getProperty("user.dir") + "/src/test/resources/" + relFilename));
     }
+
+    public static byte[] loadFileFromResources(String relFilename) throws Exception {
+        return loadFileFromPath(Paths.get(System.getProperty("user.dir") + "/src/main/resources/" + relFilename));
+    }
 }

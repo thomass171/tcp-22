@@ -49,8 +49,14 @@ processPcm() {
 			echo "ModelCreator failed"
 			return 1
 		fi
-		echo $subdir/$basename.bin >> $dirfile
-		echo $subdir/$basename.gltf >> $dirfile
+		if [ $subdir == "." ]
+		then
+		    echo $basename.bin >> $dirfile
+        echo $basename.gltf >> $dirfile
+		else
+		    echo $subdir/$basename.bin >> $dirfile
+		    echo $subdir/$basename.gltf >> $dirfile
+	  fi
 	done
 	return 0
 }

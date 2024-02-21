@@ -26,6 +26,7 @@ public class JavaBundleHelper {
      * Non http part extrcated from PlatformJme.
      * <p>
      * Expects bundle to be set in BundleResource.
+     * 19.2.24: Decoupled from bundle.
      * <p>
      */
     public static BufferedImage loadBundleTexture(/*2.1.24BundleResource*/URL textureresource) {
@@ -45,7 +46,7 @@ public class JavaBundleHelper {
             List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
             List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
             //NativeFuture<AsyncHttpResponse> future = new JavaWebClient().httpGet(bundle.getBasePath() + "/" + textureresource.getFullName(), parameters, headers);
-            NativeFuture<AsyncHttpResponse> future = new JavaWebClient().httpGet(textureresource.getUrl(), parameters, headers);
+            NativeFuture<AsyncHttpResponse> future = new JavaWebClient().httpGet(textureresource.getAsString(), parameters, headers);
 
             while (!future.isDone()) {
                 try {
@@ -57,7 +58,7 @@ public class JavaBundleHelper {
             AsyncHttpResponse response = future.get();
             if (response.getStatus() == 200) {
                 NativeByteBuffer buffer = response.getContent();
-                return ImageUtils.loadImageFromFile(getLogger(), new ByteArrayInputStream(buffer.getBuffer()), textureresource.getName());
+                return ImageUtils.loadImageFromFile(getLogger(), new ByteArrayInputStream(buffer.getBuffer()), textureresource.getAsString());
             } else {
                 getLogger().error("response with fail status " + response.getStatus());
                 return null;
@@ -67,7 +68,7 @@ public class JavaBundleHelper {
             //String bundlebasedir = BundleResolver.resolveBundle(textureresource.bundle.name, Platform.getInstance().bundleResolver).getPath();
             //2.1.24 String bundlebasedir = bundle.getBasePath();
             //2.1.24 FileSystemResource resource = FileSystemResource.buildFromFullString(bundlebasedir + "/" + textureresource.getFullName());
-            FileSystemResource resource = FileSystemResource.buildFromFullString(textureresource.getUrl());
+            FileSystemResource resource = FileSystemResource.buildFromFullString(textureresource.getAsString());
             return ImageUtils.loadAndCacheImage(resource);
         }
     }

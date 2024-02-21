@@ -14,6 +14,7 @@ import de.yard.threed.engine.*;
 
 
 import de.yard.threed.core.buffer.SimpleByteBuffer;
+import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.javacommon.*;
 
@@ -124,12 +125,12 @@ public class PlatformHomeBrew extends DefaultPlatform {
     /**
      * Not multithreaded, but async by AsyncHelper.
      *
-     * @param filename
+     * @param resourceLoader
      */
     @Override
-    public void buildNativeModelPlain(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
+    public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
 
-        AsyncHelper.asyncModelBuild(filename, opttexturepath, options, AbstractSceneRunner.getInstance().invokeLater(delegate));
+        ModelLoader.buildModelFromBundle(resourceLoader, opttexturepath, options, delegate);
     }
 
     /*4.8.21 public void /*Bundle* / loadBundle(String bundlename, /*AsyncJobCallback* /BundleLoadDelegate delegate, boolean delayed) {
@@ -255,7 +256,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
         // 23.7.21: Wird der Zwischenschritt ueberhaupt gebraucht? 2
         // 6.7.21: Eigentlich wohl nicht, z.Z. aber schon. Zieht sich total durch.
 
-        FileSystemResource resource = FileSystemResource.buildFromFullString(filename.getUrl()/*bundlebasedir + "/" + filename.getFullName()*/);
+        FileSystemResource resource = FileSystemResource.buildFromFullString(filename.getAsString()/*bundlebasedir + "/" + filename.getFullName()*/);
         NativeTexture t = buildNativeTextureOpenGL(resource, parameters);
         return t;
     }

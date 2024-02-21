@@ -9,6 +9,7 @@ import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.platform.EngineHelper;
+import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
 import de.yard.threed.traffic.config.VehicleDefinition;
@@ -34,7 +35,7 @@ public class SimpleVehicleLoader implements VehicleLoader {
             br.bundle = bundle;
 
             // 18.10.23: No more 'ac', so only gltf any more.
-            EngineHelper.buildNativeModel(br, null, (BuildResult result) -> {
+            Platform.getInstance().buildNativeModelPlain(new ResourceLoaderFromBundle(br), null, (BuildResult result) -> {
                 if (result.getNode() != null) {
 
                     SceneNode currentaircraft = new SceneNode(result.getNode());

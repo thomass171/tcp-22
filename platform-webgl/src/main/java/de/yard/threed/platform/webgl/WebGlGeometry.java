@@ -59,7 +59,7 @@ public class WebGlGeometry implements NativeGeometry {
      */
     public static NativeGeometry buildGeometry(Vector3Array vertices, int[] indices, Vector2Array uvs, Vector3Array normals) {
 
-        //logger.debug("buildGeometry");
+        //logger.debug("buildGeometry for " + vertices.size() + " vertices with basedata " + vertices.basedata);
         Uint16Array inds = TypedArrays.createUint16Array(indices.length);
         inds.set(indices);
         //logger.debug("vertices:"+vertices.arr32.length());

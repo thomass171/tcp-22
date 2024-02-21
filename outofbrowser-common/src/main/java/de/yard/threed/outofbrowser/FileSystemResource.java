@@ -5,6 +5,7 @@ import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.resource.ResourcePath;
+import de.yard.threed.core.resource.URL;
 
 /**
  * Eine Resource als simple Datei im FS.
@@ -77,7 +78,6 @@ public class FileSystemResource implements NativeResource {
      *
      * @return
      */
-    @Override
     public ResourcePath getBundlePath() {
         return null;
     }
@@ -85,9 +85,15 @@ public class FileSystemResource implements NativeResource {
     @Override
     public String getFullName() {
         if (path != null) {
-            return path.path + "/" + name;
+            return path.getPath() + "/" + name;
         }
         return name;
+    }
+
+    @Override
+    public String getFullQualifiedName() {
+        Util.notyet();
+        return null;
     }
 
     @Override
@@ -99,7 +105,19 @@ public class FileSystemResource implements NativeResource {
         // Der "." koennte auch irgendwo im Pfad sein, aber name ist ohne Pfad
         return StringUtils.substring(name, index + 1);
     }
-    
+
+    @Override
+    public String getBasename() {
+        Util.notyet();
+        return null;
+    }
+
+    @Override
+    public URL getUrl() {
+        Util.notyet();
+        return null;
+    }
+
     public static FileSystemResource buildFromFullString(String filename) {
         int index = StringUtils.lastIndexOf(filename, "/");
         if (index != -1) {

@@ -5,6 +5,7 @@ import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.resource.URL;
 
@@ -66,11 +67,9 @@ public abstract class Platform {
      * 10.11.23: The threejs gltf loader currently is the only platform provided loader abd is disabled by default because
      * it cannot handle external material (FG terrain). So
      * this method might be useless at the moment. But it might be an option in the future.
-     *
-     * @param filename
-     * @return
+     * 15.2.24: Decoupled from bundle(Resource)
      */
-    public abstract void buildNativeModelPlain(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate, int options);
+    public abstract void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate, int options);
 
     /**
      * Das Bundle wird in jedem Fall asynchron, aber nicht multithreaded ueber die Platform geladen.
@@ -172,6 +171,7 @@ public abstract class Platform {
      * 5.10.18: protected, weil von aussen nur loadTexture() aufgerufen werden soll.
      * 3.1.19: Das mit der Standardtextur ist doch eine doofe FehlerKaschierung. Das soll der Aufrufer doch pruefen und
      * im Zweifel ohne Material (wireframe) anlegen. Also, liefert jetzt null im Fehlerfall.
+     * 19.2.24: No need to change to NativeResource because URL is just more generic. At the end it might not be a difference.
      */
     public abstract NativeTexture buildNativeTexture(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> parameters);
 

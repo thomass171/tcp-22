@@ -32,28 +32,10 @@ import java.util.Vector;
  * 5.7.21: Ob das wirklich eine gute Idee ist? Evtl., aber nicht so dringlich.
  * 2.8.21: Bundle load extracted to AsyncBundleLoader.
  * 21.12.23: No more for bundle loading in general.
+ * 19.2.24: No longer for model building.
  */
 public class AsyncHelper {
     static Log logger = Platform.getInstance().getLog(AsyncHelper.class);
-    // Wird verwendet, um das einbauen der async/MT geladenen Model im Hauptthread zu machen (wegen JME).
-    // kein asyncjob, weils intern ist. Koennte evtl. trozdem zusammengefuehrt werden. Schick ist das nicht
-    static Vector<ModelBuildData> modelbuildvalues = new Vector<ModelBuildData>();
-
-    /**
-     * Emulate an async model build inside the platform (gltf only) if there is no native model load.
-     *
-     * @param value
-     * @param delegateid
-     */
-    public static void asyncModelBuild(BundleResource value, ResourcePath opttexturepath, int loaderoptions, int delegateid) {
-
-        if (loaderoptions == 0) {
-            //debug hook
-            loaderoptions = 0;
-        }
-        modelbuildvalues.add(new ModelBuildData(value, opttexturepath, loaderoptions, delegateid));
-
-    }
 
     /**
      * public fuer Tests
@@ -64,28 +46,6 @@ public class AsyncHelper {
         if (Platform.getInstance().hasOwnAsync()) {
             //throw new RuntimeException("invalid usage of AsyncHelper");
         }
-        //TODO threadsafe machen. und huebsch? Naja, MT ist es ja nicht.
-        // models
-        for (int i = modelbuildvalues.size() - 1; i >= 0; i--) {
-            ModelBuildData data = modelbuildvalues.get(i);
-            BundleResource modelresource = data.value;
-            ResourcePath opttexturepath = data.opttexturepath;
-            BuildResult r = attemptModelLoad(/*rm,*/ modelresource, opttexturepath, data.loaderoptions, data.delegateid/*21.12.23, bundleLoader*/);
-            if (r != null) {
-                // MT sicher machen? ist aber eigentlich nicht MT.
-                AbstractSceneRunner.getInstance().delegateresult.put(data.delegateid, r);
-                AbstractSceneRunner.getInstance().systemTracker.modelBuilt(modelresource.getFullQualifiedName());
-                modelbuildvalues.remove(i);
-            } else {
-                //no warning
-                logger.debug("no bundle content yet for " + modelresource.getFullName());
-            }
-
-        }
-
-        // modelbuildvalues.clear();
-        //modelbuildopttexturepath.clear();
-
 
         //21.12.23 not needed/used? External usage
         /*4.1.24for (AsyncInvoked<AsyncHttpResponse> asyncInvoked : AbstractSceneRunner.getInstance().invokedLater) {
@@ -147,15 +107,18 @@ public class AsyncHelper {
             }
         }
 
-        BuildResult r = ModelLoader.buildModelFromBundle(file, opttexturepath, loaderoptions);
+        /*14.2.24 still needed? But logging and releaseDelayedResource?
+         BuildResult r = ModelLoader.buildModelFromBundle(file, opttexturepath, loaderoptions);
+
 
         // 16.1.18: The one and only info log for building a model.
         String nodeisnull = (r.getNode() == null) ? " but node isType null." : "";
-        logger.info("Model " + file.getFullName() + " built. Loading took ?" + /*lr.loaddurationms +*/ " ms." + nodeisnull + " delegateid=" + delegateid);
+        logger.info("Model " + file.getFullName() + " built. Loading took ?" + /*lr.loaddurationms +* / " ms." + nodeisnull + " delegateid=" + delegateid);
         // Den Bundleinhalt evtl. wieder freigeben. 25.1.18: Erstmal rausgenommen bis klar ist, ob das bei shared modeln nicht zu built Fehlern führt.
         // Wegen Resourcen doch wieder.
         file.bundle.releaseDelayedResource(file, binres);
-        return r;
+        return r;*/
+        return null;
     }
 
     /**
@@ -163,12 +126,6 @@ public class AsyncHelper {
      */
     public static void cleanup() {
 
-        modelbuildvalues.clear();
-        //modelbuildopttexturepath.clear();
-    }
-
-    public static int getModelbuildvaluesSize() {
-        return modelbuildvalues.size();
     }
 
 

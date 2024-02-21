@@ -1,6 +1,7 @@
 package de.yard.threed.engine;
 
 
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.engine.avatar.VehiclePmlFactory;
@@ -15,13 +16,16 @@ import de.yard.threed.core.resource.Bundle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * Nur fuer Model building, das keine echt platform braucht. Sonst in opengl.
  * <p>
  * Created by thomass on 02.06.16.
  */
 public class SimpleModelFactoryTest {
-    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine","data"}, new PlatformFactoryHeadless());
 
     /**
      * Test vor allem wegen Texturen.
@@ -31,13 +35,15 @@ public class SimpleModelFactoryTest {
     public void testLocomotive() {
         PortableModelList locomotive = VehiclePmlFactory.buildLocomotive();
         Bundle data = BundleRegistry.getBundle("data");
+        assertNotNull(data);
         int oldcnt = EngineHelper.getStatistics().texturefailures;
         PortableModelBuilder pmb = new PortableModelBuilder(locomotive);
-        SceneNode node = pmb.buildModel(data);
+        SceneNode node = pmb.buildModel(null);
         Assertions.assertFalse(pmb.dummymaterialused, "dummymaterialused");
         Assertions.assertEquals(oldcnt, EngineHelper.getStatistics().texturefailures, "texturefailures");
         for (PortableMaterial m : locomotive.materials) {
             Assertions.assertTrue(m.shaded, "shaded");
         }
+        assertTrue(Texture.hasTexture("BucheHell.png"), "BucheHell.png");
     }
 }

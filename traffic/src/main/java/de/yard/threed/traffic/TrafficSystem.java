@@ -309,7 +309,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             //  return false;
             //}
             // Zugriff auf Asynchelper ist nicht ganz sauber, but make sure alle scenery isType loaded before placing a vehicle.
-            if (AsyncHelper.getModelbuildvaluesSize() > 0) {
+            // if (AsyncHelper.getModelbuildvaluesSize() > 0) {
+            if (AbstractSceneRunner.getInstance().futures.size() > 0) {
                 return false;
             }
             String vehiclename = (String) request.getPayload().get("name");

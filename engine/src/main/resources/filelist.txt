@@ -17,3 +17,7 @@ shader/SolidColorXX.j3md
 shader/Universal.frag
 shader/Universal.vert
 primitives.pcm
+cesiumbox/BoxTextured.gltf
+cesiumbox/BoxTextured.bin
+cesiumbox/BoxTextured0.bin
+cesiumbox/CesiumLogoFlat.png

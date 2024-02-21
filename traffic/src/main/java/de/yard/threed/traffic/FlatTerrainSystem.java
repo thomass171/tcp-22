@@ -11,6 +11,7 @@ import de.yard.threed.engine.*;
 import de.yard.threed.engine.ecs.TeleporterSystem;
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsGroup;
+import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.traffic.config.ConfigHelper;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
@@ -186,7 +187,7 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
                 logger.debug("Loading modelfile " + modelfile);
                 BundleResource br = BundleResource.buildFromFullQualifiedString(modelfile);
                 br = new BundleResource(BundleRegistry.getBundle(br.bundlename), br.getFullName());
-                SceneNode destinationNode = ModelFactory.asyncModelLoad(br);
+                SceneNode destinationNode = ModelFactory.asyncModelLoad(new ResourceLoaderFromBundle(br));
                 //TODO set name, but on which node?
                 LocalTransform transform = ConfigHelper.getTransform(nn);
                 destinationNode.getTransform().setPosition(transform.position);
@@ -231,7 +232,7 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
         String fullBasename = tileResource.getFullName();
         BundleResource baseResource = new BundleResource(bundle, fullBasename + ".gltf");
         // TODO why async?
-        terrain = ModelFactory.asyncModelLoad(baseResource);
+        terrain = ModelFactory.asyncModelLoad(new ResourceLoaderFromBundle(baseResource));
         //addToWorld(node);
         if (destinationNode == null) {
             logger.warn("no destination node");

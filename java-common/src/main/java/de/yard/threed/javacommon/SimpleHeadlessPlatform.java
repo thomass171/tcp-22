@@ -8,6 +8,7 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
 import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.resource.URL;
@@ -18,6 +19,7 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.awt.image.BufferedImage;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -129,7 +131,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
-    public void buildNativeModelPlain(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
+    public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
         // No access to SceneRunner/AsyncHelper here from java-common. According to the idea of headless: Just create a dummy node
         // for the model to continue the workflow. See AdvancedHeadlessPlatform if more is needed.
         delegate.modelBuilt(new BuildResult(new DummySceneNode()));
@@ -173,7 +175,13 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
 
     @Override
     public NativeTexture buildNativeTexture(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> parameters) {
+        // Even its not used check whether it can be load. Important in tests
+        BufferedImage li = JavaBundleHelper.loadBundleTexture(filename);
+        if (li == null) {
+            return null;
+        }
         return new DummyTexture(filename.getUrl());
+
     }
 
     @Override
@@ -701,15 +709,15 @@ class DummyMaterial implements NativeMaterial {
 
 class DummyTexture implements NativeTexture {
 
-    String name;
+    URL name;
 
-    DummyTexture(String name) {
+    DummyTexture(URL name) {
         this.name = name;
     }
 
     @Override
     public String getName() {
-        return name;
+        return name.getName();
     }
 }
 

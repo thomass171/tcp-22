@@ -37,8 +37,11 @@ public class TexturePool {
      * TODO texturepool ueber bundle.
      * 27.7.21: Ohne so einen Pool ist memory usage viel zu gross. In backyard gibts sowas auch noch.
      * 2.1.24: Returns (and ever did) null when the texture couldn't be created.
+     * 13.2.24: Deprecated in favor of below URL based
+     *
      * @return
      */
+    @Deprecated
     public NativeTexture loadTexture(BundleResource name, HashMap<NumericType, NumericValue> parameters) {
         if (loadedtexture.get(name.getName()) == null) {
             URL url = URL.fromBundleResource(name);
@@ -59,10 +62,30 @@ public class TexturePool {
     }
 
     /**
+     * 13.2.24: Successor of above
+     */
+    public NativeTexture loadTexture(URL url, HashMap<NumericType, NumericValue> parameters) {
+        if (loadedtexture.get(url.getName()) == null) {
+            NativeTexture nt = Platform.getInstance().buildNativeTexture(url, parameters);
+            if (nt == null) {
+                //statistics.texturefailures++;
+                return null;
+            }
+            loadedtexture.put(url.getName(), nt);
+            //getLog().debug("Loaded texture "+name.getFullName());
+            //statistics.textures++;
+        }
+        return loadedtexture.get(url.getName());
+    }
+
+    /**
      * Eigentlich nur fuer Tests.
      */
     public boolean hasTexture(String name) {
         return loadedtexture.containsKey(name);
     }
 
+    public int size() {
+        return loadedtexture.size();
+    }
 }

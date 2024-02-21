@@ -27,3 +27,5 @@ sceneserver/build
 
 # exclude files created during tests
 /*/src/test/resources/tmp/
+
+/backyard

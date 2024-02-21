@@ -5,6 +5,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.testutil.CoreTestFactory;
 import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
+import de.yard.threed.core.testutil.TestBundle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,10 +28,29 @@ public class BundleResourceTest {
     @Test
     public void testFullQualifiedString() {
 
+        // 13.2.24: Since ResourcePath now is defined to have no leading "/" als reject this full qualified string??
         BundleResource bundleResource = BundleResource.buildFromFullQualifiedString("b:/path/file.xml");
         assertEquals("b",bundleResource.getBundlename());
         assertEquals("/path",bundleResource.getPath().getPath());
         assertEquals("file.xml",bundleResource.getName());
+        assertEquals("b:/path/file.xml",bundleResource.getFullQualifiedName());
+
+        // 13.2.24: Should also be accepted.
+        bundleResource = BundleResource.buildFromFullQualifiedString("b:path/file.xml");
+        assertEquals("b",bundleResource.getBundlename());
+        assertEquals("path",bundleResource.getPath().getPath());
+        assertEquals("file.xml",bundleResource.getName());
+        assertEquals("b:path/file.xml",bundleResource.getFullQualifiedName());
+    }
+
+    @Test
+    public void testConstructor(){
+        TestBundle bundle=new TestBundle("test",new String[]{},"/xy");
+        BundleResource bundleResource=new BundleResource(bundle, "cesiumbox/BoxTextured.gltf");
+
+        assertEquals("cesiumbox",bundleResource.getPath().getPath());
+        assertEquals("BoxTextured.gltf",bundleResource.getName());
+        assertEquals("test:cesiumbox/BoxTextured.gltf",bundleResource.getFullQualifiedName());
     }
 
     @Test

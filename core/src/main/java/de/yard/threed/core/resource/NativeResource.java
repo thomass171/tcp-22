@@ -20,6 +20,7 @@ package de.yard.threed.core.resource;
  * Maybe a BundleResource is its own interface? Maybe rethink the use cases. Some use cases have file system traversal! Maybe addPath() in ResourcePath?
  * Maybe we need hierarchical resources and non hierarchical (URL). So NativeResource can be the hierarchical.
  *
+ * 19.2.24: Decoupled from bundle. and its hierarchical with base,path,name splitting. Hierarchical is important eg. for FG texture loading.
  * Created by thomass on 11.12.15.
  */
 public interface NativeResource {
@@ -34,6 +35,7 @@ public interface NativeResource {
 
     /**
      * isbundled wird trotz bundlepath gebraucht, weil der auch null sein kann.
+     * 19.2.24: use case is not quite clear, maybe for probing in FG.
      * @return
      */
     boolean isBundled();
@@ -42,13 +44,31 @@ public interface NativeResource {
      * Returns location of logical unit.
      * @return
      */
-    ResourcePath getBundlePath();
+    //19.2.24 ResourcePath getBundlePath();
 
     /**
      * path+name
+     * No leading "./","/" to be ready to be used as key.
+     *
      * @return
      */
     String getFullName();
-    
+    String getFullQualifiedName();
+
+        /**
+         * without ".". Return "" if there is no extension.
+         */
     String getExtension();
+
+    /**
+     * Name without path and extension.
+     */
+    String getBasename();
+
+    /**
+     * A helper needed for textures (which might not be loaded by this loader).
+     * And in general just an abstraction for a BundleResource (also for FS).
+     */
+    URL getUrl();
+
 }

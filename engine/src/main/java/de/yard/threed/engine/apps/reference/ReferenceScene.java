@@ -16,6 +16,7 @@ import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.gui.*;
 import de.yard.threed.engine.loader.PortableModelBuilder;
 import de.yard.threed.engine.platform.EngineHelper;
+import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.*;
 
 import de.yard.threed.engine.geometry.ShapeGeometry;
@@ -279,7 +280,7 @@ public class ReferenceScene extends Scene {
 
         // loc nur zum Test des async gltf Ladens, aber ohne Animation um keine Abhaengigkeit zu FG zu haben.
         // A rotation or scale of loc is not needed.
-        EngineHelper.buildNativeModel(new BundleResource(BundleRegistry.getBundle("data"), "models/loc.gltf"), null, (result) -> {
+        Platform.getInstance().buildNativeModelPlain(new ResourceLoaderFromBundle(new BundleResource(BundleRegistry.getBundle("data"), "models/loc.gltf")), null, (result) -> {
             locomotive = new SceneNode(result.getNode());
             if (locomotive != null) {
                 //Vector3 scale = new Vector3(1.5f, 1.5f, 1.5f);
@@ -328,6 +329,25 @@ public class ReferenceScene extends Scene {
             elevatorPing.setVolume(0.5);
             elevatorPing.setLooping(false);
         }
+        // Cesium Box
+        // TODO check why the box isn't visible
+        BundleResource bundleResource=new BundleResource(BundleRegistry.getBundle("engine"),"cesiumbox/BoxTextured.gltf");
+        Platform.getInstance().buildNativeModelPlain(new ResourceLoaderFromBundle(bundleResource), null, new ModelBuildDelegate() {
+            @Override
+            public void modelBuilt(BuildResult result) {
+                if (result.getNode()!=null){
+                    SceneNode cesiumBox = new SceneNode(result.getNode());
+
+                    //shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(180)));
+                    cesiumBox.getTransform().setRotation(Quaternion.buildRotationX(new Degree(0)));
+                    cesiumBox.getTransform().setScale(new Vector3(1,1,1));
+                    cesiumBox.getTransform().setPosition(new Vector3(-2, 2.8, -4));
+                    //multimatcube.getTransform().setPosition(new Vector3(-2, 1, -4));
+                    addToWorld(cesiumBox);
+                    logger.debug("cesiumBox node added");
+                }
+            }
+        }, 0);
         logger.debug("setupScene completed");
     }
 
@@ -737,7 +757,7 @@ public class ReferenceScene extends Scene {
             cycleRendering();
         }
         if (!remoteShuttleTriggered) {
-            // use ... temporarily until shuttle uses textures (for testing remote texture loading)
+            // use ... temporarily until shuttle uses textures (for testing remote texture loading). Now we have cesium box
             //String bundleUrl="http://yard.de/bundlepool/nasa";
             //String remoteModel = "shuttle-hi-res/shut.gltf";
             //Vector3 scale = new Vector3(0.003, 0.003, -0.003);
@@ -753,18 +773,21 @@ public class ReferenceScene extends Scene {
                     int loaderoptions = 0;
 
                     logger.debug("Bundle " + bundle.name + " loaded");
-                    BuildResult r = ModelLoader.buildModelFromBundle(file, opttexturepath, loaderoptions);
+                    ModelLoader.buildModelFromBundle(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new ModelBuildDelegate() {
+                        @Override
+                        public void modelBuilt(BuildResult r) {
+                            if (r.getNode() != null) {
+                                SceneNode shuttle = new SceneNode(r.getNode());
 
-                    if (r.getNode() != null) {
-                        SceneNode shuttle = new SceneNode(r.getNode());
-
-                        //shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(180)));
-                        shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(0)));
-                        shuttle.getTransform().setScale(scale);
-                        shuttle.getTransform().setPosition(new Vector3(-8, 2, -10));
-                        addToWorld(shuttle);
-                        logger.debug("shuttle node added");
-                    }
+                                //shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(180)));
+                                shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(0)));
+                                shuttle.getTransform().setScale(scale);
+                                shuttle.getTransform().setPosition(new Vector3(-8, 2, -10));
+                                addToWorld(shuttle);
+                                logger.debug("shuttle node added");
+                            }
+                        }
+                    });
                 }
             });
             remoteShuttleTriggered = true;

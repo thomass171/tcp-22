@@ -28,6 +28,7 @@ import de.yard.threed.engine.gui.Hud;
 import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.engine.loader.PortableModelBuilder;
 import de.yard.threed.engine.platform.EngineHelper;
+import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
 import de.yard.threed.core.geometry.SimpleGeometry;
@@ -228,7 +229,7 @@ public class ModelPreviewScene extends Scene {
         String extension = br.getExtension();
         BuildResult result = null;
 
-            result = new BuildResult(ModelFactory.asyncModelLoad(br, EngineHelper.LOADER_USEGLTF).nativescenenode);
+            result = new BuildResult(ModelFactory.asyncModelLoad(new ResourceLoaderFromBundle(br), EngineHelper.LOADER_USEGLTF).nativescenenode);
 
         /*29.12.18 model = null;
         // Das model hat evtl. die offsets in seinem transform

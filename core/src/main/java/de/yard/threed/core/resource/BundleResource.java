@@ -98,24 +98,25 @@ public class BundleResource implements NativeResource {
         return true;
     }
 
-    @Override
+    /*19.2.24 needed? @Override
     public ResourcePath getBundlePath() {
         return null;
-    }
+    }*/
 
     /**
      * 12.6.17: Bundlename isn't part of full name.
-     *
+     * 14.2.24: Now removes leading "./","/" because this is used as key in bundle.
      * @return
      */
     @Override
     public String getFullName() {
-        if (path != null && path.path != null && StringUtils.length(path.path) > 0) {
-            return path.path + "/" + name;
+        if (path != null && path.getPathForKey() != null && StringUtils.length(path.getPathForKey()) > 0) {
+            return path.getPathForKey() + "/" + name;
         }
         return name;
     }
 
+    @Override
     public String getFullQualifiedName() {
         String b = bundlename;
         if (b == null && bundle != null) {
@@ -127,8 +128,8 @@ public class BundleResource implements NativeResource {
         } else {
             b += ":";
         }
-        if (path != null && path.path != null && StringUtils.length(path.path) > 0) {
-            return b + path.path + "/" + name;
+        if (path != null && path.getPath() != null && StringUtils.length(path.getPath()) > 0) {
+            return b + path.getPath() + "/" + name;
         }
         return b + name;
     }
@@ -148,15 +149,16 @@ public class BundleResource implements NativeResource {
         return StringUtils.substring(name, index + 1);
     }
 
-    public String getBundlename(){
+    public String getBundlename() {
         return bundlename;
     }
 
     @Override
     public String toString() {
+        // 13.2.24: finally changing layout to full qualified
         String s = name;
         if (path != null) {
-            s = "(" + path.path + ")" + s;
+            s = path.getPath() + "/" + s;
         }
         if (bundle != null) {
             s = bundle.name + ":" + s;
@@ -179,16 +181,21 @@ public class BundleResource implements NativeResource {
     }
 
     /**
-     * Returns null is case of invalid fullQualifiedString.
+     * Returns null in case of invalid fullQualifiedString.
      */
     public static BundleResource buildFromFullQualifiedString(String fullQualifiedString) {
         if (!StringUtils.contains(fullQualifiedString, ":")) {
             return null;
         }
-        BundleResource br = new BundleResource(StringUtils.substringAfter(fullQualifiedString, ":"));
+        String path = StringUtils.substringAfter(fullQualifiedString, ":");
+        BundleResource br = new BundleResource(path);
         br.bundlename = StringUtils.substringBefore(fullQualifiedString, ":");
         return br;
     }
+
+    /*19.2.24 needed? public static BundleResource buildFromFullQualifiedString(ResourcePath p, String name) {
+        return buildFromFullQualifiedString(p.getPath() + "/" + name);
+    }*/
 
     /**
      * Name without path and extension.
@@ -201,5 +208,10 @@ public class BundleResource implements NativeResource {
             return name;
         }
         return StringUtils.substring(name, 0, StringUtils.indexOf(name, "." + ext));
+    }
+
+    @Override
+    public URL getUrl() {
+        return URL.fromBundleResource(this);
     }
 }

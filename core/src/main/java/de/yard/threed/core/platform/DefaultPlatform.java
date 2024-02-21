@@ -4,6 +4,7 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.resource.URL;
 
@@ -27,7 +28,7 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public void buildNativeModelPlain(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate, int options) {
+    public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate, int options) {
 
     }
 

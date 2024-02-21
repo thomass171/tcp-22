@@ -41,7 +41,7 @@ public class LoaderRegistry {
      * die tools wandern. 28.12.17: Jetzt dorhin kopiert.
      * @throws InvalidDataException
      */
-    public static PortableModelList loadBySuffix(BundleResource file, BundleData /* InputStream*/ ins, boolean  ignoreacworld) throws InvalidDataException {
+    /*13.2.24 public static PortableModelList loadBySuffix(BundleResource file, BundleData /* InputStream* / ins, boolean  ignoreacworld) throws InvalidDataException {
         String filename = file.getName();
         String extension = file.getExtension();
         /*15.6.21 if (extension.equals( "3ds")) {
@@ -49,7 +49,7 @@ public class LoaderRegistry {
             // Bei einem Fehler ist er schon ausgestiegen
             PortableModelList ppfile = loader.preProcess();
             return ppfile;
-        }*/
+        }* /
         if (extension.equals( "ac")) {
             // 18.10.23: Only used by tools? But tools has its own loadBySuffix.
             if (!ins.isText()) {
@@ -77,7 +77,7 @@ public class LoaderRegistry {
             // Bei einem Fehler ist er schon ausgestiegen
             //return new ModelLoaderProcessor(loader,loader.ploadedfile);
             return loader.ploadedfile;
-        }*/
+        }* /
         if (extension.equals("btg")) {
             //AbstractLoader loader = new LoaderBTG(((ins.b)), options, boptions);
             Util.nomore();//27.12.17
@@ -92,7 +92,7 @@ public class LoaderRegistry {
         }
         // 21.12.17: gltf jetzt auch explizit ladbar (nicht nur als preprocessed)
         if (extension.equals( "gltf")) {
-             AbstractLoader loader = LoaderGLTF.buildLoader(file,/*i/*ns.s,*/  file.path);
+             AbstractLoader loader = LoaderGLTF.buildLoader(file,/*i/*ns.s,* /  file.path);
             // Bei einem Fehler ist er schon ausgestiegen
             PortableModelList ppfile = loader.preProcess();
             //return new ModelLoaderProcessor(loader,ppfile);
@@ -101,7 +101,7 @@ public class LoaderRegistry {
 
         logger.warn("unknown suffix " + extension);
         return null;
-    }
+    }*/
 
 
 }

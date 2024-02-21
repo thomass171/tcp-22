@@ -4,6 +4,7 @@ import de.yard.threed.core.Util;
 import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.resource.URL;
 
 /**
  * Diese Implementierung ist natuerlich reichlich schlicht. Aber für simple Dinge reicht es erstmal.
@@ -45,7 +46,6 @@ public class WebGlResource implements NativeResource {
         return false;
     }
 
-    @Override
     public ResourcePath getBundlePath() {
         return null;
     }
@@ -56,6 +56,12 @@ public class WebGlResource implements NativeResource {
     }
 
     @Override
+    public String getFullQualifiedName() {
+        Util.notyet();
+        return null;
+    }
+
+    @Override
     public String getExtension() {
         int index = StringUtils.lastIndexOf(path, ".");
         if (index == -1) {
@@ -63,5 +69,17 @@ public class WebGlResource implements NativeResource {
         }
         // Der "." koennte auch irgendwo im Pfad sein, aber name ist ohne Pfad
         return StringUtils.substring(path, index + 1);
+    }
+
+    @Override
+    public String getBasename() {
+        Util.notyet();
+        return null;
+    }
+
+    @Override
+    public URL getUrl() {
+        Util.notyet();
+        return null;
     }
 }

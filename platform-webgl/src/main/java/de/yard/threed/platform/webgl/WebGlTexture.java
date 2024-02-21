@@ -62,7 +62,7 @@ public class WebGlTexture implements NativeTexture {
      * Otherwise its only a path starting with "/bundles".
      */
     public static WebGlTexture loadTexture(/*2.1.24BundleResource*/URL url) {
-        String filename=url.getUrl();
+        String filename=url.getAsString();
         logger.debug("Loading texture " + filename);
         return new WebGlTexture(loadTextureNative(filename));
     }

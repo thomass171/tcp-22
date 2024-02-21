@@ -38,6 +38,6 @@ public class FileSystemBundleResourceLoader implements NativeBundleResourceLoade
 
     @Override
     public String getBasePath() {
-        return basedir.path;
+        return basedir.getPath();
     }
 }

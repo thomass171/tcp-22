@@ -61,7 +61,7 @@ public class TrafficConfig {
     private static List<NativeNode> readFromBundle(Bundle bnd, ResourcePath currentPath, String configfile) {
         String pathPrefix = "";
         if (!currentPath.getPath().equals("")) {
-            pathPrefix = currentPath.path + "/";
+            pathPrefix = currentPath.getPath() + "/";
         }
         BundleData xml = bnd.getResource(pathPrefix + configfile);
         if (xml == null) {

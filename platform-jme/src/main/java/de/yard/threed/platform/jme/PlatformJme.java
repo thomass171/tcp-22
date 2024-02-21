@@ -15,7 +15,9 @@ import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.platform.PlatformInternals;
+import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.URL;
+import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.outofbrowser.FileSystemResource;
 import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.resource.ResourcePath;
@@ -118,13 +120,10 @@ public class PlatformJme extends SimpleHeadlessPlatform {
     //int threadcnt = 0;
 
     @Override
-    public void buildNativeModelPlain(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
-        // verwendet nicht asyncjob, weil es ja intern ist. JME mag kein modelload in MT. Das gibt sonst ruckzuck ConcurrentModificationException. Darum einfach async um das
-        // delayed testen zu koennen.
-        int delegateid = AbstractSceneRunner.getInstance().invokeLater(delegate);
+    public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
 
         //logger.debug("buildNativeModel "+filename+", delegateid="+delegateid);
-        AsyncHelper.asyncModelBuild(filename, opttexturepath, options, delegateid);
+        ModelLoader.buildModelFromBundle(resourceLoader, opttexturepath, options, delegate);
     }
 
     @Override
@@ -262,9 +261,9 @@ public class PlatformJme extends SimpleHeadlessPlatform {
 
     private NativeTexture buildNativeTextureJme(/*2.1.24BundleResource*/URL textureresource, BufferedImage li, HashMap<NumericType, NumericValue> params) {
         //logger.debug("buildNativeTexture " + textureresource.getName());
-        JmeTexture tex = JmeTexture.loadFromFile(textureresource.getName()/*getFullName()*/, li);
+        JmeTexture tex = JmeTexture.loadFromFile(textureresource.getAsString()/*getFullName()*/, li);
         if (tex == null) {
-            logger.warn("Loading texture " + textureresource.getName() + " failed. Using default");
+            logger.warn("Loading texture " + textureresource.getUrl() + " failed. Using default");
             return null;//defaulttexture;
         }
         NumericValue wraps = params.get(NumericType.TEXTURE_WRAP_S);

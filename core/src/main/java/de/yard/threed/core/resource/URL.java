@@ -6,136 +6,104 @@ import de.yard.threed.core.platform.Platform;
 /**
  *
  * An absolute or relative URL of a resource. Relative relies on some platform default (eg. browser origin).
- * Independent from bundles.
+ * Independent from bundles and HTTP. "baseUrl" might point to a filesystem.
  * 2.1.24: Renamed from UrlResource.
  * <p>
  * Created by thomass on 07.11.23.
  */
-public class URL /*implements NativeResource*/ {
+public class URL implements NativeResource {
+    String baseUrl;
+    ResourcePath path;
     //Real filename without path
-    public String name;
-    //sounds good, but also creates complexity public ResourcePath contextPath;
-    //sounds good, but also creates complexity public String server = null;
+    private String name;
 
-    public URL(String name) {
-        /*int index = StringUtils.lastIndexOf(name, "/");
-        if (index != -1) {
-            String path = StringUtils.substring(name, 0, index);
-            String fname = StringUtils.substring(name, index + 1);
-            this.contextPath = new ResourcePath(path);
-            this.name = fname;
-        } else {
-            this.name = name;
-            this.contextPath = new ResourcePath("");
-        }*/
+    public URL(String baseUrl, ResourcePath path, String name) {
+
+        this.baseUrl = baseUrl;
+        this.path = path;
         this.name = name;
     }
 
-    /*public URL(ResourcePath path, String name) {
-        this(name);
-        if (path == null) {
-            path = new ResourcePath("");
-        }
-        if (this.contextPath != null) {
-            this.contextPath = path.append(this.contextPath);
-        } else {
-            this.contextPath = path;
-        }
-    }*/
-
-    //@Override
-   /* public ResourcePath getPath() {
-        return contextPath;
-    }*/
-
-    //@Override
+    /**
+     * No longer the full URL but only the last part.
+     */
+    @Override
     public String getName() {
         return name;
     }
 
-    public String getUrl() {
+    @Override
+    public URL getUrl() {
+        return this;
+    }
+
+    public String getAsString() {
+        return baseUrl + "/" + getFullName();
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    @Override
+    public String getFullName() {
+        if (path != null && path.getPathForKey() != null && StringUtils.length(path.getPathForKey()) > 0) {
+            return path.getPathForKey() + "/" + name;
+        }
         return name;
     }
 
-    /*@Override
+    @Override
     public boolean isBundled() {
         return false;
-    }*/
+    }
 
-    /*@Override
-    public ResourcePath getBundlePath() {
-        return null;
-    }*/
-
-    /**
-     * server isn't part of full name.
-     * Needed?
-     */
-    //@Override
-    /*public String getFullName() {
-        if (contextPath != null && contextPath.path != null && StringUtils.length(contextPath.path) > 0) {
-            return contextPath.path + "/" + name;
-        }
-        return name;
-    }*/
-
-    /*public String getFullQualifiedName() {
-        String b = server;
+    @Override
+    public String getFullQualifiedName() {
+        String b = baseUrl;
         if (b == null) {
             // neither set ??
             b = "";
         } else {
             b += "/";
         }
-        if (contextPath != null && contextPath.path != null && StringUtils.length(contextPath.path) > 0) {
-            return b + contextPath.path + "/" + name;
+        if (getPath() != null && StringUtils.length(getPath().getPath()) > 0) {
+            return b + getPath().getPath() + "/" + name;
         }
         return b + name;
-    }*/
+    }
 
-    /**
-     * without "."
-     *
-     * @return
-     */
-    //@Override
+    @Override
     public String getExtension() {
         int index = StringUtils.lastIndexOf(name, ".");
         if (index == -1) {
             return "";
         }
-        // Der "." koennte auch irgendwo im Pfad sein, aber name ist ohne Pfad
         return StringUtils.substring(name, index + 1);
     }
 
     @Override
     public String toString() {
-        /*String s = name;
-        if (contextPath != null) {
-            s = "(" + contextPath.path + ")" + s;
-        }
-        if (server != null) {
-            s = server + "/" + s;
-        }
-        return s;*/
-        return getName();
+        return getAsString();
     }
 
     public boolean isHttp() {
-        return StringUtils.startsWith(name, "http");
+        return StringUtils.startsWith(baseUrl, "http");
     }
 
-    /**
-     * Name without path and extension.
-     *
-     * @return
-     */
+    @Override
     public String getBasename() {
+
         String ext = getExtension();
         if (StringUtils.length(ext) == 0) {
             return name;
         }
         return StringUtils.substring(name, 0, StringUtils.indexOf(name, "." + ext));
+    }
+
+    @Override
+    public ResourcePath getPath() {
+        return path;
     }
 
     /**
@@ -171,7 +139,11 @@ public class URL /*implements NativeResource*/ {
             //bundlebasedir = BundleResolver.resolveBundle(bundleResource.bundle.name, Platform.getInstance().bundleResolver).getPath();
             bundlebasedir = bundle.getBasePath();
         }
-        return new URL(bundlebasedir + "/" + bundleResource.getFullName());
+        return new URL(bundlebasedir, bundleResource.getPath(), bundleResource.getName());
     }
 
+    /*19.2.24 public static URL fromReference(URL url, String reference) {
+        String base = StringUtils.substringBeforeLast(url.getUrl(),"/");
+        return new URL(base + "/" + reference);
+    }*/
 }

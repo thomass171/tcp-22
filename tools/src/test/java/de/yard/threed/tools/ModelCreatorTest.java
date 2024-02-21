@@ -11,6 +11,8 @@ import de.yard.threed.core.testutil.InMemoryBundle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 /**
  * <p>
@@ -31,12 +33,12 @@ public class ModelCreatorTest {
                 Assert.fail(e.getMessage());
             }
             NativeJsonValue gltf = platform.parseJson(result.gltfstring);
-            Assertions.assertNotNull(gltf, "parsedgltf");
+            assertNotNull(gltf, "parsedgltf");
             BundleResource gltfbr = new BundleResource(new InMemoryBundle("plane-darkGreen", result.gltfstring, result.bin), "plane-darkGreen.gltf");
             try {
                 LoaderGLTF lf1 = LoaderGLTF.buildLoader(gltfbr, null);
-
-            } catch (InvalidDataException e) {
+                assertNotNull(lf1.doload());
+            } catch (Exception e) {
                 Assert.fail(e.getMessage());
             }
         }
@@ -56,12 +58,12 @@ public class ModelCreatorTest {
             Assert.fail(e.getMessage());
         }
         NativeJsonValue gltf = platform.parseJson(result.gltfstring);
-        Assertions.assertNotNull( gltf,"parsedgltf");
+        assertNotNull(gltf, "parsedgltf");
         BundleResource gltfbr = new BundleResource(new InMemoryBundle("loc", result.gltfstring, result.bin), "loc.gltf");
         try {
             LoaderGLTF lf1 = LoaderGLTF.buildLoader(gltfbr, null);
-
-        } catch (InvalidDataException e) {
+            assertNotNull(lf1.doload());
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }

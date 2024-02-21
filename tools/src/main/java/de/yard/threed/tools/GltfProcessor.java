@@ -130,7 +130,7 @@ public class GltfProcessor {
         try {
             SimpleByteBuffer binbuffer = new SimpleByteBuffer(FileUtils.readFileToByteArray(bininput));
             LoaderGLTF loaderGLTF = new LoaderGLTF(gltfinput, binbuffer, null, "");
-            PortableModelList pml = loaderGLTF.ploadedfile;
+            PortableModelList pml = loaderGLTF.doload();
             for (int i = 0; i < pml.getObjectCount(); i++) {
                 PortableModelDefinition obj = pml.getObject(i);
                 dumpObject(obj);
