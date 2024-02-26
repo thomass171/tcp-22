@@ -6,18 +6,18 @@ import de.yard.threed.engine.platform.common.RequestType;
 
 /**
  * 21.3.19: Abgrenzung Request/Event.
- * 
+ * <p>
  * Created on 01.03.18.
  */
 public class RequestRegistry {
 
     /**
-     * Ein (noch nicht geladenes?) Vehicle aus der Configuration laden. Entweder ein spezielles über den Namen oder einfach das nächste.
+     * Load a vehicle from configuration. Either by name (property "initialVehicle") or just the next.
      * 26.3.20: Die Location ist auch eine uebergebene oder die naechste.
      * 24.11.20: TRAFFIC_REQUEST_LOADVEHICLE is deprecated, weil der nicht in einem System läuft.
      * 29.10.21: Und ein Request to load all vehicles for a single graph (payload0,groundnet payload1). Needs to wait unitl
      * everything is ready, eg. Elevation available.(// 27.3.20: Und die Vehicles brauchen ja auch Terrain wegen der Elevation. Das soll bei client/server aber nicht mehr so sein.
-     *             // 12.5.20: Doch, die brauchen ja auch ein richtige Elevation, also passend zum Client
+     * // 12.5.20: Doch, die brauchen ja auch ein richtige Elevation, also passend zum Client
      * 18.1.23: TRAFFIC_REQUEST_LOADVEHICLES loads vehicles from a list (additional to initial vehicle? No! There is only
      * one load vehicles when terrain is available!). Might also be triggered multiple when several graphs are loaded.
      * Typically TRAFFIC_REQUEST_LOADVEHICLES is used to set up a scene.
@@ -26,15 +26,20 @@ public class RequestRegistry {
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLE = RequestType.register(4001, "TRAFFIC_REQUEST_LOADVEHICLE");
 
     public static Request buildLoadVehicle(int userEntityId, String name, String smartLocation) {
-        return new Request(TRAFFIC_REQUEST_LOADVEHICLE, new Payload().add("name",name).add("location",smartLocation));
+        return new Request(TRAFFIC_REQUEST_LOADVEHICLE, new Payload().add("name", name).add("location", smartLocation));
     }
 
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLES = RequestType.register(4003, "TRAFFIC_REQUEST_LOADVEHICLES");
 
     /**
-     * Payload: String(icao)
+     * Payload: String(icao),23.2.24: Intentionally without bundle and filename. The processor should have a kind of lookup by icao.
+     * For now has no userid.
      */
     public static RequestType TRAFFIC_REQUEST_LOADGROUNDNET = RequestType.register(4004, "TRAFFIC_REQUEST_LOADGROUNDNET");
+
+    public static Request buildLoadGroundnet(/*int userEntityId,*/ String icao) {
+        return new Request(TRAFFIC_REQUEST_LOADGROUNDNET, new Payload().add("icao", icao));
+    }
 
     /**
      * Ein Aircraft will departen. Dann muss
@@ -56,7 +61,7 @@ public class RequestRegistry {
      * 6.3.2020: Das muesste für Roundtrips, Orbit, Moon, aber auch GroundnetService gleichermassen geeignet sein. Obwohl dafuer vielleicht besser
      * ein TRAFFIC_REQUEST_VEHICLE_TRAVEL geeignet ist, und das hier wirklich für innerhalb eines Graph? Naja, mal sehn. per TravelHelper.spawnTravel()
      * Ich
-     *
+     * <p>
      * Payload enthält nur die Destination. Der PAth wird später erst ermittelt.
      * 7.5.19
      */

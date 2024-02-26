@@ -132,7 +132,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
             // muss tile kennen/laden um die initialposition und projection festzulegen.
             String basename = (String) request.getPayloadByIndex(0);
             List<Vehicle> vehicleList = (List<Vehicle>) request.getPayloadByIndex(1);
-            logger.debug("requested tile:" + basename);
+            logger.debug("requested tile '" + basename + "' with " + vehicleList.size() + " vehicles");
             TrafficSystem.vehiclelist = vehicleList;
 
             // 7.5.19: Anhand der initialPosition kann Terrain, groundnet, vehicles geladen werden und Projection gesetzt werden.
@@ -367,7 +367,9 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
         SystemManager.putDataProvider("projection", this);
 
         if (loadEDDK) {
-            SystemManager.putRequest(new Request(RequestRegistry.TRAFFIC_REQUEST_LOADGROUNDNET, new Payload("EDDK"/*trafficWorld.currentairport.icao*/, projection)));
+            // 23.2.24: Use builder with historic default values. No longer projection.
+            //SystemManager.putRequest(new Request(RequestRegistry.TRAFFIC_REQUEST_LOADGROUNDNET, new Payload("EDDK"/*trafficWorld.currentairport.icao*/, projection)));
+            SystemManager.putRequest(RequestRegistry.buildLoadGroundnet("EDDK"));
         }
 
     }

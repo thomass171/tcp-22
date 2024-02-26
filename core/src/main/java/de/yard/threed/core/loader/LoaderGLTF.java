@@ -113,11 +113,11 @@ public class LoaderGLTF {
                 logger.debug("got gltf");
                 try {
                     json = response.getContentAsString();
-                    /*NativeJsonValue gltf = Platform.getInstance().parseJson(json);
-                    if (gltf == null) {
-                        //TODO        throw new InvalidDataException("parsing json failed:" + json);
+                    //NativeJsonValue gltf = Platform.getInstance().parseJson(json);
+                    if (json == null) {
+                        throw new InvalidDataException("no gltf data");
                     }
-                    gltfo = gltf.isObject();*/
+                    //gltfo = gltf.isObject();*/
                     // TODO get bin file name from gltf
                     //BundleResource binres = LoaderGLTF.getBinResource(file);
                     logger.debug("Launching bin load");

@@ -305,7 +305,7 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
                 stillpressedkeys.add(k);
             }
         } else {
-            stillpressedkeys.remove(new Integer(k));
+            stillpressedkeys.remove(Integer.valueOf(k));
             releasedkeys.add(k);
         }
     }
@@ -598,6 +598,7 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
         // the complete callback might add additional futures. Avoid ConcurrentModificationException and don't loose the new.
         List<Pair<NativeFuture, AsyncJobDelegate>> futures = new ArrayList<>(AbstractSceneRunner.getInstance().futures);
         //C# List<Object> futures = new ArrayList<Object>();
+        int pending = 0;
         //C# foreach (Object p1 in AbstractSceneRunner.getInstance().futures) {
         for (Pair<NativeFuture, AsyncJobDelegate> p : futures) {
             //C# Pair<NativeFuture<Object>, AsyncJobDelegate<Object>> p = (Pair<NativeFuture<Object>, AsyncJobDelegate<Object>>) p1;
@@ -605,10 +606,14 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
                 p.getSecond().completed(p.getFirst().get());
                 // mark completed for below remove
                 p.setSecond(null);
+            } else {
+                pending++;
             }
         }
         AbstractSceneRunner.getInstance().futures.removeIf(e -> e.getSecond() == null);
-
+        if (pending > 0) {
+            logger.debug("Still " + pending + " futures pending");
+        }
     }
 
     public boolean hasCompletedFutures() {

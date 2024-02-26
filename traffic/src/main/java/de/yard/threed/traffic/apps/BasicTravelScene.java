@@ -596,6 +596,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     /**
      * Should be null as default? List could come from a tile?
      * For now "lok" like in OsmScenery.
+     * TODO the caller should check for null.
      * <p>
      * 28.10.21
      *
