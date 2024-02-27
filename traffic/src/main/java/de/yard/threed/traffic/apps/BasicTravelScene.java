@@ -301,6 +301,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             } else {
                 Request request;
                 // no userid known. Might not be user related. TODO Maybe the request via parameter isn't used any more.
+                // Its quite early to send this request now, but the receiver should wait until the time comes.
                 request = RequestRegistry.buildLoadVehicle(-1, argv_initialVehicle, null);
                 SystemManager.putRequest(request);
             }
@@ -594,9 +595,12 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     }
 
     /**
-     * Should be null as default? List could come from a tile?
-     * For now "lok" like in OsmScenery.
-     * TODO the caller should check for null.
+     * The default implementation for retrieving the vehicle list. Ends
+     * up in a DataProvider by SphereSystem.
+     * List could come from a tile?
+     * 27.2.24: Purpose should be redefined.
+     * Is it per sphere/tile? or per graph? Shouldn't each system read the config on its own?
+     * Or is dataprovider sufficient?
      * <p>
      * 28.10.21
      *
@@ -604,7 +608,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
      */
     public List<Vehicle> getVehicleList() {
         List<Vehicle> vehicleList = new ArrayList<Vehicle>();
-        //15.12.21 vehicleList.add(new Vehicle("loc", false,true));
-        return vehicleList;//null;
+        return vehicleList;
     }
 }

@@ -44,7 +44,7 @@ public class VehicleLauncher {
      * 3) AI aircraft
      * 4) Railing
      * Das Bundle muss noch nicht geladen sein. Hier wird die Entity angelegt.
-     * Typically triggered via TRAFFIC_REQUEST_LOADVEHICLE_NG (formerly TRAFFIC_REQUEST_LOADVEHICLE2) and TRAFFIC_REQUEST_LOADVEHICLES
+     * Typically triggered via TRAFFIC_REQUEST_LOADVEHICLE and TRAFFIC_REQUEST_LOADVEHICLES
      * <p>
      * * Nur die AI Aircrafts aus FG_Root(fgdata) rotieren um main gears.
      * Das Vehicle kommt aus den Beginn der Edge (from) in Richtung "to".
@@ -67,7 +67,7 @@ public class VehicleLauncher {
      * Wer die Entity nach dem Launch braucht, kann den Delegate verwenden.
      * 17.1.19: Wenn graph null ist (z.B. bei einem Vehicle dass sich entlang Viewpoints bewegt), wird keine GraphMovingComponent angelegt.
      * 24.11.20: avatarpc als Parameter ist deprecated. Das sollte ueber Events gehen. Gilt das nicht auch fuer den BuiltDelegate?
-     * 24.11.20: Die ganze Methode sollte ueber TRAFFIC_REQUEST_LOADVEHICLE2 gehen.
+     * 24.11.20: Triggered via TRAFFIC_REQUEST_LOADVEHICLE.
      * MA31: Wegen VehicleHelperDecoupler nicht mehr static.
      * 27.12.21: Now with a list of delegates (for decoupling doormarker)
      * <p>

@@ -237,4 +237,14 @@ public class TrafficHelper {
         }
         return found;
     }
+
+    public static List<Vehicle> getVehicleListByDataprovider() {
+        DataProvider dataProvider = SystemManager.getDataProvider("vehiclelistprovider");
+        if (dataProvider == null) {
+            logger.warn("no vehiclelistprovider");
+            return null;
+        }
+        List<Vehicle> vehicleList = (List<Vehicle>) dataProvider.getData(null);
+        return vehicleList;
+    }
 }

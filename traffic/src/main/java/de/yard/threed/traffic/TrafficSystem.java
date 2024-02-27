@@ -43,7 +43,7 @@ import java.util.Map;
  * Provides:
  * - loading of graphs, eg. from Tiles (Tile20)
  * - pooling all known traffic graphs and serving these as DataProvider
- * - load vehicles (why not TRAFFIC_REQUEST_LOADVEHICLE2?)
+ * - load vehicles
  * <p>
  * Warum? Damit es jemanden gibt, der zum Abschluss von Movements neue auslösen kann.
  * 9.5.17: Einer muss ja die Trafficsteuerung übernehmen. Und der muss updaten() und auch auf Events reagieren (z.B. Vehicle hat Ziel erreicht).
@@ -67,10 +67,7 @@ import java.util.Map;
  * Requests muessen auch gesplittet werden? Ich lass erstmal nur die schedules hier.
  * 27.2.18: TODO Dies System brauchts doch nur per group?
  * 14.3.19: Neues eigenes AutomoveSystem. Evtl. ist das TrafficSystem obselet, weil zu allgemein?
- * 24.11.20: Nicht obselet? Gerade erst ist TRAFFIC_REQUEST_LOADVEHICLE2 dazugekommen, um den RequestHandler in TrafficCommon zu ersetzen.
- * Nee, besser in TrafficWorldSystem.
- * <p>
- * <p>
+ * 24.11.20: Nicht obselet? Replaces RequestHandler in TrafficCommon zu ersetzen.
  * <p>
  * Created by thomass on 31.03.17.
  */
@@ -88,8 +85,6 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     //public Map<Integer, Schedule> schedules = new HashMap<Integer, Schedule>();
     //long lastscheduling = 0;
     //static int schedulinginterval = 2;
-    //27.10.21 die vehiclelist aus DefaultTrafficWorld hierhin. Erstmal static, spaeter ueber event?
-    public static /*ConfigNodeList*/ List<Vehicle> vehiclelist;
     public List<VehicleBuiltDelegate> genericVehicleBuiltDelegates = new ArrayList<VehicleBuiltDelegate>();
     // 19.11.23 ugly workaround for testing until we have requests in eventqueue
     public int vehiclesLoaded = 0;
@@ -111,14 +106,14 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
      * 31.10.23: After moving processing of TRAFFIC_REQUEST_LOADVEHICLE from BasicTravelScene to here,
      * data is missing. These are the fields formerly in BasicTravelScene with null values.
      */
-    public /*4.12.23ConfigNodeList*/List<SmartLocation> locationList;
+    public /*4.12.23ConfigNodeList*/ List<SmartLocation> locationList;
     public TrafficGraph groundNet;
     public SceneNode destinationNode;
     public NearView nearView;
 
     // 27.11.23: Knows vehicle already, should also no vehicle definitions and provide these. static for now, but
     // should be per event.
-    public static List<VehicleDefinition> knownVehicles=new ArrayList<VehicleDefinition>();
+    public static List<VehicleDefinition> knownVehicles = new ArrayList<VehicleDefinition>();
 
     /**
      * weil er neue Pfade im Graph hinzufuegt, lauscht er auch auf GRAPH_EVENT_PATHCOMPLETED, um diese wieder aus dem
@@ -267,9 +262,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         }
         if (request.getType().equals(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLES)) {
             // For initial and 'other' vehicles.
+            // Second parameter was groundnet once up to 2021 (replaced by graph layer?).
             TrafficGraph trafficGraph = (TrafficGraph) request.getPayloadByIndex(0);
-            // groundnet only for backward caompatibility. Should be replaces by graph layer
-            //27.12.21 GroundNet groundNet = (GroundNet) request.getPayloadByIndex(1);
 
             // terrain is needed (in 3D) for calculating elevation.
             boolean terrainavailable = false;
@@ -288,9 +282,13 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     //throw new RuntimeException("no trafficContext");
                     logger.warn("no trafficContext");
                 }
+                // 27.2.24: Currently we only have a single global vehicle list to load. Difficult to decouple via request/event due to additional vehicle properties.
+                // Provider seems a good compromise.
+                List<Vehicle> vehiclelist = TrafficHelper.getVehicleListByDataprovider();
+
                 // In server mode no user might be logged in yet, so maybe there is no TeleportComponent
                 // 19.11.23: TeleportComponent should be removed here in favor of EVENT_VIEWPOINT
-                TrafficHelper.launchVehicles(TrafficSystem.vehiclelist,
+                TrafficHelper.launchVehicles(vehiclelist,
                         trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
                         (UserSystem.getInitialUser() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
                         SphereSystem.getSphereNode()/*getWorld()*/, sphereProjections.backProjection,
@@ -301,16 +299,13 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         }
         if (request.getType().equals(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE)) {
             // 31.10.23:moved here from BasicTravelScene
-            // Loads a specific vehicle by name or the next not yet loaded from a the vehicle list
+            // Loads a specific vehicle by name or the next not yet loaded from a/the vehicle list
             logger.debug("Processing TRAFFIC_REQUEST_LOADVEHICLE request " + request);
-            // Nicht zu frueh laden, bevor es einen Graph zur Positionierung gibt.
-            // 26.3.20 Erstmal pruefen, wo das Vehicle hinsoll und dann evtl. das Groundnet vorab per Request laden.
-            //if (getGroundNet() == null) {
-            //  return false;
-            //}
-            // Zugriff auf Asynchelper ist nicht ganz sauber, but make sure alle scenery isType loaded before placing a vehicle.
-            // if (AsyncHelper.getModelbuildvaluesSize() > 0) {
-            if (AbstractSceneRunner.getInstance().futures.size() > 0) {
+            // We need a graph for placing the vehicle. Wait until its available. We can assume that also terrain will be available
+            // when a graph is available. Not sure this is really true always and not sure terrain is needed at all.
+            // graph appears sufficient. But is it always a groundnet??
+            if (groundNet == null) {
+                logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing groundnet");
                 return false;
             }
             String vehiclename = (String) request.getPayload().get("name");
@@ -331,6 +326,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     return false;
                 }*/
                 nextlocationindex++;
+                logger.debug("No location in request. Now using " + smartLocation);
             }
             /**
              * load eines Vehicle, z.B. per TRAFFIC_REQUEST_LOADVEHICLE. 24.11.20: Dafuer ist jetzt TRAFFIC_REQUEST_LOADVEHICLE2.
@@ -343,11 +339,10 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
              */
             String name = vehiclename;
 
-            //DefaultTrafficWorld.getInstance().vehiclelist
-            /*ConfigNodeList*/
-            List<Vehicle> vehiclelist = TrafficSystem.vehiclelist;
+            List<Vehicle> vehiclelist = TrafficHelper.getVehicleListByDataprovider();
 
             if (name == null) {
+                // no vehicle name in request, so get the next unloaded one.
                 for (int i = 0; i < vehiclelist.size(); i++) {
                     //SceneVehicle sv = sceneConfig.getVehicle(i);
                     if (TrafficHelper.findVehicleByName(vehiclelist.get(i).getName()) == null) {
@@ -641,9 +636,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
             // 30.10.21: Vehicles cannot be loaded immediately, because they need to wait for example for elevation.
             TrafficGraph trafficGraph = graph;
-            //no groundnet here
-            //GroundNet groundNet = null;
-            SystemManager.putRequest(new Request(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLES, new Payload(trafficGraph, null)));
+            SystemManager.putRequest(RequestRegistry.buildLoadVehicles(trafficGraph));
             return true;
         }
         return false;
@@ -682,7 +675,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
     }
 
-    public void addVehicleBuiltDelegate(VehicleBuiltDelegate vehicleBuiltDelegate){
+    public void addVehicleBuiltDelegate(VehicleBuiltDelegate vehicleBuiltDelegate) {
         genericVehicleBuiltDelegates.add(vehicleBuiltDelegate);
     }
 }

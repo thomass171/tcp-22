@@ -132,8 +132,11 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
             // muss tile kennen/laden um die initialposition und projection festzulegen.
             String basename = (String) request.getPayloadByIndex(0);
             List<Vehicle> vehicleList = (List<Vehicle>) request.getPayloadByIndex(1);
+            if (vehicleList == null) {
+                // just to be sure to avoid NPE
+                vehicleList = new ArrayList<Vehicle>();
+            }
             logger.debug("requested tile '" + basename + "' with " + vehicleList.size() + " vehicles");
-            TrafficSystem.vehiclelist = vehicleList;
 
             // 7.5.19: Anhand der initialPosition kann Terrain, groundnet, vehicles geladen werden und Projection gesetzt werden.
             // Das ist eigentlich unabhängig vom Avatar, denn dessen Position ist nicht klar, weils Vehicle erst später gibt.
@@ -170,12 +173,12 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                         List<NativeNode> xmlVehicles = xmlConfig.getVehicles();
                         if (xmlVehicles.size() > 0) {
                             logger.info("Replacing vehiclelist with list from config file");
-                            TrafficSystem.vehiclelist = new ArrayList<Vehicle>();
+                            vehicleList = new ArrayList<Vehicle>();
                             for (NativeNode nn : xmlVehicles) {
                                 String name = XmlHelper.getStringAttribute(nn, "name");
                                 boolean delayedload = XmlHelper.getBooleanAttribute(nn, XmlVehicleDefinition.DELAYEDLOAD, false);
                                 boolean automove = XmlHelper.getBooleanAttribute(nn, XmlVehicleDefinition.AUTOMOVE, false);
-                                TrafficSystem.vehiclelist.add(new Vehicle(name, delayedload, automove,
+                                vehicleList.add(new Vehicle(name, delayedload, automove,
                                         XmlHelper.getStringAttribute(nn, XmlVehicleDefinition.LOCATION),
                                         XmlHelper.getIntAttribute(nn, XmlVehicleDefinition.INITIALCOUNT, 0)));
                             }
@@ -211,6 +214,10 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                     }
                 }
             }
+            // 26.2.24: vehicleList was public static in TrafficSystem before. Provider might not be perfect, but better at least.
+            List<Vehicle> providerVehicleList = vehicleList;
+            SystemManager.putDataProvider("vehiclelistprovider", parameter -> providerVehicleList);
+
             if (initialPosition == null) {
                 //wait for async service response
                 logger.debug("no initial position yet. Waiting for information or no tile found");

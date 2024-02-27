@@ -20,8 +20,11 @@ public class RequestRegistry {
      * // 12.5.20: Doch, die brauchen ja auch ein richtige Elevation, also passend zum Client
      * 18.1.23: TRAFFIC_REQUEST_LOADVEHICLES loads vehicles from a list (additional to initial vehicle? No! There is only
      * one load vehicles when terrain is available!). Might also be triggered multiple when several graphs are loaded.
-     * Typically TRAFFIC_REQUEST_LOADVEHICLES is used to set up a scene.
-     * 31.10.23: TRAFFIC_REQUEST_LOADVEHICLE no longer deprecated.
+     * Typically TRAFFIC_REQUEST_LOADVEHICLES is used during set up of a scene to populate a traffic graph
+     * after it has been loaded. Still has no userid.
+     * 31.10.23: TRAFFIC_REQUEST_LOADVEHICLE no longer deprecated. Its triggered eg. by property "initialVehicle".
+     * 27.2.24: TRAFFIC_REQUEST_LOADVEHICLES second parameter deprecated groundnet removed. vehiclelist cannot be a parameter,
+     * because not all systems that fire this request (eg. GroundServicesSystem) know the vehicles.
      */
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLE = RequestType.register(4001, "TRAFFIC_REQUEST_LOADVEHICLE");
 
@@ -30,6 +33,9 @@ public class RequestRegistry {
     }
 
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLES = RequestType.register(4003, "TRAFFIC_REQUEST_LOADVEHICLES");
+    public static Request buildLoadVehicles(TrafficGraph trafficGraph) {
+        return new Request(TRAFFIC_REQUEST_LOADVEHICLES, new Payload(new Object[]{trafficGraph}));
+    }
 
     /**
      * Payload: String(icao),23.2.24: Intentionally without bundle and filename. The processor should have a kind of lookup by icao.

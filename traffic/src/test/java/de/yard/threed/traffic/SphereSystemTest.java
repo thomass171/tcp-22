@@ -20,6 +20,7 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
 import de.yard.threed.traffic.config.SceneConfig;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.trafficcore.model.Vehicle;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -85,8 +86,9 @@ public class SphereSystemTest {
         assertEquals(100, viewpoints.get(0).transform.position.getY(), 0.0001, "viewpoint[0].y");
         ViewPoint viewPoint = viewpoints.get(0);
 
-        assertEquals(1, TrafficSystem.vehiclelist.size(), "vehiclelist");
-        assertEquals("loc", TrafficSystem.vehiclelist.get(0).getName(), "vehiclelist[0].name");
+        List<Vehicle> vehiclelist = TrafficHelper.getVehicleListByDataprovider();
+        assertEquals(1, vehiclelist.size(), "vehiclelist");
+        assertEquals("loc", vehiclelist.get(0).getName(), "vehiclelist[0].name");
 
     }
 
