@@ -200,13 +200,17 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         // Kruecke zur Entkopplung des Modelload von AC policy.
         ModelLoader.processPolicy = getProcessPolicy();
 
-        InputToRequestSystem inputToRequestSystem = new InputToRequestSystem(new DefaultMenuProvider(getDefaultCamera(), () -> {
+        InputToRequestSystem inputToRequestSystem = new InputToRequestSystem(new DefaultMenuProvider(getMenuCamera(), (Camera camera) -> {
             /**
-             * 18.2.22 Locate menu at near plane like it was when FovElement was used. That should help to avoid menu coverage by cockpits.
+             * 18.2.22 Locate menu at near plane like it was when FovElement was used. That should help
+             * to avoid menu coverage by cockpits. But more efficient might be a deferred camera.
+             * Appropriate width/height depend from 'near' to have a semi screen width. Cannot use fix values
+             * but needs to calculate. width 0.07 is quite good for near value of 0.1, leading to quotient 1.43.
              */
             double width = 0.07;
-            double zpos = -getDefaultCamera().getNear() - 0.001;
+            double zpos = -camera.getNear() - 0.001;
             double buttonzpos = 0.0001;
+            width = camera.getNear() / 1.43;
 
             ControlPanel m = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(width, width * 0.7), zpos, buttonzpos, /*sc.*/getMenuItems(), Color.GREEN);
             ControlPanelMenu menu = new ControlPanelMenu(m);
@@ -592,6 +596,13 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
      */
     public ControlPanel buildVrControlPanel() {
         return new TrafficVrControlPanel(buttonDelegates);
+    }
+
+    /**
+     * The default based on default camera. Might be overridden if deferred camera is needed.
+     */
+    public Camera getMenuCamera() {
+        return getDefaultCamera();
     }
 
     /**

@@ -46,7 +46,7 @@ public class DefaultMenuProvider implements MenuProvider {
     }
 
     @Override
-    public Menu buildMenu() {
-        return menuBuilder.buildMenu();
+    public Menu buildMenu(Camera camera) {
+        return menuBuilder.buildMenu(camera);
     }
 }

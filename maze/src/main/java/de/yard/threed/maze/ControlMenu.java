@@ -16,6 +16,7 @@ public class ControlMenu implements ControlMenuBuilder {
      * <p>
      * Created by thomass on 23.02.17.
      */
+    @Override
     public GuiGrid buildControlMenu(Camera camera) {
 
         // 4.10.18: pyramid like for having more icons.

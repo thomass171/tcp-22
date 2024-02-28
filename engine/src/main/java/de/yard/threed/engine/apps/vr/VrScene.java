@@ -175,7 +175,7 @@ public class VrScene extends Scene {
         });
 
         //menuCycler = new MenuCycler(new MenuProvider[]{new VrMainMenuBuilder(this)});
-        menuCycler = new MenuCycler(new MenuProvider[]{new DefaultMenuProvider(getDefaultCamera(), () -> {
+        menuCycler = new MenuCycler(new MenuProvider[]{new DefaultMenuProvider(getDefaultCamera(), (Camera camera) -> {
             //7.10.19: Mal nicht auf near plane sondern 3 in der Tiefe (wegen VR Verzerrung?)
             //Dann ist es hinterm Balken. Erstmal versuchen.
             //VrMainMenu menu = new VrMainMenu(/*rs.getDefaultCamera(), VrScene.logger,*/ rs.menuitems/*, VrHelper.getController(1)*/);

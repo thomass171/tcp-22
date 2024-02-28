@@ -73,6 +73,9 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     private Integer userEntityId = null;
     private Point possiblestartdrag;
     private Integer draggedEntity = null;
+    // in some large scale setups (FG) the small z offsets of the default camera and guigrid just do not fit
+    // for those cases a dedicated deferred camera for menus can be established. For menu and control menu.
+    private Camera cameraForMenu = null;
 
     public InputToRequestSystem() {
         super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU}, new EventType[]{UserSystem.USER_EVENT_LOGGEDIN});
@@ -372,7 +375,8 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         } else {
             //menu = MainMenu.open(getDefaultCamera(), this);
             if (menuProvider != null) {
-                menu = menuProvider.buildMenu();//MainMenu.open(getDefaultCamera(), this);
+                Camera c = cameraForMenu == null ? Scene.getCurrent().getDefaultCamera() : cameraForMenu;
+                menu = menuProvider.buildMenu(c);
                 //27.1.22 menuProvider.getAttachNode().attach(menu.getNode());
                 menu.getNode().getTransform().setParent(menuProvider.getAttachNode());
             }
@@ -385,8 +389,9 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             controlmenu = null;
         } else {
             if (controlMenuProvider != null) {
-                controlmenu = controlMenuProvider.buildControlMenu(Scene.getCurrent().getDefaultCamera());
-                Scene.getCurrent().getDefaultCamera().getCarrier().attach(controlmenu);
+                Camera c = cameraForMenu == null ? Scene.getCurrent().getDefaultCamera() : cameraForMenu;
+                controlmenu = controlMenuProvider.buildControlMenu(c);
+                c.getCarrier().attach(controlmenu);
             }
         }
     }
@@ -448,6 +453,10 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
     public void setMenuProvider(MenuProvider menuProvider) {
         this.menuProvider = menuProvider;
+    }
+
+    public void setCameraForMenu(Camera cameraForMenu) {
+        this.cameraForMenu = cameraForMenu;
     }
 
     private void processPointer(Ray ray, boolean left) {

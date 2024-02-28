@@ -93,7 +93,7 @@ public class MenuCycler {
 
     public void cycle() {
         if (menu == null) {
-            menu = menuBuilders[index].buildMenu();
+            menu = menuBuilders[index].buildMenu(Scene.getCurrent().getDefaultCamera());
             //27.1.22 menuBuilders[index].getAttachNode().attach(menu.getNode());
             menu.getNode().getTransform().setParent(menuBuilders[index].getAttachNode());
             menuBuilders[index].menuBuilt();

@@ -18,6 +18,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.AmbientLight;
 import de.yard.threed.engine.Audio;
 import de.yard.threed.engine.AudioClip;
+import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.DirectionalLight;
 import de.yard.threed.engine.GenericGeometry;
 import de.yard.threed.engine.Geometry;
@@ -183,7 +184,7 @@ public class ShowroomScene extends Scene {
         } else {
             inputToRequestSystem.setControlMenuBuilder(new ShowroomControlMenuBuilder(this));
             inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
-            inputToRequestSystem.setMenuProvider(new DefaultMenuProvider(getDefaultCamera(), () -> {
+            inputToRequestSystem.setMenuProvider(new DefaultMenuProvider(getDefaultCamera(), (Camera camera) -> {
                 // not too large to avoid overlapping with regular control panel in non VR for avoiding click conflicts.
                 ControlPanel m = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(1.3, 0.7), -3, 0.01, menuitems, Color.LIGHTBLUE);
                 ControlPanelMenu menu = new ControlPanelMenu(m);

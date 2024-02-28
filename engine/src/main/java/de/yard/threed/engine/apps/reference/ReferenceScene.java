@@ -1059,9 +1059,9 @@ class MainMenuBuilder implements MenuProvider {
     }
 
     @Override
-    public Menu buildMenu() {
+    public Menu buildMenu(Camera camera) {
         // 6 Spalten und 3 Zeilen
-        GuiGrid menu = GuiGrid.buildForCamera(rs.getDefaultCamera(), 1, 6, 3, GuiGrid.GREEN_SEMITRANSPARENT, true);
+        GuiGrid menu = GuiGrid.buildForCamera(camera, 1, 6, 3, GuiGrid.GREEN_SEMITRANSPARENT, true);
         // In der Mitte rechts ein Button mit Image
         menu.addButton(/*new Request(rs.REQUEST_CLOSE), */4, 1, 1, Icon.ICON_CLOSE, () -> {
             rs.menuCycler.close();
@@ -1116,7 +1116,7 @@ class SecondMenuBuilder implements MenuProvider {
     }
 
     @Override
-    public Menu buildMenu() {
+    public Menu buildMenu(Camera camera) {
         menu = new SecondMenu(rs);
         return menu;
     }

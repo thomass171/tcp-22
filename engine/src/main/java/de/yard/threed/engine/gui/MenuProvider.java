@@ -1,6 +1,7 @@
 package de.yard.threed.engine.gui;
 
 import de.yard.threed.core.Point;
+import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.Ray;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.Transform;
@@ -13,8 +14,10 @@ public interface MenuProvider {
 
     /**
      * 7.2.22: To make that clear: Only builds the menu, but doesn't attach it to a parent/camera. For attaching getAttachNode() is provided.
+     * 28.2.24: camera added, might be a deferred camera
+     *
      */
-    Menu buildMenu();
+    Menu buildMenu(Camera camera);
 
     //besser Camera als SceneNode liefern, die brauchts für picking ray bei mouseclick.
     //wobei, besser vielleicht beides?
