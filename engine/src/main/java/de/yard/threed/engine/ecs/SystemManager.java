@@ -114,7 +114,6 @@ public class SystemManager {
         if (paused) {
             return;
         }
-        long starttime = Platform.getInstance().currentTimeMillis();
         // 21.3.19: Requests are processed before events without any special reason. And published to the net.
         requestQueue.process(busConnector);
         // Requests received from net. Requests not processed stay in the list.
@@ -158,6 +157,7 @@ public class SystemManager {
            /* if (AbstractSceneRunner.getInstance().getFrameCount()<10) {
                 getLogger().debug("Updating " + system.getTag());
             }*/
+            long starttime = Platform.getInstance().currentTimeMillis();
             system.frameinit();
             if (system.updatepergroup) {
                 processEntityGroups(system.getGroupId(), (entity, group) -> {
@@ -175,9 +175,11 @@ public class SystemManager {
             } else {
                 system.update(null, null, tpf);
             }
-            //}
+            long took = Platform.getInstance().currentTimeMillis() - starttime;
+            if (took > 500) {
+                getLogger().debug("update of " + system.getTag() + " took " +  took + " ms");
+            }
         }
-        //getLogger().debug("update took " + (Platform.getInstance().currentTimeMillis() - starttime) + " ms");
     }
 
     static private void processEvent(Event evt) {
