@@ -1,6 +1,7 @@
 package de.yard.threed.platform.webgl;
 
 import com.google.gwt.animation.client.AnimationScheduler;
+import com.google.gwt.user.client.Timer;
 import de.yard.threed.core.platform.Log;
 //import de.yard.threed.core.platform.NativeAsyncRunner;
 import de.yard.threed.core.platform.Platform;
@@ -37,10 +38,19 @@ public class WebGlInitChain extends NativeInitChain implements AnimationSchedule
     public void invokeLater(NativeInitChain runnable, int delay){
         // Prefer setTimeout over AnimationScheduler.requestAnimationFrame();
         // See https://stackoverflow.com/questions/38709923/why-is-requestanimationframe-better-than-setinterval-or-settimeout
-        // But for now AnimationScheduler is easier from GWT.
+        // 1.3.24: Switch from AnimationScheduler to timer. During init chain nothing is rendered, so it appears more
+        // efficient to interrupt some time and give concurrent threads more CPU. However, its not proved.
 
         //The recommended way, but no for VR. 7.3.23: Hmm: what does that mean? What is special about VR here.
-        AnimationScheduler animationScheduler = AnimationScheduler.get();
-        animationScheduler.requestAnimationFrame((WebGlInitChain)runnable);
+        //AnimationScheduler animationScheduler = AnimationScheduler.get();
+        //animationScheduler.requestAnimationFrame((WebGlInitChain)runnable);
+
+        Timer t = new Timer() {
+            public void run() {
+                runnable.execute();
+            }
+        };
+
+        t.schedule(100);
     }
 }

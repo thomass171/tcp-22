@@ -155,8 +155,9 @@ public class SystemManager {
         }
 
         for (EcsSystem system : systems) {
-            //if (system instanceof UpdateBasedEcsSystem) {
-            //   UpdateBasedEcsSystem ubs = (UpdateBasedEcsSystem) system;
+           /* if (AbstractSceneRunner.getInstance().getFrameCount()<10) {
+                getLogger().debug("Updating " + system.getTag());
+            }*/
             system.frameinit();
             if (system.updatepergroup) {
                 processEntityGroups(system.getGroupId(), (entity, group) -> {

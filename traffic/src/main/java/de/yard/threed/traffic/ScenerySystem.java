@@ -63,6 +63,11 @@ public class ScenerySystem extends DefaultEcsSystem {
         }
     }
 
+    @Override
+    public String getTag() {
+        return TAG;
+    }
+
     public void setTerrainBuilder(AbstractTerrainBuilder terrainBuilder) {
         this.terrainBuilder = terrainBuilder;
     }

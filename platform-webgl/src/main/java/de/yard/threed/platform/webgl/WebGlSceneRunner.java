@@ -111,7 +111,8 @@ public class WebGlSceneRunner extends AbstractSceneRunner implements NativeScene
 
         // don't continue using AnimationScheduler but switch to ThreeJs animationloop
         // updateRender(canvaspanel, cameras);
-        logger.info("Switch to ThreeJs animationloop");
+        logger.info("Switch to ThreeJs animationloop with " + ((PlatformWebGl) Platform.getInstance()).pendingHttps + " pending https("+
+                ((PlatformWebGl) Platform.getInstance()).https + " total)");
         GwtUtil.showStatus("");
         sceneRenderer.renderer.activeAnimationLoop();
 

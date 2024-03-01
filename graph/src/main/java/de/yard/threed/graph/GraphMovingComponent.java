@@ -58,7 +58,7 @@ public class GraphMovingComponent extends EcsComponent {
     //10.4.18: hilft aber nicht. Wieder inaktiv, weil er damit den Servicepoint nicht mehr findet.
     boolean antijitter = false;
     public boolean unscheduledmoving;
-    public RotationProvider rotationProvider=null;
+    public RotationProvider rotationProvider = null;
 
     /**
      * mover darf null sein, z.B. fuer Tests. Aber auch fuer etwas unsichtbares. visualizer natuerlich auch.
@@ -149,7 +149,7 @@ public class GraphMovingComponent extends EcsComponent {
     /**
      * 28.3.20: Ist schon praktisch um zu ermitteln, wo sich ein Vehicle befindet
      */
-    public Graph getGraph(){
+    public Graph getGraph() {
         return graph;
     }
 
@@ -163,7 +163,7 @@ public class GraphMovingComponent extends EcsComponent {
      * @param amount
      */
     public GraphPath moveForward(double amount) {
-        if (currentposition == null){
+        if (currentposition == null) {
             logger.error("no currentposition. Probably setGraph() not called");
             return null;
         }
@@ -185,6 +185,8 @@ public class GraphMovingComponent extends EcsComponent {
             } else {
                 stepsize=currentposition.currentedge.getLength() - currentposition.edgeposition;
                 currentposition.edgeposition += stepsize;*/
+            int iterations = 0;
+
             currentposition.edgeposition += amount;
             while (currentposition.edgeposition > currentposition.currentedge.len) {
                 // Ich stehe auf der to-Node. Nö, so kann man das nicht sagen.
@@ -201,8 +203,8 @@ public class GraphMovingComponent extends EcsComponent {
                 } else {
                     if (graphmovementdebuglog) {
                         logger.debug("new segment isType " + newsegment);
-                        if (newsegment.edge.getName().equals("")){
-                            newsegment=newsegment;
+                        if (newsegment.edge.getName().equals("")) {
+                            newsegment = newsegment;
                         }
                     }
                     adjustPositionOnNewEdge(switchnode, newsegment, currentposition.edgeposition - currentposition.currentedge.len);
@@ -216,6 +218,10 @@ public class GraphMovingComponent extends EcsComponent {
                     currentposition.edgeposition -= currentposition.currentedge.getLength();
                     currentposition.currentedge = newedge;
                     currentposition.reversegear = false;//newsegment.backward;*/
+                }
+                if (iterations++ > 10000) {
+                    logger.warn("aborting after " + iterations + " with amount " + amount + ". Might be not fitting to dimensions.");
+                    break;
                 }
             }
         }
@@ -232,7 +238,7 @@ public class GraphMovingComponent extends EcsComponent {
                     //      currentposition.edgeposition = currentposition.currentedge.len;
                     //27.4.18: das scheint nicht ganz sauber. Ich bin den Path zurueckgefahren und sollte doch am Anfang stehen.Bzw einfach stehen bleiben. 
                     //Darum reverse beachten und denn path nicht completen, denn vielleicht geh ich ja wieder vorwaerts.
-                    currentposition.edgeposition = (currentposition.reverseorientation) ? currentposition.currentedge.getLength():0;
+                    currentposition.edgeposition = (currentposition.reverseorientation) ? currentposition.currentedge.getLength() : 0;
                     /*27.4.18if (path != null) {
                         pathcompleted = movepathCompleted();
                     }*/
@@ -390,6 +396,7 @@ public class GraphMovingComponent extends EcsComponent {
     /**
      * muesste ich doch ohne auskommen. Dafer gibt es setPath mit startposition. Darum private.
      * 16.5.18: Obwohl das tricky sein kann, weil dann die Edge der startposition die erste im (smoothed) path sein muss.
+     *
      * @param currentposition
      */
     private void setCurrentposition(GraphPosition currentposition) {
@@ -410,6 +417,7 @@ public class GraphMovingComponent extends EcsComponent {
 
     /**
      * 9.1.19: Ist das nicht viel zu GroundServices spezifisch? Mal deprecated.
+     *
      * @param unscheduledmoving
      */
     @Deprecated
@@ -480,13 +488,13 @@ class GraphPathSelector implements GraphSelector {
         if (node.equals(seg.getEnterNode())) {
             // das ist ein backward
             //logger.debug("found backward at index "+index+",seg="+seg.edge.getName()+",node="+node.name);
-            if (index >0) {
+            if (index > 0) {
                 seg = path.getSegment(index - 1);
             } else {
                 // end reached
                 seg = null;
             }
-        }else {
+        } else {
             //logger.debug("found forward at index "+index+",seg="+seg.edge.getName()+",node="+node.name);
 
             if (index < path.getSegmentCount() - 1) {

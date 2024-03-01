@@ -56,6 +56,8 @@ public class PlatformWebGl extends Platform {
     // not the GWT devmode!
     public static boolean isDevmode;
     private Configuration configuration;
+    public int pendingHttps = 0;
+    public int https = 0;
 
     private PlatformWebGl(Configuration configuration) {
         this.configuration = configuration;
@@ -177,8 +179,11 @@ public class PlatformWebGl extends Platform {
         // with devmode->jetty/bundle apache
         //request.setRequestHeader("X-forcecpreflight","v");
         request.setResponseType(XMLHttpRequest.ResponseType.ArrayBuffer);
+        pendingHttps++;
+        https++;
         request.setOnReadyStateChange(xhr -> {
             if (xhr.getReadyState() == XMLHttpRequest.DONE) {
+                pendingHttps--;
                 // 2xx is considered ok
                 // response needs to be send in any case. Otherwise eg. bundle loading might wait infinitely. Codes can differ between devmode and
                 // compiled.

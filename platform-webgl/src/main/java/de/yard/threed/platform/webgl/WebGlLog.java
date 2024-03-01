@@ -1,7 +1,10 @@
 package de.yard.threed.platform.webgl;
 
 
+import com.google.gwt.i18n.client.DateTimeFormat;
 import de.yard.threed.core.platform.Log;
+
+import java.util.Date;
 
 /**
  * A very simple logger instead of the problematic GWT logger or similar cumbersome popup loggings.
@@ -55,7 +58,8 @@ public class WebGlLog implements Log {
     }
 
     private String buildMessage(String msg) {
-        return label + ":" + msg;
+        String s = DateTimeFormat.getFormat("HH:mm:ss").format(new Date());
+        return label + ":" + s + " " + msg;
     }
 
     @Override

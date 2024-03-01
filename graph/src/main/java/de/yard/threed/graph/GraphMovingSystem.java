@@ -108,6 +108,10 @@ public class GraphMovingSystem extends DefaultEcsSystem {
         //return changed;
     }
 
+    @Override
+    public String getTag() {
+        return TAG;
+    }
 
     public void moveForward(EcsEntity entity, GraphMovingComponent gmc, VelocityComponent vc, double amount) {
         GraphPath completedpath = gmc.moveForward(amount);
