@@ -417,7 +417,7 @@ public class JmeSpatial implements /*Native*/NativeTransform {
      */
     @Override
     public void setLayer(int layer) {
-        //logger.debug("setLayer " + layer);
+        //logger.debug("setLayer " + layer + " of " + getSceneNode().getName());
         Integer currentlayer = getLayerOfSpatial(spatial);
         if (currentlayer != null) {
             JmeCamera deferredcamera = JmeCamera.findCameraByLayer(currentlayer);

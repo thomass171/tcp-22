@@ -445,7 +445,7 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
 
     @Override
     public void setClearDepth(boolean clearDepth) {
-
+        //5.3.24: why isn't this needed?
     }
 
     @Override

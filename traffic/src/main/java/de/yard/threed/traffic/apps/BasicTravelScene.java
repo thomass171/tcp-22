@@ -92,6 +92,7 @@ import java.util.Map;
  * 4.10.21: MA37: Renamed TrafficCommon->BasicTravelScene und nicht mehr abstract. Auch standalone fuer tiles ohne FG.
  * This is also super class of TravelScene.
  * 14.11.23: never really existing 'help' and 'reset' removed. Could be added to menu.
+ * 05.03.24: control menu added to be prepared for touch screens.
  * Created on 28.09.18.
  */
 public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler */ {
@@ -125,6 +126,8 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     ControlPanel leftControllerPanel = null;
     public static String DEFAULT_USER_NAME = "Freds account name";
     public TrafficSystem trafficSystem;
+    // in non VR for menu and control menu
+    protected Camera cameraForMenu = null;
 
     @Override
     public void init(SceneMode sceneMode) {
@@ -200,23 +203,8 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         // Kruecke zur Entkopplung des Modelload von AC policy.
         ModelLoader.processPolicy = getProcessPolicy();
 
-        InputToRequestSystem inputToRequestSystem = new InputToRequestSystem(new DefaultMenuProvider(getMenuCamera(), (Camera camera) -> {
-            /**
-             * 18.2.22 Locate menu at near plane like it was when FovElement was used. That should help
-             * to avoid menu coverage by cockpits. But more efficient might be a deferred camera.
-             * Appropriate width/height depend from 'near' to have a semi screen width. Cannot use fix values
-             * but needs to calculate. width 0.07 is quite good for near value of 0.1, leading to quotient 1.43.
-             */
-            double width = 0.07;
-            double zpos = -camera.getNear() - 0.001;
-            double buttonzpos = 0.0001;
-            width = camera.getNear() / 1.43;
-
-            ControlPanel m = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(width, width * 0.7), zpos, buttonzpos, /*sc.*/getMenuItems(), Color.GREEN);
-            ControlPanelMenu menu = new ControlPanelMenu(m);
-            return menu;
-
-        }));
+        InputToRequestSystem inputToRequestSystem = new InputToRequestSystem();
+        // 5.3.24:Move keys to non VR?
         inputToRequestSystem.addKeyMapping(KeyCode.M, InputToRequestSystem.USER_REQUEST_MENU);
         //toggle auto move
         inputToRequestSystem.addKeyMapping(KeyCode.Alpha9, UserSystem.USER_REQUEST_AUTOMOVE);
@@ -235,7 +223,35 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             observer.attach(vrInstance.getController(1));
 
         } else {
-            // nothing special (menu,hud,controlpanel) for non VR?
+            // nothing special (menu,hud,controlpanel) for non VR? But no in server mode where there is no camera.
+            if (sceneMode.isClient()) {
+                inputToRequestSystem.setControlMenuBuilder(camera -> buildControlMenuForScene(camera));
+
+                // use dedicated camera for menu to avoid picking ray issues due to large/small dimensions conflicts
+                cameraForMenu = FovElement.getDeferredCamera(getDefaultCamera());
+
+                // might be null if not desired
+                inputToRequestSystem.setCameraForMenu(cameraForMenu);
+
+                // 5.3.24: menu only in non VR
+                inputToRequestSystem.setMenuProvider(new DefaultMenuProvider(cameraForMenu, (Camera camera) -> {
+                    /**
+                     * 18.2.22 Locate menu at near plane like it was when FovElement was used. That should help
+                     * to avoid menu coverage by cockpits. But more efficient might be a deferred camera.
+                     * Appropriate width/height depend from 'near' to have a semi screen width. Cannot use fix values
+                     * but needs to calculate. width 0.07 is quite good for near value of 0.1, leading to quotient 1.43.
+                     */
+                    double width = 0.07;
+                    double zpos = -camera.getNear() - 0.001;
+                    double buttonzpos = 0.0001;
+                    width = camera.getNear() / 1.43;
+
+                    ControlPanel m = ControlPanelHelper.buildSingleColumnFromMenuitems(new DimensionF(width, width * 0.7), zpos, buttonzpos, /*sc.*/getMenuItems(), Color.GREEN);
+                    ControlPanelMenu menu = new ControlPanelMenu(m);
+                    return menu;
+
+                }));
+            }
         }
 
 
@@ -599,13 +615,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     }
 
     /**
-     * The default based on default camera. Might be overridden if deferred camera is needed.
-     */
-    public Camera getMenuCamera() {
-        return getDefaultCamera();
-    }
-
-    /**
      * The default implementation for retrieving the vehicle list. Ends
      * up in a DataProvider by SphereSystem.
      * List could come from a tile?
@@ -621,4 +630,32 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         List<Vehicle> vehicleList = new ArrayList<Vehicle>();
         return vehicleList;
     }
+
+    /**
+     * The default non VR Control menu.
+     * Camera is a deferred camera defined during init.
+     * Might be overridden for custom menu.
+     */
+    public GuiGrid buildControlMenuForScene(Camera camera) {
+
+        GuiGrid controlmenu = GuiGrid.buildForCamera(camera, 2, 5, 1, Color.BLACK_FULLTRANSPARENT, true);
+
+        controlmenu.addButton(0, 0, 1, Icon.ICON_POSITION, () -> {
+            InputToRequestSystem.sendRequestWithId(new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{new IntHolder(0)})));
+        });
+        controlmenu.addButton(1, 0, 1, Icon.ICON_MENU, () -> {
+            InputToRequestSystem.sendRequestWithId(new Request(InputToRequestSystem.USER_REQUEST_MENU));
+        });
+        controlmenu.addButton(2, 0, 1, Icon.ICON_HORIZONTALLINE, () -> {
+            //TODO incMovementSpeed
+        });
+        controlmenu.addButton(3, 0, 1, Icon.ICON_PLUS, () -> {
+            //TODO incMovementSpeed
+        });
+        controlmenu.addButton(4, 0, 1, Icon.ICON_CLOSE, () -> {
+            InputToRequestSystem.sendRequestWithId(new Request(InputToRequestSystem.USER_REQUEST_CONTROLMENU));
+        });
+        return controlmenu;
+    }
+
 }

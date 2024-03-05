@@ -45,6 +45,7 @@ public class WebGlRenderer {
      */
     public void render(JavaScriptObject scene, List<NativeCamera> cameras) {
 
+        // TODO move dolog flag to scenerunner for general purpose
         boolean doLog = cnt % 200 == 0;
         cnt++;
 
@@ -87,7 +88,12 @@ public class WebGlRenderer {
                 WebGlCamera webglcamera = ((WebGlCamera) cameras.get(i));
                 if (webglcamera.enabled) {
                     if (doLog) {
-                        //logger.debug("Rendering camera " + i + " with layer " + webglcamera.getLayer() + " with clearmode " + webglcamera.getClearmode());
+                        /*List<NativeSceneNode> guigrids = WebGlScene.webglscene.getObjectByName("Gui Grid");
+                        if (guigrids.size()>0) {
+                            logger.debug("guigrid 0 of " + guigrids.size() + " with layer "+guigrids.get(0).getTransform().getLayer());
+                            logger.debug("dump:"+WebGlObject3D.dumpObject3D("  ", ((WebGlSceneNode) guigrids.get(0)).object3d));
+                        }
+                        logger.debug("Rendering camera " + i + " with layer " + webglcamera.getLayer() + " with clearmode " + webglcamera.getClearmode());*/
                     }
                     clear(renderer, webglcamera.getClearmode());
                     //logger.debug("dump:"+WebGlObject3D.dumpUp(webglcamera.object3d.object3d));

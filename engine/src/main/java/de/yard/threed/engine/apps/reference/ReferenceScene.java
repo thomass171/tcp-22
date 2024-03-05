@@ -135,7 +135,7 @@ public class ReferenceScene extends Scene {
 
         camera.getCarrier().getTransform().setPosition(INITIAL_CAMERA_POSITION);
         camera.lookAt(new Vector3(0, 0, 0));
-        // Zweite Camera fuer deferred rendering
+        // Second camera for deferred rendering
         if (usedeferred) {
             // There is no reason for using the main cameras near/far. Use sensitive values.
             //deferredcamera = new PerspectiveCamera(camera.getFov(), camera.getAspect(), camera.getNear(), camera.getFar());

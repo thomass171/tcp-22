@@ -108,15 +108,6 @@ public abstract class Scene {
         return s;
     }
 
-    /*4.4.16 private String dumpObject3D(String indent, Object3D object3d) {
-        String s = "";
-        s += indent + object3d.getClass().getSimpleName() + " at " + object3d.getPosition().dump("") + "\n";
-        /*THREED for (Object3D child : object.children) {
-            s += dumpObject3D(indent + "  ", child);
-        }* /
-        return s;
-    }*/
-
     public void removeLight() {
         light.clear();
     }

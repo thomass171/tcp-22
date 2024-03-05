@@ -247,6 +247,7 @@ public class WebGlObject3D implements NativeTransform {
     }
 
     /**
+     * Set parent of this node.
      * parent==null kommt an world. 7.5.21: das ist doch irgendwie Kappes
      * 1.11.19: As defined in NativeTransform, propagate layer of parent (but not for carrier).
      *
@@ -273,16 +274,16 @@ public class WebGlObject3D implements NativeTransform {
     }
 
     /**
-     * Muss im Mesh gesetzt werden, weil das ja gerendered wird. Layer isType an index, no bitmask.
+     * Set layer recursively. Layer is an index, no bitmask (index of a '1' that will be set in bitmask).
+     * Stops at a carrier to avoid overwriting the cameras layer and below.
+     * Muss im Mesh gesetzt werden, weil das ja gerendered wird.
      * Das Mesh ist ein Child von this(?). Zusaetzlich in node setzen, damit der getter geht (nicht jede Node hat ein Mesh).
-     * Arbeitet rekursiv. Aber mit nativem setLayerRecursive kann man die Camera ueberschreiben!
-     * TODO check: Also exists recursive in SceneNode!
      *
      * @param layer
      */
     @Override
     public void setLayer(int layer) {
-
+        //logger.debug("setLayer " + layer + " of " + getName());
         WebGlSceneNode sceneNode = (WebGlSceneNode) getSceneNode();
 
         setLayer(sceneNode.object3d.object3d, layer);
@@ -297,10 +298,11 @@ public class WebGlObject3D implements NativeTransform {
         //logger.debug("setLayer " + layer + " for node " + sceneNode.getName() + " and " + children.size() + " children");
         for (NativeTransform c : children) {
             //logger.debug("c.setLayer");
-            //c.getSceneNode().setLayer(layer);
-            c.setLayer(layer);
+            // 5.3.24 stop at carrier, where a different layer might start
+            if (!isCarrier()) {
+                c.setLayer(layer);
+            }
         }
-        //setLayerRecursive(object3d, layer);
     }
 
     /**
@@ -361,6 +363,16 @@ public class WebGlObject3D implements NativeTransform {
     public boolean isCarrier() {
         // might need a more reliable way to detect this. TODO use custom property
         return getName() != null && getName().toLowerCase().endsWith("carrier");
+    }
+
+    public static String dumpObject3D(String indent, WebGlObject3D object3d) {
+        var s = indent + "name=" + object3d.getName() + ",layer=" + object3d.getLayer() + ",mask=" + object3d.getLayerMask(object3d.object3d);
+        logger.debug(s);
+        //s += indent + object3d.getClass().getSimpleName() + " at " + object3d.getPosition().dump("") + "\n";
+        for (int i = 0; i < object3d.getChildCount(); i++) {
+            dumpObject3D(indent + "  ", ((WebGlObject3D) object3d.getChild(i)));
+        }
+        return s;
     }
 
     protected static native JavaScriptObject buildObject3D()  /*-{
@@ -523,20 +535,6 @@ public class WebGlObject3D implements NativeTransform {
             s = object3d.name + "->" + s;
         }
         return s;        
-    }-*/;
-
-    /**
-     * https://github.com/mrdoob/three.js/issues/10959
-     * Rekursiv aufs Mesh bringt nichts, weil das Mesh nicht die children hat.
-     * 15.11.19: Lieber nicht hier rekursiv, weil man damit den Layer einer Camra ueberschreiben kann.
-     * * TODO check: Also exists recursive in SceneNode!
-     */
-    static native void setLayerRecursive(JavaScriptObject object3d, int layer)  /*-{
-        object3d.layers.set(layer);
-        object3d.traverse( function(child) {
-            child.layers.set(layer);
-        });
-        //$wnd.logger.debug("object3d layers.mask="+object3d.layers.mask);
     }-*/;
 
     /**

@@ -59,6 +59,7 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
     //20.10.21Scene scene;
     //AirportConfig airport = null;
     SceneNode terrain = null;
+    public static String TAG = "FlatTerrainSystem";
 
     public FlatTerrainSystem() {
         super(new EventType[]{TeleporterSystem.EVENT_POSITIONCHANGED, TrafficEventRegistry.GROUNDNET_EVENT_LOADED, TrafficEventRegistry.EVENT_LOCATIONCHANGED, TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED});
@@ -167,6 +168,11 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
             // 28.10.21: TrafficGraph aus einem Tile wird im TrafficSystem geladen. 29.11.21: Jetzt nicht mehr
 
         }
+    }
+
+    @Override
+    public String getTag() {
+        return TAG;
     }
 
     private void loadTileByConfigFile(Bundle bundle, BundleResource tileResource) {

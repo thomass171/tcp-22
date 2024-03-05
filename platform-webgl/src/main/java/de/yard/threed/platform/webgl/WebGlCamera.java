@@ -76,6 +76,9 @@ public class WebGlCamera implements NativeCamera/*, NativeTransform*/ {
         return n;
     }
 
+    /**
+     * Just setting the flag. Depth buffer clearing is done in WebGLRenderer.clear().
+     */
     @Override
     public void setClearDepth(boolean clearDepth) {
         this.clearDepth = clearDepth;

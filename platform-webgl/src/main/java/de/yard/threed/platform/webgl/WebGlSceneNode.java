@@ -144,19 +144,4 @@ public class WebGlSceneNode implements NativeSceneNode {
         add(object3d,((WebGlCamera)camera).object3d);
 
     }*/
-
-    /**
-     * 31.10.19 wegen Rekursion mal hier versuchen.
-     * TODO check: really used/needed?
-     * @param object3d
-     * @param layer
-     */
-    static native void setLayerXX(JavaScriptObject object3d, int layer)  /*-{
-        object3d.layers.set(layer);
-        object3d.traverse( function(child) {
-            //$wnd.logger.debug("setLayer"+layer);
-            child.layers.set(layer);
-            //$wnd.logger.debug("object3d layers.mask="+child.layers.mask);
-        });
-    }-*/;
 }

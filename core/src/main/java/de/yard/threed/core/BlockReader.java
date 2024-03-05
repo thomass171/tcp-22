@@ -11,7 +11,6 @@ import java.util.Vector;
  * Accept text lines line by line and build a block after empty lines.
  */
 public class BlockReader {
-    static Log logger = Platform.getInstance().getLog(BlockReader.class);
 
     // Vector is synced
     List<List<String>> blocks = new Vector<List<String>>();
@@ -24,7 +23,7 @@ public class BlockReader {
     public void add(String inputLine) {
         if (StringUtils.length(inputLine) == 0) {
             if (debuglog) {
-                logger.debug("found block end");
+                Platform.getInstance().getLog(BlockReader.class).debug("found block end");
             }
             blocks.add(lines);
             lines = new ArrayList<String>();
