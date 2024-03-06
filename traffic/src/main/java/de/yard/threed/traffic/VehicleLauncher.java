@@ -208,14 +208,14 @@ public class VehicleLauncher {
      * @return
      */
     public static SceneNode getModelNodeFromVehicleNode(SceneNode vehicleNode) {
-        //31.3.20 jetzt rekursiv, weil durch proxynode/nearview und der ganze Huddel evtl. noch eine Ebene dazugekommen ist. Hoffentlich findet er nicht zu viele.
-        List<NativeSceneNode> result = vehicleNode.findNodeByName("zoffsetnode", true);
+        //31.3.20 Needs to be recursive, weil durch proxynode/nearview und der ganze Huddel evtl. noch eine Ebene dazugekommen ist. Hoffentlich findet er nicht zu viele.
+        List<SceneNode> result = vehicleNode.findNodeByName("zoffsetnode");
         if (result.size() != 1) {
             throw new RuntimeException("not exactly one zoffsetnode");
         }
-        SceneNode zoffsetNode = new SceneNode(result.get(0));
-        result = zoffsetNode.findNodeByName("basenode", false);
-        SceneNode baseNode = new SceneNode(result.get(0));
+        SceneNode zoffsetNode = result.get(0);
+        result = zoffsetNode.findNodeByName("basenode");
+        SceneNode baseNode = result.get(0);
         return baseNode;
     }
 

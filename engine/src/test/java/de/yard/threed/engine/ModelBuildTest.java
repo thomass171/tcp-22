@@ -68,13 +68,13 @@ public class ModelBuildTest {
 
         TestUtils.waitUntil(() -> {
             TestHelper.processAsync();
-            return modelLaunched.getValue() && destinationNodes.get(0).findNodeByName("models/loc.gltf", true).size() > 0;
+            return modelLaunched.getValue() && destinationNodes.get(0).findNodeByName("models/loc.gltf").size() > 0;
         }, 10000);
 
         assertEquals(1, destinationNodes.size());
         //rootnodename is full name instead of just egkk_tower
         log.debug(destinationNodes.get(0).dump("  ", 0));
-        NativeSceneNode modelNode = destinationNodes.get(0).findNodeByName("models/loc.gltf", true).get(0);
+        SceneNode modelNode = destinationNodes.get(0).findNodeByName("models/loc.gltf").get(0);
         assertNotNull(modelNode);
 
         List<String> modelsBuilt = AbstractSceneRunner.getInstance().systemTracker.getModelsBuilt();

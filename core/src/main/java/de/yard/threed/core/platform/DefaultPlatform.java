@@ -32,6 +32,9 @@ public class DefaultPlatform extends Platform {
 
     }
 
+    /**
+     * A node search by the platform. A custom search is in SceneNode.findNode[ByName]().
+     */
     @Override
     public List<NativeSceneNode> findSceneNodeByName(String name) {
         return null;

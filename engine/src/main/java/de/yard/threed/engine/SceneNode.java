@@ -3,7 +3,6 @@ package de.yard.threed.engine;
 import de.yard.threed.core.*;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.engine.ecs.DefaultBusConnector;
-import de.yard.threed.engine.platform.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -145,20 +144,9 @@ public class SceneNode {
 
     /**
      * Relative in Tree (recursive) or just on this level. But only below, never above.
-     * 3.1.18: Also check 'this'.
-     *
-     * @param name
-     * @return
      */
-    public List<NativeSceneNode> findNodeByName(String name, boolean recursive) {
-        List<NativeSceneNode> l;
-        if (name.equals(nativescenenode.getName())) {
-            l = new ArrayList<NativeSceneNode>();
-            l.add(nativescenenode);
-        } else {
-            l = Platform.findNodeByName(name, nativescenenode.getTransform(), recursive);
-        }
-        return l;
+    public List<SceneNode> findNodeByName(String name) {
+        return findNodeByName(name, this);
     }
 
     /**
@@ -272,5 +260,43 @@ public class SceneNode {
             return null;
         }
         return new Camera(cam);
+    }
+
+    /**
+     * Platform independent node search.
+     * Relativ im Tree (recursive) bzw nur auf dieser Ebene. Aber immer nur unterhalb von hier.
+     * 6.10.17: Bei Unity kann er hier auch destryte SceneNodes finden. Die liefern dann aber keine Childs.
+     * 24.3.18: Das ist die Nachbildung einer Subtree Suche laut MA22 für alle Platformen, auch die, die das selber könnten.
+     * 18.7.21: Moved here from EnginePlatform and then Platform.
+     * 3.3.24: Also check 'this'.
+     *
+     */
+    public static List<SceneNode> findNode(NodeFilter filter, SceneNode startnode) {
+        List<SceneNode> nodelist = new ArrayList<SceneNode>();
+        // 3.1.18: Also check 'this'.
+        if (filter.matches(startnode)) {
+            nodelist.add(startnode);
+        }
+        for (Transform child : startnode.getTransform().getChildren()) {
+            // sollte nicht null sein koennen. Das durfte ein Fehler irgendwo sein.
+            if (child != null) {
+                SceneNode csn = child.getSceneNode();
+                // 5.1.17: Wie kann es denn Transforms ohne SceneNode geben? TODO klaeren
+                if (csn != null) {
+                    nodelist.addAll(findNode(filter, csn));
+                }
+            }
+        }
+        return nodelist;
+    }
+
+    public static List<SceneNode> findNodeByName(String name, SceneNode startnode) {
+        List<SceneNode> result = findNode(new NodeFilter() {
+            @Override
+            public boolean matches(SceneNode n) {
+                return name.equals(n.getName());
+            }
+        }, startnode);
+        return result;
     }
 }

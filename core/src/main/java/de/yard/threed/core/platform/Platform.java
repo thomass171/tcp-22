@@ -345,35 +345,7 @@ public abstract class Platform {
      */
     public abstract void abort();
 
-    /**
-     * Relativ im Tree (recursive) bzw nur auf dieser Ebene. Aber immer nur unterhalb von hier.
-     * 6.10.17: Bei Unity kann er hier auch destryte SceneNodes finden. Die liefern dann aber keine Childs.
-     * 24.3.18: Das ist die Nachbildung einer Subtree Suche laut MA22 für alle Platformen, auch die, die das selber könnten.
-     * 18.7.21:Moved here from EnginePlatform. TODO needs a better location
-     *
-     * @param name
-     * @return
-     */
-    public static List<NativeSceneNode> findNodeByName(String name, NativeTransform startnode, boolean recursive) {
-        List<NativeSceneNode> nodelist = new ArrayList<NativeSceneNode>();
-        for (NativeTransform child : startnode.getChildren()) {
-            // sollte nicht null sein koennen. Das durfte ein Fehler irgendwo sein.
-            if (child != null) {
-                NativeSceneNode csn = child.getSceneNode();
-                // 5.1.17: Wie kann es denn Transforms ohne SceneNode geben? TODO klaeren
-                if (csn != null) {
-                    if (csn.getName() != null && csn.getName().equals(name)) {
-                        nodelist.add(csn);
-                    }
-                    if (recursive) {
-                        nodelist.addAll(findNodeByName(name, csn.getTransform(), recursive));
 
-                    }
-                }
-            }
-        }
-        return nodelist;
-    }
 
     /**
      * Muesste eigentlich generisch sein, wird z.Z. aber nur fuer GLTF verwendet.

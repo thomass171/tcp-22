@@ -438,10 +438,10 @@ public class ReferenceTests {
         logger.debug("\n" + graph);
         RuntimeTestUtil.assertTrue("World", StringUtils.startsWith(graph, "World"));
         for (SceneNode n : referenceScene.towerrechts) {
-            n.findNodeByName("xxxccvv", true);
+            n.findNodeByName("xxxccvv");
         }
         for (SceneNode n : referenceScene.tower2) {
-            n.findNodeByName("xxxccvv", true);
+            n.findNodeByName("xxxccvv");
         }
 
         List<NativeSceneNode> nodes = SceneNode.findByName("models/loc.gltf");
@@ -451,8 +451,9 @@ public class ReferenceTests {
         childNode = childNode.getTransform().getChildren().get(0).getSceneNode();
         RuntimeTestUtil.assertEquals("number loc children", 8, childNode.getTransform().getChildren().size());
 
-        SceneNode rechts1 = new SceneNode(referenceScene.towerrechts.get(0).findNodeByName("rechts 1", true).get(0));
+        SceneNode rechts1 = referenceScene.towerrechts.get(0).findNodeByName("rechts 1").get(0);
         RuntimeTestUtil.assertNotNull("", rechts1);
+        RuntimeTestUtil.assertEquals("", "rechts 1", rechts1.getName());
         RuntimeTestUtil.assertNotNull("", rechts1.getTransform().getParent());
         // wenn das mesh und name in der Original Node enthalten ist, muss es auch in der find Instanz sein.
         RuntimeTestUtil.assertNotNull("mesh", referenceScene.towerrechts.get(1).getMesh());
@@ -507,6 +508,8 @@ public class ReferenceTests {
             RuntimeTestUtil.assertEquals("inventory.z", -4.1, rs.inventory.getTransform().getPosition().getZ());
             RuntimeTestUtil.assertEquals("inventory.child.z", 0.001, area1884transform.getPosition().getZ());
         }
+        RuntimeTestUtil.assertEquals("controlMenu.layer", FovElement.LAYER, rs.controlMenu.getTransform().getLayer());
+
         // difficult to calculate world expected reference value
         // TestUtil.assertEquals("inventory.child.world.z", rs.INITIAL_CAMERA_POSITION.getZ() - 4.0 + 0.01, rs.inventory.getTransform().getChild(0).getWorldModelMatrix().extractPosition().getZ());
         SceneNode area1884 = new SceneNode(SceneNode.findByName("area1884").get(0));

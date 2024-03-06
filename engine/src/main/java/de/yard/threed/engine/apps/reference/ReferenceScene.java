@@ -447,7 +447,7 @@ public class ReferenceScene extends Scene {
      * <p/>
      * Liefert die Geometrie zurueck.
      */
-    private Geometry buildTower(String basename, ArrayList<SceneNode> towerlist, double baselength, double basewidth,
+    public static Geometry buildTower(String basename, ArrayList<SceneNode> towerlist, double baselength, double basewidth,
                                 double baseheight, Color[] color, boolean flatshaded) {
         SceneNode tower = null;
         //Mesh basetower = null;

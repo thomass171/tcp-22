@@ -145,8 +145,12 @@ public class PlatformHomeBrew extends DefaultPlatform {
 
     @Override
     public List<NativeSceneNode> findSceneNodeByName(String name) {
-        List<NativeSceneNode> l = findNodeByName(name, ((HomeBrewScene) nativeScene/*AbstractSceneRunner.getInstance().scene*/).getRootTransform(), true);
-        return l;
+        List<SceneNode> l = SceneNode.findNodeByName(name, new SceneNode(((HomeBrewScene) nativeScene/*AbstractSceneRunner.getInstance().scene*/).root));
+        List<NativeSceneNode> result = new ArrayList<NativeSceneNode>();
+        for (SceneNode n : l) {
+            result.add(n.nativescenenode);
+        }
+        return result;
     }
 
     /*29.12.17 private void buildNativeModelInternal(BundleResource filename, ResourcePath opttexturepath, ModelBuildDelegate delegate) {
