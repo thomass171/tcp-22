@@ -86,7 +86,12 @@ public class Icon implements GuiTexture {
     /**
      * Returns icon for character A-Z.
      * 11=L
-     * Mal ohne cache, das bringt doch ncihts,oder?
+     * 12=M
+     * 13=N
+     * 14=O
+     * 15=P
+     * 18=S
+     * For now without cache (will that be a benefit?)
      *
      * @param index
      * @return

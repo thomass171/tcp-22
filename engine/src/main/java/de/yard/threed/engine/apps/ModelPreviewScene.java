@@ -12,6 +12,7 @@ import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.DirectionalLight;
+import de.yard.threed.engine.Geometry;
 import de.yard.threed.engine.Input;
 import de.yard.threed.engine.KeyCode;
 import de.yard.threed.engine.Light;
@@ -53,6 +54,7 @@ public class ModelPreviewScene extends Scene {
     double rotationspeed = 10;
     SceneNode ground = null;
     public double elapsedsec = 0;
+    protected SceneNode redCube = null;
 
     /**
      *
@@ -89,6 +91,8 @@ public class ModelPreviewScene extends Scene {
         getDefaultCamera().lookAt(new Vector3(0, 0, 0), new Vector3(0, 0, 1));
 
         hud = Hud.buildForCameraAndAttach(getDefaultCamera(), 0);
+
+        redCube = new SceneNode(new Mesh(Geometry.buildCube(1.8, 1.8, 1.8), Material.buildBasicMaterial(Color.RED)));
 
         customInit();
 
@@ -166,6 +170,10 @@ public class ModelPreviewScene extends Scene {
         }
     }
 
+    /**
+     * Always returns a node, in case of error a 'redCube' node. This is to make sure the user sees
+     * a result.
+     */
     public BuildResult loadModel(String modelname) {
         String dir = null;
         String bundlename = null;
@@ -210,7 +218,11 @@ public class ModelPreviewScene extends Scene {
                     AbstractSceneRunner.instance.loadBundle(bundlename, (Bundle b_isnull) -> {
                         Bundle b = BundleRegistry.getBundle(bname);
                         BuildResult res = addModelFromBundle(b, mname);
-                        destination.attach(new SceneNode(res.getNode()));
+                        if (res.getNode() != null) {
+                            destination.attach(new SceneNode(res.getNode()));
+                        } else {
+                            destination.attach(redCube);
+                        }
                     });
                 } else {
                     result = addModelFromBundle(bundle, modelname);
@@ -218,7 +230,7 @@ public class ModelPreviewScene extends Scene {
             }
         } else {
             //7.7.21 FileSystemResource resource = FileSystemResource.buildFromFullString(dir + "/" + modelname);
-            result = null;//25.4.17 ModelFactory.buildModel(resource, false, 0, FGGlobals.getInstance().get_props(), null);
+            result = new BuildResult(redCube.nativescenenode);//25.4.17 ModelFactory.buildModel(resource, false, 0, FGGlobals.getInstance().get_props(), null);
         }
         return result;
     }

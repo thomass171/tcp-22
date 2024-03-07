@@ -105,7 +105,7 @@ public class LoaderGLTF {
      * New async trigger point
      */
     public static void load(ResourceLoader resourceLoader, GeneralParameterHandler<PortableModelList> delegate) {
-        logger.debug("Launching gltf load");
+        logger.debug("Launching gltf load of " + resourceLoader.nativeResource.getFullQualifiedName());
         resourceLoader.loadResource(new AsyncJobDelegate<AsyncHttpResponse>() {
             @Override
             public void completed(AsyncHttpResponse response) {
