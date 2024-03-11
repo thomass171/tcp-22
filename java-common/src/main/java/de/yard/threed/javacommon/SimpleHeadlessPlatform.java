@@ -12,6 +12,7 @@ import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.resource.URL;
+import de.yard.threed.outofbrowser.FileSystemResource;
 import de.yard.threed.outofbrowser.SimpleBundleResolver;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -20,6 +21,7 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -175,10 +177,21 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
 
     @Override
     public NativeTexture buildNativeTexture(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> parameters) {
-        // Even its not used check whether it can be load. Important in tests
-        BufferedImage li = JavaBundleHelper.loadBundleTexture(filename);
-        if (li == null) {
-            return null;
+        // Even its not used check whether it can be load. Important in tests.
+        if (filename.isHttp()) {
+            BufferedImage li = JavaBundleHelper.loadBundleTexture(filename);
+            if (li == null) {
+                return null;
+            }
+        } else {
+            // But don't use image loader, which is quite slow.
+            FileSystemResource resource = FileSystemResource.buildFromFullString(filename.getAsString());
+            try {
+                FileReader.readFully(FileReader.getFileStream(resource));
+            } catch (IOException e) {
+                logger.error("failed to load texture: " + e.getMessage());
+                return null;
+            }
         }
         return new DummyTexture(filename.getUrl());
 
@@ -283,14 +296,14 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     @Override
     public boolean getKeyDown(int keycode) {
         // no real input, but can be used for testing
-        boolean found = mockedKeyDownInput.remove(new Integer(keycode));
+        boolean found = mockedKeyDownInput.remove(Integer.valueOf(keycode));
         return found;
     }
 
     @Override
     public boolean getKeyUp(int keycode) {
         // no real input, but can be used for testing
-        boolean found = mockedKeyUpInput.remove(new Integer(keycode));
+        boolean found = mockedKeyUpInput.remove(Integer.valueOf(keycode));
         return found;
     }
 

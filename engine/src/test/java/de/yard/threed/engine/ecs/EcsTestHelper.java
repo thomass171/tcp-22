@@ -31,19 +31,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * An ECS extension of the standard EngineTestFactory.initPlatformForTest().
  *
  * Really needed? 16.2.23: Since its getting extended further: yes.
+ * 9.3.24: But the setup methods are in no way ECS specific. Set to deprecated
  * <p>
  * 21.3.20
  */
 public class EcsTestHelper {
 
+    @Deprecated
     public static void setup(InitMethod initMethod, Properties properties) {
         setup(initMethod, properties, new String[]{"engine"});
     }
 
+    @Deprecated
     public static void setup(InitMethod initMethod, String... bundles) {
         setup(initMethod, new Properties(), bundles);
     }
 
+    @Deprecated
     public static void setup(InitMethod initMethod, Properties properties, String... bundles) {
         SimpleHeadlessPlatformFactory platformFactory = new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting());
         EngineTestFactory.initPlatformForTest(bundles, platformFactory, initMethod, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties));

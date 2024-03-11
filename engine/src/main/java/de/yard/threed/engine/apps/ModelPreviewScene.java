@@ -137,6 +137,7 @@ public class ModelPreviewScene extends Scene {
         if (model != null) {
             SceneNode.removeSceneNode(model);
         }
+        redCube.getTransform().setPosition(new Vector3(1000,1000,1000));
         addModel();
         if (model != null) {
             model.getTransform().setScale(new Vector3(scale, scale, scale));
@@ -222,6 +223,7 @@ public class ModelPreviewScene extends Scene {
                             destination.attach(new SceneNode(res.getNode()));
                         } else {
                             destination.attach(redCube);
+                            redCube.getTransform().setPosition(new Vector3());
                         }
                     });
                 } else {
@@ -231,6 +233,7 @@ public class ModelPreviewScene extends Scene {
         } else {
             //7.7.21 FileSystemResource resource = FileSystemResource.buildFromFullString(dir + "/" + modelname);
             result = new BuildResult(redCube.nativescenenode);//25.4.17 ModelFactory.buildModel(resource, false, 0, FGGlobals.getInstance().get_props(), null);
+            redCube.getTransform().setPosition(new Vector3());
         }
         return result;
     }
