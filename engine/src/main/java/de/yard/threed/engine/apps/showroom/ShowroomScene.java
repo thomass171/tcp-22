@@ -403,7 +403,7 @@ public class ShowroomScene extends Scene {
                         spinnedValue.setValue(value.intValue());
                     }
                     return Double.valueOf(spinnedValue.getValue());
-                })));
+                }), Color.RED));
 
         // mid line: a indicator
         indicator = Indicator.buildGreen(0.03);
@@ -479,14 +479,14 @@ public class ShowroomScene extends Scene {
         ControlPanel cp = new ControlPanel(new DimensionF(ControlPanelWidth, rows * ControlPanelRowHeight), mat, 0.01);
 
         // top line: property control for yvroffset
-        cp.add(new Vector2(0, ControlPanelHelper.calcYoffsetForRow(1, rows, ControlPanelRowHeight)), new SpinnerControlPanel(rowsize, ControlPanelMargin, mat, new NumericSpinnerHandler(0.1, new VrOffsetWrapper())));
+        cp.add(new Vector2(0, ControlPanelHelper.calcYoffsetForRow(1, rows, ControlPanelRowHeight)), new SpinnerControlPanel(rowsize, ControlPanelMargin, mat, new NumericSpinnerHandler(0.1, new VrOffsetWrapper()), Color.RED));
         // mid line
         cp.add(new Vector2(0, ControlPanelHelper.calcYoffsetForRow(0, rows, ControlPanelRowHeight)), new SpinnerControlPanel(rowsize, ControlPanelMargin, mat,
                 new SelectSpinnerHandler(new String[]{"FPS", "Teleport"}, value -> {
                     logger.debug("Toggle teleport");
                     //TODO
                     return null;
-                })));
+                }), Color.RED));
 
         return cp;
     }

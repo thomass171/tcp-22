@@ -14,10 +14,12 @@ public class SpinnerControlPanel extends ControlPanel {
     ControlPanelArea textArea;
     TextTexture textTexture;
     SpinnerHandler handler;
+    Color textColor;
 
-    public SpinnerControlPanel(DimensionF size, double margin, Material mat, SpinnerHandler handler) {
+    public SpinnerControlPanel(DimensionF size, double margin, Material mat, SpinnerHandler handler, Color textColor) {
         super(new DimensionF(size.width, size.height), mat, 0.01);
         this.handler = handler;
+        this.textColor = textColor;
 
         double m2 = 2 * margin;
         double h = size.height;
@@ -36,7 +38,7 @@ public class SpinnerControlPanel extends ControlPanel {
         textTexture = new TextTexture(Color.LIGHTGRAY);
         textArea = addArea(new Vector2(0, 0), new DimensionF(textareawidth, size.height), null);
         // empty string fails due to length 0
-        textArea.setTexture(textTexture.getTextureForText(" "/*""961"*/, Color.RED));
+        textArea.setTexture(textTexture.getTextureForText(" "/*""961"*/, textColor));
         refresh();
 
         addArea(new Vector2((textareawidth / 2 + iconareasize / 2), 0), new DimensionF(iconsize, iconsize), () -> {
@@ -51,7 +53,7 @@ public class SpinnerControlPanel extends ControlPanel {
     private void refresh() {
         if (handler != null) {
             String value = handler.getValue();
-            textArea.setTexture(textTexture.getTextureForText(value, Color.RED));
+            textArea.setTexture(textTexture.getTextureForText(value, textColor));
         }
     }
 

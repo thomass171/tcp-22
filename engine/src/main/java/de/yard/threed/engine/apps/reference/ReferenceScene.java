@@ -372,7 +372,7 @@ public class ReferenceScene extends Scene {
                         spinnedValue.setValue(value.intValue());
                     }
                     return Double.valueOf(spinnedValue.getValue());
-                })));
+                }), Color.RED));
 
         // mid line: a indicator
         indicator = Indicator.buildGreen(0.03);

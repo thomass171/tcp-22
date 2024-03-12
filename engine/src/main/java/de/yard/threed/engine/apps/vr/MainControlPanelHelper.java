@@ -37,7 +37,7 @@ public class MainControlPanelHelper {
 
         // top line: property yontrol
         cp.add(new Vector2(0, PropertyControlPanelRowHeight / 2 + PropertyControlPanelRowHeight / 2),
-                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat,null));
+                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat,null, Color.RED));
 
         // mid line: a indicator
         Indicator indicator = Indicator.buildGreen(0.03);
