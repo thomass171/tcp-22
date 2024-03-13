@@ -206,10 +206,16 @@ public class GuiGrid extends SceneNode implements Menu {
         }
         if (bg != null) {
             for (GridButton bn : buttons) {
+                long startTime = Platform.getInstance().currentTimeMillis();
                 // not the button node itself but the fov element will be hit
                 List<NativeCollision> intersects = pickingray.getIntersections(bn.element, false);
-                if (intersects.size() > 0) {
+                long took = Platform.getInstance().currentTimeMillis() - startTime;
+                // there is no indicator currently that ray intersection is a performance bottleneck
+                if (took > 50) {
+                    logger.warn("intersection detection took " + took + " ms");
+                }
 
+                if (intersects.size() > 0) {
                     logger.debug("button clicked ");
                     if (bn.buttonDelegate != null) {
                         bn.buttonDelegate.buttonpressed();
@@ -287,6 +293,7 @@ public class GuiGrid extends SceneNode implements Menu {
     public static GuiGrid buildForCamera(Camera camera, int mode, int columns, int rows, Color background) {
         return buildForCamera(camera, mode, columns, rows, background, false);
     }
+
     /**
      * Alternative zu BrowsMenu. Used outside tcp-22.
      */

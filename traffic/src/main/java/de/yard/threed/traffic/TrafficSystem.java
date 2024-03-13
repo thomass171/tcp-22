@@ -396,7 +396,9 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             TeleportComponent teleportComponent = (TeleportComponent) evt.getPayloadByIndex(1);
             // Es muss nicht unbedingt eine TeleportComponent geben.
             if (teleportComponent != null) {
+                // 13.3.24: This setting here might be too early. Its again set in attachAvatarToVehicle()
                 int captainpos = teleportComponent.findPoint("Captain");
+                logger.debug("captainpos=" + captainpos);
                 if (captainpos != -1) {
                     teleportComponent.stepTo(captainpos);
                 }
@@ -535,8 +537,14 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         // start in locomotive. Weil dann der TeleporterSystem.init schon gelaufen ist, muss auch "needsupdate" gesetzt werden, darum stepTo().
         // 16.2.22 Better start at some external overview point? The user can then teleport to a vehicle. So don't change teleport position?
         // 18.2.22 But if the user requests a vehicle load, its more convenient to teleport it to the cockpit after load. So for now keep auto teleport and add a flag later.
-        avatarpc.stepTo(avatarpc.getPointCount() - 1);
-
+        // 13.3.24: Agreed, especially for a time to time user its more convenient. But make sure to really use "Captain" position.
+        int captainpos = avatarpc.findPoint("Captain");
+        logger.debug("attachAvatarToVehicle:captainpos=" + captainpos);
+        if (captainpos != -1) {
+            avatarpc.stepTo(captainpos);
+        } else {
+            avatarpc.stepTo(avatarpc.getPointCount() - 1);
+        }
     }
 
     public void addGraphFactory(String name, AbstractTrafficGraphFactory graphFactory) {

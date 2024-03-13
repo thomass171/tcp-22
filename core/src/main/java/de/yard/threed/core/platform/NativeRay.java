@@ -21,7 +21,8 @@ public interface NativeRay {
 
     /**
      * Returns all collisions of the ray without considering any subgraph. Might be inefficient, but meets best the
-     * opportunities of all platforms.
+     * opportunities of all platforms. ThreeJs can do a intersection check on specific objects(meshes), but apparently for
+     * the price of keeping geometries in memory.
      * TODO: introduce a collider scene node marker to make it more efficient.
      */
     List<NativeCollision> getIntersections();

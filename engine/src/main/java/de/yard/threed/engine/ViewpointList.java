@@ -103,7 +103,7 @@ public class ViewpointList {
 
     public int findPoint(String label) {
         for (int i = 0; i < points.size(); i++) {
-            if (points.get(i).label.equals(label)) {
+            if (points.get(i).label != null && points.get(i).label.equals(label)) {
                 return i;
             }
         }

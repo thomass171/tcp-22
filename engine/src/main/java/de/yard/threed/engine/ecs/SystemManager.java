@@ -177,7 +177,8 @@ public class SystemManager {
             }
             long took = Platform.getInstance().currentTimeMillis() - starttime;
             if (took > 500) {
-                getLogger().debug("update of " + system.getTag() + " took " +  took + " ms");
+                // should be warn as it probably leads to bad user experience
+                getLogger().warn("update of " + system.getTag() + " took " +  took + " ms");
             }
         }
     }
