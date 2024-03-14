@@ -54,7 +54,7 @@ public class Ray {
      */
     @Deprecated
     public List<NativeCollision> getIntersections(SceneNode model, boolean recursive) {
-        List<NativeCollision> collisions = ray.getIntersections();
+        List<NativeCollision> collisions = getIntersections();
         return extractModelsHit(model, collisions, recursive);
     }
 
@@ -85,13 +85,22 @@ public class Ray {
     }
 
     /**
-     * Einfach alle Collisions ermitteln, ohne einen (Teil)Graph zu uebergeben, in dem gesucht wird. Ist mehr Unity Like.
-     * Und manchmal auch praktischer.
+     * Detect all intersections without considering sub graphs.
+     * More Unity Like.
+     * See comments in {@link NativeRay}.
      *
      * @return
      */
     public List<NativeCollision> getIntersections() {
-        return ray.getIntersections();
+        long startTime = Platform.getInstance().currentTimeMillis();
+        List<NativeCollision> result = ray.getIntersections();
+        long took = Platform.getInstance().currentTimeMillis() - startTime;
+        // there is no indicator currently that ray intersection is a performance bottleneck.
+        // But now there seems to be an indicator. Eg. just clicking in the sky in TravelScene. 14.3.24: 50->20
+        if (took > 20) {
+            logger.warn("intersection detection took " + took + " ms");
+        }
+        return result;
     }
 
     private List<NativeCollision> extractModelsHit(SceneNode model, List<NativeCollision> collisions, boolean recursive) {

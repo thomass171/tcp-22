@@ -8,18 +8,20 @@ import de.yard.threed.engine.platform.common.*;
 
 
 /**
- * "Sehr schnelles" Versetzen eines Objektes (EcsEntity). Anders als ein MovingSystem, das auf einer Geschwindigkeitskomponente basiert.Irgendwie ist das alles zwar ähnlich,
+ * Rapid movement of an object (EcsEntity).
+ * Anders als ein MovingSystem, das auf einer Geschwindigkeitskomponente basiert.Irgendwie ist das alles zwar ähnlich,
  * aber so sehr ist es doch nicht dasselbe. Bei der animated teleport sieht das wohl so ähnlich aus, aber trotzdem ist es doch deutlich anders.
  * <p>
- * Stammt aus dem StepController. Siehe auch TeleportComponent.
+ * From StepController. See also TeleportComponent.
  * Aehnlich zum deprecated ViewpointSystem. Um sich umzusehen, brauchts noch ein Observersystem?
  * Die TeleportComponent befindet sich typischerweise in einem Avatar Entity. NeeNee, eher Vehicle?
  * <p>
- * 12.10.19: Obacht Denkfehler!  Die TCs haengen nicht - unbedingt - am Avatar, schon gar nicht mehrere, sondern an Z.B Vehicles. Der Avatar wie auch Vehicle haben ihre TC um sich
- * irgendwohin zu positionieren. Die TC des Avatar wird erweitert um Viewpoints eines Vehicle, um z.B. im Cockpit zu sitzen oder einen Seitenblick aufs Vehicle zu haben.
- * Navigator hat z.B. eine TC mit den ganzen POIs.
+ * 12.10.19: Heads up! TeleportComponents are not always attached to the avatar, and never multiple, but eg. to vehicles.
+ * Avatar and vehicle have a TC to position itself somewhere.
+ * The TC of a avatar is extended by viewpoints of a vehicle, eg. for sitting in a cockpit or for a sideview on the vehicle.
+ * Navigator eg. has a TC with all world POIs.
  * <p>
- * Hier kennt er nur eine aktuelle, was zur sauberen Trennung ueber eine Id gehen sollte.
+ * Here only the current TeleportComponent is known (toggled by ctrl-t). Should use id for better decoupling.
  * Created by thomass on 09.01.17.
  */
 public class TeleporterSystem extends DefaultEcsSystem {

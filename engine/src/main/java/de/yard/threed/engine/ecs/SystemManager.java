@@ -160,7 +160,7 @@ public class SystemManager {
             long starttime = Platform.getInstance().currentTimeMillis();
             system.frameinit();
             if (system.updatepergroup) {
-                processEntityGroups(system.getGroupId(), (entity, group) -> {
+                int cnt = processEntityGroups(system.getGroupId(), (entity, group) -> {
                     //6.4.17: init der group geht erst jetzt, um zur Runtime hinzugekommene auch zu handeln.
                     // TODO Das mit dem init ist anfaellig fuer vergessen. Geht das nicht anders.
                     // Bloed ist es vor allem, weil es erst im Folgeframe gemacht wird und eine neue ScendeNode dann kurzzeitig an falscher position ist.
@@ -171,14 +171,19 @@ public class SystemManager {
                             }*/
                     system.update(entity, group, tpf);
                 });
-
+                long took = Platform.getInstance().currentTimeMillis() - starttime;
+                // 14.3.24: Threshold 500->100
+                if (took > 100) {
+                    // should be warn as it probably leads to bad user experience
+                    getLogger().warn("update of " + system.getTag() + " for " + cnt + " groups/entities took " + took + " ms");
+                }
             } else {
                 system.update(null, null, tpf);
-            }
-            long took = Platform.getInstance().currentTimeMillis() - starttime;
-            if (took > 500) {
-                // should be warn as it probably leads to bad user experience
-                getLogger().warn("update of " + system.getTag() + " took " +  took + " ms");
+                long took = Platform.getInstance().currentTimeMillis() - starttime;
+                if (took > 100) {
+                    // should be warn as it probably leads to bad user experience
+                    getLogger().warn("update of " + system.getTag() + " took " + took + " ms");
+                }
             }
         }
     }
@@ -347,7 +352,8 @@ public class SystemManager {
         return EcsHelper.filterList(entities, filter);
     }
 
-    static public synchronized void processEntityGroups(String groupid, EcsGroupHandler ecsGroupHandler) {
+    static public synchronized int processEntityGroups(String groupid, EcsGroupHandler ecsGroupHandler) {
+        int cnt = 0;
         for (EcsEntity entity : entities) {
             // erstmal dynamsich matchen.
                     /*EcsGroup group = getMatchingGroup(ubs, entity);
@@ -361,9 +367,10 @@ public class SystemManager {
             EcsGroup group = entity.getGroup(groupid/*system.getGroupId()*/);
             if (group != null) {
                 ecsGroupHandler.processGroups(entity, group);
-
+                cnt++;
             }
         }
+        return cnt;
     }
 
     static public synchronized void putDataProvider(String name, DataProvider provider) {

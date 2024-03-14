@@ -17,7 +17,7 @@ import java.util.List;
  * Gibt Überschneidung mit ViewpointComponent.
  * 19.10.17: Auch fuer VR. Um die Camera zu bewegen braucht man noch ObserverSystem.
  * 19.2.18:Jetzt mehrere Groups, jede mit eigenem Index. Das ist doch Quatsch. Das System muss mehrere Entities unterscheiden.
- * 15.10.19:Siehe unbedingt TeleporterSystem!
+ * 15.10.19: See TeleporterSystem!
  * <p>
  * <p>
  * Created by thomass on 09.01.17.
