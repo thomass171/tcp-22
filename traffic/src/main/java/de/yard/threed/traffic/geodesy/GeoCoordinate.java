@@ -11,7 +11,7 @@ import de.yard.threed.core.Vector3;
  * https://en.wikipedia.org/wiki/Height_above_sea_level
  * <p>
  * And note the difference between geocentric and geodetic!
- *
+ * 14.3.24: elevation made optional for cases where it is unknown/undefined.
  *
  * <p>
  * This class is an independent simplification.
@@ -21,19 +21,24 @@ import de.yard.threed.core.Vector3;
 public class GeoCoordinate extends LatLon {
 
     // height above the ellipsoid in meter
-    double elevationM;
+    Double elevationM;
+
+    public GeoCoordinate(Degree lat, Degree lon) {
+        super(lat, lon);
+        this.elevationM = null;
+    }
 
     public GeoCoordinate(Degree lat, Degree lon, double elevation) {
         super(lat, lon);
         this.elevationM = elevation;
     }
 
-    public GeoCoordinate(double latitudeRad , double longitudeRad, double elevationM) {
-        super(latitudeRad,longitudeRad);
+    public GeoCoordinate(double latitudeRad, double longitudeRad, double elevationM) {
+        super(latitudeRad, longitudeRad);
         this.elevationM = elevationM;
     }
 
-    public double getElevationM(){
+    public Double getElevationM() {
         return elevationM;
     }
 
@@ -43,16 +48,17 @@ public class GeoCoordinate extends LatLon {
         return new GeoCoordinate(latLon.latRad, latLon.lonRad,0.0);
     }*/
 
-    public static GeoCoordinate fromLatLon(LatLon latLon, double elevationM){
-        return new GeoCoordinate(latLon.latRad, latLon.lonRad,elevationM);
+    public static GeoCoordinate fromLatLon(LatLon latLon, double elevationM) {
+        return new GeoCoordinate(latLon.latRad, latLon.lonRad, elevationM);
     }
 
     /**
      * 20.12.21:Das ist doch ne Kruecke.
+     *
      * @param e
      */
     @Deprecated
     public void setElevationM(double e) {
-        this.elevationM=e;
+        this.elevationM = e;
     }
 }

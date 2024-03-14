@@ -15,6 +15,8 @@ import de.yard.threed.traffic.geodesy.MapProjection;
 import de.yard.threed.traffic.geodesy.SimpleMapProjection;
 
 /**
+ * A wrapper for a {@link FlightRoute} graph.
+ *
  * Ein Graph mit GraphPath von einer Takeoff Runway (quasi erste Edge des Graph)
  * bis zu
  * - einer landing runway (quasi letzte Edge des Graph)
@@ -23,10 +25,13 @@ import de.yard.threed.traffic.geodesy.SimpleMapProjection;
  * 29.2.2020: Obwohl es doch nur ein Graph ist, oder?
  * Es muesste noch vermerkt werden, wo das Ende des Graph ist (Runway,Holding,Orbit) um zu wissen, ob er noch fortgesetzt werden muss, z.B.
  * weil es für die Destination noch keine Elevation gibt.
+ *
+ * The end of the graph might be undetermined (Runway,Holding,Orbit) at the beginning and be determined during flight, eg. if destination
+ * elevation or landing runway is not yet known. Even 'destination' is not required at the beginning, when the route ends in a holding.
  * <p>
  * Created on 21.11.18.
  */
-public class FlightRoute {
+public class FlightRouteGraph {
     public Destination nextDestination;
     Graph graph;
     GraphPath path;
@@ -43,7 +48,7 @@ public class FlightRoute {
      * @param takeoffedge
      * @param touchdownedge
      */
-    public FlightRoute(Graph graph, GraphEdge takeoffedge, GraphEdge touchdownedge) {
+    public FlightRouteGraph(Graph graph, GraphEdge takeoffedge, GraphEdge touchdownedge) {
         this.graph = graph;
         this.takeoffedge = takeoffedge;
         this.touchdownedge = touchdownedge;
@@ -94,12 +99,12 @@ public class FlightRoute {
 }
 
 class FlightRouteGraphPathConstraintProvider implements GraphPathConstraintProvider {
-    FlightRoute flightRoute;
+    FlightRouteGraph flightRouteGraph;
     // wegen des speed ist der Radius sehr gross. 
     double smoothingradius = 100;
 
-    FlightRouteGraphPathConstraintProvider(FlightRoute flightRoute) {
-        this.flightRoute = flightRoute;
+    FlightRouteGraphPathConstraintProvider(FlightRouteGraph flightRouteGraph) {
+        this.flightRouteGraph = flightRouteGraph;
     }
 
     @Override
@@ -113,10 +118,10 @@ class FlightRouteGraphPathConstraintProvider implements GraphPathConstraintProvi
         Vector3 loc = graphNode.getLocation();
         //SGGeod g = SGGeod.fromCart(loc);
         //alles noch nicht ausgegoren
-        if (flightRoute.getGroundDistance(graphNode) < 1000) {
+        if (flightRouteGraph.getGroundDistance(graphNode) < 1000) {
             return 50;
         }
-        if (flightRoute.getGroundDistance(graphNode) < 10000) {
+        if (flightRouteGraph.getGroundDistance(graphNode) < 10000) {
             return smoothingradius;
         }
         //erstmal nur so 90km Orbit annehmen. Hmm knifflig. 100km geht noch, 1000 schon nicht mehr. TODO

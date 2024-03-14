@@ -76,7 +76,7 @@ public class SimpleMapProjection extends OriginMapProjection {
         //SGGeod coor = SGGeod.fromCart(node.getLocation());
         GeoCoordinate coor = rbcp.fromCart(node.getLocation());
         Vector2 v = projection.project(coor);
-        Vector3 v3 = new Vector3(v.getX(), v.getY(), (float) coor.getElevationM());
+        Vector3 v3 = new Vector3(v.getX(), v.getY(), (double) coor.getElevationM());
         Vector3 location = v3;
         // 9.3.21: Ich sach ja, haarig.
         node.setLocationOnlyForSpecialPurposes(location);
