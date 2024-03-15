@@ -144,6 +144,7 @@
 
     </complexType>
 
+    <!-- This is not for airport layout data like groundnets and runways that comes from other sources (OSM, apt.dat).-->
     <complexType name="AirportDefinitionType">
         <sequence>
             <element name="home" type="string" minOccurs="0" maxOccurs="1"/>

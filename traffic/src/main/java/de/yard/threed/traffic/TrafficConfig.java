@@ -318,10 +318,10 @@ public class TrafficConfig {
     }
 
 
-    private static List<AirportDefinition> convertAirportDefinitions(List<NativeNode> vehicleDefinitions) {
+    private static List<AirportDefinition> convertAirportDefinitions(List<NativeNode> airportDefinitions) {
         List<AirportDefinition> result = new ArrayList<AirportDefinition>();
-        for (int i = 0; i < vehicleDefinitions.size(); i++) {
-            result.add(new XmlAirportDefinition(vehicleDefinitions.get(i)));
+        for (int i = 0; i < airportDefinitions.size(); i++) {
+            result.add(new XmlAirportDefinition(airportDefinitions.get(i)));
         }
         return result;
     }

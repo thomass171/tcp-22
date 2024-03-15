@@ -6,12 +6,13 @@ import de.yard.threed.core.LatLon;
 import java.util.List;
 
 /**
- * Only basic information of an airport that is needed to land there and typically can be found in eg. OSM).
- * That is runways, rough location to know the terrain tile to load for getting elevation.
+ * Layout information of an airport that is needed to land there and typically can be found in eg. OSM.
+ * That is groundnet, runways, rough location to know the terrain tile to load for getting elevation.
  * <p>
- * But not groundnet, viewpoints, parking positions.
+ * But no viewpoints, service home and preferred parking positions (that is in AirportDefinition).
  * <p>
- * For simplicity for now also groundnet. But no graphs.
+ * And no graphs.
+ * 15.3.24: Confirmed to have groundnet here.
  */
 public class Airport {
 

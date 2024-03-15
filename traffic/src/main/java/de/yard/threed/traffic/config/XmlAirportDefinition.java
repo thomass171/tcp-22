@@ -10,7 +10,10 @@ import de.yard.threed.trafficcore.model.SmartLocation;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XmlAirportDefinition extends Airport implements AirportDefinition {
+/**
+ * 15.3.24: No longer extend airport for better separation (maybe could be a composition). See {@link Airport} and {@link AirportDefinition}
+ */
+public class XmlAirportDefinition /*extends Airport*/ implements AirportDefinition {
 
     public static final String HOME = "home";
 
@@ -18,7 +21,7 @@ public class XmlAirportDefinition extends Airport implements AirportDefinition {
 
     public XmlAirportDefinition(NativeNode node) {
         //TODO center
-        super(XmlHelper.getStringAttribute(node, "icao"), -200, -200);
+        //super(XmlHelper.getStringAttribute(node, "icao"), -200, -200);
         this.nativeNode = node;
     }
 

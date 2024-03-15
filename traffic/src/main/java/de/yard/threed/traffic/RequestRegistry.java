@@ -48,10 +48,12 @@ public class RequestRegistry {
     }
 
     /**
-     * Ein Aircraft will departen. Dann muss
-     * a) evtl. der Servicepoint gecleaned werden
-     * b) ein Schedule fuer taxiing und travel angelegt werden.
-     * Es wird noch kein kompletter Graph erzeugt.
+     * A Aircraft wants to depart. This might include
+     * a) clearing the service point
+     * b) a schedule for taxing and move to runway
+     * c) start flying a flight plan
+     * A graph is used step by step.
+     * A vehicle might already be loacated on a runway. Then no taxiing ist done.
      */
     public static RequestType TRAFFIC_REQUEST_AIRCRAFTDEPARTING = RequestType.register(4005, "TRAFFIC_REQUEST_AIRCRAFTDEPARTING");
 
