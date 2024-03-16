@@ -2,7 +2,6 @@ package de.yard.threed.core;
 
 /**
  * Created by thomass on 20.04.15.
- *
  */
 
 public class Degree {
@@ -19,20 +18,20 @@ public class Degree {
         return d;
     }
 
-    public double getDegree(){
+    public double getDegree() {
         return degree;
     }
-    
+
     public double toRad() {
-        return  MathUtil2.toRadians(degree);
+        return MathUtil2.toRadians(degree);
     }
 
     public Degree add(Degree angle) {
-        return new Degree(angle.degree+degree);
+        return new Degree(angle.degree + degree);
     }
 
     public Degree subtract(Degree angle) {
-        return new Degree(degree-angle.degree);
+        return new Degree(degree - angle.degree);
     }
 
     public Degree multiply(double v) {
@@ -45,28 +44,32 @@ public class Degree {
         return "" + degree;
     }
 
+    public String toString(int total, int precision) {
+        return Util.format(degree, total, precision);
+    }
+
     /**
      * @param angle
      * @return
      */
     @Override
     public boolean equals(Object angle) {
-        return isEqual((Degree)angle,MathUtil2.DBL_EPSILON);
+        return isEqual((Degree) angle, MathUtil2.DBL_EPSILON);
     }
 
-    public boolean isEqual(Degree angle,double epsilon) {
+    public boolean isEqual(Degree angle, double epsilon) {
         double d1 = angle.degree;
         double d2 = degree;
         d1 = normalizeDegree(d1);
         d2 = normalizeDegree(d2);
-        return MathUtil2.areEqual(d1,d2,epsilon);
+        return MathUtil2.areEqual(d1, d2, epsilon);
     }
 
     private double normalizeDegree(double d) {
         while (d < 0) {
             d += 360;
         }
-        while (d > 360){
+        while (d > 360) {
             d -= 360;
         }
         return d;
@@ -85,7 +88,7 @@ public class Degree {
     }
 
     public Degree reverse() {
-        return new Degree(degree+180);
+        return new Degree(degree + 180);
     }
 
     /**

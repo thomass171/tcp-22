@@ -97,6 +97,21 @@ public class Util {
         return format;
     }
 
+    public static String format(double value, int total, int precision) {
+        String s = "" + value;
+        String[] parts = StringUtils.split(s, "\\.");
+        if (parts.length == 1) {
+            return s;
+        }
+        s = parts[1];
+        if (precision == 0) {
+            return parts[0];
+        }
+        while (s.length() > precision) {
+            s = StringUtils.substring(s, 0, s.length() - 1);
+        }
+        return parts[0] + "." + s;
+    }
 
     public static Object[] buildArray(Object o) {
         return new Object[]{o};
@@ -519,6 +534,19 @@ public class Util {
             throw new RuntimeException("parseString: invalid quaternion data " + data);
         }
         return new Quaternion(Util.parseDouble(s[0]), Util.parseDouble(s[1]), Util.parseDouble(s[2]), Util.parseDouble(s[3]));
+    }
+
+    public static LatLon parseLatLon(String data) {
+        String[] s;
+        s = StringUtils.split(data, ",");
+        if (s.length != 2) {
+            throw new RuntimeException("parseLatLon: invalid LatLon data " + data);
+        }
+        return new LatLon(Util.parseDegree(s[0]), Util.parseDegree(s[1]));
+    }
+
+    public static Degree parseDegree(String data) {
+        return new Degree(Util.parseDouble(data));
     }
 
     /**

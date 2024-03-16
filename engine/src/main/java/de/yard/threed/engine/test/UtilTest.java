@@ -27,5 +27,15 @@ public class UtilTest {
         //TestUtil.assertEquals("", "00000000045", String.format("%011d", 45));
         RuntimeTestUtil.assertEquals("", "00000000045", Util.format("%011d", 45));
 
+        // format double
+        RuntimeTestUtil.assertEquals("", "1.14", Util.format(1.14, 8,4));
+        RuntimeTestUtil.assertEquals("", "1.1", Util.format(1.14, 8,1));
+        RuntimeTestUtil.assertEquals("", "1.1", Util.format(1.18, 8,1));
+        RuntimeTestUtil.assertEquals("", "1.1", Util.format(1.1, 8,4));
+        RuntimeTestUtil.assertEquals("", "1", Util.format(1.1, 8,0));
+        RuntimeTestUtil.assertEquals("", "1.0", Util.format(1.0, 8,4));
+        RuntimeTestUtil.assertEquals("", "1", Util.format(1.0, 8,0));
+
+
     }
 }
