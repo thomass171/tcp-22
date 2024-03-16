@@ -15,7 +15,6 @@ import de.yard.threed.graph.GraphPosition;
 import de.yard.threed.graph.GraphProjection;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeSceneNode;
-import de.yard.threed.traffic.config.SceneConfig;
 import de.yard.threed.trafficcore.model.SmartLocation;
 
 import de.yard.threed.traffic.config.VehicleDefinition;

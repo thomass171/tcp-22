@@ -18,7 +18,6 @@ import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
-import de.yard.threed.traffic.config.SceneConfig;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.trafficcore.model.Vehicle;
 import org.junit.jupiter.api.Test;
@@ -41,26 +40,27 @@ public class SphereSystemTest {
     SceneNode world;
 
 
+    /**
+     * 16.3.24: Was testFlatWaylandWithoutConfigXml once, but (XML) configs are
+     * standard meanwhile. At least the legacy options are no longer used.
+     */
     @Test
-    public void testFlatWaylandWithoutConfigXml() throws Exception {
-        //DefaultTrafficWorld.instance = null;
-        //assertNull("", DefaultTrafficWorld.getInstance());
+    public void testFlatWaylandWithConfigXml() throws Exception {
 
-        startSimpleTest(/*"Desdorf"*/"traffic:Wayland");
+        startSimpleTest("traffic:tiles/Wayland.xml");
 
         // 0 because of no TRAFFIC_REQUEST_LOADGROUNDNET
         assertEquals(0, SystemManager.getRequestCount(), "requests ");
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
         assertEquals(1, completeEvents.size(), "completeEvents.size");
-        //assertNull("", DefaultTrafficWorld.getInstance());
         SphereProjections projections = TrafficHelper.getProjectionByDataprovider();
         assertNotNull(projections);
         assertNotNull(projections.projection);
         assertNull(projections.backProjection);
 
         List<ViewPoint> viewpoints = TrafficHelper.getViewpointsByDataprovider();
-        // 9 "oben*" viewpoints from osmscenery". Vehicle not loaded because of missing system.
-        assertEquals(9, viewpoints.size(), "viewpoints");
+        // Vehicle not loaded because of missing system.
+        assertEquals(5, viewpoints.size(), "viewpoints");
         ViewPoint viewPoint = viewpoints.get(0);
         assertViewPoint("oben1", new LocalTransform(new Vector3(0, 0, 137), Quaternion.buildRotationX(new Degree(0))), viewPoint);
     }
@@ -135,9 +135,9 @@ public class SphereSystemTest {
             //assertNull("", DefaultTrafficWorld.getInstance());
 
             //TrafficWorldConfig liegt in "ext"
-            setup(GeoCoordinate.fromLatLon(new LatLon(new Degree(50.86538f), new Degree(7.139103f)), 0), null);
+            setup(GeoCoordinate.fromLatLon(new LatLon(new Degree(50.86538f), new Degree(7.139103f)), 0));
         } else {
-            setup(null, null);
+            setup(null);
         }
         SystemManager.putRequest(new Request(USER_REQUEST_SPHERE, new Payload(tilename, new ArrayList())));
         //ein Request muss anliegen
@@ -149,12 +149,12 @@ public class SphereSystemTest {
     /**
      *
      */
-    private void setup(GeoCoordinate center, SceneConfig sceneConfig) {
+    private void setup(GeoCoordinate center) {
         InitMethod initMethod = new InitMethod() {
             @Override
             public void init() {
                 world = new SceneNode();
-                SystemManager.addSystem(new SphereSystem(null, null, center, sceneConfig));
+                SystemManager.addSystem(new SphereSystem(null, null));
 
                 //ohne Elevation wird kein groundnet geladen
                 //??SystemManager.putDataProvider(SystemManager.DATAPROVIDERELEVATION, TerrainElevationProvider.buildForStaticAltitude(17));

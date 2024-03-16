@@ -23,7 +23,6 @@ import de.yard.threed.traffic.TrafficHelper;
 import de.yard.threed.traffic.TrafficSystem;
 import de.yard.threed.traffic.TrafficVrControlPanel;
 import de.yard.threed.traffic.VehicleComponent;
-import de.yard.threed.traffic.config.SceneConfig;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.graph.*;
 import de.yard.threed.core.platform.Log;
@@ -101,7 +100,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     protected Hud hud;
     protected boolean visualizeTrack = false;
     protected boolean enableFPC = false, enableNearView = false;
-    protected SceneConfig sceneConfig;
     //Manche Requests können wegen zu spezieller Abhängigkeiten nicht von ECS bearbeitet werden, sondern müssen aber auf App Ebene laufen.
 
     // nur bei Flat, in 3D null! 7.10.21 static bis es wegkommt
@@ -139,7 +137,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         trafficSystem = new TrafficSystem();
         SystemManager.addSystem(trafficSystem);
 
-        SystemManager.addSystem(new SphereSystem(getRbcp(), getGraphBackProjectionProvider(), getCenter(), getSceneConfig()));
+        SystemManager.addSystem(new SphereSystem(getRbcp(), getGraphBackProjectionProvider()/*16.3.24, getCenter() getSceneConfig()*/));
         ((SphereSystem) SystemManager.findSystem(SphereSystem.TAG)).setDefaultLightDefinition(getLight());
         SystemManager.addSystem(new GraphMovingSystem());
         SystemManager.addSystem(new GraphTerrainSystem(getTerrainBuilder()));
@@ -268,10 +266,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
      */
     public GraphVisualizer getGraphVisualizer() {
         return new SimpleGraphVisualizer(getWorld());
-    }
-
-    public SceneConfig getSceneConfig() {
-        return null;
     }
 
     public GeoCoordinate getCenter() {

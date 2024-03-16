@@ -21,7 +21,6 @@ import de.yard.threed.graph.*;
 import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.traffic.config.ConfigNode;
 import de.yard.threed.traffic.config.ConfigNodeList;
-import de.yard.threed.traffic.config.SceneConfig;
 import de.yard.threed.traffic.config.VehicleConfigDataProvider;
 import de.yard.threed.traffic.config.VehicleDefinition;
 

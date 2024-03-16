@@ -31,7 +31,6 @@ import de.yard.threed.graph.GraphProjection;
 
 import de.yard.threed.traffic.config.ConfigAttributeFilter;
 import de.yard.threed.traffic.config.ConfigHelper;
-import de.yard.threed.traffic.config.SceneConfig;
 
 import de.yard.threed.traffic.config.VehicleDefinition;
 import de.yard.threed.traffic.config.ViewpointConfig;
@@ -83,10 +82,6 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     // 20.3.18: Ja, zum komplettverschieben von allem, um Artefakte wegen Rundungsproblemen zu
     // vermeiden. Das ist was anderes als die Scene.world.
     private static SceneNode sphereNode;
-
-    // 24.10.21:Nur gesetzt bei Nutzung der DefaultTrafficWorld. Provisorium, bis es andere configs gibt. TODO
-    public SceneConfig sceneConfig;
-    GeoCoordinate center;
     //29.11.21 public Tile activeTile; Stattdessen andere Kruecke.
     public boolean wasOsm;
     private LightDefinition[] lightDefinitions;
@@ -96,7 +91,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
      * <p>
      * 27.12.21: SceneConfig (das ist NUR der scene sub Part) und center mal reinstecken.
      */
-    public SphereSystem(EllipsoidCalculations/*Flight3D*/ ellipsoidCalculations, GraphBackProjectionProvider backProjection, GeoCoordinate center, SceneConfig sceneConfig) {
+    public SphereSystem(EllipsoidCalculations/*Flight3D*/ ellipsoidCalculations, GraphBackProjectionProvider backProjection) {
         super(new String[]{}, new RequestType[]{USER_REQUEST_SPHERE}, new EventType[]{});
         //??updatepergroup = false;
         this.ellipsoidCalculations = ellipsoidCalculations;
@@ -104,8 +99,6 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
         if (ellipsoidCalculations != null) {
             SystemManager.putDataProvider("ellipsoidconversionprovider", new EllipsoidConversionsProvider(ellipsoidCalculations));
         }
-        this.sceneConfig = sceneConfig;
-        this.center = center;
     }
 
     @Override
@@ -186,7 +179,10 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                         List<NativeNode> xmlTerrains = xmlConfig.getTerrains();
                         if (xmlTerrains.size() > 0) {
                             // We have terrain, so no graph visualization needed.
-                            ((GraphTerrainSystem) SystemManager.findSystem(GraphTerrainSystem.TAG)).disable();
+                            GraphTerrainSystem graphTerrainSystem = ((GraphTerrainSystem) SystemManager.findSystem(GraphTerrainSystem.TAG));
+                            if (graphTerrainSystem != null) {
+                                graphTerrainSystem.disable();
+                            }
                         }
                     }
                     for (VehicleDefinition vd : XmlVehicleDefinition.convertVehicleDefinitions(
@@ -484,34 +480,26 @@ class SphereViewPointProvider implements DataProvider {
         }
 
         // "viewpoints"
-        logger.debug("getData viewpoints, sceneConfig=" + sphereSystem.sceneConfig);
-        if (sphereSystem.sceneConfig == null) {
-            logger.debug("no sceneConfig");
-            if (sphereSystem.wasOsm) {
-                logger.debug("Using outside view points from osmscenery");
-                // Outside von oben
-                List<ViewPoint> vps = new ArrayList<ViewPoint>();
-                vps.add(new ViewPoint("oben1", new LocalTransform(new Vector3(0, 0, 137), Quaternion.buildRotationX(new Degree(/*-9*/0)))));
-                vps.add(new ViewPoint("oben1", new LocalTransform(new Vector3(0, 0, 500), Quaternion.buildRotationX(new Degree(0)))));
-                vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 1000), Quaternion.buildRotationX(new Degree(0)))));
-                vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 2000), Quaternion.buildRotationX(new Degree(0)))));
-                vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 4000), Quaternion.buildRotationX(new Degree(0)))));
-                vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 8000), Quaternion.buildRotationX(new Degree(0)))));
-                vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 16000), Quaternion.buildRotationX(new Degree(0)))));
-                vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 32000), Quaternion.buildRotationX(new Degree(0)))));
-                vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 64000), Quaternion.buildRotationX(new Degree(0)))));
-                return vps;
-            }
-            return null;
-        }
-        // From FlatTravel EDDK. 5.12.23: Pseudo tile "dummy:EDDK" no longer used.
-        if (true) throw new RuntimeException("needs XSD config");
-        List<ViewpointConfig> viewPointConfigs = null;//27.11.23 sphereSystem.sceneConfig.getViewpoints(new ConfigAttributeFilter("icao", "EDDK", true));
-        List<ViewPoint> viewPoints = new ArrayList<ViewPoint>();
-        for (ViewpointConfig vcfg : viewPointConfigs) {
-            viewPoints.add(new ViewPoint(vcfg.name, vcfg.transform));
-        }
-        return viewPoints;
+        logger.debug("no viewpoints");
+        /* 16.3.24: Assume hard coded viewpoints are no longer needed
+        logger.debug("getData hard coded viewpoints");
+                Util.nomore();
+        if (sphereSystem.wasOsm) {
+            logger.debug("Using outside view points from osmscenery");
+            // Outside von oben
+            List<ViewPoint> vps = new ArrayList<ViewPoint>();
+            vps.add(new ViewPoint("oben1", new LocalTransform(new Vector3(0, 0, 137), Quaternion.buildRotationX(new Degree(/*-9* /0)))));
+            vps.add(new ViewPoint("oben1", new LocalTransform(new Vector3(0, 0, 500), Quaternion.buildRotationX(new Degree(0)))));
+            vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 1000), Quaternion.buildRotationX(new Degree(0)))));
+            vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 2000), Quaternion.buildRotationX(new Degree(0)))));
+            vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 4000), Quaternion.buildRotationX(new Degree(0)))));
+            vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 8000), Quaternion.buildRotationX(new Degree(0)))));
+            vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 16000), Quaternion.buildRotationX(new Degree(0)))));
+            vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 32000), Quaternion.buildRotationX(new Degree(0)))));
+            vps.add(new ViewPoint("oben2", new LocalTransform(new Vector3(0, 0, 64000), Quaternion.buildRotationX(new Degree(0)))));
+            return vps;
+        }*/
+        return null;
     }
 }
 

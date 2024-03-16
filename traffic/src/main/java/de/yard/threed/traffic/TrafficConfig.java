@@ -22,7 +22,6 @@ import de.yard.threed.traffic.config.ConfigAttributeFilter;
 import de.yard.threed.traffic.config.ConfigHelper;
 import de.yard.threed.traffic.config.ConfigNodeList;
 import de.yard.threed.traffic.config.PoiConfig;
-import de.yard.threed.traffic.config.SceneConfig;
 import de.yard.threed.traffic.config.XmlVehicleDefinition;
 import de.yard.threed.trafficcore.model.Vehicle;
 
