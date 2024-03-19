@@ -80,20 +80,15 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
         Platform pl = Platform.getInstance();
         scene.setSceneAndCamera(pl.getScene()/*AbstractSceneRunner.getInstance().scene*/, scene.getWorld());
 
-        // 13.4.17: Die Bundle laden. Ausnahmesweise synchron wegen Test. Doof vor allem bei Einzeltests weil es so lange braucht.
-        if (bundlelist != null) {
-            /*15.12.23 for (String bundlename : bundlelist) {
-                //EngineTestFactory.loadBundleSync(bundlename);
-            }*/
-            //16.12.23 preLoad(bundlelist);
-            enterInitChain(bundlelist);
-        }
-
-        // 10.4.21: MannMannMann: das ist hier jetzt so reingefriemelt.
-        //18.12.23 no longer. If this is really needed this way, it should be an other location. TestHelper.cleanupAsync();
-
         // For better analyzing use a more verbose system tracker for now
+        // 18.3.24: For catching also requests from init, set it before the chain.
         SystemManager.setSystemTracker(systemTracker);
+
+        // 18.3.24: Do initChain always, not only if bundles are needed. initChain also does scene init.
+        //if (bundlelist != null) {
+            enterInitChain(bundlelist);
+        //}
+
 
         //27.3.20 dann doch vorher auch den Sceneinit fuer ein paar Systems
         //18.12.23initScene();

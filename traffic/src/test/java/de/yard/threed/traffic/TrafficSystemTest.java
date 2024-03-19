@@ -70,8 +70,7 @@ public class TrafficSystemTest {
 
     private void startSimpleTest(String tilename) {
 
-        SystemManager.sendEvent(TrafficEventRegistry.buildLOCATIONCHANGED(null, /*27.3.20 projection,*/  null,
-                BundleResource.buildFromFullQualifiedString(tilename)));
+        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(BundleResource.buildFromFullQualifiedString(tilename), null));
         //too many assertEquals("events ", 1, SystemManager.getEventCount());
         EcsTestHelper.processSeconds(2);
     }

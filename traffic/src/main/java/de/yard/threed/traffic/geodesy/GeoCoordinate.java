@@ -2,6 +2,8 @@ package de.yard.threed.traffic.geodesy;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.LatLon;
+import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 
 /**
@@ -52,6 +54,21 @@ public class GeoCoordinate extends LatLon {
         return new GeoCoordinate(latLon.latRad, latLon.lonRad, elevationM);
     }
 
+    @Override
+    public String toString() {
+        // 18.3.24: Prefer custom with specific format instead of super.toString();
+        // precision of 5 corresponds to 1m on equator. Lets go up to 7. Clipping is just to avoid
+        // strange representations like 52.4675500000001.
+        int degreePrecision = 7;
+        String s = getLatDeg().toString(8, degreePrecision) + "," + getLonDeg().toString(8, degreePrecision);
+        if (getElevationM() != null) {
+            // what is good separator? ':'?
+            s += "," + Util.format(getElevationM(), 8, 2);
+        }
+        return s;
+    }
+
+
     /**
      * 20.12.21:Das ist doch ne Kruecke.
      *
@@ -60,5 +77,21 @@ public class GeoCoordinate extends LatLon {
     @Deprecated
     public void setElevationM(double e) {
         this.elevationM = e;
+    }
+
+    public static GeoCoordinate parse(String data) {
+        if (data == null) {
+            // might happen eg. when it is optional payload
+            return null;
+        }
+        String[] s;
+        s = StringUtils.split(data, ",");
+        if (s.length == 2) {
+            return new GeoCoordinate(Util.parseDegree(s[0]), Util.parseDegree(s[1]));
+        }
+        if (s.length == 3) {
+            return new GeoCoordinate(Util.parseDegree(s[0]), Util.parseDegree(s[1]), Util.parseDouble(s[2]));
+        }
+        throw new RuntimeException("parse: invalid GeoCoordinate data " + data);
     }
 }

@@ -106,6 +106,7 @@ public class BundleResource implements NativeResource {
     /**
      * 12.6.17: Bundlename isn't part of full name.
      * 14.2.24: Now removes leading "./","/" because this is used as key in bundle.
+     *
      * @return
      */
     @Override
@@ -184,6 +185,10 @@ public class BundleResource implements NativeResource {
      * Returns null in case of invalid fullQualifiedString.
      */
     public static BundleResource buildFromFullQualifiedString(String fullQualifiedString) {
+        if (fullQualifiedString == null) {
+            // might happen eg. when it is optional payload
+            return null;
+        }
         if (!StringUtils.contains(fullQualifiedString, ":")) {
             return null;
         }

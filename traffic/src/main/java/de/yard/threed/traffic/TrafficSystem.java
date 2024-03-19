@@ -128,7 +128,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 new EventType[]{
                         GraphEventRegistry.GRAPH_EVENT_PATHCOMPLETED,
                         TrafficEventRegistry.TRAFFIC_EVENT_VEHICLELOADED,
-                        TrafficEventRegistry.EVENT_LOCATIONCHANGED,
+                        TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED,
                         BaseEventRegistry.EVENT_USER_ASSEMBLED});
         //this.visualizer = visualizer;
 
@@ -424,24 +424,20 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 GraphMovingComponent.getGraphMovingComponent(vehicleEntity).setSelector(new RailingBranchSelector());
             }
         }
-        if (evt.getType().equals(TrafficEventRegistry.EVENT_LOCATIONCHANGED)) {
+        if (evt.getType().equals(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED)) {
             //7.5.19: Das Groundnet wird woanders geladen. 30.11.21 Graphen zu einem Tile jetzt auch.
             //7.10.21: Der tile/basename kommt jetzt als payload mit.TODO
             //projection = (SimpleMapProjection) evt.getPayloadByIndex(1);
             /*27.12.21AirportConfig* /Object nearestairport = /*(AirportConfig) * /evt.getPayloadByIndex(1);*/
-            Tile initialTile = (Tile) evt.getPayloadByIndex(/*16.10.21 2 mal 1 doch wider 2*/1);
-            BundleResource tileResource = (BundleResource) evt.getPayloadByIndex(2);
+            //BundleResource tileResource = (BundleResource) evt.getPayloadByIndex(2);
+            BundleResource tileResource = evt.getPayload().get("tilename", s -> BundleResource.buildFromFullQualifiedString(s));
 
             // 28.10.21 nearestairport is deprecated and thus always null.
             //27.12.21 if (nearestairport == null) {
             //ansonsten kümmert sich GroundServicesSystem darum. Oder hier immer zusätzlich? Nee, erstmal lieber nicht.
 
             TrafficGraph graph = null;
-            String basename = (initialTile == null) ? null : initialTile.file;//TrafficWorld2D.basename;
-                /*29.11.21 jetzt beim tile laden(loadTileByConvention()) und nicht mehr die Graphen hier.
-                war nur fuer osmscenery, nicht fuer groundnet
-                */
-            //}
+
             if (tileResource != null) {
                 logger.debug("tileResource=" + tileResource);
                 // Tile 2.0

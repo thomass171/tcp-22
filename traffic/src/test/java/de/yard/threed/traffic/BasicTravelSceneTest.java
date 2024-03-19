@@ -85,8 +85,8 @@ public class BasicTravelSceneTest {
         assertNotNull(userEntity, "user entity");
 
         // "Wayland" has two graph files that should have been loaded finally (via EVENT_LOCATIONCHANGED)
-        List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
-        assertEquals(1, completeEvents.size(), "EVENT_LOCATIONCHANGED.size");
+        List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
+        assertEquals(1, completeEvents.size(), "TRAFFIC_EVENT_SPHERE_LOADED.size");
         Event evtLocationChanged = completeEvents.get(0);
 
         completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED);
@@ -129,8 +129,8 @@ public class BasicTravelSceneTest {
         assertNotNull(UserSystem.getInitialUser(), "user entity");
 
         // "Wayland" has two graph files that should have been loaded finally (via EVENT_LOCATIONCHANGED)
-        List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
-        assertEquals(1, completeEvents.size(), "EVENT_LOCATIONCHANGED.size");
+        List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
+        assertEquals(1, completeEvents.size(), "TRAFFIC_EVENT_SPHERE_LOADED.size");
 
         completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED);
         assertEquals(1, completeEvents.size(), "TRAFFIC_EVENT_GRAPHLOADED.size");

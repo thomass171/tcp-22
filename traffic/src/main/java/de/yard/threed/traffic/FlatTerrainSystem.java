@@ -1,6 +1,8 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.core.LocalTransform;
+import de.yard.threed.core.ObjectBuilder;
+import de.yard.threed.core.Payload;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.NativeNode;
@@ -62,7 +64,10 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
     public static String TAG = "FlatTerrainSystem";
 
     public FlatTerrainSystem() {
-        super(new EventType[]{TeleporterSystem.EVENT_POSITIONCHANGED, TrafficEventRegistry.GROUNDNET_EVENT_LOADED, TrafficEventRegistry.EVENT_LOCATIONCHANGED, TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED});
+        super(new EventType[]{TeleporterSystem.EVENT_POSITIONCHANGED,
+                TrafficEventRegistry.GROUNDNET_EVENT_LOADED,
+                TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED,
+                TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED});
         //20.10.21 this.scene = scene;
         //20.10.21 this.world = world;
         // this.projection = projection;
@@ -114,14 +119,15 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
             logger.debug("got event " + evt.getType());
         }
 
-        if (evt.getType().equals(TrafficEventRegistry.EVENT_LOCATIONCHANGED)) {
-            GeoCoordinate initialPosition = (GeoCoordinate) evt.getPayloadByIndex(0);
+        if (evt.getType().equals(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED)) {
+            Payload payload = evt.getPayload();
+            GeoCoordinate initialPosition = payload.get("initialPosition", s -> GeoCoordinate.parse(s));
             // 28.10.21 index 1 is deprecated  nearestairport and thus always null.
             //projection = (SimpleMapProjection) evt.getPayloadByIndex(1);
-            Tile initialTile = (Tile) evt.getPayloadByIndex(/*16.10.21 2 mal 1 doch wider 2*/1);
-            BundleResource tileResource = (BundleResource) evt.getPayloadByIndex(2);
+            Tile initialTile = null;//18.3.24 always null in the past? (Tile) evt.getPayloadByIndex(/*16.10.21 2 mal 1 doch wider 2*/1);
+            BundleResource tileResource = payload.get("tilename", s -> BundleResource.buildFromFullQualifiedString(s));
             // 27.11.23 nasty workaround until we have proper bundle payload
-            Bundle trafficBundle=BundleRegistry.getBundle("traffic");
+            Bundle trafficBundle = BundleRegistry.getBundle("traffic");
 
             SceneNode destinationNode = SphereSystem.getSphereNode();
             if (tileResource != null) {

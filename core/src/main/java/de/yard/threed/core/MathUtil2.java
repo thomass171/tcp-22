@@ -9,7 +9,6 @@ import de.yard.threed.core.platform.Platform;
  * Wobei? Auch fuer Unity (wegen lefthanded) ?
  */
 public class MathUtil2 {
-    static Log logger = Platform.getInstance().getLog(MathUtil2.class);
     public static double PI_2 =  (Math.PI / 2);
     public static double PI =  (Math.PI);
     public static double PI2 =  (Math.PI * 2);

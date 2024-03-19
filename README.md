@@ -274,6 +274,21 @@ Events and Requests are the main elements for inter system communication. But wh
 For example in client/server mode a "UserSystem" runs on the server not the client. But the client needs to
 send LOGIN requests and might process LoggedIn events. This suggests to decouple event/request registration from specific systems.
 
+### Traffic request/event flow
+
+```mermaid
+sequenceDiagram
+  actor App
+  participant SphereSystem
+  participant FlatTerrainSystem
+  participant GraphTerrainSystem
+  participant TrafficSystem
+  App->>SphereSystem: USER_REQUEST_SPHERE
+  SphereSystem->>FlatTerrainSystem: TRAFFIC_EVENT_SPHERE_LOADED
+  SphereSystem->>GraphTerrainSystem: TRAFFIC_EVENT_SPHERE_LOADED
+  SphereSystem->>TrafficSystem: TRAFFIC_EVENT_SPHERE_LOADED
+
+```
 ### Data Flow
 Data available in one system might also be needed in other systems. The options are
 

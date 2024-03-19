@@ -42,11 +42,14 @@ public class FlatTerrainSystemTest {
         //16.12.21 AbstractSceneRunner.instance.httpClient = new AirportDataProviderMock();
     }
 
+    /**
+     * Whats to test? config file not found?
+     */
     @Test
     public void testFlatWaylandWithoutTrafficWorldXml() throws Exception {
         //DefaultTrafficWorld.instance = null;
 
-        startSimpleTest(/*"Desdorf"*/"tiles/Wayland.xml");
+        startSimpleTest("tiles/Wayland.xml");
 
         /*// 0 because of no TRAFFIC_REQUEST_LOADGROUNDNET
         assertEquals("requests ", 0, SystemManager.getRequestCount());
@@ -61,8 +64,7 @@ public class FlatTerrainSystemTest {
 
     private void startSimpleTest(String tilename) {
 
-        SystemManager.sendEvent(TrafficEventRegistry.buildLOCATIONCHANGED(null, /*27.3.20 projection,*/  null,
-                 BundleResource.buildFromFullQualifiedString("traffic:"+tilename)));
+        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(BundleResource.buildFromFullQualifiedString("traffic:" + tilename), null));
         //too many assertEquals("events ", 1, SystemManager.getEventCount());
         EcsTestHelper.processSeconds(2);
     }

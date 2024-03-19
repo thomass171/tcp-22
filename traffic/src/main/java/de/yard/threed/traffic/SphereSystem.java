@@ -51,7 +51,7 @@ import java.util.List;
  * - manage multiple concurrent spheres (server mode)
  * <p>
  * Optionally triggers loading of a (static?) tile. There might also be a TerrainSystem.
- * Provider for a projection fitting to the Sphere and a world node.
+ * Provider for a projection (if not 3D) fitting to the Sphere and a world node.
  * 16.11.23: Might also provide a provider for the full configuration, so other systems do not
  * need to read it again. See README.md#DataFlow.
  * <p>
@@ -143,96 +143,94 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
             BundleResource initialTile = null;
             List<NativeNode> xmlVPs = null;
             LightDefinition[] lds = lightDefinitions;
+            // 18.3.24: null no longer leads hard coded to 3D in EDDK but is accepted but ignored
             if (basename != null) {
                 initialTile = BundleResource.buildFromFullQualifiedString(basename);
-                if (initialTile == null) {
-                    throw new RuntimeException("Failed to parse tile name (bundle missing?):" + basename);
-                }
-                /*initialTile = TileKram.findTile(basename);
-                if (initialTile == null) {
-                    logger.error("unknown tile " + basename);
-                } else*/
-                {
+                if (initialTile != null) {
+                    // found regular tilename
+
                     initialPosition = activateTile(initialTile);
-                }
-                if (initialTile.getExtension().equals("xml")) {
-                    // XML only sync for now
 
-                    TrafficConfig xmlConfig = Tile.loadConfigFile(BundleRegistry.getBundle(initialTile.bundlename), initialTile);
-                    if (xmlConfig != null) {
-                        xmlVPs = xmlConfig.getViewpoints();
-                        lds = xmlConfig.getLights();
+                    if (initialTile.getExtension().equals("xml")) {
+                        // XML only sync for now
 
-                        List<NativeNode> xmlVehicles = xmlConfig.getVehicles();
-                        if (xmlVehicles.size() > 0) {
-                            logger.info("Replacing vehiclelist with list from config file");
-                            vehicleList = new ArrayList<Vehicle>();
-                            for (NativeNode nn : xmlVehicles) {
-                                String name = XmlHelper.getStringAttribute(nn, "name");
-                                boolean delayedload = XmlHelper.getBooleanAttribute(nn, XmlVehicleDefinition.DELAYEDLOAD, false);
-                                boolean automove = XmlHelper.getBooleanAttribute(nn, XmlVehicleDefinition.AUTOMOVE, false);
-                                vehicleList.add(new Vehicle(name, delayedload, automove,
-                                        XmlHelper.getStringAttribute(nn, XmlVehicleDefinition.LOCATION),
-                                        XmlHelper.getIntAttribute(nn, XmlVehicleDefinition.INITIALCOUNT, 0)));
+                        TrafficConfig xmlConfig = Tile.loadConfigFile(BundleRegistry.getBundle(initialTile.bundlename), initialTile);
+                        if (xmlConfig != null) {
+                            xmlVPs = xmlConfig.getViewpoints();
+                            lds = xmlConfig.getLights();
+
+                            List<NativeNode> xmlVehicles = xmlConfig.getVehicles();
+                            if (xmlVehicles.size() > 0) {
+                                logger.info("Replacing vehiclelist with list from config file");
+                                vehicleList = new ArrayList<Vehicle>();
+                                for (NativeNode nn : xmlVehicles) {
+                                    String name = XmlHelper.getStringAttribute(nn, "name");
+                                    boolean delayedload = XmlHelper.getBooleanAttribute(nn, XmlVehicleDefinition.DELAYEDLOAD, false);
+                                    boolean automove = XmlHelper.getBooleanAttribute(nn, XmlVehicleDefinition.AUTOMOVE, false);
+                                    vehicleList.add(new Vehicle(name, delayedload, automove,
+                                            XmlHelper.getStringAttribute(nn, XmlVehicleDefinition.LOCATION),
+                                            XmlHelper.getIntAttribute(nn, XmlVehicleDefinition.INITIALCOUNT, 0)));
+                                }
+                            }
+                            List<NativeNode> xmlTerrains = xmlConfig.getTerrains();
+                            if (xmlTerrains.size() > 0) {
+                                // We have terrain, so no graph visualization needed.
+                                GraphTerrainSystem graphTerrainSystem = ((GraphTerrainSystem) SystemManager.findSystem(GraphTerrainSystem.TAG));
+                                if (graphTerrainSystem != null) {
+                                    graphTerrainSystem.disable();
+                                }
                             }
                         }
-                        List<NativeNode> xmlTerrains = xmlConfig.getTerrains();
-                        if (xmlTerrains.size() > 0) {
-                            // We have terrain, so no graph visualization needed.
-                            GraphTerrainSystem graphTerrainSystem = ((GraphTerrainSystem) SystemManager.findSystem(GraphTerrainSystem.TAG));
-                            if (graphTerrainSystem != null) {
-                                graphTerrainSystem.disable();
-                            }
+                        for (VehicleDefinition vd : XmlVehicleDefinition.convertVehicleDefinitions(
+                                xmlConfig.getVehicleDefinitions())) {
+                            TrafficSystem.knownVehicles.add(vd);
+                        }
+                        // 28.11.23: Was in BasicTravelScene.customInit() before
+                        TrafficSystem.baseTransformForVehicleOnGraph = xmlConfig.getBaseTransformForVehicleOnGraph();
+                    }
+                } else {
+                    // basename is no bundle resource (tilename). Assume geo coordinate.
+                    //16.6.20 3D: request geht hier noch nicht wegen "not inited". Darum weiter vereinfacht initialposition.
+                    //18.3.24: Is this comment still true? Now we get initialPosition from basename.
+                    initialPosition = GeoCoordinate.parse(basename);
+                }
+
+                if (lds != null) {
+                    logger.debug("Adding " + lds.length + " lights");
+                    for (LightDefinition ld : lds) {
+                        if (ld.position != null) {
+                            Scene.getCurrent().addLightToWorld(new DirectionalLight(ld.color, ld.position));
+                        } else {
+                            Scene.getCurrent().addLightToWorld(new AmbientLight(ld.color));
                         }
                     }
-                    for (VehicleDefinition vd : XmlVehicleDefinition.convertVehicleDefinitions(
-                            xmlConfig.getVehicleDefinitions())) {
-                        TrafficSystem.knownVehicles.add(vd);
+                }
+                // 26.2.24: vehicleList was public static in TrafficSystem before. Provider might not be perfect, but better at least.
+                List<Vehicle> providerVehicleList = vehicleList;
+                SystemManager.putDataProvider("vehiclelistprovider", parameter -> providerVehicleList);
+
+                if (initialPosition == null) {
+                    //wait for async service response. 18.3.24: Do we really have async here? If yes, request processing hould be aborted and retried.
+                    logger.debug("no initial position yet. Waiting for information or no tile found");
+                } else {
+                    // 7.10.21 das war frueher als erstes im update() sowohl 2D wie 3D
+                    sendInitialEvents(initialPosition, initialTile);
+                }
+
+                // 24.10.21: Das kommt jetzt erstmal einfach hier hin.
+                // Viewpoints koennte auch TeleporterSystem kennen, aber irgendwo muss ein neu dazugekommener Player sie ja herholen können.
+                // 17.11.23: But TeleporterSystem can collect these. Additionally send traffic independent event
+                SystemManager.putDataProvider("viewpoints", new SphereViewPointProvider(this, xmlVPs));
+                if (xmlVPs != null) {
+                    // viewpoints from XML
+                    for (NativeNode nn : xmlVPs) {
+                        LocalTransform transform = ConfigHelper.getTransform(nn);
+                        SystemManager.sendEvent(BaseEventRegistry.buildViewpointEvent(
+                                XmlHelper.getStringAttribute(nn, "name"), transform));
                     }
-                    // 28.11.23: Was in BasicTravelScene.customInit() before
-                    TrafficSystem.baseTransformForVehicleOnGraph = xmlConfig.getBaseTransformForVehicleOnGraph();
                 }
             } else {
-                //16.6.20 3D: request geht hier noch nicht wegen "not inited". Darum weiter vereinfacht initialposition.
-                // Das ist nur erstmal so ungefähr für Terrain. Wird das noch erreicht? Wann?
-                //27.12.21 wegen dependency kopiert initialPosition = WorldGlobal.eddkoverviewfar.location.coordinates;
-                // SGGeod.fromLatLon(gsw.getAirport("EDDK").getCenter());
-                initialPosition = new GeoCoordinate(new Degree(50.843675), new Degree(7.109709), 1150);
-
-            }
-            if (lds != null) {
-                logger.debug("Adding " + lds.length + " lights");
-                for (LightDefinition ld : lds) {
-                    if (ld.position != null) {
-                        Scene.getCurrent().addLightToWorld(new DirectionalLight(ld.color, ld.position));
-                    } else {
-                        Scene.getCurrent().addLightToWorld(new AmbientLight(ld.color));
-                    }
-                }
-            }
-            // 26.2.24: vehicleList was public static in TrafficSystem before. Provider might not be perfect, but better at least.
-            List<Vehicle> providerVehicleList = vehicleList;
-            SystemManager.putDataProvider("vehiclelistprovider", parameter -> providerVehicleList);
-
-            if (initialPosition == null) {
-                //wait for async service response
-                logger.debug("no initial position yet. Waiting for information or no tile found");
-            } else {
-                // 7.10.21 das war frueher als erstes im update() sowohl 2D wie 3D
-                sendInitialEvents(initialPosition, initialTile);
-            }
-
-            // 24.10.21: Das kommt jetzt erstmal einfach hier hin.
-            // Viewpoints koennte auch TeleporterSystem kennen, aber irgendwo muss ein neu dazugekommener Player sie ja herholen können.
-            // 17.11.23: But TeleporterSystem can collect these. Additionally send traffic independent event
-            SystemManager.putDataProvider("viewpoints", new SphereViewPointProvider(this, xmlVPs));
-            if (xmlVPs != null) {
-                // viewpoints from XML
-                for (NativeNode nn : xmlVPs) {
-                    LocalTransform transform = ConfigHelper.getTransform(nn);
-                    SystemManager.sendEvent(BaseEventRegistry.buildViewpointEvent(
-                            XmlHelper.getStringAttribute(nn, "name"), transform));
-                }
+                logger.warn("ignoring null tilename");
             }
             return true;
         }
@@ -337,9 +335,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
         //DefaultTrafficWorld.getInstance().currentairport = DefaultTrafficWorld.getInstance().nearestairport;
         //DefaultTrafficWorld.getInstance().nearestairport = null;
         //27.3.20: Groundnet jetzt eigenstaendig ueber request, damit es auf terrain warten kann. Das mit der projection ist aber doof.
-        SystemManager.sendEvent(TrafficEventRegistry.buildLOCATIONCHANGED(initialPosition, /*27.3.20 projection,*/ /*14.10.21 DefaultTrafficWorld.getInstance().currentairport,*/ null/*initialTile*/,
-                (initialTile)));
-        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(initialTile));
+        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(initialTile, initialPosition));
 
         //24.5.20 Event fuer Ground wird nicht mehr gebraucht, weil Airport per Init da ist und der Rest ueber Pending groundnet geht.
         //wird doch gebraucht, um groundnetXML zu lesen.

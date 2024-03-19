@@ -20,6 +20,7 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.trafficcore.model.Vehicle;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -37,8 +38,31 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class SphereSystemTest {
 
+    // 18.3.24 From former hard coded EDDK setup.
+    // initialPosition = WorldGlobal.eddkoverviewfar.location.coordinates;
+    // SGGeod.fromLatLon(gsw.getAirport("EDDK").getCenter());
+    GeoCoordinate formerInitialPositionEDDK = new GeoCoordinate(new Degree(50.843675), new Degree(7.109709), 1150);
+
     SceneNode world;
 
+    @BeforeEach
+    public void setup() {
+        InitMethod initMethod = new InitMethod() {
+            @Override
+            public void init() {
+                world = new SceneNode();
+                SystemManager.addSystem(new SphereSystem(null, null));
+
+                //ohne Elevation wird kein groundnet geladen
+                //??SystemManager.putDataProvider(SystemManager.DATAPROVIDERELEVATION, TerrainElevationProvider.buildForStaticAltitude(17));
+
+            }
+        };
+
+        EngineTestFactory.initPlatformForTest(new String[]{"engine", "traffic"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
+                ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
+        //16.12.21 AbstractSceneRunner.instance.httpClient = new AirportDataProviderMock();
+    }
 
     /**
      * 16.3.24: Was testFlatWaylandWithoutConfigXml once, but (XML) configs are
@@ -51,7 +75,7 @@ public class SphereSystemTest {
 
         // 0 because of no TRAFFIC_REQUEST_LOADGROUNDNET
         assertEquals(0, SystemManager.getRequestCount(), "requests ");
-        List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
+        List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
         assertEquals(1, completeEvents.size(), "completeEvents.size");
         SphereProjections projections = TrafficHelper.getProjectionByDataprovider();
         assertNotNull(projections);
@@ -75,7 +99,7 @@ public class SphereSystemTest {
 
         // 0 because of no TRAFFIC_REQUEST_LOADGROUNDNET
         assertEquals(0, SystemManager.getRequestCount(), "requests ");
-        List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
+        List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
         assertEquals(1, completeEvents.size(), "completeEvents.size");
         //assertNull("", DefaultTrafficWorld.getInstance());
         assertNotNull(TrafficHelper.getProjectionByDataprovider());
@@ -103,8 +127,7 @@ public class SphereSystemTest {
 
     /**
      * Without tilename request is consumed but with no action?
-     * No, tilename=null leads to 3D for now
-     * Und laedt aus BackwardCompat EDDK groundnet.
+     * 18.3.24: Once led to 3D and EDDK groundnet. But now its really ignored.
      */
     @Test
     public void testWithoutTilename() throws Exception {
@@ -114,7 +137,25 @@ public class SphereSystemTest {
         List<Event> completeEvents = EcsTestHelper.getEventHistory();
         //Hmm. es gibt ja so viele Events .assertEquals("completeEvents.size", 4/*??*/, completeEvents.size());
 
-        List<Event> locEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.EVENT_LOCATIONCHANGED);
+        List<Event> locEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
+        assertEquals(0, locEvents.size(), "completeEvents.size");
+        assertNull(TrafficHelper.getProjectionByDataprovider());
+        // 0 because of nothing happened
+        assertEquals(0, SystemManager.getRequestCount(), "requests");
+    }
+
+    /**
+     * 18.3.24: 'geoposition' is new trigger for 3D.
+     */
+    @Test
+    public void testWithGeoPosition() {
+
+        startSimpleTest(formerInitialPositionEDDK.toString());
+
+        List<Event> completeEvents = EcsTestHelper.getEventHistory();
+        //Hmm. es gibt ja so viele Events .assertEquals("completeEvents.size", 4/*??*/, completeEvents.size());
+
+        List<Event> locEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
         assertEquals(1, locEvents.size(), "completeEvents.size");
         assertNull(TrafficHelper.getProjectionByDataprovider().projection);
         // 1 because of TRAFFIC_REQUEST_LOADGROUNDNET
@@ -130,15 +171,6 @@ public class SphereSystemTest {
 
     private void startSimpleTest(String tilename) {
 
-        if (tilename == null || tilename.endsWith("EDDK")) {
-            //DefaultTrafficWorld.instance = null;
-            //assertNull("", DefaultTrafficWorld.getInstance());
-
-            //TrafficWorldConfig liegt in "ext"
-            setup(GeoCoordinate.fromLatLon(new LatLon(new Degree(50.86538f), new Degree(7.139103f)), 0));
-        } else {
-            setup(null);
-        }
         SystemManager.putRequest(new Request(USER_REQUEST_SPHERE, new Payload(tilename, new ArrayList())));
         //ein Request muss anliegen
         assertEquals(1, SystemManager.getRequestCount(), "requests ");
@@ -146,24 +178,5 @@ public class SphereSystemTest {
         EcsTestHelper.processSeconds(2);
     }
 
-    /**
-     *
-     */
-    private void setup(GeoCoordinate center) {
-        InitMethod initMethod = new InitMethod() {
-            @Override
-            public void init() {
-                world = new SceneNode();
-                SystemManager.addSystem(new SphereSystem(null, null));
 
-                //ohne Elevation wird kein groundnet geladen
-                //??SystemManager.putDataProvider(SystemManager.DATAPROVIDERELEVATION, TerrainElevationProvider.buildForStaticAltitude(17));
-
-            }
-        };
-
-        EngineTestFactory.initPlatformForTest(new String[]{"engine", "traffic"}, new SimpleHeadlessPlatformFactory(new SimpleEventBusForTesting()), initMethod,
-                ConfigurationByEnv.buildDefaultConfigurationWithEnv(new HashMap<>()));
-        //16.12.21 AbstractSceneRunner.instance.httpClient = new AirportDataProviderMock();
-    }
 }

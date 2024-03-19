@@ -10,6 +10,8 @@ import de.yard.threed.engine.ModelBuilderRegistry;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.engine.platform.common.Request;
+import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.testutil.EventFilter;
 import de.yard.threed.engine.util.BooleanMethod;
@@ -29,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * An ECS extension of the standard EngineTestFactory.initPlatformForTest().
- *
+ * <p>
  * Really needed? 16.2.23: Since its getting extended further: yes.
  * 9.3.24: But the setup methods are in no way ECS specific. Set to deprecated
  * <p>
@@ -102,6 +104,11 @@ public class EcsTestHelper {
         List<Event> l = getEventHistory();
         return l.stream().filter(e -> e.getType() == eventType).collect(Collectors.toList());
 
+    }
+
+    public static List<Request> getRequestsFromSystemTracker(RequestType requestType) {
+        return AbstractSceneRunner.getInstance().systemTracker.getRequests().stream()
+                .filter(r -> r.isType(requestType)).collect(Collectors.toList());
     }
 
     /**

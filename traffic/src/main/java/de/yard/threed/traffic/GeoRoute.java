@@ -34,7 +34,7 @@ public class GeoRoute {
     private static String LABEL_TOUCHDOWN = "touchdown";
     private static String LABEL_WAYPOINT = "wp";
 
-    public static String SAMPLE_EDKB_EDDK = "wp:50.768,7.16720->takeoff:50.7692,7.16170->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.13170->wp:50.86629,7.14439";
+    public static String SAMPLE_EDKB_EDDK = "wp:50.768,7.1672000->takeoff:50.7692,7.1617000->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.1317000->wp:50.8662999,7.1443999";
 
     GeoCoordinate takeoff, touchdown;
     List<GeoCoordinate> waypointsBeforeTakeoff = new ArrayList<>();
@@ -87,11 +87,11 @@ public class GeoRoute {
         String s = "";
         s += toString(waypointsBeforeTakeoff);
         s += "->";
-        s += LABEL_TAKEOFF + ":" + toString(takeoff);
+        s += LABEL_TAKEOFF + ":" + takeoff.toString();
         s += "->";
         s += toString(waypointsInFlight);
         s += "->";
-        s += LABEL_TOUCHDOWN + ":" + toString(touchdown);
+        s += LABEL_TOUCHDOWN + ":" + touchdown.toString();
         s += "->";
         s += toString(waypointsAfterTouchdown);
         return s;
@@ -122,21 +122,11 @@ public class GeoRoute {
         return new GeoCoordinate(latLon.getLatDeg(), latLon.getLonDeg());
     }
 
-    private String toString(GeoCoordinate coordinate) {
-        String format = "%8.4";
-        String s = coordinate.getLatDeg().toString(8, 5) + "," + coordinate.getLonDeg().toString(8, 5);
-        if (coordinate.getElevationM() != null) {
-            // what is good separator? ':'?
-            s += "," + coordinate.getElevationM().toString();
-        }
-        return s;
-    }
-
     private String toString(List<GeoCoordinate> waypoints) {
         String s = "";
         for (int i = 0; i < waypoints.size(); i++) {
             s += (i > 0) ? "->" : "";
-            s += LABEL_WAYPOINT + ":" + toString(waypoints.get(i));
+            s += LABEL_WAYPOINT + ":" + waypoints.get(i).toString();
         }
         return s;
     }

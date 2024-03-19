@@ -351,10 +351,10 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     /**
      * To be overridden by extending class.
      * This default is used when no tilename is passed by parameter.
-     * Tile name needs to be a full qualified bundle name.
+     * Tile name needs to be a full qualified bundle name or geo coordinate.
      */
     public String getDefaultTilename() {
-        // null leads to 3D
+        // null leads to 3D. 19.3.24: No longer! null will be ignored.
         return null;
     }
 
@@ -407,7 +407,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
 
         //7.10.21:Jetzt hier statt als erstes im Update. Aber fuer die Initialposition muss man das tile kennen. Darum als erstes Tile per
         //Sphere laden. Von da wird dann das alte "sendInitialEvents" gemacht.
-        SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE, new Payload(tilename/*17.10.21 TrafficWorld2D.basename*/, getVehicleList())));
+        SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE, new Payload(tilename, getVehicleList())));
 
         // create player/Avatar (via login)
         if (sceneMode.isClient()) {

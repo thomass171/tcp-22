@@ -536,6 +536,9 @@ public class Util {
         return new Quaternion(Util.parseDouble(s[0]), Util.parseDouble(s[1]), Util.parseDouble(s[2]), Util.parseDouble(s[3]));
     }
 
+    /**
+     * GeoCoordinate has its own parser.
+     */
     public static LatLon parseLatLon(String data) {
         String[] s;
         s = StringUtils.split(data, ",");

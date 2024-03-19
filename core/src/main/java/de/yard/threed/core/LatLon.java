@@ -57,7 +57,7 @@ public class LatLon {
 
     /**
      * Es gibt wohl die Konvention Breite, Länge
-     *
+     * 18.3.24: GeoCoordinate has its own toString().
      * @return
      */
     public String toWGS84decimalString() {

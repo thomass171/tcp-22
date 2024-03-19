@@ -59,7 +59,8 @@ public class GraphTerrainSystem extends DefaultEcsSystem {
     private AbstractTerrainBuilder terrainBuilder;
 
     public GraphTerrainSystem(/*10.12.21 Scene scene, SceneNode world/*, SGGeod origin* /, MapProjection projection, AirportConfig airport*/AbstractTerrainBuilder terrainBuilder) {
-        super(new EventType[]{TeleporterSystem.EVENT_POSITIONCHANGED, TrafficEventRegistry.GROUNDNET_EVENT_LOADED, TrafficEventRegistry.EVENT_LOCATIONCHANGED, TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED});
+        super(new EventType[]{TeleporterSystem.EVENT_POSITIONCHANGED, TrafficEventRegistry.GROUNDNET_EVENT_LOADED,
+                TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED, TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED});
         //10.12.21 this.scene = scene;
         //10.12.21 this.world = world;
         // this.projection = projection;
@@ -98,8 +99,9 @@ public class GraphTerrainSystem extends DefaultEcsSystem {
             terrainBuilder.buildTerrain(evt.getPayloadByIndex(0),evt.getPayloadByIndex(1),projection);
 
         }
-        if (evt.getType().equals(TrafficEventRegistry.EVENT_LOCATIONCHANGED) && enabled) {
-            GeoCoordinate initialPosition = (GeoCoordinate) evt.getPayloadByIndex(0);
+        if (evt.getType().equals(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED) && enabled) {
+            //GeoCoordinate initialPosition = (GeoCoordinate) evt.getPayloadByIndex(0);
+            GeoCoordinate initialPosition = evt.getPayload().get("initialPosition", s -> GeoCoordinate.parse(s));
 
             //projection = (SimpleMapProjection) evt.getPayloadByIndex(1);
             //7.10.21 Tile initialTile = (Tile) evt.getPayloadByIndex(2);

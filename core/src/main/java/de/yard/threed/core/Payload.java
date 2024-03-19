@@ -133,6 +133,13 @@ public class Payload {
         return values.get(name);
     }
 
+    public <T> T get(String name, ObjectBuilder<T> objectBuilder) {
+        if (values == null) {
+            throw new RuntimeException("no name based payload");
+        }
+        return objectBuilder.buildFromString((String)values.get(name));
+    }
+
     public int getAsInt(String name) {
         if (values == null) {
             throw new RuntimeException("no name based payload");
