@@ -39,6 +39,9 @@ public interface EllipsoidCalculations {
     /**
      * A elevation provider is needed for calculating 3D coordinates from geo coordinates. Otherwise
      * you might always be on sea level, which might be useful for perfect planets only. So this is considered deprecated.
+     * 21.3.24: Elevation is no longer in GeoCordinate, so the sea level problem might be avoided by just having elevation null.
+     * So now we have a priority problem. Lets define that if a provider is passed, it should be used independent of
+     * elevation in GeoCoordinate?
      *
      * @param geoCoordinate
      * @param elevationprovider

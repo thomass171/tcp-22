@@ -289,6 +289,28 @@ sequenceDiagram
   SphereSystem->>TrafficSystem: TRAFFIC_EVENT_SPHERE_LOADED
 
 ```
+
+Startup of a TravelScene(Bluebird) in tcp-flightgear (parts currently hard coded):
+```mermaid
+sequenceDiagram
+  participant SphereSystem
+  participant GroundServicesSystem
+  participant TrafficSystem
+  SphereSystem->>GroundServicesSystem: TRAFFIC_REQUEST_LOADGROUNDNET (hard coded)
+
+
+```
+
+Load a vehicle (eg. by pressing key 'l' or setting property 'initialVehicle'):
+```mermaid
+sequenceDiagram
+  actor App
+  participant TrafficSystem
+  App->>TrafficSystem: TRAFFIC_REQUEST_LOADVEHICLE
+
+
+```
+
 ### Data Flow
 Data available in one system might also be needed in other systems. The options are
 

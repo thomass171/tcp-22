@@ -13,25 +13,34 @@ public class RequestRegistry {
 
     /**
      * Load a vehicle from configuration. Either by name (property "initialVehicle") or just the next.
-     * 26.3.20: Die Location ist auch eine uebergebene oder die naechste.
-     * 24.11.20: TRAFFIC_REQUEST_LOADVEHICLE is deprecated, weil der nicht in einem System läuft.
-     * 29.10.21: Und ein Request to load all vehicles for a single graph (payload0,groundnet payload1). Needs to wait unitl
-     * everything is ready, eg. Elevation available.(// 27.3.20: Und die Vehicles brauchen ja auch Terrain wegen der Elevation. Das soll bei client/server aber nicht mehr so sein.
+     * Location also is by parameter or just the next by configuration.
+     * Typically this is a vehicle with a cockpit to where the user can teleport.
+     * Needs to wait until everything is ready, eg. terrain and elevation available.
+     * (Das soll bei client/server aber nicht mehr so sein.
      * // 12.5.20: Doch, die brauchen ja auch ein richtige Elevation, also passend zum Client
-     * 18.1.23: TRAFFIC_REQUEST_LOADVEHICLES loads vehicles from a list (additional to initial vehicle? No! There is only
-     * one load vehicles when terrain is available!). Might also be triggered multiple when several graphs are loaded.
-     * Typically TRAFFIC_REQUEST_LOADVEHICLES is used during set up of a scene to populate a traffic graph
-     * after it has been loaded. Still has no userid.
+     *
      * 31.10.23: TRAFFIC_REQUEST_LOADVEHICLE no longer deprecated. Its triggered eg. by property "initialVehicle".
-     * 27.2.24: TRAFFIC_REQUEST_LOADVEHICLES second parameter deprecated groundnet removed. vehiclelist cannot be a parameter,
-     * because not all systems that fire this request (eg. GroundServicesSystem) know the vehicles.
+     * 20.3.24: Optional parameter 'initialRoute' added. Main reason is that TrafficSystem.trafficgraphs map has no space for multiple
+     * graph in same cluster. But the future might provide a better idea.
      */
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLE = RequestType.register(4001, "TRAFFIC_REQUEST_LOADVEHICLE");
 
-    public static Request buildLoadVehicle(int userEntityId, String name, String smartLocation) {
-        return new Request(TRAFFIC_REQUEST_LOADVEHICLE, new Payload().add("name", name).add("location", smartLocation));
+    public static Request buildLoadVehicle(int userEntityId, String name, String smartLocation, String initialRoute) {
+        return new Request(TRAFFIC_REQUEST_LOADVEHICLE, new Payload()
+                .add("name", name)
+                .add("location", smartLocation)
+                .add("initialRoute", initialRoute)
+        );
     }
 
+    /**
+     * 18.1.23: TRAFFIC_REQUEST_LOADVEHICLES loads all vehicles from a list (additional to initial vehicle? No! There is only
+     * one load vehicles when terrain is available!) for a single graph (payload0,groundnet payload1). Might also be triggered multiple when several graphs are loaded.
+     * Typically TRAFFIC_REQUEST_LOADVEHICLES is used during set up of a scene to populate a traffic graph (eg. groundnet)
+     * after it has been loaded. Still has no userid.
+     * 27.2.24: TRAFFIC_REQUEST_LOADVEHICLES second parameter deprecated groundnet removed. vehiclelist cannot be a parameter,
+     * because not all systems that fire this request (eg. GroundServicesSystem) know the vehicles.
+     */
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLES = RequestType.register(4003, "TRAFFIC_REQUEST_LOADVEHICLES");
     public static Request buildLoadVehicles(TrafficGraph trafficGraph) {
         return new Request(TRAFFIC_REQUEST_LOADVEHICLES, new Payload(new Object[]{trafficGraph}));

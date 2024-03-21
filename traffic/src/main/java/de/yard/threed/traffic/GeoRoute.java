@@ -3,6 +3,9 @@ package de.yard.threed.traffic;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
+import de.yard.threed.graph.Graph;
+import de.yard.threed.graph.GraphNode;
+import de.yard.threed.traffic.geodesy.ElevationProvider;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.trafficcore.model.Runway;
 
@@ -97,6 +100,34 @@ public class GeoRoute {
         return s;
     }
 
+    /**
+     * Difficult to decouple because takeoff/touchdown information should be retained.
+     * Needs elevationProvider because elevation might be missing in route.
+     * @return
+     */
+    public Graph toGraph(EllipsoidCalculations rbcp, double cruisingaltitude, ElevationProvider elevationProvider) {
+        Graph graph = new Graph();
+        add(graph, waypointsBeforeTakeoff, rbcp, elevationProvider);
+        add(graph, takeoff, rbcp, elevationProvider);
+        add(graph, waypointsInFlight, rbcp, (latitudedeg, longitudedeg) -> cruisingaltitude);
+        add(graph, touchdown, rbcp, elevationProvider);
+        add(graph, waypointsAfterTouchdown, rbcp, elevationProvider);
+        return graph;
+    }
+
+    private void add(Graph graph, List<GeoCoordinate> l, EllipsoidCalculations rbcp, ElevationProvider elevationProvider) {
+        for (GeoCoordinate gc : l) {
+            add(graph, gc, rbcp, elevationProvider);
+        }
+    }
+
+    private void add(Graph graph, GeoCoordinate gc, EllipsoidCalculations rbcp, ElevationProvider elevationProvider) {
+        GraphNode n = graph.addNode("", rbcp.toCart(gc, elevationProvider));
+        if (graph.getNodeCount() > 1) {
+            graph.connectNodes(graph.getNode(graph.getNodeCount() - 2), n, "");
+        }
+    }
+
     public static GeoRoute parse(String s) {
         GeoRoute route = new GeoRoute();
         String[] mp = StringUtils.split(s, "->");
@@ -104,12 +135,12 @@ public class GeoRoute {
         for (int i = 0; i < mp.length; i++) {
             String[] ip = StringUtils.split(mp[i], ":");
             if (ip[0].equals("wp")) {
-                l.add(toGeoCoordinate(Util.parseLatLon(ip[i])));
+                l.add(toGeoCoordinate(Util.parseLatLon(ip[1])));
             } else if (ip[0].equals("takeoff")) {
-                route.takeoff = toGeoCoordinate(Util.parseLatLon(ip[i]));
+                route.takeoff = toGeoCoordinate(Util.parseLatLon(ip[1]));
                 l = route.waypointsInFlight;
             } else if (ip[0].equals("touchdown")) {
-                route.touchdown = toGeoCoordinate(Util.parseLatLon(ip[i]));
+                route.touchdown = toGeoCoordinate(Util.parseLatLon(ip[1]));
                 l = route.waypointsAfterTouchdown;
             } else {
                 //TODO log

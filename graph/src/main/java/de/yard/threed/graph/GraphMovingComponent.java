@@ -18,6 +18,7 @@ import de.yard.threed.engine.util.RandomIntProvider;
  * Auf die velocity hat der Graph keinen Einfluss.
  * <p>
  * Der Graph und damit die projection koennen sich auch aendern. Darum sind die nicht im Konstruktor.
+ * 21.3.24: Isn't projection for groundnet and thus icao and graph dependent? Anyway, having it here makes things really complex.
  * <p>
  * Created by thomass on 24.11.16.
  */

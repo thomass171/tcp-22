@@ -29,6 +29,9 @@ import de.yard.threed.traffic.geodesy.SimpleMapProjection;
  * The end of the graph might be undetermined (Runway,Holding,Orbit) at the beginning and be determined during flight, eg. if destination
  * elevation or landing runway is not yet known. Even 'destination' is not required at the beginning, when the route ends in a holding.
  * <p>
+ * 21.3.24: No longer limited to flight, so the 'Flight' part could be removed from name. Is it still needed at all? Probably
+ * yes, for having a location for the smoothed GraphPath. And maybe an open destination.
+ *
  * Created on 21.11.18.
  */
 public class FlightRouteGraph {
@@ -36,10 +39,10 @@ public class FlightRouteGraph {
     Graph graph;
     GraphPath path;
     GraphPath smoothedpath;
-    //edge with from on runway
-    public GraphEdge takeoffedge;
-    //edge with to on runway
-    GraphEdge touchdownedge;
+    //edge with from on runway. 20.3.24:Assume not needed
+    //public GraphEdge takeoffedge;
+    //edge with to on runway.20.3.24:Assume not needed
+    //GraphEdge touchdownedge;
 
     /**
      * Smoothen muss extra gemacht werden. Damit bleibt er prinzipiell projectbar für 2D.
@@ -50,8 +53,8 @@ public class FlightRouteGraph {
      */
     public FlightRouteGraph(Graph graph, GraphEdge takeoffedge, GraphEdge touchdownedge) {
         this.graph = graph;
-        this.takeoffedge = takeoffedge;
-        this.touchdownedge = touchdownedge;
+        //this.takeoffedge = takeoffedge;
+       // this.touchdownedge = touchdownedge;
         int layer = 1;
         path = GraphPath.buildFromNode(graph.getNode(0), layer);
     }

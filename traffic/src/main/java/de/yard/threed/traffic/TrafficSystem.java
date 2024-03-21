@@ -28,6 +28,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.util.NearView;
 
 
+import de.yard.threed.traffic.flight.FlightRouteGraph;
 import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
 
@@ -106,13 +107,13 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
      * data is missing. These are the fields formerly in BasicTravelScene with null values.
      */
     public /*4.12.23ConfigNodeList*/ List<SmartLocation> locationList;
-    public TrafficGraph groundNet;
     public SceneNode destinationNode;
     public NearView nearView;
 
     // 27.11.23: Knows vehicle already, should also no vehicle definitions and provide these. static for now, but
     // should be per event.
     public static List<VehicleDefinition> knownVehicles = new ArrayList<VehicleDefinition>();
+    private boolean sphereloaded = false;
 
     /**
      * weil er neue Pfade im Graph hinzufuegt, lauscht er auch auf GRAPH_EVENT_PATHCOMPLETED, um diese wieder aus dem
@@ -129,6 +130,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                         GraphEventRegistry.GRAPH_EVENT_PATHCOMPLETED,
                         TrafficEventRegistry.TRAFFIC_EVENT_VEHICLELOADED,
                         TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED,
+                        // 20.3.24 TRAFFIC_EVENT_GRAPHLOADED added
+                        TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED,
                         BaseEventRegistry.EVENT_USER_ASSEMBLED});
         //this.visualizer = visualizer;
 
@@ -300,32 +303,58 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             // 31.10.23:moved here from BasicTravelScene
             // Loads a specific vehicle by name or the next not yet loaded from a/the vehicle list
             logger.debug("Processing TRAFFIC_REQUEST_LOADVEHICLE request " + request);
-            // We need a graph for placing the vehicle. Wait until its available. We can assume that also terrain will be available
-            // when a graph is available. Not sure this is really true always and not sure terrain is needed at all.
-            // graph appears sufficient. But is it always a groundnet??
-            if (groundNet == null) {
-                logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing groundnet");
-                return false;
-            }
+
             String vehiclename = (String) request.getPayload().get("name");
             // TODO decode smartlocation
             SmartLocation smartLocation = (SmartLocation) request.getPayload().get("location");
-            if (smartLocation == null) {
-                // 26.3.20 Was ware denn die naechste Location? Das ist ja jetzt alles EDDK lastig. TODO
-                String icao = "EDDK";
-                //27.12.21  DefaultTrafficWorld.getInstance().getConfiguration().getLocationListByName(icao).get(nextlocationindex);
+            GeoRoute initialRoute = request.getPayload().get("initialRoute", s -> GeoRoute.parse(s));
+
+            if (!sphereloaded) {
+                logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing sphere load");
+                return false;
+            }
+
+            TrafficGraph graphToUse = null;
+            if (initialRoute == null) {
+                // 20.3.24: Would be better to move graph detection below for knowing the vehicle and location we can find the graph. But this breaks nextlocationindex.
+                // Traditionally always groundneteddk was used here. Seems neither Wayland nor Demo use it up to now.
+                // We need a graph for placing the vehicle. Wait until its available. We can assume that also terrain will be available
+                // when a graph is available. Not sure this is really true always and not sure terrain is needed at all.
+                // graph appears sufficient. But is it always a groundnet??
+                // 20.2.24: For now use always the first
+                for (String cluster : trafficgraphs.keySet()) {
+                    if (trafficgraphs.get(cluster) != null) {
+                        graphToUse = trafficgraphs.get(cluster);
+                    }
+                }
+                if (graphToUse == null) {
+                    logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing traffic graph");
+                    return false;
+                }
+
+                if (smartLocation == null) {
+                    // 26.3.20 Was ware denn die naechste Location? Das ist ja jetzt alles EDDK lastig. TODO
+                    String icao = "EDDK";
+                    //27.12.21  DefaultTrafficWorld.getInstance().getConfiguration().getLocationListByName(icao).get(nextlocationindex);
                 /*4.12.23 ConfigNode location = locationList/*getLocationList()* /.get(nextlocationindex);
                 smartLocation = new SmartLocation(icao, XmlHelper.getStringValue(location.nativeNode));*/
-                smartLocation = locationList.get(nextlocationindex);
+                    smartLocation = locationList.get(nextlocationindex);
 
-                // 27.21.21 das ist jetzt schwierig zu pruefen. Es ist auch unklar, ob es wirklich noch noetig ist. Mal weglassen.
+                    // 27.21.21 das ist jetzt schwierig zu pruefen. Es ist auch unklar, ob es wirklich noch noetig ist. Mal weglassen.
                 /*if (DefaultTrafficWorld.getInstance().getGroundNetGraph(icao) == null) {
                     SystemManager.putRequest(new Request(RequestRegistry.TRAFFIC_REQUEST_LOADGROUNDNET, new Payload(icao)));
                     // warten und nochmal versuchen
                     return false;
                 }*/
-                nextlocationindex++;
-                logger.debug("No location in request. Now using " + smartLocation);
+                    nextlocationindex++;
+                    logger.debug("No location in request. Now using " + smartLocation);
+                }
+            } else {
+                FlightRouteGraph flightRoute = new BasicRouteBuilder(TrafficHelper.getEllipsoidConversionsProviderByDataprovider())
+                        .fromGeoRoute(initialRoute);
+                GraphPath smoothedflightpath = flightRoute.getPath();
+                Graph graph = flightRoute.getGraph();
+                graphToUse = new TrafficGraph(graph);
             }
             /**
              * load eines Vehicle, z.B. per TRAFFIC_REQUEST_LOADVEHICLE. 24.11.20: Dafuer ist jetzt TRAFFIC_REQUEST_LOADVEHICLE2.
@@ -338,9 +367,9 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
              */
             String name = vehiclename;
 
-            List<Vehicle> vehiclelist = TrafficHelper.getVehicleListByDataprovider();
-
             if (name == null) {
+                List<Vehicle> vehiclelist = TrafficHelper.getVehicleListByDataprovider();
+
                 // no vehicle name in request, so get the next unloaded one.
                 for (int i = 0; i < vehiclelist.size(); i++) {
                     //SceneVehicle sv = sceneConfig.getVehicle(i);
@@ -358,14 +387,14 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             }
 
             SphereProjections sphereProjections = TrafficHelper.getProjectionByDataprovider();
-            //lauch c172p (or 777)
-            //TrafficSystem.loadVehicles(tw, avataraircraftindex);
 
             VehicleDefinition config = TrafficHelper.getVehicleConfigByDataprovider(name, null);// tw.getVehicleConfig(name);
-            EcsEntity avatar = UserSystem.getInitialUser();//AvatarSystem.getAvatar().avatarE;
-            VehicleLauncher.lauchVehicleByName(groundNet/*getGroundNet()*/, config, name, smartLocation, TeleportComponent.getTeleportComponent(avatar),
-                    destinationNode/*getDestinationNode()*/, sphereProjections.backProjection, baseTransformForVehicleOnGraph, nearView, genericVehicleBuiltDelegates,
-                    vehicleLoader/*getVehicleLoader()*/);
+            EcsEntity avatar = UserSystem.getInitialUser();
+            // 21.3.24 Without login there's no avatar yet
+            VehicleLauncher.lauchVehicleByName(graphToUse, config, name, smartLocation,
+                    avatar == null ? null : TeleportComponent.getTeleportComponent(avatar),
+                    destinationNode, sphereProjections.backProjection, baseTransformForVehicleOnGraph, nearView, genericVehicleBuiltDelegates,
+                    vehicleLoader);
             //aus flight: GroundServicesScene.lauchVehicleByIndex(gsw.groundnet, tw, 2, TeleportComponent.getTeleportComponent(avatar.avatarE), world, gsw.groundnet.projection);
 
 
@@ -452,6 +481,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 }
 
             }
+            sphereloaded=true;
         }
         if (evt.getType().equals(BaseEventRegistry.EVENT_USER_ASSEMBLED)) {
             // 31.10.23 From TrafficWorldSystem
@@ -475,6 +505,17 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             }*/
 
             TrafficSystem.attachNewAvatarToAllVehicles(UserSystem.getInitialUser(), nearView);
+        }
+        // 20.3.24: Event handler added and handling moved here from below loader.
+        if (evt.getType().equals(TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED)) {
+            TrafficGraph graph = (TrafficGraph) evt.getPayloadByIndex(0);
+            String cluster = (String) evt.getPayloadByIndex(1);
+
+            trafficgraphs.put(cluster, graph);
+
+            // 30.10.21: Vehicles cannot be loaded immediately, because they need to wait for example for elevation.
+            TrafficGraph trafficGraph = graph;
+            SystemManager.putRequest(RequestRegistry.buildLoadVehicles(trafficGraph));
         }
     }
 
@@ -604,6 +645,9 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         }
     }
 
+    /**
+     * Load a TrafficGraph.
+     */
     private boolean loadGraph(BundleData bundleData, String cluster, AbstractTrafficGraphFactory factory) {
         TrafficGraph graph = null;
         if (bundleData == null) {
@@ -627,19 +671,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
         if (graph != null) {
             SystemManager.sendEvent(new Event(TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED, new Payload(graph, cluster)));
-            //Event reicht nicht fuer alle Zwecke??
-            //12.5.20: Das ist ja ein ganz allgemeiner Trafficgraph. Der kommt einfach mal in world dazu, unabhaengig von
-            //Groundnet. Das ist doch bestimmt fuer eine OSM Scene.
-            //DefaultTrafficWorld.setLoadedGraph(null, graph);
-            //29.10.21 nur noch wenns das gibt, muss eh raus.
-                /*30.11.21if (DefaultTrafficWorld.getInstance() != null) {
-                    DefaultTrafficWorld.getInstance().addTrafficGraph(graph);
-                }*/
-            trafficgraphs.put(cluster, graph);
-
-            // 30.10.21: Vehicles cannot be loaded immediately, because they need to wait for example for elevation.
-            TrafficGraph trafficGraph = graph;
-            SystemManager.putRequest(RequestRegistry.buildLoadVehicles(trafficGraph));
+            // 20.3.24 handling of new graph moved to event handler
             return true;
         }
         return false;

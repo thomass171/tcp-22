@@ -316,7 +316,8 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
                 Request request;
                 // no userid known. Might not be user related. TODO Maybe the request via parameter isn't used any more.
                 // Its quite early to send this request now, but the receiver should wait until the time comes.
-                request = RequestRegistry.buildLoadVehicle(-1, argv_initialVehicle, null);
+                request = RequestRegistry.buildLoadVehicle(-1, argv_initialVehicle, null,
+                        Platform.getInstance().getConfiguration().getString("initialRoute"));
                 SystemManager.putRequest(request);
             }
         }
@@ -330,8 +331,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             enableNearView = (boolean) b;
         }
 
-        // Parameter basename gibt es eigentlich nur in 2D. 7.10.21: Aber das wird hier jetzt einach mal als Request sent,
-        // wenns nicht relevant oder ungueltig ist, verfaellt es halt. Und ich fuehre auch wieder den Deault EDDK ein.
+        // Parameter basename is for 2D and 3D.
 
         tilename = Platform.getInstance().getConfiguration().getString("basename");
 
@@ -477,7 +477,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         }*/
         if (Input.getKeyDown(KeyCode.L)) {
             // load next not yet loaded vehicle. 1.2.24: What is using this? Hangar/Cockpit isn't. But FlatAirportScene does.
-            Request request = RequestRegistry.buildLoadVehicle(UserSystem.getInitialUser().getId(), null, null);
+            Request request = RequestRegistry.buildLoadVehicle(UserSystem.getInitialUser().getId(), null, null, null);
             SystemManager.putRequest(request);
         }
 

@@ -24,6 +24,7 @@ import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.traffic.apps.BasicTravelScene;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -62,10 +63,14 @@ public class BasicTravelSceneTest {
      * "Wayland" is loaded "by convention". 16.12.21: No longer by convention
      */
     @ParameterizedTest
-    @CsvSource({"false", "true"})
-    public void testWayland(boolean enableFPC) throws Exception {
+    @CsvSource(value={"false;;", "true;;"}, delimiter = ';')
+    //Currently, a georoute cannot be converted to 2D
+    //@CsvSource(value={"false;;", "true;;", "false;engine:bike.xml;wp:50.768,7.1672000->wp:50.8662999,7.1443999"}, delimiter = ';')
+    public void testWayland(boolean enableFPC, String initialVehicle, String initialRoute) throws Exception {
         HashMap<String, String> customProperties = new HashMap<String, String>();
         customProperties.put("enableFPC", Boolean.toString(enableFPC));
+        customProperties.put("initialVehicle", initialVehicle);
+        customProperties.put("initialRoute", initialRoute);
         setup("traffic:tiles/Wayland.xml", customProperties);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
@@ -169,6 +174,24 @@ public class BasicTravelSceneTest {
         assertTrue(xdiff > 3.0);
 
         // 28.11.23: would be nice to test effect of 'baseTransformForVehicleOnGraph' But how, hmm?
+    }
+
+    /**
+     * 21.3.24: 3D by geolocation. Not possible until we have EllipsoidCalculations implementation.
+     */
+    @Disabled
+    @ParameterizedTest
+    @CsvSource(value={"false;engine:bike.xml;wp:50.768,7.1672000->wp:50.8662999,7.1443999"}, delimiter = ';')
+    public void testSimple3D(boolean enableFPC, String initialVehicle, String initialRoute) throws Exception {
+        HashMap<String, String> customProperties = new HashMap<String, String>();
+        customProperties.put("enableFPC", Boolean.toString(enableFPC));
+        //if (initialVehicle!=null){
+        customProperties.put("initialVehicle", initialVehicle);
+        customProperties.put("initialRoute", initialRoute);
+        //}
+        setup("lat,lon", customProperties);
+
+        assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
     }
 
     /**

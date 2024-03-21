@@ -28,7 +28,7 @@ public class Graph {
     // 15.12.21: Tja, ist das wirklich so? Oder ist das nicht eine unzulässige aber praktische Vereinfachung für z0 und y0 Ebenen? Auch in
     // einer y0 Ebene kann ein Vehicle steil nach oben moven. Stimmt dann noch die Rotation?
     public GraphOrientation orientation;
-    //1.4.20 Ohne funktionale Bedeutung, aber ganz praktisch
+    //1.4.20 name is not functional important, but helpful for testing/logging.
     private String name;
 
     public Graph(GraphOrientation orientation) {

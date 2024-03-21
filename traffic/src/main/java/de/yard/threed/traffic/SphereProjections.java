@@ -9,6 +9,7 @@ public class SphereProjections {
     public SimpleMapProjection projection;
 
     // only set for 3D?
+    // 21.3.24 Isn't this for groundnet and thus icao dependent?
     public GraphProjection/*Flight3D*/ backProjection;
 
     public SphereProjections(SimpleMapProjection projection,GraphProjection/*Flight3D*/ backProjection){

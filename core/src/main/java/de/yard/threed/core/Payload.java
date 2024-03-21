@@ -74,7 +74,7 @@ public class Payload {
     }
 
     public Payload add(String key, int value) {
-        values.put(key, new Integer(value));
+        values.put(key, Integer.valueOf(value));
         return this;
     }
 
@@ -137,7 +137,11 @@ public class Payload {
         if (values == null) {
             throw new RuntimeException("no name based payload");
         }
-        return objectBuilder.buildFromString((String)values.get(name));
+        String value = (String) values.get(name);
+        if (value == null) {
+            return null;
+        }
+        return objectBuilder.buildFromString(value);
     }
 
     public int getAsInt(String name) {
@@ -236,9 +240,9 @@ public class Payload {
             case 's':
                 return content;
             case 'i':
-                return (new Integer(Util.atoi(content)));
+                return (Integer.valueOf(Util.atoi(content)));
             case 'b':
-                return (new Boolean(StringUtils.toLowerCase(content).equals("true")));
+                return (Boolean.valueOf(StringUtils.toLowerCase(content).equals("true")));
             case 'v':
                 return Util.parseVector3(content);
             case 'q':
