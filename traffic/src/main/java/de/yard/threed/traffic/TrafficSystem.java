@@ -274,7 +274,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             }
 
             if (terrainavailable) {
-                SphereProjections sphereProjections = TrafficHelper.getProjectionByDataprovider();
+                //22.3.24 SphereProjections sphereProjections = TrafficHelper.getProjectionByDataprovider();
                 /*27.12.21AirportConfig airportConfig = null;
                 if (DefaultTrafficWorld.getInstance() != null) {
                     airportConfig = DefaultTrafficWorld.getInstance().getAirport("EDDK");
@@ -293,7 +293,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 TrafficHelper.launchVehicles(vehiclelist,
                         trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
                         (UserSystem.getInitialUser() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
-                        SphereSystem.getSphereNode()/*getWorld()*/, sphereProjections.backProjection,
+                        SphereSystem.getSphereNode()/*getWorld()*/, null/*22.3.24sphereProjections.backProjection*/,
                         /*27.12.21airportConfig,*/ baseTransformForVehicleOnGraph, vehicleLoader, genericVehicleBuiltDelegates);
                 vehiclesLoaded++;
                 return true;
@@ -386,14 +386,14 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 return true;
             }
 
-            SphereProjections sphereProjections = TrafficHelper.getProjectionByDataprovider();
+            //22.3.24 SphereProjections sphereProjections = TrafficHelper.getProjectionByDataprovider();
 
             VehicleDefinition config = TrafficHelper.getVehicleConfigByDataprovider(name, null);// tw.getVehicleConfig(name);
             EcsEntity avatar = UserSystem.getInitialUser();
             // 21.3.24 Without login there's no avatar yet
             VehicleLauncher.lauchVehicleByName(graphToUse, config, name, smartLocation,
                     avatar == null ? null : TeleportComponent.getTeleportComponent(avatar),
-                    destinationNode, sphereProjections.backProjection, baseTransformForVehicleOnGraph, nearView, genericVehicleBuiltDelegates,
+                    destinationNode,null/*22.3.24 sphereProjections.backProjection*/, baseTransformForVehicleOnGraph, nearView, genericVehicleBuiltDelegates,
                     vehicleLoader);
             //aus flight: GroundServicesScene.lauchVehicleByIndex(gsw.groundnet, tw, 2, TeleportComponent.getTeleportComponent(avatar.avatarE), world, gsw.groundnet.projection);
 

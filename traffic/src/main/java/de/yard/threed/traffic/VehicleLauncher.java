@@ -15,6 +15,7 @@ import de.yard.threed.graph.GraphPosition;
 import de.yard.threed.graph.GraphProjection;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeSceneNode;
+import de.yard.threed.graph.ProjectedGraph;
 import de.yard.threed.trafficcore.model.SmartLocation;
 
 import de.yard.threed.traffic.config.VehicleDefinition;
@@ -174,7 +175,10 @@ public class VehicleLauncher {
             /*Map*/GraphProjection projection, EntityBuilder entityBuilder, SceneNode teleportParentNode) {
         GraphMovingComponent gmc = new GraphMovingComponent(node.getTransform());
         //MA31: navigator hat keinen graph
-        gmc.setGraph((graph == null) ? null : graph.getBaseGraph(), position, projection);
+        if (projection != null && !(graph.getBaseGraph() instanceof ProjectedGraph)) {
+            throw new RuntimeException("should use ProjectedGraph");
+        }
+        gmc.setGraph((graph == null) ? null : graph.getBaseGraph(), position, null/*projection*/);
 
         EcsEntity e = new EcsEntity(node, gmc);
         VelocityComponent vc = new VelocityComponent();

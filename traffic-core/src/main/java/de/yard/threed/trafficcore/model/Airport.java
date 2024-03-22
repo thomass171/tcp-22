@@ -2,6 +2,7 @@ package de.yard.threed.trafficcore.model;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.LatLon;
+import de.yard.threed.core.StringUtils;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
  */
 public class Airport {
 
+    // should be upper case
     private String icao;
     private String groundNetXml;
     private Runway[] runways;
@@ -24,7 +26,7 @@ public class Airport {
     private double centerLon;
 
     public Airport(String icao, double centerLat, double centerLon) {
-        this.icao = icao;
+        this.icao = StringUtils.toUpperCase(icao);
         this.centerLat = centerLat;
         this.centerLon = centerLon;
 

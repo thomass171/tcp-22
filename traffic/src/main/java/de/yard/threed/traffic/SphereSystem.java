@@ -37,6 +37,7 @@ import de.yard.threed.traffic.config.ViewpointConfig;
 import de.yard.threed.traffic.config.XmlVehicleDefinition;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 
+import de.yard.threed.traffic.geodesy.MapProjection;
 import de.yard.threed.traffic.geodesy.SimpleMapProjection;
 import de.yard.threed.trafficcore.model.Airport;
 import de.yard.threed.trafficcore.model.Vehicle;
@@ -74,7 +75,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
     private boolean needsBackProjection = false;
     EllipsoidCalculations/*Flight3D*/ ellipsoidCalculations;
-    GraphBackProjectionProvider backProjection;
+    GraphBackProjectionProvider backProjectionProvider;
 
     // Das was mal world in TravelScenes war. Eine destination node an der alles(?) haengt, zumindest statischer Content(terrain), der
     // sich damit dann komplett verschieben läßt. Könnte/sollte evtl. per DataProvider zur Verfügung gestellt werden.
@@ -87,15 +88,15 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     private LightDefinition[] lightDefinitions;
 
     /**
-     * backprojection needed for 3D, otherwise null.
+     * backProjectionProvider needed for 3D, otherwise null.
      * <p>
      * 27.12.21: SceneConfig (das ist NUR der scene sub Part) und center mal reinstecken.
      */
-    public SphereSystem(EllipsoidCalculations/*Flight3D*/ ellipsoidCalculations, GraphBackProjectionProvider backProjection) {
+    public SphereSystem(EllipsoidCalculations/*Flight3D*/ ellipsoidCalculations, GraphBackProjectionProvider backProjectionProvider) {
         super(new String[]{}, new RequestType[]{USER_REQUEST_SPHERE}, new EventType[]{});
         //??updatepergroup = false;
         this.ellipsoidCalculations = ellipsoidCalculations;
-        this.backProjection = backProjection;
+        this.backProjectionProvider = backProjectionProvider;
         if (ellipsoidCalculations != null) {
             SystemManager.putDataProvider("ellipsoidconversionprovider", new EllipsoidConversionsProvider(ellipsoidCalculations));
         }
@@ -373,11 +374,14 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
     }
 
+    /**
+     * 22.3.24: Parameter 'forwardProjection' added for providing a fitting backprojection (3D only).
+     */
     @Override
     public Object getData(Object[] parameter) {
 
         //SphereProjections
-        return new SphereProjections(projection, (needsBackProjection) ? getBackProjection() : null);
+        return new SphereProjections(projection, (needsBackProjection) ? getBackProjectionByProvider((MapProjection) parameter[0]) : null);
 
     }
 
@@ -386,12 +390,12 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
      *
      * @return
      */
-    protected GraphProjection/*Flight3D*/ getBackProjection() {
-        if (backProjection/*DefaultTrafficWorld.getInstance()*/ == null) {
+    protected GraphProjection/*Flight3D*/ getBackProjectionByProvider(MapProjection forwardProjection) {
+        if (backProjectionProvider == null) {
             return null;
         }
         //GraphProjectionFlight3D graphprojection = new GraphProjectionFlight3D(DefaultTrafficWorld.getInstance().getGroundNet("EDDK").projection);
-        GraphProjection/*Flight3D*/ graphprojection = backProjection.getGraphBackProjection();
+        GraphProjection/*Flight3D*/ graphprojection = backProjectionProvider.getGraphBackProjection(forwardProjection);
         return graphprojection;
 
     }

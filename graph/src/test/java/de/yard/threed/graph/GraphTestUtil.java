@@ -1,6 +1,9 @@
 package de.yard.threed.graph;
 
 
+import de.yard.threed.core.LocalTransform;
+import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Vector3;
 import de.yard.threed.core.testutil.TestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,4 +39,17 @@ public class GraphTestUtil {
             assertNull(actual.getArc());
         }
     }
+
+    public static GraphProjection buildSimpleGraphProjection() {
+        GraphProjection projection = new GraphProjection() {
+            @Override
+            public LocalTransform project(GraphPosition cp) {
+                Vector3 position = cp.get3DPosition().add(new Vector3(3, 4, 0));
+                Quaternion rotation = new Quaternion();
+                return new LocalTransform(position, rotation);
+            }
+        };
+        return projection;
+    }
+
 }

@@ -1,8 +1,11 @@
 package de.yard.threed.graph;
 
+import de.yard.threed.core.LocalTransform;
+import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.graph.RotationProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -245,6 +248,20 @@ public class Graph {
 
     public String getName() {
         return name;
+    }
+
+    /**
+     * Extracted from GraphMovingSystem.getPosRot().
+     */
+    public LocalTransform getPosRot(GraphPosition cp, RotationProvider rotationProvider) {
+        Vector3 position = cp.get3DPosition();
+
+        // die berechnete rotation ist bei projection nicht nutzbar. 22.2.2020 abstrahirt
+        //Quaternion rotation = (gmc.graph.orientation.get3DRotation(cp.reverseorientation, cp.currentedge.getEffectiveDirection(cp.getAbsolutePosition()), cp.currentedge));
+        Quaternion rotation = rotationProvider.get3DRotation();
+        LocalTransform posrot = new LocalTransform(position, rotation);
+        //logger.debug("no projection. posrot="+posrot);
+        return posrot;
     }
 }
 

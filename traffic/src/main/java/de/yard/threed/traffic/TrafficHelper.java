@@ -17,6 +17,7 @@ import de.yard.threed.graph.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Payload;
+import de.yard.threed.traffic.geodesy.MapProjection;
 import de.yard.threed.trafficcore.config.LocatedVehicle;
 import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
@@ -131,14 +132,14 @@ public class TrafficHelper {
         //}
     }
 
-    public static SphereProjections getProjectionByDataprovider() {
+    public static SphereProjections getProjectionByDataprovider(MapProjection forwardProjection) {
         DataProvider projectionDataProvider = SystemManager.getDataProvider("projection");
         if (projectionDataProvider == null) {
             logger.error("no projection");
             return null;
         }
 
-        SphereProjections projection = (SphereProjections) projectionDataProvider.getData(null);//trafficWorld.getProjection();
+        SphereProjections projection = (SphereProjections) projectionDataProvider.getData(new Object[]{forwardProjection});
         return projection;
     }
 

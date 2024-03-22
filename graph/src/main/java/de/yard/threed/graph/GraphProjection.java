@@ -3,8 +3,8 @@ package de.yard.threed.graph;
 import de.yard.threed.core.LocalTransform;
 
 /**
- * Eine Projection zwischen zwei GraphKoordinatensystemen. Vermeidet Abhaengigkeit zu einer MapProjection, die
- * vielleicht doch zu speziell ist.
+ * Projection between two Graph coordinate systems. Avoids dependency to a MapProjection, which is
+ * quite specific.
  * 
  * Created on 10.01.19.
  */

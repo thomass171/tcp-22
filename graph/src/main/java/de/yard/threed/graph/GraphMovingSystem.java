@@ -1,7 +1,6 @@
 package de.yard.threed.graph;
 
 
-
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Input;
 import de.yard.threed.engine.KeyCode;
@@ -121,10 +120,9 @@ public class GraphMovingSystem extends DefaultEcsSystem {
             vc.setMovementSpeed(0);
             //8.5.19 hier schon den Layer löschen, weil sonst unklar ist, welches System das macht.
             gmc.graph.removeLayer(completedpath.layer);
-            SystemManager.sendEvent(new Event(GraphEventRegistry.GRAPH_EVENT_PATHCOMPLETED, new Payload(gmc.getGraph(), completedpath,entity)));
+            SystemManager.sendEvent(new Event(GraphEventRegistry.GRAPH_EVENT_PATHCOMPLETED, new Payload(gmc.getGraph(), completedpath, entity)));
         }
     }
-
 
 
     /**
@@ -202,7 +200,12 @@ public class GraphMovingSystem extends DefaultEcsSystem {
         /*1.3.18 das war eh nur Kruecke fuer Railing. Die macht das jetzt anders. if (gmc.visualizer != null) {
             offset = gmc.visualizer.getPositionOffset();
         }*/
-        LocalTransform posrot = getPosRot(gmc, gmc.getProjection());
+        LocalTransform posrot;
+        if (gmc.graph instanceof ProjectedGraph) {
+            posrot =  getPosRot(gmc, ((ProjectedGraph) gmc.graph).backProjection);
+        }else {
+            posrot = getPosRot(gmc, gmc.getProjection());
+        }
         if (posrot != null) {
             gmc.setPosRot(posrot);
             //MA31 der Rest war schon kommentiert. SGGeod geod = SGGeod.fromCart(posrot.position);
@@ -223,6 +226,10 @@ public class GraphMovingSystem extends DefaultEcsSystem {
      * @return
      */
     public static LocalTransform getTransform(GraphMovingComponent gmc) {
+        if (gmc.graph instanceof ProjectedGraph) {
+            return getPosRot(gmc, ((ProjectedGraph) gmc.graph).backProjection);
+        }
+        // keep old way for now
         return getPosRot(gmc, gmc.getProjection());
     }
 
@@ -233,22 +240,12 @@ public class GraphMovingSystem extends DefaultEcsSystem {
      * Die Projection ist zur Darstellung, nicht die des Groundnet! Die Methode muss auch woanders hin.
      * <p>
      * Ausgelagert auch zum Testen.
+     * 22.3.24: Implementation split to (Projected)Graph.
      */
     public static LocalTransform getPosRot(GraphMovingComponent gmc, /*Map*/GraphProjection projection) {
         GraphPosition cp = gmc.getCurrentposition();
         if (cp != null) {
-            Vector3 position = cp.get3DPosition();
-            if (projection == null) {
-                // die berechnete rotation ist bei projection nicht nutzbar. 22.2.2020 abstrahirt
-                //Quaternion rotation = (gmc.graph.orientation.get3DRotation(cp.reverseorientation, cp.currentedge.getEffectiveDirection(cp.getAbsolutePosition()), cp.currentedge));
-                Quaternion rotation = gmc.rotationProvider.get3DRotation();
-                LocalTransform posrot = new LocalTransform(position, rotation);
-                //logger.debug("no projection. posrot="+posrot);
-                return posrot;
-            } else {
-                return projection.project(cp);
-
-            }
+            return gmc.getGraph().getPosRot(cp, gmc.rotationProvider);
         }
         return null;
     }

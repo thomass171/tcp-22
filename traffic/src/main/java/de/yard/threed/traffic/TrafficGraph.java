@@ -31,8 +31,8 @@ public class TrafficGraph /*MA31 extends Graph */ {
     public String icao;
     //10.3.21: Decoupling
     private Graph baseGraph;
-    public static String RAILWAY="railway";
-    public static String ROAD="road";
+    public static String RAILWAY = "railway";
+    public static String ROAD = "road";
 
     public TrafficGraph(GraphValidator validator, GraphOrientation buildForZ0) {
         //super(validator,buildForZ0);
@@ -42,6 +42,11 @@ public class TrafficGraph /*MA31 extends Graph */ {
     public TrafficGraph(GraphOrientation buildForZ0) {
         //super(buildForZ0);
         baseGraph = new Graph(buildForZ0);
+    }
+
+    public TrafficGraph(GraphValidator validator, GraphOrientation buildForZ0, GraphProjection backprojection) {
+        //super(validator,buildForZ0);
+        baseGraph = new ProjectedGraph(validator, buildForZ0, backprojection);
     }
 
     /**

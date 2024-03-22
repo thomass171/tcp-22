@@ -1,7 +1,6 @@
 package de.yard.threed.graph;
 
 
-
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.core.LocalTransform;
@@ -144,7 +143,10 @@ public class GraphMovingComponent extends EcsComponent {
     public void setGraph(Graph graph, GraphPosition position, GraphProjection projection) {
         this.graph = graph;
         this.currentposition = position;
-        this.projection = projection;
+        //21.3.24 this.projection = projection;
+        if (projection != null) {
+            throw new RuntimeException("should use ProjectedGraph");
+        }
     }
 
     /**
@@ -264,7 +266,7 @@ public class GraphMovingComponent extends EcsComponent {
         return pathcompleted;
     }
 
-    public GraphPath isMoving() {
+    public GraphPath getPath() {
         return path;//state.equals(MOVING);
     }
 

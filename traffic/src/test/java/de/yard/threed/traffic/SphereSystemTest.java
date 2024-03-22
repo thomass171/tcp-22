@@ -77,7 +77,7 @@ public class SphereSystemTest {
         assertEquals(0, SystemManager.getRequestCount(), "requests ");
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
         assertEquals(1, completeEvents.size(), "completeEvents.size");
-        SphereProjections projections = TrafficHelper.getProjectionByDataprovider();
+        SphereProjections projections = TrafficHelper.getProjectionByDataprovider(null/*??*/);
         assertNotNull(projections);
         assertNotNull(projections.projection);
         assertNull(projections.backProjection);
@@ -102,7 +102,7 @@ public class SphereSystemTest {
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
         assertEquals(1, completeEvents.size(), "completeEvents.size");
         //assertNull("", DefaultTrafficWorld.getInstance());
-        assertNotNull(TrafficHelper.getProjectionByDataprovider());
+        assertNotNull(TrafficHelper.getProjectionByDataprovider(null/*??*/));
 
         List<ViewPoint> viewpoints = TrafficHelper.getViewpointsByDataprovider();
 
@@ -139,7 +139,7 @@ public class SphereSystemTest {
 
         List<Event> locEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
         assertEquals(0, locEvents.size(), "completeEvents.size");
-        assertNull(TrafficHelper.getProjectionByDataprovider());
+        assertNull(TrafficHelper.getProjectionByDataprovider(null/*??*/));
         // 0 because of nothing happened
         assertEquals(0, SystemManager.getRequestCount(), "requests");
     }
@@ -157,7 +157,7 @@ public class SphereSystemTest {
 
         List<Event> locEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
         assertEquals(1, locEvents.size(), "completeEvents.size");
-        assertNull(TrafficHelper.getProjectionByDataprovider().projection);
+        assertNull(TrafficHelper.getProjectionByDataprovider(null/*??*/).projection);
         // 1 because of TRAFFIC_REQUEST_LOADGROUNDNET
         assertEquals(1, SystemManager.getRequestCount(), "requests ");
         Request request = SystemManager.getRequest(0);
