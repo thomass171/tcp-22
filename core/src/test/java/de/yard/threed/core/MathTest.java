@@ -61,6 +61,15 @@ public class MathTest {
         q = Quaternion.buildQuaternion(rechts, oben);
         Vector3 newoben = rechts.rotate(q);
         TestUtils.assertVector3(oben, newoben);
+
+        Assertions.assertEquals(0, new Vector2(1,0).angle().getDegree(),0.00001);
+        Assertions.assertEquals(45, new Vector2(1,1).angle().getDegree(),0.00001);
+        Assertions.assertEquals(90, new Vector2(0,1).angle().getDegree(),0.00001);
+        Assertions.assertEquals(135, new Vector2(-1,1).angle().getDegree(),0.00001);
+        Assertions.assertEquals(180, new Vector2(-1,0).angle().getDegree(),0.00001);
+        Assertions.assertEquals(225, new Vector2(-1,-1).angle().getDegree(),0.00001);
+        Assertions.assertEquals(270, new Vector2(0,-1).angle().getDegree(),0.00001);
+        Assertions.assertEquals(315, new Vector2(1,-1).angle().getDegree(),0.00001);
     }
 
     @Test

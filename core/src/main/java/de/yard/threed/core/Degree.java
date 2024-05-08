@@ -58,21 +58,18 @@ public class Degree {
     }
 
     public boolean isEqual(Degree angle, double epsilon) {
-        double d1 = angle.degree;
-        double d2 = degree;
-        d1 = normalizeDegree(d1);
-        d2 = normalizeDegree(d2);
-        return MathUtil2.areEqual(d1, d2, epsilon);
+        return MathUtil2.areEqual(angle.normalize().getDegree(), this.normalize().getDegree(), epsilon);
     }
 
-    private double normalizeDegree(double d) {
+    public Degree normalize() {
+        double d = degree;
         while (d < 0) {
             d += 360;
         }
-        while (d > 360) {
+        while (d >= 360) {
             d -= 360;
         }
-        return d;
+        return new Degree(d);
     }
 
     public boolean isGreater(Degree degree) {

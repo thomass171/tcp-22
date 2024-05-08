@@ -4,7 +4,7 @@ import de.yard.threed.graph.GraphMovingComponent;
 import de.yard.threed.traffic.VehicleComponent;
 
 /**
- * We also have BasicFlightRouteBuilder.
+ * We also have {@link BasicRouteBuilder}.
  */
 public interface FlightRouteBuilder {
     /**

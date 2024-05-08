@@ -34,5 +34,17 @@ public class DegreeTest {
         
     }
 
+    @Test
+    public void testNormalize() {
+
+        Assertions.assertEquals( "0.0", new Degree(0.0).normalize().toString());
+        Assertions.assertEquals( "45.0", new Degree(45.0).normalize().toString());
+        Assertions.assertEquals( "315.0", new Degree(-45.0).normalize().toString());
+        Assertions.assertEquals( "315.0", new Degree(315.0).normalize().toString());
+        Assertions.assertEquals( "0.0", new Degree(360.0).normalize().toString());
+
+    }
+
+
 
 }

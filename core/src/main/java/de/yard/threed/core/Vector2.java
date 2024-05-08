@@ -291,10 +291,24 @@ public class Vector2 {
     }
 
     public Vector2 addX(double t) {
-        return new Vector2(x+t,y);
+        return new Vector2(x + t, y);
     }
 
     public Vector2 addY(double t) {
-        return new Vector2(x,y+t);
+        return new Vector2(x, y + t);
+    }
+
+    /**
+     * like in math, 0 degree point right (+x).
+     * From https://stackoverflow.com/questions/21483999/using-atan2-to-find-angle-between-two-vectors
+     */
+    public Degree angle() {
+        // just to be sure
+        Vector2 v = new Vector2(x, y).normalize();
+        double angle = Math.atan2(y, x) - Math.atan2(0, 1);
+        if (angle < 0) {
+            angle += 2 * Math.PI;
+        }
+        return Degree.buildFromRadians(angle);
     }
 }

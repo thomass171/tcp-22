@@ -61,11 +61,10 @@ public class BasicTravelSceneTest {
 
     /**
      * "Wayland" is loaded "by convention". 16.12.21: No longer by convention
+     * A georoute cannot be used here because Wayland is native 2D without MapProjection.
      */
     @ParameterizedTest
     @CsvSource(value={"false;;", "true;;"}, delimiter = ';')
-    //Currently, a georoute cannot be converted to 2D
-    //@CsvSource(value={"false;;", "true;;", "false;engine:bike.xml;wp:50.768,7.1672000->wp:50.8662999,7.1443999"}, delimiter = ';')
     public void testWayland(boolean enableFPC, String initialVehicle, String initialRoute) throws Exception {
         HashMap<String, String> customProperties = new HashMap<String, String>();
         customProperties.put("enableFPC", Boolean.toString(enableFPC));
