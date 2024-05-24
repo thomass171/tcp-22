@@ -9,7 +9,7 @@ import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.gui.*;
 import de.yard.threed.engine.platform.ProcessPolicy;
 import de.yard.threed.engine.vr.VrInstance;
-import de.yard.threed.traffic.AbstractTerrainBuilder;
+import de.yard.threed.traffic.AbstractSceneryBuilder;
 import de.yard.threed.traffic.FlatTerrainSystem;
 import de.yard.threed.traffic.GraphBackProjectionProvider;
 import de.yard.threed.traffic.GraphTerrainSystem;
@@ -18,6 +18,7 @@ import de.yard.threed.traffic.GraphVisualizationSystem;
 import de.yard.threed.traffic.LightDefinition;
 import de.yard.threed.traffic.RequestRegistry;
 import de.yard.threed.traffic.EllipsoidCalculations;
+import de.yard.threed.traffic.ScenerySystem;
 import de.yard.threed.traffic.SphereSystem;
 import de.yard.threed.traffic.TrafficHelper;
 import de.yard.threed.traffic.TrafficSystem;
@@ -137,7 +138,8 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         trafficSystem = new TrafficSystem();
         SystemManager.addSystem(trafficSystem);
 
-        SystemManager.addSystem(new SphereSystem(getRbcp(), getGraphBackProjectionProvider()/*16.3.24, getCenter() getSceneConfig()*/));
+        SphereSystem sphereSystem = new SphereSystem(/*getRbcp(),*/ getGraphBackProjectionProvider()/*16.3.24, getCenter() getSceneConfig()*/);
+        SystemManager.addSystem(sphereSystem);
         ((SphereSystem) SystemManager.findSystem(SphereSystem.TAG)).setDefaultLightDefinition(getLight());
         SystemManager.addSystem(new GraphMovingSystem());
         SystemManager.addSystem(new GraphTerrainSystem(getTerrainBuilder()));
@@ -159,6 +161,8 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         SystemManager.addSystem(new ObserverSystem(), 0);
         SystemManager.addSystem(new UserSystem());
         SystemManager.addSystem(new AvatarSystem(sceneMode.isClient()), 0);
+
+        SystemManager.addSystem(new ScenerySystem(sphereSystem.world));
 
         //visualizeTrack soll auch im usermode verfuegbar sein.
         /*29.12.23 was commented, but back now with abstract provider for visualizer*/
@@ -316,6 +320,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
                 Request request;
                 // no userid known. Might not be user related. TODO Maybe the request via parameter isn't used any more.
                 // Its quite early to send this request now, but the receiver should wait until the time comes.
+                // 10.5.24: far too early. Sphere is not yet loaded.
                 request = RequestRegistry.buildLoadVehicle(-1, argv_initialVehicle, null,
                         Platform.getInstance().getConfiguration().getString("initialRoute"));
                 SystemManager.putRequest(request);
@@ -423,7 +428,9 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
      * Das ist nach allgemeiner Lehre wohl die richtige Kombination; ein directional und ein ambient. In JME sind die Taxiways zu dunkel, in GWT ok.
      * Und in JME scheint ambient bei Buildings nicht zugreifen (wegen flat shading?). Die Nordseiten sind zu dunkel.
      * 27.10.21: Aus FlatTravelScene hierhin verschoben.
+     * 14.5.24: Deprecated now because 3D also moves to config files
      */
+    @Deprecated
     public LightDefinition[] getLight() {
         // quasi senkrecht von oben
         //9.5.19 DirectionalLight light = new DirectionalLight(Color.WHITE, new Vector3(0, 0, 2));
@@ -508,6 +515,8 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     }
 
     /**
+     * Returns a projection to convert a position on a non 3D graph to a 3D position.
+     * Thats the reason for the phrase 'back', even though its not the opposite of the forward projection.
      * GraphProjectionFlight3D needs FgMath
      *
      * @return
@@ -597,7 +606,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         return null;
     }
 
-    public AbstractTerrainBuilder getTerrainBuilder() {
+    public AbstractSceneryBuilder getTerrainBuilder() {
         return null;
     }
 

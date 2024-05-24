@@ -202,9 +202,9 @@ public class GraphMovingSystem extends DefaultEcsSystem {
         }*/
         LocalTransform posrot;
         if (gmc.graph instanceof ProjectedGraph) {
-            posrot =  getPosRot(gmc, ((ProjectedGraph) gmc.graph).backProjection);
+            posrot =  getPosRot(gmc/*24.5.24, ((ProjectedGraph) gmc.graph).backProjection*/);
         }else {
-            posrot = getPosRot(gmc, gmc.getProjection());
+            posrot = getPosRot(gmc/*24.5.24, gmc.getProjection()*/);
         }
         if (posrot != null) {
             gmc.setPosRot(posrot);
@@ -227,10 +227,10 @@ public class GraphMovingSystem extends DefaultEcsSystem {
      */
     public static LocalTransform getTransform(GraphMovingComponent gmc) {
         if (gmc.graph instanceof ProjectedGraph) {
-            return getPosRot(gmc, ((ProjectedGraph) gmc.graph).backProjection);
+            return getPosRot(gmc/*24.5.24), ((ProjectedGraph) gmc.graph).backProjection*/);
         }
         // keep old way for now
-        return getPosRot(gmc, gmc.getProjection());
+        return getPosRot(gmc/*24.5.24, gmc.getProjection()*/);
     }
 
     /**
@@ -241,8 +241,9 @@ public class GraphMovingSystem extends DefaultEcsSystem {
      * <p>
      * Ausgelagert auch zum Testen.
      * 22.3.24: Implementation split to (Projected)Graph.
+     * 24.5.24: Projection apparently not used.
      */
-    public static LocalTransform getPosRot(GraphMovingComponent gmc, /*Map*/GraphProjection projection) {
+    public static LocalTransform getPosRot(GraphMovingComponent gmc/*, /*Map* /GraphProjection projection*/) {
         GraphPosition cp = gmc.getCurrentposition();
         if (cp != null) {
             return gmc.getGraph().getPosRot(cp, gmc.rotationProvider);

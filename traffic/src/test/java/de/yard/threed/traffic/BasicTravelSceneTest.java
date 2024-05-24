@@ -176,21 +176,27 @@ public class BasicTravelSceneTest {
     }
 
     /**
-     * 21.3.24: 3D by geolocation. Not possible until we have EllipsoidCalculations implementation.
+     * 21.3.24: 3D scene with initial route by geolocation.
+     * Not possible until we have EllipsoidCalculations implementation?
+     * The route is the SAMPLE_EDKB_EDDK
      */
-    @Disabled
     @ParameterizedTest
-    @CsvSource(value={"false;engine:bike.xml;wp:50.768,7.1672000->wp:50.8662999,7.1443999"}, delimiter = ';')
-    public void testSimple3D(boolean enableFPC, String initialVehicle, String initialRoute) throws Exception {
+    @CsvSource(value={"loc;wp:50.768,7.1672000->takeoff:50.7692,7.1617000->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.1317000->wp:50.8662999,7.1443999"}, delimiter = ';')
+    public void testMoon(String initialVehicle, String initialRoute) throws Exception {
         HashMap<String, String> customProperties = new HashMap<String, String>();
-        customProperties.put("enableFPC", Boolean.toString(enableFPC));
         //if (initialVehicle!=null){
         customProperties.put("initialVehicle", initialVehicle);
         customProperties.put("initialRoute", initialRoute);
         //}
-        setup("lat,lon", customProperties);
+
+        setup("traffic:tiles/Moon.xml", customProperties);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
+        assertNotNull(UserSystem.getInitialUser(), "user entity");
+
+        // "Wayland" has two graph files that should have been loaded finally (via EVENT_LOCATIONCHANGED)
+        List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
+        assertEquals(1, completeEvents.size(), "TRAFFIC_EVENT_SPHERE_LOADED.size");
     }
 
     /**
@@ -199,7 +205,9 @@ public class BasicTravelSceneTest {
     private void setup(String tileName, HashMap<String, String> customProperties) throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
         properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
-        properties.put("basename", tileName);
+        if (tileName != null) {
+            properties.put("basename", tileName);
+        }
         properties.putAll(customProperties);
         sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties),
                 /*1.10.23 provided by scene new String[]{"engine", "data", "traffic"}*/null);

@@ -18,6 +18,7 @@ import de.yard.threed.traffic.geodesy.GeoCoordinate;
  * See also https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
  * and https://stackoverflow.com/questions/1185408/converting-from-longitude-latitude-to-cartesian-coordinates
  *
+ * 10.5.24: Merge with {@link de.yard.threed.traffic.geodesy.MapProjection}? At least toCart() appears similar.
  */
 public interface EllipsoidCalculations {
     //22.12.21 stoert hier GraphProjection/*Flight3D*/ getGraphBackProjection();

@@ -11,8 +11,10 @@ import de.yard.threed.traffic.geodesy.MapProjection;
  *
  * Terrain might be projected? Hmm, maybe.
  * NoNoNo, 'Flat'/Tile20 has no on-demand terrain loading, so no projection here.
+ * 9.5.24: Renamed AbstractTerrainBuilder to AbstractSceneryBuilder to indicate it is
+ * more than just terrain but full scenery (for example buildings and trees).
  */
-public interface AbstractTerrainBuilder {
+public interface AbstractSceneryBuilder {
 
     void init(SceneNode destinationNode);
 
@@ -33,4 +35,10 @@ public interface AbstractTerrainBuilder {
     void buildTerrain(Object p0, Object p1, MapProjection projection);
     @Deprecated
     SceneNode buildParkingNode(GraphNode n);
+
+    /**
+     * Was in SphereSystem once, but is highly coupled to scenery because positioning in the
+     * scenery requires exact the same calculations that were used for building the scenery.
+     */
+    EllipsoidCalculations getEllipsoidCalculations();
 }

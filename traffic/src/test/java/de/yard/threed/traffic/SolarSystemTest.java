@@ -86,17 +86,17 @@ public class SolarSystemTest {
 
         GraphMovingComponent gmc = new GraphMovingComponent();
         gmc.setGraph(orbit, new GraphPosition(edge0), null);
-        LocalTransform posrot = GraphMovingSystem.getPosRot(gmc, null);
+        LocalTransform posrot = GraphMovingSystem.getPosRot(gmc/*, null*/);
         TestUtils.assertVector3( new Vector3(0, WorldGlobal.DISTANCEMOONEARTH, 0), posrot.position,"start position");
         gmc.moveForward(umfang12);
-        TestUtils.assertVector3( new Vector3(-sinPi6*WorldGlobal.DISTANCEMOONEARTH, cosPi6*WorldGlobal.DISTANCEMOONEARTH, 0), GraphMovingSystem.getPosRot(gmc, null).position,"position");
+        TestUtils.assertVector3( new Vector3(-sinPi6*WorldGlobal.DISTANCEMOONEARTH, cosPi6*WorldGlobal.DISTANCEMOONEARTH, 0), GraphMovingSystem.getPosRot(gmc/*, null*/).position,"position");
         gmc.moveForward(umfang4);
-        TestUtils.assertVector3( new Vector3(-cosPi6*WorldGlobal.DISTANCEMOONEARTH, -sinPi6*WorldGlobal.DISTANCEMOONEARTH, 0), GraphMovingSystem.getPosRot(gmc, null).position,"position");
+        TestUtils.assertVector3( new Vector3(-cosPi6*WorldGlobal.DISTANCEMOONEARTH, -sinPi6*WorldGlobal.DISTANCEMOONEARTH, 0), GraphMovingSystem.getPosRot(gmc/*, null*/).position,"position");
         gmc.moveForward(umfang4+umfang4);
-        TestUtils.assertVector3( new Vector3(cosPi6*WorldGlobal.DISTANCEMOONEARTH, sinPi6*WorldGlobal.DISTANCEMOONEARTH, 0), GraphMovingSystem.getPosRot(gmc, null).position,"position");
+        TestUtils.assertVector3( new Vector3(cosPi6*WorldGlobal.DISTANCEMOONEARTH, sinPi6*WorldGlobal.DISTANCEMOONEARTH, 0), GraphMovingSystem.getPosRot(gmc/*, null*/).position,"position");
         //jetzt wider auf den ersten Step
         gmc.moveForward(umfang4);
-        TestUtils.assertVector3( new Vector3(-sinPi6*WorldGlobal.DISTANCEMOONEARTH, cosPi6*WorldGlobal.DISTANCEMOONEARTH, 0), GraphMovingSystem.getPosRot(gmc, null).position,"position");
+        TestUtils.assertVector3( new Vector3(-sinPi6*WorldGlobal.DISTANCEMOONEARTH, cosPi6*WorldGlobal.DISTANCEMOONEARTH, 0), GraphMovingSystem.getPosRot(gmc/*, null*/).position,"position");
 
 
     }

@@ -221,31 +221,4 @@ public class VehicleLauncher {
         SceneNode baseNode = result.get(0);
         return baseNode;
     }
-
-    /**
-     * 20.3.18: Laden eines für die Scene konfigurierten Vehicles.
-     * 21.3.19: Lädt jetzt über den Namen in der Config. Eine Prüfung, ob das Vehicle schon geladen wurde,
-     * erfolgt hier nicht.
-     * Hier sind noch zu viele Abhaengigkeiten drin, oder?
-     */
-    public static void lauchVehicleByName(TrafficGraph trafficGraph, VehicleDefinition config/*27.12.21TrafficWorldConfig tw*/, String name, SmartLocation location,
-                                          TeleportComponent tc, SceneNode destination, GraphProjection projectionforbackprojection,/*27.11.23 SceneConfig sceneConfig*/LocalTransform baseTransformForVehicleOnGraph, NearView nearView,
-                                          List<VehicleBuiltDelegate> genericVehicleBuiltDelegates, VehicleLoader vehicleLoader) {
-        //SceneVehicle vconf = /*tw.getScene("GroundServices")*/sceneConfig.getVehicleByName(name);
-        //GraphEdge ed = groundnet.groundnetgraph.findEdgeByName("128-129");
-        // SmartLocation location = new SmartLocation(attr.get("location"));
-        String edge = location.getGroundnetLocation();
-        GraphEdge ed = trafficGraph.getBaseGraph().findEdgeByName(edge);
-        if (ed == null) {
-            long millis = Platform.getInstance().currentTimeMillis();
-            logger.warn("edge not found for location: " + edge + ".Using random from millis " + millis);
-            ed = trafficGraph.getBaseGraph().getEdge((int) (millis % trafficGraph.getBaseGraph().getNodeCount()));
-        }
-        //27.12.21VehicleConfig config = tw.getVehicleConfig(name);
-        GraphPosition start = new GraphPosition(ed/*, ed.getLength() , true*/);
-        VehicleLauncher.launchVehicle(new Vehicle(name), config, trafficGraph, start, tc, destination, projectionforbackprojection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, nearView,
-                genericVehicleBuiltDelegates, vehicleLoader);
-    }
-
-
 }

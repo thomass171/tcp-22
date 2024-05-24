@@ -132,6 +132,9 @@ public class TrafficHelper {
         //}
     }
 
+    /**
+     * 22.3.24: Parameter 'forwardProjection' added for providing a fitting backprojection (3D only).
+     */
     public static SphereProjections getProjectionByDataprovider(MapProjection forwardProjection) {
         DataProvider projectionDataProvider = SystemManager.getDataProvider("projection");
         if (projectionDataProvider == null) {

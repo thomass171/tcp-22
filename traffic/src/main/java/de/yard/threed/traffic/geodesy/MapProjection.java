@@ -16,6 +16,7 @@ import de.yard.threed.traffic.flight.FlightLocation;
  *
  * 17.11.21: This cannot handle elevation, so isn't suitable for creating 3D routes.
  * <p>
+ * 10.5.24: Merge with {@link de.yard.threed.traffic.EllipsoidCalculations}? At least toCart() appears similar.
  * Created by thomass on 27.04.17.
  */
 public interface MapProjection {

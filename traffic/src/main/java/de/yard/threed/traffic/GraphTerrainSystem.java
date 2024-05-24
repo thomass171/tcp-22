@@ -15,7 +15,6 @@ import de.yard.threed.traffic.geodesy.MapProjection;
 import de.yard.threed.traffic.geodesy.SimpleMapProjection;
 import de.yard.threed.graph.*;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.trafficcore.model.Runway;
 
 
 /**
@@ -56,9 +55,9 @@ public class GraphTerrainSystem extends DefaultEcsSystem {
 
     public boolean enabled = true;
 
-    private AbstractTerrainBuilder terrainBuilder;
+    private AbstractSceneryBuilder terrainBuilder;
 
-    public GraphTerrainSystem(/*10.12.21 Scene scene, SceneNode world/*, SGGeod origin* /, MapProjection projection, AirportConfig airport*/AbstractTerrainBuilder terrainBuilder) {
+    public GraphTerrainSystem(/*10.12.21 Scene scene, SceneNode world/*, SGGeod origin* /, MapProjection projection, AirportConfig airport*/AbstractSceneryBuilder terrainBuilder) {
         super(new EventType[]{TeleporterSystem.EVENT_POSITIONCHANGED, TrafficEventRegistry.GROUNDNET_EVENT_LOADED,
                 TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED, TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED});
         //10.12.21 this.scene = scene;

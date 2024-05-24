@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 9.5.24 just a draft
+-->
+
+<c:config xmlns:c="http://www.example.org/tcp-22" name="a">
+
+    <include>locomotive.xml</include>
+
+    <terrain>
+        <builder type="scenery" name="MoonSceneryBuilder"/>
+    </terrain>
+    <object></object>
+
+
+</c:config>

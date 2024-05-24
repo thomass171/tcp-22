@@ -54,7 +54,7 @@ public class GraphComponentTest {
         projectedLocalTransform = GraphMovingSystem.getTransform(gmc);
         assertEquals(expectedX, projectedLocalTransform.position.getX());
 
-        projectedLocalTransform = GraphMovingSystem.getPosRot(gmc, projection);
+        projectedLocalTransform = GraphMovingSystem.getPosRot(gmc/*, projection*/);
         assertEquals(expectedX, projectedLocalTransform.position.getX());
     }
 

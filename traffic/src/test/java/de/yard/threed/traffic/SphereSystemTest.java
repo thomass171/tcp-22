@@ -8,7 +8,14 @@ import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.buffer.SimpleByteBuffer;
+import de.yard.threed.core.resource.Bundle;
+import de.yard.threed.core.resource.BundleData;
+import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.core.testutil.InMemoryBundle;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
+import de.yard.threed.core.testutil.TestBundle;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ViewPoint;
 import de.yard.threed.engine.ecs.EcsTestHelper;
@@ -21,8 +28,10 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.trafficcore.model.Vehicle;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +53,7 @@ public class SphereSystemTest {
     GeoCoordinate formerInitialPositionEDDK = new GeoCoordinate(new Degree(50.843675), new Degree(7.109709), 1150);
 
     SceneNode world;
+    SphereSystem sphereSystem;
 
     @BeforeEach
     public void setup() {
@@ -51,7 +61,8 @@ public class SphereSystemTest {
             @Override
             public void init() {
                 world = new SceneNode();
-                SystemManager.addSystem(new SphereSystem(null, null));
+                sphereSystem = new SphereSystem(/*null,*/ null);
+                SystemManager.addSystem(sphereSystem);
 
                 //ohne Elevation wird kein groundnet geladen
                 //??SystemManager.putDataProvider(SystemManager.DATAPROVIDERELEVATION, TerrainElevationProvider.buildForStaticAltitude(17));
@@ -79,7 +90,8 @@ public class SphereSystemTest {
         assertEquals(1, completeEvents.size(), "completeEvents.size");
         SphereProjections projections = TrafficHelper.getProjectionByDataprovider(null/*??*/);
         assertNotNull(projections);
-        assertNotNull(projections.projection);
+        //24.5.24 why should wayland define a projection?? assertNotNull(projections.projection);
+        assertNull(projections.projection);
         assertNull(projections.backProjection);
 
         List<ViewPoint> viewpoints = TrafficHelper.getViewpointsByDataprovider();
@@ -146,8 +158,10 @@ public class SphereSystemTest {
 
     /**
      * 18.3.24: 'geoposition' is new trigger for 3D.
+     * 24.5.24:This feature no longer exists
      */
     @Test
+    @Disabled
     public void testWithGeoPosition() {
 
         startSimpleTest(formerInitialPositionEDDK.toString());
@@ -163,6 +177,30 @@ public class SphereSystemTest {
         Request request = SystemManager.getRequest(0);
         assertEquals("TRAFFIC_REQUEST_LOADGROUNDNET", request.getType().getLabel());
 
+    }
+
+    @Test
+    public void testLoadGroundnet() {
+
+        TestBundle tmpBundle = new TestBundle("tmpBnd",new String[]{}, "");
+        String configXml = "<c:config xmlns:c=\"http://www.example.org/tcp-22\" name=\"a\">\n" +
+                "    <trafficgraph groundnet=\"gnetname\"/>\n" +
+                "<projection center=\"50.86538,7.139103\"/>  </c:config>";
+        tmpBundle.addAdditionalResource("config.xml", new BundleData(new SimpleByteBuffer(configXml.getBytes(StandardCharsets.UTF_8)), true));
+        tmpBundle.complete();
+        BundleRegistry.registerBundle("tmpBnd", tmpBundle);
+
+        startSimpleTest("tmpBnd:config.xml");
+
+        List<Event> locEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
+        assertEquals(1, locEvents.size(), "completeEvents.size");
+        // 1 because of TRAFFIC_REQUEST_LOADGROUNDNET
+        assertEquals(1, SystemManager.getRequestCount(), "requests ");
+        Request request = SystemManager.getRequest(0);
+        assertEquals("TRAFFIC_REQUEST_LOADGROUNDNET", request.getType().getLabel());
+        assertEquals("gnetname", request.getPayload().get("icao", s->s));
+
+        TestUtils.assertLatLon(new LatLon(new Degree(50.86538),new Degree(7.139103)), sphereSystem.projection.getOrigin(), 0.01, "projection origin");
     }
 
     private void runSimpleTest(String tilename) {

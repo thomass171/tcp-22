@@ -147,6 +147,10 @@ public class TrafficConfig {
         return XmlHelper.getChildren(topNodes, "poi");
     }
 
+    public List<NativeNode> getProjections() {
+        return XmlHelper.getChildren(topNodes, "projection");
+    }
+
     /*27.11.23 no scene" in XSD currently. public SceneConfig getScene(String scenename) {
         SceneConfig sceneconfig = null;
         if (scenes == null) {
@@ -280,10 +284,18 @@ public class TrafficConfig {
     }
 
 
-    public List<AirportDefinition> findAirportDefinitionsByIcao(String icao) {
-        List<NativeNode> result = XmlHelper.filter(getAirportDefinitions(topNodes),
-                n -> icao.equals(XmlHelper.getStringAttribute(n, "icao")));
-        return convertAirportDefinitions(result);
+    public String findSceneryBuilder() {
+        List<NativeNode> result = XmlHelper.getChildren(topNodes, "terrain");
+        if (result.size() == 0) {
+            return null;
+        }
+
+        result = XmlHelper.getChildren(result.get(0), "builder");
+        // TODO filter for type scenery
+        if (result.size() == 0) {
+            return null;
+        }
+        return XmlHelper.getStringAttribute(result.get(0), "name");
     }
 
     public LocalTransform getBaseTransformForVehicleOnGraph() {
@@ -302,6 +314,12 @@ public class TrafficConfig {
         List<NativeNode> result = XmlHelper.filter(getVehicleDefinitions(topNodes),
                 n -> name.equals(XmlHelper.getStringAttribute(n, "name")));
         return XmlVehicleDefinition.convertVehicleDefinitions(result);
+    }
+
+    public List<AirportDefinition> findAirportDefinitionsByIcao(String icao) {
+        List<NativeNode> result = XmlHelper.filter(getAirportDefinitions(topNodes),
+                n -> icao.equals(XmlHelper.getStringAttribute(n, "icao")));
+        return convertAirportDefinitions(result);
     }
 
     /**

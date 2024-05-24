@@ -35,13 +35,13 @@ public class GraphTerrainVisualizer extends DefaultGraphVisualizer {
     public MapProjection projection;
     //18.11.20 Graph graph;
     //27.12.21: Das mit dem terrainbuilder ist etwas krude hinundher.oder?
-    AbstractTerrainBuilder terrainBuilder;
+    AbstractSceneryBuilder terrainBuilder;
 
     public GraphTerrainVisualizer(/*Graph graph/*,Scene scene*/) {
         this(20f);
     }
 
-    public GraphTerrainVisualizer(AbstractTerrainBuilder terrainBuilder) {
+    public GraphTerrainVisualizer(AbstractSceneryBuilder terrainBuilder) {
         this(20);
         this.terrainBuilder = terrainBuilder;
     }

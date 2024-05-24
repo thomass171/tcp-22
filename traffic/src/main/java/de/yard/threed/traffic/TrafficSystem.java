@@ -114,6 +114,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     // should be per event.
     public static List<VehicleDefinition> knownVehicles = new ArrayList<VehicleDefinition>();
     private boolean sphereloaded = false;
+    private boolean userAssembled = false;
 
     /**
      * weil er neue Pfade im Graph hinzufuegt, lauscht er auch auf GRAPH_EVENT_PATHCOMPLETED, um diese wieder aus dem
@@ -301,6 +302,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         }
         if (request.getType().equals(RequestRegistry.TRAFFIC_REQUEST_LOADVEHICLE)) {
             // 31.10.23:moved here from BasicTravelScene
+            // User request to load a vehicle.
             // Loads a specific vehicle by name or the next not yet loaded from a/the vehicle list
             logger.debug("Processing TRAFFIC_REQUEST_LOADVEHICLE request " + request);
 
@@ -309,12 +311,20 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             SmartLocation smartLocation = (SmartLocation) request.getPayload().get("location");
             GeoRoute initialRoute = request.getPayload().get("initialRoute", s -> GeoRoute.parse(s));
 
+            // 10.5.24 also wait for user join? Hmm, maybe not because joining user can enter the
+            // vehicle loaded here. But TRAFFIC_REQUEST_LOADVEHICLE typically is triggered by a joined
+            // user, so it seems more consistent to wait here. Use ASSEMBLED as we already have this event.
             if (!sphereloaded) {
                 logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing sphere load");
                 return false;
             }
+            if (!userAssembled) {
+                logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing userAssembled");
+                return false;
+            }
 
             TrafficGraph graphToUse = null;
+            GraphPosition graphStartPosition=null;
             if (initialRoute == null) {
                 // 20.3.24: Would be better to move graph detection below for knowing the vehicle and location we can find the graph. But this breaks nextlocationindex.
                 // Traditionally always groundneteddk was used here. Seems neither Wayland nor Demo use it up to now.
@@ -328,7 +338,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     }
                 }
                 if (graphToUse == null) {
-                    logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing traffic graph");
+                    logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing traffic graph. groundnet not loaded?");
                     return false;
                 }
 
@@ -349,6 +359,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     nextlocationindex++;
                     logger.debug("No location in request. Now using " + smartLocation);
                 }
+                graphStartPosition=getGraphStartPosition(smartLocation, graphToUse);
             } else {
                 FlightRouteGraph flightRoute = new BasicRouteBuilder(TrafficHelper.getEllipsoidConversionsProviderByDataprovider())
                         .fromGeoRoute(initialRoute);
@@ -390,14 +401,15 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
             VehicleDefinition config = TrafficHelper.getVehicleConfigByDataprovider(name, null);// tw.getVehicleConfig(name);
             EcsEntity avatar = UserSystem.getInitialUser();
+            if (destinationNode==null){
+                // the most ugly hack ever. Who sets destinationNode?
+                destinationNode=Scene.getCurrent().getWorld();
+            }
             // 21.3.24 Without login there's no avatar yet
-            VehicleLauncher.lauchVehicleByName(graphToUse, config, name, smartLocation,
+            VehicleLauncher.launchVehicle(new Vehicle(name), config, graphToUse,graphStartPosition,
                     avatar == null ? null : TeleportComponent.getTeleportComponent(avatar),
-                    destinationNode,null/*22.3.24 sphereProjections.backProjection*/, baseTransformForVehicleOnGraph, nearView, genericVehicleBuiltDelegates,
+                    destinationNode, null/*22.3.24 sphereProjections.backProjection*/, baseTransformForVehicleOnGraph, nearView, genericVehicleBuiltDelegates,
                     vehicleLoader);
-            //aus flight: GroundServicesScene.lauchVehicleByIndex(gsw.groundnet, tw, 2, TeleportComponent.getTeleportComponent(avatar.avatarE), world, gsw.groundnet.projection);
-
-
             return true;
         }
         return false;
@@ -481,7 +493,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 }
 
             }
-            sphereloaded=true;
+            sphereloaded = true;
         }
         if (evt.getType().equals(BaseEventRegistry.EVENT_USER_ASSEMBLED)) {
             // 31.10.23 From TrafficWorldSystem
@@ -505,6 +517,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             }*/
 
             TrafficSystem.attachNewAvatarToAllVehicles(UserSystem.getInitialUser(), nearView);
+            userAssembled = true;
         }
         // 20.3.24: Event handler added and handling moved here from below loader.
         if (evt.getType().equals(TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED)) {
@@ -712,6 +725,24 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
     public void addVehicleBuiltDelegate(VehicleBuiltDelegate vehicleBuiltDelegate) {
         genericVehicleBuiltDelegates.add(vehicleBuiltDelegate);
+    }
+
+    /**
+     * 8.5.24: Extracted from a custom VehicleLauncher.lauchVehicleByName().
+     * Currently fails for non "groundnet" smartlocations (neither used in Demo nor in Wayland because TRAFFIC_REQUEST_LOADVEHICLE
+     * isn't used there).
+     */
+    private GraphPosition getGraphStartPosition(SmartLocation location, TrafficGraph trafficGraph) {
+        String edge = location.getGroundnetLocation();
+        GraphEdge ed = trafficGraph.getBaseGraph().findEdgeByName(edge);
+        if (ed == null) {
+            long millis = Platform.getInstance().currentTimeMillis();
+            logger.warn("edge not found for location: " + edge + ".Using random from millis " + millis);
+            ed = trafficGraph.getBaseGraph().getEdge((int) (millis % trafficGraph.getBaseGraph().getNodeCount()));
+        }
+        //27.12.21VehicleConfig config = tw.getVehicleConfig(name);
+        GraphPosition start = new GraphPosition(ed/*, ed.getLength() , true*/);
+        return start;
     }
 }
 

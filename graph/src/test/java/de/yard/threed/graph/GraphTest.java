@@ -96,7 +96,7 @@ public class GraphTest {
         gmc.setGraph(graph, pos, null);
         gmc.setSelector(new RandomGraphSelector(new DeterministicIntProvider(new int[]{1, 0})));
         move(gmc);
-        LocalTransform posrot = GraphMovingSystem.getPosRot(gmc, null);
+        LocalTransform posrot = GraphMovingSystem.getPosRot(gmc/*, null*/);
         //Die Rotation muss eine y 90 Grad sein
         TestUtils.assertVector3(new Vector3(-1, 0, 0), new Vector3(0, 0, -1).rotate(posrot.rotation), "rotated reference");
 
@@ -676,7 +676,7 @@ public class GraphTest {
         GraphMovingComponent gmc = new GraphMovingComponent();
         gmc.setGraph(graph, pos, null);
 
-        LocalTransform posrot = GraphMovingSystem.getPosRot(gmc, null);
+        LocalTransform posrot = GraphMovingSystem.getPosRot(gmc/*, null*/);
         //Die Rotation muss eine x 90 Grad sein
         TestUtils.assertVector3(new Vector3(0, 1, 0), new Vector3(0, 0, -1).rotate(posrot.rotation), "rotated reference");
 

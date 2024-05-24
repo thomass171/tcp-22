@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!---->
+<!-- Schema for all kinds of configurations -->
 <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/tcp-22"
         xmlns:c="http://www.example.org/tcp-22" elementFormDefault="unqualified">
 
@@ -21,6 +21,7 @@
             <element name="BaseTransformForVehicleOnGraph" type="c:BaseTransformForVehicleOnGraphType"/>
             <element name="include" type="string"/>
             <element name="poi" type="c:PoiType"/>
+            <element name="projection" type="c:ProjectionType"/>
         </choice>
         <attribute name="name" type="string"/>
 
@@ -29,6 +30,11 @@
     <complexType name="TrafficGraphType">
         <attribute name="graphfile" type="string"/>
         <attribute name="graphfactory" type="string"/>
+        <!-- 16.5.24 Even though groundnet was intended to be loaded 'on-the-fly', it is still helpful here because
+         1) 'on-the-fly' is far in the future and 2) a server hosted scene might have groundnets independent from some position
+         3) it avoids hard coded 'LOADGROUNDNET' requests from SphereSystem
+         -->
+        <attribute name="groundnet" type="string"/>
 
     </complexType>
 
@@ -59,8 +65,13 @@
 
     </complexType>
 
+    <!-- 9.5.24: better SceneryType? But terrain is specific for elevation providing.
+    But sceneryBuilder can also provide terrain for elevation.
+    Anyway there might be only one scenerybuilder, but multiple objects. Even though
+    this doesn't apper meaningfull.-->
     <complexType name="TerrainType">
         <sequence>
+            <element name="builder" type="c:BuilderType" minOccurs="0" maxOccurs="1"/>
             <element name="object" type="c:ObjectType" minOccurs="0" maxOccurs="unbounded"/>
         </sequence>
     </complexType>
@@ -180,6 +191,27 @@
                 <attribute name="description" type="string"/>
             </extension>
         </simpleContent>
+    </complexType>
+
+    <complexType name="BuilderType">
+        <simpleContent>
+            <extension base="string">
+                <attribute name="type" type="string"/>
+                <attribute name="name" type="string"/>
+            </extension>
+        </simpleContent>
+    </complexType>
+
+    <complexType name="ParameterType">
+        <simpleContent>
+            <extension base="string">
+                <attribute name="value" type="string"/>
+            </extension>
+        </simpleContent>
+    </complexType>
+
+    <complexType name="ProjectionType">
+        <attribute name="center" type="string"/>
     </complexType>
 
     <!-- Type for hex integers -->
