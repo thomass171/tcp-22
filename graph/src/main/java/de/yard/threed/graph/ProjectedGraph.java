@@ -18,6 +18,9 @@ public class ProjectedGraph extends Graph {
 
     public ProjectedGraph(GraphProjection projection) {
         this.projection = projection;
+        if (projection == null) {
+            throw new RuntimeException("projection is null");
+        }
     }
 
     public ProjectedGraph(GraphValidator graphValidator, GraphOrientation orientatio, GraphProjection projection) {

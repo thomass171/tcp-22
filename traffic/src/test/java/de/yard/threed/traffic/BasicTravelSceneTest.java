@@ -1,6 +1,7 @@
 package de.yard.threed.traffic;
 
 
+import de.yard.threed.core.Degree;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Quaternion;
@@ -23,6 +24,7 @@ import de.yard.threed.engine.ecs.VelocityComponent;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.traffic.apps.BasicTravelScene;
 
+import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,7 @@ import de.yard.threed.graph.GraphMovingComponent;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static de.yard.threed.core.testutil.TestUtils.assertVector3;
 import static de.yard.threed.engine.testutil.TestUtils.assertViewPoint;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -64,12 +67,11 @@ public class BasicTravelSceneTest {
      * A georoute cannot be used here because Wayland is native 2D without MapProjection.
      */
     @ParameterizedTest
-    @CsvSource(value={"false;;", "true;;"}, delimiter = ';')
-    public void testWayland(boolean enableFPC, String initialVehicle, String initialRoute) throws Exception {
+    @CsvSource(value = {"false;", "true;"}, delimiter = ';')
+    public void testWayland(boolean enableFPC, String initialVehicle) throws Exception {
         HashMap<String, String> customProperties = new HashMap<String, String>();
         customProperties.put("enableFPC", Boolean.toString(enableFPC));
         customProperties.put("initialVehicle", initialVehicle);
-        customProperties.put("initialRoute", initialRoute);
         setup("traffic:tiles/Wayland.xml", customProperties);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
@@ -119,7 +121,7 @@ public class BasicTravelSceneTest {
         List<ViewPoint> vps = TrafficHelper.getViewpointsByDataprovider();
         assertNotNull(vps);
         assertEquals(5, vps.size());
-        assertViewPoint("oben5",new LocalTransform(new Vector3(0, 0, 4000),new Quaternion()), vps.get(4));
+        assertViewPoint("oben5", new LocalTransform(new Vector3(0, 0, 4000), new Quaternion()), vps.get(4));
 
         assertNotNull(TrafficHelper.getVehicleConfigByDataprovider("loc", null));
         assertNull(TrafficHelper.getVehicleConfigByDataprovider("xx", null));
@@ -181,7 +183,7 @@ public class BasicTravelSceneTest {
      * The route is the SAMPLE_EDKB_EDDK
      */
     @ParameterizedTest
-    @CsvSource(value={"loc;wp:50.768,7.1672000->takeoff:50.7692,7.1617000->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.1317000->wp:50.8662999,7.1443999"}, delimiter = ';')
+    @CsvSource(value = {"loc;wp:50.768,7.1672000->takeoff:50.7692,7.1617000->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.1317000->wp:50.8662999,7.1443999"}, delimiter = ';')
     public void testMoon(String initialVehicle, String initialRoute) throws Exception {
         HashMap<String, String> customProperties = new HashMap<String, String>();
         //if (initialVehicle!=null){
@@ -197,6 +199,19 @@ public class BasicTravelSceneTest {
         // "Wayland" has two graph files that should have been loaded finally (via EVENT_LOCATIONCHANGED)
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
         assertEquals(1, completeEvents.size(), "TRAFFIC_EVENT_SPHERE_LOADED.size");
+
+        // Now we expect loc on the starting point of the graph of initialRoute
+        EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
+        assertNotNull(locEntity, "loc entity");
+
+        SceneNode locNode = locEntity.getSceneNode();
+        GraphMovingComponent gmc = GraphMovingComponent.getGraphMovingComponent(locEntity);
+        assertNotNull(gmc, "gmc");
+        assertNotNull(gmc.getCurrentposition(), "getCurrentposition");
+
+        Vector3 locPosition = locNode.getTransform().getPosition();
+        // there is no elevation currently(?), so the position should be quite simple to validate
+        assertVector3(new SimpleEllipsoidCalculations(MoonSceneryBuilder.MOON_RADIUS).toCart(new GeoCoordinate(new Degree(50.768), new Degree(7.1672000))), locPosition);
     }
 
     /**

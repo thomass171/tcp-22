@@ -148,6 +148,9 @@ This is a colon separated list of bundle locations, either filesystem paths or w
 ## Properties
 (what is the difference to 'Settings'?)
 
+initialVehicle:  Just a name as reference to a defined vehicle (in future maybe also or a full qualified path to a config).
+
+initialRoute
 ### Generic
 
 ### Use Case Maze

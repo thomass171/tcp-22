@@ -9,7 +9,6 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.DataProvider;
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsGroup;
-import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.TeleporterSystem;
 import de.yard.threed.traffic.geodesy.ElevationProvider;
 
@@ -83,6 +82,13 @@ public class ScenerySystem extends DefaultEcsSystem {
 
     public boolean hasTerrainBuilder() {
         return terrainBuilder != null;
+    }
+
+    /**
+     * Intended for testing
+     */
+    public AbstractSceneryBuilder getTerrainBuilder(){
+        return terrainBuilder;
     }
 }
 

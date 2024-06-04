@@ -1,11 +1,17 @@
 package de.yard.threed.traffic;
 
 
+import de.yard.threed.core.BooleanHolder;
 import de.yard.threed.core.CharsetException;
+import de.yard.threed.core.Degree;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.core.GeneralParameterHandler;
+import de.yard.threed.core.IntHolder;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
+import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
@@ -29,6 +35,7 @@ import de.yard.threed.engine.util.NearView;
 
 
 import de.yard.threed.traffic.flight.FlightRouteGraph;
+import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
 
@@ -36,6 +43,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static de.yard.threed.engine.ecs.TeleporterSystem.EVENT_POSITIONCHANGED;
 
 /**
  * Logically handles all generic traffic (but no advanced like ground services). Movement of vehicles is controlled by the GraphMovingSystem.
@@ -324,8 +333,11 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             }
 
             TrafficGraph graphToUse = null;
-            GraphPosition graphStartPosition=null;
+            GraphPosition graphStartPosition = null;
+            LocalTransform baseTransformForVehicleOnGraphToUse;
             if (initialRoute == null) {
+                // probably null for groundnet
+                baseTransformForVehicleOnGraphToUse = baseTransformForVehicleOnGraph;
                 // 20.3.24: Would be better to move graph detection below for knowing the vehicle and location we can find the graph. But this breaks nextlocationindex.
                 // Traditionally always groundneteddk was used here. Seems neither Wayland nor Demo use it up to now.
                 // We need a graph for placing the vehicle. Wait until its available. We can assume that also terrain will be available
@@ -359,13 +371,32 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     nextlocationindex++;
                     logger.debug("No location in request. Now using " + smartLocation);
                 }
-                graphStartPosition=getGraphStartPosition(smartLocation, graphToUse);
+                graphStartPosition = getGraphStartPosition(smartLocation, graphToUse);
             } else {
+                // groundnet has a (back)projection. On a initialRoute we need something different. Almost(!?) fitting value found by just probing.
+                baseTransformForVehicleOnGraphToUse = new LocalTransform(new Vector3(), Quaternion.buildRotationY(new Degree(-90)));
+                BooleanHolder shouldAbort = new BooleanHolder(false);
                 FlightRouteGraph flightRoute = new BasicRouteBuilder(TrafficHelper.getEllipsoidConversionsProviderByDataprovider())
-                        .fromGeoRoute(initialRoute);
+                        .fromGeoRoute(initialRoute, geoCoordinate -> {
+                            logger.debug("No elevation for " + geoCoordinate + " of initialRoute");
+                            if (!shouldAbort.getValue()) {
+                                // trigger terrain loading (but only once)
+                                GeoCoordinate tmpGeo = new GeoCoordinate(geoCoordinate.getLatDeg(), geoCoordinate.getLonDeg(), 0);
+                                LocalTransform loc = new LocalTransform(TrafficHelper.getEllipsoidConversionsProviderByDataprovider().toCart(tmpGeo), new Quaternion());
+                                SystemManager.sendEvent(new Event(EVENT_POSITIONCHANGED, new Payload(new Object[]{loc})));
+                                shouldAbort.setValue(true);
+                            }
+                        });
+                if (shouldAbort.getValue()) {
+                    logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing elevation");
+                    return false;
+                }
+
                 GraphPath smoothedflightpath = flightRoute.getPath();
                 Graph graph = flightRoute.getGraph();
                 graphToUse = new TrafficGraph(graph);
+                // using first edge as start should be ok
+                graphStartPosition = new GraphPosition(graph.getEdge(0));
             }
             /**
              * load eines Vehicle, z.B. per TRAFFIC_REQUEST_LOADVEHICLE. 24.11.20: Dafuer ist jetzt TRAFFIC_REQUEST_LOADVEHICLE2.
@@ -401,14 +432,15 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
             VehicleDefinition config = TrafficHelper.getVehicleConfigByDataprovider(name, null);// tw.getVehicleConfig(name);
             EcsEntity avatar = UserSystem.getInitialUser();
-            if (destinationNode==null){
+            if (destinationNode == null) {
                 // the most ugly hack ever. Who sets destinationNode?
-                destinationNode=Scene.getCurrent().getWorld();
+                destinationNode = Scene.getCurrent().getWorld();
             }
             // 21.3.24 Without login there's no avatar yet
-            VehicleLauncher.launchVehicle(new Vehicle(name), config, graphToUse,graphStartPosition,
+            logger.debug("Using baseTransformForVehicleOnGraphToUse=" + baseTransformForVehicleOnGraphToUse);
+            VehicleLauncher.launchVehicle(new Vehicle(name), config, graphToUse, graphStartPosition,
                     avatar == null ? null : TeleportComponent.getTeleportComponent(avatar),
-                    destinationNode, null/*22.3.24 sphereProjections.backProjection*/, baseTransformForVehicleOnGraph, nearView, genericVehicleBuiltDelegates,
+                    destinationNode, null/*22.3.24 sphereProjections.backProjection*/, baseTransformForVehicleOnGraphToUse, nearView, genericVehicleBuiltDelegates,
                     vehicleLoader);
             return true;
         }

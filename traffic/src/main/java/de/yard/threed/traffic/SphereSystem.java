@@ -75,7 +75,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     //14.10.21 projection aus DefaultTrafficWorld hierhin.
     public SimpleMapProjection projection;
 
-    private boolean needsBackProjection = false;
+    //25.5.24 private boolean needsBackProjection = false;
     // 10.5.24: Moved to AbstractSceneryBuilder EllipsoidCalculations/*Flight3D*/ ellipsoidCalculations;
     GraphBackProjectionProvider backProjectionProvider;
 
@@ -359,32 +359,15 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
         // 23.5.24: Now decide by defined projection. But theres nothing to decide? loadEDDK and needsBackProjection are no longer used?
         //if (initialTile == null || StringUtils.endsWith(initialTile.getName(), "EDDK-sphere.xml") || StringUtils.endsWith(initialTile.getName(), "Travel-sphere.xml")) {
         if (projection == null) {
-            // 3D, das ist ja immer erstr nur in EDDK
-            loadEDDK = true;
-            logger.debug("loadEDDK=true");
             // only backprojection?
-            needsBackProjection = true;
+            //25.5.24 needsBackProjection = true;
         } else {
-            // Die Projection wird hier festgelegt. Ob an der Location ein Airport ist, muss auch hier schon ermittelt werden,
-            //weil die Systems nachher das nicht mehr ermitteln können.
 
-            /*SimpleMapProjection*/
-            // no backprojection in 2D
-            //23.5.24: moved to XML reading projection = new SimpleMapProjection(/*BasicTravelScene.*/initialPosition);
-
-            if (TrafficHelper.isIcao(initialTile.getName())) {
-                // traditional EDDK GroundServices
-                loadEDDK = true;
-            }
-            // 5.12.23: Now uses EDDK-flat.xml instead of just "EDDK" from "dummy:EDDK". Still this is a workaround
-            if (initialTile.getName().equals("EDDK-flat.xml")) {
-                loadEDDK = true;
-            }
         }
         // 23.5.24 set provider independent from having a projection.
         SystemManager.putDataProvider("projection", this);
 
-        if (/*loadEDDK ||*/ groundnetToLoad != null) {
+        if (groundnetToLoad != null) {
             // 23.2.24: Use builder with historic default values. No longer projection.
             //SystemManager.putRequest(new Request(RequestRegistry.TRAFFIC_REQUEST_LOADGROUNDNET, new Payload("EDDK"/*trafficWorld.currentairport.icao*/, projection)));
             SystemManager.putRequest(RequestRegistry.buildLoadGroundnet(groundnetToLoad == null ? "EDDK" : groundnetToLoad));

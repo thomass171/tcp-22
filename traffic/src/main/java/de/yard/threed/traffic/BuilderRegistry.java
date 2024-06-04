@@ -12,9 +12,7 @@ public class BuilderRegistry {
     static Map<String, ObjectBuilder<AbstractSceneryBuilder>> registry = new HashMap<String, ObjectBuilder<AbstractSceneryBuilder>>();
 
     public static AbstractSceneryBuilder buildSceneryBuilder(String name) {
-        if (name.equals("MoonSceneryBuilder")) {
-            return new MoonSceneryBuilder();
-        }
+
         if (registry.containsKey(name)) {
             return registry.get(name).buildFromString("");
         }

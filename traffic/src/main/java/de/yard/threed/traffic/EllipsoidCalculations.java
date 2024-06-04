@@ -1,6 +1,7 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
@@ -43,12 +44,14 @@ public interface EllipsoidCalculations {
      * 21.3.24: Elevation is no longer in GeoCordinate, so the sea level problem might be avoided by just having elevation null.
      * So now we have a priority problem. Lets define that if a provider is passed, it should be used independent of
      * elevation in GeoCoordinate?
+     * 29.5.24: Yes, it should be used if it is available. And we need a callback to inform the user that elevation could not be retrieved.
+     * Any kind of default value is just not helpful.
      *
      * @param geoCoordinate
      * @param elevationprovider
      * @return
      */
-    Vector3 toCart(GeoCoordinate geoCoordinate, ElevationProvider elevationprovider);
+    Vector3 toCart(GeoCoordinate geoCoordinate, ElevationProvider elevationprovider, GeneralParameterHandler<GeoCoordinate> missingElevationHandler);
     @Deprecated
     Vector3 toCart(GeoCoordinate geoCoordinate);
 

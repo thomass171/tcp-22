@@ -105,7 +105,7 @@ public class LoaderGLTF {
      * New async trigger point
      */
     public static void load(ResourceLoader resourceLoader, GeneralParameterHandler<PortableModelList> delegate) {
-        logger.debug("Launching gltf load of " + resourceLoader.nativeResource.getFullQualifiedName());
+        logger.debug("Launching async gltf load of " + resourceLoader.nativeResource.getFullQualifiedName());
         resourceLoader.loadResource(new AsyncJobDelegate<AsyncHttpResponse>() {
             @Override
             public void completed(AsyncHttpResponse response) {
@@ -120,7 +120,7 @@ public class LoaderGLTF {
                     //gltfo = gltf.isObject();*/
                     // TODO get bin file name from gltf
                     //BundleResource binres = LoaderGLTF.getBinResource(file);
-                    logger.debug("Launching bin load");
+                    logger.debug("Launching async bin load");
                     ResourceLoader binLoader = resourceLoader.fromReference(LoaderGLTF.getBinResource(resourceLoader.getUrl()));
                     binLoader.loadResource(new AsyncJobDelegate<AsyncHttpResponse>() {
                         @Override

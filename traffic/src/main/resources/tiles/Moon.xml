@@ -12,5 +12,7 @@
     </terrain>
     <object></object>
 
+    <light color="white" direction="3,3,3"/>
+    <light color="white"/>
 
 </c:config>

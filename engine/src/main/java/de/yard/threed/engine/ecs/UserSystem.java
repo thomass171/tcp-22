@@ -2,6 +2,7 @@ package de.yard.threed.engine.ecs;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.core.IntHolder;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
@@ -103,8 +104,16 @@ public class UserSystem extends DefaultEcsSystem {
     }
 
     public static Request buildJoinRequest(int userEntityId/*, boolean forLogin*/) {
-        return new Request(USER_REQUEST_JOIN, new Payload(/*new Integer(userEntityId), new Boolean(forLogin)*/),userEntityId);
+        return new Request(USER_REQUEST_JOIN, new Payload(/*new Integer(userEntityId), new Boolean(forLogin)*/), userEntityId);
     }
+
+    public static Request buildTeleportRequest(int userEntityId, int option, String destination) {
+        if (option == 4) {
+            return new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new IntHolder(4), destination));
+        }
+        return new Request(USER_REQUEST_TELEPORT, new Payload(new Object[]{option}), userEntityId);
+    }
+
 
     /**
      * Only real user, no bots.

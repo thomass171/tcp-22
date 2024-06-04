@@ -10,12 +10,14 @@ import de.yard.threed.engine.gui.*;
 import de.yard.threed.engine.platform.ProcessPolicy;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.traffic.AbstractSceneryBuilder;
+import de.yard.threed.traffic.BuilderRegistry;
 import de.yard.threed.traffic.FlatTerrainSystem;
 import de.yard.threed.traffic.GraphBackProjectionProvider;
 import de.yard.threed.traffic.GraphTerrainSystem;
 
 import de.yard.threed.traffic.GraphVisualizationSystem;
 import de.yard.threed.traffic.LightDefinition;
+import de.yard.threed.traffic.MoonSceneryBuilder;
 import de.yard.threed.traffic.RequestRegistry;
 import de.yard.threed.traffic.EllipsoidCalculations;
 import de.yard.threed.traffic.ScenerySystem;
@@ -260,6 +262,14 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         SystemManager.addSystem(inputToRequestSystem, 0);
         //6.10.21 buildToggleMenu();
         //menuCycler = new MenuCycler(new MenuProvider[]{new TravelMainMenuBuilder(this)});
+
+        // Add MoonSceneryBuilder just to have it. Currently we don't know a better location becuase init()
+        // needs to be called. If its not needed it doesn't harm.
+        BuilderRegistry.add("MoonSceneryBuilder", (ObjectBuilder<AbstractSceneryBuilder>) s -> {
+            AbstractSceneryBuilder moonSceneryBuilder = new MoonSceneryBuilder();
+            moonSceneryBuilder.init(sphereSystem.world);
+            return moonSceneryBuilder;
+        });
 
         customInit();
         postInit(sceneMode);

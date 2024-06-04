@@ -1,6 +1,7 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Quaternion;
@@ -43,7 +44,7 @@ public class SimpleEllipsoidCalculations implements EllipsoidCalculations {
     }
 
     @Override
-    public Vector3 toCart(GeoCoordinate geoCoordinate, ElevationProvider elevationprovider) {
+    public Vector3 toCart(GeoCoordinate geoCoordinate, ElevationProvider elevationprovider, GeneralParameterHandler<GeoCoordinate> missingElevationHandler) {
         Vector3 cart = toCart(geoCoordinate);
         // TODO elevation??
         return cart;

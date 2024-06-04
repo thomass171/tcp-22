@@ -1,5 +1,6 @@
 package de.yard.threed.traffic;
 
+import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
@@ -105,24 +106,24 @@ public class GeoRoute {
      * Needs elevationProvider because elevation might be missing in route.
      * @return
      */
-    public Graph toGraph(EllipsoidCalculations rbcp, double cruisingaltitude, ElevationProvider elevationProvider) {
+    public Graph toGraph(EllipsoidCalculations rbcp, double cruisingaltitude, ElevationProvider elevationProvider, GeneralParameterHandler<GeoCoordinate> missingElevationHandler) {
         Graph graph = new Graph();
-        add(graph, waypointsBeforeTakeoff, rbcp, elevationProvider);
-        add(graph, takeoff, rbcp, elevationProvider);
-        add(graph, waypointsInFlight, rbcp, (latitudedeg, longitudedeg) -> cruisingaltitude);
-        add(graph, touchdown, rbcp, elevationProvider);
-        add(graph, waypointsAfterTouchdown, rbcp, elevationProvider);
+        add(graph, waypointsBeforeTakeoff, rbcp, elevationProvider, missingElevationHandler);
+        add(graph, takeoff, rbcp, elevationProvider, missingElevationHandler);
+        add(graph, waypointsInFlight, rbcp, (latitudedeg, longitudedeg) -> cruisingaltitude, missingElevationHandler);
+        add(graph, touchdown, rbcp, elevationProvider, missingElevationHandler);
+        add(graph, waypointsAfterTouchdown, rbcp, elevationProvider, missingElevationHandler);
         return graph;
     }
 
-    private void add(Graph graph, List<GeoCoordinate> l, EllipsoidCalculations rbcp, ElevationProvider elevationProvider) {
+    private void add(Graph graph, List<GeoCoordinate> l, EllipsoidCalculations rbcp, ElevationProvider elevationProvider, GeneralParameterHandler<GeoCoordinate> missingElevationHandler) {
         for (GeoCoordinate gc : l) {
-            add(graph, gc, rbcp, elevationProvider);
+            add(graph, gc, rbcp, elevationProvider, missingElevationHandler);
         }
     }
 
-    private void add(Graph graph, GeoCoordinate gc, EllipsoidCalculations rbcp, ElevationProvider elevationProvider) {
-        GraphNode n = graph.addNode("", rbcp.toCart(gc, elevationProvider));
+    private void add(Graph graph, GeoCoordinate gc, EllipsoidCalculations rbcp, ElevationProvider elevationProvider, GeneralParameterHandler<GeoCoordinate> missingElevationHandler) {
+        GraphNode n = graph.addNode("", rbcp.toCart(gc, elevationProvider, missingElevationHandler));
         if (graph.getNodeCount() > 1) {
             graph.connectNodes(graph.getNode(graph.getNodeCount() - 2), n, "");
         }

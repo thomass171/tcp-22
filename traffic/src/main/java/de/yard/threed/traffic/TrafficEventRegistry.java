@@ -37,15 +37,16 @@ public class TrafficEventRegistry {
     public static EventType TRAFFIC_EVENT_VEHICLEMOVEREQUEST = EventType.register(4004, "TRAFFIC_EVENT_VEHICLEMOVEREQUEST");
 
     /**
-     * Das EVENT_POSITIONCHANGED kommt nur beim Teleporten, nicht bei jedem Movement. Das
-     * EVENT_LOCATIONCHANGED (18.3.24 now TRAFFIC_EVENT_SPHERE_LOADED) hingegen zeigt an, dass die Umgebung gewechselt wird. Das geschieht nicht beim Teleport, zumindest nicht
+     * EVENT_POSITIONCHANGED is triggered by teleport, not every movement. Event
+     * EVENT_LOCATIONCHANGED (18.3.24 now TRAFFIC_EVENT_SPHERE_LOADED) is for sphere change. Das geschieht nicht beim Teleport, zumindest nicht
      * so automatisch.
-     * Ein wegmoven zu einem anderen Airport wird damit nicht so ohne weiteres wie in FG zu einem UnLoad/Load führen. Denn woran soll
+     * EVENT_POSITIONCHANGED is the event that ScenerySystem observes for updating scenery.
+     * Flying to some airport wird damit nicht so ohne weiteres wie in FG zu einem UnLoad/Load führen. Denn woran soll
      * man das festmachen. Es gibt ja nicht wie in FG ein main aircraft, auf das sich alles bezieht.
-     * 27.3.20: Es ist wohl unklar, wann genau ein EVENT_LOCATIONCHANGED. Zumindest mal beim Init, um nachfolgendes Laden wie groundnet und terrain zu machen. Das
-     * Groundnet geht jetzt aber ueber Request, weil ja nicht bekannt ist, wann Terrain wirklich da ist. Request kann dann warten.
+     *
+     * 26.5.24: Must be defined in TeleporterSystem and not here due to packages, even though it
+     * doesn't really belong there (Hmm). Probably GraphMovingSystem should also send these events from time to time, so maybe its ok to have it there.
      */
-    //In TeleporterSystem public static EventType EVENT_POSITIONCHANGED = new EventType("EVENT_POSITIONCHANGED");
 
     /**
      *
@@ -58,8 +59,9 @@ public class TrafficEventRegistry {
      * a big data provider leads to coupling. See README.md#DataFlow
      * GeoCoordinate is the most generic position information, suitable for all currently known tiles. For 2D projected tiles the GeoCoordinate
      * might be the center?
-     *
-     * 18.3.24: For 3D there is no tilename but GeoCoordinate (roughly a start location).
+     * 18.3.24: No more: For 3D there is no tilename but GeoCoordinate (roughly a start location).
+     * 26.5.24: The semantic of 'initialPosition' is not really defined and its purpose is questionable. Projection is provided by a provider
+     * and there are viewpoints which could provide initial positions. Maybe we should consider it deprecated.
      */
     public static EventType TRAFFIC_EVENT_SPHERE_LOADED = EventType.register(4007, "TRAFFIC_EVENT_SPHERE_LOADED");
 

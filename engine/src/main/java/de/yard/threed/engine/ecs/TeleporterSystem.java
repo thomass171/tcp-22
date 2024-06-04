@@ -244,8 +244,8 @@ public class TeleporterSystem extends DefaultEcsSystem {
     }
 
     /**
-     * 7.7.20: Ist das wirklich sinnvoll? Oder eine Kruecke?
-     *
+     * 7.7.20: Useful?
+     * 25.5.24: At least in (external) tests its useful.
      * @param activetc
      */
     public void setActivetc(TeleportComponent activetc) {

@@ -46,7 +46,7 @@ public class FlightLocation {
     }
 
     public LocalTransform toPosRot(EllipsoidCalculations rbcp) {
-        return new LocalTransform(rbcp.toCart(coordinates,null), rbcp.buildRotation(coordinates, heading, pitch));
+        return new LocalTransform(rbcp.toCart(coordinates,null,null), rbcp.buildRotation(coordinates, heading, pitch));
     }
 
     /**

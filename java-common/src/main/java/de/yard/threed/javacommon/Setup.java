@@ -109,6 +109,15 @@ public class Setup {
             // automove is enabled in Demo.xml.
             properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
+        boolean moon = true;
+        if (moon) {
+            // loc is too high above ground currently. Probably needs an elevation provider
+            properties.put("basename", "traffic:tiles/Moon.xml");
+            properties.put("initialRoute", "wp:50.768,7.1672000->takeoff:50.7692,7.1617000->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.1317000->wp:50.8662999,7.1443999");
+            // initialVehicle needed here different to Wayland where it is part of config
+            properties.put("initialVehicle", "loc");
+            properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
+        }
 
 
         return properties;
