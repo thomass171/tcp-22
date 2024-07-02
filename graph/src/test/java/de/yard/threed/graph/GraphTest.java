@@ -537,7 +537,7 @@ public class GraphTest {
         Assertions.assertEquals("eins:teardrop.smootharc--ex-->smoothbegin.zero(1)--smootharcfrom-->smootharc@zero(1)--smootharcto-->smoothbegin.a(1)--smootharcfrom-->smootharc@a(2)--smootharcto-->smoothend.a(1)", path.getDetailedString(), "path");
         GraphMovingComponent gmc = new GraphMovingComponent(null);
         gmc.setGraph(graph, start, null);
-        gmc.setPath(path);
+        gmc.setPath(path, true);
         gmc.moveForward(18);
         //muss jetzt am Ende stehen, und zwar umgesetzt wieder auf layer 0.
         Assertions.assertEquals( "ab", gmc.getCurrentposition().currentedge.getName(),"currentposition.edge");
@@ -573,7 +573,7 @@ public class GraphTest {
         Assertions.assertEquals("smootharcfrom", path.getSegment(4).getEnterNode().getName(), "enternode darf nicht a sein");
         GraphMovingComponent gmc = new GraphMovingComponent(null);
         gmc.setGraph(graph, start, null);
-        gmc.setPath(path);
+        gmc.setPath(path, true);
         gmc.moveForward(7);
         //steht jetzt irgendwo auf dem Path, aber nicht am Ende
         gmc.moveForward(-8);
@@ -801,7 +801,7 @@ public class GraphTest {
         GraphPath path = graph.findPath(start, oben, gwp);
         Assertions.assertEquals(16 + halbumfang, path.getLength(null), 0.00001);
         Assertions.assertEquals(16 + halbumfang, path.getLength(gmc.getCurrentposition()), 0.00001);
-        gmc.setPath(path);
+        gmc.setPath(path, true);
         gmc.moveForward(5);
         Assertions.assertEquals(16 + halbumfang - 5, path.getLength(gmc.getCurrentposition()), 0.00001);
         gmc.moveForward(12);

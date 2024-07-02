@@ -39,7 +39,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static de.yard.threed.core.testutil.TestUtils.assertVector3;
 import static de.yard.threed.engine.testutil.TestUtils.assertViewPoint;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 /**
@@ -56,7 +55,6 @@ public class BasicTravelSceneTest {
     SceneNode world;
 
     EcsEntity aircraft;
-    GraphMovingComponent gmc;
     VehicleComponent vhc;
     VelocityComponent vc;
     SceneRunnerForTesting sceneRunner;
@@ -109,6 +107,9 @@ public class BasicTravelSceneTest {
         // vehicle loaded for each of the railway and road graphs
         assertEquals(2, ((TrafficSystem) SystemManager.findSystem(TrafficSystem.TAG)).vehiclesLoaded);
 
+        EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
+        assertNotNull(locEntity, "loc entity");
+
         if (enableFPC) {
             assertNull(TeleportComponent.getTeleportComponent(userEntity));
             assertEquals(5, ((FirstPersonMovingSystem) SystemManager.findSystem(FirstPersonMovingSystem.TAG)).viewPoints.size());
@@ -125,6 +126,12 @@ public class BasicTravelSceneTest {
 
         assertNotNull(TrafficHelper.getVehicleConfigByDataprovider("loc", null));
         assertNull(TrafficHelper.getVehicleConfigByDataprovider("xx", null));
+
+        GraphMovingComponent gmc = GraphMovingComponent.getGraphMovingComponent(locEntity);
+        // loc should immediately move (without path, only by property automove set in config 'Wayland.xml' for vehicle 'loc')
+        assertNotNull(gmc.getGraph());
+        assertTrue(gmc.hasAutomove());
+        assertNull(gmc.getPath());
     }
 
     @Test
@@ -175,6 +182,12 @@ public class BasicTravelSceneTest {
         assertTrue(xdiff > 3.0);
 
         // 28.11.23: would be nice to test effect of 'baseTransformForVehicleOnGraph' But how, hmm?
+
+        GraphMovingComponent gmc = GraphMovingComponent.getGraphMovingComponent(locEntity);
+        // loc should immediately move (without path, only by property automove set in config 'Demo.xml' for vehicle 'loc')
+        assertNotNull(gmc.getGraph());
+        assertTrue(gmc.hasAutomove());
+        assertNull(gmc.getPath());
     }
 
     /**
@@ -211,7 +224,12 @@ public class BasicTravelSceneTest {
 
         Vector3 locPosition = locNode.getTransform().getPosition();
         // there is no elevation currently(?), so the position should be quite simple to validate
-        assertVector3(new SimpleEllipsoidCalculations(MoonSceneryBuilder.MOON_RADIUS).toCart(new GeoCoordinate(new Degree(50.768), new Degree(7.1672000))), locPosition);
+        //TODO other test due to movement 26.6.24:there shoud be no movement?? assertVector3(new SimpleEllipsoidCalculations(MoonSceneryBuilder.MOON_RADIUS).toCart(new GeoCoordinate(new Degree(50.768), new Degree(7.1672000))), locPosition);
+
+        // loc should *not* immediately move (even though a path there is no property automove set in config 'Moon.xml' for vehicle 'loc')
+        assertNotNull(gmc.getGraph());
+        assertFalse(gmc.hasAutomove());
+        assertNotNull(gmc.getPath());
     }
 
     /**

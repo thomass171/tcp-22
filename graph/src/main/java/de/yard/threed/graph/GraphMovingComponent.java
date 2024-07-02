@@ -19,6 +19,7 @@ import de.yard.threed.engine.util.RandomIntProvider;
  * Der Graph und damit die projection koennen sich auch aendern. Darum sind die nicht im Konstruktor.
  * 21.3.24: Isn't projection for groundnet and thus icao and graph dependent? Anyway, having it here makes things really complex.
  * <p>
+ * 20.6.24: Flag 'automoveenabled' removed
  * Created by thomass on 24.11.16.
  */
 public class GraphMovingComponent extends EcsComponent {
@@ -28,7 +29,6 @@ public class GraphMovingComponent extends EcsComponent {
     // Benutzersteuerung zu aktivieren. 9.10.19: Auf was bezieht sich das denn? automove ist entweder entlang eines path (wenn er gesetzt ist)
     // oder sonst einfach so im Graph.
     private boolean automove = false;
-    boolean automoveenabled = true;
     // keycontrolled sollte nicht gleichzeitig zu automove an sein.
     // 9.10.19: Sollte nicht key bezogen sein sondern eher Request (wegen gui). Evtl. ist das ganze obsolet
     // zugunsten pick animation/menu.
@@ -119,13 +119,9 @@ public class GraphMovingComponent extends EcsComponent {
      *
      * @param path
      */
-    public void setPath(GraphPath path) {
+    public void setPath(GraphPath path, boolean enableAutomove) {
         this.path = path;
-        //currentposition.currentedge = path.getSegment(0);
-        //currentposition.edgeposition = 0;
-        if (automoveenabled) {
-            automove = true;
-        }
+        automove = enableAutomove;
         selector = new GraphPathSelector(path);
         if (graphmovementdebuglog) {
             logger.debug("setPath: " + path + " with startposition " + path.startposition);
@@ -408,10 +404,6 @@ public class GraphMovingComponent extends EcsComponent {
 
     public GraphProjection getProjection() {
         return projection;
-    }
-
-    public void setAutomoveEnabled(boolean enabled) {
-        automoveenabled = enabled;
     }
 
     public void setAutomove(boolean enabled) {

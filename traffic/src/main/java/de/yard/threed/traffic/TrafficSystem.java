@@ -334,6 +334,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
             TrafficGraph graphToUse = null;
             GraphPosition graphStartPosition = null;
+            GraphPath optionalPath = null;
             LocalTransform baseTransformForVehicleOnGraphToUse;
             if (initialRoute == null) {
                 // probably null for groundnet
@@ -392,11 +393,13 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     return false;
                 }
 
-                GraphPath smoothedflightpath = flightRoute.getPath();
+                flightRoute.smooth();
                 Graph graph = flightRoute.getGraph();
                 graphToUse = new TrafficGraph(graph);
                 // using first edge as start should be ok
                 graphStartPosition = new GraphPosition(graph.getEdge(0));
+                // get smoothed flightpath
+                optionalPath = flightRoute.getPath();
             }
             /**
              * load eines Vehicle, z.B. per TRAFFIC_REQUEST_LOADVEHICLE. 24.11.20: Dafuer ist jetzt TRAFFIC_REQUEST_LOADVEHICLE2.
@@ -441,7 +444,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             VehicleLauncher.launchVehicle(new Vehicle(name), config, graphToUse, graphStartPosition,
                     avatar == null ? null : TeleportComponent.getTeleportComponent(avatar),
                     destinationNode, null/*22.3.24 sphereProjections.backProjection*/, baseTransformForVehicleOnGraphToUse, nearView, genericVehicleBuiltDelegates,
-                    vehicleLoader);
+                    vehicleLoader, optionalPath);
             return true;
         }
         return false;

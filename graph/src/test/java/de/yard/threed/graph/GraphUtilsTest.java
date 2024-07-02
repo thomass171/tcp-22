@@ -539,7 +539,7 @@ public class GraphUtilsTest {
         GraphPath path = GraphUtils.createPathFromGraphPosition(graph, start, n3, new DefaultGraphWeightProvider(graph, new GraphEdge[]{}), graphPathConstraintProvider, 0, false, false, null);
         GraphMovingComponent gmc = new GraphMovingComponent(null);
         gmc.setGraph(graph, start, null);
-        gmc.setPath(path);
+        gmc.setPath(path, true);
         gmc.moveForward(baselen + 0.2f);
         //position auf turn0
         //arclen ist plausibel

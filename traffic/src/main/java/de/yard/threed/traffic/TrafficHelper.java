@@ -49,7 +49,7 @@ public class TrafficHelper {
             return false;
         }
         SystemManager.sendEvent(new Event(GraphEventRegistry.GRAPH_EVENT_PATHCREATED, new Payload(gmc.getGraph(), path)));
-        gmc.setPath(path);
+        gmc.setPath(path, true);
         return true;
 
     }
@@ -107,7 +107,7 @@ public class TrafficHelper {
                         }
                     }
                     VehicleLauncher.launchVehicle(vehicle, vconfig, graph/*groundnet.groundnetgraph*/, graphposition, avatarpc, destinationnode, projection,
-                            /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, genericVehicleBuiltDelegates, vehicleLoader);
+                            /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, genericVehicleBuiltDelegates, vehicleLoader, null);
                 }
                 vehicle.wasLoaded = true;
             } else {
@@ -126,7 +126,7 @@ public class TrafficHelper {
                 SmartLocation location = vconf.getLocation();
                 //buildArrivedAircraft(config, gsw.groundnet.getParkPos(location.getParkPos()));
                 //VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()),config, groundnet.groundnetgraph, groundnet.getParkingPosition(groundnet.getParkPos(location.getParkPos())), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, null, vehicleLoader);
-                VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()), config, trafficContext.getGraph(), trafficContext.getStartPositionFromLocation(location), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, new ArrayList<VehicleBuiltDelegate>(), vehicleLoader);
+                VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()), config, trafficContext.getGraph(), trafficContext.getStartPositionFromLocation(location), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, new ArrayList<VehicleBuiltDelegate>(), vehicleLoader, null);
             }
         }
         //}

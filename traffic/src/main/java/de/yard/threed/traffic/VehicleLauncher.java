@@ -11,6 +11,7 @@ import de.yard.threed.engine.ecs.TeleportComponent;
 import de.yard.threed.engine.ecs.VelocityComponent;
 import de.yard.threed.graph.GraphEdge;
 import de.yard.threed.graph.GraphMovingComponent;
+import de.yard.threed.graph.GraphPath;
 import de.yard.threed.graph.GraphPosition;
 import de.yard.threed.graph.GraphProjection;
 import de.yard.threed.core.platform.Log;
@@ -70,6 +71,8 @@ public class VehicleLauncher {
      * 24.11.20: Triggered via TRAFFIC_REQUEST_LOADVEHICLE.
      * MA31: Wegen VehicleHelperDecoupler nicht mehr static.
      * 27.12.21: Now with a list of delegates (for decoupling doormarker)
+     * 24.6.24: Have optional path for immediate movement. However this doesn't work good with long loading vehicles
+     * because they might move before they are visible. Maybe better disable automove?
      * <p>
      *
      * @param config
@@ -80,7 +83,8 @@ public class VehicleLauncher {
      * @return
      */
     public static void launchVehicle(Vehicle vehicle, VehicleDefinition config, TrafficGraph graph, GraphPosition position, @Deprecated TeleportComponent avatarpc, SceneNode destinationnode, GraphProjection projectionforbackprojection,
-                                     LocalTransform vehiclebasetransform, NearView nearView, List<VehicleBuiltDelegate> genericVehicleBuiltDelegates, VehicleLoader vehicleLoader) {
+                                     LocalTransform vehiclebasetransform, NearView nearView, List<VehicleBuiltDelegate> genericVehicleBuiltDelegates, VehicleLoader vehicleLoader,
+                                     GraphPath optionalPath) {
         vehicleLoader.loadVehicle(vehicle, config, (SceneNode offsetNode, VehicleLoaderResult loaderResult/*9.11.21List<SGAnimation> animationList, SGPropertyNode rootpropertyNode*/, SceneNode lowresNode) -> {
             SceneNode modelNode = getModelNodeFromVehicleNode(offsetNode);
             SceneNode teleportParentNode = modelNode;
@@ -125,7 +129,13 @@ public class VehicleLauncher {
             //31.3.20: In EDDK stehen die AI aircraft aber doch wohl richtig, scheinbar auch in der Höhe.
             EcsEntity vehicleEntity = buildVehicleOnGraph(offsetNode, graph, position, config, projectionforbackprojection, entityBuilder, teleportParentNode);
             vehicleEntity.setName(config.getName());
-            GraphMovingComponent.getGraphMovingComponent(vehicleEntity).setAutomove(vehicle.hasAutomove());
+            // 24.6.24: Have optional path
+            if (optionalPath != null) {
+                // 25.6.24: automove might be too early for some long loading vehicle.
+                GraphMovingComponent.getGraphMovingComponent(vehicleEntity).setPath(optionalPath, vehicle.hasAutomove());
+            } else {
+                GraphMovingComponent.getGraphMovingComponent(vehicleEntity).setAutomove(vehicle.hasAutomove());
+            }
             //26.10.19vehicleEntity.setBasenode(modelNode);
 
             //27.12.21 doormarker extracted to DoormarkerDelegate
