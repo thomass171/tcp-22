@@ -61,7 +61,7 @@ public class SimpleMapProjection extends OriginMapProjection {
             GraphNode n = graph.getNode(i);
             projectLocation(graph,n,projection,rbcp);
         }
-        graph.orientation =  GraphOrientation.buildForZ0();
+        graph.setGraphOrientation(GraphOrientation.buildForZ0());
     }
 
     /**

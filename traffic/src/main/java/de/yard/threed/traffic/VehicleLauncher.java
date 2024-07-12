@@ -9,15 +9,13 @@ import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.TeleportComponent;
 import de.yard.threed.engine.ecs.VelocityComponent;
-import de.yard.threed.graph.GraphEdge;
+import de.yard.threed.graph.DefaultEdgeBasedRotationProvider;
 import de.yard.threed.graph.GraphMovingComponent;
 import de.yard.threed.graph.GraphPath;
 import de.yard.threed.graph.GraphPosition;
 import de.yard.threed.graph.GraphProjection;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.graph.ProjectedGraph;
-import de.yard.threed.trafficcore.model.SmartLocation;
 
 import de.yard.threed.traffic.config.VehicleDefinition;
 
@@ -194,8 +192,13 @@ public class VehicleLauncher {
         VelocityComponent vc = new VelocityComponent();
         vc.setMaximumSpeed(config.getMaximumSpeed());
         vc.setAcceleration(config.getAcceleration());
+        // addComponent also triggers entity init and GraphMovingSystem.adjustVisual()
         e.addComponent(vc);
         if (config != null) {
+            // its important to set the vehicle rotation before the final component is added
+            // and an entity init is triggered.
+            gmc.customModelRotation = getModelBaseRotation(config);
+
             // 29.8.23: Why VehicleComponent only if config exists? Conatins eg. also the teleportParentNode
             VehicleComponent vhc = new VehicleComponent(config/*type,modeltype*/);
             vhc.teleportParentNode = teleportParentNode;
@@ -211,6 +214,37 @@ public class VehicleLauncher {
             }*/
         }
         return e;
+    }
+
+    /**
+     * The rotation of a standard oriented vehicle to
+     * the graph standard orientation (see README).
+     */
+    public static Quaternion locToGraphRotation() {
+        return Quaternion.buildFromAngles(new Degree(0), new Degree(-90), new Degree(0));
+    }
+
+    private static Quaternion getModelBaseRotation(VehicleDefinition config) {
+        String name = config.getName();
+        if (name.toLowerCase().equals("loc") || name.toLowerCase().equals("locomotive")) {
+            // Was 'BaseTransformForVehicleOnGraph' in Demo.xml once
+            return locToGraphRotation();
+        }
+        Quaternion fgrot = DefaultEdgeBasedRotationProvider.getFgVehicleForwardRotation();
+        if (name.toLowerCase().contains("bluebird")) {
+            return fgrot;
+        }
+        if (name.toLowerCase().contains("c172p")) {
+            return fgrot;
+        }
+        if (name.toLowerCase().contains("777")) {
+            return fgrot;
+        }
+        if (config.getBundlename().contains("fgdatabasicmodel")) {
+            return fgrot;
+        }
+        logger.debug("no model rotation detected for " + config.getName());
+        return new Quaternion();
     }
 
     /**

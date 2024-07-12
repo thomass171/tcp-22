@@ -245,7 +245,7 @@ public class GraphTest {
 
         //outline von links nach rechts (unten). upVector ist y. Dann geht rechts nach +z
         float offset = 7;
-        List<Vector3> outline = graph.orientation.getOutline(buildListFromEdge(edgelinks.from, edgelinks, edgerechts), offset, -1);
+        List<Vector3> outline = graph.getGraphOrientation().getOutline(buildListFromEdge(edgelinks.from, edgelinks, edgerechts), offset, -1);
         Assertions.assertEquals(3, outline.size());
         TestUtils.assertVector3(new Vector3(15, 0, offset), outline.get(0));
         TestUtils.assertVector3(new Vector3(20, 0, offset), outline.get(1));
@@ -424,7 +424,7 @@ public class GraphTest {
         GraphNode eins = graph.findNodeByName("eins");
         GraphEdge zeroeins = graph.findEdgeByName("zeroeins");
         float offset = -0.3f;
-        List<Vector3> outline = graph.orientation.getOutlineFromNode(zero, offset);
+        List<Vector3> outline = graph.getGraphOrientation().getOutlineFromNode(zero, offset);
         Assertions.assertEquals(9, outline.size());
         //TestUtil.assertVector3( zero.getLocation().add(new Vector3(1, 0, -1).normalize().multiply(offset)), outline.get(0));
         //TestUtil.assertVector3( eins.getLocation().add(new Vector3(1, 0, -1).normalize().multiply(offset)), outline.get(1));
@@ -434,7 +434,7 @@ public class GraphTest {
         TestUtils.assertVector3(new Vector3(5.9f, 0, 0.7696745f), outline.get(4), 0.1f);
         TestUtils.assertVector3(new Vector3(7.7f, 0, 0), outline.get(7), 0.1f);
         TestUtils.assertVector3(new Vector3(7.7f, 0, -1), outline.get(8), 0.1f);
-        outline = graph.orientation.getOutlineFromNode(zero, -offset);
+        outline = graph.getGraphOrientation().getOutlineFromNode(zero, -offset);
         Assertions.assertEquals(9, outline.size());
         // TestUtil.assertVector3( zero.getLocation().add(new Vector3(-1, 0, 1).normalize().multiply(offset)), outline.get(0));
         // TestUtil.assertVector3( eins.getLocation().add(new Vector3(-1, 0, 1).normalize().multiply(offset)), outline.get(1));
@@ -480,7 +480,7 @@ public class GraphTest {
         zerob.arcParameter = new GraphArc(zerob.getCenter(), zerob.getArc().getRadius(), new Vector3(0, 0, 1), new Vector3(0, 1, 0), -MathUtil2.PI);
 
         List<GraphPathSegment> path;
-        List<Vector3> outline = graph.orientation.getOutline(buildListFromEdge(zerob.from, zerob), offset, -1);
+        List<Vector3> outline = graph.getGraphOrientation().getOutline(buildListFromEdge(zerob.from, zerob), offset, -1);
         Assertions.assertEquals(17, outline.size());
         Assertions.assertEquals(-offset, Vector3.getDistance(outline.get(0), zerob.from.getLocation()), "distance.arcbeginloc");
         TestUtils.assertVector3(new Vector3(0f, 0, -offset), outline.get(0));
@@ -492,7 +492,7 @@ public class GraphTest {
         // erstmal ein gerades Edge
         path = new ArrayList<GraphPathSegment>();
         path.add(new GraphPathSegment(zeroa, zeroa.from));
-        outline = graph.orientation.getOutline(path, offset, -1);
+        outline = graph.getGraphOrientation().getOutline(path, offset, -1);
         Assertions.assertEquals(2, outline.size());
         TestUtils.assertVector3(new Vector3(-0.14142136f, 0, 0.14142136f), outline.get(0));
 
@@ -505,7 +505,7 @@ public class GraphTest {
         path = new ArrayList<GraphPathSegment>();
         path.add(new GraphPathSegment(arc, arc.from));
         //outline = graph.orientation.getOutline(arc.getFrom(),offset, arc.from, arc,null);
-        outline = graph.orientation.getOutline(path, offset, -1);
+        outline = graph.getGraphOrientation().getOutline(path, offset, -1);
         Assertions.assertEquals(17, outline.size());
         Assertions.assertEquals(-offset, Vector3.getDistance(outline.get(0), arc.from.getLocation()), 0.0001, "distance.arcbeginloc");
         //knifflig zu testen. 
@@ -608,14 +608,14 @@ public class GraphTest {
 
         List<GraphPathSegment> path = new ArrayList<GraphPathSegment>();
         path.add(new GraphPathSegment(edgelinks, edgelinks.from));
-        List<Vector3> outline = graph.orientation.getOutline(path, offset, -1);
+        List<Vector3> outline = graph.getGraphOrientation().getOutline(path, offset, -1);
         Assertions.assertEquals(2, outline.size());
         TestUtils.assertVector3(new Vector3(31, 0, -offset), outline.get(0));
         TestUtils.assertVector3(new Vector3(15, 0, -offset), outline.get(1));
         path = new ArrayList<GraphPathSegment>();
         path.add(new GraphPathSegment(halbkreis, halbkreis.from));
         //outline = graph.orientation.getOutline(halbkreis.getFrom(),offset, halbkreis.to, halbkreis,null);
-        outline = graph.orientation.getOutline(path, offset, -1);
+        outline = graph.getGraphOrientation().getOutline(path, offset, -1);
         Assertions.assertEquals(17, outline.size());
         TestUtils.assertVector3(new Vector3(15, 0, -offset), outline.get(0));
         TestUtils.assertVector3(new Vector3(15, 0, -15.7f), outline.get(16));
@@ -623,7 +623,7 @@ public class GraphTest {
         path = new ArrayList<GraphPathSegment>();
         path.add(new GraphPathSegment(halbkreis, halbkreis.to));
         //outline = graph.orientation.getOutline(halbkreis.getTo(),offset, halbkreis.from, halbkreis,null);
-        outline = graph.orientation.getOutline(path, offset, -1);
+        outline = graph.getGraphOrientation().getOutline(path, offset, -1);
         Assertions.assertEquals(17, outline.size());
         TestUtils.assertVector3(new Vector3(15, 0, -16.3f), outline.get(0));
         TestUtils.assertVector3(new Vector3(15, 0, offset), outline.get(16));
@@ -663,8 +663,7 @@ public class GraphTest {
      */
     @Test
     public void testGraphPosition5() {
-        Graph graph = new Graph();
-        graph.orientation = GraphOrientation.buildForZ0();
+        Graph graph = new Graph(GraphOrientation.buildForZ0());
         GraphNode unten = graph.addNode("", new Vector3(0, 0, 0));
         GraphNode mitte = graph.addNode("", new Vector3(0, 2, 0));
         GraphNode oben = graph.addNode("", new Vector3(0, 5, 0));
@@ -700,9 +699,8 @@ public class GraphTest {
      */
     @Test
     public void testRotationXZ() {
-        Graph graph = new Graph();
+        Graph graph = new Graph(GraphOrientation.buildForY0());
         //19.2.20 graph.orientation =  GraphOrientation.buildForZ0();
-        graph.orientation = GraphOrientation.buildForY0();
         GraphNode n1 = graph.addNode("n1", new Vector3(0, 0, 3));
         GraphNode n2 = graph.addNode("n2", new Vector3(0, 0, -3));
         GraphEdge edge = graph.connectNodes(n1, n2);
@@ -718,8 +716,7 @@ public class GraphTest {
      */
     @Test
     public void testRotationXY() {
-        Graph graph = new Graph();
-        graph.orientation = GraphOrientation.buildForZ0();
+        Graph graph = new Graph(GraphOrientation.buildForZ0());
         //graph.iszEbene = true;
         GraphNode n1 = graph.addNode("n1", new Vector3(0, 3, 0));
         GraphNode n2 = graph.addNode("n2", new Vector3(0, 7, 0));
@@ -756,23 +753,23 @@ public class GraphTest {
     public void testIdentity() {
 
 
-        Graph graph = new Graph();
-        graph.orientation = GraphOrientation.buildDefault();
+        Graph graph = new Graph(GraphOrientation.buildDefault());
         GraphNode n1 = graph.addNode("n1", new Vector3(0, 0, 0));
         GraphNode n2 = graph.addNode("n2", new Vector3(0, 0, -1));
         //Die Referenzedge, bei der nicht rotiert wird.
         GraphEdge edge = graph.connectNodes(n1, n2);
 
-        Quaternion rot = graph.orientation.get3DRotation(false, edge.getEffectiveBeginDirection(), edge/*,graph.orientation.orientation*/);
+        Quaternion rot = DefaultEdgeBasedRotationProvider.get3DRotation(false, edge.getEffectiveBeginDirection(), /*graph.getGraphOrientation().getForwardRotation(),*/
+                graph.getGraphOrientation().getUpVector(edge)/*,graph.orientation.orientation*/);
         TestUtils.assertQuaternion(new Quaternion(), rot, "identity rotation");
 
-        Vector3 outpoint = graph.orientation.getEndOutlinePoint(edge.from, edge, edge.getEffectiveOutboundDirection(edge.from), 456);
+        Vector3 outpoint = graph.getGraphOrientation().getEndOutlinePoint(edge.from, edge, edge.getEffectiveOutboundDirection(edge.from), 456);
         TestUtils.assertVector3(new Vector3(456, 0, 0), outpoint, "outline");
-        outpoint = graph.orientation.getEndOutlinePoint(edge.from, edge, edge.getEffectiveOutboundDirection(edge.from), -456);
+        outpoint = graph.getGraphOrientation().getEndOutlinePoint(edge.from, edge, edge.getEffectiveOutboundDirection(edge.from), -456);
         TestUtils.assertVector3(new Vector3(-456, 0, 0), outpoint, "outline");
-        outpoint = graph.orientation.getEndOutlinePoint(edge.to, edge, edge.getEffectiveEndDirection(), -456);
+        outpoint = graph.getGraphOrientation().getEndOutlinePoint(edge.to, edge, edge.getEffectiveEndDirection(), -456);
         TestUtils.assertVector3(new Vector3(-456, 0, -1), outpoint, "outline");
-        outpoint = graph.orientation.getEndOutlinePoint(edge.to, edge, edge.getEffectiveEndDirection(), 456);
+        outpoint = graph.getGraphOrientation().getEndOutlinePoint(edge.to, edge, edge.getEffectiveEndDirection(), 456);
         TestUtils.assertVector3(new Vector3(456, 0, -1), outpoint, "outline");
     }
 
@@ -862,7 +859,7 @@ public class GraphTest {
         GraphEdge edge = graph.connectNodes(n1, n2);
         float offset = 30f;
 
-        List<Vector3> outline = graph.orientation.getOutline(buildListFromEdge(edge.from, edge), offset, -1);
+        List<Vector3> outline = graph.getGraphOrientation().getOutline(buildListFromEdge(edge.from, edge), offset, -1);
         Assertions.assertEquals(2, outline.size());
         TestUtils.assertVector3(new Vector3(-1978.7867f, 3021.2131f, 0), outline.get(0));
         TestUtils.assertVector3(new Vector3(-2078.7869f, 3121.2131f, 0), outline.get(1));
@@ -870,14 +867,14 @@ public class GraphTest {
         GraphNode n3 = graph.addNode("n3", new Vector3(-2200, 3100, 0));
         GraphEdge edgel = graph.connectNodes(n2, n3);
 
-        outline = graph.orientation.getOutline(buildListFromEdge(edge.from, edge, edgel), offset, -1);
+        outline = graph.getGraphOrientation().getOutline(buildListFromEdge(edge.from, edge, edgel), offset, -1);
         Assertions.assertEquals(3, outline.size());
         TestUtils.assertVector3(new Vector3(-1978, 3021, 0), outline.get(0), 1);
         TestUtils.assertVector3(new Vector3(-2088, 3127, 0), outline.get(1), 1);
         TestUtils.assertVector3(new Vector3(-2200, 3130, 0), outline.get(2), 1);
 
         offset = -30;
-        outline = graph.orientation.getOutline(buildListFromEdge(edge.from, edge, edgel), offset, -1);
+        outline = graph.getGraphOrientation().getOutline(buildListFromEdge(edge.from, edge, edgel), offset, -1);
         Assertions.assertEquals(3, outline.size());
         TestUtils.assertVector3(new Vector3(-2021, 2978, 0), outline.get(0), 1);
         TestUtils.assertVector3(new Vector3(-2111, 3072, 0), outline.get(1), 1);
@@ -919,7 +916,7 @@ public class GraphTest {
         path.addSegment(new GraphPathSegment(edge6, n5));
         path.addSegment(new GraphPathSegment(edge7, n6));
         path.addSegment(new GraphPathSegment(edge8, n7));
-        List<Vector3> outline = graph.orientation.getOutline(path.path, offset, -1);
+        List<Vector3> outline = graph.getGraphOrientation().getOutline(path.path, offset, -1);
         Assertions.assertEquals(8, outline.size());
         TestUtils.assertVector3(new Vector3(18, 28, 0), outline.get(0), 1);
         TestUtils.assertVector3(new Vector3(25.7f, 23.5f, 0), outline.get(1), 1);
@@ -927,7 +924,7 @@ public class GraphTest {
         TestUtils.assertVector3(new Vector3(26.8f, 34.2f, 0), outline.get(3), 0.1f);
 
         offset = -2;
-        outline = graph.orientation.getOutline(path.path, offset, -1);
+        outline = graph.getGraphOrientation().getOutline(path.path, offset, -1);
         Assertions.assertEquals(8, outline.size());
         TestUtils.assertVector3(new Vector3(21.4f, 31, 0), outline.get(0), 1);
         TestUtils.assertVector3(new Vector3(24f, 26, 0), outline.get(1), 1);
@@ -1040,7 +1037,8 @@ public class GraphTest {
      */
     /*19.4.17 eigentlich keine Sache des Graphen?? Und auf was beziht sich diese Rotation? Bei Railing wohl -z*/
     public Quaternion get3DRotation(Graph graph, GraphPosition position) {
-        return graph.orientation.get3DRotation(position.reverseorientation, position.currentedge.getEffectiveDirection(position.getAbsolutePosition()), position.currentedge/*,graph.orientation.orientation*/);
+        return DefaultEdgeBasedRotationProvider.get3DRotation(position.reverseorientation, position.currentedge.getEffectiveDirection(position.getAbsolutePosition()),
+                /*graph.getGraphOrientation().getForwardRotation(),*/graph.getGraphOrientation().getUpVector(position.currentedge/*,graph.orientation.orientation*/));
         //return currentedge.get3DRotation(edgeposition, upVector,reverseorientation);
     }
 

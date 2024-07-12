@@ -6,6 +6,7 @@ import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
 import de.yard.threed.graph.Graph;
 import de.yard.threed.graph.GraphNode;
+import de.yard.threed.graph.GraphOrientation;
 import de.yard.threed.traffic.geodesy.ElevationProvider;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.trafficcore.model.Runway;
@@ -107,7 +108,7 @@ public class GeoRoute {
      * @return
      */
     public Graph toGraph(EllipsoidCalculations rbcp, double cruisingaltitude, ElevationProvider elevationProvider, GeneralParameterHandler<GeoCoordinate> missingElevationHandler) {
-        Graph graph = new Graph();
+        Graph graph = new Graph(GraphOrientation.buildForFG());
         add(graph, waypointsBeforeTakeoff, rbcp, elevationProvider, missingElevationHandler);
         add(graph, takeoff, rbcp, elevationProvider, missingElevationHandler);
         add(graph, waypointsInFlight, rbcp, (latitudedeg, longitudedeg) -> cruisingaltitude, missingElevationHandler);

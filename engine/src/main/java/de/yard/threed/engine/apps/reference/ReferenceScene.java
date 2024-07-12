@@ -285,7 +285,7 @@ public class ReferenceScene extends Scene {
             if (locomotive != null) {
                 //Vector3 scale = new Vector3(1.5f, 1.5f, 1.5f);
                 //locomotive.getTransform().setScale(scale);
-                //locomotive.getTransform().setRotation(Quaternion.buildRotationX(new Degree(-90)));
+                // Don't rotate 'loc' to show the default vehicle orientation as mentioned in README.md.
                 locomotive.getTransform().setPosition(new Vector3(-5, 0, -10));
                 addToWorld(locomotive);
             } else {

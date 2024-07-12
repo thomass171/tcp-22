@@ -12,12 +12,10 @@ import java.util.List;
 
 /**
  * Ich weiss erstmal keinen besseren Namen.
- * Enthaelt auch den fuer den Graphen gültigen backreference Vector.
- * 24.4.18: GraphRotation hier aufgenommen
  * 22.2.2020:Es ist ein konzeptionelles Problem, dass der Graph dafür sorgen soll, dass Vehicle richtig stehen. Dann gehen nested Graphs(Orbit) nicht.
  * Es müsste aber doch gehen, dass ein EDDK Vehicle von einer Kugel umrundet wird.
  * Ich fürchte, diese Klasse ist krude.
- *
+ * 4.7.24: Still doubt this class has a valid concept? After extracting 3Drotation() appears ok now for outline.
  * <p>
  * Created on 16.03.18.
  */
@@ -26,26 +24,6 @@ public abstract class GraphOrientation {
 
     public GraphOrientation() {
     }
-
-    /**
-     * different eg. for earth and moon
-     */
-    //public abstract Quaternion getBaseRotation(Vector3 location);
-
-    /**
-     * Basis Rotation in Bezug auf ein Vehicle?
-     * Nee, das waere zu speziell, weil es ja auch fuer Outline sein soll. Oder doch, und Outline muss angepasst werden.
-     * Aber es kann die Rotation fuer ein -z Vehicle sein. Das ist abwaerttskompatibel und passt zu referenceback.
-     * Ist nur fuer FG erforderlich? Warum auch immer.
-     * 19.2.2020 Fuer einen universellen 3D graph muss das aber mal klar definiert werden.
-     * 22.2.2020:Es ist ein konzeptionelles Problem, dass der Graph dafür sorgen soll, dass Vehicle richtig stehen. Dann gehen nested Graphs(Orbit) nicht.
-     * Es müsste aber doch gehen, dass ein EDDK Vehicle von einer Kugel umrundet wird.
-     *
-     * @return
-     */
-    public abstract Quaternion getForwardRotation();
-
-    /*public abstract Vector3 getReferenceBack(Vector3 location);*/
 
     public static GraphOrientation buildForZ0() {
         return new GraphOrientationZ0();
@@ -71,81 +49,6 @@ public abstract class GraphOrientation {
     public abstract Vector3 getUpVector(GraphEdge edge);
 
     public abstract String getName();
-
-    /**
-     * 14.12.16: Die Richtung der Kante steht ja fest, aber für die Ermittlung der kompletten Rotation brauchts auch einen up-Vektor.
-     * 19.04.17: Aus GraphEdge hier hin, denn die Rotation ist keine Angelegenheit des Graphen. Erstmal static (fuer Tests) bis das rund ist.
-     * 02.05.17: Immer einen upVector annehmen. Damit keinen referenceback mehr.(??) Eine Edge in Richtung (0, 0, -1) mit upvector nach y führt zur Identityrotation.
-     * Das ist dann quasi eine Art Defaultrotation des Graphen. Hmm, das mit dem upvector in 3D ist aber fraglich, oder?
-     * 15.3.18: Weil es doch Sache des Graphen ist, zumindets in weiten Teilen, wider zurück nach GraphEdge? Naja. wird aber nur bei Movement gebraucht.
-     * Bevor ich das nochmal dahin verschieben will: Die Orientierung eines Vehicle auf einem Graph ist KEINE Graphfunktionalität, bestenfalls
-     * eines GraphPath.
-     * 29.3.18: Fuer Edges
-     * ausserhalb der plane Ebene hat mann dann aber immer noch keine definierte Rotation, z.B. edges
-     * parallel zum upVector.
-     * 29.3.18: Hier muss doch ein upVector mit rein. Dann lass ich das auch mit der base/edgelocal Rotation. Ich glaube,
-     * den referenceback brauche ich dann nicht mehr? Diese Rotation hat als Referenz dann, dass ein Vehicle
-     * richtig steht. Und kann man das dann noch fuer Outline nehmen? Ich glaube nicht.
-     * 22.2.2020: Hier stimmt das Konzept mit Vehicle einfach nicht. Bzw. diese Methode ist nur für spezielle Vehicles geeignet. Abstrahiert über RotationProvider.
-     * Für outline sollte es dann aber doch eher nicht (mehr) genutzt werden.
-     *
-     * @return
-     */
-    public Quaternion get3DRotation(boolean reverseorientation, Vector3 effectivedirection, GraphEdge edge/*, GraphRotation orientation*/) {
-        //logger.debug("get3DRotation: edgeposition=" + edgeposition + ",reverseorientation="+reverseorientation+",effectivedirection="+effectivedirection);
-
-        if (reverseorientation) {
-            effectivedirection = effectivedirection.negate();
-        }
-
-        //10.5.18 boolean useup = true;
-        //if (useup) {
-        //Quaternion forwardrotation = new Quaternion(new Degree(0),new Degree(90),new Degree(0));
-        //effectivedirection = effectivedirection.rotate(forwardrotation);
-        Quaternion forwardrotation = this/*baseRotation*/.getForwardRotation();
-
-        Vector3 up = this/*baseRotation*/.getUpVector(edge);
-        //Quaternion uprotation = new Quaternion(new Degree(0),new Degree(90),new Degree(0));
-        //up = up.rotate(uprotation);
-        // effectivedirection = effectivedirection.rotate(baserotation);
-        Quaternion rotation = Quaternion.buildLookRotation(effectivedirection.negate(), up);
-        Quaternion localr = new Quaternion();
-        //return baser.multiply(edger).multiply(localr);
-        //16.3.18 Reihenfolge gefaellt mir so besser:19.2.20: Aber ist das auch richtig? mal anders rum versuchen. Damit stimmt SolarSystem dann. Ich blick nicht mehr durch.
-        return localr.multiply(rotation).multiply(forwardrotation);
-        //return forwardrotation.multiply(localr.multiply(rotation));
-
-        //return localr.multiply(rotation);
-        /*} else {
-            //from zu verwenden ist aber nicht ganz sauber. to waere aber auch nicht besser
-            Quaternion baser = new Quaternion();
-
-            baser = this.getBaseRotation(edge.from.getLocation());
-
-            // Es mahct kaienen Sinn das in die edge zu verschieben, weil es keine lokale Rotation gibt.
-            Quaternion edger = null;
-            edger = getLocal3DRotation(edge, effectivedirection);//Quaternion.buildQuaternion(getLocalReferenceBack(edge.from.getLocation()), effectivedirection);
-            //edger =     edge.get3DRotation(edgeposition,reverseorientation);
-//edger=new Quaternion();
-            // TODO in Edge? graphRotation.getLocalRotation(0); local vielleicht nicht hier, weil outline das auch verwendet.
-            Quaternion localr = new Quaternion();
-            //return baser.multiply(edger).multiply(localr);
-            //16.3.18 Reihenfolge gefaellt mir so besser:
-            return localr.multiply(edger).multiply(baser);
-        }*/
-    }
-
-    /**
-     * Liefert die Rotation an der Stelle im "graph space" (obwohl der Begriff fragwürdig ist?), also ohne Beruecksichtigung einer baserotation des Graph.
-     * Je nach dem aus Sicht from->to oder reverse.
-     * Die lokale Rotattion muss immer mit der referecne in baserotation gemacht werden!
-     *
-     * @return
-     */
-    /*10.5.18 public Quaternion getLocal3DRotation(GraphEdge edge, Vector3 effectivedirection) {
-        Vector3 rb = this.getReferenceBack(edge.from.getLocation());
-        return Quaternion.buildQuaternion(rb, effectivedirection);
-    }*/
 
     /**
      * Eine Outline entlang eines Graphen erzeugen.
@@ -341,7 +244,7 @@ public abstract class GraphOrientation {
         //16.3.18: Edge in Referenceorientierung anlegen und dann "einfach" rotieren.
         Vector3 outv = new Vector3(offset, 0, 0);
         boolean reverseorientation = false;
-        Quaternion rotation = get3DRotation(reverseorientation, dir, edge);
+        Quaternion rotation = DefaultEdgeBasedRotationProvider.get3DRotation(reverseorientation, dir, this.getUpVector(edge));
         return node.getLocation().add(outv.rotate(rotation));
     }
 
@@ -387,31 +290,6 @@ class GraphOrientationZ0 extends GraphOrientation {
 
     public static String NAME = "z0";
 
-    /*@Override
-    public Quaternion getBaseRotation(Vector3 location) {
-        // um die x-Aches aufrichten. 29.3.18: Aber doch -90?
-        return Quaternion.buildRotationX(new Degree(90));
-    }*/
-
-    @Override
-    public Quaternion getForwardRotation() {
-        // um die x-Aches aufrichten.
-        // 19.2.20: Das ist deutlich plausibler als Identity, denn das muss ja falsch sein, weil gleich zu Default. Aber nicht -90?
-        //Ich blick nicht mehr durch.
-        //return Quaternion.buildRotationZ(new Degree(-90));
-        return new Quaternion();
-    }
-
-    /*
-    @Override
-    public Vector3 getReferenceBack(Vector3 location) {
-        // Als Referenzrotation lege ich einfach mal negativ z fest, so wie die Defaultblickrichtung der Camera.
-        // d.h., wenn eine Kante entlang von z läuft, wird die Identityrotation geliefert.
-        Vector3 referenceback = new Vector3(0, 0, -1);
-//TODO nicht immer berechnen
-        return referenceback.rotate(getBaseRotation(location));
-    }*/
-
     @Override
     public Vector3 getUpVector(GraphEdge edge) {
         Vector3 up = new Vector3(0, 0, 1);
@@ -433,26 +311,6 @@ class GraphOrientationY0/*Default*/ extends GraphOrientation {
 
     public static String NAME = "y0";
 
-    /*@Override
-    public Quaternion getBaseRotation(Vector3 position) {
-        return new Quaternion();
-    }
-*/
-    @Override
-    public Quaternion getForwardRotation() {
-        Quaternion rotation = new Quaternion();
-        //rotation = new Quaternion(new Degree(0), new Degree(0), new Degree(0));
-        return rotation;
-    }
-
-    /*@Override
-    public Vector3 getReferenceBack(Vector3 position) {
-        // Als Referenzrotation lege ich einfach mal negativ z fest, so wie die Defaultblickrichtung der Camera.
-        // d.h., wenn eine Kante entlang von z läuft, wird die Identityrotation geliefert.
-        Vector3 referenceback = new Vector3(0, 0, -1);
-        return referenceback;
-    }*/
-
     @Override
     public Vector3 getUpVector(GraphEdge edge) {
         return new Vector3(0, 1, 0);
@@ -470,32 +328,6 @@ class GraphOrientationY0/*Default*/ extends GraphOrientation {
 class GraphOrientationFG extends GraphOrientation {
 
     public static String NAME = "fg";
-
-   /* @Override
-    public Quaternion getBaseRotation(Vector3 position) {
-        return FlightLocation.buildRotation(SGGeod.fromCart(position));
-    }*/
-
-    @Override
-    public Quaternion getForwardRotation() {
-        Quaternion rotation = Quaternion.buildFromAngles(new Degree(180), new Degree(0), new Degree(-90));
-        // Die Werte entstanden durch ausprobieren. :-) Vielleicht laesst sich das mal untermauern. TODO
-        rotation = Quaternion.buildFromAngles(new Degree(-90), new Degree(-90), new Degree(0));
-        return rotation;
-    }
-
-    /**
-     * kann man das staendige Rechnen nicht optimieren? TODO
-     *
-     * @param location
-     * @return
-     */
-    /*@Override
-    public Vector3 getReferenceBack(Vector3 location) {
-        Vector3 referenceback = FlightLocation.getNorthHeadingReference(SGGeod.fromCart(location));
-
-        return referenceback;//.rotate(getBaseRotation(location));
-    }*/
 
     /**
      * kann man das staendige Rechnen nicht optimieren? TODO

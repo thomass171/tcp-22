@@ -61,7 +61,7 @@ public class SolarSystem {
         Graph orbit = buildGlobalOrbitGraph(radius);
         GraphPosition startPosition = new GraphPosition(orbit.getEdge(0));
         gmc.setGraph(orbit, startPosition, null);
-        gmc.rotationProvider = new OrbitRotationProvider();
+        orbit.setRotationProvider(new OrbitRotationProvider());
         VelocityComponent vc = VelocityComponent.getVelocityComponent(ecsEntity);
         vc.setMovementSpeed(speed);
         vc.setMaximumSpeed(speed);

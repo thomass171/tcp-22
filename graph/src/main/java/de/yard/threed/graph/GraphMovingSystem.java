@@ -246,7 +246,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
     public static LocalTransform getPosRot(GraphMovingComponent gmc/*, /*Map* /GraphProjection projection*/) {
         GraphPosition cp = gmc.getCurrentposition();
         if (cp != null) {
-            return gmc.getGraph().getPosRot(cp, gmc.rotationProvider);
+            return gmc.getGraph().getPosRot(cp, gmc.customModelRotation);
         }
         return null;
     }

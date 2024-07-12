@@ -76,7 +76,7 @@ public class TerrainBuilderTest {
         float offset = width / 2;
 
         if (TerrainBuilder.useoutline) {
-            CustomGeometry geo = TerrainBuilder.buildRoadGeometry(startedge, width,osm.orientation);
+            CustomGeometry geo = TerrainBuilder.buildRoadGeometry(startedge, width,osm.getGraphOrientation());
             Assertions.assertEquals( 4, geo.vertices.size(),"vertices");
             TestUtils.assertVector3(new Vector3(offset, 0, 0), geo.vertices.get(0),"v0");
             TestUtils.assertVector3( new Vector3(offset, 10, 0), geo.vertices.get(1),"v1");
@@ -100,13 +100,13 @@ public class TerrainBuilderTest {
         float width = 0.8f;
         float offset = width / 2;
         if (TerrainBuilder.useoutline) {
-            CustomGeometry geo = TerrainBuilder.buildRoadGeometry(edgelinks, width,graph.orientation);
+            CustomGeometry geo = TerrainBuilder.buildRoadGeometry(edgelinks, width,graph.getGraphOrientation());
             Assertions.assertEquals(4, geo.vertices.size(),"vertices");
             TestUtils.assertVector3( new Vector3(31, 0, -offset), geo.vertices.get(0),"v0");
             TestUtils.assertVector3( new Vector3(15, 0, -offset), geo.vertices.get(1),"v1");
             TestUtils.assertVector3( new Vector3(15, 0, offset), geo.vertices.get(2),"v2");
             TestUtils.assertVector3( new Vector3(31, 0, offset), geo.vertices.get(3),"v3");
-            geo = TerrainBuilder.buildRoadGeometry(halbkreis, width,graph.orientation);
+            geo = TerrainBuilder.buildRoadGeometry(halbkreis, width,graph.getGraphOrientation());
             Assertions.assertEquals( 34, geo.vertices.size(),"vertices");
             TestUtils.assertVector3( new Vector3(15, 0, -offset), geo.vertices.get(0),"v0");
             TestUtils.assertVector3( new Vector3(15, 0, -16 + offset), geo.vertices.get(16),"v1");

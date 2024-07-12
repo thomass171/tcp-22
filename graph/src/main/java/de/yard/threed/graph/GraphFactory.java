@@ -115,7 +115,6 @@ public class GraphFactory {
         Graph graph = new /*Traffic*/Graph(GraphOrientation.buildDefault());
         //15.3.18 graph.upVector = new Vector3(0, 1, 0);
         //Railing liegt in y0 und hat Defaultausrichtung
-        graph.orientation = GraphOrientation.buildDefault();
         return addReturnKreis(graph, radius, extended, false);
     }
 

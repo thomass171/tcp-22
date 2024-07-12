@@ -101,10 +101,10 @@ public class GraphTerrainVisualizer extends DefaultGraphVisualizer {
         taxiwayMarkerwidth = 1;
         if (showtaxiways) {
             // Der z Wert für die Taxiwaymarkierung muss relativ hoch sein, warum auch immer.
-            segment.attach(buildEdge(edge, Color.YELLOW, taxiwayMarkerwidth, 0.3f, graph.orientation));
+            segment.attach(buildEdge(edge, Color.YELLOW, taxiwayMarkerwidth, 0.3f, graph.getGraphOrientation()));
         }
         // Asphalt ueber Textur
-        segment.attach(buildEdge(edge, null, taxiwaywidth, 0, graph.orientation));
+        segment.attach(buildEdge(edge, null, taxiwaywidth, 0, graph.getGraphOrientation()));
         return segment;
     }
 

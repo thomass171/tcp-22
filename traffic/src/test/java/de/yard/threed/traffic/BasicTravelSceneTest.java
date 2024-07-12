@@ -3,7 +3,9 @@ package de.yard.threed.traffic;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.Event;
+import de.yard.threed.core.LatLon;
 import de.yard.threed.core.LocalTransform;
+import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeSceneNode;
@@ -25,6 +27,7 @@ import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.traffic.apps.BasicTravelScene;
 
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.traffic.testutils.TrafficTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -36,7 +39,7 @@ import de.yard.threed.graph.GraphMovingComponent;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static de.yard.threed.core.testutil.TestUtils.assertVector3;
+import static de.yard.threed.core.testutil.TestUtils.*;
 import static de.yard.threed.engine.testutil.TestUtils.assertViewPoint;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -227,9 +230,27 @@ public class BasicTravelSceneTest {
         //TODO other test due to movement 26.6.24:there shoud be no movement?? assertVector3(new SimpleEllipsoidCalculations(MoonSceneryBuilder.MOON_RADIUS).toCart(new GeoCoordinate(new Degree(50.768), new Degree(7.1672000))), locPosition);
 
         // loc should *not* immediately move (even though a path there is no property automove set in config 'Moon.xml' for vehicle 'loc')
-        assertNotNull(gmc.getGraph());
-        assertFalse(gmc.hasAutomove());
-        assertNotNull(gmc.getPath());
+        TrafficTestUtils.assertEntityOnGraph(locEntity, true, VehicleLauncher.locToGraphRotation());
+
+        LocalTransform posrot = gmc.getGraph().getPosRot(gmc.getCurrentposition(),new Quaternion());
+        log.debug("posrot={}", posrot);
+
+        EllipsoidCalculations elliCalcs = TrafficHelper.getEllipsoidConversionsProviderByDataprovider();
+        TrafficTestUtils.assertGeoGraphRotation(gmc.getGraph(), gmc.getGraph().getEdge(0), 100);
+
+        // double check to TrafficTestUtils.assertGeoGraphRotation()
+        GeoCoordinate first = GeoCoordinate.fromLatLon(LatLon.fromDegrees(50.768, 7.1672000), 60);
+        GeoCoordinate second = GeoCoordinate.fromLatLon(LatLon.fromDegrees(50.7692, 7.1617000), 60);
+        double distance = 100;//elliCalcs.distanceTo(first, second);
+        // negate due to typical forward orientation confusion
+        Vector3 rotatedForward = MathUtil2.DEFAULT_FORWARD.negate().rotate(posrot.rotation);
+        // rotatedForward should roughly have direction -x, -y, +z
+        log.debug("distance={},rotatedForward={}", distance, rotatedForward);
+        GeoCoordinate rotTarget = elliCalcs.fromCart(elliCalcs.toCart(first).add(rotatedForward.multiply(distance)));
+        // 50.7690336,7.1622472 is correct (appx. 100m from first on runway) according to visual map check
+        assertLatLon(LatLon.fromDegrees(50.7690336, 7.1622472), rotTarget, 0.001, "rotTarget");
+
+
     }
 
     /**

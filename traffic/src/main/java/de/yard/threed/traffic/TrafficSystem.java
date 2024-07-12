@@ -97,9 +97,6 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     public List<VehicleBuiltDelegate> genericVehicleBuiltDelegates = new ArrayList<VehicleBuiltDelegate>();
     // 19.11.23 ugly workaround for testing until we have requests in eventqueue
     public int vehiclesLoaded = 0;
-    //27.11.23 public static SceneConfig sceneConfig;
-    @Deprecated
-    public static LocalTransform baseTransformForVehicleOnGraph;
 
     VehicleLoader vehicleLoader = new SimpleVehicleLoader();
 
@@ -304,7 +301,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                         trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
                         (UserSystem.getInitialUser() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
                         SphereSystem.getSphereNode()/*getWorld()*/, null/*22.3.24sphereProjections.backProjection*/,
-                        /*27.12.21airportConfig,*/ baseTransformForVehicleOnGraph, vehicleLoader, genericVehicleBuiltDelegates);
+                        /*27.12.21airportConfig,*/ null/*baseTransformForVehicleOnGraph*/, vehicleLoader, genericVehicleBuiltDelegates);
                 vehiclesLoaded++;
                 return true;
             }
@@ -335,10 +332,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             TrafficGraph graphToUse = null;
             GraphPosition graphStartPosition = null;
             GraphPath optionalPath = null;
-            LocalTransform baseTransformForVehicleOnGraphToUse;
             if (initialRoute == null) {
-                // probably null for groundnet
-                baseTransformForVehicleOnGraphToUse = baseTransformForVehicleOnGraph;
+
                 // 20.3.24: Would be better to move graph detection below for knowing the vehicle and location we can find the graph. But this breaks nextlocationindex.
                 // Traditionally always groundneteddk was used here. Seems neither Wayland nor Demo use it up to now.
                 // We need a graph for placing the vehicle. Wait until its available. We can assume that also terrain will be available
@@ -374,8 +369,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 }
                 graphStartPosition = getGraphStartPosition(smartLocation, graphToUse);
             } else {
-                // groundnet has a (back)projection. On a initialRoute we need something different. Almost(!?) fitting value found by just probing.
-                baseTransformForVehicleOnGraphToUse = new LocalTransform(new Vector3(), Quaternion.buildRotationY(new Degree(-90)));
+                // groundnet has a (back)projection. On a initialRoute we need something different. Geo graph will have a FG graph orientation.
                 BooleanHolder shouldAbort = new BooleanHolder(false);
                 FlightRouteGraph flightRoute = new BasicRouteBuilder(TrafficHelper.getEllipsoidConversionsProviderByDataprovider())
                         .fromGeoRoute(initialRoute, geoCoordinate -> {
@@ -400,6 +394,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 graphStartPosition = new GraphPosition(graph.getEdge(0));
                 // get smoothed flightpath
                 optionalPath = flightRoute.getPath();
+                // like FlightSystem does. Needed for visualization.
+                SystemManager.sendEvent(new Event(GraphEventRegistry.GRAPH_EVENT_PATHCREATED, new Payload(graph, optionalPath)));
             }
             /**
              * load eines Vehicle, z.B. per TRAFFIC_REQUEST_LOADVEHICLE. 24.11.20: Dafuer ist jetzt TRAFFIC_REQUEST_LOADVEHICLE2.
@@ -440,10 +436,9 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 destinationNode = Scene.getCurrent().getWorld();
             }
             // 21.3.24 Without login there's no avatar yet
-            logger.debug("Using baseTransformForVehicleOnGraphToUse=" + baseTransformForVehicleOnGraphToUse);
             VehicleLauncher.launchVehicle(new Vehicle(name), config, graphToUse, graphStartPosition,
                     avatar == null ? null : TeleportComponent.getTeleportComponent(avatar),
-                    destinationNode, null/*22.3.24 sphereProjections.backProjection*/, baseTransformForVehicleOnGraphToUse, nearView, genericVehicleBuiltDelegates,
+                    destinationNode, null/*22.3.24 sphereProjections.backProjection*/, null/*baseTransformForVehicleOnGraphToUse*/, nearView, genericVehicleBuiltDelegates,
                     vehicleLoader, optionalPath);
             return true;
         }

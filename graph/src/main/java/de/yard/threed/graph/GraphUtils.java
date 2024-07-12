@@ -1088,7 +1088,7 @@ public class GraphUtils {
     private static GraphPath createOutlinePath(Graph graph, GraphPath path, GraphLane graphlane, int layer, boolean beginwithoutline) {
         double offset = graphlane.offset;
 
-        List<Vector3> outline = graph.orientation.getOutline(path.path, offset, 0);
+        List<Vector3> outline = graph.getGraphOrientation().getOutline(path.path, offset, 0);
         GraphNode from;
         if (beginwithoutline) {
             from = graph.addNode("outline0", outline.get(0));

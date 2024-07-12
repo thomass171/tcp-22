@@ -1,6 +1,7 @@
 package de.yard.threed.graph;
 
 
+import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.core.LocalTransform;
@@ -9,7 +10,6 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.ecs.EcsComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
-import de.yard.threed.engine.graph.RotationProvider;
 import de.yard.threed.engine.util.RandomIntProvider;
 
 /**
@@ -58,7 +58,8 @@ public class GraphMovingComponent extends EcsComponent {
     //10.4.18: hilft aber nicht. Wieder inaktiv, weil er damit den Servicepoint nicht mehr findet.
     boolean antijitter = false;
     public boolean unscheduledmoving;
-    public RotationProvider rotationProvider = null;
+    // (vehicle)model specific rotation
+    public Quaternion customModelRotation = new Quaternion();
 
     /**
      * mover darf null sein, z.B. fuer Tests. Aber auch fuer etwas unsichtbares. visualizer natuerlich auch.
@@ -83,8 +84,6 @@ public class GraphMovingComponent extends EcsComponent {
             pos.getTransform().setParent(mover.getParent());
             mover.setParent(rot.getTransform());
         }
-        //22.2.2020 das mal als Default
-        rotationProvider = new VehicleRotationProvider(this);
     }
     /*public GraphMovingComponent(/*Graph graph,* /Transform mover/*, GraphVisualizer visualizer, GraphPosition currentposition* /) {
         this(mover/*graph,mover, currentposition* /);
@@ -92,10 +91,6 @@ public class GraphMovingComponent extends EcsComponent {
 
     public GraphMovingComponent(/*GraphPosition currentposition*/) {
         mover = null;
-        //visualizer = null;
-        //this.currentposition = currentposition;
-        //22.2.2020 das mal als Default
-        rotationProvider = new VehicleRotationProvider(this);
         // 10.4.20 auch ein Default Selector
         selector = new RandomGraphSelector(new RandomIntProvider());
     }

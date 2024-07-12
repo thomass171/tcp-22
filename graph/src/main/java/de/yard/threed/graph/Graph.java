@@ -5,7 +5,6 @@ import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.graph.RotationProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,21 +20,23 @@ public class Graph {
     // Eine globale Liste der Knoten und Kanten ist genauso praktisch wie die verlinkten Kanten in Knoten und Knoten in Kanten.
     private List<GraphNode> nodes = new ArrayList<GraphNode>();
     private List<GraphEdge> edges = new ArrayList<GraphEdge>();
-    //29.3.17: bloeder hack. Aber praktsich fuer den Upvector.
-    //15.3.18 public boolean iszEbene;
     private GraphSmoothing smoothing = null;
-    //y0 Ebene als Default weils damit abwaets komptibel ist.
-    //163.18 public Vector3 upVector = new Vector3(0,1,0);
-    // Man koennte denken, das gehört hier nicht hin. Aber das wird beim Anlegen eines Graph ja mit festgelegt.
-    // Koennte vielleicht hier in eine Art static Registry, damit es nicht Attribut der Klasse ist?
-    // 15.12.21: Tja, ist das wirklich so? Oder ist das nicht eine unzulässige aber praktische Vereinfachung für z0 und y0 Ebenen? Auch in
-    // einer y0 Ebene kann ein Vehicle steil nach oben moven. Stimmt dann noch die Rotation?
-    public GraphOrientation orientation;
+    // GraphOrientation is the container for up-vector and plane information
+    // 15.12.21: if there really is a plane? Also in
+    // a y0 plane a Vehicle can move up on a vertical edge.How is this related to Rotation?
+    // 4.7.24: Too deeply coupled to remove it. And maybe its really needed (for outline). Still needs one write access!! RotationProvider extracted
+    private GraphOrientation orientation;
+    // 4.7.24: A graph should provide the information how a vehicle (or any object) on the graph should rotate. up- and rolling-vector might be
+    // important here. This is not related to a base rotation that is needed for converting different vehicle model coordinate systems.
+    // This information is hard to retrieve from outside, eg. a flight route is created long before a vehicle is placed on the graph.
+    // And at least currently this information is not needed in ProjectedGraphs.
+    private RotationProvider rotationProvider = null;
     //1.4.20 name is not functional important, but helpful for testing/logging.
     private String name;
 
     public Graph(GraphOrientation orientation) {
         this.orientation = orientation;
+        this.rotationProvider = new DefaultEdgeBasedRotationProvider();
     }
 
     public Graph() {
@@ -45,6 +46,18 @@ public class Graph {
     public Graph(GraphValidator graphValidator, GraphOrientation orientation) {
         this(orientation);
         this.graphValidator = graphValidator;
+    }
+
+    public GraphOrientation getGraphOrientation() {
+        return orientation;
+    }
+
+    public void setGraphOrientation(GraphOrientation orientation) {
+        this.orientation = orientation;
+    }
+
+    public void setRotationProvider(RotationProvider rotationProvider) {
+        this.rotationProvider = rotationProvider;
     }
 
     public GraphNode addNode(String name, Vector3 location) {
@@ -252,13 +265,15 @@ public class Graph {
 
     /**
      * Extracted from GraphMovingSystem.getPosRot().
+     * Overridden in ProjectedGraph!
      */
-    public LocalTransform getPosRot(GraphPosition cp, RotationProvider rotationProvider) {
+    public LocalTransform getPosRot(GraphPosition cp, Quaternion customModelRotation/*4.7.24, RotationProvider rotationProvider*/) {
         Vector3 position = cp.get3DPosition();
 
         // die berechnete rotation ist bei projection nicht nutzbar. 22.2.2020 abstrahirt
         //Quaternion rotation = (gmc.graph.orientation.get3DRotation(cp.reverseorientation, cp.currentedge.getEffectiveDirection(cp.getAbsolutePosition()), cp.currentedge));
-        Quaternion rotation = rotationProvider.get3DRotation();
+        Quaternion rotation = rotationProvider.get3DRotation(this, cp);
+        rotation = rotation.multiply(customModelRotation);
         LocalTransform posrot = new LocalTransform(position, rotation);
         //logger.debug("no projection. posrot="+posrot);
         return posrot;

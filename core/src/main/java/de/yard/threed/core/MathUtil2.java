@@ -9,17 +9,17 @@ import de.yard.threed.core.platform.Platform;
  * Wobei? Auch fuer Unity (wegen lefthanded) ?
  */
 public class MathUtil2 {
-    public static double PI_2 =  (Math.PI / 2);
-    public static double PI =  (Math.PI);
-    public static double PI2 =  (Math.PI * 2);
+    public static double PI_2 = (Math.PI / 2);
+    public static double PI = (Math.PI);
+    public static double PI2 = (Math.PI * 2);
     public static float FLT_EPSILON = 1.19209290E-07f;
     public static double DBL_EPSILON = 2.2204460492503131e-016;
 
     // OpenGL default orientation pointing to 'us' (object's lookat).
-    public static Vector3 DEFAULT_FORWARD = new Vector3(0,0,1);
-    public static Vector3 DEFAULT_UP = new Vector3(0,1,0);
-    public static Vector3 DEFAULT_LEFT = new Vector3(-1,0,0);
-    public static Vector3 DEFAULT_RIGHT = new Vector3(1,0,0);
+    public static Vector3 DEFAULT_FORWARD = new Vector3(0, 0, 1);
+    public static Vector3 DEFAULT_UP = new Vector3(0, 1, 0);
+    public static Vector3 DEFAULT_LEFT = new Vector3(-1, 0, 0);
+    public static Vector3 DEFAULT_RIGHT = new Vector3(1, 0, 0);
 
     /**
      * Kopiert und laut (http://fabiensanglard.net/doom3_documentation/37726-293748.pdf) angepasst.
@@ -70,7 +70,7 @@ public class MathUtil2 {
 
         return result;
     }
-    
+
     /**
      * Aus JME.
      *
@@ -82,9 +82,9 @@ public class MathUtil2 {
         } else {
             double vx = v.getX(), vy = v.getY(), vz = v.getZ();
             double x = q.getX(), y = q.getY(), z = q.getZ(), w = q.getW();
-            Vector3 vec =  new Vector3(w * w * vx + 2 * y * w * vz - 2 * z * w * vy + x * x
-                            * vx + 2 * y * x * vy + 2 * z * x * vz - z * z * vx - y
-                            * y * vx,
+            Vector3 vec = new Vector3(w * w * vx + 2 * y * w * vz - 2 * z * w * vy + x * x
+                    * vx + 2 * y * x * vy + 2 * z * x * vz - z * z * vx - y
+                    * y * vx,
                     2 * x * y * vx + y * y * vy + 2 * z * y * vz + 2 * w
                             * z * vx - z * z * vy + w * w * vy - 2 * x * w * vz - x
                             * x * vy,
@@ -218,26 +218,21 @@ public class MathUtil2 {
         return res;
     }
 
-     /*MA16 public static Quaternion buildQuaternionFromAngles(*/
-     
-   
+    /*MA16 public static Quaternion buildQuaternionFromAngles(*/
 
-    
 
     public static Vector3 divideScalar(Vector3 v, double scalar) {
         double invScalar = 1.0f / scalar;
-        return new Vector3( (v.getX() * invScalar),  (v.getY() * invScalar),  (v.getZ() * invScalar));
+        return new Vector3((v.getX() * invScalar), (v.getY() * invScalar), (v.getZ() * invScalar));
         //return new Vector3((v.getX() / scalar), (v.getY() / scalar), (v.getZ() / scalar));
     }
 
-    
-    
 
     /**
      * Kreuzprodukt. Wikipedia: Das Kreuzprodukt der Vektoren a und b
      * ist ein Vektor, der senkrecht auf der von den beiden Vektoren aufgespannten Ebene steht und mit ihnen ein Rechtssystem bildet.
      * Die Länge dieses Vektors entspricht dem Flächeninhalt des Parallelogramms, das von den Vektoren a und b aufgespannt wird.
-     * 
+     * <p>
      * Definitionsgemaess nicht normalisiert.
      * <p>
      * Mit der Definition dürfte klar sein, dass weder a und b noch das Resultat normalisiert sein müssen.
@@ -257,8 +252,8 @@ public class MathUtil2 {
         double x2 = (double) a.getZ() * (double) b.getY();
         double y = (double) a.getZ() * (double) b.getX() - (double) a.getX() * (double) b.getZ();
         double z = (double) a.getX() * (double) b.getY() - (double) a.getY() * (double) b.getX();
-        Vector3 output = new Vector3( (x1 - x2),
-                 y,  z);
+        Vector3 output = new Vector3((x1 - x2),
+                y, z);
 
         return output;
     }
@@ -298,12 +293,12 @@ public class MathUtil2 {
     }
 
     public static double getDotProduct(Quaternion v1, Quaternion v2) {
-        double p = v1.getX() * v2.getX() + v1.getY() * v2.getY() + v1.getZ() * v2.getZ()+ v1.getW() * v2.getW();
+        double p = v1.getX() * v2.getX() + v1.getY() * v2.getY() + v1.getZ() * v2.getZ() + v1.getW() * v2.getW();
         return p;
     }
-    
+
     public static double getDistance(Vector3 p1, Vector3 p2) {
-        return  subtract(p1, p2).length();
+        return subtract(p1, p2).length();
     }
 
     /**
@@ -377,9 +372,9 @@ public class MathUtil2 {
         double e32 = m.getElement(2, 1);
         double e33 = m.getElement(2, 2);
 
-        return new Vector3( Math.sqrt(e11 * e11 + e21 * e21 + e31 * e31),
-                 Math.sqrt(e12 * e12 + e22 * e22 + e32 * e32),
-                 Math.sqrt(e13 * e13 + e23 * e23 + e33 * e33));
+        return new Vector3(Math.sqrt(e11 * e11 + e21 * e21 + e31 * e31),
+                Math.sqrt(e12 * e12 + e22 * e22 + e32 * e32),
+                Math.sqrt(e13 * e13 + e23 * e23 + e33 * e33));
     }
 
     /**
@@ -420,8 +415,8 @@ public class MathUtil2 {
      * @return
      */
     private static Quaternion extractQuaternion(double m00, double m01, double m02,
-                                                      double m10, double m11, double m12,
-                                                      double m20, double m21, double m22) {
+                                                double m10, double m11, double m12,
+                                                double m20, double m21, double m22) {
    
         /*double m00 = ohnescale.matrix[0], m01 = ohnescale.matrix[3], m02 = ohnescale.matrix[6],
                 m10 = ohnescale.matrix[1], m11 = ohnescale.matrix[4], m12 = ohnescale.matrix[7],
@@ -432,28 +427,28 @@ public class MathUtil2 {
         // Der folgende Algorithmus ist aus jme3
 
         if (trace >= 0) {
-            double s =  Math.sqrt(trace + 1);
+            double s = Math.sqrt(trace + 1);
             w = 0.5f * s;
             s = 0.5f / s;
             x = (m21 - m12) * s;
             y = (m02 - m20) * s;
             z = (m10 - m01) * s;
         } else if ((m00 > m11) && (m00 > m22)) {
-            double s =  Math.sqrt(1.0f + m00 - m11 - m22);
+            double s = Math.sqrt(1.0f + m00 - m11 - m22);
             x = s * 0.5f;
             s = 0.5f / s;
             y = (m10 + m01) * s;
             z = (m02 + m20) * s;
             w = (m21 - m12) * s;
         } else if (m11 > m22) {
-            double s =  Math.sqrt(1.0f + m11 - m00 - m22);
+            double s = Math.sqrt(1.0f + m11 - m00 - m22);
             y = s * 0.5f;
             s = 0.5f / s;
             x = (m10 + m01) * s;
             z = (m21 + m12) * s;
             w = (m02 - m20) * s;
         } else {
-            double s =  Math.sqrt(1.0f + m22 - m00 - m11);
+            double s = Math.sqrt(1.0f + m22 - m00 - m11);
             z = s * 0.5f;
             s = 0.5f / s;
             x = (m02 + m20) * s;
@@ -495,9 +490,9 @@ public class MathUtil2 {
         //double sz = MathUtil2.length(new OpenGlVector3(matrix[6], matrix[7], matrix[8]));
 
 
-        double sx =  getColumn(m, 0).length();
-        double sy =  getColumn(m, 1).length();
-        double sz =  getColumn(m, 2).length();
+        double sx = getColumn(m, 0).length();
+        double sy = getColumn(m, 1).length();
+        double sz = getColumn(m, 2).length();
         // Das mit der Determinanten macht ThreeJS so. JME nicht.
         double det = getDeterminant(m);
         if (det < 0) {
@@ -543,8 +538,8 @@ public class MathUtil2 {
      */
     public static Vector3 getTriangleIntersection(Vector3 origin, Vector3 direction, Vector3 v0, Vector3 v1, Vector3 v2) {
         Vector3 edge1, edge2, normal;              // triangle vectors
-        Vector3     w0, w;           // maze vectors
-        double      a, b;              // params to calc maze-plane intersect
+        Vector3 w0, w;           // maze vectors
+        double a, b;              // params to calc maze-plane intersect
 
         //28.8.16: direction sicherheitshalber normalize
         direction = direction.normalize();
@@ -598,7 +593,7 @@ public class MathUtil2 {
                         result.point = maze.origin +
                                 result.parameter * maze.direction;
                         return result;*/
-                        return MathUtil2.add(origin, direction.multiply( QdN / DdN));
+                        return MathUtil2.add(origin, direction.multiply(QdN / DdN));
                     }
                     // else: t < 0, no intersection
                 }
@@ -637,13 +632,13 @@ public class MathUtil2 {
         up = (getCrossProduct(forward, right)).normalize();
 
         //Matrix3 m = new Matrix3(
-        return extractQuaternion(right,up,forward);
+        return extractQuaternion(right, up, forward);
                 /*right.getX(), up.getX(), forward.getX(),
                 right.getY(), up.getY(), forward.getY(),
                 right.getZ(), up.getZ(), forward.getZ());*/
     }
 
-    public static Quaternion extractQuaternion(Vector3 right,Vector3 up,Vector3 forward){
+    public static Quaternion extractQuaternion(Vector3 right, Vector3 up, Vector3 forward) {
         return extractQuaternion(
                 right.getX(), up.getX(), forward.getX(),
                 right.getY(), up.getY(), forward.getY(),
@@ -738,40 +733,44 @@ public class MathUtil2 {
         if (dot > 1) {
             dot = 1;
         }
-        return  Math.acos(dot);
+        return Math.acos(dot);
     }
 
     public static double sin(double f) {
-        return  Math.sin(f);
+        return Math.sin(f);
     }
 
     public static double asin(double f) {
-        return  Math.asin(f);
+        return Math.asin(f);
+    }
+
+    public static double atan2(double y, double x) {
+        return Math.atan2(y, x);
     }
 
     public static double cos(double f) {
-        return  Math.cos(f);
+        return Math.cos(f);
     }
 
     /**
      * Das ist nicht geod geeignet.
      * 14.6.19: Ist doch bestimmt auch nicht korrekt. TODO klaeren
      * Aber direkt an der Stelle ist die Abweichung gering??
+     *
      * @param v
      * @return
      */
     public static Degree getHeadingFromDirection(Vector2 v) {
-        double a =  Math.atan2(v.getX(), v.getY());
+        double a = Math.atan2(v.getX(), v.getY());
         if (a < 0) {
             a += PI2;
         }
         return Degree.buildFromRadians(a);
     }
-    
+
     /**
      * Result is normalized.
      * 14.5.18: Deprecated weil nicht korrekt. TODO klaeren. Die Abweichung fürht doch schon innerhalb eines Airport zu sichtbaren Fehlern, oder?.
-     *
      */
     @Deprecated
     public static Vector2 getDirectionFromHeading(Degree d) {
@@ -783,13 +782,14 @@ public class MathUtil2 {
 
     /**
      * Unter der Annahme eines -x Headings als Default.
+     *
      * @param heading
      * @return
      */
     public static Degree getDegreeFromHeading(Degree heading) {
         return new Degree(-(90 + heading.getDegree()));
     }
-    
+
     public static boolean areEqual(double f1, double f2) {
         return areEqual(f1, f2, FLT_EPSILON);
     }
@@ -816,11 +816,11 @@ public class MathUtil2 {
         if (angle < PI_2) {
             return start;
         }
-        double b = - (cos(angle) * (v1).length());
+        double b = -(cos(angle) * (v1).length());
         if (b > (v).length()) {
             return add(start, v);
         }
-        return add(start, (v).normalize().multiply( b));
+        return add(start, (v).normalize().multiply(b));
     }
 
     /**
@@ -828,7 +828,7 @@ public class MathUtil2 {
      * Cramersche Regel.
      */
     public static Vector2 getLineIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4) {
-        double nenner = ((((double)p4.getY() - p3.getY()) * (p2.getX() - p1.getX())) - ((p2.getY() - p1.getY()) * (p4.getX() - p3.getX())));
+        double nenner = ((((double) p4.getY() - p3.getY()) * (p2.getX() - p1.getX())) - ((p2.getY() - p1.getY()) * (p4.getX() - p3.getX())));
         if (Math.abs(nenner) < FLT_EPSILON) {
             return null;
         }
@@ -839,7 +839,7 @@ public class MathUtil2 {
         //if (nenner < FLT_EPSILON){
         //  return null;
         //}
-        double ys = ((((double)p1.getY() - p2.getY()) * (p4.getX() * p3.getY() - p3.getX() * p4.getY())) -
+        double ys = ((((double) p1.getY() - p2.getY()) * (p4.getX() * p3.getY() - p3.getX() * p4.getY())) -
                 ((p3.getY() - p4.getY()) * (p2.getX() * p1.getY() - p1.getX() * p2.getY()))) / nenner;
         return new Vector2(xs, ys);
     }

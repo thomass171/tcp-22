@@ -592,7 +592,7 @@ public class GraphUtilsTest {
         GraphNode acht = graph.findNodeByName("acht");
         GraphEdge zeroeins = graph.findEdgeByName("zeroeins");
         float offset = -0.3f;
-        List<Vector3> outline = graph.orientation.getOutlineFromNode(zero, offset);
+        List<Vector3> outline = graph.getGraphOrientation().getOutlineFromNode(zero, offset);
         RuntimeTestUtil.assertVector3("", new Vector3(0.21213204f, 0, -0.21213204f), outline.get(0));
 
         // start ist auf zero Richtung links oben. Dann passt ein U-Turn

@@ -1,22 +1,20 @@
 package de.yard.threed.graph;
 
 import de.yard.threed.core.Quaternion;
-import de.yard.threed.engine.graph.RotationProvider;
 
 /**
- * Fuer Planeten und Monde.
- * 22.2.20202
+ * For planets and moons.
+ * 4.7.24: The rotation in an orbit cannot be derived from an edge because the edge is a circle!
+ * 22.2.2022
  */
 public class OrbitRotationProvider implements RotationProvider {
-    GraphMovingComponent gmc;
 
     public OrbitRotationProvider( ) {
-        this.gmc = gmc;
     }
 
     @Override
-    public Quaternion get3DRotation() {
-        //erstmal nur so
+    public Quaternion get3DRotation(Graph graph, GraphPosition cp) {
+        // just this for now
         return new Quaternion();
     }
 }

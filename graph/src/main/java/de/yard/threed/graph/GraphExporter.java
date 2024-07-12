@@ -15,7 +15,7 @@ public class GraphExporter {
         //Locale locale = new Locale("us", "US");
         String s = "";
         s += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        s += "<graph orientation=\"" + graph.orientation.getName() + "\">\n";
+        s += "<graph orientation=\"" + graph.getGraphOrientation().getName() + "\">\n";
 
         s += "  <nodes>\n";
         for (int i = 0; i < graph.getNodeCount(); i++) {

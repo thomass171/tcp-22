@@ -216,7 +216,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                             TrafficSystem.knownVehicles.add(vd);
                         }
                         // 28.11.23: Was in BasicTravelScene.customInit() before
-                        TrafficSystem.baseTransformForVehicleOnGraph = xmlConfig.getBaseTransformForVehicleOnGraph();
+                        //11.7.24 TrafficSystem.baseTransformForVehicleOnGraph = xmlConfig.getBaseTransformForVehicleOnGraph();
                         // 16.5.24: scenerybuilder now in config which also provides ellipsoidconversionprovider
                         String scenerybuilder = xmlConfig.findSceneryBuilder();
                         if (scenerybuilder != null) {

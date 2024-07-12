@@ -1,4 +1,4 @@
-package de.yard.threed.engine.graph;
+package de.yard.threed.engine;
 
 import de.yard.threed.engine.SceneNode;
 

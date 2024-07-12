@@ -46,9 +46,9 @@
 
     <vehicle name="loc" delayedload="false" automove="true" location="*:firstEdge" initialcount="1"/>
 
-    <BaseTransformForVehicleOnGraph>
+    <!--9.7.24<BaseTransformForVehicleOnGraph>
         <transform>
             <angle>0,-90,0</angle>
         </transform>
-    </BaseTransformForVehicleOnGraph>
+    </BaseTransformForVehicleOnGraph>-->
 </c:config>

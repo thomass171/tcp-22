@@ -361,6 +361,23 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.de.yard.threed=
 
 The UI is then available on 'http://localhost:8080/servermanager.html'.
 
+### Traffic
+
+The default/expected orientation of a vehicle is front at +x and +y up, like
+eg. 'loc'. (See ReferenceScene which uses the default orientation).
+
+For vehicles moving on a graph GraphMovingSystem calculates the correct 3D orientation,
+which depends on the orientation of the base model. The default orientation of
+a graph differs by a -90 degree y-rotation from the default vehicle orientation. 
+
+Currently, a graph needs to know how models are oriented via  
+GraphMovingComponent.customModelRotation
+for providing the visually correct rotation.
+
+The alternative to decouple the knowledge from a graph seems promising, but
+requires to use a common model orientation. That in turn leads to complexity
+with projected graphs (groundnet) which by nature have a different rotation strategy.
+
 ## Bundles
 
 Bundles are a well defined set of resources (files) that reside somewhere.

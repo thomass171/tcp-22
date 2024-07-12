@@ -2,7 +2,7 @@ package de.yard.threed.graph;
 
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.engine.graph.Visualizer;
+import de.yard.threed.engine.Visualizer;
 
 /**
  * Das Aussehen eines Graph kann sehr unterschiedlich sein, z.B. Strassen, Gleise, einfache Lnien, Tubes.

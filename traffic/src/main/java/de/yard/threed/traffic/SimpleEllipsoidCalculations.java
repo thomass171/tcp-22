@@ -5,6 +5,7 @@ import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.traffic.geodesy.ElevationProvider;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
@@ -40,7 +41,10 @@ public class SimpleEllipsoidCalculations implements EllipsoidCalculations {
 
     @Override
     public GeoCoordinate fromCart(Vector3 cart) {
-        return null;
+        LatLon latLon = new LatLon(MathUtil2.asin(cart.getZ() / radius),
+         MathUtil2.atan2(cart.getY(), cart.getX()));
+        // TODO elevation
+        return GeoCoordinate.fromLatLon(latLon,0);
     }
 
     @Override
@@ -60,16 +64,19 @@ public class SimpleEllipsoidCalculations implements EllipsoidCalculations {
 
     @Override
     public LatLon applyCourseDistance(LatLon latLon, Degree coursedeg, double dist) {
+        Util.notyet();
         return null;
     }
 
     @Override
     public Degree courseTo(LatLon latLon, LatLon dest) {
+        Util.notyet();
         return null;
     }
 
     @Override
     public double distanceTo(LatLon latLon, LatLon dest) {
+        Util.notyet();
         return 0;
     }
 }
