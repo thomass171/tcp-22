@@ -2,9 +2,12 @@
 
 A cross platform 3D graphics meta engine for Java, but still WiP!
 
-See https://thomass171.github.io/tcp-22/tcp-22.html for examples 
-and https://thomass171.github.io/maze-games/mazegames.html and
-https://thomass171.github.io/tcp-flightgear/tcp-flightgear.html for use cases.
+See also
+
+  * [Examples](https://thomass171.github.io/tcp-22/tcp-22.html) 
+  * [Maze use cases](https://thomass171.github.io/maze-games/mazegames.html)
+  * [Flightgear use cases](https://thomass171.github.io/tcp-flightgear/tcp-flightgear.html)
+  * [My Blog](https://thomass171.github.io/blog)
 
 # Building And Deploying
 
@@ -159,7 +162,7 @@ initialRoute
 | Property       | Purpose                                                                          |
 |----------------|----------------------------------------------------------------------------------|
 | enableAutomove | Start vehicle immediately after scene start without the need for a start request |
-|    |                                                                                  |
+|                |                                                                                  |
 
 # Development
 The most convenient way is to develop for a Java platform like JME (or homebrew) initially and later test it on other platforms
@@ -255,7 +258,7 @@ Major changes:
 ## Architecture
 
 <!-- two similar options ![svg not processed?](docs/Architecture-base.svg)-->
-<img src="docs/Architecture-base.svg" width="100%">
+<img src="docs/Architecture-base.svg" width="100%" alt="">
 
 ## Design
 
