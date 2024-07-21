@@ -112,6 +112,10 @@ public class FirstPersonScene extends Scene {
                 inputToRequestSystem.setSegmentRequest(5, BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT);
                 inputToRequestSystem.setSegmentRequest(7, BaseRequestRegistry.TRIGGER_REQUEST_FORWARD);
             }
+            inputToRequestSystem.setDragMapping(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT,BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT,
+                    BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN,BaseRequestRegistry.TRIGGER_REQUEST_TURNUP,
+                    BaseRequestRegistry.TRIGGER_REQUEST_START_FORWARD, BaseRequestRegistry.TRIGGER_REQUEST_STOP_FORWARD);
+
             SystemManager.addSystem(inputToRequestSystem);
 
             ObserverSystem observerSystem = new ObserverSystem();
@@ -174,18 +178,6 @@ public class FirstPersonScene extends Scene {
     @Override
     public String[] getPreInitBundle() {
         return new String[]{"engine", "data"};
-    }
-
-    /**
-     * Portrait for Smartphone. But only interesting for dev. Otherwise the user should decide.
-     * 23.3.23 Seems to be quite nonsens.
-     */
-    @Override
-    public Dimension getPreferredDimension() {
-        /*if (((Platform) Platform.getInstance()).isDevmode()) {
-            return new Dimension(500, 700);
-        }*/
-        return null;
     }
 
     @Override

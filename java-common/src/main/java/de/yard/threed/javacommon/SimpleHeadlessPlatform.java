@@ -317,6 +317,15 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
+    public Point getMouseMove() {
+        // no real input, but can be used for testing
+        if (mockedMouseMoveInput.size() == 0) {
+            return null;
+        }
+        return mockedMouseMoveInput.remove(0);
+    }
+
+    @Override
     public Point getMouseUp() {
         // no real input, but can be used for testing
         if (mockedMouseUpInput.size() == 0) {

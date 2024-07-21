@@ -151,6 +151,29 @@ public class InputToRequestSystemTest {
         assertEquals(0, SystemManager.getRequestCount(), "pending requests");
     }
 
+    /**
+     *
+     */
+    @Test
+    public void testDraggingRequests() {
+
+        inputToRequestSystem.setDragMapping(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT,BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT,
+                BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN,BaseRequestRegistry.TRIGGER_REQUEST_TURNUP,
+                BaseRequestRegistry.TRIGGER_REQUEST_START_FORWARD, BaseRequestRegistry.TRIGGER_REQUEST_STOP_FORWARD);
+
+        login();
+
+        // click position doesn't matter. control panel mock will always accept.
+        SimpleHeadlessPlatform.mockedMouseDownInput.add(new Point(-10, -10));
+        EcsTestHelper.processSeconds(2);
+        SimpleHeadlessPlatform.mockedMouseMoveInput.add(new Point(-8, -10));
+        EcsTestHelper.processSeconds(1);
+
+        assertEquals(2, sceneRunner.getSystemTracker().getRequests().size(), "requests");
+        assertEquals(BaseRequestRegistry.TRIGGER_REQUEST_START_FORWARD, sceneRunner.getSystemTracker().getRequests().get(0).getType());
+        assertEquals(BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT, sceneRunner.getSystemTracker().getRequests().get(1).getType());
+    }
+
     private void login() {
         String clientId = "677";
         int userEntitId = 343;

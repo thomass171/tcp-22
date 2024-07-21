@@ -214,7 +214,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         inputToRequestSystem.addKeyMapping(KeyCode.Alpha9, UserSystem.USER_REQUEST_AUTOMOVE);
 
         if (enableFPC) {
-            FirstPersonMovingSystem.addDefaultKeyBindings(inputToRequestSystem);
+            FirstPersonMovingSystem.addDefaultKeyBindingsforContinuousMovement(inputToRequestSystem);
         }
 
         if (vrInstance != null) {

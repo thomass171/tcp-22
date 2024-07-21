@@ -70,7 +70,8 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
     public ArrayList<Integer> releasedkeys = new ArrayList<Integer>();
     public ArrayList<Integer> stillpressedkeys = new ArrayList<Integer>();
     public static AbstractSceneRunner instance = null;
-    public Point mousemove, mousepress, mouseclick, mousedrag;
+    // used for forwarding native mouse events to platform interface
+    public Point mousemove, mousepress, mouseclick;
     public ArrayList<Integer> buttondown = new ArrayList<Integer>();
     public ArrayList<Integer> buttonup = new ArrayList<Integer>();
     private long lastTime = -1; // when the last frame was

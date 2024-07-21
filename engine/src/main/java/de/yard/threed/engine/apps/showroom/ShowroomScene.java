@@ -5,10 +5,8 @@ import de.yard.threed.core.Color;
 import de.yard.threed.core.DimensionF;
 import de.yard.threed.core.IntHolder;
 import de.yard.threed.core.Point;
-import de.yard.threed.core.ValueWrapper;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.core.geometry.ProportionalUvMap;
 import de.yard.threed.core.geometry.SimpleGeometry;
@@ -20,7 +18,6 @@ import de.yard.threed.engine.Audio;
 import de.yard.threed.engine.AudioClip;
 import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.DirectionalLight;
-import de.yard.threed.engine.GenericGeometry;
 import de.yard.threed.engine.Geometry;
 import de.yard.threed.engine.Input;
 import de.yard.threed.engine.KeyCode;
@@ -53,11 +50,8 @@ import de.yard.threed.engine.gui.DefaultMenuProvider;
 import de.yard.threed.engine.gui.Hud;
 import de.yard.threed.engine.gui.Icon;
 import de.yard.threed.engine.gui.Indicator;
-import de.yard.threed.engine.gui.MenuCycler;
 import de.yard.threed.engine.gui.MenuItem;
-import de.yard.threed.engine.gui.MenuProvider;
 import de.yard.threed.engine.gui.NumericSpinnerHandler;
-import de.yard.threed.engine.gui.PropertyPanel;
 import de.yard.threed.engine.gui.SelectSpinnerHandler;
 import de.yard.threed.engine.gui.SpinnerControlPanel;
 import de.yard.threed.engine.platform.common.Settings;
@@ -147,7 +141,7 @@ public class ShowroomScene extends Scene {
         vrInstance = VrInstance.buildFromArguments();
 
         InputToRequestSystem inputToRequestSystem = new InputToRequestSystem();
-        FirstPersonMovingSystem.addDefaultKeyBindings(inputToRequestSystem);
+        FirstPersonMovingSystem.addDefaultKeyBindingsforContinuousMovement(inputToRequestSystem);
         SystemManager.addSystem(inputToRequestSystem);
 
         // ObserverSystem also needed in VR

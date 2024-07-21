@@ -42,12 +42,14 @@ import java.util.Map;
  * in general.
  * <p>
  * Dragging for now has no real use case. At least its no non-VR supplement for grabbing.
+ * 20.7.24 Dragging is now used for touchscreen movement requests.
  * <p>
  * Created by thomass on 11.10.19.
  */
 public class InputToRequestSystem extends DefaultEcsSystem {
     static Log logger = Platform.getInstance().getLog(InputToRequestSystem.class);
     private Map<KeyEntry, RequestBuilder> keymapping = new HashMap<KeyEntry, RequestBuilder>();
+    private RequestBuilder[] dragmapping = null;
 
     //2.4.21: menu. Why not in UserSystem?
     //4.2.22: What is the difference? Apparently the only difference is a control menu is attached to a camera while
@@ -71,11 +73,13 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     private List<MockedInput> mockedInputs = new ArrayList<MockedInput>();
     // Entity id of the current player (the one controlling the game). null unless not logged in
     private Integer userEntityId = null;
-    private Point possiblestartdrag;
+    private Point possiblestartdrag, lastDragPosition = null;
     private Integer draggedEntity = null;
     // in some large scale setups (FG) the small z offsets of the default camera and guigrid just do not fit
     // for those cases a dedicated deferred camera for menus can be established. For menu and control menu.
     private Camera cameraForMenu = null;
+    // VR grabbing is different from dragging. Not sure whether entity dragging ever was more than an attempt/idea.
+    boolean entityDraggingEnabled = false;
 
     public InputToRequestSystem() {
         super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU}, new EventType[]{UserSystem.USER_EVENT_LOGGEDIN});
@@ -145,6 +149,21 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         keymapping.put(new KeyEntry(keyCode, true, true), new RequestBuilder(requestType));
     }
 
+    /**
+     * Mapping for dragging.
+     */
+    public void setDragMapping(RequestType requestTypeLeft, RequestType requestTypeRight,
+                               RequestType requestTypeDown, RequestType requestTypeUp,
+                               RequestType requestOnStartDrag, RequestType requestOnStopDrag) {
+        dragmapping = new RequestBuilder[]{
+                new RequestBuilder(requestTypeLeft),
+                new RequestBuilder(requestTypeRight),
+                new RequestBuilder(requestTypeDown),
+                new RequestBuilder(requestTypeUp),
+                new RequestBuilder(requestOnStartDrag),
+                new RequestBuilder(requestOnStopDrag)};
+    }
+
     @Override
     public void init(EcsGroup group) {
         openCloseControlMenu();
@@ -209,12 +228,12 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
         // Mouse input
 
-        Point mouseMovelocation = Input.getMouseMove();
-        if (mouseMovelocation != null) {
+        Point mouseMoveLocation = Input.getMouseMove();
+        if (mouseMoveLocation != null) {
 
             // No longer just emulate VR controller but general feature. But still have a left and right pointer even with mouse (left by holding ctrl key)
-            Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseMovelocation);
-            // ctrl geht nicht in JME mit click, darum shift.
+            Ray ray = camera.buildPickingRay(camera.getCarrierTransform(), mouseMoveLocation);
+            // ctrl not working in JME with click, so use shift for left pointer.
             processPointer(ray, Input.getKey(KeyCode.Shift));
         }
         // now check mouse clicks. Be aware of multiple possible targets, eg. segment and control menu.
@@ -223,29 +242,54 @@ public class InputToRequestSystem extends DefaultEcsSystem {
         if (mouseDownLocation != null) {
             possiblestartdrag = mouseDownLocation;
             //logger.debug("possible drag from " + startdrag);
+            // 19.7.24 now at the begiining. dragging is not only for entites
+            if (entityDraggingEnabled) {
+                draggedEntity = findDraggedEntity(camera);
+            }
+            lastDragPosition = possiblestartdrag;
+
+            // will trigger a request on every mouse press. might not be the best choice
+            if (dragmapping != null) {
+                SystemManager.putRequest(dragmapping[4].build(userEntityId));
+            }
         }
         if (possiblestartdrag != null) {
-            Point mouseMoveLocation = Input.getMouseMove();
             if (mouseMoveLocation != null) {
-                Point offset = mouseMoveLocation.subtract(possiblestartdrag);
-                logger.debug("dragging offset " + offset);
-                if (draggedEntity == null) {
-                    draggedEntity = findDraggedEntity(camera);
-                    if (draggedEntity == null) {
-                        // no entity hit. Abort drag.
-                        possiblestartdrag = null;
-                    } else {
-                        logger.debug("Dragging entity with id " + draggedEntity);
-                    }
-                }
-                // This calc is highly q&d. Dragged object should stay in its plane.
-                double dragfactor = 0.003;
-                double dragX = (double) offset.getX() * dragfactor;
-                double dragY = -(double) offset.getY() * dragfactor;
-                if (draggedEntity != null) {
-                    requestDragTransform(dragX, dragY);
-                }
+                Point offset;
 
+                if (draggedEntity != null) {
+                    offset = mouseMoveLocation.subtract(possiblestartdrag);
+                    logger.debug("dragging offset " + offset);
+                    logger.debug("Dragging entity with id " + draggedEntity);
+
+                    // This calc is highly q&d. Dragged object should stay in its plane.
+                    double dragfactor = 0.003;
+                    double dragX = (double) offset.getX() * dragfactor;
+                    double dragY = -(double) offset.getY() * dragfactor;
+                    requestDragTransform(dragX, dragY);
+                } else {
+                    offset = mouseMoveLocation.subtract(lastDragPosition);
+                    logger.debug("dragging offset " + offset + " with dragmapping " + dragmapping);
+
+                    // when no entity is dragged, maybe convert dragging to requests
+                    logger.debug("offset.x=" + offset.getX());
+                    if (dragmapping != null) {
+                        if (offset.getX() < 0) {
+                            SystemManager.putRequest(dragmapping[0].build(userEntityId));
+                        }
+                        if (offset.getX() > 0) {
+                            SystemManager.putRequest(dragmapping[1].build(userEntityId));
+                        }
+                        if (offset.getY() < 0) {
+                            SystemManager.putRequest(dragmapping[2].build(userEntityId));
+                        }
+                        if (offset.getY() > 0) {
+                            SystemManager.putRequest(dragmapping[3].build(userEntityId));
+                        }
+                    }
+                    logger.debug("offset.y=" + offset.getY());
+                }
+                lastDragPosition = mouseMoveLocation;
             }
         }
         Point mouseUpLocation = Input.getMouseUp();
@@ -288,6 +332,11 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             }
             // mouse up ends drag in any case
             possiblestartdrag = null;
+
+            // will trigger a request on every mouse release. might not be the best choice
+            if (dragmapping != null) {
+                SystemManager.putRequest(dragmapping[5].build(userEntityId));
+            }
         }
 
         // VR controller input
