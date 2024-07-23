@@ -146,14 +146,25 @@ The following properties are evaluated from the environment or system properties
 ADDITIONALBUNDLE
 
 This is a colon separated list of bundle locations, either filesystem paths or web URLs. The default
-  bundle location is $HOSTDIR/bundles for filesystems and 'origin'/bundles from a browser.
+  bundle location is $HOSTDIR/bundles for filesystems and 'origin'/bundles from a browser. For the
+bundles listed in ADDITIONALBUNDLE a bundle resolver is added **after** the default bundle resolver
+during platform setup. See
+also property 'bundleResolver', which has a similar semantic.
 
 ## Properties
 (what is the difference to 'Settings'?)
 
 initialVehicle:  Just a name as reference to a defined vehicle (in future maybe also or a full qualified path to a config).
 
-initialRoute
+initialRoute:
+
+bundleResolver(in future?;or httpBundleResolver?): Similar to ADDITIONALBUNDLE, but not base64 encoded and adding the resolver
+**before** the default resolver. This allows overriding default bundles by custom bundles.
+
+initialLocation:  In traffic a (smart)location resulting/superseeded in FlightLocation. 
+
+initialHeading: Contributing to initialLocation(FlightLocation)
+
 ### Generic
 
 ### Use Case Maze
@@ -259,6 +270,12 @@ Major changes:
 
 <!-- two similar options ![svg not processed?](docs/Architecture-base.svg)-->
 <img src="docs/Architecture-base.svg" width="100%" alt="">
+
+### Conventions
+
+position: Consider a 3D coordinate (Vector3) like Payload and XML config (traffic.xsd) does.
+
+location: Consider an abstract position, in traffic a (Smart/FlightLocation)
 
 ## Design
 

@@ -1,7 +1,9 @@
 package de.yard.threed.traffic;
 
+import de.yard.threed.core.Degree;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ViewPoint;
@@ -17,6 +19,8 @@ import de.yard.threed.graph.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Payload;
+import de.yard.threed.traffic.flight.FlightLocation;
+import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.traffic.geodesy.MapProjection;
 import de.yard.threed.trafficcore.config.LocatedVehicle;
 import de.yard.threed.trafficcore.model.SmartLocation;
@@ -250,5 +254,22 @@ public class TrafficHelper {
         }
         List<Vehicle> vehicleList = (List<Vehicle>) dataProvider.getData(null);
         return vehicleList;
+    }
+
+    /**
+     * 22.7.24
+     */
+    public static FlightLocation getInitialFlightLocation() {
+        // have it int two separate properties due to complex parsing
+        String initialLocation = Platform.getInstance().getConfiguration().getString("initialLocation");
+        if (initialLocation == null) {
+            return null;
+        }
+        GeoCoordinate g = GeoCoordinate.parse(initialLocation);
+        String initialHeading = Platform.getInstance().getConfiguration().getString("initialHeading");
+        if (initialHeading == null) {
+            return new FlightLocation(g, new Degree(0));
+        }
+        return new FlightLocation(g, new Degree(Util.parseDouble(initialHeading)));
     }
 }

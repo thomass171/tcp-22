@@ -20,6 +20,7 @@ public class Payload {
     public static String KEY_POSITION = "position";
     public static String KEY_ROTATION = "rotation";
     public static String KEY_SCALE = "scale";
+    // 22.7.24: A location is considered abstract like FlightLocation
 
     // by index
     @Deprecated

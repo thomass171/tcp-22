@@ -18,6 +18,7 @@ import de.yard.threed.traffic.geodesy.GeoCoordinate;
  * Und vielleicht fehlt noch yaw?
  *
  * 27.12.21:Needed in FG, so it must be in "traffic".
+ * 22.7.24: Has no parse() because its too complex. Needs to consider SmartLocation?
  *
  * Created by thomass on 05.01.17.
  */
