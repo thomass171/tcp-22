@@ -1,44 +1,39 @@
 package de.yard.threed.core.geometry;
 
 
-
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Eine einfache Faceliste (beliebige Faces), um Signaturen zu vereinfachen.
+ * A simple face list (arbitrary faces).
  * 16.2.16
- *
  */
-public  class FaceList   {
+public class FaceList {
     public List<Face> faces = new ArrayList<Face>();
-    // Ein Flag zur Optimierung, um unnötiges Kopieren/triangulieren zu vermeiden.
+    // Flag for optimizing to avoid unnecessary triangulation
     public boolean onlyface3;
-    // 31.3.17: Flag nur fuer AC import um anzuzeigen, das surface unshaded ist.
-    public boolean unshaded = false;
+    // 31.3.17: Originated from AC. Was "unshaded=false" until 18.9.24.
+    private boolean shaded = true;
 
-    public FaceList(List<Face> faces) {
+    public FaceList(List<Face> faces, boolean shaded) {
         this.faces = faces;
+        this.shaded = shaded;
     }
 
-    public FaceList(Face face) {
+    public FaceList(Face face, boolean shaded) {
         faces.add(face);
+        this.shaded = shaded;
     }
 
-    public FaceList() {
-
+    public FaceList(boolean shaded) {
+        this.shaded = shaded;
     }
-    
-    public void add(Face f){
+
+    public void add(Face f) {
         faces.add(f);
     }
 
-    /*3.12.16 problemtisch public Map<Integer, Integer> buildUniqueIndexMap(List<Vector3> vertices) {
-        Map<Integer, Integer> uniquemap = new HashMap<Integer, Integer>();
-
-        for (Face gface : facelist.faces) {
-
-        }
-    }*/
+    public boolean isShaded() {
+        return shaded;
+    }
 }

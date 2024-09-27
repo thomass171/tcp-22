@@ -3,10 +3,7 @@ package de.yard.threed.engine;
 import de.yard.threed.core.BooleanHolder;
 import de.yard.threed.core.BuildResult;
 import de.yard.threed.core.CharsetException;
-import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.ModelBuildDelegate;
-import de.yard.threed.core.loader.LoaderGLTF;
-import de.yard.threed.core.loader.PortableModelList;
 import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
@@ -14,7 +11,6 @@ import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.testutil.TestUtils;
-import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.ModelLoader;
@@ -149,7 +145,7 @@ public class ModelBuildTest {
         BundleResource bundleResource = new BundleResource(BundleRegistry.getBundle("engine"), "cesiumbox/BoxTextured.gltf");
 
         List<NativeSceneNode> builtNodes = new ArrayList<>();
-        ModelLoader.buildModelFromBundle(new ResourceLoaderFromBundle(bundleResource), null, 0, new ModelBuildDelegate() {
+        ModelLoader.buildModel(new ResourceLoaderFromBundle(bundleResource), null, 0, new ModelBuildDelegate() {
             @Override
             public void modelBuilt(BuildResult result) {
                 if (result.getNode() == null) {

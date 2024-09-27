@@ -131,7 +131,7 @@ public class LightedRotatingQuad extends Scene {
         faces.add(new Face3(2, 3, 0, uv, uv, uv));
 
         List<FaceList> facelist = new ArrayList<FaceList>();
-        facelist.add(new FaceList(faces));
+        facelist.add(new FaceList(faces, true));
         HomeBrewMaterial material = (HomeBrewMaterial) Material.buildBasicMaterial(Color.RED).material;
         List<SimpleGeometry> geolist = GeometryHelper.prepareGeometry(vertices, facelist, null, true, false);
 

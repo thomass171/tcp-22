@@ -7,7 +7,7 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.apps.WoodenToyPmlFactory;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.Color;
 
 
@@ -37,7 +37,7 @@ public class VehiclePmlFactory {
      *
      * @return
      */
-    public static PortableModelList buildLocomotive() {
+    public static PortableModel/*List*/ buildLocomotive() {
         // Grundelement (Absenkung vorne fehlt noch.
          float wheelwidth = 0.05f;
 
@@ -67,15 +67,16 @@ public class VehiclePmlFactory {
         PortableMaterial wheelmaterial = new PortableMaterial("wheelred", Color.RED);
         WoodenToyPmlFactory tbf = new WoodenToyPmlFactory();
 
-        PortableModelDefinition baseblock = tbf.buildBlock(baselen, baseheight, trackwidth, woodmaterial.name);
-
-        PortableModelDefinition boiler = tbf.buildCylinder(boilerradius, boilerlength, woodmaterial.name);
+        PortableModelDefinition baseblock = tbf.buildBlock(baselen, baseheight, trackwidth, woodmaterial.getName());
+        baseblock.setName("baseblock");
+        PortableModelDefinition boiler = tbf.buildCylinder(boilerradius, boilerlength, woodmaterial.getName());
+        boiler.setName("boiler");
         boiler.setPosition(new Vector3(boilerxpos, trackwidth / 4f, 0));
         boiler.setRotation(Quaternion.buildQuaternionFromAngleAxis((new Degree(90)).toRad(), new Vector3(0, 1, 0)));
         baseblock.attach(boiler);
 
         // chimney auf den Boiler
-        PortableModelDefinition chimney = tbf.buildChimney(chimneyheight, trackwidth * 0.1f, trackwidth * 0.2f, woodmaterial.name);
+        PortableModelDefinition chimney = tbf.buildChimney(chimneyheight, trackwidth * 0.1f, trackwidth * 0.2f, woodmaterial.getName());
         // Boiler ist rotiert, darum sind Achsen anders.
         chimney.setPosition(new Vector3(0, boilerradius + chimneyheight2 - 0.05f, -boilerlength / 4));
         //chimney.getTransform().setParent(boiler.getTransform());
@@ -90,7 +91,8 @@ public class VehiclePmlFactory {
                 // rechts bzw. hinteres z
                 zoffset = -zoffset;
             }
-            wheel[i] = tbf.buildWheel(wheelradius, wheelwidth, wheelmaterial.name);
+            wheel[i] = tbf.buildWheel(wheelradius, wheelwidth, wheelmaterial.getName());
+            wheel[i].setName("wheel");
             wheel[i].setPosition(new Vector3(-baselen2 + (achse + 1) * baselen / (WHEELCNT / 2 + 1), -baseheight2, zoffset));
             //wheel[i].getTransform().setParent(baseblock.getTransform());
             baseblock.attach(wheel[i]);
@@ -109,6 +111,7 @@ public class VehiclePmlFactory {
 
         // Die Node back hat kein Mesh. Sie schliesst direkt an den Boiler an
         PortableModelDefinition back = new PortableModelDefinition();
+        back.setName("back");
         back.setPosition(new Vector3(boilerxpos + boilerlength / 2 + backlen2, backheight2 + baseheight2, 0));
         //back.getTransform().setParent(baseblock.getTransform());
         baseblock.attach(back);
@@ -116,7 +119,8 @@ public class VehiclePmlFactory {
         // Die Pfosten liegen ein bischen nach innen in back rein.
         PortableModelDefinition[] pfosten = new PortableModelDefinition[4];
         for (int i = 0; i < 4; i++) {
-            pfosten[i] = tbf.buildBlock(backheight, pfostenwidth, pfostenwidth, woodmaterial.name);
+            pfosten[i] = tbf.buildBlock(backheight, pfostenwidth, pfostenwidth, woodmaterial.getName());
+            pfosten[i].setName("pole");
             pfosten[i].setPosition(new Vector3((i < 2) ? backlen2 - pfostenwidth : -backlen2 + pfostenwidth, 0, (i % 2 == 0) ? backwidth2 - pfostenwidth : -backwidth2 + pfostenwidth));
             //pfosten[i].getTransform().setParent(back.getTransform());
             back.attach(pfosten[i]);
@@ -124,7 +128,8 @@ public class VehiclePmlFactory {
             pfosten[i].setRotation(Quaternion.buildQuaternionFromAngleAxis((new Degree(90)).toRad(), new Vector3(0, 0, 1)));
         }
         float roofheight = 0.15f;
-        PortableModelDefinition roof = tbf.buildBlock(backlen, roofheight, backwidth, woodmaterial.name);
+        PortableModelDefinition roof = tbf.buildBlock(backlen, roofheight, backwidth, woodmaterial.getName());
+        roof.setName("roof");
         roof.setPosition(new Vector3(0, backheight2, 0));
         //roof.getTransform().setParent(back.getTransform());
         back.attach(roof);
@@ -135,8 +140,8 @@ public class VehiclePmlFactory {
         baseblock.setPosition(new Vector3(0, baseheight2 + wheelradius, 0));
         raiser.setName("Locomotive");
 
-        PortableModelList pml = new PortableModelList(null);
-        pml.addModel(raiser);
+        PortableModel/*List*/ pml = new PortableModel/*List*/(raiser,null);
+        //pml.addModel(raiser);
         pml.addMaterial(woodmaterial);
         pml.addMaterial(wheelmaterial);
         return pml;
@@ -148,13 +153,13 @@ public class VehiclePmlFactory {
      *
      * @return
      */
-    public static PortableModelList buildLocomotiveLowres() {
+    public static PortableModel/*List*/ buildLocomotiveLowres() {
         float baselen = trackwidth;
         PortableMaterial woodmaterial = new PortableMaterial("BucheHell", "data:textures/gimp/wood/BucheHell.png");
         WoodenToyPmlFactory tbf = new WoodenToyPmlFactory();
-        PortableModelDefinition baseblock = tbf.buildBlock(baselen, baselen, baselen, woodmaterial.name);
-        PortableModelList pml = new PortableModelList(null);
-        pml.addModel(baseblock);
+        PortableModelDefinition baseblock = tbf.buildBlock(baselen, baselen, baselen, woodmaterial.getName());
+        PortableModel/*List*/ pml = new PortableModel/*List*/(baseblock, null);
+        //pml.addModel(baseblock);
         pml.addMaterial(woodmaterial);
         return pml;
     }
@@ -172,7 +177,7 @@ public class VehiclePmlFactory {
      *
      * @return
      */
-    public static PortableModelList buildMobi() {
+    public static PortableModel/*List*/ buildMobi() {
          float wheelwidth = 0.05f;
 
         // Grundelement 
@@ -196,7 +201,7 @@ public class VehiclePmlFactory {
         // TODO kein Holz
         WoodenToyPmlFactory tbf = new WoodenToyPmlFactory();
 
-        PortableModelDefinition baseblock = tbf.buildBlock(baselen, baseheight, trackwidth, woodmaterial.name);
+        PortableModelDefinition baseblock = tbf.buildBlock(baselen, baseheight, trackwidth, woodmaterial.getName());
 
         PortableModelDefinition[] wheel = new PortableModelDefinition[WHEELCNT];
         for (int i = 0; i < WHEELCNT; i++) {
@@ -207,7 +212,7 @@ public class VehiclePmlFactory {
                 // rechts bzw. hinteres z
                 zoffset = -zoffset;
             }
-            wheel[i] = tbf.buildWheel(wheelradius, wheelwidth,wheelmaterial.name);
+            wheel[i] = tbf.buildWheel(wheelradius, wheelwidth,wheelmaterial.getName());
             wheel[i].setPosition(new Vector3(-baselen2 + (achse + 1) * baselen / (WHEELCNT / 2 + 1), -baseheight2, zoffset));
             //wheel[i].getTransform().setParent(baseblock.getTransform());
             baseblock.attach(wheel[i]);
@@ -222,7 +227,7 @@ public class VehiclePmlFactory {
         float backwidth = trackwidth * 0.9f - 0.1f;
         float backwidth2 = backwidth / 2;
 
-        PortableModelDefinition drivercell = tbf.buildBlock(backlen, backheight, backwidth,woodmaterial.name);
+        PortableModelDefinition drivercell = tbf.buildBlock(backlen, backheight, backwidth,woodmaterial.getName());
         drivercell.setPosition(new Vector3(baselen2 / 3, backheight2 + baseheight2, 0));
         //drivercell.getTransform().setParent(baseblock.getTransform());
         baseblock.attach(drivercell);
@@ -233,8 +238,8 @@ public class VehiclePmlFactory {
         baseblock.setPosition(new Vector3(0, baseheight2 + wheelradius, 0));
         raiser.setName("Mobi");
 
-        PortableModelList pml = new PortableModelList(null);
-        pml.addModel(raiser);
+        PortableModel/*List*/ pml = new PortableModel/*List*/(raiser, null);
+        //pml.addModel(raiser);
         pml.addMaterial(woodmaterial);
         pml.addMaterial(wheelmaterial);
         return pml;
@@ -253,7 +258,7 @@ public class VehiclePmlFactory {
      *
      * @return
      */
-    public static PortableModelList buildBike() {
+    public static PortableModel/*List*/ buildBike() {
         float wheelwidth = 0.04f;
         int WHEELCNT = 2;
         float wheelradius = 0.30f;
@@ -272,35 +277,35 @@ public class VehiclePmlFactory {
         WoodenToyPmlFactory tbf = new WoodenToyPmlFactory();
 
         // baseblock ist die Nabe
-        PortableModelDefinition baseblock = tbf.buildBlock(0.03f, 0.03f, 0.1f, woodmaterial.name);
+        PortableModelDefinition baseblock = tbf.buildBlock(0.03f, 0.03f, 0.1f, woodmaterial.getName());
 
-        PortableModelDefinition gabelback = tbf.buildGabel(wheeloffset, thinbeamradius, gabelwidth, woodmaterial.name);
+        PortableModelDefinition gabelback = tbf.buildGabel(wheeloffset, thinbeamradius, gabelwidth, woodmaterial.getName());
         baseblock.attach(gabelback);
 
-        PortableModelDefinition mainbeam = tbf.buildBeam(mainbeamlen, thickbeamradius,  woodmaterial.name);
+        PortableModelDefinition mainbeam = tbf.buildBeam(mainbeamlen, thickbeamradius,  woodmaterial.getName());
         mainbeam.setRotation( Quaternion.buildRotationZ(new Degree(45)));
         baseblock.attach(mainbeam);
 
         // Der muss mit den beiden Gabeln ein gleichschenkliges Dreieck bilden
-        PortableModelDefinition mainbeamback = tbf.buildBeam(wheeloffset, thickbeamradius,  woodmaterial.name);
+        PortableModelDefinition mainbeamback = tbf.buildBeam(wheeloffset, thickbeamradius,  woodmaterial.getName());
         mainbeamback.setRotation( Quaternion.buildRotationZ(new Degree(120)));
         baseblock.attach(mainbeamback);
 
-        PortableModelDefinition gabelback2 = tbf.buildGabel(wheeloffset, thinbeamradius, gabelwidth, woodmaterial.name);
+        PortableModelDefinition gabelback2 = tbf.buildGabel(wheeloffset, thinbeamradius, gabelwidth, woodmaterial.getName());
         gabelback2.setPosition(new Vector3(-wheeloffset/2, saddleheight, 0));
         gabelback2.setRotation( Quaternion.buildRotationZ(baseangle));
         baseblock.attach(gabelback2);
 
         //der ganze Frontteil mit Rad, Gabel und Lenker, die alle miteinander drehbar sind.
         PortableModelDefinition front = new PortableModelDefinition();
-        PortableModelDefinition gabelfront = tbf.buildGabel(wheeloffset, thinbeamradius, gabelwidth, woodmaterial.name);
+        PortableModelDefinition gabelfront = tbf.buildGabel(wheeloffset, thinbeamradius, gabelwidth, woodmaterial.getName());
         //gabelback2.setPosition(new Vector3(-wheeloffset/2, saddleheight, 0));
         gabelfront.setRotation( Quaternion.buildRotationZ(new Degree(180)));
         front.attach(gabelfront);
-        PortableModelDefinition frontnode = tbf.buildBeam(0.1f, thickbeamradius,  woodmaterial.name);
+        PortableModelDefinition frontnode = tbf.buildBeam(0.1f, thickbeamradius,  woodmaterial.getName());
         frontnode.setPosition(new Vector3(-0.08f, 0, 0));
         front.attach(frontnode);
-        PortableModelDefinition handlebar = tbf.buildBeam(0.5f, thinbeamradius,  woodmaterial.name);
+        PortableModelDefinition handlebar = tbf.buildBeam(0.5f, thinbeamradius,  woodmaterial.getName());
         handlebar.setRotation( Quaternion.buildRotationY(new Degree(90)));
         handlebar.setPosition(new Vector3(-0.1f, 0, 0.25f));
         front.attach(handlebar);
@@ -312,7 +317,7 @@ public class VehiclePmlFactory {
 
         for (int i = 0; i < WHEELCNT; i++) {
             PortableModelDefinition wheel;
-            wheel = tbf.buildWheel(wheelradius, wheelwidth, wheelmaterial.name);
+            wheel = tbf.buildWheel(wheelradius, wheelwidth, wheelmaterial.getName());
             wheel.setPosition(new Vector3(wheeloffset * ((i == 0) ? -1 : 1), 0, 0));
             wheel.setRotation(Quaternion.buildQuaternionFromAngleAxis((new Degree(90)).toRad(), new Vector3(1, 0, 0)));
             //wheel[i].getTransform().setParent(baseblock.getTransform());
@@ -331,8 +336,8 @@ public class VehiclePmlFactory {
         // baseblock.setPosition(new Vector3(0, baseheight2 + wheelradius, 0));
         raiser.setName("Bike");
 
-        PortableModelList pml = new PortableModelList(null);
-        pml.addModel(raiser);
+        PortableModel/*List*/ pml = new PortableModel/*List*/(raiser, null);
+        //pml.addModel(raiser);
         pml.addMaterial(woodmaterial);
         pml.addMaterial(wheelmaterial);
         return pml;

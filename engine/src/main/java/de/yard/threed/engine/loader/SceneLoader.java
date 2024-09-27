@@ -3,12 +3,14 @@ package de.yard.threed.engine.loader;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.ParsingHelper;
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.loader.AsciiLoader;
 import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.NativeJsonArray;
 import de.yard.threed.core.platform.NativeJsonObject;
 import de.yard.threed.core.platform.NativeJsonString;
@@ -16,6 +18,8 @@ import de.yard.threed.core.platform.NativeJsonValue;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.core.geometry.SimpleGeometry;
+import de.yard.threed.engine.PerspectiveCamera;
+import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
 import java.util.List;
 
@@ -30,6 +34,8 @@ public class SceneLoader extends AsciiLoader {
     private NativeJsonObject top;
     String source;
     int materialCount = 0;
+    PortableModel ploadedfile = null;//30.12.18new PortableModelList();
+
 
     /**
      * Read a scene description. Just gets the json, independent from bundle reading.
@@ -49,7 +55,9 @@ public class SceneLoader extends AsciiLoader {
     protected void doload() throws InvalidDataException {
         NativeJsonArray objects = (top.get("objects") != null) ? top.get("objects").isArray() : null;
 
-        PortableModelList ppfile = new PortableModelList(null);
+        PortableModelDefinition sceneroot = new PortableModelDefinition();
+
+        PortableModel/*List*/ ppfile = new PortableModel(sceneroot,null);
         ploadedfile = ppfile;
         ppfile.setName(source);
         //4.1.17: hier mal keine Exception fangen, weil das schon der Modelloader macht. Andererseits passt es hier aber gut hin. Hmm
@@ -77,7 +85,7 @@ public class SceneLoader extends AsciiLoader {
      * Loader loaded preprocessed. Nothing to do here.
      */
     @Override
-    public PortableModelList preProcess() {
+    public PortableModel/*List*/ buildPortableModel() {
         return ploadedfile;
     }
 
@@ -86,17 +94,17 @@ public class SceneLoader extends AsciiLoader {
         return logger;
     }
 
-    private void addObject(NativeJsonObject obj, List<PortableMaterial> materials, PortableModelList ppfile) throws InvalidDataException {
-        PortableModelDefinition pmd = new PortableModelDefinition();
+    private void addObject(NativeJsonObject obj, List<PortableMaterial> materials, PortableModel/*List*/ ppfile) throws InvalidDataException {
+        //PortableModelDefinition pmd = new PortableModelDefinition();
 
+
+        PortableMaterial material = buildMaterial(obj.get("material").isString());
+        materials.add(material);
+        PortableModelDefinition pmd = buildGeometry(obj.get("geometry").isString(),  material.getName());
         NativeJsonValue v = obj.get("name");
         if (v != null) {
             pmd.name = v.isString().stringValue();
         }
-
-        PortableMaterial material = buildMaterial(obj.get("material").isString());
-        materials.add(material);
-        buildGeometry(obj.get("geometry").isString(), pmd, material.getName());
 
         v = obj.get("position");
         if (v != null) {
@@ -110,19 +118,20 @@ public class SceneLoader extends AsciiLoader {
 
         v = obj.get("parent");
         if (v != null) {
-            ppfile.addModel(pmd, v.isString().stringValue());
+            pmd.parent = v.isString().stringValue();
+            ppfile.getRoot().addModel(pmd/*, v.isString().stringValue()*/);
         } else {
-            ppfile.addModel(pmd);
+            ppfile.getRoot().addModel(pmd);
         }
     }
 
-    private void buildGeometry(NativeJsonString jgeometry, PortableModelDefinition pmd, String materialname) throws InvalidDataException {
+    private PortableModelDefinition buildGeometry(NativeJsonString jgeometry, String materialname) throws InvalidDataException {
         String geometry = StringUtils.replaceAll(jgeometry.stringValue(), " ", "");
         if (!geometry.equals("primitive:box")) {
             throw new InvalidDataException("unsupported geometry:" + geometry);
         }
         SimpleGeometry geo = Primitives.buildBox(1.0, 1.0, 1.0);
-        pmd.addGeoMat(geo, materialname);
+        return new PortableModelDefinition(geo, materialname);
     }
 
     private PortableMaterial buildMaterial(NativeJsonString jmaterial) throws InvalidDataException {

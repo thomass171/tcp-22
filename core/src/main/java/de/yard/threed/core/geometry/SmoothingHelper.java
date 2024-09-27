@@ -1,7 +1,5 @@
 package de.yard.threed.core.geometry;
 
-import de.yard.threed.core.MathUtil2;
-import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 
 import de.yard.threed.core.platform.Platform;
@@ -19,31 +17,29 @@ public class SmoothingHelper {
     }
 
     /**
+     * Just prepare a SmoothingMap. No normals are calculated yet.
+     *
      * Die einfache Form des Smoothing. Die Normale eines Vertex ergibt sich aus dem Durchschnitt der daran
      * grenzenden Faces. Einfach die Faces durchgehen und die Indizes mappen.
      * Die Zugehörigkeit zu einer Facelist spielt hier keine Rolle! Das ist der Standard Algorithmus zur Normalenberechnung, der frueher
      * in GeometryHelper.calculateSmoothVertexNormals() war.
      *
-     * @param vertices
-     * @param faces
-     * @return
+     * 7.9.24: This will lead to visual artifacts for geometries like
+     * - closed tapes
+     * - boxes? (edges are smoothed, but shouldn't)
+     *
      */
-    public static SmoothingMap buildStandardSmoothingMap(List</*7.2.18 Native*/Vector3> vertices, List<Face3List> faces) {
-        SmoothingMap smoothingMap = new SmoothingMap();
+    public static VertexMap buildStandardSmoothingMap(/*8.9.24 List<Vector3> vertices,*/ List<Face3List> faces) {
+        VertexMap vertexMap = new VertexMap();
         for (Face3List fl : faces) {
             for (Face gface : fl.faces) {
                 Face3 face = (Face3) gface;
-                // Mehrere normale in der Face sind obselet.
-                //Vector3 normal0 = face.normal;
-                smoothingMap.add(face.index0, face);
-                smoothingMap.add(face.index1, face);
-                smoothingMap.add(face.index2, face);
-                //normals[face.index0] = MathUtil2.add(normals[face.index0], normal0);
-                //normals[face.index1] = MathUtil2.add(normals[face.index1], normal0);
-                //normals[face.index2] = MathUtil2.add(normals[face.index2], normal0);
+                vertexMap.add(face.index0, face);
+                vertexMap.add(face.index1, face);
+                vertexMap.add(face.index2, face);
             }
         }
-        return smoothingMap;
+        return vertexMap;
     }
 
     /**
@@ -103,48 +99,6 @@ public class SmoothingHelper {
         return normals;
     }*/
 
-    /**
-     * Fuer ein Face, das dem Vertex vindex zugeordnet ist, pruefen, ob es anhand seiner Normale ueberhaupt dazu passt.
-     * groupsofvertex ist die Liste der Vertexindizes, die durch duplizieren schon entstanden sind.
-     * Vergleich immer zum "ersten" Face in seiner Gruppe.
-     *
-     * @return
-     */
-    public static int getgroupForFace(Face3 f, int vindex, List<Integer> groupsofvertex, List</*7.2.18 Native*/Vector3> vertices, float cosCreaseAngle, SmoothingMap smoothingMap) {
-        Face3 facetocheck = f;//smoothingMap.get(faceindex);
-        //Wenn in einer Gruppe ein Face gefunden wird, das zum geprueften passt, reicht das
-        for (int group : groupsofvertex) {
-            Face3 erstesface = smoothingMap.map.get(group).get(0);
-            double dot = MathUtil2.getDotProduct(erstesface.normal, facetocheck.normal);
-            double lengths = erstesface.normal.length() * facetocheck.normal.length();
-            if (cosCreaseAngle * lengths <= dot) {
-                // Winkel ist innerhalb der Toleranz
-                // Ok put that into the current set. Die Gruppe koennte eine neue sein. Wenn dieses Face dazukommt sicherstellen, dass das Face auch auf die neue
-                // Gruppe zeigt.
-                if (vindex != group){
-                    //Debug stop
-                    vindex=vindex;
-                }
-                f.replaceIndex(vindex, group);
-                if (vindex != group) {
-                    smoothingMap.add(group, f);
-                    return group;
-                }
-                return -1;
-            }
-        }
-        // create new group; duplicate Vertex
-        int grp = vertices.size();
-        Vector3 v = vertices.get(vindex);
-        vertices.add(new Vector3(v.getX(), v.getY(), v.getZ()));
-        //normals.add(Platform.getInstance().buildVector3(0, 0, 0));
-        // Index im Face anpassen
-        facetocheck.replaceIndex(vindex, grp);
-        groupsofvertex.add(grp);
-        smoothingMap.add(grp, f);
-
-        return grp;
-    }
 
     private static void registerFace(List<List<Face>> facesatvertex, Face face) {
         for (int i : face.getIndices()) {

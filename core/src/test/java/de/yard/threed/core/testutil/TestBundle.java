@@ -6,7 +6,7 @@ import de.yard.threed.core.resource.BundleData;
 public class TestBundle extends Bundle {
 
     public TestBundle(String name, String[] directory, String basepath) {
-        super(name, directory, basepath);
+        super(name, false, directory, basepath);
     }
 
     public void addAdditionalResource(String fname, BundleData bundleData) {

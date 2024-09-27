@@ -14,6 +14,9 @@ import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.resource.URL;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
+/**
+ * Just get the needed resource from a bundle, which is quite straightforward.
+ */
 public class ResourceLoaderFromBundle extends ResourceLoader implements NativeFuture<AsyncHttpResponse> {
 
     public BundleResource bundleResource;

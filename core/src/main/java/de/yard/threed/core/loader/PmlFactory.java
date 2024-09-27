@@ -2,7 +2,7 @@ package de.yard.threed.core.loader;
 
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.geometry.GeometryHelper;
 import de.yard.threed.core.geometry.SimpleGeometry;
 
@@ -23,17 +23,26 @@ public class PmlFactory {
     }*/
 
     public static PortableModelDefinition buildElement(SimpleGeometry geo, String materialname) {
-        PortableModelDefinition pmd = new PortableModelDefinition();
-        pmd.addGeoMat(geo, materialname);
+        PortableModelDefinition pmd = new PortableModelDefinition(geo, materialname);
+        //pmd.addGeoMat(geo, materialname);
         return pmd;
     }
 
-    public static PortableModelList buildPortableModelList(PortableModelDefinition[] pmd, PortableMaterial[] material) {
+    /*public static PortableModelList buildPortableModel/*List* /(PortableModelDefinition[] pmd, PortableMaterial[] material) {
 
         PortableModelList pml = new PortableModelList(null);
         for (PortableModelDefinition m : pmd) {
             pml.addModel(m);
         }
+        for (PortableMaterial mat : material) {
+            pml.addMaterial(mat);
+        }
+        return pml;
+    }*/
+
+    public static PortableModel buildPortableModel(PortableModelDefinition pmd, PortableMaterial[] material) {
+
+        PortableModel pml = new PortableModel(pmd,null);
         for (PortableMaterial mat : material) {
             pml.addMaterial(mat);
         }

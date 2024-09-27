@@ -1,7 +1,6 @@
 package de.yard.threed.traffic;
 
 
-import de.yard.threed.core.Degree;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.LocalTransform;
@@ -29,7 +28,6 @@ import de.yard.threed.traffic.apps.BasicTravelScene;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.traffic.testutils.TrafficTestUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -40,7 +38,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static de.yard.threed.core.testutil.TestUtils.*;
-import static de.yard.threed.engine.testutil.TestUtils.assertViewPoint;
+import static de.yard.threed.engine.testutil.EngineTestUtils.assertViewPoint;
 import static org.junit.jupiter.api.Assertions.*;
 
 

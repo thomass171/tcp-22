@@ -7,7 +7,7 @@ import de.yard.threed.core.platform.Platform;
 
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Color;
 
@@ -26,7 +26,7 @@ public class PrimitiveCreator implements ProceduralModelCreator {
     }
 
     @Override
-    public PortableModelList createModel() throws ModelCreateException {
+    public PortableModel/*List*/ createModel() throws ModelCreateException {
         String type = args[0];
         String colorName = args[1];
         logger.debug("type=" + type + ",color=" + colorName);
@@ -39,30 +39,30 @@ public class PrimitiveCreator implements ProceduralModelCreator {
 
             SimpleGeometry planeGeo = Primitives.buildPlaneGeometry(1, 1, 1, 1);
             PortableMaterial planeMat = new PortableMaterial("planeMat", color);
-            pmd = PmlFactory.buildElement(planeGeo, planeMat.name);
+            pmd = PmlFactory.buildElement(planeGeo, planeMat.getName());
             pmd.setName("Plane");
 
-            return PmlFactory.buildPortableModelList(new PortableModelDefinition[]{pmd}, new PortableMaterial[]{planeMat});
+            return PmlFactory.buildPortableModel(pmd, new PortableMaterial[]{planeMat});
 
         }
         if (type.equals("sphere")) {
 
             SimpleGeometry sphereGeo = Primitives.buildSphereGeometry(1, 32,32);
             PortableMaterial sphereMat = new PortableMaterial("sphereMat", color);
-            pmd = PmlFactory.buildElement(sphereGeo, sphereMat.name);
+            pmd = PmlFactory.buildElement(sphereGeo, sphereMat.getName());
             pmd.setName("Sphere");
 
-            return PmlFactory.buildPortableModelList(new PortableModelDefinition[]{pmd}, new PortableMaterial[]{sphereMat});
+            return PmlFactory.buildPortableModel(pmd, new PortableMaterial[]{sphereMat});
 
         }
         if (type.equals("cube")) {
 
             SimpleGeometry cubeGeo = Primitives.buildBox(1, 1,1);
             PortableMaterial cubeMat = new PortableMaterial("cubeMat", color);
-            pmd = PmlFactory.buildElement(cubeGeo, cubeMat.name);
+            pmd = PmlFactory.buildElement(cubeGeo, cubeMat.getName());
             pmd.setName("Cube");
 
-            return PmlFactory.buildPortableModelList(new PortableModelDefinition[]{pmd}, new PortableMaterial[]{cubeMat});
+            return PmlFactory.buildPortableModel(pmd, new PortableMaterial[]{cubeMat});
 
         }
         throw new ModelCreateException("unknown type:" + type);

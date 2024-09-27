@@ -9,10 +9,8 @@ import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
-import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleRegistry;
-import de.yard.threed.core.testutil.InMemoryBundle;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
 import de.yard.threed.core.testutil.TestBundle;
 import de.yard.threed.core.testutil.TestUtils;
@@ -36,7 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static de.yard.threed.engine.testutil.TestUtils.assertViewPoint;
+import static de.yard.threed.engine.testutil.EngineTestUtils.assertViewPoint;
 import static de.yard.threed.traffic.SphereSystem.USER_REQUEST_SPHERE;
 import static org.junit.jupiter.api.Assertions.*;
 

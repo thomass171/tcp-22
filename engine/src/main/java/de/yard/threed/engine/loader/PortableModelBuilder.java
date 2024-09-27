@@ -5,9 +5,12 @@ import de.yard.threed.core.ColorType;
 import de.yard.threed.core.NumericType;
 import de.yard.threed.core.NumericValue;
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.TreeNode;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
+import de.yard.threed.core.loader.PreparedModel;
+import de.yard.threed.core.loader.PreparedObject;
 import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeCamera;
@@ -40,6 +43,8 @@ import java.util.List;
 
 /**
  * 06.12.22: A builder for universal model specification.
+ * // 2.5.19: matpool: aknn man sicher sein, dass es wirklich dasselbe ist? Z.B (un/flat)shaded. Eigentlich ist es doch ein zugrosses Risiko im Vergleich zum Nutzen, oder?
+ * // mal weglassen
  */
 public class PortableModelBuilder {
 
@@ -48,28 +53,12 @@ public class PortableModelBuilder {
     private NativeMaterial dummyMaterial;
 
     //ResourcePath defaulttexturebasepath;
-    PortableModelList pml;
+    //PortableModelList pml;
     //Just an indicator for testing
-    public boolean dummymaterialused;
+    public static List<String> dummyMaterialReasons = new ArrayList<String>();
 
-    public PortableModelBuilder(PortableModelList pml) {
+    /*public PortableModelBuilder(PortableModel pml) {
         this.pml = pml;
-    }
-
-
-
-    /*public PortableModelBuilder(ResourcePath texturebasepath, List<GeoMat> gml) {
-        this.defaulttexturebasepath = texturebasepath;
-        this.gml = gml;
-        /*TODO erstmal material in gltf klaeren for (GeoMat gm : gml){
-            PreprocessedLoadedObject ppo = new PreprocessedLoadedObject();
-            ppo.geolist=new ArrayList<SimpleGeometry>();
-            ppo.geolist.add(gm.geo);
-            objects.add(ppo);
-            LoadedMaterial ppm = new LoadedMaterial();
-            ppm.
-            materials.add(ppm);
-        }* /
     }*/
 
     /**
@@ -79,58 +68,81 @@ public class PortableModelBuilder {
      *
      * @return
      */
-    public SceneNode buildModel(ResourceLoader resourceLoader) {
-        return buildModel(resourceLoader, null);
+    public static SceneNode buildModel(PortableModel pml, ResourceLoader resourceLoader) {
+        //return buildModel(pml, resourceLoader, null);
+        return buildModel(prepareModel(pml, resourceLoader, null));
     }
 
-    public SceneNode buildModel(ResourceLoader resourceLoader, ResourcePath alttexturepath) {
+    public static PreparedModel prepareModel(PortableModel pml, ResourceLoader resourceLoader) {
+        //return buildModel(pml, resourceLoader, null);
+        return prepareModel(pml, resourceLoader, null);
+    }
+
+    /**
+     * 21.8.24: Only create geometries and materials but no objects yet. Useful for shared model.
+     * resourceLoader is used for async texture load (with internal delegate).
+     */
+    public static PreparedModel prepareModel(PortableModel pml, ResourceLoader resourceLoader, ResourcePath alttexturepath) {
+        PreparedModel rootnode = new PreparedModel(pml.getName());
+        /*if (pml.getName() != null) {
+            rootnode.setName(pml.getName());
+        }*/
+
+        TreeNode<PreparedObject> newModel = prepareModel(pml, resourceLoader, pml.getRoot()/*getObject(i)*/, alttexturepath, pml.defaulttexturebasepath);
+        String parent = pml.getRoot().parent;
+        //SceneNode destinationNode = rootnode;
+        if (parent != null) {
+            // 26.7.24: What is/was happening here? What is the use case? eg. SceneLoader.java
+            logger.debug("looking for parent " + parent);
+            rootnode.parent = parent;
+        }
+        //  destinationNode.attach(newModel);
+        rootnode.root = newModel;
+
+        return rootnode;
+    }
+
+    public static SceneNode buildModel(PreparedModel pml) {
         SceneNode rootnode = new SceneNode();
         if (pml.getName() != null) {
             rootnode.setName(pml.getName());
         }
-        for (int i = 0; i < pml.getObjectCount(); i++) {
-            SceneNode newModel = buildModel(resourceLoader, pml.getObject(i), alttexturepath);
-            String parent = pml.getParent(i);
-            SceneNode destinationNode = rootnode;
-            if (parent != null) {
-                logger.debug("looking for parent " + parent);
-                NativeCamera camera = AbstractSceneRunner.getInstance().findCameraByName(parent);
-                PerspectiveCamera perspectiveCamera = new PerspectiveCamera(camera);
-                destinationNode = perspectiveCamera.getCarrier();
-                // attach to carrier will propagate layer. newModel.getTransform().setLayer(perspectiveCamera.getLayer());
-                logger.debug("found parent camera with layer " + perspectiveCamera.getLayer());
-            }
-            destinationNode.attach(newModel);
+
+        SceneNode newModel = buildModel(pml.getRoot()/*getObject(i)*/);
+        String parent = pml./*getRoot().*/parent;
+        SceneNode destinationNode = rootnode;
+        if (parent != null) {
+            // 26.7.24: What is/was happening here? What is the use case? eg. SceneLoader.java
+            logger.debug("looking for parent " + parent);
+            NativeCamera camera = AbstractSceneRunner.getInstance().findCameraByName(parent);
+            PerspectiveCamera perspectiveCamera = new PerspectiveCamera(camera);
+            destinationNode = perspectiveCamera.getCarrier();
+            // attach to carrier will propagate layer. newModel.getTransform().setLayer(perspectiveCamera.getLayer());
+            logger.debug("found parent camera with layer " + perspectiveCamera.getLayer());
         }
+        destinationNode.attach(newModel);
+        pml.useCounter++;
         return rootnode;
     }
 
-    private SceneNode buildModel(ResourceLoader resourceLoader, PortableModelDefinition obj, ResourcePath alttexturepath/*, boolean dummywegensignatureindeutigkeit*/) {
-        //this.bundle = bundle;
-        //this.rpath = rpath;
-        ResourcePath nr = pml.defaulttexturebasepath;
+    private static TreeNode<PreparedObject> prepareModel(PortableModel pml, ResourceLoader resourceLoader, PortableModelDefinition obj, ResourcePath alttexturepath, ResourcePath defaulttexturebasepath) {
+        ResourcePath nr = defaulttexturebasepath;
         if (alttexturepath != null) {
             nr = alttexturepath;
         }
-        return buildObject(resourceLoader, obj /*, null/*, matlist*/, nr);
+        return prepareObject(pml, resourceLoader, obj /*, null/*, matlist*/, nr);
     }
 
-    private SceneNode buildObject(ResourceLoader resourceLoader, PortableModelDefinition obj, /*MaterialPool matpool,*/ ResourcePath texturebasepath) {
-        /*30.12.17 Es kann mit GLTF auch leere Objekte geben if (obj.geolist == null) {
-            throw new RuntimeException("geo not preprocessed");
-        }*/
+    private static SceneNode buildModel(TreeNode<PreparedObject>/*PortableModelDefinition*/ obj) {
+        return buildObject(obj);
+    }
+
+    private static TreeNode<PreparedObject> prepareObject(PortableModel pml, ResourceLoader resourceLoader, PortableModelDefinition obj, ResourcePath texturebasepath) {
         // Eine Liste der Materialien DIESES Objects anlegen.
         // Nur die in den Facelisten des Objekts wirklich verwendeten Materialien anlegen. Sonst stimmt
         // die Zuordnung nicht. 2.5.19: Spaetestens seit Flat Shading ist es noch nicht sicher, wie das Material konkret angelegt werden muss. Darum
         // die Matlist nur mit MaterialDefinitionen anlegen.
-        // 2.5.19: matpool: aknn man sicher sein, dass es wirklich dasselbe ist? Z.B (un/flat)shaded. Eigentlich ist es doch ein zugrosses Risiko im Vergleich zum Nutzen, oder?
-        // mal weglassen
-        /*30.12.17: das pruef ich auch nicht mehr
-        if (obj.geolistmaterial.size() == 0) {
-            // Kommt wolh bei RollerCoaster.ac schon mal vor. 
-            logger.warn("facelistmaterial isType empty in " + obj.name);
-        }*/
-        List<PortableMaterial/*NativeMaterial*/> matlist = buildMatlist(/*13.2.24 bundle,*/ obj, /*matpool,*/ texturebasepath);
+        List<PortableMaterial/*NativeMaterial*/> matlist = buildMatlist(pml, obj, texturebasepath);
         boolean wireframe = false;
         if (wireframe) {
             for (int i = 0; i < matlist.size(); i++) {
@@ -138,37 +150,32 @@ public class PortableModelBuilder {
             }
         }
 
-        SceneNode model = new SceneNode();
-        String name;
-        if (StringUtils.empty(obj.name)) {
-            name = "<no name>";
-        } else {
-            name = obj.name;
-        }
+        PreparedObject model = new PreparedObject(obj.name);
+        TreeNode<PreparedObject> node = new TreeNode<PreparedObject>(model);
 
-        model.setName(name);
         if (obj.translation != null) {
-            model.getTransform().setPosition((obj.translation));
+            model.setPosition((obj.translation));
         }
         if (obj.rotation != null) {
-            model.getTransform().setRotation((obj.rotation));
+            model.setRotation((obj.rotation));
         }
         // Keine leeren Objekte anlegen (z.B. AC World). Als Node aber schon. Die AC kids Hierarchie soll erhalten bleiben.
-        if (obj.geolist != null && obj.geolist.size() > 0) {
-            if (obj.geolist.size() > 1/*faces.size() > 1 && matlist.size() > 1*/) {
-                //List<SimpleGeometry> geolist = GeometryHelper.prepareGeometry(obj.vertices, obj.faces, /*matlist,*/ null, true, obj.crease);
+        if (obj.geo/*list*/ != null /*&& obj.geolist.size() > 0*/) {
+            /*27.7.24 if (obj.geolist.size() > 1/*faces.size() > 1 && matlist.size() > 1* /) {
+                //List<SimpleGeometry> geolist = GeometryHelper.prepareGeometry(obj.vertices, obj.faces, /*matlist,* / null, true, obj.crease);
                 //2.5.19: Gibt es das seit GLTF ueberhauot noch? Ja, eine Node kann doch mehrere Meshes haben, oder?
-                SceneNode m = buildSceneNode(resourceLoader, obj.geolist, matlist, false, false, texturebasepath/*3.5.19, obj.texture*/);
+                SceneNode m = buildSceneNode(resourceLoader, obj.geolist, matlist, false, false, texturebasepath/*3.5.19, obj.texture* /);
                 m.setName(obj.name);
                 model.attach(m);
-            } else {
+            } else*/
+            {
                 //List<SimpleGeometry> geolist = GeometryHelper.prepareGeometry(obj.vertices, obj.faces, /*matlist,*/ null, false, obj.crease);
                 //if (geolist.size() > 1) {
                 //  throw new RuntimeException("unexpected multiple geos");
                 //}
-                if (obj.geolist.size() == 0) {
+                /*27.7.24 if (obj.geolist.size() == 0) {
                     logger.error("no geo list");
-                }
+                }*/
                 PortableMaterial/*NativeMaterial*/ mate = null;
                 if (matlist.size() == 0) {
                     logger.error("no matlist in " + obj.name);
@@ -176,24 +183,50 @@ public class PortableModelBuilder {
                     mate = matlist.get(0);
                 }
                 //2.5.19: Neu an dieser Stelle
-                NativeMaterial nmat = buildMaterialFromPortableMaterial(resourceLoader, mate, texturebasepath, /*3.5.19obj.texture, */obj.geolist.get(0).getNormals() != null);
+                NativeMaterial nmat = buildMaterialFromPortableMaterial(resourceLoader, mate, texturebasepath, /*3.5.19obj.texture, */obj.geo/*list.get(0)*/.getNormals() != null);
+                model.setMaterial(nmat);
 
-
-                Mesh mesh = new Mesh(new GenericGeometry(obj.geolist.get(0)).getNativeGeometry(), nmat/*mate*/, false, false);
-                model.setMesh(mesh);
+                //Mesh mesh = new Mesh(new GenericGeometry(obj.geo/*list.get(0)*/).getNativeGeometry(), nmat/*mate*/, false, false);
+                model.setGeometry(new GenericGeometry(obj.geo/*list.get(0)*/).getNativeGeometry());
             }
         }
 
         for (int i = 0; i < obj.kids.size(); i++) {
-            model.attach(buildObject(resourceLoader, obj.kids.get(i)/*, matpool/*, matlist*/, texturebasepath));
+            node.addChild(prepareObject(pml, resourceLoader, obj.kids.get(i), texturebasepath));
         }
         if (Config.modelloaddebuglog) {
-            logger.debug("buildObject complete " + name);
+            logger.debug("prepareObject complete " + model.name);
+        }
+        return node;
+    }
+
+    private static SceneNode buildObject(TreeNode<PreparedObject>/*PortableModelDefinition*/ node) {
+
+        PreparedObject/*PortableModelDefinition*/ obj = node.getElement();
+        SceneNode model = new SceneNode();
+        model.setName(obj.name);
+        if (obj.position != null) {
+            model.getTransform().setPosition((obj.position));
+        }
+        if (obj.rotation != null) {
+            model.getTransform().setRotation((obj.rotation));
+        }
+        // There might be nodes without mesh
+        if (obj.geometry != null) {
+            Mesh mesh = new Mesh(obj.geometry, obj.material, false, false);
+            model.setMesh(mesh);
+        }
+
+        for (int i = 0; i < node.getChildCount(); i++) {
+            model.attach(buildObject(node.getChild(i)));
+        }
+        if (Config.modelloaddebuglog) {
+            logger.debug("buildObject complete " + obj.name);
         }
         return model;
     }
 
-    NativeMaterial buildMaterialFromPortableMaterial(ResourceLoader resourceLoader, /*Bundle bundle,*/ PortableMaterial portableMaterial, ResourcePath texturebasepath/*3.5.19, String objtexture*/, boolean hasnormals) {
+    static NativeMaterial buildMaterialFromPortableMaterial(ResourceLoader resourceLoader, /*Bundle bundle,*/ PortableMaterial portableMaterial, ResourcePath texturebasepath/*3.5.19, String objtexture*/, boolean hasnormals) {
         NativeMaterial nmat;
         if (portableMaterial != null) {
             //Auf AC zugeschnitten, denn nur die(?) haben die Textur am Object.
@@ -202,11 +235,13 @@ public class PortableModelBuilder {
             if (ma == null) {
                 logger.warn("No material. Using dummy material.");
                 nmat = getDummyMaterial();
+                dummyMaterialReasons.add("no material built");
             } else {
                 nmat = ma.material;
             }
         } else {
             nmat = getDummyMaterial();
+            dummyMaterialReasons.add("no material");
         }
         return nmat;
     }
@@ -252,7 +287,7 @@ public class PortableModelBuilder {
         NativeMaterial nmat;
         //SHADED ist der Defasult
         HashMap<NumericType, NumericValue> parameters = new HashMap<NumericType, NumericValue>();
-        if (!mat.shaded) {
+        if (!mat.isShaded()) {
             parameters.put(NumericType.SHADING, new NumericValue(NumericValue.UNSHADED));
         } else {
             if (!hasnormals) {
@@ -260,8 +295,8 @@ public class PortableModelBuilder {
             }
         }
 
-        if (mat.texture != null) {
-            String texturename = mat.texture;
+        if (mat.getTexture() != null) {
+            String texturename = mat.getTexture();
             /*21.12.16 nicht mehr noetig wegen ResourcePath if (texturebasepath == null) {
                 texturebasepath = ".";
             }*/
@@ -289,7 +324,7 @@ public class PortableModelBuilder {
                 //BundleResource br = new BundleResource(texturebasepath, texturename);
                 //br.bundle = bundle;
                 URL br = resourceLoader.fromRootReference(texturebasepath, texturename).getUrl();
-                texture = new Texture/*.buildBundleTexture*/(br, mat.wraps, mat.wrapt);
+                texture = new Texture/*.buildBundleTexture*/(br, mat.getWraps(), mat.getWrapt());
                 if (texture.texture == null) {
                     // 13.9.23: Better to log this
                     logger.warn("failed to build texture from " + texturename + " at " + texturebasepath);
@@ -307,12 +342,16 @@ public class PortableModelBuilder {
             nmat = Platform.getInstance().buildMaterial(null, null, map, parameters, null);
         } else {
             HashMap<ColorType, Color> color = new HashMap<ColorType, Color>();
-            color.put(ColorType.MAIN, mat.color);
+            color.put(ColorType.MAIN, mat.getColor());
             //TODO die restlichen colors
             // 25.4.19 unshaded wird oben zwar schon eingetragen, aber nicht immer. "shaded" ist eh etwas unklar. Auf jeden Fall bleibt ein Material mit Color in JME sonst schwarz.
             //Darum erstmal immer setzen, bis klar ist, was mit Property "shaded" ist. 28.4.19: Das ist aber doof, nur weil JME die combination shaded/ambientLight schwarz darstellt.
             //Evtl. wegen Normale?
             //parameters.put(NumericType.UNSHADED, new NumericValue(1));
+            // 10.8.24: consider transparency
+            if (mat.getTransparency() != null) {
+                parameters.put(NumericType.TRANSPARENCY, new NumericValue(mat.getTransparency().floatValue()));
+            }
             nmat = Platform.getInstance().buildMaterial(null, color, null, parameters, null);
         }
         return new Material(nmat);
@@ -326,10 +365,10 @@ public class PortableModelBuilder {
      * 2.5.19: Spaetestens seit Flat Shading ist es noch nicht sicher, wie das Material konkret angelegt werden muss. Darum
      * die Matlist nur mit MaterialDefinitionen anlegen
      */
-    private List<PortableMaterial/*NativeMaterial*/> buildMatlist(/*13.2.24 Bundle bundle,*/ PortableModelDefinition obj, /*MaterialPool matpool,*/ ResourcePath texturebasepath) {
+    private static List<PortableMaterial/*NativeMaterial*/> buildMatlist(PortableModel pml, PortableModelDefinition obj, /*MaterialPool matpool,*/ ResourcePath texturebasepath) {
         List<PortableMaterial> matlist = new ArrayList<PortableMaterial>();
         int index = 0;
-        for (String matname : obj.geolistmaterial) {
+        for (String matname : new String[]{obj.material/*geolistmaterial*/}) {
             PortableMaterial mat = pml.findMaterial(matname);
             //das kann auch null sein. Dann wird später ein Dummy angelegt.
             matlist.add(mat);
@@ -343,16 +382,12 @@ public class PortableModelBuilder {
      * Material, das verwendet wird, wenn das eigentlich definierte nicht bekannt ist.
      * Einfach schlicht blau.
      * Better white to make more clear its not intended.
+     * 21.8.24: A dummy material is questionable and shouldn't be needed. So don't have effords for caching it.
+     * Just register to missingMaterials.
      */
-    private NativeMaterial getDummyMaterial() {
-        dummymaterialused = true;
-        if (dummyMaterial == null) {
-            HashMap<ColorType, Color> color = new HashMap<ColorType, Color>();
-            color.put(ColorType.MAIN, Color.WHITE);
-            dummyMaterial = (Platform.getInstance()).buildMaterial(null, color, null, null, null);
-        }
-        return dummyMaterial;
+    private static NativeMaterial getDummyMaterial() {
+        HashMap<ColorType, Color> color = new HashMap<ColorType, Color>();
+        color.put(ColorType.MAIN, Color.WHITE);
+        return (Platform.getInstance()).buildMaterial(null, color, null, null, null);
     }
-
-
 }

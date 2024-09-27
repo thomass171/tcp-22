@@ -9,6 +9,8 @@ import de.yard.threed.core.loader.StringReader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 /**
  * 9.3.21: From engine due to "genie*" (licence?), etc. .
@@ -39,13 +41,14 @@ public class LoaderOBJTest {
         try {
             //ByteArrayInputStream ins = new ByteArrayInputStream(LoaderOBJ.sampleobj.getBytes());
             LoaderOBJ obj = new LoaderOBJ(new StringReader(LoaderOBJ.sampleobj));
-            Assertions.assertEquals( 1, obj.loadedfile.objects.size());
-            Assertions.assertEquals( 0, obj.loadedfile.objects.get(0).kids.size());
-            Assertions.assertEquals( 1, obj.loadedfile.objects.get(0).getFaceLists().size(),"facelists");
-            Assertions.assertEquals( 12, obj.loadedfile.objects.get(0).getFaceLists().get(0).faces.size(),"face3");
-            LoadedObject o = obj.loadedfile.objects.get(0);
+            assertNotNull(obj.loadedfile.object);
+            LoadedObject mainObj = obj.loadedfile.object.kids.get(0);
+            Assertions.assertEquals( 0, mainObj.kids.size());
+            Assertions.assertEquals( 1, mainObj.getFaceLists().size(),"facelists");
+            Assertions.assertEquals( 12, mainObj.getFaceLists().get(0).faces.size(),"face3");
+            LoadedObject o = mainObj;
             // vorletztes pruefen (       "f 3//5 7//5 4//5\n" )
-            Face3 face3 = (Face3) obj.loadedfile.objects.get(0).getFaceLists().get(0).faces.get(10);
+            Face3 face3 = (Face3) mainObj.getFaceLists().get(0).faces.get(10);
             TestUtils.assertVector3(new Vector3(-1, -1, 1), o.vertices.get(face3.index0));
             TestUtils.assertVector3(new Vector3(-1, 1, 1), o.vertices.get(face3.index1));
             TestUtils.assertVector3(new Vector3(-1, -1, -1), o.vertices.get(face3.index2));

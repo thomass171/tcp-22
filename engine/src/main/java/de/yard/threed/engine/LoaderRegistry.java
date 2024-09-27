@@ -9,7 +9,7 @@ import de.yard.threed.core.loader.AbstractLoader;
 import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.loader.LoaderAC;
 import de.yard.threed.core.loader.LoaderGLTF;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.Log;

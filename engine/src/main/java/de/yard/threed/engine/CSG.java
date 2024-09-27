@@ -112,7 +112,7 @@ public class CSG {
             }
             FaceList facelist = shareid2facelist.get(p.shared);
             if (facelist == null) {
-                shareid2facelist.put(p.shared, new FaceList());
+                shareid2facelist.put(p.shared, new FaceList(true));
                 facelist = shareid2facelist.get(p.shared);
                 //if (p.shared==2) {
                     geo.facelist.add(facelist);

@@ -7,14 +7,12 @@ import de.yard.threed.core.Util;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.configuration.ConfigurationByProperties;
 import de.yard.threed.core.resource.*;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.engine.*;
 
 
 import de.yard.threed.core.buffer.SimpleByteBuffer;
-import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.javacommon.*;
 
@@ -130,7 +128,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
     @Override
     public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
 
-        ModelLoader.buildModelFromBundle(resourceLoader, opttexturepath, options, delegate);
+        ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate);
     }
 
     /*4.8.21 public void /*Bundle* / loadBundle(String bundlename, /*AsyncJobCallback* /BundleLoadDelegate delegate, boolean delayed) {

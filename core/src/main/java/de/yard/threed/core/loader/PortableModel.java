@@ -22,20 +22,23 @@ import java.util.List;
  * 7.6.18: PreprocessedLoadedFile->PortableModelList
  * Alles was hier drinsteht muss per GLTF imp/exportierbar sein!
  * 30.12.18: Vielleich die build* mal in eine Factory auslagern.
- *
+ * 27.7.24: Having a list here is redundant to the kids in each definition. So let this
+ * just be a PortableModel.
  *
  * <p>
  * Created by thomass on 10.06.16.
  */
-public class PortableModelList {
+public class PortableModel/*List*/ {
     //voruebergehende BTG Kruecke
     public List<GeoMat> gml = null;
-    Log logger = Platform.getInstance().getLog(PortableModelList.class);
+    Log logger = Platform.getInstance().getLog(PortableModel.class);
     int MAGIC = 38;
     int VERSION = 1;
+    // The list of materials is 'independent' from the object/kids list, but PortableModelDefinitions refer to this list.
     public List<PortableMaterial> materials = new ArrayList<PortableMaterial>();
     //30.12.18: Muesste es nicht eher "models" heissen? Objekte sind es ja noch nicht.
-    private List<PortableModelDefinition> objects = new ArrayList<PortableModelDefinition>();
+    //private List<PortableModelDefinition> objects = new ArrayList<PortableModelDefinition>();
+    private PortableModelDefinition root;
     //TODO besser double?? Noch wichtiger: Das ist BTG spezifisch und hat hier deswegen und wegen GLTF nichts zu suchen
     public /*SGVec3d*/ Vector3 gbs_center;
     // Die Texturen werden dort erwartet, also in dem ResourcePAth, wo auch das Model liegt.
@@ -49,49 +52,19 @@ public class PortableModelList {
     // um einen definierten Einstieg zu haben, z.B. für AC world, aber auch GLTF. NeeNee, das ist doch Quatsch. 
     // Es entsteht erst beim Model bauen eine root Node mit file name als Container. Aber einen name gibt es.
     //public PreprocessedLoadedObject root=null;
-    // Ein uebergeordneter Name, ohne funktionale Bedeutung, wird aber fuer rootnode verwendet Z.B. eine Herkunftsangabe (source).
+    // Just a name without any semantic. 3.8.24 Still used for rootnode? For example a source name.
     private String name = null;
     public int loaddurationms;
-    // optional parent per object
-    private List<String> parents = new ArrayList<String>();
+    // optional parent per object.
+    // 27.7.24private List<String> parents = new ArrayList<String>();
 
-    public PortableModelList(ResourcePath texturebasepath) {
+    public PortableModel(PortableModelDefinition model, ResourcePath texturebasepath) {
+        this.root = model;
         this.defaulttexturebasepath = texturebasepath;
     }
 
-    /**
-     * Wiederherstellen aus serialisiertem Objekt
-     * acpp reader? deprecated?
-     */
-    /*3.5.19public PortableModelList(/*NativeResource file,* / ByteArrayInputStream ins, ResourcePath texturebasepath) throws InvalidDataException {
-        try {
-            int magic = ins.readInt();
-            if (Config.loaderdebuglog) {
-                logger.debug("magic=" + magic);
-            }
-            int version = ins.readInt();
-            if (Config.loaderdebuglog) {
-                logger.debug("version=" + version);
-            }
-            int cnt = ins.readInt();
-            if (Config.loaderdebuglog) {
-                logger.debug("material.cnt=" + cnt);
-            }
-            for (int i = 0; i < cnt; i++) {
-                materials.add(new PortableMaterial(ins));
-            }
-            cnt = ins.readInt();
-            for (int i = 0; i < cnt; i++) {
-                objects.add(new PortableModelDefinition(ins));
-            }
-            this.defaulttexturebasepath = texturebasepath;
-        } catch (java.lang.Exception e) {
-            String msg = "reading LoadedFile from pp failed : " + e.getMessage() + " for file " /*+ file.getFullName()* /;
-            logger.error(msg, e);
-            throw new InvalidDataException(msg, e);
-        }
-    }*/
-    public PortableModelList(ResourcePath texturebasepath, List<GeoMat> gml) {
+    public PortableModel(PortableModelDefinition model, ResourcePath texturebasepath, List<GeoMat> gml) {
+        this.root = model;
         this.defaulttexturebasepath = texturebasepath;
         this.gml = gml;
         /*TODO erstmal material in gltf klaeren for (GeoMat gm : gml){
@@ -104,11 +77,6 @@ public class PortableModelList {
             materials.add(ppm);
         }*/
     }
-
-    /*7.12.22 public void resetAfterDeserialize() {
-        Log logger = Platform.getInstance().getLog(PortableModelList.class);
-        dummyMaterial = null;
-    }*/
 
     public String dumpObject(String offset, LoadedObject obj, String separator) {
         String s = offset + "OBJECT:";
@@ -147,7 +115,7 @@ public class PortableModelList {
         return s;
     }
 
-    public String dumpMaterial(String separator) {
+    /*12.8.24public String dumpMaterial(String separator) {
         String s = "MATERIAL:" + separator;
         for (PortableMaterial mat : materials) {
             s += " name=" + mat.name + separator;
@@ -156,10 +124,10 @@ public class PortableModelList {
             s += " emis=" + mat.emis + separator;
             s += " spec=" + mat.specular + separator;
             s += " shi=" + mat.getShininess() + separator;
-            s += " trans=" + mat.getTransparencypercent() + separator;
+            s += " trans=" + mat.getTransparency() + separator;
         }
         return s;
-    }
+    }*/
 
 
     /**
@@ -170,8 +138,12 @@ public class PortableModelList {
      * @return
      */
     public PortableMaterial findMaterial(String name) {
+        return findMaterial(materials, name);
+    }
+
+    public static PortableMaterial findMaterial(List<PortableMaterial> materials, String name) {
         for (PortableMaterial m : materials) {
-            if (m.name != null && m.name.equals(name)) {
+            if (m.getName() != null && m.getName().equals(name)) {
                 return m;
             }
         }
@@ -186,7 +158,7 @@ public class PortableModelList {
      */
     public int findMaterialIndex(String name) {
         for (int i = 0; i < materials.size(); i++) {
-            if (materials.get(i).name.equals(name)) {
+            if (materials.get(i).getName().equals(name)) {
                 return i;
             }
         }
@@ -201,7 +173,10 @@ public class PortableModelList {
      */
     public PortableModelDefinition findObject(String name) {
         //  for (int i = 0; i < objects.size(); i++) {
-        return findObject(objects, name);
+        if (name.equals(getRoot().name)) {
+            return getRoot();
+        }
+        return findObject(getRoot().kids, name);
 
     }
 
@@ -247,7 +222,7 @@ public class PortableModelList {
     private List<PortableMaterial/*NativeMaterial*/> buildMatlist(Bundle bundle, PortableModelDefinition obj, /*MaterialPool matpool,*/ ResourcePath texturebasepath) {
         List<PortableMaterial> matlist = new ArrayList<PortableMaterial>();
         int index = 0;
-        for (String matname : obj.geolistmaterial) {
+        for (String matname : new String[]{obj.material/*listmaterial*/}) {
             PortableMaterial mat = findMaterial(matname);
             //das kann auch null sein. Dann wird später ein Dummy angelegt.
             matlist.add(mat);
@@ -289,7 +264,7 @@ public class PortableModelList {
         return matlist;
     }
 
-    public void addModel(PortableModelDefinition model) {
+    /*27.7.24 public void addModel(PortableModelDefinition model) {
         objects.add(model);
         parents.add(null);
     }
@@ -297,7 +272,7 @@ public class PortableModelList {
     public void addModel(PortableModelDefinition model, String parent) {
         objects.add(model);
         parents.add(parent);
-    }
+    }*/
 
     public void addMaterial(PortableMaterial material) {
         materials.add(material);
@@ -311,15 +286,19 @@ public class PortableModelList {
         this.name = name;
     }
 
-    public int getObjectCount() {
+   /*27.7.24  public int getObjectCount() {
         return objects.size();
     }
 
     public PortableModelDefinition getObject(int i) {
         return objects.get(i);
+    }*/
+
+    public PortableModelDefinition getRoot() {
+        return root;
     }
 
-    public String getParent(int i) {
+    /* 27.7.24public String getParent(int i) {
         return parents.get(i);
-    }
+    }*/
 }

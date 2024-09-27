@@ -35,7 +35,7 @@ class AcSurface {
     }
 
     /**
-     * Liefert true, when Face isType complete.
+     * Returns true, when Face is complete.
      *
      * @param token
      * @return
@@ -62,13 +62,14 @@ class AcSurface {
      * @param faceList
      * @throws InvalidDataException
      */
-    public void buildFace(AcObject obj, FaceList faceList) throws InvalidDataException {
+    public void buildFace(AcObject obj, FaceList faceList, FaceList backfaceList) throws InvalidDataException {
         //31.3.17: Sonderfrickellösung. Wenn die erste SURF nicht shaded ist, nehme ich das für die ganze und unterdrücke damit später das crease-smoothing.(z.B. Douglas.ac)
-        if (faceList.faces.size() == 0) {
+        /*18.9.24 completely weird. Moved to constructor of Facelist.
+         if (faceList.faces.size() == 0) {
             if (!isShaded()) {
                 faceList.unshaded = true;
             }
-        }
+        }*/
         Face face, backface = null;
         if (rcount == 2) {
             //in marker.ac gibts auch faces mit nur zwei Vertices! TODO das sind wohl lines
@@ -80,7 +81,7 @@ class AcSurface {
                 faceList.faces.add(face);
                 if (isTwoSided()) {
                     backface = new Face3(vref[2], vref[1], vref[0], uv[2], uv[1], uv[0]);
-                    faceList.faces.add(backface);
+                    backfaceList.faces.add(backface);
                 }
             } else {
                 if (rcount > 3) {
@@ -89,7 +90,7 @@ class AcSurface {
                     if (isTwoSided()) {
                         backface = new FaceN(vref, uv);
                         ((FaceN) backface).revert();
-                        faceList.faces.add(backface);
+                        backfaceList.faces.add(backface);
                     }
                 } else {
 

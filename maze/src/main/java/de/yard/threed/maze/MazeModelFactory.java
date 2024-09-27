@@ -16,7 +16,7 @@ import de.yard.threed.engine.imaging.NormalMap;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.engine.loader.PortableModelBuilder;
 
@@ -111,7 +111,7 @@ public class MazeModelFactory implements ModelBuilderRegistry {
         double size = settings.sokobanboxsize / 2;
         Geometry cuboid = Geometry.buildCube(size, size, size);
         // Not too much transparency (0xCC)
-        Mesh m = new Mesh(cuboid, Material.buildBasicMaterial(MazeTheme.diamondColor.transparency(0xCC), true));
+        Mesh m = new Mesh(cuboid, Material.buildBasicMaterial(MazeTheme.diamondColor.transparency(0xCC), 0.5));
         SceneNode diamond = new SceneNode(m);
         diamond.getTransform().setRotation(Quaternion.buildFromAngles(new Degree(45), new Degree(45), new Degree(45)));
         return new SceneNode(diamond);
@@ -155,11 +155,10 @@ public class MazeModelFactory implements ModelBuilderRegistry {
 
         PortableModelDefinition head = AvatarPmlFactory.buildHead(headRadius, "faceMaterial");
 
-        PortableModelList pml = new PortableModelList(null);
-        pml.addModel(head);
+        PortableModel pml = new PortableModel(head,null);
         pml.addMaterial(faceMaterial);
 
-        SceneNode model = new PortableModelBuilder(pml).buildModel(null, null);
+        SceneNode model = PortableModelBuilder.buildModel(pml, null);
         model.setName("Monster");
         return new SceneNode(model);
     }

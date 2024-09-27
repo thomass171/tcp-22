@@ -37,7 +37,7 @@ public class BundleRegistry {
         if (logger == null) {
             logger = Platform.getInstance().getLog(BundleRegistry.class);
         }
-        if (!bundle.isCompleted()) {
+        if (!bundle.isCompleted() && !bundle.isDelayed()) {
             throw new RuntimeException("bundle must be completed before register: " + bundlename);
         }
         bundles.put(bundlename, bundle);

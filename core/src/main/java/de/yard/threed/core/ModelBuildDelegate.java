@@ -3,7 +3,7 @@ package de.yard.threed.core;
 
 
 /**
- * 15.09.2017: Listener fuer das Laden eines Models über die Platform.
+ * 15.09.2017: Listener for building a model via the platform.
  */
 @FunctionalInterface
 public interface ModelBuildDelegate {

@@ -26,7 +26,7 @@ public class MoonSceneryBuilder implements AbstractSceneryBuilder {
         int segments = 512;
 
         SimpleGeometry geo = Primitives.buildSphereGeometry(MOON_RADIUS, segments, segments);
-        Material mat = Material.buildLambertMaterial((Texture.buildBundleTexture("data", "images/river.jpg")), false, false);
+        Material mat = Material.buildLambertMaterial((Texture.buildBundleTexture("data", "images/river.jpg")), null, false);
         //mat.setWireframe(true);
         Mesh mesh = new Mesh(geo, mat);
         SceneNode node = new SceneNode();

@@ -397,7 +397,7 @@ public class GuiGrid extends SceneNode implements Menu {
         ImageData image = ImageFactory.buildSingleColor(256, 256, background);
         Texture texture = new Texture(image);
         // Double transparence? Color and material?
-        Material mat = Material.buildBasicMaterial(texture, null, true);
+        Material mat = Material.buildBasicMaterial(texture, null, 0.5);
         return mat;
     }
 
@@ -437,7 +437,7 @@ class BgElement extends FovElementPlane {
         //CustomShaderMaterial mat = new CustomShaderMaterial("basetex",texture, Effect.buildUniversalEffect(true));
         // BasicMaterial, damit Beleuchtung keine Rolle spielt.
         //8.10.17: wie bei Hud kein Effect. Fuer trasnparent muss die Color den richtigen Alpha haben.
-        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, true);
+        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, 0.5);
         return mat;
     }
 

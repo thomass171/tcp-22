@@ -3,9 +3,14 @@ package de.yard.threed.engine;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
+import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.testutil.TestUtils;
+import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.testutil.EngineTestFactory;
+import de.yard.threed.engine.testutil.TestHelper;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -46,10 +51,10 @@ public class SceneRunnerTest {
         assertEquals(0, BundleRegistry.getBundleNames().length);
 
         String bundleName = "bundle1";
-        PlatformBundleLoaderTest.mockWebBundle(wireMockServer,bundleName, false);
+        PlatformBundleLoaderTest.mockWebBundle(wireMockServer, bundleName, false);
 
         EngineTestFactory.initPlatformForTest(new String[]{"engine", "data", "http://localhost:" + wireMockServer.port() + "/bundles/bundle1"},
-                new SimpleHeadlessPlatformFactory() );
+                new SimpleHeadlessPlatformFactory());
 
         assertEquals(3, BundleRegistry.getBundleNames().length);
         Bundle engine = BundleRegistry.getBundle("engine");
@@ -62,4 +67,28 @@ public class SceneRunnerTest {
         assertNotNull(bundle1);
     }
 
+    @Test
+    public void testDelayedViaSceneRunner() throws Exception {
+
+        EngineTestFactory.initPlatformForTest(new String[]{"engine"}, new SimpleHeadlessPlatformFactory());
+
+        String bundleName = "data";
+        String bundleNameDelayed = "data-delayed";
+
+        BundleRegistry.unregister(bundleName);
+
+        AbstractSceneRunner.getInstance().loadBundle(bundleNameDelayed, bundle -> {
+            assertNotNull(BundleRegistry.getBundle(bundleName));
+            bundle.isDelayed();
+        });
+
+        TestUtils.waitUntil(() -> {
+            TestHelper.processAsync();
+            return BundleRegistry.getBundle(bundleName) != null;
+        }, 10000);
+
+        assertTrue(BundleRegistry.getBundle(bundleName).isDelayed());
+        assertTrue(BundleRegistry.getBundle(bundleName).exists("models/loc.gltf"));
+        assertFalse(BundleRegistry.getBundle(bundleName).contains("models/loc.gltf"));
+    }
 }

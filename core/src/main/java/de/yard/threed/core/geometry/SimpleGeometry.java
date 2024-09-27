@@ -33,6 +33,10 @@ public class SimpleGeometry {
     private int[] indices;
     private Vector2Array uvs;
 
+    // data not needed, but really useful for testing/analyzis
+    public List<VertexMap> vertexMaps;
+    public List<UsedIndex> usedIndexes;
+
     /**
      * leere Geometrie.
      */

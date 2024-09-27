@@ -61,7 +61,7 @@ public class TravelSphere {
         int segments = 32;
 
         SimpleGeometry geo = Primitives.buildSphereGeometry(radius,segments,segments);
-        Material mat = Material.buildLambertMaterial((Texture.buildBundleTexture("data-old", texture)),false,false);
+        Material mat = Material.buildLambertMaterial((Texture.buildBundleTexture("data-old", texture)),null,false);
         //mat.setWireframe(true);
         Mesh mesh = new Mesh(geo, mat);
         SceneNode node = new SceneNode();

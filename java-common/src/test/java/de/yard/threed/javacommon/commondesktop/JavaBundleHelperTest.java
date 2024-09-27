@@ -57,7 +57,7 @@ public class JavaBundleHelperTest {
         String texturename = "textures/SokobanTarget.png";
 
         // cannot load bundle here, so mock it. But InMemoryBundle has no basepath.
-        Bundle bundle = new Bundle("data-mock", new String[]{"not relevant"}, bundleBasedir.getPath());
+        Bundle bundle = new Bundle("data-mock", false, new String[]{"not relevant"}, bundleBasedir.getPath());
         BundleResource bundleResource = new BundleResource(bundle, new ResourcePath(""), texturename);
 
         BufferedImage bi = JavaBundleHelper.loadBundleTexture(URL.fromBundleResource(bundleResource));
@@ -79,7 +79,7 @@ public class JavaBundleHelperTest {
         mockWebTexture(wireMockServer, "/bundles/data/"+texturename, png, false);
 
         // cannot load bundle here? so mock it. But InMemoryBundle has no basepath.
-        Bundle bundle = new Bundle("data-mock", new String[]{"not relevant"}, "http://localhost:8089/bundles/data");
+        Bundle bundle = new Bundle("data-mock", false, new String[]{"not relevant"}, "http://localhost:8089/bundles/data");
 
         BundleResource bundleResource = new BundleResource(bundle, new ResourcePath(""), texturename);
         BufferedImage bi = JavaBundleHelper.loadBundleTexture(URL.fromBundleResource(bundleResource));

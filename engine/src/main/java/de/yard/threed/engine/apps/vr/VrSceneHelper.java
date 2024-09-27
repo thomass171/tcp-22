@@ -44,7 +44,7 @@ public class VrSceneHelper {
      */
     public static ControlPanel buildControllerControlPanel(Map<String, ButtonDelegate> buttonDelegates) {
         Color backGround = controlPanelBackground;
-        Material mat = Material.buildBasicMaterial(backGround, false);
+        Material mat = Material.buildBasicMaterial(backGround, null);
 
         int rows = 4;
         DimensionF rowsize = new DimensionF(ControlPanelWidth, ControlPanelRowHeight);

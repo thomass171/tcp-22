@@ -4,6 +4,9 @@ import com.google.gwt.core.client.JavaScriptObject;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by thomass on 25.04.15.
  * <p/>
@@ -137,11 +140,22 @@ public class WebGlSceneNode implements NativeSceneNode {
     }
 
     /**
-     * 6.6.15 Ob das hier so gut ist??
+     * 20.8.24: Additional platform finder. Might be more efficient by using threejs finder?
      */
-    /*@Override
-    public void addCamera(NativeCamera camera) {
-        add(object3d,((WebGlCamera)camera).object3d);
-
-    }*/
+    public List<NativeSceneNode> findNodeByName(String name) {
+        List<NativeSceneNode> nodelist = new ArrayList<NativeSceneNode>();
+        // 3.1.18: Also check 'this'.
+        if (name.equals(this.getName())) {
+            nodelist.add(this);
+        }
+        for (NativeTransform child : object3d.getChildren()) {
+            if (child != null) {
+                NativeSceneNode csn = child.getSceneNode();
+                if (csn != null) {
+                    nodelist.addAll(((WebGlSceneNode)csn).findNodeByName(name));
+                }
+            }
+        }
+        return nodelist;
+    }
 }

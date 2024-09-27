@@ -24,6 +24,7 @@ import de.yard.threed.engine.platform.EngineHelper;
  * 3) emulated
  * <p>
  * VR Controller no longer attached to avatar model
+ * 31.1.24: boolean "vrEnabled/enableVR" replaced by "vrMode"
  */
 public class VrInstance {
     static Log logger = Platform.getInstance().getLog(VrInstance.class);

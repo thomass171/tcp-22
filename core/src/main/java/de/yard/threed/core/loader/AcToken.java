@@ -14,7 +14,7 @@ public class AcToken {
     public String stringvalue;
     public boolean objTupel = false;
     public int[] ni, vi;
-    public PortableMaterial material;
+    public MaterialCandidate material;
 
     public AcToken(float floatvalue) {
         this.floatvalue = floatvalue;

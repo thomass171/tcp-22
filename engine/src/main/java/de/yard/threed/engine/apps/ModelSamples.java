@@ -15,7 +15,7 @@ import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.NativeMaterial;
 
@@ -80,10 +80,10 @@ public class ModelSamples {
         faces.add(new Face3(1, 3, 4, wood[0], wood[1], wood[3]));
         faces.add(new Face3(3, 6, 4, wood[1], wood[2], wood[3]));
 
-        FaceList f = new FaceList(faces);
+        FaceList f = new FaceList(faces, true);
         f.onlyface3 = true;
         // Durch das splitten ist hasedges irrelevant.
-        List<SimpleGeometry> geolist = GeometryHelper.prepareGeometry(vertices, new SmartArrayList<FaceList>(f), null, true, new Degree(60), false, null);
+        List<SimpleGeometry> geolist = GeometryHelper.prepareGeometry(vertices, new SmartArrayList<FaceList>(f), null, true, new Degree(60)/*, false, null*/);
         Mesh mesh = new Mesh(new GenericGeometry(geolist.get(0)).getNativeGeometry(), mat, false, false);
         SceneNode model = new SceneNode();
         model.setMesh(mesh);
@@ -122,7 +122,7 @@ public class ModelSamples {
 
     public static SceneNode buildEarth(int segments, int shading) {
         ShapeGeometry geoSphere = ShapeGeometry.buildSphere(segments, segments/*16*/, new Degree(360));
-        Material mat = Material.buildLambertMaterial((Texture.buildBundleTexture("data", "textures/earth/2_no_clouds_4k.jpg")),false,(shading==NumericValue.FLAT));
+        Material mat = Material.buildLambertMaterial((Texture.buildBundleTexture("data", "textures/earth/2_no_clouds_4k.jpg")),null,(shading==NumericValue.FLAT));
         //mat.setWireframe(true);
         Mesh mesh = new Mesh(geoSphere, mat);
         SceneNode model = new SceneNode();
@@ -137,38 +137,38 @@ public class ModelSamples {
      * <p>
      * Laeuft nativ in der xy-Ebene (z=0) entlang der y-Achse (Norden rot positiv).
      */
-    public static PortableModelList buildCompassNeedle(double height, double width) {
+    public static PortableModel buildCompassNeedle(double height, double width) {
         PortableModelDefinition needle = new PortableModelDefinition();
         needle.setName("Needle");
         double w2 = width / 2;
         double h2 = height / 2;
 
         List<Vector3> vertices = new ArrayList<Vector3>();
-        FaceList faces = new FaceList();
+        FaceList faces = new FaceList(true);
         vertices.add(new Vector3(-w2, 0, 0));
         vertices.add(new Vector3(w2, 0, 0));
         vertices.add(new Vector3(0, h2, 0));
         faces.faces.add(new Face3(0, 1, 2));
-        SimpleGeometry geo = GeometryHelper.prepareGeometry(vertices, new SmartArrayList<FaceList>(faces), null, false, new Degree(30), false, null).get(0);
+        SimpleGeometry geo = GeometryHelper.prepareGeometry(vertices, new SmartArrayList<FaceList>(faces), null, false, new Degree(30)/*, false, null*/).get(0);
         PortableMaterial northmat = new PortableMaterial("northmat", new Color(0xCC, 0, 00));
-        PortableModelDefinition north = PmlFactory.buildElement(geo, northmat.name);
+        PortableModelDefinition north = PmlFactory.buildElement(geo, northmat.getName());
         north.setName("North");
         needle.attach(north);
 
         vertices = new ArrayList<Vector3>();
-        faces = new FaceList();
+        faces = new FaceList(true);
         vertices.add(new Vector3(-w2, 0, 0));
         vertices.add(new Vector3(0, -h2, 0));
         vertices.add(new Vector3(w2, 0, 0));
         faces.faces.add(new Face3(0, 1, 2));
-        geo = GeometryHelper.prepareGeometry(vertices, new SmartArrayList<FaceList>(faces), null, false, new Degree(30), false, null).get(0);
+        geo = GeometryHelper.prepareGeometry(vertices, new SmartArrayList<FaceList>(faces), null, false, new Degree(30)/*, false, null*/).get(0);
         PortableMaterial southmat = new PortableMaterial("southmat", new Color(0, 0, 0xCC));
-        PortableModelDefinition south = PmlFactory.buildElement(geo, southmat.name);
+        PortableModelDefinition south = PmlFactory.buildElement(geo, southmat.getName());
         south.setName("South");
 
         needle.attach(south);
 
-        PortableModelList pml =  PmlFactory.buildPortableModelList(new PortableModelDefinition[]{needle}, new PortableMaterial[]{northmat, southmat});
+        PortableModel pml =  PmlFactory.buildPortableModel(needle, new PortableMaterial[]{northmat, southmat});
         pml.setName("CompassNeedle");
         return pml;
     }

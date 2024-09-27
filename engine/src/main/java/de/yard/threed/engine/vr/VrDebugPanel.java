@@ -52,7 +52,7 @@ public class VrDebugPanel extends ControlPanel {
 
     public static VrDebugPanel buildVrDebugPanel() {
         Color backGround = new Color(128, 193, 255, 128);
-        Material mat = Material.buildBasicMaterial(backGround, false);
+        Material mat = Material.buildBasicMaterial(backGround, null);
         return new VrDebugPanel(mat);
     }
 }

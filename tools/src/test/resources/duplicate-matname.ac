@@ -1,0 +1,40 @@
+AC3Db
+MATERIAL "NoName" rgb 1 1 1  amb 1 1 1  emis 0 0 0  spec 0 0 0  shi 0  trans 0
+MATERIAL "NoName" rgb 1 1 1  amb 1 1 1  emis 0 0 0  spec 0 0.42 0.416  shi 97  trans 0
+OBJECT world
+kids 1
+# will have 4 geos finally: unshaded front mat 0, shaded mat 1, unshaded mat 1, finally unshaded back
+OBJECT poly
+name "obj"
+texture "texture-a.png"
+numvert 4
+-1 12 3
+1 12 3
+1 -12 3
+-1 -12 3
+numsurf 3
+# unshaded twosided
+SURF 0x20
+mat 0
+refs 4
+3 0 0
+2 1 0
+1 1 1
+0 0 1
+# shaded
+SURF 0x10
+mat 1
+refs 4
+3 0 0
+2 1 0
+1 1 1
+0 0 1
+# unshaded
+SURF 0x0
+mat 1
+refs 4
+3 0 0
+2 1 0
+1 1 1
+0 0 1
+kids 0

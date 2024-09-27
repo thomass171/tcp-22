@@ -5,7 +5,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.geometry.ModelCreateException;
 import de.yard.threed.core.geometry.ProceduralModelCreator;
 
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.platform.Log;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -83,7 +83,7 @@ public class ModelCreator {
      */
     public static GltfBuilderResult createModel(String name, String classname, String[] remainingArgs) throws ModelCreateException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         logger.debug("createModel: classname='" + classname + "',remainingArgs=" + remainingArgs);
-        PortableModelList pml;
+        PortableModel pml;
         try {
             Class clazz = Class.forName(classname);
             ProceduralModelCreator pmc;
@@ -95,6 +95,10 @@ public class ModelCreator {
                         .newInstance(new Object[] { remainingArgs});
             }
             pml = pmc.createModel();
+            if (pml.getName() == null) {
+                pml.setName(name);
+            }
+
         } catch (NoSuchMethodException | InvocationTargetException e) {
             logger.error("",e);
             throw new ModelCreateException(e.getMessage());

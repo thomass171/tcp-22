@@ -10,7 +10,6 @@ import de.yard.threed.core.Point;
 import de.yard.threed.core.Server;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.platform.AsyncDelegator;
-import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeCamera;
@@ -36,7 +35,7 @@ import de.yard.threed.engine.ecs.ClientBusConnector;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.engine.loader.PortableModelBuilder;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.engine.loader.SceneLoader;
 
 import java.util.ArrayList;
@@ -420,9 +419,9 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
             SceneLoader sceneLoader = null;
             try {
                 sceneLoader = new SceneLoader(sceneExtension0, "");
-                PortableModelList ppfile = sceneLoader.preProcess();
-                PortableModelBuilder pmb = new PortableModelBuilder(ppfile);
-                SceneNode node = pmb.buildModel(null);
+                PortableModel/*List*/ ppfile = sceneLoader.buildPortableModel();
+                //PortableModelBuilder pmb = new PortableModelBuilder(ppfile);
+                SceneNode node = PortableModelBuilder.buildModel(ppfile, null);
                 ascene.addToWorld(node);
             } catch (InvalidDataException e) {
                 logger.error("sceneExtension0 failed");
@@ -523,10 +522,12 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
      * In general async but without MT.
      * 10.11.23: 'delayed' removed.
      * 15.12.23: also used in preload.
+     * 26.8.24: Delayed bundle reactivated
      */
     public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate) {
         //2.8.21 AsyncHelper.asyncBundleLoad(bundlename, AbstractSceneRunner.getInstance().invokeLater(bundleLoadDelegate), delayed);
 
+        boolean delayed = false;
         NativeBundleResourceLoader resourceLoader;
         if (StringUtils.startsWith(bundlename, "http")) {
             // full qualified bundle
@@ -539,12 +540,16 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
             //bundleLoader/*new PlatformBundleLoader()*/.loadBundle(bundlename, bundleLoadDelegate, resourceLoader);
         } else {
             //13.12.23 Platform.getInstance().bundleLoader.asyncBundleLoad(bundlename, bundleLoadDelegate, delayed);
+            if (StringUtils.endsWith(bundlename, "-delayed")) {
+                bundlename = StringUtils.replaceAll(bundlename, "-delayed", "");
+                delayed = true;
+            }
             resourceLoader = Platform.getInstance().buildResourceLoader(bundlename, null);
 
         }
 
         String loadBundlename = bundlename;
-        bundleLoader.loadBundle(loadBundlename, bundle -> {
+        bundleLoader.loadBundle(loadBundlename, delayed, bundle -> {
             // the loader doesn't register the bundle
             if (bundle == null) {
                 logger.error("Bundle load failed");
@@ -646,6 +651,7 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
         List<Bundle> loadedBundle = new ArrayList();
 
         for (String bundlename : bundleNames) {
+            //26.8.24: Delayed bundle reactivated in loadBundle()
             /*15.12.23 this is old stuff boolean delayed = false;
             //wegen C#
             String bname = bundlename;

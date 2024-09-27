@@ -171,7 +171,7 @@ public abstract class AbstractMazeTerrain {
         // a bit larger for better visibility with box in front of it.
         destinationsize = 1.3f;
         ShapeGeometry cubegeometry = ShapeGeometry.buildPlane(destinationsize, destinationsize, 1, 1);
-        Material mat = Material.buildLambertMaterial(texture, true, true);
+        Material mat = Material.buildLambertMaterial(texture, 0.5, true);
         SceneNode dest = new SceneNode(new Mesh(cubegeometry, mat));
         // raise a bit to avoid z-Fighting
         addGridElement(dest, x, y, 0.01f);

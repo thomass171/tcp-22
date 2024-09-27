@@ -28,7 +28,6 @@ public abstract class AsciiLoader extends AbstractLoader {
         return token.intvalue;
     }
 
-    
 
     /**
      * Die Verwendung von String.split geht nicht, weil es bei "ac" Zeichenketten in Anfuehrungszeichen geben kann, die dann, wenn
@@ -52,11 +51,11 @@ public abstract class AsciiLoader extends AbstractLoader {
 
         // 2.1.18: Fix fuer krude Exoten in AC. Ein Wahnsinn, was es an Properties gibt. Einfach alle ignorieren. TODO lesen, erkennen? Andere Ascii Loader betroffen?
         if (StringUtils.startsWith(ins, "lod_near=") || StringUtils.startsWith(ins, "lod_far=") ||
-                StringUtils.startsWith(ins, "blend=")|| StringUtils.startsWith(ins, "hard_surf=") ||
+                StringUtils.startsWith(ins, "blend=") || StringUtils.startsWith(ins, "hard_surf=") ||
                 StringUtils.startsWith(ins, "deck=")) {
             ins = StringUtils.replaceAll(ins, "=", " ");
         }
-        if (StringUtils.contains(ins,"=")){
+        if (StringUtils.contains(ins, "=")) {
             return new AcToken[0];
         }
         c = StringUtils.charAt(ins, 0);
@@ -92,8 +91,8 @@ public abstract class AsciiLoader extends AbstractLoader {
             // Evtlnur fuer AC Header erforderlich
             return new AcToken[0];
         }
-        if (tokenizer == null){
-            getLog().warn("no tokenizer found for line; ignored:"+ins);
+        if (tokenizer == null) {
+            getLog().warn("no tokenizer found for line; ignored:" + ins);
             return new AcToken[0];
         }
         return tokenizer.tokenize(ins);
@@ -256,7 +255,7 @@ public abstract class AsciiLoader extends AbstractLoader {
         }
         if (StringUtils.equalsIgnoreCase(firsttoken, "crease") ||
                 StringUtils.equalsIgnoreCase(firsttoken, "width") || StringUtils.equalsIgnoreCase(firsttoken, "lod_near") ||
-                StringUtils.equalsIgnoreCase(firsttoken, "lod_far") || StringUtils.equalsIgnoreCase(firsttoken, "blend")|| 
+                StringUtils.equalsIgnoreCase(firsttoken, "lod_far") || StringUtils.equalsIgnoreCase(firsttoken, "blend") ||
                 StringUtils.equalsIgnoreCase(firsttoken, "hard_surf") || StringUtils.equalsIgnoreCase(firsttoken, "deck") ||
                 StringUtils.equalsIgnoreCase(firsttoken, "showname")) {
             return new NumericFloatTokenizer(firsttoken);
@@ -307,7 +306,7 @@ public abstract class AsciiLoader extends AbstractLoader {
             throw new InvalidDataException("unknown getFirst token " + token[0] + ". number of tokens:" + token.length);
         }
     }
-    
+
     private AcToken buildToken(StringBuffer currenttoken, boolean possibleInt, boolean possibleFloat, boolean objTupel) {
        /*if (possibleObjTupel){
 
@@ -543,7 +542,7 @@ class MaterialTokenizer extends Tokenizer {
         String ident = readIdent(sb);
         List<AcToken> l = new ArrayList<AcToken>();
         input = sb.toString();
-        PortableMaterial m = new PortableMaterial();
+        MaterialCandidate m = new MaterialCandidate();
         // 31.3.17: Wrap als Defualt fuer ac setzen. texrep soll default "1 1" sein.
         m.wraps = true;
         m.wrapt = true;
@@ -588,8 +587,10 @@ class MaterialTokenizer extends Tokenizer {
                                 parts = parts.subList(2, parts.size());
                             } else {
                                 if (p.equals("trans")) {
-                                    m.transparencypercent = new FloatHolder(0);
-                                    m.transparencypercent.value = Float.parseFloat(parts.get(1));
+                                    float transparencyValue = Float.parseFloat(parts.get(1));
+                                    if (transparencyValue > 0.0) {
+                                        m.transparency = new FloatHolder(transparencyValue);
+                                    }
                                     parts = parts.subList(2, parts.size());
                                 } else {
                                     throw new InvalidDataException("unexpected toekn " + parts.get(0));
@@ -601,6 +602,7 @@ class MaterialTokenizer extends Tokenizer {
             }
         }
         AcToken token = new AcToken(input);
+        // Assume colored material. We don't know about texture until now.
         token.material = m;
         return buildTlist(new AcToken[]{token});
     }

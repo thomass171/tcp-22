@@ -55,6 +55,10 @@ public class JmeSpatial implements /*Native*/NativeTransform {
         }
     }
 
+    static JmeSpatial buildForExisting(Spatial spatial) {
+        return new JmeSpatial(spatial, null, true);
+    }
+
     /*Spatial isType abstract public JmeObject3D() {
         this(new Spatial());
     }*/
@@ -268,28 +272,30 @@ public class JmeSpatial implements /*Native*/NativeTransform {
             Spatial child = ((Node) spatial).getChild(i);
             // Geometry ist das mesh child. 24.9.19: Auch nicht die CameraNode mitzaehlen. Das ist ja eine Component.
             //11.11.19 nach neuer Bewertung mit Unity doch wieder mitzaehlen. 14.11.19: Doch nicht wegen ThreeJS
-            if (!(child instanceof Geometry) && !(child instanceof CameraNode)) {
-
-                if (child == null) {
-                    //debug stop
-                    child = null;
-                } else {
-                    //Ich leg einen  Wrapper einfach neu an. 
-                /*Integer id = (Integer) child.getUserData("uniqueid");
-                if (id == null) {
-                    id = null;
-                }
-                l.add(Platform.getInstance().findObject3DById((id)));*/
-                    l.add(new JmeSpatial(child, null, true));
-                }
+            if (isCountingChild(child)) {
+                //Ich leg einen  Wrapper einfach neu an.
+                l.add(new JmeSpatial(child, null, true));
             }
-
         }
         return l;
     }
 
     /**
+     * 20.8.24: Just extracted from above for reuse
+     */
+    private static boolean isCountingChild(Spatial child) {
+        if (child == null) {
+            return false;
+        }
+        if (!(child instanceof Geometry) && !(child instanceof CameraNode)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Einer der Children muss das Child fuer den Mesh sein.
+     *
      * @return
      */
     public JmeMesh getMeshHolder() {
@@ -444,9 +450,9 @@ public class JmeSpatial implements /*Native*/NativeTransform {
 
     }
 
-    /**
-     * 31.10.19: Noch nicht ganz stimmig.
-     */
+/**
+ * 31.10.19: Noch nicht ganz stimmig.
+ */
     /*private void setLayerIndex(Node node, int layer){
         node.setUserData("layer", new Integer(layer));
         for (Spatial c:node.getChildren()){
@@ -484,4 +490,25 @@ public class JmeSpatial implements /*Native*/NativeTransform {
         return layer;
     }
 
+
+    /**
+     * Like getChildren, but more efficient for node search.
+     */
+    public static List<NativeSceneNode> findNodeByName(String name, Spatial startNode) {
+
+        List<NativeSceneNode> nodelist = new ArrayList<NativeSceneNode>();
+
+        // 3.1.18: Also check 'this'.
+        if (name.equals(startNode.getName())) {
+            nodelist.add(JmeSpatial.buildForExisting(startNode).getSceneNode());
+        }
+
+        for (int i = 0; i < ((Node) startNode).getChildren().size(); i++) {
+            Spatial child = ((Node) startNode).getChild(i);
+            if (isCountingChild(child)) {
+                nodelist.addAll(findNodeByName(name, child));
+            }
+        }
+        return nodelist;
+    }
 }

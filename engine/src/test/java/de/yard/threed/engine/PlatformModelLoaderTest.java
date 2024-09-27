@@ -53,8 +53,17 @@ public class PlatformModelLoaderTest {
     void setup() {
         wireMockServer = new WireMockServer(wireMockConfig().port(8089));
         wireMockServer.start();
+        wireMockServer.addMockServiceRequestListener(PlatformModelLoaderTest::requestReceived);
 
         JavaWebClient.close();
+    }
+
+    protected static void requestReceived(com.github.tomakehurst.wiremock.http.Request inRequest,
+                                          com.github.tomakehurst.wiremock.http.Response inResponse) {
+        log.debug("WireMock request at URL: " + inRequest.getAbsoluteUrl());
+        //log.debug("WireMock request headers: " + inRequest.getHeaders());
+        //might be binary log.debug("WireMock response body: " + inResponse.getBodyAsString());
+        //log.debug("WireMock response headers: " + inResponse.getHeaders());
     }
 
     @AfterEach
@@ -69,8 +78,9 @@ public class PlatformModelLoaderTest {
         mockHttpLoadCesium(false);
 
         String baseUrl = "http://localhost:" + wireMockServer.port() + "/bundles";
-        runLoad(new ResourceLoaderViaHttp(new URL(baseUrl,new ResourcePath("somebundle/cesiumbox"),"BoxTextured.gltf")));
+        runLoad(new ResourceLoaderViaHttp(new URL(baseUrl, new ResourcePath("somebundle/cesiumbox"), "BoxTextured.gltf")));
 
+        // Expect request for gltf, bin and texture
         wireMockServer.verify(3, RequestPatternBuilder.allRequests());
 
         assertEquals(0, AbstractSceneRunner.getInstance().futures.size());

@@ -1,5 +1,6 @@
 package de.yard.threed.core.loader;
 
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.Degree;
@@ -13,19 +14,21 @@ import java.util.List;
 
 /**
  * Created by thschonh on 14.07.2015.
- * 18.10.23: No longer used inside platform but only in tools for converting. TODO move to tools.
+ * 18.10.23: No longer used inside platform but only in tools for converting. TODO move to tools.(16.9.24 but it is used in ModelPreviewScene)
  * 16.11.23: Now has auto mapping of 'rgb' to 'png'.
  */
 public class LoaderAC extends AsciiLoader {
     static public int flagSurfaceTypePolygon = 0,
             flagSurfaceTypeLineLoop = 1,
             flagSurfaceTypeLineStrip = 2,
-            flagSurfaceShaded = 16,//1<<4,
+            flagSurfaceShaded = 16,//1<<4, 0x10
             flagSurfaceTwoSided = 32;//1<<5 0x20
-    // 27.12.17: Blender ignoriert beim import "world". Das sehe ich auch mal vor.
+    // 27.12.17: Blender ignores "world" during import. Das sehe ich auch mal vor.
+    // 2.8.24: Now converter sets it because we need a single root as we no longer have to top "geolist".
     boolean ignoreacworld = false;
 
-    List<String> materialnamebyindex = new ArrayList<String>();
+    // The original AC material name. The same name might be used several times.
+    private List<String> materialnamebyindex = new ArrayList<String>();
 
     Log logger = Platform.getInstance().getLog(LoaderAC.class);
     // a simple twosided unshaded rectangle (white):
@@ -101,7 +104,7 @@ public class LoaderAC extends AsciiLoader {
             "kids 0";
 
     // ein twosided viereck, dass sich in y Richtung erstreckt.
-    public static final String sampleac2 = "AC3Db\n" +
+    public static final String twosidedRectangle = "AC3Db\n" +
             "MATERIAL \"\" rgb 1 1 1  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.5 0.5 0.5  shi 10  trans 0\n" +
             "OBJECT world\n" +
             "kids 1\n" +
@@ -191,6 +194,10 @@ public class LoaderAC extends AsciiLoader {
         this.ignoreacworld = ignoreacworld;
         load();
         //loadedfile.preProcess();
+        // 3.8.24: We typically no longer ignore ac 'world' to have a single root, but that typically has no name in AC. So set one here
+        if (!ignoreacworld) {
+            fixWorldName(null);
+        }
     }
 
     public LoaderAC(StringReader ins, BundleResource filename) throws InvalidDataException {
@@ -214,12 +221,16 @@ public class LoaderAC extends AsciiLoader {
     }*/
 
     /**
-     * 22.12.17: Wenn world keinen eigenen Namen hat, den filename setzen.
+     * 22.12.17: If 'world' has no name, set bundle filename or some other.
      */
     private void fixWorldName(BundleResource file) {
-        if (loadedfile.objects.size() > 0) {
-            if (StringUtils.empty(loadedfile.objects.get(0).name) && file instanceof BundleResource) {
-                loadedfile.objects.get(0).name = ((BundleResource) file).getBasename();
+        if (loadedfile.object != null) {
+            if (StringUtils.empty(loadedfile.object.name)) {
+                if (file != null && file instanceof BundleResource) {
+                    loadedfile.object.name = ((BundleResource) file).getBasename();
+                } else {
+                    loadedfile.object.name = "ac-world";
+                }
             }
         }
     }
@@ -235,7 +246,8 @@ public class LoaderAC extends AsciiLoader {
         int surfaceindex = 0;
         AcObject parent = null;
 
-        while ((token = parseLine(ins.readLine(), false, inrefs ? 1 : 0, null)) != null) {
+        // 14.8.24 Why shouldn't we allow comments event hough AC doesn't. Its helpful for commenting test referencefiles
+        while ((token = parseLine(ins.readLine(), true, inrefs ? 1 : 0, null)) != null) {
             //dumpen
            /* System.out.print("line " + lines + "(" + token.length + " token):");
             for (AcToken tk : token) {
@@ -251,25 +263,34 @@ public class LoaderAC extends AsciiLoader {
                     }
                 } else {
                     if (token[0].isMaterial()) {
-                        // Material in einer shaded und unshaded variante anlegen
-                        PortableMaterial lmat = buildMaterial(token);
-                        PortableMaterial lmat1 = lmat.duplicate("shaded" + lmat.name);
+                        // create material in a shaded and unshaded variant
+                        // 13.8.24:Caution:AC sometimes has duplicate material name like eg. "NoName". This
+                        // is no problem in AC which references by index, but might be later in GLTF. So
+                        // add index to name
+                        int index = materialnamebyindex.size();
+                        MaterialCandidate lmat = materialFromToken(token);
+                        MaterialCandidate lmat1 = lmat.duplicate("shaded" + index + lmat.name);
+                        lmat1.shaded = true;
                         loadedfile.materials.add(lmat1);
-                        PortableMaterial lmat2 = lmat.duplicate("unshaded" + lmat.name);
+                        MaterialCandidate lmat2 = lmat.duplicate("unshaded" + index + lmat.name);
                         lmat2.shaded = false;
                         loadedfile.materials.add(lmat2);
                         materialnamebyindex.add(lmat.name);
                     } else {
                         if (token[0].isObject()) {
                             AcObject newobj = new AcObject(token[1], loadedfile.materials.size());
-                            // newobj ist "world"
+                            // newobj is "world"
                             loadObject(ins, newobj);
                             if (ignoreacworld) {
-                                loadedfile.objects = newobj.kids;
+                                Util.nomore();
+                                //loadedfile.objects = newobj.kids;
                             } else {
                                 // Nur "world" kommt in die Liste
                                 newobj.isworld = true;
-                                loadedfile.objects.add(newobj);
+                                if (loadedfile.object!=null){
+                                    throw new RuntimeException("multiple root objects no longer valid");
+                                }
+                                loadedfile.object = newobj;
                             }
                         }
                     }
@@ -297,7 +318,8 @@ public class LoaderAC extends AsciiLoader {
         AcObject currentobject = newobj;
         Tokenizer nexttokenizer = null;
 
-        while ((token = parseLine(ins.readLine(), false, inrefs ? 1 : 0, nexttokenizer)) != null) {
+        // 14.8.24 Why shouldn't we allow comments event hough AC doesn't. Its helpful for commenting test referencefiles
+        while ((token = parseLine(ins.readLine(), true, inrefs ? 1 : 0, nexttokenizer)) != null) {
             nexttokenizer = null;
             //dumpen
            /* System.out.print("line " + lines + "(" + token.length + " token):");
@@ -421,32 +443,23 @@ public class LoaderAC extends AsciiLoader {
                                                                                                             } else {
                                                                                                                 if (inrefs) {
                                                                                                                     if (currentsurface.addRef(token)) {
-                                                                                            /*if (currentobject.name.equals("cockpit_ORIGINAL")) {
-                                                                                                inrefs = inrefs;
-                                                                                            }*/
-                                                                                                                        // Surface komplett. Wahrscheinlich immer FaceN oder Face3.
+                                                                                                                        // currentsurface complete. Likely FaceN or Face3.
                                                                                                                         // Kommt an die Face Liste zu dem Material
                                                                                                                         // Fuer das facelistmaterial kann nicht mat als Index verwendet werden, denn das muss ja nicht fortlaufend sein (in diesem Objekt)
                                                                                                                         // Furthermore surfaces might have different SURF attributes (shaded/unshaded)
                                                                                                                         String matname = buildMaterialName(currentsurface, currentsurface.mat);
-                                                                                        /*
-                                                                                        while (currentobject.faces.size() <= currentsurface.mat) {
-                                                                                            currentobject.addFacelist();
-                                                                                        }
-                                                                                        // Das ist aber schwer aufzudroeseln. Darum zunächst tatsaechlich mat als Index verwenden und leere Facelisten in Kauf nehmen.
-                                                                                        while (currentobject.facelistmaterial.size() < currentobject.faces.size()) {
-                                                                                            currentobject.facelistmaterial.add(null);
-                                                                                        }
-                                                                                        if (currentobject.facelistmaterial.get(currentsurface.mat) == null) {
-                                                                                            currentobject.facelistmaterial.set(currentsurface.mat, loadedfile.materials.get(currentsurface.mat).name);
-                                                                                        }
-                                                                                        currentsurface.buildFace(currentobject.faces.get(currentsurface.mat));*/
+
                                                                                                                         if (currentobject.getFaceListByMaterialName(matname) == null) {
                                                                                                                             currentobject.facelistmaterial.add(matname);
                                                                                                                             // dann darf es die FaceListe auch noch nicht geben
-                                                                                                                            currentobject.addFacelist();
+                                                                                                                            //we don't know yet whether it will be twosided
+                                                                                                                            //will be done twice if we have a mix shaded/unshaded
+                                                                                                                            currentobject.addFacelist(true, currentsurface.isShaded());
                                                                                                                         }
-                                                                                                                        currentsurface.buildFace(currentobject, currentobject.getFaceListByMaterialName(matname));
+                                                                                                                        int facelistIndex = currentobject.getFaceListByMaterialName(matname);
+                                                                                                                        // 11.9.24 there has never been a not found check
+                                                                                                                        currentsurface.buildFace(currentobject, currentobject.faces.get(facelistIndex),
+                                                                                                                                currentobject.backfaces.get(facelistIndex));
                                                                                                                         //currentsurface.endPrimitive();
 
                                                                                                                     }
@@ -505,9 +518,9 @@ public class LoaderAC extends AsciiLoader {
     private String buildMaterialName(AcSurface surface, int matindex) {
         String s;
         if (surface.isShaded()) {
-            s = "shaded";
+            s = "shaded" + matindex;
         } else {
-            s = "unshaded";
+            s = "unshaded" + matindex;
         }
 
         return s + materialnamebyindex.get(matindex);
@@ -530,7 +543,7 @@ public class LoaderAC extends AsciiLoader {
     }
 
 
-    private PortableMaterial buildMaterial(AcToken[] token) throws InvalidDataException {
+    private MaterialCandidate/*PortableMaterial*/ materialFromToken(AcToken[] token) throws InvalidDataException {
       /*  if (token.length != 22) {
             throw new InvalidAcDataException("MATERIAL line has " + token.length + " token, expected 22");
         }
@@ -543,7 +556,8 @@ public class LoaderAC extends AsciiLoader {
         m.shi = token[19].getValueAsFloat();
         m.trans = token[21].getValueAsFloat();
         return m;*/
-        return token[1].material;
+        // 12.8.24: TODO Too early to build material because texture isn't considered
+        return token[1].material/*.buildPortableMaterial()*/;
     }
 }
 

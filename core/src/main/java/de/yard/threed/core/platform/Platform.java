@@ -58,13 +58,14 @@ public abstract class Platform {
 
     /**
      * 15.9.17: Let the platform load a model async. This might be very efficient. Threejs/gltfloader is a good reference.
-     * If data is needed from a bundle (depending on the platform), it might wait for the bundle until it is available.
+     *
      * Successor of ModelFactory.buildModelFromBundle().
      * Not for FG XML model!
-     * Eine Exception bei einem Fehler gibt es hieraus dann auch nicht, sondern nur eine FM über den Delegate.
-     * 04.10.2018: Das ist trotz async aber nicht multithreaded.
+     * Due to async no exception here but only information via d delegate. The delegate should be called exactly once in every case!
+     * 04.10.2018: Even though it is async it is not multithreaded.
      * 18.10.23: No more 'ac', so only gltf any more.
-     * 10.11.23: The threejs gltf loader currently is the only platform provided loader abd is disabled by default because
+     * 10.11.23: Even though most platforms just use the custom {@ModelLoader}, the entry point is here because a platform *might* have a better GLTF
+     * loader. The threejs gltf loader currently is the only platform provided loader and is disabled by default because
      * it cannot handle external material (FG terrain). So
      * this method might be useless at the moment. But it might be an option in the future.
      * 15.2.24: Decoupled from bundle(Resource)
@@ -458,10 +459,24 @@ public abstract class Platform {
     public abstract NativeAudio buildNativeAudio(NativeAudioClip audioClip);
 
     /**
-     * bundlename to make clear its for bundle content loading with resolver (or abs HTTP).
+     * Build a loader for loading a single resource(file) either from some web/HTTP bundle location or from
+     * a local(HOSTDIR) bundle. Provides the option to get a single file from a bundle without loading the complete bundle.
+     * This method is also used internally for loading a bundle!
+     *
+     * "bundlename" to make clear its for bundle content loading with resolver (or abs HTTP).
      * if location is null, the resolver will be used.
      * Should location end with bundlename or not? Probably not, because bundlename is standalone parameter.
+     * Examples:
+     * - buildResourceLoader("engine", null) for loading from a local bundle
+     * - buildResourceLoader("some-bundle", "http://somehost:8085/bundles") for loading from a remote bundle
      */
     public abstract NativeBundleResourceLoader buildResourceLoader(String bundlename, String location);
 
+    /**
+     * Do a recursive depth first search for a node like SceneNode.findNodeByName(String name, SceneNode startnode) does.
+     * This is redundant and we already had this some time ago in the platform and removed it later. But the platform just has more options to do the search
+     * more efficiently. SceneNode.findNodeByName() might be a performance killer (~40ms in JME) especially when used many times
+     * like for FG animations.
+     */
+    public abstract List<NativeSceneNode> findNodeByName(String name, NativeSceneNode startnode);
 }

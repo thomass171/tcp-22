@@ -20,16 +20,21 @@ public class BundleTest {
 
     Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine"}, new SimpleHeadlessPlatformFactory());
 
+    /**
+     * egg/hen problem during initial build? Needs intermediate
+     * <p>
+     * sh bin/deployBundle.sh -m engine
+     */
     @Test
     public void testKeysInMap() {
         Bundle bundle = BundleRegistry.getBundle("engine");
-        BundleResource bundleResource=new BundleResource("plane-darkgreen.bin");
+        BundleResource bundleResource = new BundleResource("plane-darkgreen.bin");
         assertNotNull(bundle.getResource(bundleResource));
         // what about this? Normalize and find it.
-        bundleResource=new BundleResource(bundle, new ResourcePath("."),"plane-darkgreen.bin");
+        bundleResource = new BundleResource(bundle, new ResourcePath("."), "plane-darkgreen.bin");
         assertNotNull(bundle.getResource(bundleResource));
         // what about this? Normalize and find it.
-        bundleResource=new BundleResource(bundle, "./plane-darkgreen.bin");
+        bundleResource = new BundleResource(bundle, "./plane-darkgreen.bin");
         assertNotNull(bundle.getResource(bundleResource));
     }
 }

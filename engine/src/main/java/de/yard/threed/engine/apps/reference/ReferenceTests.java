@@ -428,7 +428,7 @@ public class ReferenceTests {
 
     /**
      * Test, ob die Platform das mit den Childs richtig macht (z.B. jme meshholder)
-     *
+     * 20.8.24: There is a custom finder in SceneNode and a finder by platform. Test both.
      * @param referenceScene
      */
     public static void testFindNodeByName(ReferenceScene referenceScene) {
@@ -448,13 +448,24 @@ public class ReferenceTests {
         RuntimeTestUtil.assertEquals("number loc", 1, nodes.size());
         // children are two level below
         NativeSceneNode childNode = nodes.get(0).getTransform().getChildren().get(0).getSceneNode();
+        RuntimeTestUtil.assertEquals("node name","gltfroot", childNode.getName());
         childNode = childNode.getTransform().getChildren().get(0).getSceneNode();
+        RuntimeTestUtil.assertEquals("node name","Locomotive", childNode.getName());
+        childNode = childNode.getTransform().getChildren().get(0).getSceneNode();
+        //6.8.24 TODO check baseblock without name? RuntimeTestUtil.assertEquals("node name","baseblock", childNode.getName());
         RuntimeTestUtil.assertEquals("number loc children", 8, childNode.getTransform().getChildren().size());
 
         SceneNode rechts1 = referenceScene.towerrechts.get(0).findNodeByName("rechts 1").get(0);
         RuntimeTestUtil.assertNotNull("", rechts1);
         RuntimeTestUtil.assertEquals("", "rechts 1", rechts1.getName());
         RuntimeTestUtil.assertNotNull("", rechts1.getTransform().getParent());
+        // same test via platform finder
+        rechts1 = new SceneNode(Platform.getInstance().findNodeByName("rechts 1", referenceScene.towerrechts.get(0).nativescenenode).get(0));
+        RuntimeTestUtil.assertNotNull("", rechts1);
+        RuntimeTestUtil.assertEquals("", "rechts 1", rechts1.getName());
+        RuntimeTestUtil.assertNotNull("", rechts1.getTransform().getParent());
+
+
         // wenn das mesh und name in der Original Node enthalten ist, muss es auch in der find Instanz sein.
         RuntimeTestUtil.assertNotNull("mesh", referenceScene.towerrechts.get(1).getMesh());
         RuntimeTestUtil.assertEquals("name", "rechts 1", referenceScene.towerrechts.get(1).getName());

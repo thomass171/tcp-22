@@ -5,6 +5,7 @@ import de.yard.threed.core.FloatHolder;
 import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.ModelBuildDelegate;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleResource;
@@ -52,26 +53,25 @@ public class LoaderGLTF {
     // source is important for setting node name
     private String source;
     boolean flipy = false;
+    String json;
     //
     // 
     // 
     // BundleResource file;
     public static final int REPEAT = 10497;
+    public static String GLTF_ROOT = "gltfroot";
 
     /**
      * Read a GLTF. json and 'bin' are parameter to be independent from bundle loading.
      * Textures are loaded async on the fly.
+     * 24.8.24: Don't handle error here by (quite useless) exception handling here but inform delegate about failure.
      */
-    public LoaderGLTF(String json, NativeByteBuffer binbuffer, ResourcePath texturebasepath, String source) throws InvalidDataException {
+    public LoaderGLTF(String json, NativeByteBuffer binbuffer, ResourcePath texturebasepath, String source) /*throws InvalidDataException*/ {
+        this.json = json;
         this.binbuffer = binbuffer;
         this.source = source;
 
-        NativeJsonValue gltf = Platform.getInstance().parseJson(json);
-        if (gltf == null) {
-            throw new InvalidDataException("parsing json failed:" + json);
-        }
-        gltfo = gltf.isObject();
-        this.texturebasepath = texturebasepath;
+         this.texturebasepath = texturebasepath;
         if (binbuffer == null) {
             // 6.3.21: Das macht doch keinen Sinn, oder?
             logger.warn("no bin. Intended?");
@@ -102,20 +102,30 @@ public class LoaderGLTF {
     }
 
     /**
-     * New async trigger point
+     * New async trigger point.
+     * Only reads the model without building a 3D Object.
+     * 24.8.24: Don't handle error here by (quite useless) exception handling here but inform delegate about failure.
      */
-    public static void load(ResourceLoader resourceLoader, GeneralParameterHandler<PortableModelList> delegate) {
+    public static void load(ResourceLoader resourceLoader, GeneralParameterHandler<PortableModel/*List*/> delegate) {
         logger.debug("Launching async gltf load of " + resourceLoader.nativeResource.getFullQualifiedName());
         resourceLoader.loadResource(new AsyncJobDelegate<AsyncHttpResponse>() {
             @Override
             public void completed(AsyncHttpResponse response) {
                 String json;
                 logger.debug("got gltf");
+               // try {
                 try {
                     json = response.getContentAsString();
-                    //NativeJsonValue gltf = Platform.getInstance().parseJson(json);
+                } catch (CharsetException e) {
+                    logger.error(e.getMessage());
+                    delegate.handle(null);
+                    return;
+                }
+                //NativeJsonValue gltf = Platform.getInstance().parseJson(json);
                     if (json == null) {
-                        throw new InvalidDataException("no gltf data");
+                        logger.warn("no gltf data for " + resourceLoader.nativeResource.getFullQualifiedName());
+                        //throw new InvalidDataException("no gltf data for " + resourceLoader.nativeResource.getFullQualifiedName());
+                        delegate.handle(null);
                     }
                     //gltfo = gltf.isObject();*/
                     // TODO get bin file name from gltf
@@ -126,9 +136,9 @@ public class LoaderGLTF {
                         @Override
                         public void completed(AsyncHttpResponse response) {
                             NativeByteBuffer binbuffer = response.getContent();
-                            if (binbuffer!=null) {
+                            if (binbuffer != null) {
                                 logger.debug("got bin with size " + binbuffer.getSize());
-                            }else{
+                            } else {
                                 logger.error("no bin found from " + binLoader.getUrl());
                             }
 
@@ -137,10 +147,11 @@ public class LoaderGLTF {
                             }*/
                             try {
 
-                                LoaderGLTF loaderGLTF = new LoaderGLTF(json,binbuffer, resourceLoader.getUrl().getPath(),
-                            // source is important for setting node name
+                                LoaderGLTF loaderGLTF = new LoaderGLTF(json, binbuffer, resourceLoader.getUrl().getPath(),
+                                        // source is important for setting node name
                                         resourceLoader.nativeResource.getFullName());
-                                PortableModelList ploadedfile =loaderGLTF.doload();
+                                // 24.8.24: ploadedfile might be null in case of error (already logged)
+                                PortableModel/*List */ploadedfile = loaderGLTF.doload();
                                 delegate.handle(ploadedfile);
                             } catch (InvalidDataException e) {
                                 // problem was already logged
@@ -149,15 +160,34 @@ public class LoaderGLTF {
                         }
                     });
 
-                } catch (Exception e) {
+                /*24.8.24} catch (Exception e) {
                     //TODO throw new InvalidDataException("CharsetException not found");
                     e.printStackTrace();
-                }
+                }*/
             }
         });
     }
 
-    public PortableModelList doload() throws InvalidDataException {
+    public PortableModel/*List*/ doload() throws InvalidDataException {
+        if (json == null) {
+            //throw new InvalidDataException("parsing json failed:" + json);
+            logger.warn("no json");
+            return null;
+        }
+
+        NativeJsonValue gltf = Platform.getInstance().parseJson(json);
+        if (gltf == null) {
+            //throw new InvalidDataException("parsing json failed:" + json);
+            logger.warn("parsing json failed:" + json);
+            return null;
+        }
+        gltfo = gltf.isObject();
+        if (gltfo == null) {
+            //throw new InvalidDataException("parsing json failed to gltfo:" + json);
+            logger.warn("parsing json failed to gltfo:" + json);
+            return null;
+        }
+
         //logger.debug("Start building");
         textures = (gltfo.get("textures") != null) ? gltfo.get("textures").isArray() : null;
         images = (gltfo.get("images") != null) ? gltfo.get("images").isArray() : null;
@@ -165,14 +195,20 @@ public class LoaderGLTF {
         NativeJsonObject asset = (gltfo.get("asset") != null) ? gltfo.get("asset").isObject() : null;
         if (asset != null) {
             String generator = asset.getString("generator");
-            //Zum Thema Flipy gibts eine aktulle Diskussion bei GLTF, z.B. https://github.com/KhronosGroup/glTF-WebGL-PBR/issues/16
-            //das ist wohl noch nicht rund. Der WebGL Loader hat damit aber wohl kein Problem, obwohl er anscheinend KEIN flip macht. 
-            if (StringUtils.startsWith(generator, "Khronos Blender")) {
-                flipy = true;
+            if (generator != null) {
+                //Zum Thema Flipy gibts eine aktulle Diskussion bei GLTF, z.B. https://github.com/KhronosGroup/glTF-WebGL-PBR/issues/16
+                //das ist wohl noch nicht rund. Der WebGL Loader hat damit aber wohl kein Problem, obwohl er anscheinend KEIN flip macht.
+                if (StringUtils.startsWith(generator, "Khronos Blender")) {
+                    flipy = true;
+                }
             }
         }
 
-        PortableModelList ppfile = new PortableModelList(texturebasepath);
+        // We cannot be sure that the GLTF file has a clear tree with exactly one root. So we add a synthetic here and
+        // GLTF content will end in 'kids' (with hierarchy from file)
+        PortableModelDefinition gltfroot = new PortableModelDefinition();
+        gltfroot.setName(GLTF_ROOT);
+        PortableModel ppfile = new PortableModel(gltfroot, texturebasepath);
 
         //ppfile.root = new PreprocessedLoadedObject();
         //ppfile.root.geolist = new ArrayList<SimpleGeometry>();
@@ -189,7 +225,7 @@ public class LoaderGLTF {
                     ppfile.materials.add(buildMaterial(gltfmaterial, i));
                 }
             }
-            // alle Nodes erst seqeuntiell lesen und danach die children rausdröseln.
+            // read all nodes as array and later derive parent/children relations
             NativeJsonArray nodes = gltfo.get("nodes").isArray();
             List<PortableModelDefinition> nodelist = new ArrayList<PortableModelDefinition>();
             int nodecnt = gltfo.get("nodes").isArray().size();
@@ -237,7 +273,8 @@ public class LoaderGLTF {
             for (int i = 0; i < nodecnt; i++) {
                 PortableModelDefinition n = nodelist.get(i);
                 if (n != null) {
-                    ppfile.addModel(n);
+                    // ppfile.addModel(n);
+                    gltfroot.kids.add(n);
                 }
             }
         } catch (java.lang.Exception e) {
@@ -256,6 +293,9 @@ public class LoaderGLTF {
         return ppfile;
     }
 
+    /**
+     * Load a single object without considering parent/children, which is done later.
+     */
     private PortableModelDefinition loadObject(NativeJsonObject node, List<PortableMaterial> materials) throws InvalidDataException {
         PortableModelDefinition lo = new PortableModelDefinition();
         GltfNode gltfnode = new GltfNode(node);
@@ -265,87 +305,137 @@ public class LoaderGLTF {
         if (Config.loaderdebuglog) {
             logger.debug("Loading object from gltf: " + lo.name + "(" + lo.name + ")");
         }
-        // meshes gibt es wohl maximal eins. Es kann dann aber mehrere primitives enthalten.
         GltfMesh mesh = gltfnode.getMesh(gltfo);
         if (mesh != null) {
             int geocnt = mesh.primitives.size();
-
             if (Config.loaderdebuglog) {
                 logger.debug("Loading mesh from gltf: primitives.size=" + geocnt);
             }
-            lo.geolist = new ArrayList<SimpleGeometry>();
-            for (int k = 0; k < geocnt; k++) {
-                GltfAccessor accessor = mesh.getPrimitive(k, "POSITION", gltfo, binbuffer, false);
-                if (accessor.vec3array == null) {
-                    throw new RuntimeException("no vertices");
+            // meshes might contain a primitives array. So probably there can be multiple primitives per meshes.
+            // This was also used in our pre 2024 layout with 'geolist' in objects.
+            // Fuer GLTF wird das facelistmaterial als mesh->material map verwendet. Als Name einfach der Index
+            // der name könnte auch mal null sein, z.B. bei genie. 22.1.18: NeeNee, material name ist der echte
+            if (geocnt > 1) {
+                // occurs in traditional GLTFs where primitives were created for "geolist".
+                // in this case every primitive should be a subnode. TODO only has unit tests in tcp-flightgear with old GLTFs.
+                for (int k = 0; k < geocnt; k++) {
+                    SimpleGeometry simpleGeometry = buildGeometryFromPrimitive(mesh, k);
+                    //27.7.24 lo.geolist.add(new SimpleGeometry(lvertices, indices, uvs, lnormals));
+                    String materialname = mesh.getMaterialName(k, materials);
+                    //27.7.24lo.geolistmaterial.add(materialname);
+                    lo.addChild(new PortableModelDefinition(simpleGeometry, materialname));
                 }
-                Vector3Array lvertices = accessor.vec3array;
-                if (Config.loaderdebuglog) {
-                    logger.debug("found " + lvertices.size() + " vertices in mesh " + k);
-                }
-                //3.1.19: normals are be optional. These are not expected to be part of a GLTF model.
-                accessor = mesh.getPrimitive(k, "NORMAL", gltfo, binbuffer, false);
-                Vector3Array lnormals = null;
-                if (accessor != null) {
-                    if (accessor.vec3array != null) {
-                        lnormals = accessor.vec3array;
-                        //das ist Quatsch, weil nicht allgemeingültig. Bestenfalls zur analyse. logger.warn("overwriting normals with default");
-                    /*for (int ii=0;ii<lnormals.size();ii++){
-                        lnormals.setElement(ii,0,0,1);
-                    }*/
-                        if (Config.loaderdebuglog) {
-                            logger.debug("found " + lnormals.size() + " normals in mesh " + k);
-                        }
-                    /*for (int ii=0;ii<lnormals.size();ii++){
-                        logger.debug("normal: "+lnormals.getElement(ii));
-                    }*/
-                    }
-                }
-                accessor = mesh.getPrimitive(k, "indices", gltfo, binbuffer, false);
-                if (accessor.intarray == null) {
-                    throw new RuntimeException("no indices");
-                }
-                int[] indices = accessor.intarray;
-                if (Config.loaderdebuglog) {
-                    logger.debug("found " + indices.length + " indices in mesh " + k);
-                }
-                accessor = mesh.getPrimitive(k, "TEXCOORD_0", gltfo, binbuffer, flipy);
-                Vector2Array uvs = null;
-                if (accessor.vec2array != null) {
-                    uvs = accessor.vec2array;
-                    if (Config.loaderdebuglog) {
-                        logger.debug("found " + uvs.size() + " uvs in mesh " + k);
-                    }
-                }
-                lo.geolist.add(new SimpleGeometry(lvertices, indices, uvs, lnormals));
-                // Fuer GLTF wird das facelistmaterial als mesh->material map verwendet. Als Name einfach der Index
-                // der name könnte auch mal null sein, z.B. bei genie. 22.1.18: NeeNee, material name ist der echte
-                String materialname = mesh.getMaterialName(k, materials);
-                lo.geolistmaterial.add(materialname);
+            } else {
+                //lo.geolist = new ArrayList<SimpleGeometry>();
+                lo.geo = buildGeometryFromPrimitive(mesh, 0);
+                //27.7.24 lo.geolist.add(new SimpleGeometry(lvertices, indices, uvs, lnormals));
+                lo.material = mesh.getMaterialName(0, materials);
+                //27.7.24lo.geolistmaterial.add(materialname);
             }
-
         }
         return lo;
     }
 
+    /**
+     * 27.7.24: Extracted from above
+     * 12.8.24: "alphamode" added
+     */
+    private SimpleGeometry buildGeometryFromPrimitive(GltfMesh mesh, int k) throws InvalidDataException {
+        GltfAccessor accessor = mesh.getPrimitive(k, "POSITION", gltfo, binbuffer, false);
+        if (accessor.vec3array == null) {
+            throw new RuntimeException("no vertices");
+        }
+        Vector3Array lvertices = accessor.vec3array;
+        if (Config.loaderdebuglog) {
+            logger.debug("found " + lvertices.size() + " vertices in mesh " + k);
+        }
+        //3.1.19: normals are be optional. These are not expected to be part of a GLTF model.
+        accessor = mesh.getPrimitive(k, "NORMAL", gltfo, binbuffer, false);
+        Vector3Array lnormals = null;
+        if (accessor != null) {
+            if (accessor.vec3array != null) {
+                lnormals = accessor.vec3array;
+                //das ist Quatsch, weil nicht allgemeingültig. Bestenfalls zur analyse. logger.warn("overwriting normals with default");
+                    /*for (int ii=0;ii<lnormals.size();ii++){
+                        lnormals.setElement(ii,0,0,1);
+                    }*/
+                if (Config.loaderdebuglog) {
+                    logger.debug("found " + lnormals.size() + " normals in mesh " + k);
+                }
+                    /*for (int ii=0;ii<lnormals.size();ii++){
+                        logger.debug("normal: "+lnormals.getElement(ii));
+                    }*/
+            }
+        }
+        accessor = mesh.getPrimitive(k, "indices", gltfo, binbuffer, false);
+        if (accessor.intarray == null) {
+            throw new RuntimeException("no indices");
+        }
+        int[] indices = accessor.intarray;
+        if (Config.loaderdebuglog) {
+            logger.debug("found " + indices.length + " indices in mesh " + k);
+        }
+        accessor = mesh.getPrimitive(k, "TEXCOORD_0", gltfo, binbuffer, flipy);
+        Vector2Array uvs = null;
+        if (accessor.vec2array != null) {
+            uvs = accessor.vec2array;
+            if (Config.loaderdebuglog) {
+                logger.debug("found " + uvs.size() + " uvs in mesh " + k);
+            }
+        }
+        return new SimpleGeometry(lvertices, indices, uvs, lnormals);
+    }
+
     private PortableMaterial buildMaterial(GltfMaterial gltfmaterial, int index) {
-        PortableMaterial lm = new PortableMaterial();
-        lm.color = gltfmaterial.color;
-        lm.emis = gltfmaterial.emis;
+
+        // transparency is a generic material property, not only for color.
+        FloatHolder transparency = null;
+        if ("BLEND".equalsIgnoreCase(gltfmaterial.alphaMode)) {
+            if (gltfmaterial.color != null) {
+                // transparency is inverse of alpha
+                transparency = new FloatHolder(1 - gltfmaterial.color.getAlpha());
+            } else if (gltfmaterial.emis != null) {
+                // transparency is inverse of alpha
+                transparency = new FloatHolder(1 - gltfmaterial.emis.getAlpha());
+            } else {
+                // No idea how to use BLEND is this case. See AlphaBlendModeTest.gltf.
+                logger.warn("Using default transparency value for alphamode BLEND");
+                transparency = new FloatHolder(0.6f);
+            }
+        }
+
+        // keep it simple.
+        PortableMaterial lm = null;
         // der Name des Materials ist eigentlich uninteressant. Den Index eintragen, denn darüber wird es
-        //referenziert. 22.1.18: Der Name wird aber fuer (un)shaded gebraucht. Ist auch konsistenter. Dann muss per Index referenziert werden.
-        lm.name = gltfmaterial.name;
         //lm.name = "" + index;
-        lm.texture = gltfmaterial.texname;
-        lm.wraps = gltfmaterial.getWrap("S") == REPEAT;
-        lm.wrapt = gltfmaterial.getWrap("T") == REPEAT;
+        //referenziert. 22.1.18: Der Name wird aber fuer (un)shaded gebraucht. Ist auch konsistenter. Dann muss per Index referenziert werden.
+
+        // texture has priority to be caompatible with pre2024 built GLTFs. And just because we
+        // keep it simple. If we have a texture, it will provide the base color.
+        if (gltfmaterial.texname == null) {
+            if (transparency != null) {
+                // is valueless until now. Need to retrieve value from alpha. But revert it!
+                transparency.value = 1.0f - gltfmaterial.color.getAlpha();
+            }
+            lm = new PortableMaterial(gltfmaterial.name, gltfmaterial.color);
+
+        } else {
+            lm = new PortableMaterial(gltfmaterial.name, gltfmaterial.texname, gltfmaterial.getWrap("S") == REPEAT,
+                    gltfmaterial.getWrap("T") == REPEAT);
+        }
+        lm.setTransparency(transparency);
+
         if (gltfmaterial.shininess != null) {
-            lm.shininess = new FloatHolder((float) gltfmaterial.shininess);
+            lm.setShininess(new FloatHolder((float) gltfmaterial.shininess));
+        }
+        if (gltfmaterial.emis != null) {
+            lm.setEmis(gltfmaterial.emis);
         }
         //Eine Kruecke, die nur bei AC geht. 3.1.19: Aber besser umgekehrte Logik, um shaded als default nicht unintended abzuschalten
         //2.5.19: Umgestellt auf die passende GLTF Extension.
         //if (StringUtils.startsWith(lm.name, "unshaded")) {
-        lm.shaded = gltfmaterial.shaded;
+        lm.setShaded(gltfmaterial.shaded);
+
         return lm;
 
     }
@@ -486,7 +576,7 @@ class GltfMesh {
         if (n != null) {
             int matindex = n.intValue();
             PortableMaterial mat = materials.get(matindex);
-            return mat.name;
+            return mat.getName();
         }
         String index = primitive.getString("material");
         return "" + index;
@@ -613,8 +703,9 @@ class GltfBufferView {
 class GltfMaterial {
     NativeJsonObject material;
     int byteLength, byteOffset, target;
-    String name;
-    //Mal keinen Defaultwert fuer Color.Das ist verfälschend.
+    String name, alphaMode;
+    //No default for Color?
+    // 12.8.24: But according to description of 'factor' baseColorFactor seems to assume there is a default color (1,1,1)
     Color color = null;//Color.WHITE;
     Color emis = null;
     String texname = null;
@@ -626,8 +717,9 @@ class GltfMaterial {
     GltfMaterial(NativeJsonObject material) {
         this.material = material;
         name = material.getString("name");
+        alphaMode = material.getString("alphaMode");
 
-        //25.4.19: Was ist das eigentlich fuer ein merkwürdiger Name: "pbrMetallicRoughness"?
+        //25.4.19: What a strange/specific name: "pbrMetallicRoughness"?
         if (material.get("pbrMetallicRoughness") != null) {
             NativeJsonObject pbrMetallicRoughness = material.get("pbrMetallicRoughness").isObject();
             if (pbrMetallicRoughness.get("baseColorFactor") != null) {

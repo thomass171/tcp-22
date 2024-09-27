@@ -5,7 +5,6 @@ import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeEventBus;
 import de.yard.threed.core.platform.PlatformInternals;
-import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.engine.platform.common.ModelLoader;
@@ -45,6 +44,6 @@ public class AdvancedHeadlessPlatform extends SimpleHeadlessPlatform {
     public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
 
         //logger.debug("buildNativeModel "+filename+", delegateid="+delegateid);
-        ModelLoader.buildModelFromBundle(resourceLoader, opttexturepath, options, delegate);
+        ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate);
     }
 }

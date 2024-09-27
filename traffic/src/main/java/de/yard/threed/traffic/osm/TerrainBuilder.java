@@ -145,7 +145,7 @@ public class TerrainBuilder {
         Vector2 uv1 = new Vector2();
         Vector2 uv2 = new Vector2();
         Vector2 uv3 = new Vector2();
-        FaceList faces = new FaceList();
+        FaceList faces = new FaceList(true);
         //17.7.17: Wenn es dumm läuft (50% der Faelle?) sind die Faces unpassend orientiert? Darum erstmal twosided? Geht abr nicht so einfach.
         //und dürfte auch nicht die Lösung sein. Das ist doch eh komplett in z0! Das Problem war eine falsche Rotation.
         //TODO uvs sind eh falsch
@@ -197,7 +197,7 @@ public class TerrainBuilder {
             outline.add(leftoutline.get(i));
         }
         // jetzt ist es ein Polygon 
-        FaceList faces = new FaceList();
+        FaceList faces = new FaceList(true);
         //TODO  uvs sind  falsch
         int cnt = outline.size();
         int[] indices = new int[cnt];

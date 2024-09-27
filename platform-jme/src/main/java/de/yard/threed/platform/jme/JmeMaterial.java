@@ -48,29 +48,6 @@ public class JmeMaterial implements NativeMaterial {
         //this.definition = definition;
     }
 
-    /**
-     * Wie ist der Unterschied zu Phong?
-     *
-     * @return
-     */
-    /*20.7.16 public static JmeMaterial buildLambertMaterialWithNormalMap(Color col, NativeTexture texture) {
-        Material mat = new Material(((JmeResourceManager) JmeResourceManager.getInstance()).am,
-                "Common/MatDefs/Light/Lighting.j3md");  // create a simple material
-        if (col != null) {
-            mat.setColor("Diffuse", PlatformJme.buildColor(col)); // with Lighting.j3md
-            mat.setColor("Ambient", PlatformJme.buildColor(col)); // with Lighting.j3md
-            mat.setBoolean("UseMaterialColors", true); // with Lighting.j3md
-        }
-        if (texture != null) {
-            mat.setTexture("DiffuseMap", ((JmeTexture) texture).texture); // with Lighting.j3md
-        }
-        // 6.11.15: Backface Culling ausschalten. Wird für Analyse genutzt und sollte mittelfristig
-        //generell eingeschaltet sein. TO DO
-        mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
-
-        return new JmeMaterial(mat, false);
-    }*/
-
     /*public static JmeMaterial buildCustomShaderMaterial(Color col, NativeTexture[] textures, Effect effect) {
        
     }*/

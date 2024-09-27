@@ -7,6 +7,7 @@ import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.resource.URL;

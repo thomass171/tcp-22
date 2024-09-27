@@ -4,21 +4,21 @@ import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.loader.LoaderAC;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.apps.ModelSamples;
 import de.yard.threed.engine.loader.*;
-import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
+import de.yard.threed.engine.testutil.EngineTestUtils;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.core.geometry.FaceList;
 import de.yard.threed.core.geometry.FaceN;
 import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.engine.test.testutil.TestUtil;
-import de.yard.threed.engine.testutil.TestHelper;
+import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
@@ -27,91 +27,84 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Created by thomass on 08.02.16.
  */
 public class LoaderTest {
-    //6.7.21 static EngineHelper platform = TestFactory.initPlatformForTest(false,false,null,true);
-    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine"}, new PlatformFactoryHeadless());
+    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine"}, new SimpleHeadlessPlatformFactory());
 
 
     @Test
-    public void testAC() {
-        try {
-            LoaderAC ac = new LoaderAC(new StringReader(LoaderAC.sampleac), false);
-            TestUtil.assertEquals("", 1, ac.loadedfile.objects.size());
-            TestUtil.assertEquals("", 1, ac.loadedfile.objects.get(0).kids.size());
-            TestUtil.assertEquals("facelists", 1, ac.loadedfile.objects.get(0).kids.get(0).getFaceLists().size());
-            // 2 faces wegene twosided
-            TestUtil.assertEquals("face", 2, ac.loadedfile.objects.get(0).kids.get(0).getFaceLists().get(0).faces.size());
-            TestUtil.assertFace4("face 0", new int[]{3, 2, 1, 0}, (FaceN) ac.loadedfile.objects.get(0).kids.get(0).getFaceLists().get(0).faces.get(0));
-            TestUtil.assertEquals("materials", 2, ac.loadedfile.materials.size());
-            TestUtil.assertTrue("shaded", ac.loadedfile.materials.get(0).shaded);
-            TestUtil.assertFalse("shaded", ac.loadedfile.materials.get(1).shaded);
-        } catch (Exception e) {
-            throw new RuntimeException("Error opening or reading ac file", e);
-        }
+    public void testAC() throws InvalidDataException {
+        LoaderAC ac = new LoaderAC(new StringReader(LoaderAC.sampleac), false);
+        assertNotNull(ac.loadedfile.object);
+        TestUtil.assertEquals("", 1, ac.loadedfile.object.kids.size());
+        TestUtil.assertEquals("facelists", 1, ac.loadedfile.object.kids.get(0).getFaceLists().size());
+        // 2 facelists due to twosided
+        TestUtil.assertEquals("face", 1, ac.loadedfile.object.kids.get(0).getFaceLists().size());
+        TestUtil.assertEquals("face", 1, ac.loadedfile.object.kids.get(0).backfaces.size());
+        TestUtil.assertEquals("face", 1, ac.loadedfile.object.kids.get(0).getFaceLists().get(0).faces.size());
+        TestUtil.assertEquals("face", 1, ac.loadedfile.object.kids.get(0).backfaces.get(0).faces.size());
+        TestUtil.assertFace4("face 0", new int[]{3, 2, 1, 0}, (FaceN) ac.loadedfile.object.kids.get(0).getFaceLists().get(0).faces.get(0));
+        TestUtil.assertEquals("materials", 2, ac.loadedfile.materials.size());
+        TestUtil.assertTrue("shaded", ac.loadedfile.materials.get(0).shaded);
+        TestUtil.assertFalse("shaded", ac.loadedfile.materials.get(1).shaded);
     }
 
 
     @Test
-    public void testLndSpots() {
-        try {
-            LoaderAC ac = new LoaderAC(new StringReader(LoaderAC.lndspots), false);
-            TestUtil.assertEquals("", 1, ac.loadedfile.objects.size());
-            TestUtil.assertEquals("", 2, ac.loadedfile.objects.get(0).kids.size());
-            TestUtil.assertEquals("facelists", 1, ac.loadedfile.objects.get(0).kids.get(0).getFaceLists().size());
-            // 2 faces wegen twosided
-            TestUtil.assertEquals("face", 2, ac.loadedfile.objects.get(0).kids.get(0).getFaceLists().get(0).faces.size());
-            TestUtil.assertEquals("materials", 2, ac.loadedfile.materials.size());
-            TestUtil.assertTrue("shaded", ac.loadedfile.materials.get(0).shaded);
-            TestUtil.assertFalse("shaded", ac.loadedfile.materials.get(1).shaded);
-            // LHND ist twosided. Die beiden Faces sind aber nicht definiert, eine ist halt front, die andere back.
-            FaceList lhndfaces = ac.loadedfile.objects.get(0).kids.get(0).getFaceLists().get(0);
-            //FaceList lhndfaces1 = ac.loadedfile.objects.get(0).kids.get(0).getFaceLists().get(1);
-            TestUtil.assertFace4("lhndfaces0", new int[]{3, 2, 1, 0}, (FaceN) lhndfaces.faces.get(0));
-            TestUtil.assertFace4("lhndfaces1", new int[]{0, 1, 2, 3}, (FaceN) lhndfaces.faces.get(1));
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error opening or reading ac file", e);
-        }
+    public void testLndSpots() throws InvalidDataException {
+        LoaderAC ac = new LoaderAC(new StringReader(LoaderAC.lndspots), false);
+        assertNotNull(ac.loadedfile.object);
+        TestUtil.assertEquals("", 2, ac.loadedfile.object.kids.size());
+        TestUtil.assertEquals("facelists", 1, ac.loadedfile.object.kids.get(0).getFaceLists().size());
+        // 2 faces wegen twosided
+        TestUtil.assertEquals("face", 1, ac.loadedfile.object.kids.get(0).getFaceLists().get(0).faces.size());
+        TestUtil.assertEquals("face", 1, ac.loadedfile.object.kids.get(0).backfaces.get(0).faces.size());
+        TestUtil.assertEquals("materials", 2, ac.loadedfile.materials.size());
+        TestUtil.assertTrue("shaded", ac.loadedfile.materials.get(0).shaded);
+        TestUtil.assertFalse("shaded", ac.loadedfile.materials.get(1).shaded);
+        // LHND ist twosided. Die beiden Faces sind aber nicht definiert, eine ist halt front, die andere back.
+        FaceList lhndfaces = ac.loadedfile.object.kids.get(0).getFaceLists().get(0);
+        //FaceList lhndfaces1 = ac.loadedfile.objects.get(0).kids.get(0).getFaceLists().get(1);
+        TestUtil.assertFace4("lhndfaces0", new int[]{3, 2, 1, 0}, (FaceN) lhndfaces.faces.get(0));
+        TestUtil.assertFace4("lhndfaces1", new int[]{0, 1, 2, 3}, (FaceN) ac.loadedfile.object.kids.get(0).backfaces.get(0).faces.get(0));
     }
 
     /**
      * Der tower erfordert vertexduplizierung wegen UV.
      */
     @Test
-    public void testEgkk_tower() {
-        try {
-            LoaderAC ac = new LoaderAC(new StringReader(LoaderAC.egkk_tower), false);
-            PortableModelList ppfile = ac.preProcess();
-            TestUtil.assertEquals("", 1, ppfile.getObjectCount());
-            TestUtil.assertEquals("", 1, ppfile.getObject(0).kids.size());
-            PortableModelDefinition tower = ppfile.getObject(0).kids.get(0);
-            SimpleGeometry geo = tower.geolist.get(0);
-            //29 durch ausprobieren
-            TestUtil.assertEquals("vertices", 29, geo.getVertices().size());
-            TestUtil.assertEquals("indices", 4 * 2 * 3, geo.getIndices().length);
-        } catch (Exception e) {
-            throw new RuntimeException("Error opening or reading ac file", e);
-        }
+    public void testEgkk_tower() throws InvalidDataException {
+        LoaderAC ac = new LoaderAC(new StringReader(LoaderAC.egkk_tower), false);
+        PortableModel ppfile = ac.buildPortableModel();
+        //TestUtil.assertEquals("", 1, ppfile.getObjectCount());
+        TestUtil.assertEquals("", 1, ppfile.getRoot().kids.size());
+        PortableModelDefinition tower = ppfile.getRoot().kids.get(0);
+        SimpleGeometry geo = tower.geo/*list.get(0)*/;
+
+        // 18.9.24:Up to 32 after shading refactorings
+        TestUtil.assertEquals("vertices", /*29 less after refactoring of index duplicating*//*24*/32, geo.getVertices().size());
+        TestUtil.assertEquals("indices", 4 * 2 * 3, geo.getIndices().length);
+
     }
 
     /**
      * 24.1.19: Liegt hier vielleicht nicht ganz ideal, aber einen besseren Platz gibt es nicht?
      */
     @Test
-    public void testPortableModelList() {
-        PortableModelList needle = ModelSamples.buildCompassNeedle(20, 30);
-        SceneNode n = new PortableModelBuilder(needle).buildModel(null);
+    public void testPortableModel() {
+        PortableModel needle = ModelSamples.buildCompassNeedle(20, 30);
+        SceneNode n = PortableModelBuilder.buildModel(needle, null);
         TestUtil.assertEquals("needle.name", "CompassNeedle", n.getName());
     }
 
     @Test
     public void testSceneLoader() throws Exception {
 
-        SceneLoader sceneLoader = new SceneLoader(TestHelper.loadFileFromClasspath("SimpleScene.json"), "");
-        PortableModelList ppfile = sceneLoader.preProcess();
-        TestUtil.assertEquals("", 1, ppfile.getObjectCount());
-        TestUtil.assertEquals("", 0, ppfile.getObject(0).kids.size());
-        PortableModelDefinition box = ppfile.getObject(0);
-        SimpleGeometry geo = box.geolist.get(0);
+        SceneLoader sceneLoader = new SceneLoader(EngineTestUtils.loadFileFromClasspath("SimpleScene.json"), "");
+        PortableModel ppfile = sceneLoader.buildPortableModel();
+        //TestUtil.assertEquals("", 1, ppfile.getObjectCount());
+        // 27.7.24: scene objects are now one level below root.
+        TestUtil.assertEquals("", 1, ppfile.getRoot().kids.size());
+        PortableModelDefinition box = ppfile.getRoot().kids.get(0);
+        SimpleGeometry geo = box.geo/*list.get(0)*/;
         TestUtil.assertEquals("vertices", 3 * 8, geo.getVertices().size());
 
     }
@@ -132,6 +125,7 @@ public class LoaderTest {
                 "1 -0.5 0\n" +
                 "-1 -0.5 0\n" +
                 "numsurf 1\n" +
+                // unshaded
                 "SURF 0x20\n" +
                 "mat 0\n" +
                 "refs 4\n" +
@@ -142,16 +136,18 @@ public class LoaderTest {
                 "kids 0\n";
 
         LoaderAC ac = new LoaderAC(new StringReader(sampleWithRgb), false);
-        TestUtil.assertEquals("", 1, ac.loadedfile.objects.size());
-        TestUtil.assertEquals("", 1, ac.loadedfile.objects.get(0).kids.size());
+        assertNotNull(ac.loadedfile.object);
+        TestUtil.assertEquals("", 1, ac.loadedfile.object.kids.size());
         TestUtil.assertEquals("materials", 2, ac.loadedfile.materials.size());
         TestUtil.assertTrue("shaded", ac.loadedfile.materials.get(0).shaded);
         TestUtil.assertFalse("shaded", ac.loadedfile.materials.get(1).shaded);
 
-        PortableModelList portableModelList = ac.preProcess();
-        assertEquals(2, portableModelList.materials.size());
-        PortableMaterial unshaded = portableModelList.materials.get(1);
+        PortableModel portableModelList = ac.buildPortableModel();
+        // 14.8.24 materials now only contains really used material
+        assertEquals(1, portableModelList.materials.size());
+        PortableMaterial unshaded = portableModelList.materials.get(0);
+        assertFalse(unshaded.isShaded());
         // rgb should have been mapped to png
-        assertEquals("sample.png", unshaded.texture);
+        assertEquals("sample.png", unshaded.getTexture());
     }
 }

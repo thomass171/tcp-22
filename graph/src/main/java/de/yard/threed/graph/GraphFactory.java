@@ -238,7 +238,7 @@ public class GraphFactory {
         List<Vector2> uvs = new ArrayList<Vector2>();
         List<Vector3> normals;
         IndexList indexes = new IndexList();
-        FaceList facelist = new FaceList();
+        FaceList facelist = new FaceList(true);
 
         normals = new ArrayList<Vector3>();
 

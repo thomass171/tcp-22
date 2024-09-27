@@ -24,8 +24,9 @@ public interface NativeMaterial {
      * ist auf jeden Fall der erste Weg.
      * 6.10.17:Ob das aber mit nativen Loadern (z.B. gltf) geht, ist fraglich. Der Weg, wie FG Effects baut, ist vielleicht schon sehr sepziell.
      * 10.10.17: jetzt boolean und erstmal nicht deprecated, solane es nutzbar ist und keine Probleme macht.
+     * 10.8.24:Again deprecated. Cannot be set later. This is nonsense. Building new material is the way to go.
      */
-    //@Deprecated
+    @Deprecated
     void setTransparency(boolean enabled);
 
     /**

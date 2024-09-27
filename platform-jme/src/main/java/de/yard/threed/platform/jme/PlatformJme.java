@@ -9,7 +9,6 @@ import com.jme3.scene.SceneGraphVisitor;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 import de.yard.threed.core.configuration.Configuration;
-import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.resource.BundleResource;
@@ -17,15 +16,11 @@ import de.yard.threed.core.platform.*;
 import de.yard.threed.core.platform.PlatformInternals;
 import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.URL;
-import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
-import de.yard.threed.outofbrowser.FileSystemResource;
-import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 
 import de.yard.threed.core.buffer.SimpleByteBuffer;
-import de.yard.threed.javacommon.JALog;
 
 
 import de.yard.threed.engine.platform.common.*;
@@ -95,8 +90,8 @@ public class PlatformJme extends SimpleHeadlessPlatform {
         instance.bundleResolver.addAll(SimpleBundleResolver.buildFromPath(configuration.getString("ADDITIONALBUNDLE"), resourceReader));
 
         // 29.12.23: Moved from JmeSceneRunner to here for having JME statics (JmeScene) inited earlier.
-        ((PlatformJme)instance).app = new JmeSimpleApplication();
-        JmeScene.init(((PlatformJme)instance).app, ((PlatformJme)instance).app.getFlyCam());
+        ((PlatformJme) instance).app = new JmeSimpleApplication();
+        JmeScene.init(((PlatformJme) instance).app, ((PlatformJme) instance).app.getFlyCam());
 
         return platformInternals/*instance*/;
     }
@@ -123,7 +118,7 @@ public class PlatformJme extends SimpleHeadlessPlatform {
     public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
 
         //logger.debug("buildNativeModel "+filename+", delegateid="+delegateid);
-        ModelLoader.buildModelFromBundle(resourceLoader, opttexturepath, options, delegate);
+        ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate);
     }
 
     @Override
@@ -522,8 +517,13 @@ public class PlatformJme extends SimpleHeadlessPlatform {
 
     @Override
     public NativeAudio buildNativeAudio(NativeAudioClip audioClip) {
-        JmeAudio audio = JmeAudio.createAudio((JmeAudioClip)audioClip);
+        JmeAudio audio = JmeAudio.createAudio((JmeAudioClip) audioClip);
         return audio;
+    }
+
+    @Override
+    public List<NativeSceneNode> findNodeByName(String name, NativeSceneNode startnode) {
+        return ((JmeSceneNode) startnode).object3d.findNodeByName(name, ((JmeSceneNode) startnode).object3d.spatial);
     }
 
     /**

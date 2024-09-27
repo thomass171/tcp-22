@@ -26,7 +26,7 @@ public class ControlPanelHelper {
      * @return
      */
     public static ControlPanel buildInventoryForDeferredCamera(Camera camera, Dimension screenDimensionInPixel, Color basecolor, Dimension inventorySizeInPixel) {
-        Material mat = Material.buildBasicMaterial(basecolor, true);
+        Material mat = Material.buildBasicMaterial(basecolor, 0.5);
         // Shouldn't be a fix value but derived from the cameras near plane. And keep a distance for backplane
         // elements.
         double zpos = camera.getNear() + 0.1;
@@ -57,7 +57,7 @@ public class ControlPanelHelper {
      * a panel located centered at top screen/display/window border (used for example for a banner)
      */
     public static ControlPanel buildForNearplaneBanner(Camera camera, Dimension screenDimensionInPixel, Color basecolor) {
-        Material mat = Material.buildBasicMaterial(basecolor, true);
+        Material mat = Material.buildBasicMaterial(basecolor, 0.5);
 
         DimensionF nearPlaneSize = camera.getNearplaneSize();
         logger.debug("nearPlaneSize=" + nearPlaneSize);
@@ -91,7 +91,7 @@ public class ControlPanelHelper {
      * @return
      */
     public static ControlPanel buildSingleColumnFromMenuitems(DimensionF dimension, double zpos, double buttonzpos, MenuItem[] menuitems, Color basecolor) {
-        Material mat = Material.buildBasicMaterial(basecolor, true);
+        Material mat = Material.buildBasicMaterial(basecolor, 0.5);
 
         double elementWidth = dimension.getWidth();
         double rowHeight = dimension.getHeight() / menuitems.length;

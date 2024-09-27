@@ -10,7 +10,7 @@ import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.geometry.SimpleGeometry;
 
 /**
@@ -27,7 +27,7 @@ public class AvatarPmlFactory {
      * The total height is appx. 0.8 + 0.2.
      * Only specific colors are allowed (due to faces needed): "red","blue","green","darkgreen"
      */
-    public static PortableModelList buildAvatarA(String color) {
+    public static PortableModel/*List*/ buildAvatarA(String color) {
         double headRadius = 0.20;
 
         double bottomRadius = 0.4f;
@@ -44,8 +44,8 @@ public class AvatarPmlFactory {
         head.setPosition(new Vector3(0, baseHeight / 2 + headRadius - 0.1, 0));
         body.attach(head);
 
-        PortableModelList pml = new PortableModelList(null);
-        pml.addModel(body);
+        PortableModel pml = new PortableModel(body, null);
+        //pml.addModel(body);
         pml.addMaterial(mainMaterial);
         pml.addMaterial(faceMaterial);
         return pml;

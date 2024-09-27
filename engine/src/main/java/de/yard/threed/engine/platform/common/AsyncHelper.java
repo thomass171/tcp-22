@@ -17,7 +17,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.SceneNode;
 
 
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 
 import java.util.ArrayList;
 import java.util.List;

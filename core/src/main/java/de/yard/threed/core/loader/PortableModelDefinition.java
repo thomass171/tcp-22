@@ -25,7 +25,11 @@ public class PortableModelDefinition /*extends CustomGeometry */{
     // sehen, wo er das Material herbekommt. Der Materialname in der Liste passt vom Index her zur geolist.
     // 28.12.17: Das Arbeiten mit Materialnamen kann riskant sein, wenn sie nicht eindeutig sind. Gabs schon mal bei Merhfachnutzung in BTGs. Ein eindeutiger Index
     // waere besser.
-    public List<String> geolistmaterial = new ArrayList<String>();
+    //27.7.24: GLTF allows a mesh (which is assigned to an object) with multiple
+    //primitives, each of which might have a material. But we want to keep it simple here, so LoaderGLTF should split multiple primitives in
+    //subnodes.
+    //27.7.24 public List<String> geolistmaterial = new ArrayList<String>();
+   public String material;
     // Auf AC zugeschnitten, denn nur die(?) haben die Textur am Object. 22.12.17: Das ist ja Kappes. Jetzt auch in LoadedMaterial
     // 3.5.19: Wird das Material bei AC dann dupliziert? Ja, offebar. siehe testAC_777_200. Aus 12 wird 37. Darum ganz raus.
     //@Deprecated
@@ -33,16 +37,34 @@ public class PortableModelDefinition /*extends CustomGeometry */{
     public Vector3 translation = null;//3.5.19 new Vector3(0, 0, 0);
     public Quaternion rotation=null;
     public Vector3 scale;
-    public List<SimpleGeometry> geolist;
+    //27.7.24 public List<SimpleGeometry> geolist;
+    public SimpleGeometry geo;
+    // Optional. If the model definition also contains the destination node name. Means
+    // that the model will not be attached to its natural parent according to definition hierarchy.
+    // Used in SceneLoader.
+    public String parent;
 
-    public PortableModelDefinition() {
+    /*27.7.24 public PortableModelDefinition() {
         geolist = new ArrayList<SimpleGeometry>();
+    }*/
+
+    /**
+     * There can be empty nodes.
+     */
+    public PortableModelDefinition() {
+        this.geo = null;
+        this.material = null;
     }
 
-    public void addGeoMat(SimpleGeometry geo, String material) {
+    public PortableModelDefinition(SimpleGeometry geo, String material) {
+        this.geo = geo;
+        this.material = material;
+    }
+
+    /*public void addGeoMat(SimpleGeometry geo, String material) {
         geolist.add(geo);
         geolistmaterial.add(material);
-    }
+    }*/
 
     public void setPosition(Vector3 position) {
         this.translation = position;
@@ -56,7 +78,27 @@ public class PortableModelDefinition /*extends CustomGeometry */{
         kids.add(pmd);
     }
 
+    /**
+     * Alternative name that we had in PortableMofel(List) before.
+     * @param pmd
+     */
+    public void addModel(PortableModelDefinition pmd) {
+        kids.add(pmd);
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void addChild(PortableModelDefinition meshDefinition) {
+        kids.add(meshDefinition);
+    }
+
+    public PortableModelDefinition getChild(int i) {
+        return kids.get(i);
     }
 }

@@ -8,6 +8,7 @@ import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.resource.URL;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,7 +30,6 @@ public class DefaultPlatform extends Platform {
 
     @Override
     public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate, int options) {
-
     }
 
     /**
@@ -268,7 +268,28 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public NativeBundleResourceLoader buildResourceLoader(String basedir, String location) {throw new RuntimeException("not implemented"); };
+    public NativeBundleResourceLoader buildResourceLoader(String basedir, String location) {throw new RuntimeException("not implemented"); }
+
+    /**
+     * 20.8.24: Just a simple default implementation. The platform might do it more efficiently.
+     */
+    @Override
+    public List<NativeSceneNode> findNodeByName(String name, NativeSceneNode startnode) {
+        List<NativeSceneNode> nodelist = new ArrayList<NativeSceneNode>();
+        // 3.1.18: Also check 'this'.
+        if (name.equals(startnode.getName())) {
+            nodelist.add(startnode);
+        }
+        for (NativeTransform child : startnode.getTransform().getChildren()) {
+            if (child != null) {
+                NativeSceneNode csn = child.getSceneNode();
+                if (csn != null) {
+                    nodelist.addAll(this.findNodeByName(name, csn));
+                }
+            }
+        }
+        return nodelist;
+    }
 
     /*@Override
     public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed) {

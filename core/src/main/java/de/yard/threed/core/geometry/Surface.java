@@ -28,7 +28,7 @@ public abstract class Surface {
     //Face[][] faces;
     //public List<Face> faces = new ArrayList<Face>();
     //15.6.16: Auch auf Facelist umgestellt wegen Einheitlichkeit.
-FaceList facelist = new FaceList();
+FaceList facelist = new FaceList(true);
     // Die Koordinaten jedes Vertex relativ in seiner UV Mapping Area.
     //6.11.15 HashMap<Integer, Vector2> vloc = new HashMap<Integer, Vector2>();
 

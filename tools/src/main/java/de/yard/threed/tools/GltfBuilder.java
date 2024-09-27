@@ -5,14 +5,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.loader.LoaderGLTF;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.loader.*;
 import de.yard.threed.core.Vector2Array;
 
 import de.yard.threed.core.Vector3Array;
@@ -28,22 +28,29 @@ import java.io.ByteArrayOutputStream;
 public class GltfBuilder {
     // use Platform for logging? platform might bee needed for libs.
     Log logger = Platform.getInstance().getLog(GltfBuilder.class);
-    private JsonArray accessors, bufferViews, nodes, meshes, materials, scenes, textures, images, samplers;
+    private JsonArray accessors, bufferViews, nodes, meshes, materials, scenes, textures, images, samplers, extensionsUsed;
     private boolean isfirstobject = true;
     private int objindex = 0;
+    // The byte stream resulting in the 'bin' file.
     private JAOutputStream binarystream;
     private ByteArrayOutputStream bos;
-    private PortableModelList ppfile;
+    private PortableModel ppfile;
 
     public GltfBuilder() {
 
     }
 
-    public GltfBuilderResult process(PortableModelList ppfile) {
+    public GltfBuilderResult process(PortableModel ppfile) {
         this.ppfile = ppfile;
         JsonObject gltf = new JsonObject();
         accessors = new JsonArray();
         gltf.add("accessors", accessors);
+
+        JsonObject asset = new JsonObject();
+        asset.add("version", new JsonPrimitive("2.0"));
+        asset.add("generator", new JsonPrimitive("GltfBuilder.java"));
+        gltf.add("asset", asset);
+
         bufferViews = new JsonArray();
         gltf.add("bufferViews", bufferViews);
         meshes = new JsonArray();
@@ -55,11 +62,10 @@ public class GltfBuilder {
         scenes = new JsonArray();
         gltf.add("scenes", scenes);
         textures = new JsonArray();
-        gltf.add("textures", textures);
         images = new JsonArray();
-        gltf.add("images", images);
         samplers = new JsonArray();
-        gltf.add("samplers", samplers);
+        extensionsUsed = new JsonArray();
+
         bos = new ByteArrayOutputStream();
         binarystream = new JAOutputStream(bos);
         buildScene();
@@ -69,53 +75,94 @@ public class GltfBuilder {
         }
         // ob es eine AC world gibt oder nicht, spielt hier keine Rolle. Hier wird das ppfile konvertiert, egal was/wie drin ist.
         //for (PortableModelDefinition obj : ppfile.objects) {
-        for (int i = 0; i < ppfile.getObjectCount(); i++) {
-            processObject(ppfile.getObject(i));
+        for (int i = 0; i < 1/*ppfile.getObjectCount()*/; i++) {
+            processObject(ppfile.getRoot()/*Object(i)*/);
         }
+
+        // Add not before now to GLTF as empty entities are not allowed
+        if (textures.size() > 0) {
+            gltf.add("textures", textures);
+        }
+        if (images.size() > 0) {
+            gltf.add("images", images);
+        }
+        if (samplers.size() > 0) {
+            gltf.add("samplers", samplers);
+        }
+        if (extensionsUsed.size() > 0) {
+            gltf.add("extensionsUsed", extensionsUsed);
+        }
+
+
+        byte[] binContent = bos.toByteArray();
+        // add buffers at end when bin file is complete.
+        gltf.add("buffers", buildBuffers(binContent.length, ppfile.getName()));
 
         Gson gson = new Gson();
         gson = new GsonBuilder().setPrettyPrinting().create();
         String result = gson.toJson(gltf);
         //System.out.println(result);
-        return new GltfBuilderResult(result, bos.toByteArray());
+        return new GltfBuilderResult(result, binContent);
     }
 
+    /**
+     * See https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html (eg. material 'gold' example)
+     * GLTF has eg.
+     * - 'baseColor' (beyond 'pbrMetallicRoughness')
+     * - 'emissive' (not! beyond 'pbrMetallicRoughness')
+     * GLTF often adds the phrase "Factor".
+     * And for textures the phrase 'Texture' is added.
+     * <p>
+     * According to BoxTextured.gltf a simple textured material uses pbrMetallicRoughness.baseColorTexture
+     * with metallicFactor 0.0.
+     */
     private void processMaterial(PortableMaterial mat) {
         JsonObject material = new JsonObject();
         boolean unshaded = false;
 
-        if (mat.name != null) {
-            material.add("name", new JsonPrimitive(mat.name));
-            if (mat.name.startsWith("unshaded")) {
+        if (mat.getName() != null) {
+            material.add("name", new JsonPrimitive(mat.getName()));
+            if (mat.getName().startsWith("unshaded")) {
                 //fuer AC
                 unshaded = true;
             }
         }
-        if (mat.emis != null) {
-            JsonArray emissiveFactor = buildColorArray(mat.emis, false);
+        boolean hadTransparency = false;
+        if (mat.getTransparency() != null) {
+            // not possible to set the value. That must be derived from some alpha, eg. from color
+            material.add("alphaMode", new JsonPrimitive("BLEND"));
+            hadTransparency = true;
+        }
+
+        if (mat.getEmis() != null) {
+            JsonArray emissiveFactor = buildColorArray(mat.getEmis(), false);
             material.add("emissiveFactor", emissiveFactor);
         }
         JsonObject pbrMetallicRoughness = new JsonObject();
-        if (mat.color != null) {
-            JsonArray baseColorFactor = buildColorArray(mat.color, true);
+        if (mat.getColor() != null) {
+            Color c = mat.getColor();
+            if (hadTransparency) {
+                c = c.transparency((int) ((1.0f - mat.getTransparency().floatValue()) * 255));
+            }
+            JsonArray baseColorFactor = buildColorArray(c, true);
             pbrMetallicRoughness.add("baseColorFactor", baseColorFactor);
         }
-        if (mat.shininess != null) {
+        if (mat.getShininess() != null) {
             // assume this to be metallic
-            pbrMetallicRoughness.add("metallicFactor", new JsonPrimitive(mat.shininess.value));
+            pbrMetallicRoughness.add("metallicFactor", new JsonPrimitive(mat.getShininess().value));
         }
 
-        if (mat.texture != null) {
+        if (mat.getTexture() != null) {
 
             JsonObject image = new JsonObject();
-            image.add("uri", new JsonPrimitive(mat.texture));
+            image.add("uri", new JsonPrimitive(mat.getTexture()));
             images.add(image);
 
             JsonObject sampler = new JsonObject();
-            if (mat.wraps) {
+            if (mat.getWraps()) {
                 sampler.add("wrapS", new JsonPrimitive(LoaderGLTF.REPEAT));
             }
-            if (mat.wrapt) {
+            if (mat.getWrapt()) {
                 sampler.add("wrapT", new JsonPrimitive(LoaderGLTF.REPEAT));
             }
             samplers.add(sampler);
@@ -138,8 +185,13 @@ public class GltfBuilder {
         if (unshaded) {
             JsonObject extensions = new JsonObject();
             JsonObject ea = new JsonObject();
+            // See https://www.khronos.org/assets/uploads/developers/presentations/gltf20-reference-guide.pdf
+            // for valid extensions
             extensions.add("KHR_materials_unlit", ea);
             material.add("extensions", extensions);
+            if (!extensionsUsed.contains(new JsonPrimitive("KHR_materials_unlit"))) {
+                extensionsUsed.add(new JsonPrimitive("KHR_materials_unlit"));
+            }
         }
         materials.add(material);
 
@@ -157,16 +209,17 @@ public class GltfBuilder {
     }
 
     /**
-     * GLTF kennt wohl nur ein Mesh pro Object? Aber in einem Mesh kann es mehrere Primitives geben.
+     * meshes is an array of primitives array. So probably there can be multiple meshes. We currently only consider one.
      * <p>
      * Returns node index.
      */
     private int processObject(PortableModelDefinition obj) {
         int meshindex = -1;
-        if (obj.geolist.size() > 0) {
+        if (obj.geo != null/*obj.geolist.size() > 0*/) {
             JsonObject mesh = new JsonObject();
             if (obj.name != null) {
-                mesh.add("name", new JsonPrimitive(obj.name));
+                //1.8.24 meshes shouldn't have a name
+                //mesh.add("name", new JsonPrimitive(obj.name));
             }
             mesh.add("primitives", buildPrimitives(obj));
             meshes.add(mesh);
@@ -198,8 +251,6 @@ public class GltfBuilder {
         nodes.add(node);
         int nodeindex = nodes.size() - 1;
 
-
-        ((JsonObject) scenes.get(0)).getAsJsonArray("nodes").add(new JsonPrimitive(objindex));
         isfirstobject = false;
         objindex++;
 
@@ -215,7 +266,7 @@ public class GltfBuilder {
     }
 
     /**
-     * Baut auch BufferView.
+     * Also builds BufferView.
      * 5121 = uint8
      * 5123 = uint16
      * 5125 = uint32
@@ -226,6 +277,7 @@ public class GltfBuilder {
     private int buildAccessor(int cnt, int buffertype) {
         JsonObject accessor = new JsonObject();
         JsonPrimitive componentType, type;
+        // itemsize in bytes
         int itemsize;
         switch (buffertype) {
             /*case 0:
@@ -246,12 +298,12 @@ public class GltfBuilder {
                 // vertices,normals
                 componentType = new JsonPrimitive(5126);
                 type = new JsonPrimitive("VEC3");
-                itemsize = 4;
+                itemsize = 3/*vectors*/ * 4/*bytes*/;
                 break;
             case 2:
                 componentType = new JsonPrimitive(5126);
                 type = new JsonPrimitive("VEC2");
-                itemsize = 4;
+                itemsize = 2/*vectors*/ * 4/*bytes*/;
                 break;
             default:
                 throw new RuntimeException("unknown buffertype");
@@ -270,22 +322,27 @@ public class GltfBuilder {
         accessor.add("componentType", componentType);
         accessor.add("type", type);
         accessor.add("count", new JsonPrimitive(cnt));
+        //??accessor.add("min", buildMin());
         accessors.add(accessor);
         return accessors.size() - 1;
     }
 
+    /**
+     * 27.7.24: We no longer have multple primitives.
+     * We had these for "geolist" once.
+     */
     private JsonArray buildPrimitives(PortableModelDefinition obj) {
         JsonArray primitives = new JsonArray();
 
-        for (int i = 0; i < obj.geolist.size(); i++) {
-            //Nicht jede geo hat immer ein Material, z.B bei Genie. Dann wird es ein MEsh ohne Material ->wireframe.
-            String mat = null;
-            if (obj.geolistmaterial.size() > i) {
-                mat = obj.geolistmaterial.get(i);
-            }
-            JsonObject primitive = buildPrimitive(obj, obj.geolist.get(i), mat);
-            primitives.add(primitive);
+        //for (int i = 0; i < obj.geolist.size(); i++) {
+        //Nicht jede geo hat immer ein Material, z.B bei Genie. Dann wird es ein MEsh ohne Material ->wireframe.
+        String mat = null;
+        if (obj.material != null/*geolistmaterial.size() > i*/) {
+            mat = obj.material;//geolistmaterial.get(i);
         }
+        JsonObject primitive = buildPrimitive(obj, obj.geo/*list.get(i)*/, mat);
+        primitives.add(primitive);
+        //}
         return primitives;
     }
 
@@ -307,6 +364,9 @@ public class GltfBuilder {
         //2.5.19: Normale sind nicht mandatory
         if (lnormals != null) {
             attributes.add("NORMAL", new JsonPrimitive(buildAccessor(cnt, 0)));
+            if (lnormals.size() != cnt) {
+                throw new RuntimeException("normals mismatch. Expected " + cnt + " but found " + lnormals.size());
+            }
             for (int i = 0; i < cnt; i++) {
                 Vector3 v = lnormals.getElement(i);
                 binarystream.writeFloat((float) v.getX());
@@ -349,11 +409,44 @@ public class GltfBuilder {
         scene.add("name", new JsonPrimitive("Scene"));
         scene.add("nodes", new JsonArray());
         scenes.add(scene);
+
+        // 4.9.24: Only node 0 (the root node) should be listed in the scene. All other are just children of the root node,
+        ((JsonObject) scenes.get(0)).getAsJsonArray("nodes").add(new JsonPrimitive(0));
     }
 
     /*public NativeByteBuffer getBin() {
         return new sgSimpleBuffer(bos.toByteArray());
     }*/
+
+    /**
+     * We only use one
+     */
+    private JsonArray buildBuffers(int length, String source) {
+        String binName = source;
+        if (StringUtils.contains(binName, "/")) {
+            binName = StringUtils.substringAfterLast(source, "/");
+        }
+        if (StringUtils.contains(binName, ".")) {
+            binName = StringUtils.substringBeforeLast(binName, ".");
+        }
+        binName += ".bin";
+        JsonArray buffers = new JsonArray();
+        JsonObject buffer = new JsonObject();
+        buffer.add("byteLength", new JsonPrimitive(length));
+        buffer.add("uri", new JsonPrimitive(binName));
+        buffers.add(buffer);
+        return buffers;
+    }
+
+    /**
+     * The spec says "Animation input and vertex position attribute accessors MUST have accessor.min and accessor.max defined. For all other accessors, these properties are optional."
+     * So its mandatory for position vertices. TODO implement when we know how
+     */
+    private JsonArray buildMin() {
+        JsonArray mins = new JsonArray();
+        //mins.add("byteLength", new JsonPrimitive(length));
+        return mins;
+    }
 }
 
 /*

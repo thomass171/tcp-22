@@ -381,6 +381,22 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.de.yard.threed=
 
 The UI is then available on 'http://localhost:8080/servermanager.html'.
 
+### Tools
+
+#### ac3d
+
+From AC3D manual:
+
+>
+> If a surface is flat-shaded, the color across the surface will be constant. If it is shaded then the color will be 'graded' depending on lighting conditions.
+> 
+> Vertices can be shared between surfaces (i.e. one or more surfaces use the same vertex). If these surface types are set to ‘smooth’, the effect is of one continuous 'smooth' surface. The vertices MUST be shared for two surfaces to be smoothed together. This method of shading allows smooth- looking objects to be created from relatively simple shapes.
+>
+> 
+and about 'crease':
+
+> A crease angle of zero degrees forces all surfaces to be flat. A crease angle of 180 degrees forces all surfaces to be drawn smooth.
+Setting a surface type to ‘flat’ forces the surfaces to remain flat shaded. Setting a surface type to smooth allows it to be under control of the crease angle.
 ### Traffic
 
 The default/expected orientation of a vehicle is front at +x and +y up, like

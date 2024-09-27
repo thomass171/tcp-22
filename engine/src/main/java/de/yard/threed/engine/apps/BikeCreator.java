@@ -3,7 +3,7 @@ package de.yard.threed.engine.apps;
 
 import de.yard.threed.core.geometry.ProceduralModelCreator;
 import de.yard.threed.engine.avatar.VehiclePmlFactory;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 
 /**
  * Used by reflection!
@@ -12,8 +12,8 @@ import de.yard.threed.core.loader.PortableModelList;
  */
 public class BikeCreator implements ProceduralModelCreator {
     @Override
-    public PortableModelList createModel() {
-        PortableModelList bike = VehiclePmlFactory.buildBike();
+    public PortableModel createModel() {
+        PortableModel bike = VehiclePmlFactory.buildBike();
         return bike;
     }
 }

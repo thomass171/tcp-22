@@ -755,7 +755,7 @@ public class ShapeGeometry extends CustomGeometry {
     }
 
     /**
-     * Center in 0,0,0
+     * Center in 0,0,0, extruded rectangle along z-axis from positive to negative(?)
      * <p/>
      * width ist entlang x, height der y Achse und depth ueber die z-Achse.
      * 18.5. umbenannt von cuboid nach box
@@ -883,19 +883,19 @@ public class ShapeGeometry extends CustomGeometry {
                         throw new RuntimeException("not impl");
                     }
                 }*/
-                facelist.add(new FaceList(surface.getFaces()));
+                facelist.add(new FaceList(surface.getFaces(), true));
             }
         }
         List<Surface> surfacelist1 = surfaces.back;
         if (surfacelist1 != null) {
             for (Surface surface : surfacelist1) {
-                facelist.add(new FaceList(surface.getFaces()));
+                facelist.add(new FaceList(surface.getFaces(), true));
             }
         }
         surfacelist1 = surfaces.front;
         if (surfacelist1 != null) {
             for (Surface surface : surfacelist1) {
-                facelist.add(new FaceList(surface.getFaces()));
+                facelist.add(new FaceList(surface.getFaces(), true));
             }
         }
         return facelist;

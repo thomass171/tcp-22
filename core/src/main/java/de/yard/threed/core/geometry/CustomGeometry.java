@@ -39,7 +39,7 @@ public abstract class CustomGeometry {
     public List<Vector3> normals = null;
 
     // 19.12.16: Eine optionale Smoothing Map. Kann verwendet werden, wenn das Standard smoothen nicht geeignet ist.
-    public SmoothingMap smoothingMap = null;
+    public VertexMap smoothingMap = null;
 
     public CustomGeometry(/*int planecnt, int verticesperplane*/) {
 

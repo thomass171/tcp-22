@@ -8,7 +8,8 @@ import de.yard.threed.core.geometry.Face3;
 import de.yard.threed.core.geometry.FaceList;
 import de.yard.threed.core.loader.BinaryLoader;
 import de.yard.threed.core.loader.InvalidDataException;
-import de.yard.threed.core.loader.PortableMaterial;
+import de.yard.threed.core.loader.LoadedObject;
+import de.yard.threed.core.loader.MaterialCandidate;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.loader.*;
 import de.yard.threed.core.buffer.ByteArrayInputStream;
@@ -29,12 +30,10 @@ import java.util.ArrayList;
 public class Loader3DS extends BinaryLoader {
     Log logger = Platform.getInstance().getLog(Loader3DS.class);
     private boolean headerchecked = false;
-    //byte[] inbuf;
     ByteArrayInputStream buf;
 
-    public Loader3DS(ByteArrayInputStream buf /*InputStream ins*/) throws InvalidDataException {
+    public Loader3DS(ByteArrayInputStream buf) throws InvalidDataException {
 
-        //inbuf = ins.readFully();
         this.buf = buf;
         load();
 
@@ -47,6 +46,8 @@ public class Loader3DS extends BinaryLoader {
     protected void doload() throws InvalidDataException {
         //sgSimpleBuffer buf = new sgSimpleBuffer(inbuf);
 
+        // 23.9.24: We now only have a single root, so every object will be a child
+        loadedfile.object = new LoadedObject();
         readChunklist(buf, null, "");
 
     }
@@ -57,7 +58,7 @@ public class Loader3DS extends BinaryLoader {
     }
 
     void readChunklist(ByteArrayInputStream buf, Object3DS p_object, String level) throws InvalidDataException {
-        PortableMaterial material = null;
+        MaterialCandidate material = null;
         FloatHolder floatexpector = null;
         ImportMap map = null;
 
@@ -121,7 +122,9 @@ public class Loader3DS extends BinaryLoader {
                         throw new RuntimeException("recursive objects");
                     }
                     Object3DS new_object = new Object3DS();
-                    loadedfile.objects.add(new_object);
+                    // 23.9.24 add as child now
+                    //loadedfile.objects.add(new_object);
+                    loadedfile.object.kids.add(new_object);
                     // name varying
                     new_object.name = buf.readString();
                     if (Config.loaderdebuglog)
@@ -199,7 +202,7 @@ public class Loader3DS extends BinaryLoader {
                     //Darum parallele Liste
                     //LoadedMaterial mat = findMaterial(name);
                     p_object.addFacelistMaterial(matname);
-                    FaceList facelist = p_object.addFacelist();
+                    FaceList facelist = p_object.addFacelist(false, true);
                     for (int i = 0; i < l_qty; i++) {
                         int faceindex = buf.readUShort();
                         Face3 face = (Face3) p_object.tmpfaces.get(faceindex);
@@ -263,8 +266,10 @@ public class Loader3DS extends BinaryLoader {
                         System.err.println("duplicate material block");
                     }*/
                     // materials = new ArrayList<LoadedMaterial>();
-                    material = new PortableMaterial();
-                    loadedfile.materials.add(material);
+                    if (material != null) {
+                        loadedfile.materials.add(material);
+                    }
+                    material = new MaterialCandidate();
                     break;
                 case 0xA000: // Material Name (varying)
                     //sgSimpleBuffer bufA000 = sgReadBytes(fp, chunklength - 6);
@@ -292,9 +297,9 @@ public class Loader3DS extends BinaryLoader {
                     //floatexpector = material.shininessstrengthpercent;
                     floatexpector = new FloatHolder(0);
                     break;
-                case 0xA050: //Transparency percent
-                    material.transparencypercent = new FloatHolder(0);
-                    floatexpector = material.transparencypercent;
+                case 0xA050: //Transparency percent. 9.8.24: No longer percent. TODO check needs calc
+                    material.transparency = new FloatHolder(0);
+                    floatexpector = material.transparency;
                     break;
                 case 0xA100: //Render type (Bedeutung unklar)
                     buf.skip(chunklength - 6);
@@ -340,6 +345,9 @@ public class Loader3DS extends BinaryLoader {
                     // Mal als Fehler betrachten, damit es nicht untergeht
                     throw new InvalidDataException("unknown chunkid " + Util.format("0x%x", chunkid));
             }
+        }
+        if (material != null) {
+            loadedfile.materials.add(material);
         }
     }
 

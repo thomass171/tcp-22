@@ -29,9 +29,11 @@ import java.util.List;
 
 /**
  * 14.9.15: Das mit dem InputStream ist noch nicht ganz das wahre. Da muss mehr in die Plattform.
+ * 19.8.24: Deprecated in favor of EngineTestUtils.
  * <p/>
  * Created by thomass on 17.07.15.
  */
+@Deprecated
 public class TestHelper {
     /**
      * Ein Gearde, ein Viertelkreis und wieder eine Gerade.
@@ -103,32 +105,5 @@ public class TestHelper {
         }
     }
 
-    public static String loadFileFromClasspath(String fileName) throws Exception {
-        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
-        StringBuilder textBuilder = new StringBuilder();
-        try (Reader reader = new BufferedReader(new InputStreamReader
-                (inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            int c = 0;
-            while ((c = reader.read()) != -1) {
-                textBuilder.append((char) c);
-            }
-        }
-        return textBuilder.toString();
-    }
 
-    public static String getHierarchy(SceneNode node, int maxlevel) {
-        String s = node.getName();
-        Transform t = node.getTransform();
-        if (t.getChildCount() == 0 || maxlevel <= 0) {
-            return s;
-        }
-        if (t.getChildCount() == 1) {
-            return s + "->" + getHierarchy(t.getChild(0).getSceneNode(), maxlevel - 1);
-        }
-        s += "->[";
-        for (int i = 0; i < t.getChildCount(); i++) {
-            s += ((i > 0) ? "," : "") + getHierarchy(t.getChild(i).getSceneNode(), maxlevel - 1);
-        }
-        return s + "]";
-    }
 }

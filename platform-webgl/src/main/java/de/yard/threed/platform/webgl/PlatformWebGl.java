@@ -17,12 +17,10 @@ import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.HttpBundleResolver;
-import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.URL;
 import de.yard.threed.engine.*;
-import de.yard.threed.engine.platform.common.AsyncHelper;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.ColorType;
 import de.yard.threed.core.resource.ResourcePath;
@@ -154,7 +152,7 @@ public class PlatformWebGl extends Platform {
             }
         }
         // build model like in all other platforms.
-        ModelLoader.buildModelFromBundle(resourceLoader, opttexturepath, options, delegate);
+        ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate);
     }
 
     /*MA36 now in SceneRunner
@@ -620,6 +618,11 @@ public class PlatformWebGl extends Platform {
         ResourcePath bundlebasedir = BundleResolver.resolveBundle(bundlename, bundleResolver);
         logger.debug("bundlebasedir=" + bundlebasedir.getPath());
         return new HttpBundleResourceLoader(bundlebasedir.getPath());
+    }
+
+    @Override
+    public List<NativeSceneNode> findNodeByName(String name, NativeSceneNode startnode) {
+        return ((WebGlSceneNode) startnode).findNodeByName(name);
     }
 
     public NativeInitChain buildInitChain(InitExecutor initExecutor) {

@@ -71,6 +71,9 @@ public class LoaderOBJ extends AsciiLoader {
         boolean inrefs = false;
         int surfaceindex = 0;
 
+        // 23.9.24: We now only have a single root, so every object will be a child
+        loadedfile.object = new LoadedObject();
+
         while ((token = parseLine(ins.readLine(), true,  inrefs?1:0,null)) != null) {
             //dumpen
             //System.out.print("line " + lines + "(" + token.length + " token):");
@@ -88,9 +91,11 @@ public class LoaderOBJ extends AsciiLoader {
                     } else {
                         if (token[0].isO()) {
                             currentobject = new ObjObject(token[1]);
-                            loadedfile.objects.add(currentobject);
+                            // 23.9.24 add as child now
+                            //loadedfile.objects.add(currentobject);
+                            loadedfile.object.kids.add(currentobject);
                             // Hier gibt es nur eine Facelist. Darum sofort anlegen
-                            currentobject.addFacelist();
+                            currentobject.addFacelist(false, true);
                         } else {
                             if (token[0].isL()) {
                                 //TODO

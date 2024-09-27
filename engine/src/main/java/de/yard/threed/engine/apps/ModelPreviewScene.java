@@ -6,6 +6,11 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.Dimension;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.geometry.FaceList;
+import de.yard.threed.core.loader.InvalidDataException;
+import de.yard.threed.core.loader.LoadedObject;
+import de.yard.threed.core.loader.LoaderAC;
+import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
@@ -26,7 +31,7 @@ import de.yard.threed.engine.avatar.AvatarPmlFactory;
 import de.yard.threed.engine.avatar.VehiclePmlFactory;
 import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.gui.Hud;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.engine.loader.PortableModelBuilder;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
@@ -38,17 +43,16 @@ import de.yard.threed.core.geometry.SimpleGeometry;
  * A simple model preview scene.
  * <p>
  * Verwendet das FG Koordinatensystem?
- * Die z-Achse zeigt nach oben, y von links nach rechts und x von vorne nach hinten;wie bei FG Aircraft- und Scenery Modellen üblich.
- * Die Camera steht auf positivem x und blickt Richtung negativem X. Damit werden Aircraftmodelle z.B. zunächst von hinten oben gesehen.
- * Dimensionierung in etwa in Metern, um nicht zu viel scalen zu muessen.
- * ECS wird aber nicht verwendet, um es schlicht zu halten.
+ * z-axis points up, y to the left and x-axis to the viewpoint.
+ * Die Camera steht auf positivem x und blickt Richtung negativem X.
+ * No ECS to keep it simple.
  */
 public class ModelPreviewScene extends Scene {
     public Log logger = Platform.getInstance().getLog(ModelPreviewScene.class);
     Light light;
     public double scale = 1;
     public SceneNode model = null;
-    public int major = 5;
+    public int major = 7;
     String[] modellist;
     Hud hud;
     double rotationspeed = 10;
@@ -67,7 +71,9 @@ public class ModelPreviewScene extends Scene {
                 "engine:plane-darkgreen.gltf",
                 "engine:sphere-orange.gltf",
                 // 5
-                "pcm:avatarA"
+                "pcm:avatarA",
+                "ac:sample",
+                "ac:hard-coded"
         };
     }
 
@@ -117,8 +123,6 @@ public class ModelPreviewScene extends Scene {
     private void addLight() {
         Light light = new DirectionalLight(Color.WHITE, new Vector3(0, 3, 2));
         addLightToWorld(light);
-        //light = new DirectionalLight(Color.WHITE, new Vector3(-0, 3, -2));
-        //addLightToWorld(light);
     }
 
     private void cycleMajor(int inc, int cnt) {
@@ -137,7 +141,7 @@ public class ModelPreviewScene extends Scene {
         if (model != null) {
             SceneNode.removeSceneNode(model);
         }
-        redCube.getTransform().setPosition(new Vector3(1000,1000,1000));
+        redCube.getTransform().setPosition(new Vector3(1000, 1000, 1000));
         addModel();
         if (model != null) {
             model.getTransform().setScale(new Vector3(scale, scale, scale));
@@ -178,6 +182,9 @@ public class ModelPreviewScene extends Scene {
     public BuildResult loadModel(String modelname) {
         String dir = null;
         String bundlename = null;
+        if (StringUtils.startsWith(modelname, "ac")) {
+            return buildhardCodedAC(StringUtils.substringAfterLast(modelname, ":"));
+        }
         if (StringUtils.startsWith(modelname, "pcm")) {
             // Pseudo Bundle
             bundlename = "pcm";
@@ -197,7 +204,7 @@ public class ModelPreviewScene extends Scene {
             if (bundlename.equals("pcm")) {
                 // Pseudo Bundle
                 logger.debug("Building pcm for model " + modelname);
-                PortableModelList pml;
+                PortableModel pml;
                 if (modelname.equals("loc")) {
                     pml = VehiclePmlFactory.buildLocomotive();
                 } else if (modelname.equals("bike")) {
@@ -209,7 +216,7 @@ public class ModelPreviewScene extends Scene {
                 } else {
                     throw new RuntimeException("unknown pcm model " + modelname);
                 }
-                SceneNode node = new PortableModelBuilder(pml).buildModel(null, null);
+                SceneNode node = PortableModelBuilder.buildModel(pml, null);
                 result = new BuildResult(node.nativescenenode);
             } else {
                 Bundle bundle = BundleRegistry.getBundle(bundlename);
@@ -243,28 +250,51 @@ public class ModelPreviewScene extends Scene {
         br.bundle = bundle;
         String extension = br.getExtension();
         BuildResult result = null;
-
-            result = new BuildResult(ModelFactory.asyncModelLoad(new ResourceLoaderFromBundle(br), EngineHelper.LOADER_USEGLTF).nativescenenode);
-
-        /*29.12.18 model = null;
-        // Das model hat evtl. die offsets in seinem transform
-        model = new SceneNode(result.getNode());
-        //scale = 0.5f;
-        // Der dump bringt hier nichts, weil der Load async ist und spaeter eingehangen wird.
-        //logger.info("Building imported model. scale=" + scale+", tree:"+model.dump("",0));
-        logger.info("Building imported model.");
-        model.getTransform().setScale(new Vector3(scale, scale, scale));
-        */
-
-        //29.12.18 addToWorld(model);
+        result = new BuildResult(ModelFactory.asyncModelLoad(new ResourceLoaderFromBundle(br), EngineHelper.LOADER_USEGLTF).nativescenenode);
         return result;
     }
 
-    @Override
+    /**
+     * ac files should be processed to GLTF and packeded in bundle for using it. Because there is no other workflow (eg. no
+     * file access), for testing
+     * we need to add these hardcoded. "sceneextension" (parameter) might also be an option.
+     * No async here.
+     */
+    private BuildResult buildhardCodedAC(String model) {
+
+        String acSource = LoaderAC.sampleac;
+
+        if (model.equals("hard-coded")) {
+            acSource = "";
+        }
+        LoaderAC ac;
+        try {
+            ac = new LoaderAC(new StringReader(acSource), false);
+        } catch (InvalidDataException e) {
+            throw new RuntimeException(e);
+        }
+
+        String specificObject = null;// "Tunnel1Rotunda";
+        if (specificObject != null) {
+            // remove other
+            while (ac.loadedfile.object.kids.size() > 1) {
+                if (ac.loadedfile.object.kids.get(0).name.equals(specificObject)) {
+                    ac.loadedfile.object.kids.remove(1);
+                } else {
+                    ac.loadedfile.object.kids.remove(0);
+                }
+            }
+        }
+        PortableModel portableModel = ac.buildPortableModel();
+        SceneNode node = PortableModelBuilder.buildModel(portableModel, null);
+        return new BuildResult(node.nativescenenode);
+    }
+
+    /*6.9.24 @Override
     public Dimension getPreferredDimension() {
         return new Dimension(1200, 900);
         //return new Dimension(800, 600);
-    }
+    }*/
 
 
     @Override

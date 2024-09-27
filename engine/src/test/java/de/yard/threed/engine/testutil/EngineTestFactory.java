@@ -78,23 +78,17 @@ public class EngineTestFactory {
     /**
      * 22.12.23
      */
-    public static void loadBundleAndWait(String bundlename) {
-        AbstractSceneRunner.getInstance().loadBundle(bundlename, new BundleLoadDelegate() {
-            @Override
-            public void bundleLoad(Bundle bundle) {
-                BundleRegistry.registerBundle(bundlename, bundle);
-            }
-        });
+    public static void loadBundleAndWait(String bundlename, boolean delayed) {
+        AbstractSceneRunner.getInstance().loadBundle(bundlename + ((delayed) ? "-delayed" : ""), bundle -> BundleRegistry.registerBundle(bundlename, bundle));
         try {
-            TestUtils.waitUntil(new BooleanSupplier() {
-                @Override
-                public boolean getAsBoolean() {
-                    return BundleRegistry.getBundle(bundlename) != null;
-                }
-            }, 2000);
+            TestUtils.waitUntil(() -> BundleRegistry.getBundle(bundlename) != null, 2000);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void loadBundleAndWait(String bundlename) {
+        loadBundleAndWait(bundlename, false);
     }
 
     @Deprecated
@@ -146,11 +140,11 @@ public class EngineTestFactory {
             PlatformBundleLoader bundleLoader = new PlatformBundleLoader();
             bundleLoader.setBundleFactory(new BundleFactory() {
                 @Override
-                public Bundle createBundle(String name, String[] directory, String basepath) {
+                public Bundle createBundle(String name, boolean delayed, String[] directory, String basepath) {
                     return new TestBundle(name, directory, basepath);
                 }
             });
-            bundleLoader.loadBundle("test-resources", new BundleLoadDelegate() {
+            bundleLoader.loadBundle("test-resources", false, new BundleLoadDelegate() {
                 @Override
                 public void bundleLoad(Bundle bundle) {
                     BundleRegistry.registerBundle("test-resources", bundle);
@@ -171,7 +165,7 @@ public class EngineTestFactory {
                     false, new DefaultResourceReader(), bundlebasedir);*/
             // bundleLoader in SceneRunner is hidden. So use a new one for this special case.
             PlatformBundleLoader bundleLoader = new PlatformBundleLoader();
-            bundleLoader.loadBundle(bundleName, new BundleLoadDelegate() {
+            bundleLoader.loadBundle(bundleName, false, new BundleLoadDelegate() {
                 @Override
                 public void bundleLoad(Bundle bundle) {
                     BundleRegistry.registerBundle(bundleName, bundle);

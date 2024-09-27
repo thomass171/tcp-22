@@ -3,6 +3,7 @@ package de.yard.threed.engine.apps.reference;
 import de.yard.threed.core.*;
 import de.yard.threed.core.geometry.ProportionalUvMap;
 import de.yard.threed.core.geometry.SimpleGeometry;
+import de.yard.threed.core.loader.PreparedModel;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
@@ -297,12 +298,12 @@ public class ReferenceScene extends Scene {
         SceneNode line = ModelSamples.buildLine(new Vector3(-3, 3, -5), new Vector3(3, 3, -15), Color.BLUE);
         addToWorld(line);
 
-        //einen Cube ohne Normals
+        //a blue cube without normals. 25.9.2024: Made transparent for transparency check (Needs alpha != 1 in color).
         SimpleGeometry cuboid = Primitives.buildBox(0.5f, 0.5f, 0.5f);
         cuboid = new SimpleGeometry(cuboid.getVertices(), cuboid.getIndices(), cuboid.getUvs(), null);
-        cubeWithoutNormals = new SceneNode(new Mesh(cuboid, Material.buildBasicMaterial(Color.BLUE)));
+        cubeWithoutNormals = new SceneNode(new Mesh(cuboid, Material.buildBasicMaterial(new Color(0.0f,0.0f,1.0f,0.5f), 0.5)));
         cubeWithoutNormals.setName("CubeWithoutNormals");
-        //plane liegt auf -2
+        //plane is on y=-2
         cubeWithoutNormals.getTransform().setPosition(new Vector3(5, 0.5f, 0));
         addToWorld(cubeWithoutNormals);
 
@@ -331,16 +332,16 @@ public class ReferenceScene extends Scene {
         }
         // Cesium Box
         // TODO check why the box isn't visible
-        BundleResource bundleResource=new BundleResource(BundleRegistry.getBundle("engine"),"cesiumbox/BoxTextured.gltf");
+        BundleResource bundleResource = new BundleResource(BundleRegistry.getBundle("engine"), "cesiumbox/BoxTextured.gltf");
         Platform.getInstance().buildNativeModelPlain(new ResourceLoaderFromBundle(bundleResource), null, new ModelBuildDelegate() {
             @Override
             public void modelBuilt(BuildResult result) {
-                if (result.getNode()!=null){
+                if (result.getNode() != null) {
                     SceneNode cesiumBox = new SceneNode(result.getNode());
 
                     //shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(180)));
                     cesiumBox.getTransform().setRotation(Quaternion.buildRotationX(new Degree(0)));
-                    cesiumBox.getTransform().setScale(new Vector3(1,1,1));
+                    cesiumBox.getTransform().setScale(new Vector3(1, 1, 1));
                     cesiumBox.getTransform().setPosition(new Vector3(-2, 2.8, -4));
                     //multimatcube.getTransform().setPosition(new Vector3(-2, 1, -4));
                     addToWorld(cesiumBox);
@@ -348,6 +349,30 @@ public class ReferenceScene extends Scene {
                 }
             }
         }, 0);
+
+        // 20.8.24: Add two instances (objects) of GLTF AlphaBlendModeTest
+        bundleResource = new BundleResource(BundleRegistry.getBundle("data"), "gltf-sample-assets/AlphaBlendModeTest/AlphaBlendModeTest.gltf");
+        ModelLoader.prepareModel(new ResourceLoaderFromBundle(bundleResource), null, new ModelPreparedDelegate() {
+            @Override
+            public void modelPrepared(PreparedModel preparedModel) {
+                if (preparedModel != null) {
+                    SceneNode panel = PortableModelBuilder.buildModel(preparedModel);
+                    double scale = 0.15;
+                    panel.getTransform().setScale(new Vector3(scale, scale, scale));
+                    panel.getTransform().setPosition(new Vector3(3.5, 1.1, 4.0));
+                    addToWorld(panel);
+
+                    SceneNode secondPanel = PortableModelBuilder.buildModel(preparedModel);
+                    scale = 0.05;
+                    secondPanel.getTransform().setScale(new Vector3(scale, scale, scale));
+                    secondPanel.getTransform().setPosition(new Vector3(3.5, 1.6, 3.9));
+                    addToWorld(secondPanel);
+
+                    logger.debug("AlphaBlendModeTest node added");
+                }
+            }
+        }, null);
+
         logger.debug("setupScene completed");
     }
 
@@ -358,7 +383,7 @@ public class ReferenceScene extends Scene {
     private static double PropertyControlPanelMargin = 0.005;
 
     private static ControlPanel buildControlPanel(Color backGround, ReferenceScene rs) {
-        Material mat = Material.buildBasicMaterial(backGround, false);
+        Material mat = Material.buildBasicMaterial(backGround, null);
 
         DimensionF rowsize = new DimensionF(PropertyControlPanelWidth, PropertyControlPanelRowHeight);
         ControlPanel cp = new ControlPanel(new DimensionF(PropertyControlPanelWidth, 3 * PropertyControlPanelRowHeight), mat, 0.01);
@@ -448,7 +473,7 @@ public class ReferenceScene extends Scene {
      * Liefert die Geometrie zurueck.
      */
     public static Geometry buildTower(String basename, ArrayList<SceneNode> towerlist, double baselength, double basewidth,
-                                double baseheight, Color[] color, boolean flatshaded) {
+                                      double baseheight, Color[] color, boolean flatshaded) {
         SceneNode tower = null;
         //Mesh basetower = null;
         double scale = 1;
@@ -543,11 +568,11 @@ public class ReferenceScene extends Scene {
         // Earth hat radius 1
         earth = ModelSamples.buildEarth();
         // eine unrotierte Needle, auf die man direkt sieht
-        SceneNode needle = new PortableModelBuilder(ModelSamples.buildCompassNeedle(0.3f, 0.1f)).buildModel(null);
+        SceneNode needle = PortableModelBuilder.buildModel(ModelSamples.buildCompassNeedle(0.3f, 0.1f), null);
         needle.getTransform().setPosition(new Vector3(0, 0, 1.01f));
         earth.attach(needle);
         // und eine links halbhoch, wo manchmal Europa ist.
-        needle = new PortableModelBuilder(ModelSamples.buildCompassNeedle(0.3f, 0.1f)).buildModel(null);
+        needle = PortableModelBuilder.buildModel(ModelSamples.buildCompassNeedle(0.3f, 0.1f), null);
         Vector3 pos = new Vector3(-0.75f, 0.75f, 0);
         needle.getTransform().setPosition(pos);
         // Warum man die direction nicht negieren muss, ist nicht ganz klar. Klappt aber.
@@ -773,7 +798,7 @@ public class ReferenceScene extends Scene {
                     int loaderoptions = 0;
 
                     logger.debug("Bundle " + bundle.name + " loaded");
-                    ModelLoader.buildModelFromBundle(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new ModelBuildDelegate() {
+                    ModelLoader.buildModel(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new ModelBuildDelegate() {
                         @Override
                         public void modelBuilt(BuildResult r) {
                             if (r.getNode() != null) {

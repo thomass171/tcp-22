@@ -13,11 +13,9 @@ import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleFactory;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
-import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.LoadingBundle;
 import de.yard.threed.core.resource.NativeResource;
-import de.yard.threed.core.resource.ResourcePath;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,16 +46,17 @@ public class PlatformBundleLoader {
 
     public PlatformBundleLoader() {
         this.url = url;
-        bundleFactory = (name, directory, basepath) -> new Bundle(name, directory, basepath);
+        bundleFactory = (name, delayed, directory, basepath) -> new Bundle(name, delayed, directory, basepath);
     }
 
     /**
      * First the directory, then the content.
      * 'bundlename' must be a full qualified name (URL)
+     * 27.8.24:'delayed' reactivated.
      */
-    public void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, NativeBundleResourceLoader resourceLoader) {
+    public void loadBundle(String bundlename, boolean delayed, BundleLoadDelegate bundleLoadDelegate, NativeBundleResourceLoader resourceLoader) {
 
-        logger.debug("Loading effective bundle " + bundlename);
+        logger.debug("Loading effective bundle " + bundlename + " from " + ((resourceLoader==null)?null:resourceLoader.getBasePath()));
 
         if (resourceLoader == null) {
             logger.error("No resourceLoader. Bundle '" + bundlename + "' not resolvable?");
@@ -82,14 +81,14 @@ public class PlatformBundleLoader {
         //loadingbundle.add(lb);
         //WebGlResource directory = new WebGlResource(directoryresource);
 
-        //loadRessource(new BundleResource(directoryUrl), new AsyncJobDelegate<AsyncHttpResponse>() {
+        // first load directory
         resourceLoader.loadFile(directoryUrl, new AsyncJobDelegate<AsyncHttpResponse>() {
             @Override
             public void completed(AsyncHttpResponse response) {
                 logger.debug("Got http response " + response);
                 if (response.getStatus() == 200) {
 
-                    logger.debug("directory loaded for bundle " + bundlename);
+                    logger.debug("directory loaded for bundle " + bundlename + " from " + resourceLoader.getBasePath());
                     String d;
                     try {
                         d = response.getContentAsString();
@@ -98,13 +97,11 @@ public class PlatformBundleLoader {
                         throw new RuntimeException(e);
                     }
 
-                    lb.bundle = bundleFactory.createBundle(lb.bundlename, StringUtils.split(d, "\n"), resourceLoader.getBasePath());
-
+                    lb.bundle = bundleFactory.createBundle(lb.bundlename, delayed, StringUtils.split(d, "\n"), resourceLoader.getBasePath());
                     for (String filename : lb.bundle.directory) {
                         String resource = /*13.12.23 url + "/" +*/ filename;
-                        loadBundleData(lb.bundle, BundleResource.buildFromFullString(resource), filename, false, lb/*, bundlebasedir*/, resourceLoader);
+                        loadBundleData(lb.bundle, BundleResource.buildFromFullString(resource), filename, delayed, lb/*, bundlebasedir*/, resourceLoader);
                     }
-
                 } else {
                     logger.error("Unexpected response " + response);
                     // Assume bundle doesn't exist. Anyway we need to avoid an endless wait, so inform requester.
@@ -150,76 +147,57 @@ public class PlatformBundleLoader {
         this.bundleFactory = bundleFactory;
     }
 
+    public static void addLoadedBundleData(AsyncHttpResponse response, Bundle bundle, String filename, Log logger){
+        if (response.getStatus() == 200) {
+            logger.trace(filename + " loaded with response " + response);
+
+            BundleData bundleData;
+            if (Bundle.isBinary(filename)) {
+                bundleData = new BundleData(response.getContent(), false);
+            } else {
+                bundleData = new BundleData(response.getContent(), true);
+            }
+            if (bundle.contains(filename)) {
+                logger.error("duplicate directory entry " + filename + " or data already loaded: " + bundle.getResource(filename).getSize() + " bytes");
+            }
+            bundle.addResource(filename, bundleData);
+        } else {
+            logger.error(filename + " failed with response " + response);
+            if (bundle.contains(filename)) {
+                logger.error("onError, but data exists for " + filename);
+            }
+            bundle.addFailure(filename, "" + response.getStatus());
+        }
+    }
+
     private void loadBundleData(Bundle bundle, BundleResource resource, String filename, boolean delayed, LoadingBundle lb/*, String bundlebasedir*/,
                                 NativeBundleResourceLoader resourceLoader) {
 
         AsyncJobDelegate listener = new AsyncJobDelegate<AsyncHttpResponse>() {
             @Override
             public void completed(AsyncHttpResponse response) {
-                if (response.getStatus() == 200) {
-                    logger.trace(resource.getFullName() + " loaded with response " + response);
-
-                    BundleData bundleData;
-                    if (Bundle.isBinary(filename)) {
-                        bundleData = new BundleData(response.getContent(), false);
-                    } else {
-                        bundleData = new BundleData(response.getContent(), true);
-                    }
-                    if (bundle.contains(filename)) {
-                        logger.error("duplicate directory entry " + filename + " or data already loaded: " + bundle.getResource(filename).getSize() + " bytes");
-                    }
-                    bundle.addResource(filename, bundleData);
-                } else {
-                    logger.error(resource.getFullName() + " failed with response " + response);
-                    if (bundle.contains(filename)) {
-                        logger.error("onError, but data exists for " + filename);
-                    }
-                    bundle.addFailure(filename, "" + response.getStatus());
-                }
+                addLoadedBundleData(response, bundle, filename, logger);
                 checkCompleted(lb, bundle);
 
             }
         };
-        /*ResourceLoadingListener listener =
-                new ResourceLoadingListener() {
-                    @Override
-                    public void onLoad(BundleData bytebuf) {
-                        //debug.log ist schon im loadResource()
-                        if (bundle.contains(filename)) {
-                            logger.error("duplicate directory entry " + filename + " or data already loaded: " + bundle.getResource(filename).getSize());
-                        }
-                        bundle.addResource(filename, bytebuf);
-                    }
 
-                    @Override
-                    public void onError(int httperrorcode) {
-                        // already logged
-                        //14.6.17:  Wenn beim Lesen eines einzelnen Elements ein Fehler auftritt, wird das im Bundle vermerkt und der Eintrag bleibt halt leer. Es erfolgt aber kein Abbruch.
-                        if (bundle.contains(filename)) {
-                            logger.error("onError, but data exists for " + filename);
-                        }
-                        bundle.addFailure(filename, "" + httperrorcode);
-                    }
-                };*/
-        //logger.debug("filename="+filename);
+        // 27.8.24: To be more intuitive, handle 'delayed' in general, not per file type.
+        if (delayed){
+            bundle.addResource(filename, null);
+            checkCompleted(lb, bundle);
+            return;
+        }
         char filetype = Bundle.filetype(filename);
         switch (filetype) {
             case 'T'://GLTF
                 // C# conform fall through
             case 't':
-                if (filetype == 'T' && delayed) {
-                    bundle.addResource(filename, null);
-                    break;
-                }
                 loadRessource(resource, listener, false, resourceLoader);
                 break;
             case 'B'://GLTF binary
                 // C# conform fall through
             case 'b':
-                if (filetype == 'B' && delayed) {
-                    bundle.addResource(filename, null);
-                    break;
-                }
                 BundleResource res = resource;
                 /*if (StringUtils.endsWith(filename, ".btg.gz")) {
                     // uncompressed lesen weil ein uncompress in js oder Browser offenbar nicht geht.
@@ -269,7 +247,9 @@ public class PlatformBundleLoader {
             logger.info("bundle " + bundle.name + " load complete(" + (bundle.getSizeInBytes() / 1000000) + " MB," + bundle.getSize() + " files,took " +
                     (Platform.getInstance().currentTimeMillis() - lb.started) + " ms)");
 
-            bundle.complete();
+            if (!bundle.isDelayed()) {
+                bundle.complete();
+            }
             for (BundleLoadDelegate delegate : lb.callbacks) {
                 delegate.bundleLoad(bundle);
             }
@@ -277,7 +257,7 @@ public class PlatformBundleLoader {
         loadingbundles.remove(bundle.name);
     }
 
-    public void loadRessource(final NativeResource ressource, final AsyncJobDelegate loadlistener, boolean binary, NativeBundleResourceLoader resourceLoader) {
+    private/*public*/ void loadRessource(final NativeResource ressource, final AsyncJobDelegate loadlistener, boolean binary, NativeBundleResourceLoader resourceLoader) {
         //logger.debug("loadRessource:" + ressource.getFullName());
 
         resourceLoader.loadFile(ressource.getFullName(), loadlistener);

@@ -79,7 +79,7 @@ public class Hud extends FovElementPlane {
         }
         // BasicMaterial, damit Beleuchtung keine Rolle spielt.
         // 8.10.17: Dafuer muss ich doch keinen Effect bemuehen.
-        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, true);
+        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, 0.5);
         Mesh mesh = element.getMesh();
         if (mesh != null) {
             // might be null when headless?
@@ -127,7 +127,7 @@ public class Hud extends FovElementPlane {
         //CustomShaderMaterial mat = new CustomShaderMaterial("basetex",texture, Effect.buildUniversalEffect(true));
         // BasicMaterial, damit Beleuchtung keine Rolle spielt.
         // 8.10.17: Dafuer muss ich doch keinen Effect bemuehen.
-        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, true);
+        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, 0.5);
         return mat;
     }
 

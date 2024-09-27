@@ -1,12 +1,5 @@
 package de.yard.threed.core.loader;
 
-import de.yard.threed.core.Vector3;
-import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.platform.NativeMaterial;
-import de.yard.threed.core.buffer.NativeOutputStream;
-
-import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.geometry.FaceList;
 import de.yard.threed.core.resource.ResourcePath;
 
@@ -14,33 +7,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Serialisierbar zum Cachen.
- * MA19: Das wird jetzt die Hauptklasse zur Anbindung von GLTF (statt serialisieren).
- * Koennte deswegen vielleicht umbenannt werden. Ach, fuer GLTF gibts einen eigenen Loader. Das passt besser.
- * 11.12.17: Das preprocess Resultat ausgelagert nach PreprocessObject/File. Kann man später nochmal umbenennen.
+ *
+ * 23.9.24: What is this finally? Just a container for a root object together with materials.
  * <p/>
  * Created by thomass on 10.06.16.
  */
 public class LoadedFile {
-    Log logger = Platform.getInstance().getLog(LoadedFile.class);
-    int MAGIC = 38;
-    int VERSION = 1;
-    public List<PortableMaterial> materials = new ArrayList<PortableMaterial>();
-    public List<LoadedObject> objects = new ArrayList<LoadedObject>();
-    // Material, das verwendet wird, wenn das eigentlich definierte nicht bekannt ist     
-    private NativeMaterial dummyMaterial;
-    //TODO besser double??
-    public /*SGVec3d*/ Vector3 gbs_center;
+    // 12.8.24: Better a MaterialCandidate, but that too much effort now
+    public List<MaterialCandidate> materials = new ArrayList<MaterialCandidate>();
+    // 23.9.24: For simplification only have one root object any more. If we have more, these should be children.
+    //public List<LoadedObject> objects = new ArrayList<LoadedObject>();
+    public LoadedObject object;
     // Die Texturen werden dort erwartet, also in dem ResourcePAth, wo auch das Model liegt.
     // wird nicht mit serialisiert. Ist NativeResoure um zu erkennen, ob bundled. Auch nicht schoen.
     public ResourcePath texturebasepath;
-    public Bundle bundle;
-    ResourcePath rpath;
 
     public LoadedFile() {
 
     }
-    
+
 
     public String dumpObject(String offset, LoadedObject obj, String separator) {
         String s = offset + "OBJECT:";
@@ -81,34 +66,24 @@ public class LoadedFile {
 
     public String dumpMaterial(String separator) {
         String s = "MATERIAL:" + separator;
-        for (PortableMaterial mat : materials) {
+        /*TODO 12.8.24 for (PortableMaterial mat : materials) {
             s += " name=" + mat.name + separator;
             s += " color/diffuse=" + mat.color + separator;
             s += " ambient=" + mat.ambient + separator;
             s += " emis=" + mat.emis + separator;
             s += " spec=" + mat.specular + separator;
             s += " shi=" + mat.getShininess() + separator;
-            s += " trans=" + mat.getTransparencypercent() + separator;
-        }
+            s += " trans=" + mat.getTransparency() + separator;
+        }*/
         return s;
     }
-    
-    /**
-     * Serialisieren geht nur mit den vorgefertigten Geolists, damit es den maximalen Nutzen hat.
-     *
-     * @param outs
-     */
-    public void serialize(NativeOutputStream outs) {
-        outs.writeInt(MAGIC);
-        outs.writeInt(VERSION);
-        outs.writeInt(materials.size());
-        for (PortableMaterial m : materials) {
-            m.serialize(outs);
-        }
-        outs.writeInt(objects.size());
-        for (LoadedObject o : objects) {
-            o.serialize(outs);
-        }
-    }
 
+    public MaterialCandidate findMaterialCandidateByName(String name) {
+        for (int i = 0; i < materials.size(); i++) {
+            if (materials.get(i).name.equals(name)) {
+                return materials.get(i);
+            }
+        }
+        return null;
+    }
 }

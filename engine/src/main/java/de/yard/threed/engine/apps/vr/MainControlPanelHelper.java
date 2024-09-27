@@ -30,7 +30,7 @@ public class MainControlPanelHelper {
 
     public static ControlPanel buildMainControlPanel() {
         Color backGround = controlPanelBackground;
-        Material mat = Material.buildBasicMaterial(backGround, false);
+        Material mat = Material.buildBasicMaterial(backGround, null);
 
         DimensionF rowsize = new DimensionF(PropertyControlPanelWidth, PropertyControlPanelRowHeight);
         ControlPanel cp = new ControlPanel(new DimensionF(PropertyControlPanelWidth, 3 * PropertyControlPanelRowHeight), mat, 0.01);

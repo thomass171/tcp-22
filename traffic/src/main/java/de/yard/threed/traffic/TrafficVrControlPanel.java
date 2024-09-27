@@ -38,7 +38,7 @@ public class TrafficVrControlPanel extends ControlPanel {
      */
     public TrafficVrControlPanel(Map<String, ButtonDelegate> buttonDelegates) {
 
-        super(new DimensionF(ControlPanelWidth, ControlPanelRows * ControlPanelRowHeight), Material.buildBasicMaterial(controlPanelBackground, false), 0.01);
+        super(new DimensionF(ControlPanelWidth, ControlPanelRows * ControlPanelRowHeight), Material.buildBasicMaterial(controlPanelBackground, null), 0.01);
 
         PanelGrid panelGrid = new PanelGrid(ControlPanelWidth, ControlPanelRowHeight, ControlPanelRows, ControlPanelColWidth);
 

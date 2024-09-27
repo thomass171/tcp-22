@@ -28,3 +28,6 @@ textures/Face-red.png
 audio/elevator-ping-01.wav
 audio/elevator-ping-03.wav
 audio/aiwha_ding.wav
+gltf-sample-assets/AlphaBlendModeTest/AlphaBlendModeTest.gltf
+gltf-sample-assets/AlphaBlendModeTest/AlphaBlendModeTest.bin
+gltf-sample-assets/AlphaBlendModeTest/AlphaBlendLabels.png

@@ -3,7 +3,6 @@ package de.yard.threed.core.geometry;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.SmartArrayList;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
@@ -15,6 +14,7 @@ import de.yard.threed.core.Vector3Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by thomass on 06.02.16.
@@ -61,8 +61,11 @@ public class GeometryHelper {
                 face.index2 = handleVertex(face.index2, indexmap, vlist, vertices, nlist, normals);
                 flist.faces.add(face);
             }
-            SimpleGeometry geo = new SimpleGeometry(vlist, flist, nlist);
-            list.add(geo);
+            // 16.9.24 skip/ignore empty lists
+            if (flist.faces.size() > 0) {
+                SimpleGeometry geo = new SimpleGeometry(vlist, flist, nlist);
+                list.add(geo);
+            }
         }
         return list;
     }
@@ -265,87 +268,6 @@ public class GeometryHelper {
         return getNormal(v0, v1, v2, debughelper);
     }
 
-    /**
-     * Eine Berechnung der Vertexnormalen mit Smoothing. Die Normalenvektoren der Faces werden
-     * dafuer zunaechst im Vertex addiert und danach normalisiert.
-     * <p/>
-     * Algorithmus aus http://schemingdeveloper.com/2014/10/17/better-method-recalculate-normals-unity/
-     * <p/>
-     * Dieser einfache Algorithmus geht aber nicht, wenn das smoothing von einem smoothingangle oder einer smoothinfgroup abhaengt.
-     * <p/>
-     * Wenn Eckpunkte nicht gesmoothed werden (können), werden Vertices dupliziert.
-     * <p>
-     * 02.12.16: Verschiedene uvs pro Vertex duerften/sollten hier nicht mehr problematisch sein, weil dafuer vorher schon Vertices dupliziert worden
-     * sein sollten. Hier wird davon ausgegangen, dass die Faces ALLER Listen eine gemeinsame Fläche bilden (unter Berücksichtigung von crease/grouping).
-     * Es werden keine Vertices mit denselben Werten zusammengefasst. Dafuer muss der Aufrufer sorgen. Das würde wegen evtl. unterschiedlicher uv Werte
-     * ja auch gar nicht gehen.
-     * <p>
-     * 15.12.16: Jetzt mit allgemeingültiger SmoothingMap statt crease.
-     *
-     * @param vertices
-     * @param faces
-     * @return
-     */
-    public static List<Vector3> calculateSmoothVertexNormals(List</*7.2.18 Native*/Vector3> vertices, List<Face3List> faces, /*Degree crease,*/ SmoothingMap smoothingMap) {
-
-        if (smoothingMap != null) {
-            // 15.12.16: DER Weg
-            // Initialbefuellung
-            Vector3[] normals = new Vector3[vertices.size()];
-            for (int i = 0; i < normals.length; i++) {
-                normals[i] = new Vector3(0, 0, 0);
-            }
-
-            for (int index : smoothingMap.map.keySet()) {
-                for (Face3 face : smoothingMap.map.get(index)) {
-                    // Mehrere normale in der Face sind obselet.
-                    Vector3 facenormal = face.normal;
-                    normals[index] = MathUtil2.add(normals[index], facenormal);
-                    //normals[face.index1] = MathUtil2.add(normals[face.index1], normal0);
-                    //normals[face.index2] = MathUtil2.add(normals[face.index2], normal0);
-                }
-            }
-            List<Vector3> normallist = new ArrayList<Vector3>();
-            for (int i = 0; i < normals.length; i++) {
-                normallist.add(normals[i].normalize());
-            }
-            return normallist;
-        }
-
-        return (List<Vector3>) Util.notyet();
-        // 15.12.16: Ab hier deprecated
-        /*if (crease == null) {
-            // Initialbefuellung
-            Vector3[] normals = new Vector3[vertices.size()];
-            for (int i = 0; i < normals.length; i++) {
-                normals[i] = Platform.getInstance().buildVector3(0, 0, 0);
-            }
-
-            // Die einfache Form des Smoothing
-            for (Face3List fl : faces) {
-                for (Face gface : fl.faces) {
-                    Face3 face = (Face3) gface;
-                    //Vector3 v0 = vertices.get(face.index0);
-                    //Vector3 v1 = vertices.get(face.index1);
-                    //Vector3 v2 = vertices.get(face.index2);
-                    // Mehrere normale in der Face sind obselet.
-                    Vector3 normal0 = face.normal;
-                    //normal0=Platform.getInstance().buildVector3(1,0,0);
-                    normals[face.index0] = MathUtil2.add(normals[face.index0], normal0);
-                    normals[face.index1] = MathUtil2.add(normals[face.index1], normal0);
-                    normals[face.index2] = MathUtil2.add(normals[face.index2], normal0);
-                }
-            }
-            List<Vector3> normallist = new ArrayList<Vector3>();
-            for (int i = 0; i < normals.length; i++) {
-                normallist.add(MathUtil2.normalize(normals[i]));
-            }
-            return normallist;
-        } else {
-            return new SmoothingHelper().calculateSmoothVertexNormalsByGroups(vertices, faces, crease);
-        }*/
-    }
-
 
     /**
      * Teil aus fruehere Platform.buildMeshG() Methode.
@@ -355,7 +277,14 @@ public class GeometryHelper {
      * 13.7.16: Fuer smooth Shading muessen die Normalen hier berechnet werden, weil in die Berechnung ALLE(?) Faces einfliessen muessen. Das ist aber zweifelhaft, ob das
      * beabsichtigt ist. Andererseits kann man die Entscheidung auch dem Aufrufer ueberlassen. Wenn Faces einen Vertex sharen, wird halt gesmoothed. Sonst soll
      * der Aufrufer den Vertex duplizieren. Ist aber einfacher gesagt. Wenn Modelfiles sowas nunmal so enthalten...
-     * 13.7.16: Das soll jetzt DIE Stelle sein, an der Triangulation, Normalenberechnung bzw. smoothing und Vertexduplizierung stattfindet. Hier werden
+     * 13.7.16: This is the main location for
+     * - triangulation of non Face3 faces
+     * - normal calculation, ie. smoothing und vertex duplication.
+     * - vertex duplication for different uvs
+     * - geometry split of facelists
+     * - facelist flatten
+     * <p>
+     * Hier werden
      * die mehreren Facelisten entweder in eine geflattet oder in mehrere Geometrien gesplittet, je nach dem, wie der
      * Aufrufer es braucht. Das Splitten ist erforderlich, wenn es mehr als ein Material gibt.
      * Es werden keine Vertices mit denselben Werten zusammengefasst. Dafuer muss der Aufrufer sorgen, wenn das wichtig ist (und fuer smoothing duerfte es das sein).
@@ -364,45 +293,96 @@ public class GeometryHelper {
      * TODO Die beiden Parameter muessten in einen mode zusammengefasst werden, weil sich split und hasedges ueberschneiden koennen.
      * <p>
      * 15.12.16: Jetzt mit allgemeingültiger SmoothingMap statt crease.
+     * <p>
+     * 09.09.24: split should/might be done by caller or at least in other method. Will make normal creating
+     * more straightforward here. But for now we do it here.
+     * Flatten at the end however is useful for having multiple facelist with multiple NormalBuilder for use cases like wheel/disc.
+     * Vertices will not be shared across facelists but duplicated, so there will be no smooth shading across facelists. If that
+     * is not intended, the caller should flatten the facelists preliminary.
+     * BTW: The normal calculation of shaded surfaces isn't accurate in many cases due to unbalanced majority of faces connected to a vertex.
      */
-    public static List<SimpleGeometry> prepareGeometry(List</*7.2.18 Native*/Vector3> vertices, List<FaceList> faces,/* List<NativeMaterial> material,*/ List<Vector3> normals, boolean split, Degree crease, boolean hasedges, SmoothingMap smoothingMap) {
-        boolean flatshading = false;
+    public static List<SimpleGeometry> prepareGeometry(List<Vector3> vertices, List<FaceList> faces, List<Vector3> normals, boolean split, Degree crease/*, boolean hasedgesUnused, NormalBuilder normalBuilderUnused*/) {
         // das G steht fuer generic faces.
         List<Face3List> faces3 = GeometryHelper.triangulate(vertices, faces);
+
+        List<VertexMap> vertexMaps = null;
         if (normals == null) {
-            if (flatshading) {
-                // never reached
-            } else {
-                if (faces.size() > 1 && !split && hasedges) {
-                    // Dann gibt es wohl Kanten. Die ziwschen den Facelisten geshareten Vertices duplizieren.
-                    // 25.1.17: Das ist fuer die Normalen wichtig. uvs erfordern vielleicht auch eine Duplizierung. Das wird aber separat gemacht.
-                    /*vertices =*/
-                    duplicateVertices(vertices, faces3);
+            //18.9.24 if (faces.size() > 1 && !split && hasedges) {
+            // Dann gibt es wohl Kanten. Die ziwschen den Facelisten geshareten Vertices duplizieren.
+            // 25.1.17: Das ist fuer die Normalen wichtig. uvs erfordern vielleicht auch eine Duplizierung. Das wird aber separat gemacht.
+            /*vertices =*/
+            //8.9.24 moved to Normalbuilder duplicateVertices(vertices, faces3);
+            //}
+            // wenn zwei Vertices in verschiedenen Faces verschiedene UVs haben, duplizieren. Dann geh ich mal davon aus, dass diese Faces nicht gemeinsam gesmotthed werden
+            // Beispiel egkk_tower
+            //9.9.24 List<UsedIndex> usedIndexes = duplicateVerticesDueToUv(vertices, faces3);
+            // Wenn ich eine SmoothingMap bekomme, verwende ich die. Ansonsten eine StandardMap erstellen. Dazu muessen die Facenormelen noch nicht
+            // bekannt sein.
+            //8.9.24 New approach with NormalBuilder. What does 'unshaded' really mean? We use it as
+            // flag for deciding which NormalBuilder
+            // to use. Note: ac sometimes mixes unshaded with crease, but for unshaded crease is ignored.
+            // See README.md.
+            List<NormalBuilder> normalBuilder = new ArrayList<>();
+            //if (normalBuilder == null) {
+            for (int i = 0; i < faces.size(); i++) {
+
+                //normalBuilder = SmoothingHelper.buildStandardSmoothingMap(vertices, faces3);
+                if (faces.get(i).isShaded()) {
+                    normalBuilder.add(new SmoothShadingNormalBuilder(crease));
+                } else {
+                    normalBuilder.add(new FlatShadingNormalBuilder());
                 }
-                // wenn zwei Vertices in verschiedenen Faces verschiedene UVs haben, duplizieren. Dann geh ich mal davon aus, dass diese Faces nicht gemeinsam gesmotthed werden
-                // Beispiel egkk_tower
-                duplicateVerticesDueToUv(vertices, faces3);
-                // Wenn ich eine SmoothingMap bekomme, verwende ich die. Ansonsten eine StandardMap erstellen. Dazu muessen die Facenormelen noch nicht
-                // bekannt sein.
-                if (smoothingMap == null) {
-                    smoothingMap = SmoothingHelper.buildStandardSmoothingMap(vertices, faces3);
+            }
+            //}
+            calculateMissingFaceNormals(vertices, faces3);
+
+            // be prepared for different NormalBuilder per facelist which shouldn't share vertices.
+            // So create vertex maps per facelist and duplicate vertices as needed.
+            // As a consequence, there will be no smooth shading across facelists!
+            vertexMaps = VertexMap.prepareVertexMaps(vertices, faces3);
+            /*8.9.24
+            // Sicherstellen, dass jedes Face eine Normale enthaelt.
+            calculateMissingFaceNormals(vertices, faces3);
+            if (crease != null) {
+                // Erst wenn die Normalen in den Faces stehen, kann ein Crease eingesetzt werden, um bisher gesharte Vertices zu trennen
+                smoothingMap.applyCrease(vertices, faces3, crease);
+            }
+            normals = GeometryHelper.calculateSmoothVertexNormals(vertices, faces3, /*crease,* /smoothingMap);
+            */
+            Map<Integer, Vector3> normalsMap = new HashMap<Integer, Vector3>();
+            for (int i = 0; i < faces3.size(); i++) {
+                normalsMap.putAll(normalBuilder.get(i).calculateVertexNormals(vertices, faces3.get(i), vertexMaps.get(i)));
+            }
+            normals = new ArrayList<>();
+            while (normals.size() < vertices.size()) {
+                normals.add(null);
+            }
+            for (Integer i : normalsMap.keySet()) {
+                normals.set(i, normalsMap.get(i).normalize());
+            }
+            for (int i = 0; i < normals.size(); i++) {
+                if (normals.get(i) == null) {
+                    logger.warn("missing normal");
+                    normals.set(i, new Vector3());
                 }
-                // Sicherstellen, dass jedes Face eine Normale enthaelt.
-                calculateMissingFaceNormals(vertices, faces3);
-                if (crease != null) {
-                    // Erst wenn die Normalen in den Faces stehen, kann ein Crease eingesetzt werden, um bisher gesharte Vertices zu trennen
-                    smoothingMap.applyCrease(vertices, faces3, crease);
-                }
-                normals = GeometryHelper.calculateSmoothVertexNormals(vertices, faces3, /*crease,*/smoothingMap);
             }
         }
+
+        // 9.9.24 Do this AFTER normal calculation because it might break information about connected faces.
+        // wenn zwei Vertices in verschiedenen Faces verschiedene UVs haben, duplizieren. Dann geh ich mal davon aus, dass diese Faces nicht gemeinsam gesmotthed werden
+        // Beispiel egkk_tower
+        List<UsedIndex> usedIndexes = duplicateVerticesDueToUv(vertices, faces3, normals);
+
         if (faces.size() > 1 /*&& material.size() > 1*/) {
             List<SimpleGeometry> geolist;
             if (split) {
                 // fuer multiple Material
                 geolist = GeometryHelper.extractSubmeshes(vertices, faces3, normals);
             } else {
-                geolist = new SmartArrayList<SimpleGeometry>(new SimpleGeometry(vertices, Face3List.flatten(faces3), normals));
+                SimpleGeometry geo = new SimpleGeometry(vertices, Face3List.flatten(faces3), normals);
+                geo.vertexMaps = vertexMaps;
+                geo.usedIndexes = usedIndexes;
+                geolist = new SmartArrayList<SimpleGeometry>(geo);
             }
             return geolist;
         }
@@ -417,127 +397,113 @@ public class GeometryHelper {
     /**
      * wenn zwei Vertices in verschiedenen Faces verschiedene UVs haben, duplizieren. Dann geh ich mal davon aus, dass diese Faces nicht gemeinsam gesmotthed werden
      * Beispiel egkk_tower
+     * 10.9.24: Normals also need to be duplicated.
      *
      * @param vertices
      * @param faces3
      */
-    private static void duplicateVerticesDueToUv(List</*7.2.18 Native*/Vector3> vertices, List<Face3List> faces3) {
-        List</*7.2.18 Native*/Vector3> nvertices = new ArrayList<Vector3>();
+    private static List<UsedIndex> duplicateVerticesDueToUv(List</*7.2.18 Native*/Vector3> vertices, List<Face3List> faces3, List<Vector3> normals) {
+        List<Vector3> nvertices = new ArrayList<Vector3>();
+        List<Vector3> nnormals = new ArrayList<Vector3>();
         // In welchem Face wurde ein Vertex verwendet. Es mag auch noch andere Faces geben, aber da sind die uvs dieselben, daher brauchts hier nur das erste Face
         HashMap<Integer, Face3> faceofvertex = new HashMap<Integer, Face3>();
+        List<UsedIndex> usedIndexes = new ArrayList<>();
+
         for (Face3List fl : faces3) {
             for (Face f : fl.faces) {
                 Face3 face = (Face3) f;
                 if (face.hasUV) {
                     // ohne uvs witzlos
-                    checkFaceVertex(vertices, face, face.index0, face.uv[0], faceofvertex, nvertices);
-                    checkFaceVertex(vertices, face, face.index1, face.uv[1], faceofvertex, nvertices);
-                    checkFaceVertex(vertices, face, face.index2, face.uv[2], faceofvertex, nvertices);
+                    face.index0 = checkFaceVertex(vertices, face, face.index0, face.uv[0], faceofvertex, nvertices, usedIndexes, normals, nnormals);
+                    face.index1 = checkFaceVertex(vertices, face, face.index1, face.uv[1], faceofvertex, nvertices, usedIndexes, normals, nnormals);
+                    face.index2 = checkFaceVertex(vertices, face, face.index2, face.uv[2], faceofvertex, nvertices, usedIndexes, normals, nnormals);
                 }
             }
         }
         vertices.addAll(nvertices);
+        normals.addAll(nnormals);
+        return usedIndexes;
     }
 
-    private static void checkFaceVertex(List</*7.2.18 Native*/Vector3> vertices, Face3 face, int index, Vector2 uv, HashMap<Integer, Face3> faceofvertex, List</*7.2.18 Native*/Vector3> nvertices) {
-        Face3 faceref;
-        if ((faceref = faceofvertex.get(index)) == null) {
+    private static int checkFaceVertex(List<Vector3> vertices, Face3 face, int indexInFace, Vector2 uv,
+                                       HashMap<Integer, Face3> faceofvertex, List<Vector3> nvertices, List<UsedIndex> usedIndexes,
+                                       List<Vector3> normals, List<Vector3> nnormals) {
+        /*Face3 faceref;
+        if ((faceref = faceofvertex.get(indexInFace)) == null) {
             // Vertex noch nicht verwendet.
-            faceofvertex.put(index, face);
+            faceofvertex.put(indexInFace, face);
             return;
         }
-        // Vertex wurde schon mal in faceref verwendet. Ich geh mal davon aus, dass ein Index nur einmal verwendet wird (darum der else).
-        // Es gibt da zwar mal Anomalien, aber das ist dann doch eh krumm.
-        if (faceref.index0 == index && !uv.equalsVector2(faceref.uv[0])) {
-            //duplizieren
-            nvertices.add(vertices.get(index));
-            face.replaceIndex(index, vertices.size() + nvertices.size() - 1);
+        // Vertex "indexInFace" already used for a face. Assume an index is only used once per face, so we can use "else".
+        // 5.9.24: It might happen that we duplicate a vertex more than once just because we do not track the duplicate in
+        // "faceofvertex". Maybe even more often for twosided. But that should be no problem, just a little waste of resources.
+        // tracking not easy?!
+        if (faceref.index0 == indexInFace && !uv.equalsVector2(faceref.uv[0])) {
+            fixIndexOfFaceForDifferentUV(vertices, face, indexInFace,faceofvertex, nvertices);
         } else {
-            if (faceref.index1 == index && !uv.equalsVector2(faceref.uv[1])) {
-                //duplizieren
-                nvertices.add(vertices.get(index));
-                face.replaceIndex(index, vertices.size() + nvertices.size() - 1);
+            if (faceref.index1 == indexInFace && !uv.equalsVector2(faceref.uv[1])) {
+                fixIndexOfFaceForDifferentUV(vertices, face, indexInFace,faceofvertex, nvertices);
             } else {
-                if (faceref.index2 == index && !uv.equalsVector2(faceref.uv[2])) {
-                    //duplizieren
-                    nvertices.add(vertices.get(index));
-                    face.replaceIndex(index, vertices.size() + nvertices.size() - 1);
+                if (faceref.index2 == indexInFace && !uv.equalsVector2(faceref.uv[2])) {
+                    fixIndexOfFaceForDifferentUV(vertices, face, indexInFace,faceofvertex, nvertices);
                 }
             }
-        }
-    }
-
-    /**
-     * Mehrfach verwendete Vertices derart duplizieren, dass jede Facelist quasi ihre eigenen hat. Erforderlich bei Kanten in der Geometrie, z.B. Boxen.
-     * Die Indizes in den Facelists werden hier angepasst.
-     * 5.12.16: Die Indizes in die schon vorhandenen Vertices sollen aber nicht verändert werden. Das ist für Analysen sonst total verwirrend.
-     * Darum gibt es auch keine neue Liste, sondern die bestehende wird erweitert. Das heisst füer Cubes aber, dass die bisherige Symmetrie bei der uv Zuordnung
-     * nicht mehr besteht? Das ist eh nur fuer generisches testen wichtig.
-     *
-     * @param vertices
-     * @param faces3
-     * @return
-     */
-    private static /*List<Vector3>*/void duplicateVertices(List</*7.2.18 Native*/Vector3> vertices, List<Face3List> faces3) {
-        // in welche Facelist gehoert ein Vertex
-        HashMap<Integer, Integer> vertexowner = new HashMap<Integer, Integer>();
-
-        List</*7.2.18 Native*/Vector3> nvertices = new ArrayList</*7.2.18 Native*/Vector3>();
-        int facelistindex = 0;
-        for (Face3List fl : faces3) {
-            // Pro Facelist Indizes auf alte Liste auf Indizes auf neue Liste mappen.
-            HashMap<Integer, Integer> facemap = new HashMap<Integer, Integer>();
-            for (Face f : fl.faces) {
-                Face3 face = (Face3) f;
-                face.index0 = handleVertex(vertices, face.index0, facemap, nvertices, vertexowner, facelistindex);
-                face.index1 = handleVertex(vertices, face.index1, facemap, nvertices, vertexowner, facelistindex);
-                face.index2 = handleVertex(vertices, face.index2, facemap, nvertices, vertexowner, facelistindex);
-            }
-            facelistindex++;
-        }
-        vertices.addAll(nvertices);
-        //return nvertices;
-    }
-
-    /**
-     * Liefert den neuen Index (Index in die neue Liste) dieses Vertex.
-     *
-     * @param vertices
-     * @param index
-     * @param facemap
-     * @param nvertices
-     * @param vertexowner
-     * @return
-     */
-    private static int handleVertex(List</*7.2.18 Native*/Vector3> vertices, int index, HashMap<Integer, Integer> facemap, List</*7.2.18 Native*/Vector3> nvertices, HashMap<Integer, Integer> vertexowner, int facelistindex) {
-        Integer i;
-        /*if ((i = facemap.get(index)) == null) {
-            // Noch kein Mapping für diesen Index/Vertex
-            nvertices.add(vertices.get(index));
-            i = nvertices.size() - 1;
-            facemap.put(index, i);
         }*/
-        if (vertexowner.get(index) == null) {
-            // Vertex ist noch keiner Facelist zugeordnet. Kann dann so uebernommen werden.
-            vertexowner.put(index, facelistindex);
-            return index;
+        /* case 2:
+                // index found but different uv
+                usedIndexes.add(new Pair(indexInFace, uv));
+                fixIndexOfFaceForDifferentUV(vertices, face, indexInFace, faceofvertex, nvertices);
+                usedIndexes.add(new Pair(indexInFace, uv));
+*/
+
+        boolean foundIndex = false;
+        for (int i = 0; i < usedIndexes.size(); i++) {
+            UsedIndex p = usedIndexes.get(i);
+            if (p.index == indexInFace) {
+                foundIndex = true;
+                if (p.uv.equalsVector2(uv)) {
+                    // found with same uv. Nothing to do, Just keep it
+                    return indexInFace;
+                } /*else {
+                    return 2;
+                }*/
+            }
+            // do we know a duplicate?
+            if (p.duplicateOf != -1 && p.duplicateOf == indexInFace) {
+                if (p.uv.equalsVector2(uv)) {
+                    // found duplicate of indexInFace with same uv. We can be sure that the original will
+                    // not fit due to uv. So replace in face.
+                    return p.duplicateOf;
+                } /*else {
+                    return 2;
+                }*/
+            }
         }
-        // Neumapping und evtl. neuer Vertex erforderlich
-        if (vertexowner.get(index) == facelistindex) {
-            // Vertex ist dieser Facelist zugeordnet. Kann dann auch so uebernommen werden.
-            return index;
+        if (foundIndex) {
+            // 25.9.24 not really helpful logger.debug("Duplicating index ");
+
+            // found index, but not expected nor duplicated fits. Duplicate it.
+            nvertices.add(vertices.get(indexInFace));
+            nnormals.add(normals.get(indexInFace));
+            int newIndex = vertices.size() + nvertices.size() - 1;
+            usedIndexes.add(new UsedIndex(newIndex, uv, indexInFace));
+            return newIndex;
         }
-        if ((i = facemap.get(index)) == null) {
-            // Noch kein Mapping für diesen neuen Index/Vertex vorhanden
-            nvertices.add(vertices.get(index));
-            i = vertices.size() + nvertices.size() - 1;
-            facemap.put(index, i);
-        }
-        return (int) i;
+        // index not found at all. Just register with uv and keep it
+        usedIndexes.add(new UsedIndex(indexInFace, uv));
+        return indexInFace;
     }
+
+    private static void fixIndexOfFaceForDifferentUV(List<Vector3> vertices, Face3 face, int indexInFace, HashMap<Integer, Face3> faceofvertex, List<Vector3> nvertices) {
+        nvertices.add(vertices.get(indexInFace));
+        int newIndex = vertices.size() + nvertices.size() - 1;
+        face.replaceIndex(indexInFace, newIndex);
+        //faceofvertex.put(newIndex, face);
+    }
+
 
     public static List<SimpleGeometry> prepareGeometry(List</*7.2.18 Native*/Vector3> vertices, List<FaceList> faces,/* List<NativeMaterial> material,*/ List<Vector3> normals, boolean split, boolean hasedges) {
-        return prepareGeometry(vertices, faces, normals, split, null, hasedges, null);
+        return prepareGeometry(vertices, faces, normals, split, null/*, hasedges, null*/);
     }
 
     /**

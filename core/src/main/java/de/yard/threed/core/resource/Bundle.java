@@ -1,6 +1,8 @@
 package de.yard.threed.core.resource;
 
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.platform.AsyncHttpResponse;
+import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
@@ -13,6 +15,7 @@ import java.util.Map;
 /**
  * Koennte auch schoen ein Interface sein, das manche Platformen als zip/jar implementieren. Das macht die GWT Implementierung aber schwieriger bzw. anfällig.
  * Kann auch null für ein Element liefern, wenn es beim Lesen einen Fehler gab.
+ * 27.8.24:'delayed' reactivated.
  * <p>
  * Created by thomass on 09.04.17.
  */
@@ -36,10 +39,10 @@ public class Bundle {
      * @param directory
      * @param basepath  is location + bundlename
      */
-    public Bundle(String name, String[] directory, String basepath) {
+    public Bundle(String name, boolean delayed, String[] directory, String basepath) {
         this.name = name;
         this.directory = new ArrayList<>();
-        this.delayed = false;
+        this.delayed = delayed;
         this.basepath = basepath;
         // 14.2.24: Be more consistent with path names and do not allow leading "./" or "/".
         for (String d : directory) {
@@ -257,5 +260,9 @@ public class Bundle {
 
     public boolean isCompleted() {
         return completedAt > 0;
+    }
+
+    public boolean isDelayed() {
+        return delayed;
     }
 }

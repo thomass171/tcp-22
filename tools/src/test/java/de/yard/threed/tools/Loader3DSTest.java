@@ -25,6 +25,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 /**
  * Created by thomass on 08.02.16.
@@ -42,8 +44,8 @@ public class Loader3DSTest {
         shuttle = new Loader3DS(new ByteArrayInputStream(new SimpleByteBuffer(IOUtils.toByteArray(inputStream))));
 
         System.out.println(shuttle.loadedfile.dumpMaterial("\n"));
-        Assertions.assertEquals(1, shuttle.loadedfile.objects.size());
-        Object3DS shutlayer = (Object3DS) shuttle.loadedfile.objects.get(0);
+        assertNotNull(shuttle.loadedfile.object);
+        Object3DS shutlayer = (Object3DS) shuttle.loadedfile.object.kids.get(0);
         Assertions.assertEquals(9876, shutlayer.vertices.size(), "vertices");
         Assertions.assertEquals(9876, shutlayer.texcoords.size(), "texcoords");
         Assertions.assertEquals(42, shutlayer.getFaceLists().size(), "face lists");
@@ -60,11 +62,11 @@ public class Loader3DSTest {
             InputStream inputStream = new FileInputStream(TestUtils.locatedTestFile(srcfile));
             Loader3DS shuttle = new Loader3DS(new ByteArrayInputStream(new SimpleByteBuffer(IOUtils.toByteArray(inputStream))));
             System.out.println(shuttle.loadedfile.dumpMaterial("\n"));
-            Assertions.assertEquals(1, shuttle.loadedfile.objects.size());
-            LoadedObject shutlayer = shuttle.loadedfile.objects.get(0);
+            assertNotNull(shuttle.loadedfile.object);
+            LoadedObject shutlayer = shuttle.loadedfile.object.kids.get(0);
             Assertions.assertEquals(9876, shutlayer.vertices.size(), "vertices");
             Assertions.assertEquals(42, shutlayer.getFaceLists().size(), "face lists");
-            List<SimpleGeometry> geolist = GeometryHelper.prepareGeometry(shutlayer.vertices, shutlayer.getFaceLists(), null, true, null, false, null);
+            List<SimpleGeometry> geolist = GeometryHelper.prepareGeometry(shutlayer.vertices, shutlayer.getFaceLists(), null, true, null/*, false, null*/);
             Assertions.assertEquals(42, geolist.size(), "geolist size");
             Assertions.assertEquals(2072 * 3, geolist.get(0).getIndices().length, "geolist 0 faces size");
             Assertions.assertEquals(572, geolist.get(0).getVertices().size(), "geolist 0 vertices size");

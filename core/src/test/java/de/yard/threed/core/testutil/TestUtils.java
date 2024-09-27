@@ -12,13 +12,20 @@ import de.yard.threed.core.Pair;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.Vector3Array;
+import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.resource.BundleRegistry;
 import org.junit.jupiter.api.Assertions;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,6 +36,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Date: 21.02.23
  */
 public class TestUtils {
+
+    static Log log = Platform.getInstance().getLog(TestUtils.class);
     //26.8.15: Sometimes there are great tolerances, but these are probably bugs.
     // public static float floattesttolerance = 0.001f;
     //28.8.16: 0.001->0.005 for picking ray maze
@@ -147,6 +156,13 @@ public class TestUtils {
         }
     }
 
+    public static void assertVector3Array(String msg, List<Vector3> expected, Vector3Array actual) {
+        for (int i = 0; i < expected.size(); i++) {
+            Util.notyet();
+            //Assertions.assertEquals(expected[i], actual[i], msg + "" + i);
+        }
+    }
+
     public static void assertPoint(Point expected, Point actual) {
         assertPoint(expected, actual, "");
     }
@@ -228,6 +244,7 @@ public class TestUtils {
 
     /**
      * 10.2.24: Deprecated in favor of loadFileFromTestResources because classpath isn't src/test/resources but target directory(?).
+     *
      * @param fileName
      * @return
      * @throws Exception
@@ -250,5 +267,15 @@ public class TestUtils {
 
     public static byte[] loadFileFromResources(String relFilename) throws Exception {
         return loadFileFromPath(Paths.get(System.getProperty("user.dir") + "/src/main/resources/" + relFilename));
+    }
+
+    public static boolean listComplete(List<String> list, List<String> expectedEntries) {
+        for (String expectedEntry : expectedEntries) {
+            if (!list.contains(expectedEntry)) {
+                log.debug("Missing in list:" + expectedEntry);
+                return false;
+            }
+        }
+        return true;
     }
 }

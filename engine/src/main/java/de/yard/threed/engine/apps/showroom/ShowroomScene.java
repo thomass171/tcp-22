@@ -383,7 +383,7 @@ public class ShowroomScene extends Scene {
     private static double PropertyControlPanelMargin = 0.005;
 
     private ControlPanel buildControlPanel(Color backGround) {
-        Material mat = Material.buildBasicMaterial(backGround, false);
+        Material mat = Material.buildBasicMaterial(backGround, null);
 
         DimensionF rowsize = new DimensionF(PropertyControlPanelWidth, PropertyControlPanelRowHeight);
         ControlPanel cp = new ControlPanel(new DimensionF(PropertyControlPanelWidth, 3 * PropertyControlPanelRowHeight), mat, 0.01);
@@ -461,7 +461,7 @@ public class ShowroomScene extends Scene {
      */
     private ControlPanel buildVrControlPanel(Map<String, ButtonDelegate> buttonDelegates) {
         Color backGround = controlPanelBackground;
-        Material mat = Material.buildBasicMaterial(backGround, false);
+        Material mat = Material.buildBasicMaterial(backGround, null);
 
         double ControlPanelWidth = 0.6;
         double ControlPanelRowHeight = 0.1;

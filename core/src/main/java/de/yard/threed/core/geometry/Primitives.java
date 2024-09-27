@@ -53,18 +53,18 @@ public class Primitives {
      * Die Geo läuft nachher über prepareGeometry(). Ist damit eigentlich keine im Sinne meines Primitive Verstaendnisses.
      * TODO: Die Box hat mit Normalmap eine "kaputte" Seite. Evtl. hat das Smoothing eine Macke.
      * Diese Methode ist zum Test des Smoothing.
-     *
+     * 8.9.24: Never used? Remove because replaced by either primives or other
      * @param width
      * @param height
      * @param depth
      * @return
      */
-    public static SimpleGeometry buildBoxWithSmoothing(double width, double height, double depth) {
+   /* public static SimpleGeometry buildBoxWithSmoothing(double width, double height, double depth) {
         //Platform platform = ((Platform) Platform.getInstance());
         double w2 = width / 2;
         double h2 = height / 2;
         double d2 = depth / 2;
-        List</*7.2.18 Native*/Vector3> vertices = new ArrayList</*7.2.18 Native*/Vector3>();
+        List</*7.2.18 Native* /Vector3> vertices = new ArrayList</*7.2.18 Native* /Vector3>();
         FaceList faces = new FaceList();
 
         vertices.add(new Vector3(-w2, -h2, d2));
@@ -96,7 +96,7 @@ public class Primitives {
         // TODO: 01.12.16:ob das mit den uvs hinhaut ist fraglich, denn es fehlen Edges und damit eine Vertexduplizierung. umstellen auf smoothingmap
         SimpleGeometry geo = GeometryHelper.prepareGeometry(vertices, new SmartArrayList<FaceList>(faces), null, false, new Degree(30), false, null).get(0);
         return geo;
-    }
+    }*/
 
     /**
      * Kugel mit "Nordpol" im positivem y und "Suedpol" im negativen y. UV (0,0) ist am Suedpol.

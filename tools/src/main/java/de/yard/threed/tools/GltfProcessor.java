@@ -5,7 +5,7 @@ import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.loader.LoaderAC;
 import de.yard.threed.core.loader.LoaderGLTF;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.PortableModelList;
+import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.loader.AbstractLoaderBuilder;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import de.yard.threed.javacommon.DefaultResourceReader;
@@ -17,7 +17,6 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.loader.StringReader;
-import de.yard.threed.javacommon.SimpleHeadlessPlatform;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.apache.commons.io.FileUtils;
 
@@ -45,7 +44,7 @@ public class GltfProcessor {
 
     private Log logger = Platform.getInstance().getLog(GltfProcessor.class);
 
-    public GltfProcessor(){
+    public GltfProcessor() {
 
     }
 
@@ -113,7 +112,8 @@ public class GltfProcessor {
                 customLoader = buildDynamicLoader(loaderClass.get());
             }
             // AC world will be ignored.
-            gltf = gltfbuilder.process(loadBySuffix(inputfile, true, customLoader));
+            // 2.8.24: No longer ignore root because we need a single root as we no longer have to top "geolist" in PortableModel.
+            gltf = gltfbuilder.process(loadBySuffix(inputfile, false, customLoader));
         } catch (InvalidDataException e) {
             System.out.println("InvalidDataException:" + e.getMessage());
             return gltf;
@@ -130,12 +130,9 @@ public class GltfProcessor {
         try {
             SimpleByteBuffer binbuffer = new SimpleByteBuffer(FileUtils.readFileToByteArray(bininput));
             LoaderGLTF loaderGLTF = new LoaderGLTF(gltfinput, binbuffer, null, "");
-            PortableModelList pml = loaderGLTF.doload();
-            for (int i = 0; i < pml.getObjectCount(); i++) {
-                PortableModelDefinition obj = pml.getObject(i);
-                dumpObject(obj);
-
-            }
+            PortableModel pml = loaderGLTF.doload();
+            PortableModelDefinition obj = pml.getRoot();
+            dumpObject(obj);
         } catch (InvalidDataException e) {
             System.out.println("InvalidDataException:" + e.getMessage());
             return;
@@ -144,9 +141,8 @@ public class GltfProcessor {
 
     private void dumpObject(PortableModelDefinition obj) {
         System.out.println("Node " + obj.name);
-        for (int j = 0; j < obj.geolist.size(); j++) {
-            dumpGeo(obj.geolist.get(j), obj.geolistmaterial.get(j));
-        }
+
+        dumpGeo(obj.geo, obj.material);
         System.out.println("Kids " + obj.kids.size());
         for (int i = 0; i < obj.kids.size(); i++) {
             dumpObject(obj.kids.get(i));
@@ -215,7 +211,7 @@ public class GltfProcessor {
      *
      * @throws InvalidDataException
      */
-    private PortableModelList loadBySuffix(String filename, boolean ignoreacworld, AbstractLoaderBuilder customLoader) throws
+    private PortableModel loadBySuffix(String filename, boolean ignoreacworld, AbstractLoaderBuilder customLoader) throws
             InvalidDataException, IOException {
         //String filename = file.getName();
         String extension;// = file.getExtension();
@@ -228,7 +224,11 @@ public class GltfProcessor {
         }
         if (customLoader != null && customLoader.supports(extension)) {
             AbstractLoader loader = customLoader.buildAbstractLoader(ins, filename);
-            return loader.preProcess();
+            PortableModel portableModel = loader.buildPortableModel();
+            if (portableModel.getName() == null) {
+                portableModel.setName(filename);
+            }
+            return portableModel;
         }
         if (extension.equals("3ds")) {
             //22.8.21 TODO 3DS plugin
@@ -241,12 +241,15 @@ public class GltfProcessor {
         if (extension.equals("ac")) {
 
             AbstractLoader loader = new LoaderAC(new StringReader(new String(ins)), ignoreacworld);
-            // Bei einem Fehler ist er schon ausgestiegen
-            // TO DO Wenn das ac in einem jar lag, muss der texturepath auch noch den bundlkepfad enthalten!
-            // 6.12.17: Von wann ist das denn? brauchts das wirklich? mal ohne versuchen. Nein, das geht nicht bei readerwriterstg.
-            // 28.12.17: ob das jetzt so aber geht?
-            loader.loadedfile.texturebasepath = new ResourcePath(StringUtils.substringBeforeLast(filename, "/"));//.file.getPath();
-            PortableModelList ppfile = loader.preProcess();
+            // Threw exception in case of error
+            // Keep source path where the AC file came from for 'texturebasepath'. This will be the default lookup
+            // location for textures later.
+            loader.loadedfile.texturebasepath = new ResourcePath(StringUtils.substringBeforeLast(filename, "/"));
+            PortableModel ppfile = loader.buildPortableModel();
+            // 29.7.24 Also set optional file name for better tracking
+            if (ppfile.getName() == null) {
+                ppfile.setName(filename);
+            }
             return ppfile;
         }
 

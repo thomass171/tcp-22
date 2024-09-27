@@ -58,6 +58,7 @@ public class WebGlMaterial implements NativeMaterial {
     public static NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> colors, HashMap<String, NativeTexture> textures, HashMap<NumericType, NumericValue> params, Effect effect) {
         Color col = (colors == null) ? null : colors.get(ColorType.MAIN);
         Float transparency = NumericValue.transparency(params);
+        logger.debug("buildMaterial: name=" + name + ",col=" + col + ",params=" + params + ",effect=" + effect);
 
         if (effect != null) {
             logger.debug("Building effect " + effect.name);
@@ -108,7 +109,8 @@ public class WebGlMaterial implements NativeMaterial {
             if (texture != null) {
                 mat = new WebGlMaterial(name, buildBasicMaterialNative(texture.texture, transparent));
             } else {
-                mat = new WebGlMaterial(name, buildBasicMaterialNative(col.getRGB(), transparent));
+                // 25.9.24: Also needs alpha channel for transparency
+                mat = new WebGlMaterial(name, buildBasicMaterialNative(col.getARGB()/*col.getRGB()*/, transparency));
             }
         } else {
             // Wenn eine Shininess definiert ist, Phong nehmen, sonst Lambert.
@@ -121,8 +123,8 @@ public class WebGlMaterial implements NativeMaterial {
                     mat = new WebGlMaterial(name, buildPhongMaterialNative(texture.texture, (normalmap == null) ? null : normalmap.texture, transparent));
                 } else {
                     // hier duerfte normalmap auch keinen Sinn machen.
-                    //logger.debug("buildPhongMaterialNative");
-                    mat = new WebGlMaterial(name, buildPhongMaterialNative(col.getARGB(), transparent));
+                    //logger.debug("buildPhongMaterialNative transparent=" + transparent);
+                    mat = new WebGlMaterial(name, buildPhongMaterialNative(col.getARGB(), transparency));
                 }
             } else {
                 if (texture != null) {
@@ -262,13 +264,23 @@ public class WebGlMaterial implements NativeMaterial {
         return mat;
     }-*/;
 
-    private static native JavaScriptObject buildPhongMaterialNative(int col, boolean transparent)  /*-{
-        var mat = new $wnd.THREE.MeshPhongMaterial({color: col, transparent : transparent});
+    private static native JavaScriptObject buildPhongMaterialNative(int col, Float transparency)  /*-{
+        var mat = null;
+        if (transparency == null) {
+             mat = new $wnd.THREE.MeshPhongMaterial({color: col});
+         } else {
+             mat = new $wnd.THREE.MeshPhongMaterial({color: col, transparent: true, opacity: 1.0 - transparency});
+        }
         return mat;
     }-*/;
 
-    private static native JavaScriptObject buildBasicMaterialNative(int col, boolean transparent)  /*-{
-        var mat = new $wnd.THREE.MeshBasicMaterial({color: col, transparent : transparent});
+    private static native JavaScriptObject buildBasicMaterialNative(int col, Float transparency)  /*-{
+        var mat;
+         if (transparency == null) {
+             mat = new $wnd.THREE.MeshBasicMaterial({color: col});
+         } else {
+             mat = new $wnd.THREE.MeshBasicMaterial({color: col, transparent: true, opacity: 1.0 - transparency});
+        }
         return mat;
     }-*/;
 

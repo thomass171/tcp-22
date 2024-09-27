@@ -67,12 +67,12 @@ public class Material {
         return map;
     }
 
-    protected static HashMap<NumericType, NumericValue> buildParamList(boolean transparent, int shading) {
+    protected static HashMap<NumericType, NumericValue> buildParamList(Double transparency, int shading) {
         HashMap<NumericType, NumericValue> paramlist = new HashMap<NumericType, NumericValue>();
 
-        if (transparent) {
-            //TODO stimmt die 1?, oder wie ist der Wertebereich?
-            paramlist.put(NumericType.TRANSPARENCY, new NumericValue(1));
+        if (transparency != null) {
+            // 1 is full transparency while 0 is opak. This is opposite to the alpha channel values.
+            paramlist.put(NumericType.TRANSPARENCY, new NumericValue(transparency.floatValue()));
         }
         paramlist.put(NumericType.SHADING, new NumericValue(shading));
         return paramlist;
@@ -164,9 +164,9 @@ public class Material {
         return new Material(Platform.getInstance().buildMaterial(null, null, buildTextureMap(texture), null, null));
     }
 
-    public static Material buildLambertMaterial(Texture texture, boolean transparent, boolean flatshading) {
+    public static Material buildLambertMaterial(Texture texture, Double transparency, boolean flatshading) {
         return new Material(Platform.getInstance().buildMaterial(null, null, buildTextureMap(texture),
-                buildParamList(transparent, (flatshading) ? NumericValue.FLAT : NumericValue.SMOOTH), null));
+                buildParamList(transparency, (flatshading) ? NumericValue.FLAT : NumericValue.SMOOTH), null));
     }
 
     /**
@@ -179,17 +179,17 @@ public class Material {
      * 29.4.19: Obwohl unshaded, wird es in JME offenbar doch etwas geshaed (z.B. manche linke Seite tower, ander aber nicht??)
      */
     public static Material buildBasicMaterial(Texture texture) {
-        return buildBasicMaterial(texture, null, false);
+        return buildBasicMaterial(texture, null, null);
     }
 
     public static Material buildBasicMaterial(Texture texture, Effect effect) {
-        return buildBasicMaterial(texture, effect, false);
+        return buildBasicMaterial(texture, effect, null);
     }
 
-    public static Material buildBasicMaterial(Texture texture, Effect effect, boolean transparent) {
+    public static Material buildBasicMaterial(Texture texture, Effect effect, Double transparency) {
         //super(texture);
         return new Material(Platform.getInstance().buildMaterial(null, null,
-                buildTextureMap(texture), buildParamList(transparent, NumericValue.UNSHADED), effect));
+                buildTextureMap(texture), buildParamList(transparency, NumericValue.UNSHADED), effect));
     }
 
     public static Material buildBasicMaterial(Color color) {
@@ -199,10 +199,10 @@ public class Material {
     }
 
     //28.4.21
-    public static Material buildBasicMaterial(Color color, boolean transparent) {
+    public static Material buildBasicMaterial(Color color, Double transparency) {
         //super(color);
         return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color),
-                null, buildParamList(transparent, NumericValue.UNSHADED), null));
+                null, buildParamList(transparency, NumericValue.UNSHADED), null));
     }
 
     /**
@@ -214,11 +214,11 @@ public class Material {
     }*/
 
     //TODO 11.3.16: der effect wird so evtl. nicht mehr gehen
-    public static Material buildCustomShaderMaterial(String uniformname, Texture texture, Effect effect, boolean transparent) {
+    public static Material buildCustomShaderMaterial(String uniformname, Texture texture, Effect effect, Double transparency) {
         //super((Color)null);
         HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
         map.put(uniformname, texture.texture);
-        return new Material(Platform.getInstance().buildMaterial(null, null, map, buildParamList(transparent, NumericValue.SMOOTH), effect));
+        return new Material(Platform.getInstance().buildMaterial(null, null, map, buildParamList(transparency, NumericValue.SMOOTH), effect));
     }
 
     public static Material buildCustomShaderMaterial(Texture texture) {

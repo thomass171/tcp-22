@@ -25,14 +25,18 @@ do
         checkrc mvn
 done
 
+# 3.8.24 Some tests in engine need pcm from bundle
+mvn install -DskipTests=true
+checkrc mvn
+
+sh bin/deployBundle.sh  -m engine
+checkrc deployBundle
+
 mvn install
 checkrc mvn
 
 sh bin/deploy.sh
 checkrc deploy
-
-sh bin/deployBundle.sh  -m engine
-checkrc deployBundle
 
 for m in core engine maze outofbrowser-common graph traffic-core traffic
 do

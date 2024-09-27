@@ -17,46 +17,57 @@ public class NumericValue {
     float fvalue;
     boolean isfloat;
 
-    public NumericValue(float f){
+    public NumericValue(float f) {
         this.fvalue = f;
-        isfloat=true;
+        isfloat = true;
     }
 
-    public NumericValue(int f){
+    public NumericValue(int f) {
         this.ivalue = f;
-        isfloat=false;
+        isfloat = false;
     }
 
     public static boolean unshaded(HashMap<NumericType, NumericValue> parameters) {
-        if (parameters == null){
+        if (parameters == null) {
             return false;
         }
         NumericValue p = parameters.get(NumericType.SHADING);
-        if (p == null){
+        if (p == null) {
             return false;
         }
         return p.ivalue == UNSHADED;
     }
 
     public static boolean flatshading(HashMap<NumericType, NumericValue> parameters) {
-        if (parameters == null){
+        if (parameters == null) {
             return false;
         }
         NumericValue p = parameters.get(NumericType.SHADING);
-        if (p == null){
+        if (p == null) {
             return false;
         }
         return p.ivalue == FLAT;
     }
 
     public static Float transparency(HashMap<NumericType, NumericValue> parameters) {
-        if (parameters == null){
+        if (parameters == null) {
             return null;
         }
         NumericValue p = parameters.get(NumericType.TRANSPARENCY);
-        if (p == null){
+        if (p == null) {
             return null;
         }
-        return new Float(p.ivalue);
+        if (p.isfloat) {
+            return Float.valueOf(p.fvalue);
+        }
+        return Float.valueOf(p.ivalue);
+    }
+
+    @Override
+    public String toString() {
+        if (isfloat) {
+            return "" + fvalue;
+        }
+        return "" + ivalue;
     }
 }
