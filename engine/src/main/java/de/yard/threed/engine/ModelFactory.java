@@ -31,8 +31,10 @@ public class ModelFactory {
      * instead of delegate.
      * 18.10.23: core loader no more 'ac', so only gltf any more. ac file mapping extracted to tcp-flightgear.
      * 15.2.24: Decoupled from bundle(Resource)
+     * 11.10.2024: However, this method prevents error handling when a model couldn't be loaded.
+     *
      * @param loaderoptions
-     * @return
+     * @return the destination node
      */
     public static SceneNode asyncModelLoad(ResourceLoader resourceLoader, int loaderoptions) {
         SceneNode destination = new SceneNode();

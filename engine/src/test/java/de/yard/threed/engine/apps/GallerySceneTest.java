@@ -1,7 +1,9 @@
-package de.yard.threed.engine;
+package de.yard.threed.engine.apps;
 
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.testutil.TestUtils;
+import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.javacommon.ConfigurationByEnv;
 import lombok.extern.slf4j.Slf4j;
@@ -11,45 +13,45 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import static de.yard.threed.javanative.JavaUtil.sleepMs;
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Depends on external bundle 'nasa'.
+ *
  */
 @Slf4j
-public class ReferenceSceneTest {
+public class GallerySceneTest {
 
     SceneRunnerForTesting sceneRunner;
     static final int INITIAL_FRAMES = 30;
 
     /**
-     * 13.12.23 disabled because breaks GuiGridTest.
+     *
      */
-    @ParameterizedTest
-    @CsvSource({"false"})
-    @Disabled
-    public void testReferenceScene(boolean enableFPC) throws Exception {
+    @Test
+    public void testGalleryScene() throws Exception {
         HashMap<String, String> customProperties = new HashMap<String, String>();
-        customProperties.put("enableFPC", Boolean.toString(enableFPC));
         setup(customProperties);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
 
         assertEquals(2, BundleRegistry.getBundleNames().length);
-        //order is not deterministic assertEquals("data", BundleRegistry.getBundleNames()[0]);
         assertNotNull(BundleRegistry.getBundle("engine"));
         assertNotNull(BundleRegistry.getBundle("data"));
 
-        // could be optimized for speed
-        for (int i = 0; i < 50; i++) {
-            sceneRunner.runLimitedFrames(1, 0.1);
-            sleepMs(100);
-        }
-        //nasa not ending in registry??
-        //TestUtils.waitUntil(BundleRegistry.getBundle("nasa")!=null);
+        // wait for entities. No load error will occur for 'yy.gltf' in SimpleHeadlessPlatform!
+        TestUtils.waitUntil(() -> SystemManager.findEntities(null).size() >= 8, 10000);
+
+        List<EcsEntity> entities = SystemManager.findEntities(null);
+        assertEquals(6/*objects*/ + 1/*yy.gltf*/ + 1/*user*/, entities.size());
+
+        EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
+        assertNotNull(locEntity, "loc entity");
+
     }
 
     /**
@@ -57,7 +59,7 @@ public class ReferenceSceneTest {
      */
     private void setup(HashMap<String, String> customProperties) throws Exception {
         HashMap<String, String> properties = new HashMap<String, String>();
-        properties.put("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
+        properties.put("scene", "de.yard.threed.engine.apps.GalleryScene");
         properties.putAll(customProperties);
         sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties), null);
     }

@@ -101,16 +101,13 @@ public class ShowroomScene extends Scene {
     Color controlPanelBackground = new Color(128, 193, 255, 128);
     MenuItem[] menuitems;
     VrDebugPanel vrDebugPanel;
-    String vrMode = null;
 
     public ShowroomScene() {
     }
 
     @Override
     public void init(SceneMode sceneMode) {
-        logger.info("init FirstPersonScene");
-
-        vrMode = Platform.getInstance().getConfiguration().getString("vrMode");
+        logger.info("init ShowroomScene");
 
         menuitems = new MenuItem[]{
                 new MenuItem("scale up", () -> {
@@ -199,7 +196,7 @@ public class ShowroomScene extends Scene {
         bar = VrSceneHelper.buildBar();
         addToWorld(bar);
 
-        if (!isAR()) {
+        if (!VrInstance.isAR(vrInstance)) {
             ground = buildGround();
             addToWorld(ground);
         }
@@ -210,7 +207,7 @@ public class ShowroomScene extends Scene {
         secondBar = VrSceneHelper.buildSecondBar();
         addToWorld(secondBar);
 
-        if (!isAR()) {
+        if (!VrInstance.isAR(vrInstance)) {
             wall = buildWall();
             addToWorld(secondBar);
         }
@@ -483,9 +480,5 @@ public class ShowroomScene extends Scene {
                 }), Color.RED));
 
         return cp;
-    }
-
-    private boolean isAR() {
-        return vrMode != null && vrMode.equals("AR");
     }
 }

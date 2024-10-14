@@ -117,6 +117,11 @@ public class PlatformJme extends SimpleHeadlessPlatform {
     @Override
     public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
 
+        if (!resourceLoader.nativeResource.getExtension().equals("gltf")) {
+            logger.error("Only GLTF allowed any more: " + resourceLoader.getUrl());
+            de.yard.threed.core.Util.nomore();
+        }
+
         //logger.debug("buildNativeModel "+filename+", delegateid="+delegateid);
         ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate);
     }

@@ -25,7 +25,7 @@ public class GrabbingComponent extends EcsComponent {
             if (getEntity().getSceneNode() != null) {
                 var distance = Vector3.getDistance(wp, getEntity().getSceneNode().getTransform().getPosition());
                 logger.debug("distance=" + distance);
-                if (distance < 0.5) {
+                if (distance < GrabbingSystem.grabDistance) {
                     return true;
                 }
             }

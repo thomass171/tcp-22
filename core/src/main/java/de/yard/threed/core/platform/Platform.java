@@ -69,6 +69,7 @@ public abstract class Platform {
      * it cannot handle external material (FG terrain). So
      * this method might be useless at the moment. But it might be an option in the future.
      * 15.2.24: Decoupled from bundle(Resource)
+     * 11.10.24: In case of an error no node should be passed to delegate.
      */
     public abstract void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate, int options);
 

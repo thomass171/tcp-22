@@ -4,6 +4,7 @@ import de.yard.threed.core.BuildResult;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.Dimension;
+import de.yard.threed.core.ModelBuildDelegate;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.geometry.FaceList;
@@ -52,13 +53,12 @@ public class ModelPreviewScene extends Scene {
     Light light;
     public double scale = 1;
     public SceneNode model = null;
-    public int major = 7;
+    public int major = 4;
     String[] modellist;
     Hud hud;
     double rotationspeed = 10;
     SceneNode ground = null;
     public double elapsedsec = 0;
-    protected SceneNode redCube = null;
 
     /**
      *
@@ -98,7 +98,7 @@ public class ModelPreviewScene extends Scene {
 
         hud = Hud.buildForCameraAndAttach(getDefaultCamera(), 0);
 
-        redCube = new SceneNode(new Mesh(Geometry.buildCube(1.8, 1.8, 1.8), Material.buildBasicMaterial(Color.RED)));
+        SmartModelLoader.init();
 
         customInit();
 
@@ -141,7 +141,7 @@ public class ModelPreviewScene extends Scene {
         if (model != null) {
             SceneNode.removeSceneNode(model);
         }
-        redCube.getTransform().setPosition(new Vector3(1000, 1000, 1000));
+        //redCube.getTransform().setPosition(new Vector3(1000, 1000, 1000));
         addModel();
         if (model != null) {
             model.getTransform().setScale(new Vector3(scale, scale, scale));
@@ -157,137 +157,21 @@ public class ModelPreviewScene extends Scene {
         model = null;
         String modelname = modellist[major];
 
-        BuildResult result = loadModel(modelname);
-        if (result != null) {
-            model = new SceneNode(result.getNode());
-            //scale = 0.5f;
-            if (model != null) {
+        final SceneNode destination = new SceneNode();
+        SmartModelLoader.loadAndScaleModelByDefinitions(modelname, result -> {
+
+            if (result.getNode() != null) {
+                model = new SceneNode(result.getNode());
                 logger.info("Building imported model. scale=" + scale);
 
+                model.getTransform().setScale(new Vector3(scale, scale, scale));
+                addToWorld(model);
             } else {
                 //cube as a 'not loaded indicator'
                 logger.warn("Showing cube ");
                 model = ModelSamples.buildCube(10, new Color(0xCC, 00, 00));
-
             }
-            model.getTransform().setScale(new Vector3(scale, scale, scale));
-            addToWorld(model);
-        }
-    }
-
-    /**
-     * Always returns a node, in case of error a 'redCube' node. This is to make sure the user sees
-     * a result.
-     */
-    public BuildResult loadModel(String modelname) {
-        String dir = null;
-        String bundlename = null;
-        if (StringUtils.startsWith(modelname, "ac")) {
-            return buildhardCodedAC(StringUtils.substringAfterLast(modelname, ":"));
-        }
-        if (StringUtils.startsWith(modelname, "pcm")) {
-            // Pseudo Bundle
-            bundlename = "pcm";
-            modelname = StringUtils.substring(modelname, 4);
-        } else {
-            int index = StringUtils.indexOf(modelname, ":");
-            if (index != -1) {
-                bundlename = StringUtils.substring(modelname, 0, index);
-                modelname = StringUtils.substring(modelname, index + 1);
-            }
-        }
-
-        BuildResult result = null;
-        final String mname = modelname;
-        final String bname = bundlename;
-        if (bundlename != null) {
-            if (bundlename.equals("pcm")) {
-                // Pseudo Bundle
-                logger.debug("Building pcm for model " + modelname);
-                PortableModel pml;
-                if (modelname.equals("loc")) {
-                    pml = VehiclePmlFactory.buildLocomotive();
-                } else if (modelname.equals("bike")) {
-                    pml = VehiclePmlFactory.buildBike();
-                } else if (modelname.equals("mobi")) {
-                    pml = VehiclePmlFactory.buildMobi();
-                } else if (modelname.equals("avatarA")) {
-                    pml = AvatarPmlFactory.buildAvatarA("red");
-                } else {
-                    throw new RuntimeException("unknown pcm model " + modelname);
-                }
-                SceneNode node = PortableModelBuilder.buildModel(pml, null);
-                result = new BuildResult(node.nativescenenode);
-            } else {
-                Bundle bundle = BundleRegistry.getBundle(bundlename);
-                if (bundle == null) {
-                    final SceneNode destination = new SceneNode();
-                    result = new BuildResult(destination.nativescenenode);
-                    AbstractSceneRunner.instance.loadBundle(bundlename, (Bundle b_isnull) -> {
-                        Bundle b = BundleRegistry.getBundle(bname);
-                        BuildResult res = addModelFromBundle(b, mname);
-                        if (res.getNode() != null) {
-                            destination.attach(new SceneNode(res.getNode()));
-                        } else {
-                            destination.attach(redCube);
-                            redCube.getTransform().setPosition(new Vector3());
-                        }
-                    });
-                } else {
-                    result = addModelFromBundle(bundle, modelname);
-                }
-            }
-        } else {
-            //7.7.21 FileSystemResource resource = FileSystemResource.buildFromFullString(dir + "/" + modelname);
-            result = new BuildResult(redCube.nativescenenode);//25.4.17 ModelFactory.buildModel(resource, false, 0, FGGlobals.getInstance().get_props(), null);
-            redCube.getTransform().setPosition(new Vector3());
-        }
-        return result;
-    }
-
-    public BuildResult addModelFromBundle(Bundle bundle, String modelname) {
-        BundleResource br = BundleResource.buildFromFullString(modelname);
-        br.bundle = bundle;
-        String extension = br.getExtension();
-        BuildResult result = null;
-        result = new BuildResult(ModelFactory.asyncModelLoad(new ResourceLoaderFromBundle(br), EngineHelper.LOADER_USEGLTF).nativescenenode);
-        return result;
-    }
-
-    /**
-     * ac files should be processed to GLTF and packeded in bundle for using it. Because there is no other workflow (eg. no
-     * file access), for testing
-     * we need to add these hardcoded. "sceneextension" (parameter) might also be an option.
-     * No async here.
-     */
-    private BuildResult buildhardCodedAC(String model) {
-
-        String acSource = LoaderAC.sampleac;
-
-        if (model.equals("hard-coded")) {
-            acSource = "";
-        }
-        LoaderAC ac;
-        try {
-            ac = new LoaderAC(new StringReader(acSource), false);
-        } catch (InvalidDataException e) {
-            throw new RuntimeException(e);
-        }
-
-        String specificObject = null;// "Tunnel1Rotunda";
-        if (specificObject != null) {
-            // remove other
-            while (ac.loadedfile.object.kids.size() > 1) {
-                if (ac.loadedfile.object.kids.get(0).name.equals(specificObject)) {
-                    ac.loadedfile.object.kids.remove(1);
-                } else {
-                    ac.loadedfile.object.kids.remove(0);
-                }
-            }
-        }
-        PortableModel portableModel = ac.buildPortableModel();
-        SceneNode node = PortableModelBuilder.buildModel(portableModel, null);
-        return new BuildResult(node.nativescenenode);
+        });
     }
 
     /*6.9.24 @Override
@@ -364,5 +248,10 @@ public class ModelPreviewScene extends Scene {
             SceneNode.removeSceneNode(ground);
             ground = null;
         }
+    }
+
+    public static SceneNode buildErrorIndicator() {
+        SceneNode redCube = new SceneNode(new Mesh(Geometry.buildCube(0.3, 0.3, 0.3), Material.buildBasicMaterial(Color.RED)));
+        return redCube;
     }
 }

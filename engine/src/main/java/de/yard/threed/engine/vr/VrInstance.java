@@ -43,11 +43,13 @@ public class VrInstance {
     private LocalTransform cpTransform = null;
     private static VRController controller0 = null;
     private static VRController controller1 = null;
-    private Vector3 emulatedControllerPosition = new Vector3(0,0,0);
+    private Vector3 emulatedControllerPosition = new Vector3(0, 0, 0);
+    String vrMode = null;
 
     private VrInstance(int mode, Vector3 offsetVR) {
         this.mode = mode;
         this.offsetVR = offsetVR;
+        vrMode = Platform.getInstance().getConfiguration().getString("vrMode");
     }
 
     /*public static VrInstance getObserverMovingInstance() {
@@ -214,7 +216,7 @@ public class VrInstance {
         return mode == MODE_EMULATED;
     }
 
-    public void dumpDebugInfo(){
+    public void dumpDebugInfo() {
         Camera camera = Scene.getCurrent().getDefaultCamera();
         logger.info("offsetVR=" + ((VrInstance.getInstance() != null) ? ("" + VrInstance.getInstance().getOffsetVR()) : ""));
         logger.info("cam vr pos=" + camera.getVrPosition(true));
@@ -235,6 +237,14 @@ public class VrInstance {
     }
 
     public void setEmulatedControllerPosition(Vector3 v) {
-        emulatedControllerPosition=v;
+        emulatedControllerPosition = v;
+    }
+
+    public static boolean isAR(VrInstance vrInstance) {
+        return vrInstance != null && vrInstance.isAR();
+    }
+
+    public boolean isAR() {
+        return vrMode != null && vrMode.equals("AR");
     }
 }

@@ -25,6 +25,7 @@ import java.util.List;
 public class GrabbingSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(GrabbingSystem.class);
     public static String TAG = "GrabbingSystem";
+    public static double grabDistance = 0.5;
 
     /**
      *
@@ -71,6 +72,9 @@ public class GrabbingSystem extends DefaultEcsSystem {
         return TAG;
     }
 
+    /**
+     * Configure grabbing by keys 'g' and 'j' (if no VR is available).
+     */
     public static void addDefaultKeyBindings(InputToRequestSystem inputToRequestSystem) {
 
         // grabposition not added to payload for now, maybe later. Receiver also needs the controller for attaching the grabbed object anyway.
@@ -105,12 +109,16 @@ public class GrabbingSystem extends DefaultEcsSystem {
             VRController controller = VrInstance.getInstance().getController(controllerIndex);
             Vector3 wp = controller.getWorldPosition();
 
+            // 11.10.24: Only grab one object a time. Otherwise the objects will clump together
+            // and cannot be separated any more.
             for (EcsEntity entity : getTransformables()) {
                 if (GrabbingComponent.getGrabbingComponent(entity).grabs(wp)) {
                     GrabbingComponent.getGrabbingComponent(entity).grabbedBy = controllerIndex;
                     entity.getSceneNode().getTransform().setPosition(new Vector3());
                     controller.attach(entity.getSceneNode());
                     logger.debug("grabbed");
+
+                    break;
                 }
             }
         }

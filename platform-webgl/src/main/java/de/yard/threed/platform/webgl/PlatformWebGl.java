@@ -131,6 +131,7 @@ public class PlatformWebGl extends Platform {
         //4.4.18: Beim internen scheine auch die AGAnimations nicht zu gehen.
         boolean usethreejsgltfloader = false;
         if (!resourceLoader.nativeResource.getExtension().equals("gltf")) {
+            logger.error("Only GLTF allowed any more: " + resourceLoader.getUrl());
             Util.nomore();
         }
         if (usethreejsgltfloader) {

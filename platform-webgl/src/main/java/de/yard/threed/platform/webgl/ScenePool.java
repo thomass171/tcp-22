@@ -3,6 +3,7 @@ package de.yard.threed.platform.webgl;
 
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.apps.FirstPersonScene;
+import de.yard.threed.engine.apps.GalleryScene;
 import de.yard.threed.engine.apps.ModelPreviewScene;
 import de.yard.threed.engine.apps.reference.ReferenceScene;
 import de.yard.threed.engine.apps.showroom.ShowroomScene;
@@ -40,6 +41,8 @@ public class ScenePool {
             return new ShowroomScene();
         if (name.equals("ModelPreviewScene"))
             return new ModelPreviewScene();
+        if (name.equals("GalleryScene"))
+            return new GalleryScene();
         logger.error("Scene " + name + " not found");
         return null;
     }
