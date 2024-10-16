@@ -62,7 +62,7 @@ public class WebGlMaterial implements NativeMaterial {
 
         if (effect != null) {
             logger.debug("Building effect " + effect.name);
-            // Vorbelegung mit Trivialshadern fuer evtl. Testzwecke und als Fallback bei Fehlern beim Laden
+            // Default trivial shader for testing and fallback in case of load error
             String vertexshader = "uniform vec3 color;\n" +
                     "attribute float size;\n" +
                     "\n" +
@@ -80,7 +80,7 @@ public class WebGlMaterial implements NativeMaterial {
                     "void main() {  \n" +
                     "  gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);  \n" +
                     "}";
-            //Testmode ist für Trivialshader
+            //Testmode is for trivial shader
             boolean testmode = false;
             if (!testmode) {
                 try {
@@ -218,17 +218,10 @@ public class WebGlMaterial implements NativeMaterial {
         return new NativeTexture[0];
     }
 
-   /* @Override
-    public boolean isTransparent() {
-        Util.notyet();
-        return false;
-    }*/
-
     private static String loadShader(String ressourcename) throws ResourceNotFoundException {
         logger.debug("load shader " + ressourcename);
         String source = null;
-        //  try {
-        // 20.4.17: Jetzt aus Bundle
+        // 20.4.17: Load from bundle
         String bytebuf;
         try {
             bytebuf = BundleRegistry.getBundle("engine").getResource(ressourcename).getContentAsString();
@@ -236,10 +229,7 @@ public class WebGlMaterial implements NativeMaterial {
             // TODO improved eror handling
             throw new RuntimeException(e);
         }
-        source = bytebuf;//new String(bytebuf, "UTF-8");
-       /* } catch (UnsupportedEncodingException e) {
-            throw new ResourceNotFoundException(ressourcename + " UTF-8 decode failed", e);
-        }*/
+        source = bytebuf;
         //HashMap<String,String> translatemap = new HashMap<String, String>();
         source = ShaderUtil.preprocess(source/*,translatemap*/);
         if (ressourcename.endsWith(".vert")) {
@@ -250,10 +240,12 @@ public class WebGlMaterial implements NativeMaterial {
             source = source.replaceAll("MULTITEXCOORD0", "uv");
             source = source.replaceAll("NORMALMATRIX", "normalMatrix");
             source = source.replaceAll("NORMAL", "normal");
+            source = source.replaceAll("OUT", "out");
         }
         if (ressourcename.endsWith(".frag")) {
             source = source.replaceAll("FRAGCOLOR", "gl_FragColor");
             source = source.replaceAll("TEXTURE2D", "texture2D");
+            source = source.replaceAll("IN", "in");
         }
         // logger.debug("shader source: " + source);
         return source;
@@ -314,12 +306,6 @@ public class WebGlMaterial implements NativeMaterial {
     }-*/;
 
     private static native JavaScriptObject buildCustomShaderMaterial(JavaScriptObject uniforms, String vertexshader, String fragmentshader, boolean transparent)  /*-{
-       // var uniforms = {
-            //myColor: { type: "c", value: new $wnd.THREE.Color( 0xffffff ) },
-//};
- // uniforms["Texture0"] = { type: "t", value: ptexture  };
-
-
 
 var attributes = {
   size: { type: 'f', value: [] },
@@ -328,13 +314,16 @@ var attributes = {
 for (var i=0; i < 64; i++) {
   attributes.size.value[i] = 5 + Math.floor(Math.random() * 10);
 }
-
+        // ShaderMaterial adds many shader code for convenience, which RawShaderMaterial doesn't. However
+        // it seems to be the easier way to use that convenience.
         var mat = new $wnd.THREE.ShaderMaterial({
             uniforms: uniforms,
             attributes: attributes,
             vertexShader: vertexshader,
             fragmentShader: fragmentshader
         });
+        // Even when using dedicated shader which handle transparency its imported to tell the engine
+        // to put these objects at the end of rendering.
         if (transparent) {
             mat.transparent = true;
             mat.opacity = 0.5;

@@ -263,7 +263,18 @@ Major changes:
 
 ##
   * upgrade of maven-compiler-plugin to 3.12 for setting java release 11 
- 
+
+## 2024-09-24
+  * PortableModel(List) refactored
+  * transparency refactored
+  * findNodeByName() in Platform
+  * reactivated delayed bundle
+  * GLTFs more according spec
+  * normal building refactored(SmoothingMap->VertexMap)
+
+## 2024-10-16
+  * Shader handling fixed for WebGL
+
 # Technical Details
 
 ## Architecture
@@ -447,3 +458,20 @@ by executing all pending callbacks while preparing a frame.
 Changed from Java 8 to Java 11 in January 24 due to ClassCastExceptions in java.nio.(Byte)Buffer flip() and clear().
 There was a kind of breaking change in the API after Java 8. Still needs care about Java 9
 limitation for C# conversion.
+
+## Shader
+Each platform seems to have its own special idea how to handle 
+shader (at least ThreeJS and JME have) and which GLSL versions are supported.
+To avoid the need to have different shader for each platform we use an abstraction
+layer where the shader code contains keywords in capital letters, which are 
+string replaced for each platform.
+
+Due to its binding to an old OpenGL version and some internal shader using
+GLSL 1.0, JME sticks to GLSL 1.0(1.2), while ThreeJS uses OpenGL ES 3.0.
+
+So as a consequence, for now we can only have shader that consider
+these constraints. The following rules apply to shader:
+
+  * IN/OUT instead of varying
+  * no version macros
+  * No integer literals for float operations (eg. use 1.0 instead of 1)

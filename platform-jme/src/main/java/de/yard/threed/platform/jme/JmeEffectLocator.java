@@ -15,7 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 /**
- * Effects sind dynamisch gebaute j3md Dateien. Ein rootpath ist da witzlos.
+ * Effects are dynamically built j3md files. So they have no rootpath.
  *
  * Created by thomass on 30.10.15.
  */
@@ -32,7 +32,7 @@ public class JmeEffectLocator implements AssetLocator {
     }
 
     /**
-     * Die JME j3me Datei dynamisch aus dem Effect erstellen.
+     * Dynamically build temporary JME j3me file on the fly.
      *
      * @param assetManager
      * @param assetKey
@@ -57,16 +57,16 @@ public class JmeEffectLocator implements AssetLocator {
             //  Uniform uniform = effect.uniforms.get(key);
             jdmestring += getJ3mdType(uniform.type) + " " + uniform.name + "\n";
         }
-        // 23.12.15: Die GLSL Version 1.20 kann hard codiert bleiben, weil neuere gar nicht
-        // in Frage kommen (siehe Wiki).
+        // 23.12.15: GLSL version 1.20 can be hard coded, because newer are not available due to the JME binding to
+        // old OpenGL.
+        // Setting LWJGL_OPENGL3 provides the option to use GLSL >= 1.5, but causes JME internal shader (using GLSL100) to fail
         jdmestring += " }\n" +
                 "    Technique {\n" +
                 "        // Shader\n" +
-                // Die FG Originalshader haben eine version 120
+                // FG Original shader have version 120
 
                 "        VertexShader GLSL120:   " + JmeResourceManager.RESOURCEPREFIX + "/" + effect.shader.vertexshader + "\n" +
                 "        FragmentShader GLSL120: " + JmeResourceManager.RESOURCEPREFIX + "/" + effect.shader.fragmentshader + "\n" +
-                //"        FragmentShader GLSL100: shader/" + "cloud-shadowfunc.frag" + "\n" +
                 "        // global uniforms\n" +
                 "        WorldParameters {\n" +
                 "            WorldViewProjectionMatrix\n" +

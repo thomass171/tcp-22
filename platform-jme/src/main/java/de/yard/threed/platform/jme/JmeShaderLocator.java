@@ -76,10 +76,12 @@ public class JmeShaderLocator implements AssetLocator {
                         source = source.replaceAll("MULTITEXCOORD0", "inTexCoord");
                         source = source.replaceAll("NORMALMATRIX", "mat3(g_NormalMatrix)");
                         source = source.replaceAll("NORMAL", "inNormal");
+                        source = source.replaceAll("OUT", "varying");
                     }
                     if (assetkey.endsWith(".frag")) {
                         source = source.replaceAll("FRAGCOLOR", "gl_FragColor");
                         source = source.replaceAll("TEXTURE2D", "texture2D");
+                        source = source.replaceAll("IN", "varying");
                     }
                     // Die ungeeignete JME Nomenklatur mit Material uniform prefix "m_" beachten
                     // 27.4.16: Das ist wirklich reichlich nervend.

@@ -61,9 +61,11 @@ public class JmeMaterial implements NativeMaterial {
             AssetManager am = ((PlatformJme) Platform.getInstance()).jmeResourceManager.am;
             effects.put(effect.name, effect);
 
-            // Der Suffix j3md ist erfoderlich, damit der richige Loader verwendet wird.
+            // Suffix j3md is needed for triggering the fitting loader (JmeEffectLocator?). The j3md file is created temporarily on the fly.
             mat = new Material(am/**/, effect.name + ".j3md");
 
+            // Even when using dedicated shader which handle transparency its imported to tell the engine
+            // to put these objects at the end of rendering.
             if (transparency != null/*effect.transparent*/) {
                 //ist fuer Shader, aber eigene haben das nicht. 
                 if (mat.getParam("UseAlpha") != null) {

@@ -1,15 +1,8 @@
 /**
- * Ein Photoalbumshader fuer alle Platformen
+ * A photo album shader for all platforms
  */
- 
-// als Ersatz fuer gl_TexCoord
-#ifdef VERSION150
-out vec2 texcoord;
-out vec3 v_lighting;
-#else
-varying vec2 texcoord;
-varying vec3 v_lighting;
-#endif
+
+OUT vec2 texcoord;
 
 void main(){
     

@@ -6,14 +6,11 @@ Labelset-LightBlue.png
 bike.xml
 bike.pcm
 shader/PhotoAlbum.frag
-shader/PhotoAlbum.j3md
 shader/PhotoAlbum.vert
 shader/SimpleTexture.frag
 shader/SimpleTexture.vert
-shader/SimpleTextureXX.j3md
 shader/SolidColor.frag
 shader/SolidColor.vert
-shader/SolidColorXX.j3md
 shader/Universal.frag
 shader/Universal.vert
 primitives.pcm
