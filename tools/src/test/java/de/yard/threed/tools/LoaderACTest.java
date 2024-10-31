@@ -16,6 +16,7 @@ import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.testutil.CoreTestFactory;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.Material;
+import de.yard.threed.engine.loader.DefaultMaterialFactory;
 import de.yard.threed.engine.loader.PortableModelBuilder;
 import de.yard.threed.engine.test.testutil.TestUtil;
 import de.yard.threed.javacommon.ConfigurationByEnv;
@@ -96,7 +97,7 @@ public class LoaderACTest {
         PortableModel portableModel = ac.buildPortableModel();
         ModelAssertions.assertMultiObject(portableModel, false, true, twoSidedAsSingleSided);
 
-        Material material = PortableModelBuilder.buildMaterial(null, portableModel.findMaterial("unshaded1glass"), null, false);
+        Material material = new DefaultMaterialFactory().buildMaterial(null, portableModel.findMaterial("unshaded1glass"), null, false);
         assertNotNull(material);
         assertNotNull(material.material);
         Float transparency = NumericValue.transparency(((SimpleHeadlessPlatform.DummyMaterial) material.material).parameters);

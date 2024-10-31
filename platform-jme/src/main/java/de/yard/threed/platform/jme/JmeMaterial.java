@@ -85,7 +85,7 @@ public class JmeMaterial implements NativeMaterial {
 
                 switch (uniform.type) {
                     case FLOAT_VEC4:
-                        //TODOmat.setColor(uniform.name, ((JmeColor) col).color); // with Lighting.j3md
+                        //TODO mat.setColor(uniform.name, ((JmeColor) col).color); // with Lighting.j3md
                         break;
                     case SAMPLER_2D:
                         JmeTexture texture = (JmeTexture) definition.texture.get(uniform.name);

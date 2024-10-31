@@ -151,8 +151,9 @@ public abstract class Platform {
     public abstract NativeCamera buildPerspectiveCamera(double fov, double aspect, double near, double far);
 
     /**
-     * TODO Unerwenschte Dependency auf Effect.
+     * TODO Solve Dependency on Effect.
      * Der name hat keine funktionale Bedeutung. Er dient nur der Wiedererkennbarkeit.
+     * The names (keys) in the texture map must match to the uniforms defined in the Effect.
      *
      * @param color
      * @param texture

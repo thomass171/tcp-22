@@ -40,6 +40,7 @@ import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 06.12.22: A builder for universal model specification.
@@ -183,7 +184,7 @@ public class PortableModelBuilder {
                     mate = matlist.get(0);
                 }
                 //2.5.19: Neu an dieser Stelle
-                NativeMaterial nmat = buildMaterialFromPortableMaterial(resourceLoader, mate, texturebasepath, /*3.5.19obj.texture, */obj.geo/*list.get(0)*/.getNormals() != null);
+                NativeMaterial nmat = buildMaterialFromPortableMaterial(resourceLoader, mate, texturebasepath, /*3.5.19obj.texture, */obj.geo/*list.get(0)*/.getNormals() != null, new DefaultMaterialFactory());
                 model.setMaterial(nmat);
 
                 //Mesh mesh = new Mesh(new GenericGeometry(obj.geo/*list.get(0)*/).getNativeGeometry(), nmat/*mate*/, false, false);
@@ -226,12 +227,12 @@ public class PortableModelBuilder {
         return model;
     }
 
-    static NativeMaterial buildMaterialFromPortableMaterial(ResourceLoader resourceLoader, /*Bundle bundle,*/ PortableMaterial portableMaterial, ResourcePath texturebasepath/*3.5.19, String objtexture*/, boolean hasnormals) {
+    static NativeMaterial buildMaterialFromPortableMaterial(ResourceLoader resourceLoader, /*Bundle bundle,*/ PortableMaterial portableMaterial, ResourcePath texturebasepath/*3.5.19, String objtexture*/, boolean hasnormals, MaterialFactory materialFactory) {
         NativeMaterial nmat;
         if (portableMaterial != null) {
             //Auf AC zugeschnitten, denn nur die(?) haben die Textur am Object.
             //22.12.17: Darum jetzt bevorzugt den Texturename aus dem Material.
-            Material ma = /*PortableMaterial.*/buildMaterial(/*bundle*/resourceLoader, portableMaterial, /*3.5.19(portableMaterial.texture != null) ? * 14.2.24 /portableMaterial.texture/*3.5.19 : objtexture*/ texturebasepath, hasnormals);
+            Material ma = /*PortableMaterial.*/materialFactory.buildMaterial(/*bundle*/resourceLoader, portableMaterial, /*3.5.19(portableMaterial.texture != null) ? * 14.2.24 /portableMaterial.texture/*3.5.19 : objtexture*/ texturebasepath, hasnormals);
             if (ma == null) {
                 logger.warn("No material. Using dummy material.");
                 nmat = getDummyMaterial();
@@ -253,109 +254,24 @@ public class PortableModelBuilder {
      * Ist in Model statt in Mesh, weil durch die Aufsplittung ja auch ein Model rauskommt. Die Methode ist jetzt auch wirklich nur fuer Multi Material gedacht.
      * 2.5.19: War mal Constructor von SceneNode. Passt da aber nicht hin.
      */
-    public SceneNode buildSceneNode(ResourceLoader resourceLoader, /*Bundle bundle,*/ List<SimpleGeometry> geolist, List<PortableMaterial> material, boolean castShadow, boolean receiveShadow, ResourcePath texturebasepath/*3.5.19, String objtexture*/) {
+    /*28.10.24 public SceneNode buildSceneNode(ResourceLoader resourceLoader, /*Bundle bundle,* / List<SimpleGeometry> geolist, List<PortableMaterial> material, boolean castShadow, boolean receiveShadow, ResourcePath texturebasepath/*3.5.19, String objtexture* /) {
         //this();
         SceneNode mainsn = new SceneNode();
         int i = 0;
         for (SimpleGeometry geo : geolist) {
-            NativeGeometry ng = EngineHelper.buildGeometry(geo.getVertices(), /*new SmartArrayList<Face3List>(*/geo.getIndices(), geo.getUvs(), geo.getNormals());
+            NativeGeometry ng = EngineHelper.buildGeometry(geo.getVertices(), /*new SmartArrayList<Face3List>(* /geo.getIndices(), geo.getUvs(), geo.getNormals());
             //2.5.19: Neu an dieser Stelle
-            NativeMaterial nmat = buildMaterialFromPortableMaterial(resourceLoader, material.get(i), texturebasepath, /*3.5.19objtexture,*/ geo.getNormals() != null);
+            NativeMaterial nmat = buildMaterialFromPortableMaterial(resourceLoader, material.get(i), texturebasepath, /*3.5.19objtexture,* / geo.getNormals() != null);
 
-            Mesh submesh = new Mesh(ng, nmat/*material.get(i)*/, castShadow, receiveShadow);
+            Mesh submesh = new Mesh(ng, nmat/*material.get(i)* /, castShadow, receiveShadow);
             // add(new SceneNode(submesh));
             SceneNode sn = new SceneNode(submesh);
             sn.nativescenenode.getTransform().setParent(mainsn.nativescenenode.getTransform());
             i++;
         }
         return mainsn;
-    }
+    }*/
 
-    /**
-     * 27.12.17: public static, um allgemeingueltig aus einem LoadedMaterial ein Material zu machen. War frueher in LoadedFile.
-     * 30.12.18: For loading a texture, the model origin (eg. a bundle) and an optional different path is needed. The texture name is taken from the material.
-     * Also an absolute path in texture name like "bundle:/xx/yy/zz.png" is possible. Then it can be loaded without further information.
-     * <p>
-     * Returns mull, wenn bei Texturen Bundle oder Path fehlen. Aufrufer kann DummyMaterial verwenden oder auch keins (wird dann wireframe).
-     * 13.2.24: Shouldn't need a bundle any more.
-     *
-     * @param mat
-     * @param texturebasepath for bundle and HTTP. Might only be null with absolute texturename. Is relative to resourceloader or absolute path (eg. "engine:cesiumbox").
-     * @return
-     */
-    public /*10.4.17*/ static /*Native*/Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial mat, ResourcePath texturebasepath, boolean hasnormals) {
-        NativeMaterial nmat;
-        //SHADED ist der Defasult
-        HashMap<NumericType, NumericValue> parameters = new HashMap<NumericType, NumericValue>();
-        if (!mat.isShaded()) {
-            parameters.put(NumericType.SHADING, new NumericValue(NumericValue.UNSHADED));
-        } else {
-            if (!hasnormals) {
-                parameters.put(NumericType.SHADING, new NumericValue(NumericValue.FLAT));
-            }
-        }
-
-        if (mat.getTexture() != null) {
-            String texturename = mat.getTexture();
-            /*21.12.16 nicht mehr noetig wegen ResourcePath if (texturebasepath == null) {
-                texturebasepath = ".";
-            }*/
-            if (StringUtils.contains(texturename, ":")) {
-                // use case isn't gltf but manually build model definitions. Is a kind of absolute texture path.
-                int index = StringUtils.indexOf(texturename, ":");
-                texturebasepath = null;
-                // texturename in resourceloader will be replaced later anyway, so just "" is ok.
-                Bundle bundle = BundleRegistry.getBundle(StringUtils.substring(texturename, 0, index));
-                if (bundle == null) {
-                    logger.warn("bundle not found:" + StringUtils.substring(texturename, 0, index));
-                }
-                resourceLoader = new ResourceLoaderFromBundle(new BundleResource(bundle, null, ""));
-                texturename = StringUtils.substring(texturename, index + 1);
-            } else {
-                if (texturebasepath == null) {
-                    logger.warn("no texturebasepath. Not building material.");
-                    return null;
-                }
-            }
-            Texture texture;
-            HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
-
-            if (resourceLoader != null) {
-                //BundleResource br = new BundleResource(texturebasepath, texturename);
-                //br.bundle = bundle;
-                URL br = resourceLoader.fromRootReference(texturebasepath, texturename).getUrl();
-                texture = new Texture/*.buildBundleTexture*/(br, mat.getWraps(), mat.getWrapt());
-                if (texture.texture == null) {
-                    // 13.9.23: Better to log this
-                    logger.warn("failed to build texture from " + texturename + " at " + texturebasepath);
-                    texturename = texturename;
-                }
-                map.put("basetex", texture.texture);
-
-            } else {
-                // 26.4.17: resourceLoader muat exist
-                logger.error("bundle not set");
-
-            }
-            //map.put("normalmap",normalmap.texture);
-            //TODO die anderen Materialparameter
-            nmat = Platform.getInstance().buildMaterial(null, null, map, parameters, null);
-        } else {
-            HashMap<ColorType, Color> color = new HashMap<ColorType, Color>();
-            color.put(ColorType.MAIN, mat.getColor());
-            //TODO die restlichen colors
-            // 25.4.19 unshaded wird oben zwar schon eingetragen, aber nicht immer. "shaded" ist eh etwas unklar. Auf jeden Fall bleibt ein Material mit Color in JME sonst schwarz.
-            //Darum erstmal immer setzen, bis klar ist, was mit Property "shaded" ist. 28.4.19: Das ist aber doof, nur weil JME die combination shaded/ambientLight schwarz darstellt.
-            //Evtl. wegen Normale?
-            //parameters.put(NumericType.UNSHADED, new NumericValue(1));
-            // 10.8.24: consider transparency
-            if (mat.getTransparency() != null) {
-                parameters.put(NumericType.TRANSPARENCY, new NumericValue(mat.getTransparency().floatValue()));
-            }
-            nmat = Platform.getInstance().buildMaterial(null, color, null, parameters, null);
-        }
-        return new Material(nmat);
-    }
 
     /**
      * Eine Liste der Materialien EINES Objects anlegen.

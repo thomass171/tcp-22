@@ -124,10 +124,9 @@ public class Hud extends FovElementPlane {
     public Material buildMat() {
         image = ImageFactory.buildSingleColor(256, 256, basecolor);
         Texture texture = new Texture(image);
-        //CustomShaderMaterial mat = new CustomShaderMaterial("basetex",texture, Effect.buildUniversalEffect(true));
         // BasicMaterial, damit Beleuchtung keine Rolle spielt.
         // 8.10.17: Dafuer muss ich doch keinen Effect bemuehen.
-        Material mat = Material.buildBasicMaterial(texture, /*Effect.buildUniversalEffect()*/null, 0.5);
+        Material mat = Material.buildBasicMaterial(texture, null, 0.5);
         return mat;
     }
 

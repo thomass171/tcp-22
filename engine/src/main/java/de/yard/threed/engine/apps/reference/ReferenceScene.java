@@ -376,8 +376,14 @@ public class ReferenceScene extends Scene {
         logger.debug("setupScene completed");
     }
 
-    // panel with 3 rows (dimesion 0.6x0.3)
-    // rows must be quite narrow to have a proper property panel with text area large enough
+    /**
+     * A control panel with 3 rows (dimesion 0.6x0.3) containing
+     *  - a property control value spinner for value "961"
+     *  - a light/dark green indicator toggled by the button below
+     *  - button for toggling the indicator above, playing elevator ping.
+     *
+     *  rows must be quite narrow to have a proper property panel with text area large enough
+     */
     private static double PropertyControlPanelWidth = 0.6;
     private static double PropertyControlPanelRowHeight = 0.1;
     private static double PropertyControlPanelMargin = 0.005;
@@ -399,12 +405,16 @@ public class ReferenceScene extends Scene {
                     return Double.valueOf(spinnedValue.getValue());
                 }), Color.RED));
 
-        // mid line: a indicator
+        // mid line: a indicator on the left side, a transformable subtexture on the left right side
         indicator = Indicator.buildGreen(0.03);
-        // half in ground
-        cp.addArea(new Vector2(0, 0), new DimensionF(PropertyControlPanelWidth / 4,
-                PropertyControlPanelRowHeight), null);
-        cp.attach(indicator);
+        Mesh m = buildTextureAtlasPanel(PropertyControlPanelRowHeight);
+        SceneNode mnode = new SceneNode(m);
+        mnode.getTransform().rotateX(new Degree(90));
+        mnode.getTransform().rotateY(new Degree(-90));
+        cp.addArea(new Vector2(-PropertyControlPanelWidth / 4, 0), new DimensionF(PropertyControlPanelWidth / 2,
+                PropertyControlPanelRowHeight), null).attach(indicator);
+        cp.addArea(new Vector2(PropertyControlPanelWidth / 8, 0), new DimensionF(PropertyControlPanelRowHeight,
+                PropertyControlPanelRowHeight), null).attach(mnode);
 
         // bottom line:  a button
         cp.addArea(new Vector2(0, -PropertyControlPanelRowHeight/*PropertyControlPanelWidth/2,PropertyControlPanelRowHeight/2)*/), new DimensionF(PropertyControlPanelWidth,
@@ -455,7 +465,7 @@ public class ReferenceScene extends Scene {
 
     /**
      * 25.9.19: Hat river ueberhaupt einen brauchbaren Alpha Channel?
-     *
+     * 16.10.24: Probably no, so there will be no transparancy at all
      * @return
      */
     private Material buildWallMaterial(boolean transparent) {
@@ -1024,6 +1034,21 @@ public class ReferenceScene extends Scene {
                 // 3: no light, just dark
                 () -> {
                 }};
+    }
+
+    private static Mesh buildTextureAtlasPanel(double size){
+        GenericGeometry planeGeo = new GenericGeometry(Primitives.buildPlaneGeometry(size, size, 1, 1));
+        Texture texture = Texture.buildBundleTexture("engine", "Iconset-LightBlue.png");
+
+        HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
+        map.put("texture", texture.texture);
+
+        Material mat = Material.buildCustomShaderMaterial(map, Effect.buildSimpleTextureEffect());
+
+
+        return new Mesh(planeGeo, mat);
+        //SceneNode wall = new SceneNode();
+
     }
 }
 
