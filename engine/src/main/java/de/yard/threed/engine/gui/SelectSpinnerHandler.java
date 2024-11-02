@@ -20,7 +20,7 @@ public class SelectSpinnerHandler implements SpinnerHandler {
     }
 
     @Override
-    public String getValue() {
+    public String getDisplayValue() {
         return values[current];
     }
 

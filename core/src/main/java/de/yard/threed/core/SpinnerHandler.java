@@ -2,6 +2,6 @@ package de.yard.threed.core;
 
 public interface SpinnerHandler {
     void up();
-    String getValue();
+    String getDisplayValue();
     void down();
 }

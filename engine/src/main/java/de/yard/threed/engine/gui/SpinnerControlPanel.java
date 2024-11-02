@@ -52,7 +52,7 @@ public class SpinnerControlPanel extends ControlPanel {
 
     private void refresh() {
         if (handler != null) {
-            String value = handler.getValue();
+            String value = handler.getDisplayValue();
             textArea.setTexture(textTexture.getTextureForText(value, textColor));
         }
     }

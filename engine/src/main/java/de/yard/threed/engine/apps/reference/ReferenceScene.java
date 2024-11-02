@@ -301,7 +301,7 @@ public class ReferenceScene extends Scene {
         //a blue cube without normals. 25.9.2024: Made transparent for transparency check (Needs alpha != 1 in color).
         SimpleGeometry cuboid = Primitives.buildBox(0.5f, 0.5f, 0.5f);
         cuboid = new SimpleGeometry(cuboid.getVertices(), cuboid.getIndices(), cuboid.getUvs(), null);
-        cubeWithoutNormals = new SceneNode(new Mesh(cuboid, Material.buildBasicMaterial(new Color(0.0f,0.0f,1.0f,0.5f), 0.5)));
+        cubeWithoutNormals = new SceneNode(new Mesh(cuboid, Material.buildBasicMaterial(new Color(0.0f, 0.0f, 1.0f, 0.5f), 0.5)));
         cubeWithoutNormals.setName("CubeWithoutNormals");
         //plane is on y=-2
         cubeWithoutNormals.getTransform().setPosition(new Vector3(5, 0.5f, 0));
@@ -377,12 +377,13 @@ public class ReferenceScene extends Scene {
     }
 
     /**
-     * A control panel with 3 rows (dimesion 0.6x0.3) containing
-     *  - a property control value spinner for value "961"
-     *  - a light/dark green indicator toggled by the button below
-     *  - button for toggling the indicator above, playing elevator ping.
-     *
-     *  rows must be quite narrow to have a proper property panel with text area large enough
+     * A control panel with 6 rows (dimesion 0.6x0.3) containing
+     * - a property control value spinner for value "961"
+     * - a light/dark green indicator toggled by the button below
+     * - button for toggling the indicator above, playing elevator ping.
+     * ...
+     * <p>
+     * rows must be quite narrow to have a proper property panel with text area large enough
      */
     private static double PropertyControlPanelWidth = 0.6;
     private static double PropertyControlPanelRowHeight = 0.1;
@@ -395,15 +396,17 @@ public class ReferenceScene extends Scene {
         ControlPanel cp = new ControlPanel(new DimensionF(PropertyControlPanelWidth, 3 * PropertyControlPanelRowHeight), mat, 0.01);
         Indicator indicator;
 
+        int rows = 6;
         // top line: property control
-        IntHolder spinnedValue = new IntHolder(961);
-        cp.add(new Vector2(0, PropertyControlPanelRowHeight / 2 + PropertyControlPanelRowHeight / 2),
-                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat, new NumericSpinnerHandler(1, value -> {
+        DoubleHolder doubleSpinnedValue = new DoubleHolder(961.2);
+        cp.add(new Vector2(0,
+                        ControlPanelHelper.calcYoffsetForRow(5, rows, PropertyControlPanelRowHeight)),
+                new SpinnerControlPanel(rowsize, PropertyControlPanelMargin, mat, new NumericSpinnerHandler(0.7, value -> {
                     if (value != null) {
-                        spinnedValue.setValue(value.intValue());
+                        doubleSpinnedValue.setValue(value.doubleValue());
                     }
-                    return Double.valueOf(spinnedValue.getValue());
-                }), Color.RED));
+                    return Double.valueOf(doubleSpinnedValue.getValue());
+                }, null, new NumericDisplayFormatter(1)), Color.RED));
 
         // mid line: a indicator on the left side, a transformable subtexture on the left right side
         indicator = Indicator.buildGreen(0.03);
@@ -411,19 +414,54 @@ public class ReferenceScene extends Scene {
         SceneNode mnode = new SceneNode(m);
         mnode.getTransform().rotateX(new Degree(90));
         mnode.getTransform().rotateY(new Degree(-90));
-        cp.addArea(new Vector2(-PropertyControlPanelWidth / 4, 0), new DimensionF(PropertyControlPanelWidth / 2,
+        cp.addArea(new Vector2(-PropertyControlPanelWidth / 4, ControlPanelHelper.calcYoffsetForRow(4, rows, PropertyControlPanelRowHeight)), new DimensionF(PropertyControlPanelWidth / 2,
                 PropertyControlPanelRowHeight), null).attach(indicator);
-        cp.addArea(new Vector2(PropertyControlPanelWidth / 8, 0), new DimensionF(PropertyControlPanelRowHeight,
+        cp.addArea(new Vector2(PropertyControlPanelWidth / 8, ControlPanelHelper.calcYoffsetForRow(4, rows, PropertyControlPanelRowHeight)), new DimensionF(PropertyControlPanelRowHeight,
                 PropertyControlPanelRowHeight), null).attach(mnode);
 
-        // bottom line:  a button
-        cp.addArea(new Vector2(0, -PropertyControlPanelRowHeight/*PropertyControlPanelWidth/2,PropertyControlPanelRowHeight/2)*/), new DimensionF(PropertyControlPanelWidth,
+        // next line:  a button
+        cp.addArea(new Vector2(0, ControlPanelHelper.calcYoffsetForRow(3, rows, PropertyControlPanelRowHeight)), new DimensionF(PropertyControlPanelWidth,
                 PropertyControlPanelRowHeight), () -> {
             logger.debug("area clicked");
             indicator.toggle();
             rs.elevatorPing.play();
 
         }).setIcon(Icon.ICON_POSITION);
+
+        // int value spinner
+        IntHolder labeledSpinnedValue = new IntHolder(10);
+        cp.add(new Vector2(0,
+                        ControlPanelHelper.calcYoffsetForRow(2, rows, PropertyControlPanelRowHeight)),
+                new LabeledSpinnerControlPanel("int", rowsize, PropertyControlPanelMargin, mat, new NumericSpinnerHandler(1, value -> {
+                    if (value != null) {
+                        labeledSpinnedValue.setValue(value.intValue());
+                    }
+                    return Double.valueOf(labeledSpinnedValue.getValue());
+                }, null, new NumericDisplayFormatter(0)), Color.RED));
+
+        // degree value spinner, starting at 15
+        IntHolder degreeSpinnedValue = new IntHolder(15);
+        cp.add(new Vector2(0,
+                        ControlPanelHelper.calcYoffsetForRow(1, rows, PropertyControlPanelRowHeight)),
+                new LabeledSpinnerControlPanel("degree", rowsize, PropertyControlPanelMargin, mat, new NumericSpinnerHandler(5, value -> {
+                    if (value != null) {
+                        degreeSpinnedValue.setValue(value.intValue());
+                    }
+                    return Double.valueOf(degreeSpinnedValue.getValue());
+                }, 360, new NumericDisplayFormatter(0)), Color.RED));
+
+        // time value spinner (minutes from midnight) , starting at 08:00
+        IntHolder timeSpinnedValue = new IntHolder(8 * 60);
+        cp.add(new Vector2(0,
+                        ControlPanelHelper.calcYoffsetForRow(0, rows, PropertyControlPanelRowHeight)),
+                new LabeledSpinnerControlPanel("time", rowsize, PropertyControlPanelMargin, mat,
+                        new NumericSpinnerHandler(15, value -> {
+                            if (value != null) {
+                                timeSpinnedValue.setValue(value.intValue());
+                            }
+                            return Double.valueOf(timeSpinnedValue.getValue());
+                        }, 24 * 60, new TimeDisplayFormatter()), Color.RED));
+
         return cp;
     }
 
@@ -466,6 +504,7 @@ public class ReferenceScene extends Scene {
     /**
      * 25.9.19: Hat river ueberhaupt einen brauchbaren Alpha Channel?
      * 16.10.24: Probably no, so there will be no transparancy at all
+     *
      * @return
      */
     private Material buildWallMaterial(boolean transparent) {
@@ -1036,7 +1075,7 @@ public class ReferenceScene extends Scene {
                 }};
     }
 
-    private static Mesh buildTextureAtlasPanel(double size){
+    private static Mesh buildTextureAtlasPanel(double size) {
         GenericGeometry planeGeo = new GenericGeometry(Primitives.buildPlaneGeometry(size, size, 1, 1));
         Texture texture = Texture.buildBundleTexture("engine", "Iconset-LightBlue.png");
 
