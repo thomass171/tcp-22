@@ -49,6 +49,7 @@ import java.util.Map;
 public class InputToRequestSystem extends DefaultEcsSystem {
     static Log logger = Platform.getInstance().getLog(InputToRequestSystem.class);
     private Map<KeyEntry, RequestBuilder> keymapping = new HashMap<KeyEntry, RequestBuilder>();
+    // What happens with drag gestures. Useful for touch screens.
     private RequestBuilder[] dragmapping = null;
 
     //2.4.21: menu. Why not in UserSystem?
@@ -248,13 +249,14 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             }
             lastDragPosition = possiblestartdrag;
 
-            // will trigger a request on every mouse press. might not be the best choice
-            if (dragmapping != null) {
+            // will trigger a request on every mouse press. might not be the best choice. But not with open menu.
+            if (dragmapping != null && !isMenuOpen()) {
                 SystemManager.putRequest(dragmapping[4].build(userEntityId));
             }
         }
         if (possiblestartdrag != null) {
-            if (mouseMoveLocation != null) {
+            // ignore drag when menu is open
+            if (mouseMoveLocation != null && !isMenuOpen()) {
                 Point offset;
 
                 if (draggedEntity != null) {
@@ -334,7 +336,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             possiblestartdrag = null;
 
             // will trigger a request on every mouse release. might not be the best choice
-            if (dragmapping != null) {
+            if (dragmapping != null && !isMenuOpen()) {
                 SystemManager.putRequest(dragmapping[5].build(userEntityId));
             }
         }
@@ -506,6 +508,10 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
     public void setCameraForMenu(Camera cameraForMenu) {
         this.cameraForMenu = cameraForMenu;
+    }
+
+    public boolean isMenuOpen() {
+        return menu != null;
     }
 
     private void processPointer(Ray ray, boolean left) {

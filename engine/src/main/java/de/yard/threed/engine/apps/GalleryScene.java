@@ -47,7 +47,7 @@ public class GalleryScene extends Scene {
     public Log logger = Platform.getInstance().getLog(GalleryScene.class);
     String[] modellist;
     String vrMode = null;
-    static VrInstance vrInstance;
+    protected VrInstance vrInstance;
     protected EcsEntity avatar = null;
     String userName = "user";
 
@@ -106,7 +106,7 @@ public class GalleryScene extends Scene {
         GrabbingSystem.addDefaultKeyBindings(inputToRequestSystem);
         SystemManager.addSystem(grabbingSystem);
 
-        // no menus for now
+        // no menus for now. Extending classes might have a menu on their own.
 
         if (vrInstance != null) {
             // Even in VR the observer will be attached to avatar later
