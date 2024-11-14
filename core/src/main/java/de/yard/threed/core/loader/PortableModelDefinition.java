@@ -12,11 +12,11 @@ import java.util.List;
 
 /**
  * 06.03.21: A universal intermediate format of a model specification.
- *
+ * <p>
  * Created by thomass on 12.02.16.
  * 7.6.18: PreprocessedLoadedObject->PortableModelDefinition
  */
-public class PortableModelDefinition /*extends CustomGeometry */{
+public class PortableModelDefinition /*extends CustomGeometry */ {
     Log logger = Platform.getInstance().getLog(PortableModelDefinition.class);
     public String name;
     public List<PortableModelDefinition> kids = new ArrayList<PortableModelDefinition>();
@@ -29,13 +29,11 @@ public class PortableModelDefinition /*extends CustomGeometry */{
     //primitives, each of which might have a material. But we want to keep it simple here, so LoaderGLTF should split multiple primitives in
     //subnodes.
     //27.7.24 public List<String> geolistmaterial = new ArrayList<String>();
-   public String material;
-    // Auf AC zugeschnitten, denn nur die(?) haben die Textur am Object. 22.12.17: Das ist ja Kappes. Jetzt auch in LoadedMaterial
-    // 3.5.19: Wird das Material bei AC dann dupliziert? Ja, offebar. siehe testAC_777_200. Aus 12 wird 37. Darum ganz raus.
-    //@Deprecated
-    //public String texture;
+    // 13.11.24 material no longer a name but an index to the global matlist? Too much effort and unclear benefit. And it increases dependencies
+    // making PortableModelDefinition dependent. So for now make this a duo use field? Might be a name or an index. Better not, that is completely confusing.
+    public String material;
     public Vector3 translation = null;//3.5.19 new Vector3(0, 0, 0);
-    public Quaternion rotation=null;
+    public Quaternion rotation = null;
     public Vector3 scale;
     //27.7.24 public List<SimpleGeometry> geolist;
     public SimpleGeometry geo;
@@ -80,6 +78,7 @@ public class PortableModelDefinition /*extends CustomGeometry */{
 
     /**
      * Alternative name that we had in PortableMofel(List) before.
+     *
      * @param pmd
      */
     public void addModel(PortableModelDefinition pmd) {

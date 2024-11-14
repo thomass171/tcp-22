@@ -35,7 +35,9 @@ public class PortableModel/*List*/ {
     int MAGIC = 38;
     int VERSION = 1;
     // The list of materials is 'independent' from the object/kids list, but PortableModelDefinitions refer to this list.
-    public List<PortableMaterial> materials = new ArrayList<PortableMaterial>();
+    // 12.11.24 The list is accessed by index, not by name(hopefully). GLTF also references by index. So we can set the material
+    // name eg.to the land class for BTGs, which provides more options when building the objects.
+    private List<PortableMaterial> materials = new ArrayList<PortableMaterial>();
     //30.12.18: Muesste es nicht eher "models" heissen? Objekte sind es ja noch nicht.
     //private List<PortableModelDefinition> objects = new ArrayList<PortableModelDefinition>();
     private PortableModelDefinition root;
@@ -151,7 +153,7 @@ public class PortableModel/*List*/ {
     }
 
     /**
-     * Returns -1 if material isType not known. Might happen eg. for landclasses in BTG.
+     * Returns -1 if material is not known. Might happen eg. for landclasses in BTG.
      *
      * @param name
      * @return
@@ -163,6 +165,14 @@ public class PortableModel/*List*/ {
             }
         }
         return -1;
+    }
+
+    public int getMaterialCount() {
+        return materials.size();
+    }
+
+    public PortableMaterial getMaterialByIndex(int index) {
+        return materials.get(index);
     }
 
     /**
@@ -219,10 +229,10 @@ public class PortableModel/*List*/ {
      * 2.5.19: Spaetestens seit Flat Shading ist es noch nicht sicher, wie das Material konkret angelegt werden muss. Darum
      * die Matlist nur mit MaterialDefinitionen anlegen
      */
-    private List<PortableMaterial/*NativeMaterial*/> buildMatlist(Bundle bundle, PortableModelDefinition obj, /*MaterialPool matpool,*/ ResourcePath texturebasepath) {
+    /*13.11.24 private List<PortableMaterial/*NativeMaterial* /> buildMatlist(Bundle bundle, PortableModelDefinition obj, /*MaterialPool matpool,* / ResourcePath texturebasepath) {
         List<PortableMaterial> matlist = new ArrayList<PortableMaterial>();
         int index = 0;
-        for (String matname : new String[]{obj.material/*listmaterial*/}) {
+        for (String matname : new String[]{obj.material/*listmaterial* /}) {
             PortableMaterial mat = findMaterial(matname);
             //das kann auch null sein. Dann wird später ein Dummy angelegt.
             matlist.add(mat);
@@ -259,10 +269,10 @@ public class PortableModel/*List*/ {
             }
 
             matlist.add(nmat);
-            index++;*/
+            index++;* /
         }
         return matlist;
-    }
+    }*/
 
     /*27.7.24 public void addModel(PortableModelDefinition model) {
         objects.add(model);
@@ -296,6 +306,15 @@ public class PortableModel/*List*/ {
 
     public PortableModelDefinition getRoot() {
         return root;
+    }
+
+    /**
+     * 12.11.24: Last remaining global setter after making materials private.
+     * TODO remove need for it
+     */
+    @Deprecated
+    public void setMaterials(ArrayList<PortableMaterial> materials) {
+        this.materials=materials;
     }
 
     /* 27.7.24public String getParent(int i) {

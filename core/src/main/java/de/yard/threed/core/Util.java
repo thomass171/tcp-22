@@ -245,6 +245,9 @@ public class Util {
         return java.lang.Float.parseFloat(s);
     }
 
+    /**
+     * Might be used with isNumeric().
+     */
     public static int parseInt(String s) {
         return java.lang.Integer.parseInt(s);
     }
@@ -291,6 +294,24 @@ public class Util {
             index++;
         }
         return Long.parseLong(StringUtils.substring(data, 0, index));
+    }
+
+    public static boolean isNumeric(String data) {
+        int len = StringUtils.length(data);
+        if (len == 0)
+            return false;
+        char first = StringUtils.charAt(data, 0);
+        if (!Util.isDigit(first) && first != '-') {
+            return false;
+        }
+        int index = 1;
+        while (index < len) {
+            if (!Util.isDigit(StringUtils.charAt(data, index))){
+                return false;
+            }
+            index++;
+        }
+        return true;
     }
 
     /**

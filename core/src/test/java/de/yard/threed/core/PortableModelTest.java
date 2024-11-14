@@ -53,7 +53,9 @@ public class PortableModelTest {
     public static void assertLocomotive(PortableModel model, boolean loadedFromGltf) {
 
         assertNotNull(model);
-        assertEquals(2, model.materials.size());
+        assertEquals(2, model.getMaterialCount());
+        assertEquals("BucheHell", model.getMaterialByIndex(0).getName());
+        assertEquals("wheelred", model.getMaterialByIndex(1).getName());
 
         PortableModelDefinition root = model.getRoot();
 

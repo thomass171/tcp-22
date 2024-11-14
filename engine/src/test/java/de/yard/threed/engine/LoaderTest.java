@@ -144,8 +144,8 @@ public class LoaderTest {
 
         PortableModel portableModelList = ac.buildPortableModel();
         // 14.8.24 materials now only contains really used material
-        assertEquals(1, portableModelList.materials.size());
-        PortableMaterial unshaded = portableModelList.materials.get(0);
+        assertEquals(1, portableModelList.getMaterialCount());
+        PortableMaterial unshaded = portableModelList.getMaterialByIndex(0);
         assertFalse(unshaded.isShaded());
         // rgb should have been mapped to png
         assertEquals("sample.png", unshaded.getTexture());

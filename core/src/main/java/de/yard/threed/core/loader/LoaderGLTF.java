@@ -71,7 +71,7 @@ public class LoaderGLTF {
         this.binbuffer = binbuffer;
         this.source = source;
 
-         this.texturebasepath = texturebasepath;
+        this.texturebasepath = texturebasepath;
         if (binbuffer == null) {
             // 6.3.21: Das macht doch keinen Sinn, oder?
             logger.warn("no bin. Intended?");
@@ -113,7 +113,7 @@ public class LoaderGLTF {
             public void completed(AsyncHttpResponse response) {
                 String json;
                 logger.debug("got gltf");
-               // try {
+                // try {
                 try {
                     json = response.getContentAsString();
                 } catch (CharsetException e) {
@@ -122,43 +122,43 @@ public class LoaderGLTF {
                     return;
                 }
                 //NativeJsonValue gltf = Platform.getInstance().parseJson(json);
-                    if (json == null) {
-                        logger.warn("no gltf data for " + resourceLoader.nativeResource.getFullQualifiedName());
-                        //throw new InvalidDataException("no gltf data for " + resourceLoader.nativeResource.getFullQualifiedName());
-                        delegate.handle(null);
-                    }
-                    //gltfo = gltf.isObject();*/
-                    // TODO get bin file name from gltf
-                    //BundleResource binres = LoaderGLTF.getBinResource(file);
-                    logger.debug("Launching async bin load");
-                    ResourceLoader binLoader = resourceLoader.fromReference(LoaderGLTF.getBinResource(resourceLoader.getUrl()));
-                    binLoader.loadResource(new AsyncJobDelegate<AsyncHttpResponse>() {
-                        @Override
-                        public void completed(AsyncHttpResponse response) {
-                            NativeByteBuffer binbuffer = response.getContent();
-                            if (binbuffer != null) {
-                                logger.debug("got bin with size " + binbuffer.getSize());
-                            } else {
-                                logger.error("no bin found from " + binLoader.getUrl());
-                            }
+                if (json == null) {
+                    logger.warn("no gltf data for " + resourceLoader.nativeResource.getFullQualifiedName());
+                    //throw new InvalidDataException("no gltf data for " + resourceLoader.nativeResource.getFullQualifiedName());
+                    delegate.handle(null);
+                }
+                //gltfo = gltf.isObject();*/
+                // TODO get bin file name from gltf
+                //BundleResource binres = LoaderGLTF.getBinResource(file);
+                logger.debug("Launching async bin load");
+                ResourceLoader binLoader = resourceLoader.fromReference(LoaderGLTF.getBinResource(resourceLoader.getUrl()));
+                binLoader.loadResource(new AsyncJobDelegate<AsyncHttpResponse>() {
+                    @Override
+                    public void completed(AsyncHttpResponse response) {
+                        NativeByteBuffer binbuffer = response.getContent();
+                        if (binbuffer != null) {
+                            logger.debug("got bin with size " + binbuffer.getSize());
+                        } else {
+                            logger.error("no bin found from " + binLoader.getUrl());
+                        }
 
                             /* if (file.bundle.exists(binres)) {
                                 binbuffer = binres.bundle.getResource(binres).b;
                             }*/
-                            try {
+                        try {
 
-                                LoaderGLTF loaderGLTF = new LoaderGLTF(json, binbuffer, resourceLoader.getUrl().getPath(),
-                                        // source is important for setting node name
-                                        resourceLoader.nativeResource.getFullName());
-                                // 24.8.24: ploadedfile might be null in case of error (already logged)
-                                PortableModel/*List */ploadedfile = loaderGLTF.doload();
-                                delegate.handle(ploadedfile);
-                            } catch (InvalidDataException e) {
-                                // problem was already logged
-                                delegate.handle(null);
-                            }
+                            LoaderGLTF loaderGLTF = new LoaderGLTF(json, binbuffer, resourceLoader.getUrl().getPath(),
+                                    // source is important for setting node name
+                                    resourceLoader.nativeResource.getFullName());
+                            // 24.8.24: ploadedfile might be null in case of error (already logged)
+                            PortableModel/*List */ploadedfile = loaderGLTF.doload();
+                            delegate.handle(ploadedfile);
+                        } catch (InvalidDataException e) {
+                            // problem was already logged
+                            delegate.handle(null);
                         }
-                    });
+                    }
+                });
 
                 /*24.8.24} catch (Exception e) {
                     //TODO throw new InvalidDataException("CharsetException not found");
@@ -222,7 +222,7 @@ public class LoaderGLTF {
                 cnt = gltfo.get("materials").isArray().size();
                 for (int i = 0; i < cnt; i++) {
                     GltfMaterial gltfmaterial = new GltfMaterial(materials.get(i).isObject());
-                    ppfile.materials.add(buildMaterial(gltfmaterial, i));
+                    ppfile.addMaterial(buildMaterial(gltfmaterial, i));
                 }
             }
             // read all nodes as array and later derive parent/children relations
@@ -230,7 +230,7 @@ public class LoaderGLTF {
             List<PortableModelDefinition> nodelist = new ArrayList<PortableModelDefinition>();
             int nodecnt = gltfo.get("nodes").isArray().size();
             for (int i = 0; i < nodecnt; i++) {
-                nodelist.add(loadObject(nodes.get(i).isObject(), ppfile.materials));
+                nodelist.add(loadObject(nodes.get(i).isObject(), ppfile/*.materials*/));
             }
             //23.3.18:Manchmal gabs hier NPE, z.B. SceneryViewer :
             //ERROR:ModelLoader loader threw InvalidDataException error in line 1: : for file Objects/e000n50/e007n50/moffett-hangar-n-211.gltf
@@ -296,7 +296,7 @@ public class LoaderGLTF {
     /**
      * Load a single object without considering parent/children, which is done later.
      */
-    private PortableModelDefinition loadObject(NativeJsonObject node, List<PortableMaterial> materials) throws InvalidDataException {
+    private PortableModelDefinition loadObject(NativeJsonObject node, PortableModel ppfile/*List<PortableMaterial> materials*/) throws InvalidDataException {
         PortableModelDefinition lo = new PortableModelDefinition();
         GltfNode gltfnode = new GltfNode(node);
         lo.name = node.getString("name");
@@ -321,7 +321,7 @@ public class LoaderGLTF {
                 for (int k = 0; k < geocnt; k++) {
                     SimpleGeometry simpleGeometry = buildGeometryFromPrimitive(mesh, k);
                     //27.7.24 lo.geolist.add(new SimpleGeometry(lvertices, indices, uvs, lnormals));
-                    String materialname = mesh.getMaterialName(k, materials);
+                    String materialname = mesh.getMaterialNameOfPrimitive(k, ppfile/*materials*/);
                     //27.7.24lo.geolistmaterial.add(materialname);
                     lo.addChild(new PortableModelDefinition(simpleGeometry, materialname));
                 }
@@ -329,7 +329,7 @@ public class LoaderGLTF {
                 //lo.geolist = new ArrayList<SimpleGeometry>();
                 lo.geo = buildGeometryFromPrimitive(mesh, 0);
                 //27.7.24 lo.geolist.add(new SimpleGeometry(lvertices, indices, uvs, lnormals));
-                lo.material = mesh.getMaterialName(0, materials);
+                lo.material = mesh.getMaterialNameOfPrimitive(0, ppfile/*materials*/);
                 //27.7.24lo.geolistmaterial.add(materialname);
             }
         }
@@ -559,27 +559,33 @@ class GltfMesh {
     }
 
     /**
-     * Might be an external material name (eg. land class)
+     * 13.11.24: No longer an external material name (eg. land class). We shouldn't rely on material having a name at all.
+     * But if it exists, we assume it is unique.
+     * Otherwise use index as name.
      *
-     * @param pos
-     * @param materials
-     * @return
+     * @return material name if it has a name, otherwise the index
      */
-    public String getMaterialName(int pos, List<PortableMaterial> materials) {
-        NativeJsonObject primitive = primitives.get(pos).isObject();
-        if (primitive.get("material") == null) {
-            //dann gibt es halt kein Material->wireframe. 23.4.19: Scheint eher schwarz zu werden
+    public String getMaterialNameOfPrimitive(int primitiveIndex, PortableModel ppfile/*List<PortableMaterial> materials*/) {
+        NativeJsonObject primitive = primitives.get(primitiveIndex).isObject();
+        NativeJsonValue primitiveMaterial = primitive.get("material");
+        if (primitiveMaterial == null) {
+            //no material defined for primitive -> wireframe or black or whatever.
             return null;
         }
-        // might be a material index into material list or an external material name (eg. land class) 
-        NativeJsonNumber n = primitive.get("material").isNumber();
+        // No longer an external material name (eg. land class). Always an index and the land class might be the material name.
+        NativeJsonNumber n = primitiveMaterial.isNumber();
         if (n != null) {
             int matindex = n.intValue();
-            PortableMaterial mat = materials.get(matindex);
+            PortableMaterial mat = ppfile.getMaterialByIndex(matindex);
+            if (mat.getName() == null) {
+                return "" + matindex;
+            }
             return mat.getName();
         }
-        String index = primitive.getString("material");
-        return "" + index;
+        //TODO improve error handling
+        throw new RuntimeException("mat is no number:" + primitiveMaterial);
+        /*String index = primitive.getString("material");
+        return "" + index;*/
     }
 }
 

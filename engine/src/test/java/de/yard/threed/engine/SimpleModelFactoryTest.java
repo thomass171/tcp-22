@@ -47,7 +47,8 @@ public class SimpleModelFactoryTest {
         SceneNode node = PortableModelBuilder.buildModel(pmb);
         Assertions.assertEquals(0, PortableModelBuilder.dummyMaterialReasons.size(), "dummymaterialused");
         Assertions.assertEquals(oldcnt, EngineHelper.getStatistics().texturefailures, "texturefailures");
-        for (PortableMaterial m : locomotive.materials) {
+        for (int i = 0; i < locomotive.getMaterialCount(); i++) {
+            PortableMaterial m = locomotive.getMaterialByIndex(i);
             Assertions.assertTrue(m.isShaded(), "shaded");
         }
         assertTrue(Texture.hasTexture("BucheHell.png"), "BucheHell.png");

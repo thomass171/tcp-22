@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.loader.LoaderGLTF;
 import de.yard.threed.core.loader.PortableMaterial;
@@ -70,8 +71,8 @@ public class GltfBuilder {
         binarystream = new JAOutputStream(bos);
         buildScene();
 
-        for (PortableMaterial mat : ppfile.materials) {
-            processMaterial(mat);
+        for (int i = 0; i < ppfile.getMaterialCount(); i++) {
+            processMaterial(ppfile.getMaterialByIndex(i));
         }
         // ob es eine AC world gibt oder nicht, spielt hier keine Rolle. Hier wird das ppfile konvertiert, egal was/wie drin ist.
         //for (PortableModelDefinition obj : ppfile.objects) {
@@ -393,8 +394,8 @@ public class GltfBuilder {
         if (materialname != null) {
             int matindex = ppfile.findMaterialIndex(materialname);
             if (matindex == -1) {
-                // material not know. Might eg. be a BTG landclass
-                primitive.add("material", new JsonPrimitive(materialname));
+                // material not known. 13.11.24 Was eg. a BTG landclass once, but we no longer support this because it leads to an invalid GLTF
+                //primitive.add("material", new JsonPrimitive(materialname));
             } else {
                 primitive.add("material", new JsonPrimitive(matindex));
             }

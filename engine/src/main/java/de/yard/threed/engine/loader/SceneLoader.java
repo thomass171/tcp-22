@@ -64,7 +64,7 @@ public class SceneLoader extends AsciiLoader {
         try {
             //int nodecnt = gltfo.get("nodes").isArray().size();
             for (int i = 0; i < objects.size(); i++) {
-                addObject(objects.get(i).isObject(), ppfile.materials, ppfile);
+                addObject(objects.get(i).isObject()/*.materials*/, ppfile);
             }
 
         } catch (java.lang.Exception e) {
@@ -94,13 +94,13 @@ public class SceneLoader extends AsciiLoader {
         return logger;
     }
 
-    private void addObject(NativeJsonObject obj, List<PortableMaterial> materials, PortableModel/*List*/ ppfile) throws InvalidDataException {
+    private void addObject(NativeJsonObject obj,/* List<PortableMaterial> materials,*/ PortableModel/*List*/ ppfile) throws InvalidDataException {
         //PortableModelDefinition pmd = new PortableModelDefinition();
 
 
         PortableMaterial material = buildMaterial(obj.get("material").isString());
-        materials.add(material);
-        PortableModelDefinition pmd = buildGeometry(obj.get("geometry").isString(),  material.getName());
+        ppfile.addMaterial(material);
+        PortableModelDefinition pmd = buildGeometry(obj.get("geometry").isString(), material.getName());
         NativeJsonValue v = obj.get("name");
         if (v != null) {
             pmd.name = v.isString().stringValue();

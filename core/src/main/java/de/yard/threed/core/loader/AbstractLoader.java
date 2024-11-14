@@ -60,12 +60,12 @@ public abstract class AbstractLoader {
         //have final material names when objects are built.
         ArrayList<PortableMaterial> materials = new ArrayList<PortableMaterial>();
         //for (LoadedObject obj : loadedfile.objects) {
-            arrangeMaterials(materials, loadedfile.object, loadedfile);
+        arrangeMaterials(materials, loadedfile.object, loadedfile);
         //}
 
         PortableModel ppfile = new PortableModel(buildPortableModelDefinition(loadedfile.object), loadedfile.texturebasepath);
         // We don't know source here
-        ppfile.materials = materials;
+        ppfile.setMaterials(materials);
         ppfile.loaddurationms = loaddurationms;
         return ppfile;
     }
