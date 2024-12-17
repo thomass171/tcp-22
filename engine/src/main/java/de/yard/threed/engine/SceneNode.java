@@ -178,7 +178,7 @@ public class SceneNode {
     public String dump(String indent, int details) {
         String detailstring = "";
         if (details > 0) {
-            detailstring = "(";
+            detailstring = "(pos=" + getTransform().getPosition() + ",";
             String mapstring = "";
             Mesh mesh;
             if ((mesh = getMesh()) != null) {
@@ -269,7 +269,6 @@ public class SceneNode {
      * 24.3.18: Das ist die Nachbildung einer Subtree Suche laut MA22 für alle Platformen, auch die, die das selber könnten.
      * 18.7.21: Moved here from EnginePlatform and then Platform.
      * 3.3.24: Also check 'this'.
-     *
      */
     public static List<SceneNode> findNode(NodeFilter filter, SceneNode startnode) {
         List<SceneNode> nodelist = new ArrayList<SceneNode>();

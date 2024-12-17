@@ -37,20 +37,28 @@ public class EngineTestUtils {
         return textBuilder.toString();
     }
 
-    public static String getHierarchy(SceneNode node, int maxlevel) {
+    public static String getHierarchy(SceneNode node, int maxlevel, boolean down) {
         String s = node.getName();
         Transform t = node.getTransform();
-        if (t.getChildCount() == 0 || maxlevel <= 0) {
+        if (maxlevel <= 0) {
             return s;
         }
-        if (t.getChildCount() == 1) {
-            return s + "->" + getHierarchy(t.getChild(0).getSceneNode(), maxlevel - 1);
+        if (down) {
+            if (t.getChildCount() == 0) {
+                return s;
+            }
+
+            if (t.getChildCount() == 1) {
+                return s + "->" + getHierarchy(t.getChild(0).getSceneNode(), maxlevel - 1, true);
+            }
+            s += "->[";
+            for (int i = 0; i < t.getChildCount(); i++) {
+                s += ((i > 0) ? "," : "") + getHierarchy(t.getChild(i).getSceneNode(), maxlevel - 1, true);
+            }
+            return s + "]";
         }
-        s += "->[";
-        for (int i = 0; i < t.getChildCount(); i++) {
-            s += ((i > 0) ? "," : "") + getHierarchy(t.getChild(i).getSceneNode(), maxlevel - 1);
-        }
-        return s + "]";
+        // up: Even with 'up' arrow goes to the right(children)
+        return getHierarchy(t.getParent().getSceneNode(), maxlevel - 1, false) + "->" + s;
     }
 
     /**

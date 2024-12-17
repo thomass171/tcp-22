@@ -73,6 +73,7 @@ public class MainTest {
             logger.info("Running UtilTest.testFormat()");
             UtilTest utilTest = new UtilTest();
             utilTest.testFormat();
+            utilTest.testUpperBounds();
 
             GeometryTest geometryTest = new GeometryTest();
             //25.1.18 ist in ReferenceScenelogger.info("Running GeometryTest.testSimpleIntersection()");

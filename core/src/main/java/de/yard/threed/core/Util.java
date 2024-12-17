@@ -7,7 +7,11 @@ import de.yard.threed.core.platform.Platform;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Date: 01.04.14
@@ -306,7 +310,7 @@ public class Util {
         }
         int index = 1;
         while (index < len) {
-            if (!Util.isDigit(StringUtils.charAt(data, index))){
+            if (!Util.isDigit(StringUtils.charAt(data, index))) {
                 return false;
             }
             index++;
@@ -585,6 +589,26 @@ public class Util {
             }
         }
         return list;
+    }
+
+    /**
+     * From C++ upper_bound().
+     * <p>
+     * Returns an iterator pointing to the first element in the container whose key is considered to go after k.
+     * <p>
+     * The function uses its internal comparison object (key_comp) to determine this, returning an iterator to the first element for which key_comp(k,element_key) would return true.
+     *
+     * Not really usable like in C++, so probably not used at all.
+     */
+    public static <K, V> Iterator<K> upperBound(Map<K, V> map, K k, Comparator<K> comparator) {
+        List<K> sortedKeys = new ArrayList<K>(map.keySet());
+        sortedKeys.sort(comparator);
+        for (int i = 0; i < sortedKeys.size(); i++) {
+            if (comparator.compare(k, sortedKeys.get(i)) < 0) {
+                return sortedKeys.subList(i, sortedKeys.size()).iterator();
+            }
+        }
+        return sortedKeys.subList(sortedKeys.size(), sortedKeys.size()).iterator();
     }
 }
 

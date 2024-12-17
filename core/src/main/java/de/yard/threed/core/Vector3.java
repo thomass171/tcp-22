@@ -262,4 +262,11 @@ public class Vector3 implements Dumpable {
     public Vector3 addZ(double t) {
         return new Vector3(x, y, z + t);
     }
+
+    /**
+     * The euclidean norm of the vector, that is what most people call length
+     */
+    public double norm() {
+        return length();
+    }
 }

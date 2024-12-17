@@ -123,8 +123,10 @@ public class MathUtil2 {
         double determinant = getDeterminant(m);
 
         if (determinant == 0.0f) {
-//TODO anders
-            throw new RuntimeException("determinant is 0");
+            // 5.12.24: This might really happen under circumstances we don't know currently (maybe at the poles?)
+            // So don't abort but return decision to caller
+            getLogger().error("determinant is 0");
+            return null;
         }
         return multiply(inverse, 1f / determinant);
 
@@ -861,6 +863,10 @@ public class MathUtil2 {
             return false;
         }
         return true;
+    }
+
+    static private Log getLogger() {
+        return Platform.getInstance().getLog(MathUtil2.class);
     }
 }
 

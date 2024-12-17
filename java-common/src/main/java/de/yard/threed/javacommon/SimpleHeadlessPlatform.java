@@ -867,6 +867,11 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
          */
         private List<Vector3> getIntersection(DummyGeometry geo, Matrix4 worldModelMatrix) {
             Matrix4 worldModelMatrixInverse = MathUtil2.getInverse(worldModelMatrix);
+            if (worldModelMatrixInverse == null) {
+                // might happen when determinant is 0
+                logger.warn("no inverse matrix found");
+                return new ArrayList<>();
+            }
             Vector3 lorigin = worldModelMatrixInverse.transform(origin);
             //Why is direction not transformed?
             //Vector3 ldirection = worldModelMatrixInverse.transform(direction);
