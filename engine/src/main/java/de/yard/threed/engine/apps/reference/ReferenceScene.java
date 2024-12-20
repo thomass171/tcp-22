@@ -52,10 +52,10 @@ import de.yard.threed.engine.test.MainTest;
  * f: enable/disable FPS Controller
  * c: enable/disable FPS Controller fuer weisse Box
  * m: Menu cycle: (Gridmenupanel), SecondMenu(greencube). Could also be used for help page.
- * e: Effects durchcyclen
+ * e: cycle effects (eg. blend modes, transparency): toggle 'river wall' plane transparency.
  * l: toggle hiddencube layer
  * L: cycle lightNode
- * r: cycle layer renedered
+ * r: cycle layer rendered
  * s: cycle shading of earth (nicht fertig)
  * <p>
  * 9.3.16: Toggable FPS Controller added. Dann geht aber je nach Einstellung im FPS z.B. Pickingray nicht (wegen Mausmovehandling)
@@ -117,6 +117,8 @@ public class ReferenceScene extends Scene {
     double DEFERRED_CAMERA_FAR = 15.0;
     Audio elevatorPing;
     boolean remoteShuttleTriggered = false;
+    Material wallMat;
+    int effectCycle = 0;
 
     @Override
     public void init(SceneMode sceneMode) {
@@ -266,11 +268,11 @@ public class ReferenceScene extends Scene {
         ground.setName("Ground");
         addToWorld(ground);
 
-        //eine Mazewand mit Normalmap. 25.9.19: Die Normals in der geo sind trotzdem erforderlich (wegen tangent space).
+        //a maze wall with Normalmap. 25.9.19: Die Normals in der geo sind trotzdem erforderlich (wegen tangent space).
         GenericGeometry wallgeo = new GenericGeometry(Primitives.buildPlaneGeometry(0.7f, 1.1f, 2, 1));
-        Material mat = buildWallMaterial(false);
+        wallMat = buildWallMaterial(false);
 
-        SceneNode wall = new SceneNode(new Mesh(wallgeo, mat));
+        SceneNode wall = new SceneNode(new Mesh(wallgeo, wallMat));
         //aufrecht mittig zwischen die Boxen und gedreht, damit die Wall nicht auf der Seite steht. 
         wall.getTransform().rotateX(new Degree(90));
         wall.getTransform().rotateY(new Degree(-90));
@@ -313,7 +315,7 @@ public class ReferenceScene extends Scene {
 
         //eine Plane für Canvas
         GenericGeometry canvasgeo = new GenericGeometry(Primitives.buildPlaneGeometry(0.7f, 1.1f, 2, 1));
-        mat = buildWallMaterial(false);
+        //18.12.24 not used/needed? mat = buildWallMaterial(false);
 
         NativeCanvas canvas = Platform.getInstance().buildNativeCanvas(300, 200);
         SceneNode canvasNode = new SceneNode(new Mesh(canvasgeo, Material.buildBasicMaterial(new Texture(canvas))));
@@ -502,15 +504,15 @@ public class ReferenceScene extends Scene {
     }
 
     /**
-     * 25.9.19: Hat river ueberhaupt einen brauchbaren Alpha Channel?
-     * 16.10.24: Probably no, so there will be no transparancy at all
-     *
+     * 25.9.19: Has river.jpg a usable alpha channel at all?
+     * 16.10.24: Probably no, so there will be no transparancy at all. The JPG file format simply does not have alpha.
+     * 18.12.24: river.jpg replaced with SokobanTarget.png which has alpha channel (full transparent)
      * @return
      */
     private Material buildWallMaterial(boolean transparent) {
         Material mat;
         // river, um besser Orientierung pruefen zu können.
-        mat = Material.buildPhongMaterialWithNormalMap(Texture.buildBundleTexture("data", "images/river.jpg"),
+        mat = Material.buildPhongMaterialWithNormalMap(Texture.buildBundleTexture("data", "textures/SokobanTarget.png"),
                 Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image), transparent);
         return mat;
     }
@@ -876,8 +878,23 @@ public class ReferenceScene extends Scene {
         addOrReplaceEarth();
     }
 
+    /**
+     * For now only wall transparency toggle
+     */
     private void cycleEffects() {
-
+        effectCycle++;
+        if (effectCycle > 1) {
+            effectCycle = 0;
+        }
+        logger.debug("Cycling to effect " + effectCycle);
+        switch (effectCycle) {
+            case 0:
+                wallMat.setTransparency(false);
+                break;
+            case 1:
+                wallMat.setTransparency(true);
+                break;
+        }
     }
 
     private void cycleRendering() {
