@@ -423,4 +423,10 @@ public class Matrix4 /*30.5.implements Dumpable*/ {
     public Vector3 getForward() {
         return getColumn(2).normalize();
     }
+
+    public void setTranslation(Vector3 v) {
+        a14 = v.getX();
+        a24 = v.getY();
+        a34 = v.getZ();
+    }
 }

@@ -1,6 +1,9 @@
 package de.yard.threed.core;
 
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.Assert;
+import de.yard.threed.core.testutil.CoreTestFactory;
+import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
 import de.yard.threed.core.testutil.TestUtils;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +12,8 @@ import org.junit.jupiter.api.Test;
  * Date: 26.04.14
  */
 public class Matrix3Test {
+    static Platform platform = CoreTestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
+
     Matrix3 mat1 = new Matrix3(
             1, 2, 3,
             5, 6, 7,
@@ -63,5 +68,10 @@ public class Matrix3Test {
         TestUtils.assertVector2(new Vector2(-2, 0), v, "");
     }
 
-
+    @Test
+    public void testTransform() {
+        Matrix3 m3 = new Matrix3();
+        m3.setTranslation(new Vector2(2, 3));
+        TestUtils.assertVector2(new Vector2(2 + 4, 3 + 5), m3.transform(new Vector2(4, 5)), "");
+    }
 }

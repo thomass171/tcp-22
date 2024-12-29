@@ -62,14 +62,14 @@ public class MathTest {
         Vector3 newoben = rechts.rotate(q);
         TestUtils.assertVector3(oben, newoben);
 
-        Assertions.assertEquals(0, new Vector2(1,0).angle().getDegree(),0.00001);
-        Assertions.assertEquals(45, new Vector2(1,1).angle().getDegree(),0.00001);
-        Assertions.assertEquals(90, new Vector2(0,1).angle().getDegree(),0.00001);
-        Assertions.assertEquals(135, new Vector2(-1,1).angle().getDegree(),0.00001);
-        Assertions.assertEquals(180, new Vector2(-1,0).angle().getDegree(),0.00001);
-        Assertions.assertEquals(225, new Vector2(-1,-1).angle().getDegree(),0.00001);
-        Assertions.assertEquals(270, new Vector2(0,-1).angle().getDegree(),0.00001);
-        Assertions.assertEquals(315, new Vector2(1,-1).angle().getDegree(),0.00001);
+        Assertions.assertEquals(0, new Vector2(1, 0).angle().getDegree(), 0.00001);
+        Assertions.assertEquals(45, new Vector2(1, 1).angle().getDegree(), 0.00001);
+        Assertions.assertEquals(90, new Vector2(0, 1).angle().getDegree(), 0.00001);
+        Assertions.assertEquals(135, new Vector2(-1, 1).angle().getDegree(), 0.00001);
+        Assertions.assertEquals(180, new Vector2(-1, 0).angle().getDegree(), 0.00001);
+        Assertions.assertEquals(225, new Vector2(-1, -1).angle().getDegree(), 0.00001);
+        Assertions.assertEquals(270, new Vector2(0, -1).angle().getDegree(), 0.00001);
+        Assertions.assertEquals(315, new Vector2(1, -1).angle().getDegree(), 0.00001);
     }
 
     @Test
@@ -233,5 +233,12 @@ public class MathTest {
         result = Vector2.getRotationAngleBetween(a, b);
         //0 waere auch richtig. Tja.
         Assertions.assertEquals(8 * PI4, result);
+    }
+
+    @Test
+    public void testfmod() {
+
+        Assertions.assertEquals(0.0, MathUtil2.fmod(3.6, 1.2),0.00001);
+        Assertions.assertEquals(0.1, MathUtil2.fmod(3.7, 1.2),0.00001);
     }
 }

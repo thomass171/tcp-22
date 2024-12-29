@@ -323,11 +323,8 @@ public class MathUtil2 {
     }
 
     public static Matrix4 buildTranslationMatrix(Vector3 v) {
-        Matrix4 mat = new Matrix4(
-                1, 0, 0, v.getX(),
-                0, 1, 0, v.getY(),
-                0, 0, 1, v.getZ(),
-                0, 0, 0, 1);
+        Matrix4 mat = new Matrix4();
+        mat.setTranslation(v);
         return mat;
     }
 
@@ -863,6 +860,15 @@ public class MathUtil2 {
             return false;
         }
         return true;
+    }
+
+    /**
+     * From C++
+     * Computes the floating-point remainder of the division operation x / y
+     */
+    public static double fmod(double d1, double d2) {
+        // The int mod operation should also work for double
+        return d1 % d2;
     }
 
     static private Log getLogger() {

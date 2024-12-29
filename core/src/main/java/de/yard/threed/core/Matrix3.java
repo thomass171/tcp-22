@@ -30,9 +30,7 @@ public class Matrix3 implements Dumpable {
      * Identity Matrix
      */
     public Matrix3() {
-        this(1, 0, 0,
-                0, 1, 0,
-                0, 0, 1);
+        init();
     }
 
     /**
@@ -50,7 +48,18 @@ public class Matrix3 implements Dumpable {
         e31 = a31;
         e32 = a32;
         e33 = a33;
+    }
 
+    public void init() {
+        e11 = 1;
+        e12 = 0;
+        e13 = 0;
+        e21 = 0;
+        e22 = 1;
+        e23 = 0;
+        e31 = 0;
+        e32 = 0;
+        e33 = 1;
     }
 
     @Override
@@ -59,7 +68,7 @@ public class Matrix3 implements Dumpable {
         String s = "";
 
         s += Util.formatFloats(label, e11, e12, e13) + lineseparator;
-        s += Util.formatFloats(label,e21, e22, e23) + lineseparator;
+        s += Util.formatFloats(label, e21, e22, e23) + lineseparator;
         s += Util.formatFloats(label, e31, e32, e33);
         return s;
     }
@@ -138,8 +147,8 @@ public class Matrix3 implements Dumpable {
 
     public static Matrix3 buildRotationMatrix(double theta) {
         Matrix3 mat = new Matrix3(
-                 Math.cos(theta),  -Math.sin(theta), 0,
-                 Math.sin(theta),  Math.cos(theta), 0,
+                Math.cos(theta), -Math.sin(theta), 0,
+                Math.sin(theta), Math.cos(theta), 0,
                 0, 0, 1);
         return mat;
     }
@@ -171,4 +180,10 @@ public class Matrix3 implements Dumpable {
                 e12, e22, e32,
                 e13, e23, e33);
     }
+
+    public void setTranslation(Vector2 v) {
+        e13 = v.getX();
+        e23= v.getY();
+    }
+
 }
