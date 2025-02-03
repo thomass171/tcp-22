@@ -188,7 +188,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
         MaterialDefinition materialDefinition = new MaterialDefinition("name", colors, null, null);
 
         HomeBrewMaterial material = null;
-        material = HomeBrewMaterial.buildMaterial(renderer.getGlContext(), materialDefinition, null);
+        material = HomeBrewMaterial.buildMaterial(renderer.getGlContext(), materialDefinition);
         HomeBrewMesh linemesh = new HomeBrewMesh(geo, material, false, false);
         HomeBrewSceneNode n = new HomeBrewSceneNode((String) null);
         n.setMesh(linemesh);
@@ -212,9 +212,9 @@ public class PlatformHomeBrew extends DefaultPlatform {
     }
 
     @Override
-    public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameter, Object/*Effect*/ effect) {
+    public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameter) {
         MaterialDefinition materialDefinition = new MaterialDefinition(name, color, texture, parameter);
-        return HomeBrewMaterial.buildMaterial(renderer.getGlContext(), materialDefinition, (Effect) effect);
+        return HomeBrewMaterial.buildMaterial(renderer.getGlContext(), materialDefinition);
     }
 
     /**
@@ -516,5 +516,11 @@ public class PlatformHomeBrew extends DefaultPlatform {
     public NativeBundleResourceLoader buildResourceLoader(String bundlename, String location) {
         return JavaBundleResolverFactory.buildResourceLoader(bundlename, location, bundleResolver);
     }
+
+    @Override
+    public NativeProgram buildProgram(String name, BundleResource vertexShader, BundleResource fragmentShader) {
+        return new HomeBrewProgram(name, vertexShader, fragmentShader);
+    }
+
 }
 

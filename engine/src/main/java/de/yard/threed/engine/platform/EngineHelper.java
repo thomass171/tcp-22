@@ -1,8 +1,6 @@
 package de.yard.threed.engine.platform;
 
 import de.yard.threed.core.*;
-import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.platform.common.*;
@@ -64,8 +62,8 @@ public /*abstract*/ class EngineHelper /*extends Platform*/ {
     /**
      * MA36: Only convenience? Made static
      */
-    public static NativeMaterial buildMaterial(MaterialDefinition def, Effect effect) {
-        return Platform.getInstance().buildMaterial(def.name, def.color, def.texture, def.parameters, null);
+    public static NativeMaterial buildMaterial(MaterialDefinition def, ShaderPool effect) {
+        return Platform.getInstance().buildMaterial(def.name, def.color, def.texture, def.parameters);
     }
 
 

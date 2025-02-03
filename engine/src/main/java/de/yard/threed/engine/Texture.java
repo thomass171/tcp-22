@@ -1,5 +1,9 @@
 package de.yard.threed.engine;
 
+import de.yard.threed.core.Matrix3;
+import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.Vector2;
+import de.yard.threed.core.geometry.ProportionalUvMap;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleRegistry;
@@ -141,5 +145,20 @@ public class Texture {
 
     public static int texturePoolSize() {
         return texturePool.size();
+    }
+
+    /**
+     * Assume the original uvs are for the top left element (0,0).
+     * Logical 'y' counts from bottom here(!) like 'v' in 'uv'.
+     */
+    public static Matrix3 getTextureMatrixForGridElement(int wsegments, int hsegments, int x, int y) {
+        ProportionalUvMap uvMap = ProportionalUvMap.buildForGridElement(wsegments, x, y, false);
+
+        Matrix3 matrix3 = new Matrix3();
+        Vector2 translation = uvMap.getUvFromNativeUv(new Vector2());
+        // Need to negate 'v' because reference is the top left element (0,0)
+        translation = new Vector2(translation.getX(), translation.getY());
+        matrix3.setTranslation(translation);
+        return matrix3;
     }
 }

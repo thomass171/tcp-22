@@ -58,10 +58,7 @@ public class Icon implements GuiTexture {
     public UvMap1 getUvMap() {
         // wegen der Planeorientierung ist noch der rechts rotate erforderlich.
         // 3.5.21: Es gibt jetzt aber noch andere planes, die more natural sind und das nicht mehr brauchen. Das kann/soll er hier aber gar nicht wissen.
-         ProportionalUvMap uvmap = new ProportionalUvMap(
-                new Vector2(((float) x / cnt), (((float) cnt - y - 1) / cnt)),
-                new Vector2((((float) x + 1) / cnt), (((float) cnt - y) / cnt))/*3.5.21 no longer, ProportionalUvMap.ROTATION_RIGHT);*/);
-
+        ProportionalUvMap uvmap = ProportionalUvMap.buildForGridElement(cnt, x, y, true);
         return uvmap;//.rotateRight();
     }
 

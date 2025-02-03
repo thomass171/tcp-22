@@ -10,7 +10,7 @@ varying	vec3	reflVec;
 varying vec3 	vertVec;
 varying	float	alpha;
 
-void main(){
+void main() {
 		rawpos = vec3(0,0,0);
 		VNormal= vec3(0,0,0);
 		VTangent= vec3(0,0,0);

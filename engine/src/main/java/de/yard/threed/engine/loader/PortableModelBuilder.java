@@ -304,6 +304,6 @@ public class PortableModelBuilder {
     private static NativeMaterial getDummyMaterial() {
         HashMap<ColorType, Color> color = new HashMap<ColorType, Color>();
         color.put(ColorType.MAIN, Color.WHITE);
-        return (Platform.getInstance()).buildMaterial(null, color, null, null, null);
+        return (Platform.getInstance()).buildMaterial(null, color, null, null);
     }
 }

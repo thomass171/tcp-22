@@ -173,7 +173,7 @@ public class PlatformJme extends SimpleHeadlessPlatform {
         JmeGeometry geometry = JmeGeometry.buildMesh(vertices, new int[]{0, 1}, uvs, vertices);
         MaterialDefinition materialDefinition = new MaterialDefinition("mat", Material.buildColorMap(color), null, null);
 
-        NativeMaterial material = JmeMaterial.buildMaterial(materialDefinition, null);
+        NativeMaterial material = JmeMaterial.buildMaterial(materialDefinition);
         JmeMesh mesh = JmeMesh.buildMesh((JmeGeometry) geometry, (JmeMaterial) material, false, false, true);
         JmeSceneNode n = new JmeSceneNode((String) null);
         n.setMesh(mesh);
@@ -244,11 +244,16 @@ public class PlatformJme extends SimpleHeadlessPlatform {
 
     @Override
     public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap</*TextureType*/String, NativeTexture> texture,
-                                        HashMap<NumericType, NumericValue> parameters, /*MA36 TODO Effect*/ Object effect) {
-        return JmeMaterial.buildMaterial(new MaterialDefinition(name, color, texture, parameters), (Effect) effect);
+                                        HashMap<NumericType, NumericValue> parameters /*MA36  Effect Object effect*/) {
+        return JmeMaterial.buildMaterial(new MaterialDefinition(name, color, texture, parameters)/*, (Effect) effect*/);
     }
     //return buildMaterial(new MaterialDefinition(name,color,texture,parameters),effect);
-    
+
+    @Override
+    public NativeMaterial buildMaterial(NativeProgram program, boolean opaque) {
+        return JmeMaterial.buildMaterial((JmeProgram) program, opaque);
+    }
+
     /*@Override
     public NativeMaterial buildLambertMaterialWithNormalMap(Color colorargb) {
         return JmeMaterial.buildLambertMaterialWithNormalMap(colorargb, null);
@@ -529,6 +534,11 @@ public class PlatformJme extends SimpleHeadlessPlatform {
     @Override
     public List<NativeSceneNode> findNodeByName(String name, NativeSceneNode startnode) {
         return ((JmeSceneNode) startnode).object3d.findNodeByName(name, ((JmeSceneNode) startnode).object3d.spatial);
+    }
+
+    @Override
+    public NativeProgram buildProgram(String name, BundleResource vertexShader, BundleResource fragmentShader) {
+        return new JmeProgram(name, vertexShader, fragmentShader);
     }
 
     /**

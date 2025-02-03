@@ -98,7 +98,7 @@ public class DefaultMaterialFactory implements MaterialFactory {
             }
             //map.put("normalmap",normalmap.texture);
             //TODO die anderen Materialparameter
-            nmat = Platform.getInstance().buildMaterial(null, null, map, parameters, null);
+            nmat = Platform.getInstance().buildMaterial(null, null, map, parameters);
         } else {
             HashMap<ColorType, Color> color = new HashMap<ColorType, Color>();
             color.put(ColorType.MAIN, mat.getColor());
@@ -111,7 +111,7 @@ public class DefaultMaterialFactory implements MaterialFactory {
             if (mat.getTransparency() != null) {
                 parameters.put(NumericType.TRANSPARENCY, new NumericValue(mat.getTransparency().floatValue()));
             }
-            nmat = Platform.getInstance().buildMaterial(null, color, null, parameters, null);
+            nmat = Platform.getInstance().buildMaterial(null, color, null, parameters);
         }
         return new Material(nmat);
     }

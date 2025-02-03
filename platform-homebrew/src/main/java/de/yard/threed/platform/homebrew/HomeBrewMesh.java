@@ -81,7 +81,7 @@ public class HomeBrewMesh /*19.7.16 extends OpenGlObject3D*/ implements NativeMe
         }else{
             // auch wireframe (GL_LINE_LOOP braucht wohl einen Shader
             MaterialDefinition materialDefinition=new MaterialDefinition("wireframe",Material.buildColorMap(Color.WHITE), null, Material.buildParam(NumericType.SHADING, new NumericValue(NumericValue.UNSHADED)));
-            wireframematerial = (HomeBrewMaterial) HomeBrewMaterial.buildMaterial(gl, materialDefinition, null);
+            wireframematerial = (HomeBrewMaterial) HomeBrewMaterial.buildMaterial(gl, materialDefinition);
         }
        gl.exitOnGLError(gl, "setup.material.setup");
 

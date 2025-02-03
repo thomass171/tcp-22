@@ -186,4 +186,15 @@ public class Matrix3 implements Dumpable {
         e23= v.getY();
     }
 
+    public Vector3 getCol0() {
+        return new Vector3(e11, e21, e31);
+    }
+
+    public Vector3 getCol1() {
+        return new Vector3(e12, e22, e32);
+    }
+
+    public Vector3 getCol2() {
+        return new Vector3(e13, e23, e33);
+    }
 }

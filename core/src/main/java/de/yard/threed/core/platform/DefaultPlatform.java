@@ -61,7 +61,12 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameters, Object effect) {
+    public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameters/*, Object effect*/) {
+        return null;
+    }
+
+    @Override
+    public NativeMaterial buildMaterial(NativeProgram program, boolean opaque) {
         return null;
     }
 
@@ -289,6 +294,11 @@ public class DefaultPlatform extends Platform {
             }
         }
         return nodelist;
+    }
+
+    @Override
+    public NativeProgram buildProgram(String name, BundleResource vertexShader, BundleResource fragmentShader) {
+        return null;
     }
 
     /*@Override

@@ -161,8 +161,13 @@ public abstract class Platform {
      * @return
      */
     public abstract NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap</*TextureType*/String, NativeTexture> texture,
-                                                 HashMap<NumericType, NumericValue> parameters, /*MA36 TODO Effect*/ Object effect);
+                                                 HashMap<NumericType, NumericValue> parameters /*MA36  Effect Object effect*/);
     //return buildMaterial(new MaterialDefinition(name,color,texture,parameters),effect);
+
+    /**
+     * material name is taken from program
+     */
+    public abstract NativeMaterial buildMaterial(/*String name,*/ NativeProgram program, boolean opaque);
 
     /**
      * Ob das so bleiben kann ist fraglich wegen analogie zu Ajax. Aber warum nicht? Ajax ist nur ThreeJS, und da erfolgt das laden transparent im
@@ -481,4 +486,10 @@ public abstract class Platform {
      * like for FG animations.
      */
     public abstract List<NativeSceneNode> findNodeByName(String name, NativeSceneNode startnode);
+
+    /**
+     * Use latest most generic approach for getting resources (URL/resourceloader)?
+     * Sounds nice but breaks sync workflow for material creation.
+     */
+    public abstract NativeProgram buildProgram(String name, BundleResource vertexShader, BundleResource fragmentShader);
 }

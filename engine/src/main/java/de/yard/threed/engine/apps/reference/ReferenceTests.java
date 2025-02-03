@@ -294,7 +294,7 @@ public class ReferenceTests {
 
     public static void testMovingboxView(ReferenceScene rs) {
         logger.info("testMovingboxView");
-        rs.controller.stepTo(1);
+        rs.controller.stepTo(2);
 
         Matrix4 mboxworldmatrix = (rs.getMovingbox().getTransform().getWorldModelMatrix());
         logger.debug("moving box worldmatrix=\n" + mboxworldmatrix.dump("\n"));
@@ -345,7 +345,7 @@ public class ReferenceTests {
 
     public static void testRayFromFarAway(Dimension dim, ReferenceScene rs) {
         logger.info("testRayFromFarAway");
-        rs.controller.stepTo(6);
+        rs.controller.stepTo(7);
         //Nicht per Rayhelper, der ist ja in allen Platformen der gleiche
         //RayHelper rayhelper = new RayHelper(rs.getMainCamera().getNativeCamera());
         Ray pickingray = rs.getMainCamera().buildPickingRay(rs.getMainCamera().getCarrier().getTransform(), new Point(dim.width / 2, dim.height / 2));

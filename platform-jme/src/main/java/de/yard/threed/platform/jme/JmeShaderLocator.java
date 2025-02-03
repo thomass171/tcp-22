@@ -4,21 +4,23 @@ import com.jme3.asset.AssetInfo;
 import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetLocator;
 import com.jme3.asset.AssetManager;
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.engine.Uniform;
+import de.yard.threed.engine.UniformType;
+import de.yard.threed.engine.platform.AbstractShaderProgram;
 import de.yard.threed.engine.platform.common.ShaderUtil;
-import de.yard.threed.javacommon.FileReader;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.util.List;
 
 
 /**
  * 3.5.19: Allgemeine custom shader (z.B. Photoalbum) liegen in bundle core. Da ist das mit rootpath aeusserst fragwürdig?
  * Es koennte zufällig gehen, weil die Dateien auch im FS liegen. Und es gibt auch JME spezifische custom shader (MYLighting),
  * die liegen nur in JME im FS. Da ist etwas nicht rund?
- *
+ * <p>
  * Created by thomass on 23.12.15.
  */
 public class JmeShaderLocator implements AssetLocator {
@@ -52,13 +54,22 @@ public class JmeShaderLocator implements AssetLocator {
             @Override
             public java.io.InputStream openStream() {
                 try {
-                    String source;
-                    String loc = /*17.3.16 rootpath + "/" +*/ assetkey.substring(JmeResourceManager.RESOURCEPREFIX.length()+1);
-                    logger.debug("loading shader from " + loc);
-                    InputStream is = FileReader.getFileStream(new BundleResource(loc));
-                    byte[] bytebuf;
-                    bytebuf = FileReader.readFully(is);
-                    source = new String(bytebuf, "UTF-8");
+                    String source = null;
+                    String loc = /*17.3.16 rootpath + "/" +*/ assetkey.substring(JmeResourceManager.RESOURCEPREFIX.length() + 1);
+                    String effectKey = StringUtils.substringBefore(loc, "/");
+                    loc = StringUtils.substringAfter(loc, "/");
+                    logger.debug("loading " + loc + " from effect " + effectKey);
+                    AbstractShaderProgram shaderInfo = JmeProgram.effects.get(effectKey);
+
+                    if (loc.equals("vertexshader.vert")) {
+                        source = shaderInfo.vertexshader;
+                    }
+                    if (loc.equals("fragmentshader.frag")) {
+                        source = shaderInfo.fragmentshader;
+                    }
+                    if (source == null) {
+                        throw new RuntimeException("no source for shader " + loc);
+                    }
                     //HashMap<String,String> translatemap = new HashMap<String, String>();
                     source = ShaderUtil.preprocess(source/*,translatemap*/);
                     if (assetkey.endsWith(".vert")) {
@@ -83,12 +94,18 @@ public class JmeShaderLocator implements AssetLocator {
                         source = source.replaceAll("TEXTURE2D", "texture2D");
                         source = source.replaceAll("IN", "varying");
                     }
-                    // Die ungeeignete JME Nomenklatur mit Material uniform prefix "m_" beachten
-                    // 27.4.16: Das ist wirklich reichlich nervend.
-                    source = source.replaceAll("isunshaded","m_isunshaded");
-                    source = source.replaceAll("texture0","m_texture0");
-                    source = source.replaceAll("texture1","m_texture1");
+                    source = workaroundMat3(source, shaderInfo.uniforms);
 
+                    // Consider the unusual JME naming convention of material uniforms with prefix "m_".
+                    // 27.4.16: That is really annoying and error prone.
+                    // 8.1.25: And why doesn't "texture" need a replacement? Anyway, we use 'u_texture' now.
+                    source = source.replaceAll("u_isunshaded", "m_isunshaded");
+                    source = source.replaceAll("u_texture", "m_texture");
+                    source = source.replaceAll("u_texture0", "m_texture0");
+                    source = source.replaceAll("u_texture1", "m_texture1");
+                    source = source.replaceAll("u_transparency", "m_transparency");
+
+                    logger.debug("final shader source:" + source);
                     return new ByteArrayInputStream(source.getBytes("UTF-8"));
                 } catch (Exception e) {
                     //TODO Fehlerhandling
@@ -98,6 +115,56 @@ public class JmeShaderLocator implements AssetLocator {
             }
         };
         return ai;
+    }
+
+    /**
+     * JME has no mat3 uniform type.
+     *
+     * @param source
+     * @param uniforms
+     * @return
+     */
+    private String workaroundMat3(String source, List<Uniform> uniforms) {
+
+        String MAIN_LINE = "void main() {";
+        String initPart = "";
+
+        if (!source.contains(MAIN_LINE)) {
+            throw new RuntimeException("no main line found");
+        }
+        for (Uniform uniform : uniforms) {
+            if (uniform.type == UniformType.MATRIX3) {
+                String expectedUniformDefinition = "uniform mat3 " + uniform.name + ";";
+                // This workaround is called for both vert/frag shader, but uniforms might only exist in one of these
+                if (source.contains(expectedUniformDefinition)) {
+
+                    source = source.replaceAll(expectedUniformDefinition,
+                            "uniform vec3 " + uniform.name + "_col0;\n" +
+                                    "uniform vec3 " + uniform.name + "_col1;\n" +
+                                    "uniform vec3 " + uniform.name + "_col2;");
+
+                    initPart +=
+                            //  GLSL uses column major!
+                            // texture_matrix[0] = u_texture_matrix_col0; // first column
+                            //    texture_matrix[1] = u_texture_matrix_col1; // second column
+                            //    texture_matrix[2] = u_texture_matrix_col2; // third column
+                            "\n" +
+                                    "    mat3 " + uniform.name + ";\n" +
+                                    "    " + uniform.name + "[0]=" + uniform.name + "_col0;" + "// first column\n" +
+                                    "    " + uniform.name + "[1]=" + uniform.name + "_col1;" + "// second column\n" +
+                                    "    " + uniform.name + "[2]=" + uniform.name + "_col2;" + "// third column\n";
+
+                }
+            }
+        }
+
+        source = source.replace(MAIN_LINE, MAIN_LINE + initPart);
+
+        if (source.contains("uniform mat3")) {
+            throw new RuntimeException("'uniform mat3' not replaced");
+        }
+
+        return source;
     }
 
 

@@ -8,6 +8,7 @@ import de.yard.threed.core.Color;
 import de.yard.threed.core.ColorType;
 import de.yard.threed.core.NumericType;
 import de.yard.threed.core.NumericValue;
+import de.yard.threed.engine.platform.common.ShaderProgram;
 
 
 import java.util.HashMap;
@@ -28,7 +29,7 @@ public class Material {
         this.material = material;
     }
 
-    protected static HashMap<String, NativeTexture> buildTextureMap(Texture texture) {
+    public static HashMap<String, NativeTexture> buildTextureMap(Texture texture) {
         HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
         map.put("basetex", texture.texture);
         return map;
@@ -94,12 +95,12 @@ public class Material {
      */
     public static Material buildPhongMaterial(Texture texture) {
         //super(texture);
-        return new Material(Platform.getInstance().buildMaterial(null, null, buildTextureMap(texture), buildParam(NumericType.SHININESS, new NumericValue(20)), null));
+        return new Material(Platform.getInstance().buildMaterial(null, null, buildTextureMap(texture), buildParam(NumericType.SHININESS, new NumericValue(20))));
     }
 
     public static Material buildPhongMaterial(Color color) {
         //super(color);
-        return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color), null, buildParam(NumericType.SHININESS, new NumericValue(20)), null));
+        return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color), null, buildParam(NumericType.SHININESS, new NumericValue(20))));
 
     }
 
@@ -120,13 +121,13 @@ public class Material {
             //Wert spielt keine Rolle
             paramlist.put(NumericType.TRANSPARENCY, new NumericValue(0));
         }
-        return new Material(Platform.getInstance().buildMaterial(null, null, map, paramlist, null));
+        return new Material(Platform.getInstance().buildMaterial(null, null, map, paramlist));
     }
 
     public static Material buildPhongMaterial(Color color, int shading) {
         HashMap<NumericType, NumericValue> paramlist = buildParam(NumericType.SHININESS, new NumericValue(20));
         paramlist.put(NumericType.SHADING, new NumericValue(shading));
-        return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color), null, paramlist, null));
+        return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color), null, paramlist));
     }
 
     /*THREED TODO @Override
@@ -152,21 +153,21 @@ public class Material {
 
     public static Material buildLambertMaterial(Color color) {
         //super(color);
-        return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color), null, null, null));
+        return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color), null, null));
     }
 
     public static Material buildLambertMaterial(Color color, HashMap<String, NativeTexture> texturemap) {
         //super(color);
-        return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color), texturemap, null, null));
+        return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color), texturemap, null));
     }
 
     public static Material buildLambertMaterial(Texture texture) {
-        return new Material(Platform.getInstance().buildMaterial(null, null, buildTextureMap(texture), null, null));
+        return new Material(Platform.getInstance().buildMaterial(null, null, buildTextureMap(texture), null));
     }
 
     public static Material buildLambertMaterial(Texture texture, Double transparency, boolean flatshading) {
         return new Material(Platform.getInstance().buildMaterial(null, null, buildTextureMap(texture),
-                buildParamList(transparency, (flatshading) ? NumericValue.FLAT : NumericValue.SMOOTH), null));
+                buildParamList(transparency, (flatshading) ? NumericValue.FLAT : NumericValue.SMOOTH)));
     }
 
     /**
@@ -179,30 +180,26 @@ public class Material {
      * 29.4.19: Obwohl unshaded, wird es in JME offenbar doch etwas geshaed (z.B. manche linke Seite tower, ander aber nicht??)
      */
     public static Material buildBasicMaterial(Texture texture) {
-        return buildBasicMaterial(texture, null, null);
+        return buildBasicMaterial(texture, null);
     }
 
-    public static Material buildBasicMaterial(Texture texture, Effect effect) {
-        return buildBasicMaterial(texture, effect, null);
-    }
-
-    public static Material buildBasicMaterial(Texture texture, Effect effect, Double transparency) {
+    public static Material buildBasicMaterial(Texture texture, Double transparency) {
         //super(texture);
         return new Material(Platform.getInstance().buildMaterial(null, null,
-                buildTextureMap(texture), buildParamList(transparency, NumericValue.UNSHADED), effect));
+                buildTextureMap(texture), buildParamList(transparency, NumericValue.UNSHADED)));
     }
 
     public static Material buildBasicMaterial(Color color) {
         //super(color);
         return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color),
-                null, buildParam(NumericType.SHADING, new NumericValue(NumericValue.UNSHADED)), null));
+                null, buildParam(NumericType.SHADING, new NumericValue(NumericValue.UNSHADED))));
     }
 
     //28.4.21
     public static Material buildBasicMaterial(Color color, Double transparency) {
         //super(color);
         return new Material(Platform.getInstance().buildMaterial(null, buildColorMap(color),
-                null, buildParamList(transparency, NumericValue.UNSHADED), null));
+                null, buildParamList(transparency, NumericValue.UNSHADED)));
     }
 
     /**
@@ -213,22 +210,13 @@ public class Material {
         this(new Texture[]{texture}, shader);
     }*/
 
-    //TODO 11.3.16: der effect wird so evtl. nicht mehr gehen
-    public static Material buildCustomShaderMaterial(String uniformname, Texture texture, Effect effect, Double transparency) {
-        //super((Color)null);
-        HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
-        map.put(uniformname, texture.texture);
-        return new Material(Platform.getInstance().buildMaterial(null, null, map, buildParamList(transparency, NumericValue.SMOOTH), effect));
-    }
-
-    public static Material buildCustomShaderMaterial(Texture texture) {
-        // super(texture);
-        return new Material(Platform.getInstance().buildMaterial(null, null, buildTextureMap(texture), null, null));
-    }
-
-    public static Material buildCustomShaderMaterial(HashMap<String, NativeTexture> map, Effect effect) {
+    public static Material buildCustomShaderMaterial(/*HashMap<String, NativeTexture> map,*/ ShaderProgram program/*Effect effect*/, boolean opaque) {
         // super((Color)null);
-        return new Material(Platform.getInstance().buildMaterial(null, null, map, null, effect));
+        Material mat = new Material(Platform.getInstance().buildMaterial(program.program, opaque));
+        if (program.defaultSetter != null) {
+            program.defaultSetter.handle(mat.material);
+        }
+        return mat;
     }
 
     public void setTransparency(boolean enabled) {

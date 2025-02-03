@@ -4,7 +4,7 @@
 
 OUT vec2 texcoord;
 
-void main(){
+void main() {
     
     gl_Position = PROJECTIONMATRIX * MODELVIEWMATRIX * vec4(VERTEX, 1.0);
 

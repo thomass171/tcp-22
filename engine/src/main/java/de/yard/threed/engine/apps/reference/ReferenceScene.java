@@ -23,7 +23,6 @@ import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import de.yard.threed.engine.test.AsyncTest;
@@ -117,7 +116,7 @@ public class ReferenceScene extends Scene {
     double DEFERRED_CAMERA_FAR = 15.0;
     Audio elevatorPing;
     boolean remoteShuttleTriggered = false;
-    Material wallMat;
+    GalleryWall galleryWall;
     int effectCycle = 0;
 
     @Override
@@ -156,6 +155,8 @@ public class ReferenceScene extends Scene {
 
         //auf Hoehe der move destination
         tl.addEntryForLookat(new Vector3(-3, 2, 6), new Vector3(-3, 2, 0));
+        // centered before gallery wall
+        tl.addEntryForLookat(new Vector3(0, 0, 2), new Vector3(0, 0, 0));
         // attached hinten an die Movebox mit Blick über die Box in Moverichtung
         // die x/y Werte scheinen sehr gross, aber auf die wirkt ja auch der scale der movinbox  (0.25?)
         tl.addEntry(new Vector3(2.5f, 2.1f, 0), Quaternion.buildFromAngles(new Degree(0), new Degree(90), new Degree(0)), getMovingbox().getTransform());
@@ -268,16 +269,7 @@ public class ReferenceScene extends Scene {
         ground.setName("Ground");
         addToWorld(ground);
 
-        //a maze wall with Normalmap. 25.9.19: Die Normals in der geo sind trotzdem erforderlich (wegen tangent space).
-        GenericGeometry wallgeo = new GenericGeometry(Primitives.buildPlaneGeometry(0.7f, 1.1f, 2, 1));
-        wallMat = buildWallMaterial(false);
-
-        SceneNode wall = new SceneNode(new Mesh(wallgeo, wallMat));
-        //aufrecht mittig zwischen die Boxen und gedreht, damit die Wall nicht auf der Seite steht. 
-        wall.getTransform().rotateX(new Degree(90));
-        wall.getTransform().rotateY(new Degree(-90));
-        wall.setName("Wall");
-        addToWorld(wall);
+        buildGalleryWall();
 
         buildPhotoalbumPage();
 
@@ -315,7 +307,6 @@ public class ReferenceScene extends Scene {
 
         //eine Plane für Canvas
         GenericGeometry canvasgeo = new GenericGeometry(Primitives.buildPlaneGeometry(0.7f, 1.1f, 2, 1));
-        //18.12.24 not used/needed? mat = buildWallMaterial(false);
 
         NativeCanvas canvas = Platform.getInstance().buildNativeCanvas(300, 200);
         SceneNode canvasNode = new SceneNode(new Mesh(canvasgeo, Material.buildBasicMaterial(new Texture(canvas))));
@@ -379,6 +370,56 @@ public class ReferenceScene extends Scene {
     }
 
     /**
+     * 2 columns, left column with platform shader, right column with custom shader.
+     */
+    private void buildGalleryWall() {
+        // dimension for having each cell apx rectangular
+        DimensionF gallerySize = new DimensionF(1.4f, 2.1f);
+
+        galleryWall = new GalleryWall(gallerySize, 2, 3);
+        // Centered between boxes und gedreht, damit die Wall nicht auf der Seite steht.
+        galleryWall.wall.getTransform().rotateX(new Degree(90));
+        galleryWall.wall.getTransform().rotateY(new Degree(-90));
+
+        addToWorld(galleryWall.wall);
+
+        //a maze wall with Normalmap. 25.9.19: Die Normals in der geo sind trotzdem erforderlich (wegen tangent space).
+        // river, um besser Orientierung pruefen zu können.
+        // 25.9.19: Has river.jpg a usable alpha channel at all?
+        // 16.10.24: Probably no, so there will be no transparancy at all. The JPG file format simply does not have alpha.
+        // 18.12.24: river.jpg replaced with SokobanTarget.png which has alpha channel (full transparent)
+        // share textures and shader
+        Texture river = Texture.buildBundleTexture("data", "images/river.jpg");
+        Texture sokobanTarget = Texture.buildBundleTexture("data", "textures/SokobanTarget.png");
+        Texture normalMap = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
+        ShaderProgram program = ShaderPool.buildSimpleTextureEffect();
+
+        // row 0 (top line): opaque (nontransparent), with normalmap (not in custom shader for now)
+        galleryWall.add(0, 0, Material.buildPhongMaterialWithNormalMap(river, normalMap, false),
+                "opaque, platform shader, normal map");
+        Material mat = Material.buildCustomShaderMaterial(program, true);
+        galleryWall.add(1, 0, mat, "opaque, custom shader");
+        mat.material.getUniform(Uniform.TEXTURE).setValue(river.texture);
+
+        // row 1: transparent (not possible with river??)
+        galleryWall.add(0, 1, Material.buildPhongMaterialWithNormalMap(river, normalMap, true),
+                "transparent, platform shader");
+        mat = Material.buildCustomShaderMaterial(program, false);
+        galleryWall.add(1, 1, mat, "transparent, custom shader");
+        mat.material.getUniform(Uniform.TEXTURE).setValue(river.texture);
+        mat.material.getUniform(Uniform.TRANSPARENCY).setValue(Float.valueOf(0.5f));
+
+        // row 2: transparent
+        galleryWall.add(0, 2, Material.buildPhongMaterialWithNormalMap(sokobanTarget, normalMap, true),
+                "transparent, platform shader");
+        mat = Material.buildCustomShaderMaterial(program, false);
+        galleryWall.add(1, 2, mat, "transparent, custom shader");
+        mat.material.getUniform(Uniform.TEXTURE).setValue(sokobanTarget.texture);
+        mat.material.getUniform(Uniform.TRANSPARENCY).setValue(Float.valueOf(0.5f));
+
+    }
+
+    /**
      * A control panel with 6 rows (dimesion 0.6x0.3) containing
      * - a property control value spinner for value "961"
      * - a light/dark green indicator toggled by the button below
@@ -397,6 +438,7 @@ public class ReferenceScene extends Scene {
         DimensionF rowsize = new DimensionF(PropertyControlPanelWidth, PropertyControlPanelRowHeight);
         ControlPanel cp = new ControlPanel(new DimensionF(PropertyControlPanelWidth, 3 * PropertyControlPanelRowHeight), mat, 0.01);
         Indicator indicator;
+        IconSetPanel iconSetPanel;
 
         int rows = 6;
         // top line: property control
@@ -412,10 +454,8 @@ public class ReferenceScene extends Scene {
 
         // mid line: a indicator on the left side, a transformable subtexture on the left right side
         indicator = Indicator.buildGreen(0.03);
-        Mesh m = buildTextureAtlasPanel(PropertyControlPanelRowHeight);
-        SceneNode mnode = new SceneNode(m);
-        mnode.getTransform().rotateX(new Degree(90));
-        mnode.getTransform().rotateY(new Degree(-90));
+        iconSetPanel = new IconSetPanel(PropertyControlPanelRowHeight);
+        SceneNode mnode = new SceneNode(iconSetPanel.mesh);
         cp.addArea(new Vector2(-PropertyControlPanelWidth / 4, ControlPanelHelper.calcYoffsetForRow(4, rows, PropertyControlPanelRowHeight)), new DimensionF(PropertyControlPanelWidth / 2,
                 PropertyControlPanelRowHeight), null).attach(indicator);
         cp.addArea(new Vector2(PropertyControlPanelWidth / 8, ControlPanelHelper.calcYoffsetForRow(4, rows, PropertyControlPanelRowHeight)), new DimensionF(PropertyControlPanelRowHeight,
@@ -427,6 +467,7 @@ public class ReferenceScene extends Scene {
             logger.debug("area clicked");
             indicator.toggle();
             rs.elevatorPing.play();
+            iconSetPanel.move();
 
         }).setIcon(Icon.ICON_POSITION);
 
@@ -503,19 +544,6 @@ public class ReferenceScene extends Scene {
         this.lightNode = addLightToWorld(light);
     }
 
-    /**
-     * 25.9.19: Has river.jpg a usable alpha channel at all?
-     * 16.10.24: Probably no, so there will be no transparancy at all. The JPG file format simply does not have alpha.
-     * 18.12.24: river.jpg replaced with SokobanTarget.png which has alpha channel (full transparent)
-     * @return
-     */
-    private Material buildWallMaterial(boolean transparent) {
-        Material mat;
-        // river, um besser Orientierung pruefen zu können.
-        mat = Material.buildPhongMaterialWithNormalMap(Texture.buildBundleTexture("data", "textures/SokobanTarget.png"),
-                Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image), transparent);
-        return mat;
-    }
 
     /**
      * Die Verkleinerung der aufstehenden Bloecke mit scale, um das auch zu nutzen.
@@ -689,10 +717,11 @@ public class ReferenceScene extends Scene {
         //ShapeGeometry cubegeometry = ShapeGeometry.buildPlane(3, 3, 1, 1);
         textures = new Texture[]{Texture.buildBundleTexture("data", "images/lake.jpg"), Texture.buildBundleTexture("data", "images/mountain-lake.jpg")};
         // Texture Shading
-        HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
-        map.put("texture0", textures[0].texture);
-        map.put("texture1", textures[1].texture);
-        mat = Material.buildCustomShaderMaterial(map, Effect.buildPhotoalbumEffect());
+        ShaderProgram program = ShaderPool.buildPhotoalbumEffect();
+        mat = Material.buildCustomShaderMaterial(program, true);
+        mat.material.getUniform("u_texture0").setValue(textures[0].texture);
+        mat.material.getUniform("u_texture1").setValue(textures[1].texture);
+
         //mat = Material.buildPhongMaterial(textures[0]);
         //3.5.21 eine wall by simple plane above
         SceneNode simplewall = new SceneNode(new Mesh(Primitives.buildSimpleXYPlaneGeometry(1.1, 1.8, new ProportionalUvMap()), mat));
@@ -889,10 +918,10 @@ public class ReferenceScene extends Scene {
         logger.debug("Cycling to effect " + effectCycle);
         switch (effectCycle) {
             case 0:
-                wallMat.setTransparency(false);
+                galleryWall.setTransparency(false);
                 break;
             case 1:
-                wallMat.setTransparency(true);
+                galleryWall.setTransparency(true);
                 break;
         }
     }
@@ -1091,20 +1120,79 @@ public class ReferenceScene extends Scene {
                 () -> {
                 }};
     }
+}
 
-    private static Mesh buildTextureAtlasPanel(double size) {
-        GenericGeometry planeGeo = new GenericGeometry(Primitives.buildPlaneGeometry(size, size, 1, 1));
-        Texture texture = Texture.buildBundleTexture("engine", "Iconset-LightBlue.png");
+class IconSetPanel {
 
-        HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
-        map.put("texture", texture.texture);
+    Mesh mesh;
+    int fontIndex;
+    Texture iconset;
+    Material mat;
 
-        Material mat = Material.buildCustomShaderMaterial(map, Effect.buildSimpleTextureEffect());
+    public IconSetPanel(double size) {
+        //GenericGeometry planeGeo = new GenericGeometry(Primitives.buildPlaneGeometry(size, size, 1, 1));
+        // start with top left element and later translate ...
+        GenericGeometry planeGeo = new GenericGeometry(Primitives.buildSimpleXYPlaneGeometry(size, size,
+                ProportionalUvMap.buildForGridElement(16, 0, 0, false)));
+        iconset = Texture.buildBundleTexture("engine", "Iconset-LightBlue.png");
 
+        ShaderProgram program = ShaderPool.buildSimpleTextureEffect();
+        mat = Material.buildCustomShaderMaterial(program, true);
+        mat.setName("IconSetPanel");
+        mat.material.getUniform(Uniform.TEXTURE).setValue(iconset.texture);
 
-        return new Mesh(planeGeo, mat);
+        move();
+        mesh = new Mesh(planeGeo, mat);
         //SceneNode wall = new SceneNode();
+    }
 
+    public void move() {
+        ReferenceScene.logger.debug("move to " + fontIndex);
+        Matrix3 textureMatrix = Texture.getTextureMatrixForGridElement(16, 16, fontIndex, 11);
+        mat.material.getUniform(Uniform.TEXTUREMATRIX).setValue(textureMatrix);
+
+        fontIndex++;
+    }
+}
+
+class GalleryWall {
+
+    SceneNode wall;
+    DimensionF size;
+    int rows, cols;
+
+    GalleryWall(DimensionF size, int cols, int rows) {
+        this.size = size;
+        this.rows = rows;
+        this.cols = cols;
+        boolean withGrid = false;
+        if (withGrid) {
+            // switch height/width due to rotation
+            GenericGeometry wallgeo = new GenericGeometry(Primitives.buildPlaneGeometry(size.getHeight(), size.getWidth(), 2, 1));
+            //wallMat = buildWallMaterial(false);
+            wall = new SceneNode(new Mesh(wallgeo, null));
+        } else {
+            wall = new SceneNode();
+        }
+        wall.setName("GalleryWall");
+    }
+
+    public void add(int col, int row, Material material, String name) {
+        material.setName(name);
+        double width = size.getWidth() / cols;// - 0.1;
+        double height = size.getHeight() / rows;
+        GenericGeometry wg = new GenericGeometry(Primitives.buildPlaneGeometry(
+                width, height, 1, 1));
+        SceneNode el0 = new SceneNode(new Mesh(wg, material));
+        // +z is left, +x is down
+        double topx = -size.getHeight() / 2 + height / 2;
+        el0.getTransform().setPosition(new Vector3(topx + row * height, 0.0, col == 0 ? width / 2 : -width / 2));
+        el0.setName(name);
+        wall.attach(el0);
+    }
+
+    public void setTransparency(boolean transparent) {
+        // TODO
     }
 }
 
@@ -1166,7 +1254,7 @@ class MainMenuBuilder implements MenuProvider {
 
     @Override
     public Menu buildMenu(Camera camera) {
-        // 6 Spalten und 3 Zeilen
+        // 6 columns with 3 rows
         GuiGrid menu = GuiGrid.buildForCamera(camera, 1, 6, 3, GuiGrid.GREEN_SEMITRANSPARENT, true);
         // In der Mitte rechts ein Button mit Image
         menu.addButton(/*new Request(rs.REQUEST_CLOSE), */4, 1, 1, Icon.ICON_CLOSE, () -> {

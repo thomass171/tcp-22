@@ -17,7 +17,7 @@ import de.yard.threed.core.geometry.UvMap1;
  * <p/>
  * Muesste vielleicht eher LinearMap heissen.
  * 24.11.2015: y (in den beiden refs) läuft hier von oben nach unten.
- *
+ * <p>
  * <p/>
  * Date: 02.09.14
  */
@@ -58,7 +58,7 @@ public class ProportionalUvMap extends UvMap1 {
      */
     public ProportionalUvMap(Vector2 ref1, Vector2 ref2, int rotation) {
         if (ref1.x >= ref2.x) {
-            throw new RuntimeException("invalid ref.x:"+ref1.x+" "+ref2.x);
+            throw new RuntimeException("invalid ref.x:" + ref1.x + " " + ref2.x);
         }
         if (ref1.y >= ref2.y) {
             throw new RuntimeException("invalid ref.y");
@@ -96,12 +96,12 @@ public class ProportionalUvMap extends UvMap1 {
                 st = new Vector2(y, 1 - x);
                 st = new Vector2(1 - y, x);
                 //27.2.17: Skizze 14
-                st = new Vector2(ref1.x+ xdiff-(xdiff * p.getY()), ref1.y + ydiff * p.getX());
+                st = new Vector2(ref1.x + xdiff - (xdiff * p.getY()), ref1.y + ydiff * p.getX());
                 break;
             case ROTATION_RIGHT_AND_ROTATE_Y:
                 //13.11.15: Unsicher, ob das so stimmt. Ist jetzt aber mit Photoseite getestet.
                 st = new Vector2(1 - y, 1 - x);
-                st = new Vector2(1-y, x);
+                st = new Vector2(1 - y, x);
                 break;
             default:
                 //TODO 12.10.15: Das duerfte nicht richtig sein. Testen.
@@ -112,4 +112,26 @@ public class ProportionalUvMap extends UvMap1 {
         return st;
     }
 
+    /**
+     * For fontmaps, iconsets, etc. eg "Iconset-LightBlue.png".
+     * Logical 'y' counts from top, while 'v' in 'uv' counts from bottom.
+     * 22.1.25: 'y' from top is the historical default, but from bottom is more intuitive, so have it optional now.
+     */
+    public static ProportionalUvMap buildForGridElement(int cnt, int x, int y, boolean yFromTop) {
+        float fcnt = cnt;
+        float fy = y;
+        ProportionalUvMap uvmap;
+        if (yFromTop) {
+            // the way it always was
+            uvmap = new ProportionalUvMap(
+                    new Vector2(((float) x / cnt), ((fcnt - fy - 1) / fcnt)),
+                    new Vector2((((float) x + 1) / cnt), ((fcnt - fy) / fcnt)));
+        } else {
+            // the more intuitive way
+            uvmap = new ProportionalUvMap(
+                    new Vector2(((float) x / cnt), fy / fcnt),
+                    new Vector2((((float) x + 1) / cnt), (fy + 1) / fcnt));
+        }
+        return uvmap;
+    }
 }

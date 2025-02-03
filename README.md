@@ -275,6 +275,9 @@ Major changes:
 ## 2024-10-16
   * Shader handling fixed for WebGL
 
+## 2025-02-03
+  * Shader refactored for material specific uniforms. Class 'Effect' replaced with 'ShaderPool'.
+
 # Technical Details
 
 ## Architecture
@@ -465,6 +468,8 @@ shader (at least ThreeJS and JME have) and which GLSL versions are supported.
 To avoid the need to have different shader for each platform we use an abstraction
 layer where the shader code contains keywords in capital letters, which are 
 string replaced for each platform.
+JME has the special feature of naming custom uniform variables with a "m_"
+prefix.
 
 Due to its binding to an old OpenGL version and some internal shader using
 GLSL 1.0, JME sticks to GLSL 1.0(1.2), while ThreeJS uses OpenGL ES 3.0.
@@ -475,3 +480,13 @@ these constraints. The following rules apply to shader:
   * IN/OUT instead of varying
   * no version macros
   * No integer literals for float operations (eg. use 1.0 instead of 1)
+  * Uniform names should have prefix "u_" (helpful for string replacement in JME)
+  * Initialize uniforms in the app, not the shader. Apparently JME has a problem with default values when uniforms are not set in all materials. And WebGL might report  "'uniform' :  cannot initialize this type of qualifier"
+  * Don't use identifier that might be predefined, like 'uv'
+
+## Transparency
+Transparency can be done with platform shader or with custom shader. Important is to put the object at the end of
+the rendering list in the platform to have background objects ready to shine through.
+
+Transparency for textures might be related to transparent pixel in the texture only (like SokobanTarget?) or
+an alpha blending to all pixel. Currently there is no parameter to define this.

@@ -228,7 +228,7 @@ public class PlatformWebGl extends Platform {
         NativeGeometry geometry = WebGlGeometry.buildGeometry(vertices, new int[]{0, 1}, uvs, vertices);
         //MaterialDefinition materialDefinition = new MaterialDefinition("mat", Material.buildColorMap(color), null, null);
 
-        NativeMaterial material = WebGlMaterial.buildMaterial("mat", Material.buildColorMap(color), null, null, null);
+        NativeMaterial material = WebGlMaterial.buildMaterial("mat", Material.buildColorMap(color), null, null);
         WebGlMesh mesh = WebGlMesh.buildMesh(((WebGlGeometry) geometry).geometry, (WebGlMaterial) material, false, false, true);
         WebGlSceneNode n = new WebGlSceneNode("");
         n.setMesh(mesh);
@@ -263,8 +263,13 @@ public class PlatformWebGl extends Platform {
     }
 
     @Override
-    public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> params, Object/*Effect*/ effect) {
-        return WebGlMaterial.buildMaterial(name, color, texture, params, (Effect) effect);
+    public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> params) {
+        return WebGlMaterial.buildMaterial(name, color, texture, params);
+    }
+
+    @Override
+    public NativeMaterial buildMaterial(NativeProgram program, boolean opaque) {
+        return WebGlMaterial.buildMaterial((WebGlProgram) program, opaque);
     }
 
     private NativeTexture buildNativeTextureWebGl(/*2.1.24BundleResource*/URL filename, HashMap<NumericType, NumericValue> params) {
@@ -624,6 +629,11 @@ public class PlatformWebGl extends Platform {
     @Override
     public List<NativeSceneNode> findNodeByName(String name, NativeSceneNode startnode) {
         return ((WebGlSceneNode) startnode).findNodeByName(name);
+    }
+
+    @Override
+    public NativeProgram buildProgram(String name, BundleResource vertexShader, BundleResource fragmentShader) {
+        return new WebGlProgram(name, vertexShader, fragmentShader);
     }
 
     public NativeInitChain buildInitChain(InitExecutor initExecutor) {

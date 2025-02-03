@@ -7,6 +7,7 @@ import de.yard.threed.core.geometry.GeometryHelper;
 import de.yard.threed.core.*;
 import de.yard.threed.core.buffer.NativeByteBuffer;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
+import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.platform.*;
@@ -170,8 +171,13 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
-    public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameters, Object effect) {
-        return new DummyMaterial(name, color, texture, parameters, effect);
+    public NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameters/*, Object effect*/) {
+        return new DummyMaterial(name, color, texture, parameters, null);
+    }
+
+    @Override
+    public NativeMaterial buildMaterial(NativeProgram program, boolean opaque) {
+        return new DummyMaterial(program, opaque);
     }
 
     @Override
@@ -349,6 +355,11 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
      */
     public void setSceneDimension(Dimension dimension) {
         ((DummyScene) nativeScene).dimension = dimension;
+    }
+
+    @Override
+    public NativeProgram buildProgram(String name, BundleResource vertexShader, BundleResource fragmentShader) {
+        return new DummyProgram(name, vertexShader, fragmentShader);
     }
 
     static class DummySceneNode implements NativeSceneNode {
@@ -711,6 +722,10 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
             this.color = color;
         }
 
+        public DummyMaterial(NativeProgram program, boolean opaque) {
+            color = null;
+        }
+
         @Override
         public void setTransparency(boolean enabled) {
         }
@@ -728,6 +743,16 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         @Override
         public NativeTexture[] getMaps() {
             return new NativeTexture[0];
+        }
+
+        @Override
+        public NativeUniform getUniform(String name) {
+
+            return new NativeUniform() {
+                @Override
+                public void setValue(Object value) {
+                }
+            };
         }
     }
 
@@ -882,6 +907,45 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
                 transformeedIntersections.add(worldModelMatrix.transform(intersection));
             }
             return transformeedIntersections;
+        }
+    }
+
+    class DummyProgram implements NativeProgram {
+        public DummyProgram(String name, BundleResource vertexShader, BundleResource fragmentShader) {
+
+        }
+
+        @Override
+        public void addSampler2DUniform(String name) {
+        }
+
+        @Override
+        public void addMatrix3Uniform(String name) {
+
+        }
+
+        @Override
+        public void addFloatVec3Uniform(String name) {
+
+        }
+
+        @Override
+        public void addFloatVec4Uniform(String name) {
+        }
+
+        @Override
+        public void addBooleanUniform(String name) {
+
+        }
+
+        @Override
+        public void addFloatUniform(String name) {
+
+        }
+
+        @Override
+        public void compile() {
+
         }
     }
 }

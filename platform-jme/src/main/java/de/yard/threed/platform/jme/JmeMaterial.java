@@ -1,11 +1,15 @@
 package de.yard.threed.platform.jme;
 
-import com.jme3.asset.*;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 
+import com.jme3.math.Vector3f;
+import com.jme3.math.Vector4f;
+import de.yard.threed.core.Matrix3;
+import de.yard.threed.core.Util;
+import de.yard.threed.core.Vector3;
+import de.yard.threed.core.platform.NativeUniform;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.Effect;
 import de.yard.threed.engine.Uniform;
 
 import de.yard.threed.core.platform.Log;
@@ -16,9 +20,8 @@ import de.yard.threed.core.ColorType;
 import de.yard.threed.engine.platform.common.MaterialDefinition;
 import de.yard.threed.core.NumericValue;
 
-import java.util.Collections;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by thomass on 25.04.15.
@@ -29,15 +32,15 @@ public class JmeMaterial implements NativeMaterial {
     static Log logger = Platform.getInstance().getLog(JmeMaterial.class);
 
     Material material;
-    // Das mit den j3md Dteien ist total verbaut. Dem kann man nur hinten rum
-    // etwas unterschieben. Die Map ist über den Wrapper gesynced.
-    static SortedMap<String, Effect> effects = Collections.synchronizedSortedMap(new TreeMap<String, Effect>());
     private boolean transparent;
     String name;
     // 23.3.17: Braucht er um nachher Normale fuer das MEsh zu berechnen. Grund unklar.
     public boolean hasNormalMap = false;
     JmeTexture basetex;
     //MaterialDefinition definition;
+    JmeProgram jmeProgram;
+    //
+    public Map<String, NativeUniform> uniforms = new HashMap<>();
 
     private JmeMaterial(String name, Material material, boolean transparent, boolean hasnormalmap, JmeTexture basetex, MaterialDefinition definition) {
         this.name = name;
@@ -48,70 +51,74 @@ public class JmeMaterial implements NativeMaterial {
         //this.definition = definition;
     }
 
-    /*public static JmeMaterial buildCustomShaderMaterial(Color col, NativeTexture[] textures, Effect effect) {
-       
-    }*/
-    public static NativeMaterial buildMaterial(MaterialDefinition definition/*String name, HashMap<ColorType, Color> colors, HashMap<String, NativeTexture> textures, HashMap<NumericType, NumericValue> params*/, Effect effect) {
+    private JmeMaterial(String name, Material material, JmeProgram jmeProgram) {
+        this.name = name;
+        this.material = material;
+        this.jmeProgram = jmeProgram;
+        for (Uniform uniform : jmeProgram.uniforms) {
+            // 8.1.25 Remove prefix "u_" because JME uses "m_" implicitly.
+            String jmeUniformName = uniform.name.substring(2);
+            switch (uniform.type) {
+                case BOOL:
+                    Util.notyet();
+                    break;
+                case SAMPLER_2D:
+                    uniforms.put(jmeUniformName, new JmeUniform<NativeTexture>() {
+                        @Override
+                        public void setValue(NativeTexture texture) {
+                            material.setTexture(jmeUniformName, ((JmeTexture) texture).texture);
+                        }
+                    });
+                    break;
+                case FLOAT_VEC3:
+                    uniforms.put(jmeUniformName, new JmeUniform<Vector3>() {
+                        @Override
+                        public void setValue(Vector3 v) {
+                            material.setVector3(jmeUniformName, new Vector3f(v.getX(), v.getY(), v.getZ()));
+                        }
+                    });
+                    break;
+                case FLOAT_VEC4:
+                    uniforms.put(jmeUniformName, new JmeUniform<Vector4f>() {
+                        @Override
+                        public void setValue(Vector4f v) {
+                            material.setVector4(jmeUniformName, v);
+                        }
+                    });
+                    break;
+                case FLOAT:
+                    uniforms.put(jmeUniformName, new JmeUniform<Float>() {
+                        @Override
+                        public void setValue(Float f) {
+                            material.setFloat(jmeUniformName, f);
+                        }
+                    });
+                    break;
+                case MATRIX3:
+                    uniforms.put(jmeUniformName, new JmeUniform<Matrix3>() {
+                        @Override
+                        public void setValue(Matrix3 v) {
+                            // JME workaround for mat3
+                            Vector3 v3 = v.getCol0();
+                            material.setVector3(jmeUniformName + "_col0", new Vector3f(v3.getX(), v3.getY(), v3.getZ()));
+                            v3 = v.getCol1();
+                            material.setVector3(jmeUniformName + "_col1", new Vector3f(v3.getX(), v3.getY(), v3.getZ()));
+                            v3 = v.getCol2();
+                            material.setVector3(jmeUniformName + "_col2", new Vector3f(v3.getX(), v3.getY(), v3.getZ()));
+                        }
+                    });
+                    break;
+                default:
+                    throw new RuntimeException("unhandled uniform type " + uniform.type);
+            }
+        }
+    }
+
+    public static NativeMaterial buildMaterial(MaterialDefinition definition/*String name, HashMap<ColorType, Color> colors, HashMap<String, NativeTexture> textures, HashMap<NumericType, NumericValue> params*/ /*Effect effect*/) {
         Color col = (definition.color == null) ? null : definition.color.get(ColorType.MAIN);
         Material mat;
         Float transparency = NumericValue.transparency(definition.parameters);
         boolean hasnormalmap = false;
-
-        if (effect != null) {
-            AssetManager am = ((PlatformJme) Platform.getInstance()).jmeResourceManager.am;
-            effects.put(effect.name, effect);
-
-            // Suffix j3md is needed for triggering the fitting loader (JmeEffectLocator?). The j3md file is created temporarily on the fly.
-            mat = new Material(am/**/, effect.name + ".j3md");
-
-            // Even when using dedicated shader which handle transparency its imported to tell the engine
-            // to put these objects at the end of rendering.
-            if (transparency != null/*effect.transparent*/) {
-                //ist fuer Shader, aber eigene haben das nicht. 
-                if (mat.getParam("UseAlpha") != null) {
-                    mat.setBoolean("UseAlpha", true);
-                }
-                mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
-            }                       
-           /* for (int i = 0; i < textures.length; i++) {
-                //mat.setTexture("texture" + i, ((JmeTexture) textures[i]).texture); // with Lighting.j3md
-
-            }*/
-            int textureindex = 0;
-            // die uniforms sind eine LinkedHashMap. Dadurch ist das keyset immer in der insertion order
-            // 30.12.15 ist jetzt normale List
-            for (Uniform uniform : effect.shader.uniforms) {
-                // Uniform uniform = effect.uniforms.get(key);
-
-                switch (uniform.type) {
-                    case FLOAT_VEC4:
-                        //TODO mat.setColor(uniform.name, ((JmeColor) col).color); // with Lighting.j3md
-                        break;
-                    case SAMPLER_2D:
-                        JmeTexture texture = (JmeTexture) definition.texture.get(uniform.name);
-                        if (texture == null) {
-                            throw new RuntimeException("uniform not set:" + uniform.name);
-                        }
-                        mat.setTexture(uniform.name, ((JmeTexture) texture)/*s[textureindex++])*/.texture);
-
-                        break;
-                    case BOOL:
-                        //TODO Die Zuordnung passt so nicht. Nur abhängig vom Typ ein uniform setzen?
-                        if (NumericValue.unshaded(definition.parameters)) {
-                            mat.setBoolean("isunshaded", true);
-                        }
-                        break;
-                    default:
-                        throw new RuntimeException("unknown uniform type " + uniform.type);
-                        //todo andere Fehlerbahdnlung
-                        //   return null;
-                }
-            }
-            // 3.11.15: Backface Culling ausschalten. Wird z.Z. nur für Leaf gebraucht (als vorübergehende Krücke) und sollte mittelfristig
-            //generell eingeschaltet sein. 
-            //mat.getAdditionalRenderState().setFaceCullMode(RenderState.FaceCullMode.Off);
-            return new JmeMaterial(definition.name, mat/*, effect.transparent*/, transparency != null, false, null, definition);
-        }
 
         JmeTexture diffusemap = null;
         NativeTexture texture = (definition.texture == null) ? null : definition.texture.get("basetex");
@@ -170,6 +177,26 @@ public class JmeMaterial implements NativeMaterial {
         return new JmeMaterial(definition.name, mat/*, false*/, transparency != null, hasnormalmap, diffusemap, definition);
     }
 
+    public static NativeMaterial buildMaterial(JmeProgram program, boolean opaque) {
+        // No idea how jme shares shader. So for now create a new material for each using of a program.
+        Material mat = JmeProgram.buildProgram(program);
+        //Float transparency = NumericValue.transparency(definition.parameters);
+        boolean hasnormalmap = false;
+
+        // Even when using dedicated shader which handle transparency its imported to tell the engine
+        // to put these objects at the end of rendering.
+        if (!opaque/*effect.transparent*/) {
+            //ist fuer Shader, aber eigene haben das nicht.
+            if (mat.getParam("UseAlpha") != null) {
+                mat.setBoolean("UseAlpha", true);
+            }
+            mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+        }
+
+        // 1.1.25 not sure about params
+        return new JmeMaterial(null, mat, program);
+    }
+
     /*@Override
     public void setWireframe(boolean wireframe) {
         material.getAdditionalRenderState().setWireframe(true);
@@ -219,6 +246,13 @@ public class JmeMaterial implements NativeMaterial {
     @Override
     public NativeTexture[] getMaps() {
         return new NativeTexture[]{basetex};
+    }
+
+    @Override
+    public NativeUniform getUniform(String name) {
+        // 8.1.25 Remove prefix "u_" because JME uses "m_" implicitly.
+        JmeUniform uniform = (JmeUniform)/* jmeProgram.*/uniforms.get(name.substring(2));
+        return uniform;
     }
 
     /*@Override*/

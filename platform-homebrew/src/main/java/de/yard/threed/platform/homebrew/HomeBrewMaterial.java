@@ -1,17 +1,16 @@
 package de.yard.threed.platform.homebrew;
 
 import de.yard.threed.core.*;
+import de.yard.threed.core.platform.NativeUniform;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.Effect;
+import de.yard.threed.engine.ShaderPool;
 import de.yard.threed.engine.Uniform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeMaterial;
 import de.yard.threed.core.platform.NativeTexture;
 import de.yard.threed.engine.platform.common.*;
-import de.yard.threed.javacommon.BufferHelper;
 
 
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,11 +26,11 @@ import java.util.TreeMap;
  */
 public class HomeBrewMaterial implements NativeMaterial {
     static Log logger = Platform.getInstance().getLog(HomeBrewMaterial.class);
-    static Effect defaulteffect = Effect.buildUniversalEffect(/*false*/);
+    static ShaderProgram defaulteffect = ShaderPool.buildUniversalEffect(/*false*/);
     // Material material;
     // Das mit den j3md Dteien ist total verbaut. Dem kann man nur hinten rum
     // etwas unterschieben. Die Map ist über den Wrapper gesynced.
-    static SortedMap<String, Effect> effects = Collections.synchronizedSortedMap(new TreeMap<String, Effect>());
+    static SortedMap<String, ShaderPool> effects = Collections.synchronizedSortedMap(new TreeMap<String, ShaderPool>());
     boolean transparent;
     OpenGlShaderProgram sp;
     public List<Uniform> uniforms = new ArrayList<Uniform>();
@@ -75,7 +74,7 @@ public class HomeBrewMaterial implements NativeMaterial {
 
     }
 
-    public static HomeBrewMaterial buildMaterial(GlInterface glcontext,MaterialDefinition definition, Effect effect) {
+    public static HomeBrewMaterial buildMaterial(GlInterface glcontext,MaterialDefinition definition) {
         Color col = (definition.color == null) ? null : definition.color.get(ColorType.MAIN);
         Float transparency = NumericValue.transparency(definition.parameters);
         boolean hasnormalmap = false;
@@ -87,9 +86,9 @@ public class HomeBrewMaterial implements NativeMaterial {
         //kann ja nur EINE VBO Struktur anlegen. 15.3.16 Nicht einfach zu klären. Erstmal immer UVs anlegen.
         //25.9.19: Der Check auf texture scheint mir doch sinnvoll. Die Lösung hier ist doch eh in die Jahre gekommen. Jetzt mal analog JME
         //Grundsätzlich dürfen die Shader nur Variablen verwenden, die auf auch vorhandene VBO Werte zeigen.
-        if (effect == null) {
+        /*24.1.25 if (effect == null) {
             effect = defaulteffect;
-        }
+        }*/
 
         //Die Order der vars ist wichtig! Hach, wie doof.
         addVar(varstobind, "VERTEX");
@@ -138,7 +137,8 @@ public class HomeBrewMaterial implements NativeMaterial {
         /*OpenGlShaderProgram sp = new OpenGlShaderProgram(new OpenGlVertexShader(OpenGlShader.loadFromFile("shader/Universal.vert"), "Universal"),
                 new OpenGlFragmentShader(OpenGlShader.loadFromFile("shader/Universal.frag"), "Universal"), varstobind);*/
 
-        String fragmentshader = effect.shader.fragmentshader;
+        OpenGlShaderProgram sp = null;
+       /*TODO move to buildProgram 24.1.25 String fragmentshader = defaulteffect.fragmentshader;
         boolean debugMaterial = false;
         if (debugMaterial) {
             // solid color shader for debugging
@@ -149,8 +149,10 @@ public class HomeBrewMaterial implements NativeMaterial {
 
         //OpenGlShaderProgram sp = new OpenGlShaderProgram(new OpenGlVertexShader(OpenGlShader.loadFromFile(effect.shader.vertexshader), "?"),
         //        new OpenGlFragmentShader(OpenGlShader.loadFromFile(effect.shader.fragmentshader), "?"), varstobind);
-
+end TODO
+        */
         return new HomeBrewMaterial(glcontext, definition.name, col, diffusemap/* textures*/, sp, transparency != null/*, effect.transparent*/);
+
     }
 
     private static void addVar(List<String> varstobind, String var) {
@@ -229,6 +231,11 @@ public class HomeBrewMaterial implements NativeMaterial {
     @Override
     public NativeTexture[] getMaps() {
         return new NativeTexture[]{basetex};
+    }
+
+    @Override
+    public NativeUniform getUniform(String name) {
+        return null;
     }
     
     /*@Override

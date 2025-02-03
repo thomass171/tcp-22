@@ -1,8 +1,8 @@
 
 IN vec2 texcoord;
 
-uniform sampler2D texture0;
-uniform sampler2D texture1;
+uniform sampler2D u_texture0;
+uniform sampler2D u_texture1;
 
 
 
@@ -48,7 +48,7 @@ float transformY(float y, float offset) {
     return (y - offset) / height;
 }
 
-void main(){
+void main() {
     //returning the color of the pixel (here solid blue)
     //- gl_FragColor is the standard GLSL variable that holds the pixel
     //color. It must be filled in the Fragment Shader.
@@ -61,11 +61,11 @@ void main(){
 
     if (isTopImage(TexCoord)) {
         TexCoordeff = vec2(transformX(TexCoord.x,hmargin),transformY(TexCoord.y,1.0-vmargin-height ));
-        FRAGCOLOR  = TEXTURE2D(texture0, TexCoordeff);
+        FRAGCOLOR  = TEXTURE2D(u_texture0, TexCoordeff);
     } else {
         if (isBottomImage(TexCoord)) {
             TexCoordeff = vec2(transformX(TexCoord.x,1.0-width-hmargin),transformY(TexCoord.y,vmargin));
-            FRAGCOLOR  = TEXTURE2D(texture1, TexCoordeff);
+            FRAGCOLOR  = TEXTURE2D(u_texture1, TexCoordeff);
         } else {
             FRAGCOLOR = vec4(0.2, 0.2, 0.2, 1.0);
         }

@@ -1,24 +1,23 @@
 package de.yard.threed.platform.webgl;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import de.yard.threed.core.CharsetException;
+import de.yard.threed.core.Matrix3;
+import de.yard.threed.core.Util;
+import de.yard.threed.core.Vector3;
+import de.yard.threed.core.platform.NativeUniform;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.ResourceNotFoundException;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeMaterial;
 import de.yard.threed.core.platform.NativeTexture;
-import de.yard.threed.core.resource.BundleRegistry;
-import de.yard.threed.engine.Effect;
 import de.yard.threed.engine.Uniform;
-import de.yard.threed.engine.UniformType;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.ColorType;
 import de.yard.threed.core.NumericType;
 import de.yard.threed.core.NumericValue;
-import de.yard.threed.engine.platform.common.ShaderUtil;
 
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by thomass on 25.04.15.
@@ -27,6 +26,8 @@ public class WebGlMaterial implements NativeMaterial {
     static Log logger = Platform.getInstance().getLog(WebGlMaterial.class);
     JavaScriptObject material;
     //6.7.17 String name;
+    WebGlProgram webglProgram;
+    public Map<String, NativeUniform> uniforms = null;
 
     /**
      * Constructor nur um Wrapper anzulegen, nicht das eigentliche Material.
@@ -41,10 +42,33 @@ public class WebGlMaterial implements NativeMaterial {
         this.material = material;
         setName(this.material, name);
     }
-    
-   /* public static WebGlMaterial buildCustomShaderMaterial(NativeTexture[] texture, Effect effect) {
-       
-    }*/
+
+    public WebGlMaterial(String name, WebGlProgram program, boolean opaque) {
+
+        // uniforms belong to the material, so we need to create WebGlMaterial here
+         uniforms = new HashMap<>();
+        JavaScriptObject nativeuniforms = buildUniformsForEffect(program /*effect, textures, NumericValue.unshaded(params)*/, uniforms);
+        //return new WebGlMaterial(name, buildCustomShaderMaterial(uniforms, vertexshader, fragmentshader, transparency != null));
+        material = buildCustomShaderMaterial(nativeuniforms, program.vertexshader, program.fragmentshader, false/*TODO transparency != null*/);
+
+        setName(this.material, name);
+        this.webglProgram = program;
+
+
+        //Float transparency = NumericValue.transparency(definition.parameters);
+        boolean hasnormalmap = false;
+
+        // Even when using dedicated shader which handle transparency its imported to tell the engine
+        // to put these objects at the end of rendering.
+        if (!opaque/*effect.transparent*/) {
+            /* TODO
+            if (mat.getParam("UseAlpha") != null) {
+                mat.setBoolean("UseAlpha", true);
+            }
+            mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);*/
+        }
+    }
+
 
     /**
      * ThreeJS verwendet keinen ARGB Wert für Farbe, sondern nur RGB. Man kann aber trozdem ARGB reinstecken. Er dürfte die
@@ -55,44 +79,11 @@ public class WebGlMaterial implements NativeMaterial {
      * @param params
      * @return
      */
-    public static NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> colors, HashMap<String, NativeTexture> textures, HashMap<NumericType, NumericValue> params, Effect effect) {
+    public static NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> colors, HashMap<String, NativeTexture> textures, HashMap<NumericType, NumericValue> params) {
         Color col = (colors == null) ? null : colors.get(ColorType.MAIN);
         Float transparency = NumericValue.transparency(params);
-        logger.debug("buildMaterial: name=" + name + ",col=" + col + ",params=" + params + ",effect=" + effect);
+        logger.debug("buildMaterial: name=" + name + ",col=" + col + ",params=" + params);
 
-        if (effect != null) {
-            logger.debug("Building effect " + effect.name);
-            // Default trivial shader for testing and fallback in case of load error
-            String vertexshader = "uniform vec3 color;\n" +
-                    "attribute float size;\n" +
-                    "\n" +
-                    "varying vec3 vColor;  // 'varying' vars are passed to the fragment shader\n" +
-                    "\n" +
-                    "void main() {\n" +
-                    "  vColor = color;   // pass the color to the fragment shader\n" +
-                    "  gl_Position = projectionMatrix * \n" +
-                    "                        modelViewMatrix * \n" +
-                    "                        vec4(position,1.0);" +
-                    "}";
-            String fragmentshader = "varying vec3 vColor;\n" +
-                    "uniform sampler2D texture1;\n" +
-                    "\n" +
-                    "void main() {  \n" +
-                    "  gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);  \n" +
-                    "}";
-            //Testmode is for trivial shader
-            boolean testmode = false;
-            if (!testmode) {
-                try {
-                    vertexshader = loadShader(effect.shader.vertexshader);
-                    fragmentshader = loadShader(effect.shader.fragmentshader);
-                } catch (ResourceNotFoundException e) {
-                    logger.error("Loading shader failed: " + e.getMessage());
-                }
-            }
-            JavaScriptObject uniforms = buildUniformsForEffect(effect, textures, NumericValue.unshaded(params));
-            return new WebGlMaterial(name, buildCustomShaderMaterial(uniforms, vertexshader, fragmentshader, transparency != null));
-        }
         WebGlTexture texture = (WebGlTexture) ((textures == null) ? null : textures.get("basetex"));
         WebGlTexture normalmap = (WebGlTexture) ((textures == null) ? null : textures.get("normalmap"));
 
@@ -143,51 +134,47 @@ public class WebGlMaterial implements NativeMaterial {
         return mat;
     }
 
-
     /**
-     * unwanted dependency to Uniform
-     *
-     * @return
+     * No idea how to share shader.
+     * So for now create a new material for each using of a program.
      */
-    private static JavaScriptObject buildUniformsForEffect(Effect effect, HashMap<String, NativeTexture> textures, boolean unshaded) {
-        JavaScriptObject uniforms = buildUniform(null, null, null, null);
-        for (Uniform uniform : effect.shader.uniforms) {
-            //  Uniform uniform = effect.uniforms.get(key);
-            //TODO das muss irgendwie generischer gehen mit den uniforms
-            if (uniform.name.equals("isunshaded")) {
+    public static NativeMaterial buildMaterial(WebGlProgram program, boolean opaque) {
+        // No idea how to share shader. So for now create a new material for each using of a program.
 
-                uniforms = buildUniformi(uniforms, uniform.name, getThreeJsType(uniform.type), (int) (unshaded ? 1 : 0));
-            } else {
-                WebGlTexture texture = (WebGlTexture) textures.get(uniform.name);
-                if (texture == null) {
-                    throw new RuntimeException("uniform not set:" + uniform.name);
-                }
-                uniforms = buildUniform(uniforms, uniform.name, getThreeJsType(uniform.type), texture.texture);
+        logger.debug("Building program " + program.name);
+        // Default trivial shader for testing and fallback in case of load error
+        String vertexshader = "uniform vec3 color;\n" +
+                "attribute float size;\n" +
+                "\n" +
+                "varying vec3 vColor;  // 'varying' vars are passed to the fragment shader\n" +
+                "\n" +
+                "void main() {\n" +
+                "  vColor = color;   // pass the color to the fragment shader\n" +
+                "  gl_Position = projectionMatrix * \n" +
+                "                        modelViewMatrix * \n" +
+                "                        vec4(position,1.0);" +
+                "}";
+        String fragmentshader = "varying vec3 vColor;\n" +
+                "uniform sampler2D texture1;\n" +
+                "\n" +
+                "void main() {  \n" +
+                "  gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);  \n" +
+                "}";
+        //Testmode is for trivial shader
+        boolean testmode = false;
+        if (!testmode) {
+            try {
+                vertexshader = /*loadShader*/(program.vertexshader);
+                fragmentshader = /*loadShader*/(program.fragmentshader);
+            } catch (Exception e) {
+                logger.error("Loading shader failed: " + e.getMessage());
             }
         }
-        return uniforms;
+
+        WebGlMaterial mat = new WebGlMaterial(program.name, program,opaque);
+        return mat;
     }
 
-    /**
-     * Infos: https://github.com/mrdoob/three.js/wiki/Uniforms-types
-     *
-     * @param type
-     * @return
-     */
-    private static String getThreeJsType(UniformType type) {
-        switch (type) {
-            case FLOAT_VEC4:
-                return "f";
-            case SAMPLER_2D:
-                return "t";
-            case BOOL:
-                // als integer
-                return "i";
-            default:
-                logger.error("unknown uniform type " + type);
-                return "unknown";
-        }
-    }
 
     public void setWireframe(boolean wireframe) {
         setWireframe(material, wireframe);
@@ -218,37 +205,10 @@ public class WebGlMaterial implements NativeMaterial {
         return new NativeTexture[0];
     }
 
-    private static String loadShader(String ressourcename) throws ResourceNotFoundException {
-        logger.debug("load shader " + ressourcename);
-        String source = null;
-        // 20.4.17: Load from bundle
-        String bytebuf;
-        try {
-            bytebuf = BundleRegistry.getBundle("engine").getResource(ressourcename).getContentAsString();
-        } catch (CharsetException e) {
-            // TODO improved eror handling
-            throw new RuntimeException(e);
-        }
-        source = bytebuf;
-        //HashMap<String,String> translatemap = new HashMap<String, String>();
-        source = ShaderUtil.preprocess(source/*,translatemap*/);
-        if (ressourcename.endsWith(".vert")) {
-            //source = source.replaceAll("MODELVIEWPROJECTIONMATRIX", "g_WorldViewProjectionMatrix");
-            source = source.replaceAll("PROJECTIONMATRIX", "projectionMatrix");
-            source = source.replaceAll("MODELVIEWMATRIX", "modelViewMatrix");
-            source = source.replaceAll("VERTEX", "position");
-            source = source.replaceAll("MULTITEXCOORD0", "uv");
-            source = source.replaceAll("NORMALMATRIX", "normalMatrix");
-            source = source.replaceAll("NORMAL", "normal");
-            source = source.replaceAll("OUT", "out");
-        }
-        if (ressourcename.endsWith(".frag")) {
-            source = source.replaceAll("FRAGCOLOR", "gl_FragColor");
-            source = source.replaceAll("TEXTURE2D", "texture2D");
-            source = source.replaceAll("IN", "in");
-        }
-        // logger.debug("shader source: " + source);
-        return source;
+    @Override
+    public NativeUniform getUniform(String name) {
+        WebGlUniform uniform = (WebGlUniform)uniforms.get(name);
+        return uniform;
     }
 
     private static native JavaScriptObject buildLambertMaterialNative(int col, boolean transparent)  /*-{
@@ -305,6 +265,94 @@ public class WebGlMaterial implements NativeMaterial {
        mat.needsUpdate = true;
     }-*/;
 
+
+    /**
+     * unwanted dependency to Uniform(25.1.25 still?)
+     *
+     * @return
+     */
+    private JavaScriptObject buildUniformsForEffect(WebGlProgram program/*Effect effect, HashMap<String, NativeTexture> textures, boolean unshaded*/, Map<String, NativeUniform> uniforms) {
+        // 25.1.25 why do we need this initial uniform ?? A kind of internal list of uniforms.
+        JavaScriptObject nativeUniformMap = buildUniformMap();
+        /*25.1.25 moved to new 'for' block and WebGlUniform (Uniform uniform : effect.shader.getUniforms()) {
+            //  Uniform uniform = effect.uniforms.get(key);
+
+            if (uniform.name.equals("isunshaded")) {
+
+                uniforms = buildUniformi(uniforms, uniform.name, getThreeJsType(uniform.type), (int) (unshaded ? 1 : 0));
+            } else {
+                WebGlTexture texture = (WebGlTexture) textures.get(uniform.name);
+                if (texture == null) {
+                    throw new RuntimeException("uniform not set:" + uniform.name);
+                }
+                uniforms = buildUniform(uniforms, uniform.name, getThreeJsType(uniform.type), texture.texture);
+            }
+        }*/
+        for (Uniform uniform : program.uniforms) {
+            logger.debug("uniform type " + uniform.type);
+            switch (uniform.type) {
+                case BOOL:
+                    buildUniform(nativeUniformMap, uniforms, uniform, new WebGlUniform<Boolean>(uniform.type) {
+                        @Override
+                        public void setValue(Boolean b) {
+                            setBool(b);
+                        }
+                    });
+                    break;
+                case SAMPLER_2D:
+                    buildUniform(nativeUniformMap, uniforms, uniform, new WebGlUniform<NativeTexture>(uniform.type) {
+                        @Override
+                        public void setValue(NativeTexture texture) {
+                            setObject(((WebGlTexture) texture).texture);
+                        }
+                    });
+                    break;
+                case FLOAT_VEC3:
+                    buildUniform(nativeUniformMap, uniforms, uniform, new WebGlUniform<Vector3>(uniform.type) {
+                        @Override
+                        public void setValue(Vector3 v) {
+                            setObject(WebGlVector3.toWebGl(v).vector3);
+                        }
+                    });
+                    break;
+                case FLOAT_VEC4:
+                    Util.notyet();
+                    /*uniforms.put(jmeUniformName, new WebGlUniform<Vector4f>() {
+                        @Override
+                        public void setValue(Vector4f v) {
+                            //TODO material.setVector4(jmeUniformName, v);
+                        }
+                    });*/
+                    break;
+                case FLOAT:
+                    buildUniform(nativeUniformMap, uniforms, uniform, new WebGlUniform<Float>(uniform.type) {
+                        @Override
+                        public void setValue(Float f) {
+                            setFloat(f);
+                        }
+                    });
+                    break;
+                case MATRIX3:
+                    buildUniform(nativeUniformMap, uniforms, uniform, new WebGlUniform<Matrix3>(uniform.type) {
+                        @Override
+                        public void setValue(Matrix3 matrix3) {
+                            setObject(WebGlMatrix3.toWebGl(matrix3).matrix3);
+                        }
+                    });
+                    break;
+                default:
+                    throw new RuntimeException("unhandled uniform type " + uniform.type);
+            }
+        }
+        return nativeUniformMap;
+    }
+
+    private void buildUniform(JavaScriptObject nativeUniformMap, Map<String, NativeUniform> uniforms, Uniform uniform, WebGlUniform webGlUniform) {
+
+        addUniform(nativeUniformMap, uniform.name, webGlUniform.uniform);
+        uniforms.put(uniform.name, webGlUniform);
+    }
+
     private static native JavaScriptObject buildCustomShaderMaterial(JavaScriptObject uniforms, String vertexshader, String fragmentshader, boolean transparent)  /*-{
 
 var attributes = {
@@ -318,7 +366,7 @@ for (var i=0; i < 64; i++) {
         // it seems to be the easier way to use that convenience.
         var mat = new $wnd.THREE.ShaderMaterial({
             uniforms: uniforms,
-            attributes: attributes,
+            // 30.1.25 THREE.ShaderMaterial: attributes should now be defined in THREE.BufferGeometry instead. attributes: attributes,
             vertexShader: vertexshader,
             fragmentShader: fragmentshader
         });
@@ -331,22 +379,13 @@ for (var i=0; i < 64; i++) {
         return mat;
     }-*/;
 
-    private static native JavaScriptObject buildUniform(JavaScriptObject puniforms, String name, String ptype, JavaScriptObject pvalue)  /*-{
-        if (puniforms == null) {
-            var uniforms = {};
-            return uniforms;
-        }
-        puniforms[name] = { type: ptype, value: pvalue  };
-        return puniforms;
+    private static native void addUniform(JavaScriptObject uniformMap, String name, JavaScriptObject uniform)  /*-{
+        uniformMap[name] = uniform;
     }-*/;
 
-    private static native JavaScriptObject buildUniformi(JavaScriptObject puniforms, String name, String ptype, int pvalue)  /*-{
-        if (puniforms == null) {
-            var uniforms = {};
-            return uniforms;
-        }
-        puniforms[name] = { type: ptype, value: pvalue  };
-        return puniforms;
+    private static native JavaScriptObject buildUniformMap()  /*-{
+        var uniforms = {};
+        return uniforms;
     }-*/;
 
     private static native void setName(JavaScriptObject mat, String name)  /*-{

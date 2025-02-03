@@ -43,4 +43,6 @@ public interface NativeMaterial {
     NativeTexture[] getMaps();
     //6.10.17:Ob das mit nativen Loadern (z.B. gltf) geht, ist reichlich fraglich.
     //MaterialDefinition getDefinition();
+
+     NativeUniform getUniform(String name);
 }

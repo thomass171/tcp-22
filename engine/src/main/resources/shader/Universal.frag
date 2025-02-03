@@ -12,10 +12,10 @@
 //uniform sampler2D m_ColorMap;
 //   #endif
 
-uniform sampler2D basetex;
-uniform bool isunicolor;
-uniform vec4 unicolor;
-uniform vec4 lightcolor;
+uniform sampler2D u_basetex;
+uniform bool u_isunicolor;
+uniform vec4 u_unicolor;
+uniform vec4 u_lightcolor;
 
 //3.3.16 v_lighting jetzt vec3 statt vec4
 #ifdef VERSION150
@@ -28,23 +28,23 @@ varying vec2 texcoord;
 #endif
 
 
-void main(){
+void main() {
     
     vec4 surfacecolor;
     float alpha;
-    if (isunicolor) {
+    if (u_isunicolor) {
         //FRAGCOLOR = vec4(0.0, 0.0, 1.0, 1.0);
-        //FRAGCOLOR = vec4(v_lighting * unicolor.rgb, unicolor.a);
-        surfacecolor = vec4(unicolor.rgb,0);
-        alpha = unicolor.a;
+        //FRAGCOLOR = vec4(v_lighting * u_unicolor.rgb, u_unicolor.a);
+        surfacecolor = vec4(u_unicolor.rgb,0);
+        alpha = u_unicolor.a;
     } else {
         //FRAGCOLOR = vec4(0.0, 0.0, 1.0, 1.0);
         //FRAGCOLOR  = TEXTURE2D(basetex, texcoord);
-        surfacecolor  = TEXTURE2D(basetex, texcoord);
+        surfacecolor  = TEXTURE2D(u_basetex, texcoord);
         // 19.3.16: Da ist die Frage, ob Alpha aus der Textur genommen wird, oder von aussen, oder fix, oder nur bei transparent? Erstmal fix.
         alpha = 0.5;//surfacecolor.a;
     }
 
-    FRAGCOLOR = vec4(v_lighting * surfacecolor.rgb, alpha);
+    FRAGCOLOR = vec4(u_v_lighting * surfacecolor.rgb, alpha);
 
 }

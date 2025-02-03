@@ -26,7 +26,7 @@ varying vec2 texcoord;
 varying vec3 v_lighting;
 #endif
 
-void main(){
+void main() {
 
     // Nach letzter Recherche ist die Reihenfolge richtig. Umgekehrt MVP.
     // 10.3.16: In zwei statt einem Schritt werden Rundungsfehler vermieden, zumindest in bestimmten Situationen
