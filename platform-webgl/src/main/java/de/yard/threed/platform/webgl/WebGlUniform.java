@@ -2,7 +2,7 @@ package de.yard.threed.platform.webgl;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import de.yard.threed.core.platform.NativeUniform;
-import de.yard.threed.engine.UniformType;
+import de.yard.threed.core.platform.UniformType;
 
 public abstract class WebGlUniform<T> implements NativeUniform<T> {
 
@@ -35,6 +35,8 @@ public abstract class WebGlUniform<T> implements NativeUniform<T> {
                 return "mat3";
             case FLOAT:
                 return "float";
+            case FLOAT_VEC3:
+                return "Vector3";
             default:
                 throw new RuntimeException("unknown uniform type " + type);
                 //return "unknown";
@@ -51,6 +53,10 @@ public abstract class WebGlUniform<T> implements NativeUniform<T> {
 
     public void setFloat(float f) {
         setFloat(uniform, f);
+    }
+
+    public void setVector4(float x, float y, float z, float w) {
+        setVector4(uniform, x, y, z, w);
     }
 
     private static native JavaScriptObject buildUniform(String ptype)  /*-{
@@ -73,4 +79,9 @@ public abstract class WebGlUniform<T> implements NativeUniform<T> {
     private native void setObject(JavaScriptObject uniform, JavaScriptObject value)  /*-{
         uniform.value = value;
     }-*/;
+
+    private native void setVector4(JavaScriptObject uniform, float x, float y, float z, float w)  /*-{
+        uniform.value = new $wnd.THREE.Vector4(x, y, z, w);
+    }-*/;
+
 }

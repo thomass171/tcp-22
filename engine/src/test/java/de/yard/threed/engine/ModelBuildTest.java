@@ -11,13 +11,18 @@ import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.testutil.TestUtils;
+import de.yard.threed.engine.apps.ModelSamples;
+import de.yard.threed.engine.loader.DefaultMaterialFactory;
+import de.yard.threed.engine.loader.PortableModelBuilder;
 import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.ModelLoader;
 import de.yard.threed.engine.testutil.AdvancedHeadlessPlatformFactory;
 import de.yard.threed.engine.testutil.EngineTestFactory;
+import de.yard.threed.engine.testutil.EngineTestUtils;
 import de.yard.threed.engine.testutil.TestHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -153,7 +158,7 @@ public class ModelBuildTest {
                 }
                 builtNodes.add(result.getNode());
             }
-        });
+        }, new DefaultMaterialFactory());
 
         TestUtils.waitUntil(() -> {
             TestHelper.processAsync();
@@ -165,4 +170,22 @@ public class ModelBuildTest {
 
         SceneNode cesiumBox = new SceneNode(builtNodes.get(0));
     }
+
+    /**
+     * Maybe not the best location here, but which is better?
+     */
+    @Test
+    public void testTexturedCube() {
+        EngineTestFactory.loadBundleAndWait("data");
+        SceneNode n = ModelSamples.buildTexturedCube(2, new DefaultMaterialFactory());
+        Assertions.assertEquals(0, PortableModelBuilder.dummyMaterialReasons.size(), "dummymaterialused");
+        EngineTestUtils.processAsync();
+        EngineTestUtils.processAsync();
+        Assertions.assertEquals(1, Texture.texturePool.size(), "texturePoolsize");
+        Assertions.assertTrue(Texture.texturePool.hasTexture("texturedcube-atlas.jpg"), "texture");
+        Material material = n.getMesh().getMaterial();
+        assertNotNull(material);
+
+    }
+
 }

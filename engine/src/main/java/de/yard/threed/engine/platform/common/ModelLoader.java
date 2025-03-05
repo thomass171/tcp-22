@@ -16,6 +16,7 @@ import de.yard.threed.engine.SceneNode;
 
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.loader.PortableModel;
+import de.yard.threed.engine.AbstractMaterialFactory;
 import de.yard.threed.engine.loader.PortableModelBuilder;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.ProcessPolicy;
@@ -38,10 +39,12 @@ public class ModelLoader {
     public static ProcessPolicy processPolicy;
 
     /**
+     * Async load of a GLTF model.
      * 10.11.23: Code section extracted from AsyncHelper.
      * Do the two steps read and prepare/build.
+     * This method is also used by some platforms for platform internal model loading.
      */
-    public static void buildModel(ResourceLoader resourceLoader, ResourcePath opttexturepath, int buildoptions, ModelBuildDelegate delegate) {
+    public static void buildModel(ResourceLoader resourceLoader, ResourcePath opttexturepath, int buildoptions, ModelBuildDelegate delegate, AbstractMaterialFactory materialFactory) {
 
         readGltfModel(resourceLoader, new GeneralParameterHandler<PortableModel>() {
             @Override
@@ -53,7 +56,7 @@ public class ModelLoader {
                     delegate.modelBuilt(r);
                 } else {
                     // resourceLoader is used for async texture load (with internal delegate).
-                    PreparedModel preparedModel = PortableModelBuilder.prepareModel(lr, resourceLoader, opttexturepath);
+                    PreparedModel preparedModel = PortableModelBuilder.prepareModel(lr, resourceLoader, opttexturepath, materialFactory);
                     r = ModelLoader.buildModelFromPreparedModel(preparedModel, buildoptions);
                     AbstractSceneRunner.getInstance().systemTracker.modelBuilt(resourceLoader.nativeResource.getFullQualifiedName());
                     delegate.modelBuilt(r);

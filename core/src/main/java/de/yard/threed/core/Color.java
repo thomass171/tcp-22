@@ -211,6 +211,10 @@ public class Color {
         return new Color(Util.parseFloat(s[0]), Util.parseFloat(s[1]), Util.parseFloat(s[2]), Util.parseFloat(s[3]));
     }
 
+    public Vector3 asVector3() {
+        return new Vector3(r, g, b);
+    }
+
     /**
      * Apply transparency to a color.
      */
@@ -218,7 +222,7 @@ public class Color {
         return new Color(r, g, b, (float) a / 255);
     }
 
-    private static Log getLogger(){
+    private static Log getLogger() {
         return Platform.getInstance().getLog(Color.class);
     }
 }

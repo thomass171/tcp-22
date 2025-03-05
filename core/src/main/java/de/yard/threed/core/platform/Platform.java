@@ -33,6 +33,9 @@ public abstract class Platform {
 
     public List<BundleResolver> bundleResolver = new ArrayList<BundleResolver>();
 
+    // we need to know all shader materials for updating light properties
+    public List<RegisteredShaderMaterial> shaderMaterials = new ArrayList<RegisteredShaderMaterial>();
+
     protected static Platform instance;
 
     // Added to have Scenerunner available in all platforms (like SimpleHeadlessPlatform)
@@ -58,7 +61,7 @@ public abstract class Platform {
 
     /**
      * 15.9.17: Let the platform load a model async. This might be very efficient. Threejs/gltfloader is a good reference.
-     *
+     * <p>
      * Successor of ModelFactory.buildModelFromBundle().
      * Not for FG XML model!
      * Due to async no exception here but only information via d delegate. The delegate should be called exactly once in every case!
@@ -70,6 +73,7 @@ public abstract class Platform {
      * this method might be useless at the moment. But it might be an option in the future.
      * 15.2.24: Decoupled from bundle(Resource)
      * 11.10.24: In case of an error no node should be passed to delegate.
+     * 06.02.25: Has no option for a material factory because that would be specific for our GLTF loader.
      */
     public abstract void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate, int options);
 
@@ -165,9 +169,9 @@ public abstract class Platform {
     //return buildMaterial(new MaterialDefinition(name,color,texture,parameters),effect);
 
     /**
-     * material name is taken from program
+     * material name is taken from program or can later be set by setName()
      */
-    public abstract NativeMaterial buildMaterial(/*String name,*/ NativeProgram program, boolean opaque);
+    public abstract NativeMaterial buildMaterial(NativeProgram program, boolean opaque);
 
     /**
      * Ob das so bleiben kann ist fraglich wegen analogie zu Ajax. Aber warum nicht? Ajax ist nur ThreeJS, und da erfolgt das laden transparent im
@@ -198,15 +202,15 @@ public abstract class Platform {
     public abstract NativeLight buildAmbientLight(Color argb);
 
     /**
-     * Die Position bei einem directional light gibt es nicht, nur die Richtung.
-     * Die Direction ist die Richtung, aus der das Licht kommt, nicht die Richtung, in die es scheint.
-     * Also eigentlich doch die Position. Es scheint dann in Richtung (0,0,0).
-     * Das Light wird zugleich als Schattenverursacher eingerichtet.
-     *
-     * @param argb
-     * @return
+     * There is no position
+     * direction is the position from where the light is coming, related to (0,0,0). So
+     * it is the vector from 0,0,0 to the light origin.
+     * <p>
+     * Also configured to cast shadows.
      */
-    public abstract NativeLight buildDirectionalLight(Color argb, Vector3 direction);
+    public abstract NativeLight buildDirectionalLight(Color color, Vector3 direction);
+
+    public abstract List<NativeLight> getLights();
 
     /**
      * Hier kommen schon fertige Dreiecke (Face3) rein, da:
@@ -354,7 +358,6 @@ public abstract class Platform {
     public abstract void abort();
 
 
-
     /**
      * Muesste eigentlich generisch sein, wird z.Z. aber nur fuer GLTF verwendet.
      * 22.9.21: Now like XML handling for replacing model mapper.
@@ -395,9 +398,6 @@ public abstract class Platform {
     public abstract NativeRenderProcessor buildSSAORenderProcessor();
 
     public abstract void addRenderProcessor(NativeRenderProcessor renderProcessor);
-
-
-   //25.10.23 try without protected abstract Log getLog();
 
     public abstract Log getLog(Class clazz);
 
@@ -469,7 +469,7 @@ public abstract class Platform {
      * Build a loader for loading a single resource(file) either from some web/HTTP bundle location or from
      * a local(HOSTDIR) bundle. Provides the option to get a single file from a bundle without loading the complete bundle.
      * This method is also used internally for loading a bundle!
-     *
+     * <p>
      * "bundlename" to make clear its for bundle content loading with resolver (or abs HTTP).
      * if location is null, the resolver will be used.
      * Should location end with bundlename or not? Probably not, because bundlename is standalone parameter.
@@ -492,4 +492,16 @@ public abstract class Platform {
      * Sounds nice but breaks sync workflow for material creation.
      */
     public abstract NativeProgram buildProgram(String name, BundleResource vertexShader, BundleResource fragmentShader);
+
+    public void registerAndInitializeShaderMaterial(RegisteredShaderMaterial shaderMaterial) {
+        shaderMaterials.add(shaderMaterial);
+        shaderMaterial.updateLightUniforms(getLights());
+    }
+
+    public void updateShaderMaterials() {
+        List<NativeLight> lights = getLights();
+        for (RegisteredShaderMaterial m : shaderMaterials) {
+            m.updateLightUniforms(lights);
+        }
+    }
 }

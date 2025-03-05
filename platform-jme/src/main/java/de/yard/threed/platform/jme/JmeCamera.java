@@ -7,6 +7,7 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 import com.jme3.scene.control.CameraControl;
+import com.jme3.shader.UniformBindingManager;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Point;
@@ -25,6 +26,8 @@ import de.yard.threed.engine.platform.common.RayHelper;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
 import de.yard.threed.javacommon.JALog;
+
+import java.util.function.Function;
 
 /**
  * Das ist erstmal? nur ein Dummy, weil JME ein anderes Camera Konzept hat.
@@ -105,7 +108,28 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
         //Platform.getInstance().addCamera(this);
         AbstractSceneRunner.getInstance().addCamera(this);
 
+        // 20.2.25: Do we need to apply viewMatrix for textureMatrix? Totally unclear.
+        // Needs extension in JME.
+        // Finally turned out to be not needed, but without explanation.
+        // mirror is also its inverse
+        /*final Camera pcamera = camera;
+        UniformBindingManager.viewMatrixProcessor = new Function<Matrix4f, Matrix4f>() {
+            @Override
+            public Matrix4f apply(Matrix4f originalm4) {
+                com.jme3.math.Quaternion q = pcamera.getRotation();
+                Matrix4f m4 = new Matrix4f();
+                //m4.setRotationQuaternion(q);
+                m4.set(originalm4);
+                m4=m4.mult(mirror);
+                if (cnt++ % 100 == 0) {
+                    logger.debug("originalm4=" + originalm4);
+                    //logger.debug("m4=" + m4);
+                }
+                return originalm4;
+            }
+        };*/
     }
+    //static int cnt;
 
     //@Override
     public Vector3 getPosition() {
@@ -140,6 +164,7 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
             //unklar, wie das zu berechnen ist. Ueber die world inverse geht es bestimmt, aber es muesste auch direkter gehen.
             /*Jme*/
             Matrix4 m4 = /*(JmeMatrix4)*/ getWorldModelMatrix();
+            // TODO add crosscheck, should be the same like native???
             camviewmatrix = m4.getInverse();//matrix4.invert();
         }
         return /*new JmeMatrix4*/(camviewmatrix);

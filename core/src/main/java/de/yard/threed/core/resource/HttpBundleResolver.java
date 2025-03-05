@@ -7,7 +7,7 @@ import de.yard.threed.core.platform.Platform;
 /**
  * A resolver that knows on which HTTP server a specific bundle can be found
  * using a configuration like "b1,b2,b3@http://xx.yy:ppp/context".
- *
+ * <p>
  * Might fall back to some platform default like HostPageBaseURL(origin).
  */
 public class HttpBundleResolver extends BundleResolver {
@@ -19,11 +19,12 @@ public class HttpBundleResolver extends BundleResolver {
      * Default constructor without URL that always resolves (needs a default platform URL).
      */
     public HttpBundleResolver() {
-        this.url=null;
+        this.url = null;
     }
 
     /**
      * path is like "b1,b2,b3@http://xx.yy:ppp/context"
+     * 1.3.25 '@' no optional for redirecting in general to HOSTDIE in webgl
      *
      * @param path
      */
@@ -33,6 +34,14 @@ public class HttpBundleResolver extends BundleResolver {
             bundlelist = new String[]{};
             url = "";
         }
+    }
+
+    /**
+     * 3.3.25: Additional more specific constructor.
+     */
+    public HttpBundleResolver(String url, String[] bundlelist) {
+        this.url = url;
+        this.bundlelist = bundlelist;
     }
 
     protected boolean parse(String path) {
@@ -51,12 +60,16 @@ public class HttpBundleResolver extends BundleResolver {
 
         if (url == null) {
             // default to HostPageBaseURL/origin
-            String bundlebasedir = "bundles/" + bundleName;
+            String bundlebasedir = "bundles/" + getBundlePath(bundleName) + bundleName;
             return new ResourcePath(bundlebasedir);
         }
         if (StringUtils.indexOf(bundlelist, bundleName) != -1) {
-            return new ResourcePath(url + "/" + bundleName);
+            return new ResourcePath(url + "/" + getBundlePath(bundleName) + bundleName);
         }
+        if (bundlelist.length == 1 && bundlelist[0].equals("*")) {
+            return new ResourcePath(url + "/" + getBundlePath(bundleName) + bundleName);
+        }
+
         return null;
     }
 

@@ -1,8 +1,12 @@
 package de.yard.threed.platform.webgl;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import de.yard.threed.core.Color;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeLight;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -10,21 +14,32 @@ import de.yard.threed.core.platform.NativeLight;
  */
 public class WebGlLight implements NativeLight {
     JavaScriptObject light;
+    Color col;
+    Vector3 direction;
 
-    private WebGlLight(JavaScriptObject light) {
+    // registry for all lights
+    static List<WebGlLight> lights = new ArrayList<>();
+
+    private WebGlLight(Color col, Vector3 direction, JavaScriptObject light) {
+        this.col = col;
+        this.direction = direction;
         this.light = light;
     }
 
-    public static WebGlLight buildPointLight(int col, double range) {
-        return new WebGlLight(buildPointLightNative(col, range));
+    public static WebGlLight buildPointLight(Color col, double range) {
+        return new WebGlLight(null/*??*/, null, buildPointLightNative(col.getARGB(), range));
     }
 
-    public static WebGlLight buildAmbientLight(int col) {
-        return new WebGlLight(buildAmbientLightNative(col));
+    public static WebGlLight buildAmbientLight(Color col) {
+        WebGlLight l = new WebGlLight(col, null, buildAmbientLightNative(col.getARGB()));
+        lights.add(l);
+        return l;
     }
 
-    public static WebGlLight buildDirectionalLight(int col, JavaScriptObject direction) {
-        return new WebGlLight(buildDirectionalLightNative(col, direction));
+    public static WebGlLight buildDirectionalLight(Color col, Vector3 direction) {
+        WebGlLight l = new WebGlLight(col, direction, buildDirectionalLightNative(col.getARGB(), WebGlVector3.toWebGl(direction).vector3));
+        lights.add(l);
+        return l;
     }
 
     public void setPosition(Vector3 pos) {
@@ -33,6 +48,27 @@ public class WebGlLight implements NativeLight {
 
     public WebGlVector3 getPosition() {
         return new WebGlVector3(WebGlObject3D.getPosition(light));
+    }
+
+    @Override
+    public Color getAmbientColor() {
+        if (direction == null) {
+            return col;
+        }
+        return null;
+    }
+
+    @Override
+    public Color getDirectionalColor() {
+        if (direction!=null) {
+            return col;
+        }
+        return null;
+    }
+
+    @Override
+    public Vector3 getDirectionalDirection() {
+        return direction;
     }
 
     private static native JavaScriptObject buildPointLightNative(int col, double range)  /*-{

@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * This class is not easy to use.
+ * We also have TransformNodeVisitor and GenericTreeNode.
  */
 public class TreeNode<T> {
     private T element;

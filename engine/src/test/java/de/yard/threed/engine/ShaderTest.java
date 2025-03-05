@@ -29,7 +29,7 @@ public class ShaderTest {
         HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
         map.put("texture", texture.texture);
 
-        ShaderProgram program = ShaderPool.buildSimpleTextureEffect();
+        ShaderProgram program = ShaderPool.buildUniversalEffect();
         Matrix3 textureMatrix=new Matrix3();
         program.program.compile();
 

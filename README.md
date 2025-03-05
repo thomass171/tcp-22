@@ -202,16 +202,16 @@ dev console of the browser for additional information.
 
 For ReferenceScene use
 ```
-ADDITIONALBUNDLE=engine,data@http://localhost:80/~thomas/tcp-22/bundles
+HOSTDIR=http://localhost:80/~thomas/tcp-22
 ```
 which leads to URL
 ```
-http://localhost:8888/webgl.html?scene=ReferenceScene&devmode=true&ADDITIONALBUNDLE=ZW5naW5lLGRhdGFAaHR0cDovL2xvY2FsaG9zdDo4MC9+dGhvbWFzL3RjcC0yMi9idW5kbGVz
+http://localhost:8888/webgl.html?scene=ReferenceScene&devmode=true&HOSTDIR=http%3A%2F%2Flocalhost%3A80%2F~thomas%2Ftcp-22
 ```
 
 and for maze with the default sokoban grid it will be
 ```
-http://localhost:8888/webgl.html?scene=MazeScene&devmode=true&ADDITIONALBUNDLE=ZW5naW5lLGRhdGEsbWF6ZUBodHRwOi8vbG9jYWxob3N0OjgwL350aG9tYXMvdGNwLTIyL2J1bmRsZXM=
+http://localhost:8888/webgl.html?scene=MazeScene&devmode=true&HOSTDIR=http%3A%2F%2Flocalhost%3A80%2F~thomas%2Ftcp-22
 ```
 
 For avoiding URL de/encoding issues, ADDITIONALBUNDLE parts which are URLs need to be base64 encoded.
@@ -277,6 +277,8 @@ Major changes:
 
 ## 2025-02-03
   * Shader refactored for material specific uniforms. Class 'Effect' replaced with 'ShaderPool'.
+  * Reactivated 'Universalshader' as multi purpose shader (including textureMatrix).
+  * Property ADDITIONALBUNDLE no longer for gwt dev mode but with http query param HOSTDIR
 
 # Technical Details
 
@@ -432,7 +434,10 @@ with projected graphs (groundnet) which by nature have a different rotation stra
 
 Bundles are a well defined set of resources (files) that reside somewhere.
 They are identified by a name. Lookup is done by bundle resolver which
-check whether they know how to load a bundle. The first resolver wins.
+check whether they know how to load a bundle (there is no probing).
+The first resolver wins. Every platform has a default low prio bundle resolver
+that points to HOSTDIR/HOSTDIRFG on desktop and 'origin' in a browser. The browser location can
+be overwritten by HTTP query param HOSTDIR.
 
 Alternatively, a bundle can be loaded with a full qualified name ('bundle@location'), which
 doesn't need a resolver.
@@ -483,6 +488,25 @@ these constraints. The following rules apply to shader:
   * Uniform names should have prefix "u_" (helpful for string replacement in JME)
   * Initialize uniforms in the app, not the shader. Apparently JME has a problem with default values when uniforms are not set in all materials. And WebGL might report  "'uniform' :  cannot initialize this type of qualifier"
   * Don't use identifier that might be predefined, like 'uv'
+
+In JME the orientation of normals visually appears not correct when transformed with g_NormalMatrix,
+which is intended to be the normalMatrix(transpose inverse of modelView matrix). Even with debugging
+the reason couldn't be revealed. The 'mirror' in JmeCamera seems not to be the reason.
+It's all quite strange.
+BTW: The 'normalMatrix' provided by ThreeJS appears correct.
+
+### Lighting
+Custom shader need to be updated about light changes, eg. light might be moving in a scene. This could be done
+by the platform. ThreeJs for example requires multiple changes
+(additional uniforms) in the shader
+and probably using THREE.UniformsLib['lights'] for generating all the additional uniforms.
+But documentation is an issue. Eg. it's not clear whether light
+vectors are already transformed to view space when they are injected
+to the shader.
+
+So the question is, should we use the platform or create a generic helper. The
+main challenge for a helper (RegisteredShaderMaterial.java) is to know when a light was moved.
+
 
 ## Transparency
 Transparency can be done with platform shader or with custom shader. Important is to put the object at the end of

@@ -38,7 +38,7 @@ public class SimpleBundleResolver extends BundleResolver {
         if (specificBundle != null && !specificBundle.equals(bundleName)) {
             return null;
         }
-        String basedir = bundledir + "/" + bundleName;
+        String basedir = bundledir + "/" + getBundlePath(bundleName) + bundleName;
         String dirfile = basedir + "/" + BundleRegistry.getDirectoryName(bundleName, false);
         if (resourceReader.exists(dirfile)) {
             return new ResourcePath(basedir);

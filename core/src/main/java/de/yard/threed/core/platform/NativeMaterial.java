@@ -4,13 +4,10 @@ package de.yard.threed.core.platform;
 
 /**
  * Created by thomass on 05.06.15.
+ * 27.02.25: name no longer deprecated.
+ * Has no 'MaterialDefinition getDefinition()' because it appears weird/inappropriate. How should a platform build it.
  */
 public interface NativeMaterial {
-    /**
-     * 8.8.16: Ist jetzt kein Attribut mehr. Um wireframe zu haben, wird beim Mesh einfach kein (null) Material uebergeben.
-     * @param wireframe
-     */
-    //public void setWireframe(boolean wireframe);
 
     /**
      * 21.7.16
@@ -30,19 +27,15 @@ public interface NativeMaterial {
     void setTransparency(boolean enabled);
 
     /**
-     * 01.09.16: Z.B. um ein Material wiedererkennbar zu machen.
-     * @return
+     * 01.09.16: Not unique, so no identifier. More a label, helpful for logging.
+     *
      */
-    @Deprecated
     String getName();
 
-    @Deprecated
     void setName(String name);
 
-    //20.7.16 public boolean isTransparent();
+    //27.2.25 what's this??
     NativeTexture[] getMaps();
-    //6.10.17:Ob das mit nativen Loadern (z.B. gltf) geht, ist reichlich fraglich.
-    //MaterialDefinition getDefinition();
 
      NativeUniform getUniform(String name);
 }

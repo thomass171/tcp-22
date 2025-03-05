@@ -7,10 +7,6 @@ bike.xml
 bike.pcm
 shader/PhotoAlbum.frag
 shader/PhotoAlbum.vert
-shader/SimpleTexture.frag
-shader/SimpleTexture.vert
-shader/SolidColor.frag
-shader/SolidColor.vert
 shader/Universal.frag
 shader/Universal.vert
 primitives.pcm

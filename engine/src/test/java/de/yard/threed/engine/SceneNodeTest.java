@@ -5,6 +5,7 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.apps.reference.ReferenceScene;
 import de.yard.threed.engine.apps.reference.ReferenceTests;
+import de.yard.threed.engine.loader.DefaultMaterialFactory;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.engine.testutil.PlatformFactoryHeadless;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
@@ -25,7 +26,8 @@ public class SceneNodeTest {
 
         ArrayList<SceneNode> towerrechts = new ArrayList<SceneNode>();
 
-        ReferenceScene.buildTower("r", towerrechts, 4, 3, 1, new Color[]{Color.RED, new Color(1.0f, 1.0f, 0), Color.GREEN}, false);
+        ReferenceScene.buildTower("r", towerrechts, 4, 3, 1, new Color[]{Color.RED, new Color(1.0f, 1.0f, 0), Color.GREEN},
+                new DefaultMaterialFactory());
 
         assertEquals(1,SceneNode.findNodeByName("r 0",towerrechts.get(0)).size());
         assertEquals(1,SceneNode.findNodeByName("r 1",towerrechts.get(0)).size());

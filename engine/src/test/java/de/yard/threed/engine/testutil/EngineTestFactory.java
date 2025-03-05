@@ -9,6 +9,8 @@ import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.core.testutil.TestBundle;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.Observer;
+import de.yard.threed.engine.Texture;
+import de.yard.threed.engine.TexturePool;
 import de.yard.threed.engine.platform.PlatformBundleLoader;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.javacommon.ConfigurationByEnv;
@@ -127,6 +129,7 @@ public class EngineTestFactory {
             AbstractSceneRunner.instance = null;
         }
         JavaWebClient.close();
+        Texture.resetTexturePool();
     }
 
     /**

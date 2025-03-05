@@ -8,6 +8,7 @@ import de.yard.threed.core.Color;
 import de.yard.threed.core.ColorType;
 import de.yard.threed.core.NumericType;
 import de.yard.threed.core.NumericValue;
+import de.yard.threed.core.platform.RegisteredShaderMaterial;
 import de.yard.threed.engine.platform.common.ShaderProgram;
 
 
@@ -202,20 +203,15 @@ public class Material {
                 null, buildParamList(transparency, NumericValue.UNSHADED)));
     }
 
-    /**
-     * Date: 26.10.15
-     */
- 
-    /*public CustomShaderMaterial(Texture texture, String shader) {
-        this(new Texture[]{texture}, shader);
-    }*/
-
     public static Material buildCustomShaderMaterial(/*HashMap<String, NativeTexture> map,*/ ShaderProgram program/*Effect effect*/, boolean opaque) {
         // super((Color)null);
         Material mat = new Material(Platform.getInstance().buildMaterial(program.program, opaque));
         if (program.defaultSetter != null) {
             program.defaultSetter.handle(mat.material);
         }
+        // register and set light uniforms
+        Platform.getInstance().registerAndInitializeShaderMaterial(new RegisteredShaderMaterial(mat.material));
+
         return mat;
     }
 

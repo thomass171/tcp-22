@@ -26,6 +26,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Simple Platform implementation eg. for unit tests. This is less than a full platform and PlatformHomeBrew without renderer but more
@@ -177,7 +178,8 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
 
     @Override
     public NativeMaterial buildMaterial(NativeProgram program, boolean opaque) {
-        return new DummyMaterial(program, opaque);
+        // too early to call registerAndInitializeShaderMaterial() because defaults are not yet set
+        return new DummyMaterial((DummyProgram) program, opaque);
     }
 
     @Override
@@ -200,6 +202,32 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         }
         return new DummyTexture(filename.getUrl());
 
+    }
+
+    @Override
+    public NativeLight buildPointLight(Color argb, double range) {
+        return null;
+    }
+
+    @Override
+    public NativeLight buildAmbientLight(Color argb) {
+        NativeLight l = new DummyLight(argb, null);
+        updateShaderMaterials();
+        return l;
+    }
+
+    @Override
+    public NativeLight buildDirectionalLight(Color argb, Vector3 direction) {
+        NativeLight l = new DummyLight(argb, direction);
+        updateShaderMaterials();
+        return l;
+    }
+
+    @Override
+    public List<NativeLight> getLights() {
+        List<NativeLight> rs = new ArrayList<>();
+        DummyLight.lights.forEach(l -> rs.add(l));
+        return rs;
     }
 
     @Override
@@ -355,6 +383,16 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
      */
     public void setSceneDimension(Dimension dimension) {
         ((DummyScene) nativeScene).dimension = dimension;
+    }
+
+    @Override
+    public void updateMesh(NativeMesh mesh, NativeGeometry nativeGeometry, NativeMaterial material) {
+        if (nativeGeometry != null) {
+            ((DummyMesh) mesh).geometry = (DummyGeometry) nativeGeometry;
+        }
+        if (material != null) {
+            ((DummyMesh) mesh).material = material;
+        }
     }
 
     @Override
@@ -715,6 +753,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         private final HashMap<ColorType, Color> color;
         String name;
         public HashMap<NumericType, NumericValue> parameters;
+        public Map<String, NativeUniform> uniforms = new HashMap<>();
 
         DummyMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameters, Object effect) {
             this.name = name;
@@ -722,8 +761,63 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
             this.color = color;
         }
 
-        public DummyMaterial(NativeProgram program, boolean opaque) {
+        public DummyMaterial(DummyProgram program, boolean opaque) {
             color = null;
+            for (Uniform uniform : program.uniforms) {
+
+                String uniformName = uniform.name;
+                switch (uniform.type) {
+                    case BOOL:
+                        uniforms.put(uniformName, new DummyUniform<Boolean>() {
+                            @Override
+                            public void setValue(Boolean b) {
+
+                            }
+                        });
+                        break;
+                    case SAMPLER_2D:
+                        uniforms.put(uniformName, new DummyUniform<NativeTexture>() {
+                            @Override
+                            public void setValue(NativeTexture texture) {
+
+                            }
+                        });
+                        break;
+                    case FLOAT_VEC3:
+                        uniforms.put(uniformName, new DummyUniform<Vector3>() {
+                            @Override
+                            public void setValue(Vector3 v) {
+
+                            }
+                        });
+                        break;
+                    case FLOAT_VEC4:
+                        uniforms.put(uniformName, new DummyUniform<Quaternion>() {
+                            @Override
+                            public void setValue(Quaternion v) {
+
+                            }
+                        });
+                        break;
+                    case FLOAT:
+                        uniforms.put(uniformName, new DummyUniform<Float>() {
+                            @Override
+                            public void setValue(Float f) {
+
+                            }
+                        });
+                        break;
+                    case MATRIX3:
+                        uniforms.put(uniformName, new DummyUniform<Matrix3>() {
+                            @Override
+                            public void setValue(Matrix3 v) {
+                            }
+                        });
+                        break;
+                    default:
+                        throw new RuntimeException("unhandled uniform type " + uniform.type);
+                }
+            }
         }
 
         @Override
@@ -747,13 +841,14 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
 
         @Override
         public NativeUniform getUniform(String name) {
-
-            return new NativeUniform() {
-                @Override
-                public void setValue(Object value) {
-                }
-            };
+            return uniforms.get(name);
         }
+    }
+
+    abstract class DummyUniform<T> implements NativeUniform<T> {
+
+        @Override
+        public abstract void setValue(T value);
     }
 
     class DummyTexture implements NativeTexture {
@@ -910,42 +1005,52 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         }
     }
 
-    class DummyProgram implements NativeProgram {
+    /**
+     *
+     */
+    class DummyProgram extends AbstractShaderProgram implements NativeProgram {
+
         public DummyProgram(String name, BundleResource vertexShader, BundleResource fragmentShader) {
-
-        }
-
-        @Override
-        public void addSampler2DUniform(String name) {
-        }
-
-        @Override
-        public void addMatrix3Uniform(String name) {
-
-        }
-
-        @Override
-        public void addFloatVec3Uniform(String name) {
-
-        }
-
-        @Override
-        public void addFloatVec4Uniform(String name) {
-        }
-
-        @Override
-        public void addBooleanUniform(String name) {
-
-        }
-
-        @Override
-        public void addFloatUniform(String name) {
-
+            super(name, loadShader(vertexShader), loadShader(fragmentShader));
         }
 
         @Override
         public void compile() {
 
+        }
+    }
+
+    static class DummyLight implements NativeLight {
+        Color col;
+        Vector3 direction;
+        // registry for all lights
+        static List<DummyLight> lights = new ArrayList<>();
+
+        private DummyLight(Color col, Vector3 direction) {
+            this.col = col;
+            this.direction = direction;
+            lights.add(this);
+        }
+
+        @Override
+        public Color getAmbientColor() {
+            if (direction == null) {
+                return col;
+            }
+            return null;
+        }
+
+        @Override
+        public Color getDirectionalColor() {
+            if (direction != null) {
+                return col;
+            }
+            return null;
+        }
+
+        @Override
+        public Vector3 getDirectionalDirection() {
+            return direction;
         }
     }
 }

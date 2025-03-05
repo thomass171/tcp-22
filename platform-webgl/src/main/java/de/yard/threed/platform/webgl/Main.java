@@ -2,6 +2,7 @@ package de.yard.threed.platform.webgl;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import de.yard.threed.core.configuration.Configuration;
 import de.yard.threed.core.configuration.ConfigurationByProperties;
@@ -21,21 +22,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
- * 05.10.2018: Altkram wie RemoteConsoleScene (die ist erschoben nach FG) entfernt und Platform mit Properties sauber init.
+ * 05.10.2018: Removed old stuff like RemoteConsoleScene (moved to FG?) and consistent platform init with properties.
+ * 01.03.2025: Property ADDITIONALBUNDLE no longer for gwt dev mode, one time URL decoding,
  */
 public class Main implements EntryPoint {
-    //static Platform platform = PlatformWebGl.getInstance();
-    Log logger;// = Platform.getInstance().getLog(Main.class);
-    //static boolean withgui;
+    // Platform not yet available for initing logger
+    Log logger;
 
     public static boolean usesTLS = false;
 
     /**
-     * This isType the entry point method.
-     * Die Entscheidung, was gestartet wird, soll aus der URL kommen.
+     * This is the entry point method.
+     * The scene to start comes from the URL
      * <p>
      * Eine Entscheidung über "Production" treffen, um Logging entsprechend zu akivieren. Die Erkennung ist so etwas "Naja". Aber am Port 8888
      * ist es z.Z. nicht erkennbar. 10.10.18: Das heisst jetzt devmode und muss explizit in der URL gesetzt werden.
@@ -46,6 +46,13 @@ public class Main implements EntryPoint {
         PlatformWebGl.isDevmode = false;
         for (String arg : args.keySet()) {
             String value = Window.Location.getParameter(arg);
+            // 1.3.25 do a general decode
+            String decodedValue = URL.decodeQueryString(value);
+            if (!value.equals(decodedValue)) {
+                WebGlLog.logNative("decoded '" + value + "' to '" + decodedValue + "'");
+            }
+            value = decodedValue;
+
             //6.3.23: Breaking change! No longer use prefix "argv"
             properties.put(arg, value);
             if (arg.equalsIgnoreCase("devmode")) {
@@ -70,7 +77,7 @@ public class Main implements EntryPoint {
         }
         // devmode should be set before init. Otherwise early setup of platform for having a logger.
         Configuration configuration = new ConfigurationByProperties(properties);
-        PlatformFactory platformFactory=getPlatformFactory(configuration);
+        PlatformFactory platformFactory = getPlatformFactory(configuration);
         PlatformInternals platformInternals = platformFactory.createPlatform(configuration);
 
         Log logger = Platform.getInstance().getLog(Main.class);

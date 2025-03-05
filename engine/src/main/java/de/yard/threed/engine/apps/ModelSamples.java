@@ -1,7 +1,6 @@
 package de.yard.threed.engine.apps;
 
 
-
 import de.yard.threed.core.*;
 import de.yard.threed.core.geometry.Face;
 import de.yard.threed.core.geometry.Face3;
@@ -11,6 +10,9 @@ import de.yard.threed.core.loader.PmlFactory;
 import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.geometry.GeometryHelper;
+import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.loader.PortableMaterial;
@@ -18,6 +20,7 @@ import de.yard.threed.core.loader.PortableModelDefinition;
 import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.NativeMaterial;
+import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 
 
 import java.util.ArrayList;
@@ -30,19 +33,29 @@ import java.util.List;
  * <p/>
  * Greift sowohl auf gebundelte wie externe Resourcen zu (FG). Das sollte vielleicht mal getrennt werden.
  * <p>
- * 22.12.18: Hier muss eh mal aufgeraeumt und auf Module verteilt werden.
+ * 22.12.18: Needs cleanup anyway and distribution to Modules.
  * <p>
  * <p/>
  * Created by thomass on 19.08.15.
  */
 public class ModelSamples {
     static Log logger = Platform.getInstance().getLog(ModelSamples.class);
-    //static Platform pf = ((EngineHelper) Platform.getInstance());
+
+    public static Material buildTexturedCubeMaterial(AbstractMaterialFactory materialFactory) {
+
+        //NativeMaterial mat = Material.buildLambertMaterial(Texture.buildBundleTexture("data", "textures/texturedcube-atlas.jpg")).material;
+        //Just have a loader pointing to bundle data, from which texture loader will be derived.
+        PortableMaterial pm = new PortableMaterial("no-name", "texturedcube-atlas.jpg");
+        Material mat = materialFactory.buildMaterial(new ResourceLoaderFromBundle(new BundleResource(BundleRegistry.getBundle("data"), "xx")
+        ), pm, new ResourcePath("textures"), true);
+        return mat;
+    }
 
     /**
-     * Der Showroom Cube (from https://github.com/rkwright/geofx_site/tree/master/graphics/nehe-three-js)
+     * The Showroom Cube (from https://github.com/rkwright/geofx_site/tree/master/graphics/nehe-three-js)
+     * 22.2.25: Now with material factory instead of hardcoded LambertMaterial
      */
-    public static SceneNode buildTexturedCube(double size) {
+    public static SceneNode buildTexturedCube(double size, AbstractMaterialFactory materialFactory) {
 
         List</*7.2.18 Native*/Vector3> vertices = new ArrayList<Vector3>();
         // Die Reihenfolge der Vertices hier entspricht einem Cube bei ThreeJS
@@ -55,7 +68,7 @@ public class ModelSamples {
         vertices.add(new Vector3(-0.5f * size, -0.5f * size, -0.5f * size));
         vertices.add(new Vector3(-0.5f * size, -0.5f * size, 0.5f * size));
 
-        NativeMaterial mat = Material.buildLambertMaterial(Texture.buildBundleTexture("data", "textures/texturedcube-atlas.jpg")).material;
+        Material mat = buildTexturedCubeMaterial(materialFactory);
 
         Vector2[] bricks = new Vector2[]{new Vector2(0, .666f), new Vector2(.5f, .666f), new Vector2(.5f, 1), new Vector2(0, 1)};
         Vector2[] clouds = new Vector2[]{new Vector2(.5f, .666f), new Vector2(1, .666f), new Vector2(1, 1), new Vector2(.5f, 1)};
@@ -93,6 +106,7 @@ public class ModelSamples {
 
     /**
      * 2.10.19: Nicht mehr Lambert, weils ja simpel sein soll.
+     *
      * @param size
      * @param color
      * @return
@@ -106,7 +120,7 @@ public class ModelSamples {
     }
 
     public static SceneNode buildCube(double size, Color color, Vector3 position) {
-        SceneNode cube =buildCube(size,color);
+        SceneNode cube = buildCube(size, color);
         cube.getTransform().setPosition(position);
         return cube;
     }
@@ -122,7 +136,7 @@ public class ModelSamples {
 
     public static SceneNode buildEarth(int segments, int shading) {
         ShapeGeometry geoSphere = ShapeGeometry.buildSphere(segments, segments/*16*/, new Degree(360));
-        Material mat = Material.buildLambertMaterial((Texture.buildBundleTexture("data", "textures/earth/2_no_clouds_4k.jpg")),null,(shading==NumericValue.FLAT));
+        Material mat = Material.buildLambertMaterial((Texture.buildBundleTexture("data", "textures/earth/2_no_clouds_4k.jpg")), null, (shading == NumericValue.FLAT));
         //mat.setWireframe(true);
         Mesh mesh = new Mesh(geoSphere, mat);
         SceneNode model = new SceneNode();
@@ -168,7 +182,7 @@ public class ModelSamples {
 
         needle.attach(south);
 
-        PortableModel pml =  PmlFactory.buildPortableModel(needle, new PortableMaterial[]{northmat, southmat});
+        PortableModel pml = PmlFactory.buildPortableModel(needle, new PortableMaterial[]{northmat, southmat});
         pml.setName("CompassNeedle");
         return pml;
     }
@@ -261,7 +275,6 @@ public class ModelSamples {
         n.setName("Vector");
         return n;
     }
-
 
 
     public static SceneNode buildLine(Vector3 from, Vector3 to, Color color) {

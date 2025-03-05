@@ -23,10 +23,10 @@ public class MenuCycler {
 
     /**
      * Returns true if the mouseclick was consumed by a click.
-     *
+     * 21.2.25 only consider pure 'm', not shifted.
      */
     public boolean update(Point mouseClickLocation) {
-        if (Input.getKeyDown(KeyCode.M)) {
+        if (Input.getKeyDown(KeyCode.M) && !Input.getKey(KeyCode.Shift)) {
             //logger.debug("m key was pressed. currentdelta=" + tpf);
             cycle();
         }

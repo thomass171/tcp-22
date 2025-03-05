@@ -72,7 +72,7 @@ public interface NativeTransform {
     List<NativeTransform> getChildren();
 
     /**
-     * Zu wem gehoere ich? Die SceneNode, deren Komponente dies Object3D ist. Kann nicht null sein. Oder doch? Wenn es z.B. zu einer Camera gehört? ODer in Tests einfach so alleine?
+     * Who owns me? The SceneNode to which this is a component. Should(?) not be null.
      *
      * @return
      */

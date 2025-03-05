@@ -4,28 +4,23 @@ import de.yard.threed.core.Color;
 import de.yard.threed.core.ColorType;
 import de.yard.threed.core.NumericType;
 import de.yard.threed.core.NumericValue;
-import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeMaterial;
 import de.yard.threed.core.platform.NativeTexture;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.Bundle;
-import de.yard.threed.core.resource.BundleRegistry;
-import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
-import de.yard.threed.core.resource.URL;
+import de.yard.threed.engine.AbstractMaterialFactory;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Texture;
-import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 
 import java.util.HashMap;
 
 /**
  * 29.10.24: Extracted from PortableModelBuilder.java
  */
-public class DefaultMaterialFactory implements MaterialFactory {
+public class DefaultMaterialFactory extends AbstractMaterialFactory {
 
     Log logger = Platform.getInstance().getLog(DefaultMaterialFactory.class);
 
@@ -36,13 +31,10 @@ public class DefaultMaterialFactory implements MaterialFactory {
      * <p>
      * Returns mull, wenn bei Texturen Bundle oder Path fehlen. Aufrufer kann DummyMaterial verwenden oder auch keins (wird dann wireframe).
      * 13.2.24: Shouldn't need a bundle any more.
-     *
-     * @param mat
-     * @param texturebasepath for bundle and HTTP. Might only be null with absolute texturename. Is relative to resourceloader or absolute path (eg. "engine:cesiumbox").
-     * @return
+     * 24.2.25: See super class for parameter specification
      */
     @Override
-    public /*10.4.17*/  /*Native*/Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial mat, ResourcePath texturebasepath, boolean hasnormals) {
+    public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial mat, ResourcePath texturebasepath, boolean hasnormals) {
         NativeMaterial nmat;
         //SHADED ist der Defasult
         HashMap<NumericType, NumericValue> parameters = new HashMap<NumericType, NumericValue>();
@@ -55,47 +47,15 @@ public class DefaultMaterialFactory implements MaterialFactory {
         }
 
         if (mat.getTexture() != null) {
-            String texturename = mat.getTexture();
-            /*21.12.16 nicht mehr noetig wegen ResourcePath if (texturebasepath == null) {
-                texturebasepath = ".";
-            }*/
-            if (StringUtils.contains(texturename, ":")) {
-                // use case isn't gltf but manually build model definitions. Is a kind of absolute texture path.
-                int index = StringUtils.indexOf(texturename, ":");
-                texturebasepath = null;
-                // texturename in resourceloader will be replaced later anyway, so just "" is ok.
-                Bundle bundle = BundleRegistry.getBundle(StringUtils.substring(texturename, 0, index));
-                if (bundle == null) {
-                    logger.warn("bundle not found:" + StringUtils.substring(texturename, 0, index));
-                }
-                resourceLoader = new ResourceLoaderFromBundle(new BundleResource(bundle, null, ""));
-                texturename = StringUtils.substring(texturename, index + 1);
-            } else {
-                if (texturebasepath == null) {
-                    logger.warn("no texturebasepath. Not building material.");
-                    return null;
-                }
+            Texture texture = resolveTexture(mat.getTexture(), resourceLoader,texturebasepath, mat.getWraps(), mat.getWrapt(),logger);
+            if (texture == null) {
+                logger.warn("no texture. Not building material.");
+                return null;
             }
-            Texture texture;
+
             HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
+            map.put("basetex", texture.texture);
 
-            if (resourceLoader != null) {
-                //BundleResource br = new BundleResource(texturebasepath, texturename);
-                //br.bundle = bundle;
-                URL br = resourceLoader.fromRootReference(texturebasepath, texturename).getUrl();
-                texture = new Texture/*.buildBundleTexture*/(br, mat.getWraps(), mat.getWrapt());
-                if (texture.texture == null) {
-                    // 13.9.23: Better to log this
-                    logger.warn("failed to build texture from " + texturename + " at " + texturebasepath);
-                    texturename = texturename;
-                }
-                map.put("basetex", texture.texture);
-
-            } else {
-                // 26.4.17: resourceLoader muat exist
-                logger.error("bundle not set");
-
-            }
             //map.put("normalmap",normalmap.texture);
             //TODO die anderen Materialparameter
             nmat = Platform.getInstance().buildMaterial(null, null, map, parameters);

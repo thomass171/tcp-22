@@ -1,19 +1,14 @@
 package de.yard.threed.engine.platform.common;
 
 
-import de.yard.threed.core.GeneralHandler;
 import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.platform.NativeMaterial;
 import de.yard.threed.core.platform.NativeProgram;
 import de.yard.threed.core.platform.NativeUniform;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.core.resource.URL;
-import de.yard.threed.engine.Uniform;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

@@ -7,9 +7,9 @@ import com.jme3.asset.AssetManager;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.Uniform;
-import de.yard.threed.engine.UniformType;
-import de.yard.threed.engine.platform.AbstractShaderProgram;
+import de.yard.threed.core.platform.Uniform;
+import de.yard.threed.core.platform.UniformType;
+import de.yard.threed.core.platform.AbstractShaderProgram;
 import de.yard.threed.engine.platform.common.ShaderUtil;
 
 import java.io.ByteArrayInputStream;
@@ -78,16 +78,20 @@ public class JmeShaderLocator implements AssetLocator {
                                 "attribute vec3 inPosition;\n" +
                                 "attribute vec3 inNormal;\n" +
                                 "attribute vec2 inTexCoord;\n" +
-                                "uniform mat4 g_NormalMatrix;\n" +
+                                // Multiple comment/blanks to avoid 'uniform mat3' replacement
+                                "uniform  /* */    mat3 g_NormalMatrix;\n" +
+                                "uniform mat4 g_ViewMatrix;\n" +
                                 source;
                         //source = source.replaceAll("MODELVIEWPROJECTIONMATRIX","g_WorldViewProjectionMatrix");
                         source = source.replaceAll("PROJECTIONMATRIX", "g_ProjectionMatrix");
                         source = source.replaceAll("MODELVIEWMATRIX", "g_WorldViewMatrix");
                         source = source.replaceAll("VERTEX", "inPosition");
                         source = source.replaceAll("MULTITEXCOORD0", "inTexCoord");
-                        source = source.replaceAll("NORMALMATRIX", "mat3(g_NormalMatrix)");
+                        // See README.md about normalMatrix Problem in JME
+                        source = source.replaceAll("NORMALMATRIX", "g_NormalMatrix");
                         source = source.replaceAll("NORMAL", "inNormal");
                         source = source.replaceAll("OUT", "varying");
+                        source = source.replaceAll("VIEWMATRIX", "g_ViewMatrix");
                     }
                     if (assetkey.endsWith(".frag")) {
                         source = source.replaceAll("FRAGCOLOR", "gl_FragColor");
@@ -99,12 +103,22 @@ public class JmeShaderLocator implements AssetLocator {
                     // Consider the unusual JME naming convention of material uniforms with prefix "m_".
                     // 27.4.16: That is really annoying and error prone.
                     // 8.1.25: And why doesn't "texture" need a replacement? Anyway, we use 'u_texture' now.
-                    source = source.replaceAll("u_isunshaded", "m_isunshaded");
+                    //22.2.25 source = source.replaceAll("u_isunshaded", "m_isunshaded");
                     source = source.replaceAll("u_texture", "m_texture");
+                    source = source.replaceAll("u_color", "m_color");
                     source = source.replaceAll("u_texture0", "m_texture0");
                     source = source.replaceAll("u_texture1", "m_texture1");
                     source = source.replaceAll("u_transparency", "m_transparency");
 
+                    source = source.replaceAll("u_shaded", "m_shaded");
+                    source = source.replaceAll("u_textured", "m_textured");
+                    source = source.replaceAll("u_ambient_light_color", "m_ambient_light_color");
+                    source = source.replaceAll("u_directional_light_color", "m_directional_light_color");
+                    source = source.replaceAll("u_directional_light_direction", "m_directional_light_direction");
+
+                    if (source.contains("u_")){
+                        throw new RuntimeException("unconverted 'u_...' uniform?");
+                    }
                     logger.debug("final shader source:" + source);
                     return new ByteArrayInputStream(source.getBytes("UTF-8"));
                 } catch (Exception e) {

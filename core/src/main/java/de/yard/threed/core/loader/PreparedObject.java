@@ -10,6 +10,9 @@ import de.yard.threed.core.platform.NativeMaterial;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A geometry and material, but not yet a 3D object. Ready to be used for multiple equal 3D object creation.
+ */
 public class PreparedObject {
     // never null or empty
     public String name;

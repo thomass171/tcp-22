@@ -67,6 +67,7 @@ public class DefaultPlatform extends Platform {
 
     @Override
     public NativeMaterial buildMaterial(NativeProgram program, boolean opaque) {
+        // too early to call registerAndInitializeShaderMaterial() because defaults are not yet set
         return null;
     }
 
@@ -97,6 +98,11 @@ public class DefaultPlatform extends Platform {
 
     @Override
     public NativeLight buildDirectionalLight(Color argb, Vector3 direction) {
+        return null;
+    }
+
+    @Override
+    public List<NativeLight> getLights() {
         return null;
     }
 

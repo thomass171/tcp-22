@@ -5,11 +5,11 @@ import com.jme3.asset.AssetKey;
 import com.jme3.asset.AssetLocator;
 import com.jme3.asset.AssetManager;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.Uniform;
-import de.yard.threed.engine.UniformType;
+import de.yard.threed.core.platform.Uniform;
+import de.yard.threed.core.platform.UniformType;
 
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.engine.platform.AbstractShaderProgram;
+import de.yard.threed.core.platform.AbstractShaderProgram;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -80,6 +80,8 @@ public class JmeEffectLocator implements AssetLocator {
                 "            WorldViewProjectionMatrix\n" +
                 "            ProjectionMatrix\n" +
                 "            WorldViewMatrix\n" +
+                "            NormalMatrix\n" +
+                "            ViewMatrix\n" +
                 "        }\n" +
                 "    }\n" +
                 "}";

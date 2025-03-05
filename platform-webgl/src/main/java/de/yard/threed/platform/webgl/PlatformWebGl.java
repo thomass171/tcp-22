@@ -24,6 +24,7 @@ import de.yard.threed.engine.*;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.ColorType;
 import de.yard.threed.core.resource.ResourcePath;
+import de.yard.threed.engine.loader.DefaultMaterialFactory;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.platform.SimpleEventBus;
 import de.yard.threed.core.XmlException;
@@ -86,9 +87,15 @@ public class PlatformWebGl extends Platform {
             additionalBundle = additionalBundle.replace(" ", "+");
         }
         instance.bundleResolver.addAll(((PlatformWebGl) instance).buildBundleResolverFromPath(additionalBundle));
-        // lowest priority default resolver for HostPageBaseURL(origin)
-        instance.bundleResolver.add(new HttpBundleResolver());
-        return platformInternals;//(Platform) Platform.instance;
+        // lowest priority default resolver for HostPageBaseURL(origin). Empty constructor to point to 'origin'.
+        // 1.3.25 No longer ADDITIONALBUNDLE for gwt dev mode but optionally default resolver to a loation from HOSTDIR (used in gwt dev mode)
+        String hostdir = configuration.getString("HOSTDIR");
+        if (hostdir == null) {
+            instance.bundleResolver.add(new HttpBundleResolver());
+        } else {
+            instance.bundleResolver.add(new HttpBundleResolver("*@" + hostdir+"/bundles"));
+        }
+        return platformInternals;
     }
     
     /*public static Platform getInstance() {
@@ -118,7 +125,7 @@ public class PlatformWebGl extends Platform {
      */
     @Override
     public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
-        int delegateid = AbstractSceneRunner.getInstance().invokeLater(delegate);
+        //6.2.25 moved down int delegateid = AbstractSceneRunner.getInstance().invokeLater(delegate);
 
         //logger.debug("buildNativeModel " + file + ", delegateid=" + delegateid);
         // In WebGL kann das "natuerlich" async gehen. Das mach ich aber erstmal nicht fuer die eigenen, die weiter pseudo async.
@@ -135,8 +142,9 @@ public class PlatformWebGl extends Platform {
             Util.nomore();
         }
         if (usethreejsgltfloader) {
+            int delegateid = AbstractSceneRunner.getInstance().invokeLater(delegate);
             logger.error("17.2.24: Branch needs fix for resourceloader");
-            BundleResource file=null;
+            BundleResource file = null;
             String basename = file.getBasename();
             BundleResource gltfile = new BundleResource(file.bundle, file.path, basename + ".gltf");
             logger.debug("probing " + gltfile);
@@ -153,7 +161,7 @@ public class PlatformWebGl extends Platform {
             }
         }
         // build model like in all other platforms.
-        ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate);
+        ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate, new DefaultMaterialFactory());
     }
 
     /*MA36 now in SceneRunner
@@ -269,6 +277,7 @@ public class PlatformWebGl extends Platform {
 
     @Override
     public NativeMaterial buildMaterial(NativeProgram program, boolean opaque) {
+        // too early to call registerAndInitializeShaderMaterial() because defaults are not yet set
         return WebGlMaterial.buildMaterial((WebGlProgram) program, opaque);
     }
 
@@ -326,17 +335,29 @@ public class PlatformWebGl extends Platform {
 
     @Override
     public NativeLight buildPointLight(Color argbcolor, double range) {
-        return WebGlLight.buildPointLight(argbcolor.getARGB(), range);
+        return WebGlLight.buildPointLight(argbcolor, range);
     }
 
     @Override
     public NativeLight buildAmbientLight(Color argbcolor) {
-        return WebGlLight.buildAmbientLight(argbcolor.getARGB());
+        NativeLight l = WebGlLight.buildAmbientLight(argbcolor);
+        updateShaderMaterials();
+        return l;
     }
 
     @Override
     public NativeLight buildDirectionalLight(Color argbcolor, Vector3 direction) {
-        return WebGlLight.buildDirectionalLight(argbcolor.getARGB(), WebGlVector3.toWebGl(direction).vector3);
+        NativeLight l = WebGlLight.buildDirectionalLight(argbcolor, direction/*WebGlVector3.toWebGl(direction).vector3*/);
+        updateShaderMaterials();
+        return l;
+    }
+
+    @Override
+    public List<NativeLight> getLights() {
+        List<NativeLight> rs = new ArrayList<>();
+        WebGlLight.lights.forEach(l -> rs.add(l));
+        //logger.debug("Returning " + rs.size() + " lights");
+        return rs;
     }
 
     @Override
@@ -642,6 +663,7 @@ public class PlatformWebGl extends Platform {
 
     /**
      * Used to parse 'ADDITIONALBUNDLE'
+     * 1.3.25 Still an option even though no longer used for gwt dev mode.
      */
     private List<BundleResolver> buildBundleResolverFromPath(String bundlepathFromEnv) {
         List<BundleResolver> l = new ArrayList<BundleResolver>();

@@ -16,6 +16,8 @@ import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
 /**
  * Just get the needed resource from a bundle, which is quite straightforward.
+ * 23.2.25:Why is the loader specific for one resource? Why isn't resource parameter of loadResource()?
+ * Maybe due to the nature how it is build in the platform. A 'root' element might not be easy to define for all loader (HTTP?).
  */
 public class ResourceLoaderFromBundle extends ResourceLoader implements NativeFuture<AsyncHttpResponse> {
 

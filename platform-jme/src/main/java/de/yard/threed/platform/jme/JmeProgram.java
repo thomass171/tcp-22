@@ -6,9 +6,9 @@ import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.NativeProgram;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.engine.Uniform;
-import de.yard.threed.engine.UniformType;
-import de.yard.threed.engine.platform.AbstractShaderProgram;
+import de.yard.threed.core.platform.Uniform;
+import de.yard.threed.core.platform.UniformType;
+import de.yard.threed.core.platform.AbstractShaderProgram;
 
 import java.util.Collections;
 import java.util.SortedMap;
@@ -30,41 +30,7 @@ public class JmeProgram extends AbstractShaderProgram implements NativeProgram {
         effects.put(name, this);
     }
 
-    @Override
-    public void addSampler2DUniform(String name) {
-        validate(name);
-        uniforms.add(new Uniform(name, UniformType.SAMPLER_2D));
-    }
 
-    @Override
-    public void addMatrix3Uniform(String name) {
-        validate(name);
-        uniforms.add(new Uniform(name, UniformType.MATRIX3));
-    }
-
-    @Override
-    public void addFloatVec3Uniform(String name) {
-        validate(name);
-        uniforms.add(new Uniform(name, UniformType.FLOAT_VEC3));
-    }
-
-    @Override
-    public void addFloatVec4Uniform(String name) {
-        validate(name);
-        uniforms.add(new Uniform(name, UniformType.FLOAT_VEC4));
-    }
-
-    @Override
-    public void addBooleanUniform(String name) {
-        validate(name);
-        Util.notyet();
-    }
-
-    @Override
-    public void addFloatUniform(String name) {
-        validate(name);
-        uniforms.add(new Uniform(name, UniformType.FLOAT));
-    }
 
     @Override
     public void compile() {

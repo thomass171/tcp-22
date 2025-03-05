@@ -5,6 +5,9 @@ import de.yard.threed.core.platform.NativeLight;
 
 import de.yard.threed.core.Color;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Fuer Point, ambient und directional.
  * <p/>
@@ -15,6 +18,8 @@ public class OpenGlLight implements NativeLight {
     private Vector3 direction = null;
 
     protected Color color;
+    // registry for all lights
+    static List<OpenGlLight> lights = new ArrayList<>();
 
     public OpenGlLight(Color col) {
         color = col;
@@ -43,7 +48,9 @@ public class OpenGlLight implements NativeLight {
     }
 
     public static NativeLight buildDirectionalLight(Color color, Vector3 direction) {
-        return new OpenGlLight(color, direction);
+        OpenGlLight l = new OpenGlLight(color, direction);
+        lights.add(l);
+        return l;
     }
 
     public Vector3 getDirection() {
@@ -51,6 +58,29 @@ public class OpenGlLight implements NativeLight {
     }
 
     public static NativeLight buildAmbientLight(Color color) {
-        return  new OpenGlLight(color);
+        OpenGlLight l = new OpenGlLight(color);
+        lights.add(l);
+        return l;
+    }
+
+    @Override
+    public Color getAmbientColor() {
+        if (direction == null) {
+            return color;
+        }
+        return null;
+    }
+
+    @Override
+    public Color getDirectionalColor() {
+        if (direction != null) {
+            return color;
+        }
+        return null;
+    }
+
+    @Override
+    public Vector3 getDirectionalDirection() {
+        return direction;
     }
 }

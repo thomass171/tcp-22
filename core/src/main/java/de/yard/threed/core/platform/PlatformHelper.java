@@ -1,6 +1,8 @@
 package de.yard.threed.core.platform;
 
+import de.yard.threed.core.GenericTreeNode;
 import de.yard.threed.core.StringUtils;
+import de.yard.threed.core.TreeNodeVisitor;
 import de.yard.threed.core.Util;
 
 import java.util.List;
@@ -23,6 +25,18 @@ public class PlatformHelper {
             NativeTransform child = children.get(i);
             //childVisitor.handleNode(child);
             traverseTransform(child, childVisitor);
+        }
+    }
+
+    /**
+     * More generic traverse
+     * Also calls visitor for itself/first.
+     */
+    public static <T> void traverse(GenericTreeNode<T> treeNode, TreeNodeVisitor<T> childVisitor) {
+        childVisitor.handleNode(treeNode.getTreeElement());
+
+        for (int i = 0; i < treeNode.getChildCount(); i++) {
+            traverse(treeNode.getChild(i), childVisitor);
         }
     }
 }

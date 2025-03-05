@@ -94,7 +94,7 @@ public class Mesh /*extends Object3D /*implements Renderable*/ {
         this.nativemesh = nativeMesh;
     }
 
-
+    //TODO 3.3.25 replace with just setMaterial?
     public void updateMeshG(NativeMesh mesh, Geometry geo/*List<Vector3> vertices, List<FaceList> faces*/, NativeMaterial material/*,List<Vector3> normals*/) {
        /* // das G steht fuer generic faces.
         List<Face3List> faces3 = null;

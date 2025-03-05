@@ -1,9 +1,9 @@
 package de.yard.threed.engine.apps.reference;
 
+import de.yard.threed.core.Color;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.Dimension;
 import de.yard.threed.core.JsonHelper;
-import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Matrix3;
 import de.yard.threed.core.Matrix4;
 import de.yard.threed.core.Point;
@@ -14,13 +14,12 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeCollision;
 import de.yard.threed.core.platform.NativeJsonObject;
 import de.yard.threed.core.platform.NativeJsonValue;
+import de.yard.threed.core.platform.NativeLight;
 import de.yard.threed.core.platform.NativeSceneNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.core.testutil.RuntimeTestUtil;
 import de.yard.threed.engine.Camera;
-import de.yard.threed.engine.FirstPersonController;
-import de.yard.threed.engine.FirstPersonTransformer;
 import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.Ray;
 import de.yard.threed.engine.SceneNode;
@@ -210,7 +209,7 @@ public class ReferenceTests {
         RuntimeTestUtil.assertQuaternion("movebox rot", rotexpected, rot);
     }
 
-    public static void testIntersect(ArrayList<SceneNode> towerrechts, SceneNode movingbox) {
+    public static void testIntersect(ArrayList<SceneNode> towerright, SceneNode movingbox) {
         logger.info("intersectionTest");
 
         // Jetzt ein Ray, der die grosse rote Box trifft und einer für die moving box.
@@ -222,7 +221,7 @@ public class ReferenceTests {
         // 2.3.17: Jetzt durch Nutzung Rayhelper aber nicht mehr. Allerdings dürften diese fixen Werte nicht zum Unity aspect passen und damit scheitern.
         if (!isUnity()) {
             raycasterredbox = new Ray(new Vector3(0, 5, 11), new Vector3(0.23f, -0.37f, -0.9f));
-            intersects = raycasterredbox.getIntersections(towerrechts.get(0), true);
+            intersects = raycasterredbox.getIntersections(towerright.get(0), true);
             //liefert 1 oder 2
             if (intersects.size() == 0) {
                 Assert.fail("no red box intersection found(1)");
@@ -263,19 +262,19 @@ public class ReferenceTests {
         double len = 1000 * 100;
         Vector3 campos = new Vector3(4 * len, 5 * len, 11 * len);
         raycasterredbox = new Ray(campos, redboxpos.subtract(campos));
-        intersects = raycasterredbox.getIntersections(towerrechts.get(0), true);
+        intersects = raycasterredbox.getIntersections(towerright.get(0), true);
         //liefert 1 oder 2
         if (intersects.size() == 0) {
             Assert.fail("no red box intersection found(2)");
         }
-        RuntimeTestUtil.assertEquals("name", "rechts 0", intersects.get(0).getSceneNode().getName());
+        RuntimeTestUtil.assertEquals("name", "right 0", intersects.get(0).getSceneNode().getName());
         logger.debug("redbox.intersect=" + (intersects.get(0).getPoint()).dump(" "));
         intersects = raycasterredbox.getIntersections();
         //liefert 1 oder 2 (Ground doch vielleicht auch?)
         if (intersects.size() == 0) {
             Assert.fail("no red box intersection found(3)");
         }
-        assertIntersection(intersects, "rechts 0");
+        assertIntersection(intersects, "right 0");
     }
 
     private static void assertIntersection(List<NativeCollision> intersects, String expectedname) {
@@ -327,7 +326,7 @@ public class ReferenceTests {
 
         RuntimeTestUtil.assertEquals("camera.name", "Main Camera", rs.getMainCamera().getName());
         RuntimeTestUtil.assertEquals("camera.parent.name", "Main Camera Carrier", rs.getMainCamera().getCarrier().getName());
-        RuntimeTestUtil.assertEquals("camera.parent.name", "rechts 2", rs.getMainCamera().getCarrier().getParent().getName());
+        RuntimeTestUtil.assertEquals("camera.parent.name", "right 2", rs.getMainCamera().getCarrier().getParent().getName());
 
         // zurueck auf Anfang
         rs.controller.stepTo(rs.controller.viewpointList.size() - 1);
@@ -419,7 +418,7 @@ public class ReferenceTests {
         logger.info("testGetParent");
         SceneNode parent = movingbox.getTransform().getParent().getSceneNode();
         parent = parent.getTransform().getParent().getSceneNode();
-        RuntimeTestUtil.assertEquals("parent name", "rechts 0", parent.getName());
+        RuntimeTestUtil.assertEquals("parent name", "right 0", parent.getName());
         parent = parent.getTransform().getParent().getSceneNode();
         RuntimeTestUtil.assertEquals("parent name", "World", parent.getName());
         Transform tparent = parent.getTransform().getParent();
@@ -429,6 +428,7 @@ public class ReferenceTests {
     /**
      * Test, ob die Platform das mit den Childs richtig macht (z.B. jme meshholder)
      * 20.8.24: There is a custom finder in SceneNode and a finder by platform. Test both.
+     *
      * @param referenceScene
      */
     public static void testFindNodeByName(ReferenceScene referenceScene) {
@@ -437,7 +437,7 @@ public class ReferenceTests {
         String graph = ReferenceScene.getCurrent().dumpSceneGraph();
         logger.debug("\n" + graph);
         RuntimeTestUtil.assertTrue("World", StringUtils.startsWith(graph, "World"));
-        for (SceneNode n : referenceScene.towerrechts) {
+        for (SceneNode n : referenceScene.towerright) {
             n.findNodeByName("xxxccvv");
         }
         for (SceneNode n : referenceScene.tower2) {
@@ -448,31 +448,31 @@ public class ReferenceTests {
         RuntimeTestUtil.assertEquals("number loc", 1, nodes.size());
         // children are two level below
         NativeSceneNode childNode = nodes.get(0).getTransform().getChildren().get(0).getSceneNode();
-        RuntimeTestUtil.assertEquals("node name","gltfroot", childNode.getName());
+        RuntimeTestUtil.assertEquals("node name", "gltfroot", childNode.getName());
         childNode = childNode.getTransform().getChildren().get(0).getSceneNode();
-        RuntimeTestUtil.assertEquals("node name","Locomotive", childNode.getName());
+        RuntimeTestUtil.assertEquals("node name", "Locomotive", childNode.getName());
         childNode = childNode.getTransform().getChildren().get(0).getSceneNode();
         //6.8.24 TODO check baseblock without name? RuntimeTestUtil.assertEquals("node name","baseblock", childNode.getName());
         RuntimeTestUtil.assertEquals("number loc children", 8, childNode.getTransform().getChildren().size());
 
-        SceneNode rechts1 = referenceScene.towerrechts.get(0).findNodeByName("rechts 1").get(0);
-        RuntimeTestUtil.assertNotNull("", rechts1);
-        RuntimeTestUtil.assertEquals("", "rechts 1", rechts1.getName());
-        RuntimeTestUtil.assertNotNull("", rechts1.getTransform().getParent());
+        SceneNode right1 = referenceScene.towerright.get(0).findNodeByName("right 1").get(0);
+        RuntimeTestUtil.assertNotNull("", right1);
+        RuntimeTestUtil.assertEquals("", "right 1", right1.getName());
+        RuntimeTestUtil.assertNotNull("", right1.getTransform().getParent());
         // same test via platform finder
-        rechts1 = new SceneNode(Platform.getInstance().findNodeByName("rechts 1", referenceScene.towerrechts.get(0).nativescenenode).get(0));
-        RuntimeTestUtil.assertNotNull("", rechts1);
-        RuntimeTestUtil.assertEquals("", "rechts 1", rechts1.getName());
-        RuntimeTestUtil.assertNotNull("", rechts1.getTransform().getParent());
+        right1 = new SceneNode(Platform.getInstance().findNodeByName("right 1", referenceScene.towerright.get(0).nativescenenode).get(0));
+        RuntimeTestUtil.assertNotNull("", right1);
+        RuntimeTestUtil.assertEquals("", "right 1", right1.getName());
+        RuntimeTestUtil.assertNotNull("", right1.getTransform().getParent());
 
 
         // wenn das mesh und name in der Original Node enthalten ist, muss es auch in der find Instanz sein.
-        RuntimeTestUtil.assertNotNull("mesh", referenceScene.towerrechts.get(1).getMesh());
-        RuntimeTestUtil.assertEquals("name", "rechts 1", referenceScene.towerrechts.get(1).getName());
-        RuntimeTestUtil.assertEquals("children rechts 1", 1, referenceScene.towerrechts.get(1).getTransform().getChildren().size());
-        RuntimeTestUtil.assertNotNull("mesh", rechts1.getMesh());
-        RuntimeTestUtil.assertEquals("name", "rechts 1", rechts1.getName());
-        RuntimeTestUtil.assertEquals("children", 1, rechts1.getTransform().getChildren().size());
+        RuntimeTestUtil.assertNotNull("mesh", referenceScene.towerright.get(1).getMesh());
+        RuntimeTestUtil.assertEquals("name", "right 1", referenceScene.towerright.get(1).getName());
+        RuntimeTestUtil.assertEquals("children right 1", 1, referenceScene.towerright.get(1).getTransform().getChildren().size());
+        RuntimeTestUtil.assertNotNull("mesh", right1.getMesh());
+        RuntimeTestUtil.assertEquals("name", "right 1", right1.getName());
+        RuntimeTestUtil.assertEquals("children", 1, right1.getTransform().getChildren().size());
 
     }
 
@@ -559,5 +559,23 @@ public class ReferenceTests {
         RuntimeTestUtil.assertEquals("FOV camera.hud", "Hud", carrierTransform.getChild(0).getSceneNode().getName());
         RuntimeTestUtil.assertEquals("FOV camera.controlmenu", "ControlIcon", carrierTransform.getChild(1).getSceneNode().getName());
     }
+
+    public static void testLights(ReferenceScene rs) {
+        logger.info("Lights");
+
+        List<NativeLight> lights = Platform.getInstance().getLights();
+        // at start only one directional
+        RuntimeTestUtil.assertEquals("lights.size", 1, lights.size());
+        // values from setDefaultLight()
+        RuntimeTestUtil.assertVector3(new Vector3(0, 1, 1).normalize(), lights.get(0).getDirectionalDirection());
+        Color c = lights.get(0).getDirectionalColor();
+        // be aware of rounding issues
+        RuntimeTestUtil.assertFloat("color.r", Float.valueOf(0xee) / 255.0,c.getR(), 0.0001);
+        RuntimeTestUtil.assertFloat("color.g", Float.valueOf(0xee) / 255.0,c.getG(), 0.0001);
+        RuntimeTestUtil.assertFloat("color.b", Float.valueOf(0xee) / 255.0,c.getB(), 0.0001);
+        RuntimeTestUtil.assertFloat("color.a", 1, c.getAlpha(), 0.0001);
+
+    }
+
 }
 

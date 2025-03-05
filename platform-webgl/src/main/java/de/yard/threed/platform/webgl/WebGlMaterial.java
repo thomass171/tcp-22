@@ -2,6 +2,7 @@ package de.yard.threed.platform.webgl;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import de.yard.threed.core.Matrix3;
+import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeUniform;
@@ -9,7 +10,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeMaterial;
 import de.yard.threed.core.platform.NativeTexture;
-import de.yard.threed.engine.Uniform;
+import de.yard.threed.core.platform.Uniform;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.ColorType;
 import de.yard.threed.core.NumericType;
@@ -46,7 +47,7 @@ public class WebGlMaterial implements NativeMaterial {
     public WebGlMaterial(String name, WebGlProgram program, boolean opaque) {
 
         // uniforms belong to the material, so we need to create WebGlMaterial here
-         uniforms = new HashMap<>();
+        uniforms = new HashMap<>();
         JavaScriptObject nativeuniforms = buildUniformsForEffect(program /*effect, textures, NumericValue.unshaded(params)*/, uniforms);
         //return new WebGlMaterial(name, buildCustomShaderMaterial(uniforms, vertexshader, fragmentshader, transparency != null));
         material = buildCustomShaderMaterial(nativeuniforms, program.vertexshader, program.fragmentshader, false/*TODO transparency != null*/);
@@ -171,7 +172,7 @@ public class WebGlMaterial implements NativeMaterial {
             }
         }
 
-        WebGlMaterial mat = new WebGlMaterial(program.name, program,opaque);
+        WebGlMaterial mat = new WebGlMaterial(program.name, program, opaque);
         return mat;
     }
 
@@ -207,7 +208,12 @@ public class WebGlMaterial implements NativeMaterial {
 
     @Override
     public NativeUniform getUniform(String name) {
-        WebGlUniform uniform = (WebGlUniform)uniforms.get(name);
+        if (uniforms == null) {
+            // really log invalid program flow?
+            logger.warn("No uniforms in material " + getName());
+            return null;
+        }
+        WebGlUniform uniform = (WebGlUniform) uniforms.get(name);
         return uniform;
     }
 
@@ -316,13 +322,12 @@ public class WebGlMaterial implements NativeMaterial {
                     });
                     break;
                 case FLOAT_VEC4:
-                    Util.notyet();
-                    /*uniforms.put(jmeUniformName, new WebGlUniform<Vector4f>() {
+                    buildUniform(nativeUniformMap, uniforms, uniform, new WebGlUniform<Quaternion>(uniform.type) {
                         @Override
-                        public void setValue(Vector4f v) {
-                            //TODO material.setVector4(jmeUniformName, v);
+                        public void setValue(Quaternion v) {
+                            setVector4((float) v.getX(), (float) v.getY(), (float) v.getZ(), (float) v.getW());
                         }
-                    });*/
+                    });
                     break;
                 case FLOAT:
                     buildUniform(nativeUniformMap, uniforms, uniform, new WebGlUniform<Float>(uniform.type) {
@@ -368,7 +373,9 @@ for (var i=0; i < 64; i++) {
             uniforms: uniforms,
             // 30.1.25 THREE.ShaderMaterial: attributes should now be defined in THREE.BufferGeometry instead. attributes: attributes,
             vertexShader: vertexshader,
-            fragmentShader: fragmentshader
+            fragmentShader: fragmentshader,
+            // 19.2.25 better get light params injected? See README.md, seems escalating. Puuh.
+            // lights: true
         });
         // Even when using dedicated shader which handle transparency its imported to tell the engine
         // to put these objects at the end of rendering.

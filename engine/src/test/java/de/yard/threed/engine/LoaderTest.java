@@ -16,6 +16,7 @@ import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.engine.test.testutil.TestUtil;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -86,13 +87,14 @@ public class LoaderTest {
     }
 
     /**
-     * 24.1.19: Liegt hier vielleicht nicht ganz ideal, aber einen besseren Platz gibt es nicht?
+     * 24.1.19: Maybe not the best location here, but which is better?
      */
     @Test
     public void testPortableModel() {
         PortableModel needle = ModelSamples.buildCompassNeedle(20, 30);
         SceneNode n = PortableModelBuilder.buildModel(needle, null);
         TestUtil.assertEquals("needle.name", "CompassNeedle", n.getName());
+        Assertions.assertEquals(0, PortableModelBuilder.dummyMaterialReasons.size(), "dummymaterialused");
     }
 
     @Test

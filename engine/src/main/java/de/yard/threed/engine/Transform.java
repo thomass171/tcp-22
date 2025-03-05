@@ -18,7 +18,7 @@ import java.util.List;
  * <p>
  * Created by thomass on 26.01.17
  */
-public class Transform implements SimpleTransform {
+public class Transform implements SimpleTransform, GenericTreeNode {
     Log logger = Platform.getInstance().getLog(Transform.class);
 
     public NativeTransform transform;
@@ -237,5 +237,9 @@ public class Transform implements SimpleTransform {
 
     public Quaternion getWorldRotation() {
         return getWorldModelMatrix().extractQuaternion();
+    }
+
+    public Transform getTreeElement(){
+        return this;
     }
 }

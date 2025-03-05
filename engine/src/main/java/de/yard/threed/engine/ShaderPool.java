@@ -3,9 +3,13 @@ package de.yard.threed.engine;
 
 import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.Matrix3;
+import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Vector3;
+import de.yard.threed.core.platform.NativeLight;
 import de.yard.threed.core.platform.NativeMaterial;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.Uniform;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
@@ -29,42 +33,7 @@ import de.yard.threed.engine.platform.common.ShaderProgram;
  * Created by thomass on 30.10.15.
  */
 public class ShaderPool {
-    Log logger = Platform.getInstance().getLog(ShaderPool.class);
-
-    @Deprecated
-    public static ShaderProgram buildSolidColorEffect() {
-        ShaderProgram program = buildShaderProgram("SolidColor", "engine",
-                "shader/SolidColor.vert",
-                "shader/SolidColor.frag");
-
-        program.program.addFloatVec4Uniform("Color");
-        return program;
-    }
-
-    /**
-     *
-     */
-    public static ShaderProgram buildSimpleTextureEffect() {
-
-        ShaderProgram program = buildShaderProgram("SimpleTexture", "engine",
-                "shader/SimpleTexture.vert",
-                "shader/SimpleTexture.frag");
-        program.program.addSampler2DUniform(Uniform.TEXTURE);
-        program.program.addMatrix3Uniform(Uniform.TEXTUREMATRIX);
-        program.program.addFloatUniform(Uniform.TRANSPARENCY);
-        program.program.compile();
-
-        program.defaultSetter = new GeneralParameterHandler<NativeMaterial>() {
-            @Override
-            public void handle(NativeMaterial mat) {
-                // No default for texture
-                //  Default is diagonal matrix with 1.0 on the diagonal.
-                mat.getUniform(Uniform.TEXTUREMATRIX).setValue(new Matrix3());
-                mat.getUniform(Uniform.TRANSPARENCY).setValue(Float.valueOf(0.0f));
-            }
-        };
-        return program;
-    }
+    static Log logger = Platform.getInstance().getLog(ShaderPool.class);
 
     public static ShaderProgram buildPhotoalbumEffect() {
         ShaderProgram program = buildShaderProgram("PhotoAlbum", "engine",
@@ -86,20 +55,45 @@ public class ShaderPool {
     }*/
 
     /**
-     * 8.10.17: deprecated, weil so was wie universal die Platform schon können könnte und ich dafuer keine custom shader brauche.
-     * 21.9.19 Aufruf wirklich verhindern. Der UniversalShader wandert in die Platform OpenGL.
+     * 8.10.17: deprecated, because available in platform.
      * 16.10.24: Used as default shader in platform Homebrew and thus in sceneserver. Should be moved there.
+     * 24.2.25: Now the merged SolidColorEffect and SimpleTextureEffect (platform shader have no textureMatrix(?)).
      *
      * @return
      */
-    @Deprecated
-    public static ShaderProgram buildUniversalEffect(/*boolean transparent*/) {
+    public static ShaderProgram buildUniversalEffect() {
         ShaderProgram program = buildShaderProgram("Universal", "engine",
                 "shader/Universal.vert",
                 "shader/Universal.frag");
-        program.program.addSampler2DUniform("u_basetex");
-        program.program.addBooleanUniform("u_isunshaded");
+        program.program.addFloatVec4Uniform(Uniform.COLOR);
+        program.program.addSampler2DUniform(Uniform.TEXTURE);
+        program.program.addMatrix3Uniform(Uniform.TEXTUREMATRIX);
+        program.program.addFloatUniform(Uniform.TRANSPARENCY);
+        program.program.addBooleanUniform(Uniform.SHADED);
+        program.program.addBooleanUniform(Uniform.TEXTURED);
+        program.program.addFloatVec3Uniform(Uniform.AMBIENT_LIGHT_COLOR);
+        program.program.addFloatVec3Uniform(Uniform.DIRECTIONAL_LIGHT_COLOR);
+        program.program.addFloatVec3Uniform(Uniform.DIRECTIONAL_LIGHT_DIRECTION);
         program.program.compile();
+
+        program.defaultSetter = mat -> {
+            // Some platforms like ThreeJs reject unset uniforms, especially vector3, so want a value for all.
+            // However texture seems to be no problem, so no default for texture
+            //mat.getUniform(Uniform.TEXTURE).setValue(new Texture());
+            mat.getUniform(Uniform.COLOR).setValue(new Quaternion());
+
+            //  Default is diagonal matrix with 1.0 on the diagonal.
+            mat.getUniform(Uniform.TEXTUREMATRIX).setValue(new Matrix3());
+            mat.getUniform(Uniform.TRANSPARENCY).setValue(Float.valueOf(0.0f));
+            // textured is the most common use case
+            mat.getUniform(Uniform.TEXTURED).setValue(true);
+            mat.getUniform(Uniform.SHADED).setValue(true);
+
+            // lights will be updated later in RegisteredShaderMaterial
+            mat.getUniform(Uniform.AMBIENT_LIGHT_COLOR).setValue(new Vector3());
+            mat.getUniform(Uniform.DIRECTIONAL_LIGHT_COLOR).setValue(new Vector3(22, 22, 22));
+            mat.getUniform(Uniform.DIRECTIONAL_LIGHT_DIRECTION).setValue(new Vector3(33, 33, 33));
+        };
         return program;
     }
 

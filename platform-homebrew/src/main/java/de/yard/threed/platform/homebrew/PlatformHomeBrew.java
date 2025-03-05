@@ -13,6 +13,7 @@ import de.yard.threed.engine.*;
 
 
 import de.yard.threed.core.buffer.SimpleByteBuffer;
+import de.yard.threed.engine.loader.DefaultMaterialFactory;
 import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.javacommon.*;
 
@@ -128,7 +129,7 @@ public class PlatformHomeBrew extends DefaultPlatform {
     @Override
     public void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate delegate, int options) {
 
-        ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate);
+        ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate, new DefaultMaterialFactory());
     }
 
     /*4.8.21 public void /*Bundle* / loadBundle(String bundlename, /*AsyncJobCallback* /BundleLoadDelegate delegate, boolean delayed) {
@@ -290,14 +291,24 @@ public class PlatformHomeBrew extends DefaultPlatform {
 
     @Override
     public NativeLight buildAmbientLight(Color argb) {
-        return OpenGlLight.buildAmbientLight(argb);
+        NativeLight l = OpenGlLight.buildAmbientLight(argb);
+        updateShaderMaterials();
+        return l;
     }
 
     @Override
     public NativeLight buildDirectionalLight(Color argb, Vector3 direction) {
-        return OpenGlLight.buildDirectionalLight(argb, direction);
+        NativeLight l = OpenGlLight.buildDirectionalLight(argb, direction);
+        updateShaderMaterials();
+        return l;
     }
 
+    @Override
+    public List<NativeLight> getLights() {
+        List<NativeLight> rs = new ArrayList<>();
+        OpenGlLight.lights.forEach(l -> rs.add(l));
+        return rs;
+    }
 
     @Override
     public NativeGeometry buildNativeGeometry(Vector3Array vertices, /*List<* /Face3List*/int[] indices, Vector2Array uvs, Vector3Array normals) {

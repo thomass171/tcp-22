@@ -92,13 +92,12 @@ public abstract class Scene {
      * @return
      */
     public SceneNode addLightToWorld(Light light) {
-        //wegen des transofrm sollte das Gameobject (die SceneNode) exklusiv fuer das Light sein).
+        //due to transform the SceneNode should be for Light exclusively.
 
         SceneNode sn = new SceneNode();
         sn.setLight(light);
         // The name might be used in tests for checking light!
         sn.setName("Scene Light");
-        //scene.add(light.light);
         addToWorld(sn);
         return sn;
     }

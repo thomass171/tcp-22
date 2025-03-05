@@ -2,9 +2,6 @@ package de.yard.threed.engine.loader;
 
 import de.yard.threed.core.Color;
 import de.yard.threed.core.ColorType;
-import de.yard.threed.core.NumericType;
-import de.yard.threed.core.NumericValue;
-import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.TreeNode;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
@@ -14,53 +11,37 @@ import de.yard.threed.core.loader.PreparedObject;
 import de.yard.threed.core.platform.Config;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeCamera;
-import de.yard.threed.core.platform.NativeGeometry;
 import de.yard.threed.core.platform.NativeMaterial;
-import de.yard.threed.core.platform.NativeTexture;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.Bundle;
-import de.yard.threed.core.resource.BundleRegistry;
-import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 
-import de.yard.threed.core.geometry.SimpleGeometry;
-import de.yard.threed.core.resource.URL;
+import de.yard.threed.engine.AbstractMaterialFactory;
 import de.yard.threed.engine.GenericGeometry;
 import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.PerspectiveCamera;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.engine.Texture;
-import de.yard.threed.engine.platform.EngineHelper;
-import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 06.12.22: A builder for universal model specification.
- * // 2.5.19: matpool: aknn man sicher sein, dass es wirklich dasselbe ist? Z.B (un/flat)shaded. Eigentlich ist es doch ein zugrosses Risiko im Vergleich zum Nutzen, oder?
- * // mal weglassen
+ * 02.05.19: no longer a matpool because that wouldn't be reliable.
  */
 public class PortableModelBuilder {
 
     static Log logger = Platform.getInstance().getLog(PortableModelBuilder.class);
-    // Material, das verwendet wird, wenn das eigentlich definierte nicht bekannt ist
-    private NativeMaterial dummyMaterial;
 
-    //ResourcePath defaulttexturebasepath;
-    //PortableModelList pml;
     //Just an indicator for testing
     public static List<String> dummyMaterialReasons = new ArrayList<String>();
 
-    /*public PortableModelBuilder(PortableModel pml) {
-        this.pml = pml;
-    }*/
+    // This is an easier way to override a default material factory when parameter are not available, eg. when used in platform
+    // async model build. But drawback is that always the same factory is used.
+    public static AbstractMaterialFactory defaultMaterialFactory = new DefaultMaterialFactory();
 
     /**
      * ResourceLoader is needed in builder for loading textures.
@@ -70,26 +51,36 @@ public class PortableModelBuilder {
      * @return
      */
     public static SceneNode buildModel(PortableModel pml, ResourceLoader resourceLoader) {
-        //return buildModel(pml, resourceLoader, null);
-        return buildModel(prepareModel(pml, resourceLoader, null));
+        return buildModel(pml, resourceLoader, defaultMaterialFactory);
+    }
+
+    public static SceneNode buildModel(PortableModel pml, ResourceLoader resourceLoader, AbstractMaterialFactory materialFactory) {
+        return buildModel(prepareModel(pml, resourceLoader, materialFactory));
     }
 
     public static PreparedModel prepareModel(PortableModel pml, ResourceLoader resourceLoader) {
-        //return buildModel(pml, resourceLoader, null);
-        return prepareModel(pml, resourceLoader, null);
+        return prepareModel(pml, resourceLoader, null, defaultMaterialFactory);
+    }
+
+    public static PreparedModel prepareModel(PortableModel pml, ResourceLoader resourceLoader, ResourcePath alttexturepath) {
+        return prepareModel(pml, resourceLoader, alttexturepath, defaultMaterialFactory);
+    }
+
+    public static PreparedModel prepareModel(PortableModel pml, ResourceLoader resourceLoader, AbstractMaterialFactory materialFactory) {
+        return prepareModel(pml, resourceLoader, null, materialFactory);
     }
 
     /**
      * 21.8.24: Only create geometries and materials but no objects yet. Useful for shared model.
      * resourceLoader is used for async texture load (with internal delegate).
      */
-    public static PreparedModel prepareModel(PortableModel pml, ResourceLoader resourceLoader, ResourcePath alttexturepath) {
+    public static PreparedModel prepareModel(PortableModel pml, ResourceLoader resourceLoader, ResourcePath alttexturepath, AbstractMaterialFactory materialFactory) {
         PreparedModel rootnode = new PreparedModel(pml.getName());
         /*if (pml.getName() != null) {
             rootnode.setName(pml.getName());
         }*/
 
-        TreeNode<PreparedObject> newModel = prepareModel(pml, resourceLoader, pml.getRoot()/*getObject(i)*/, alttexturepath, pml.defaulttexturebasepath);
+        TreeNode<PreparedObject> newModel = prepareModel(pml, resourceLoader, pml.getRoot(), alttexturepath, pml.defaulttexturebasepath, materialFactory);
         String parent = pml.getRoot().parent;
         //SceneNode destinationNode = rootnode;
         if (parent != null) {
@@ -126,19 +117,19 @@ public class PortableModelBuilder {
         return rootnode;
     }
 
-    private static TreeNode<PreparedObject> prepareModel(PortableModel pml, ResourceLoader resourceLoader, PortableModelDefinition obj, ResourcePath alttexturepath, ResourcePath defaulttexturebasepath) {
+    private static TreeNode<PreparedObject> prepareModel(PortableModel pml, ResourceLoader resourceLoader, PortableModelDefinition obj, ResourcePath alttexturepath, ResourcePath defaulttexturebasepath, AbstractMaterialFactory materialFactory) {
         ResourcePath nr = defaulttexturebasepath;
         if (alttexturepath != null) {
             nr = alttexturepath;
         }
-        return prepareObject(pml, resourceLoader, obj /*, null/*, matlist*/, nr);
+        return prepareObject(pml, resourceLoader, obj /*, null/*, matlist*/, nr, materialFactory);
     }
 
     private static SceneNode buildModel(TreeNode<PreparedObject>/*PortableModelDefinition*/ obj) {
         return buildObject(obj);
     }
 
-    private static TreeNode<PreparedObject> prepareObject(PortableModel pml, ResourceLoader resourceLoader, PortableModelDefinition obj, ResourcePath texturebasepath) {
+    private static TreeNode<PreparedObject> prepareObject(PortableModel pml, ResourceLoader resourceLoader, PortableModelDefinition obj, ResourcePath texturebasepath, AbstractMaterialFactory materialFactory) {
         // Eine Liste der Materialien DIESES Objects anlegen.
         // Nur die in den Facelisten des Objekts wirklich verwendeten Materialien anlegen. Sonst stimmt
         // die Zuordnung nicht. 2.5.19: Spaetestens seit Flat Shading ist es noch nicht sicher, wie das Material konkret angelegt werden muss. Darum
@@ -184,7 +175,7 @@ public class PortableModelBuilder {
                     mate = matlist.get(0);
                 }
                 //2.5.19: Neu an dieser Stelle
-                NativeMaterial nmat = buildMaterialFromPortableMaterial(resourceLoader, mate, texturebasepath, /*3.5.19obj.texture, */obj.geo/*list.get(0)*/.getNormals() != null, new DefaultMaterialFactory());
+                NativeMaterial nmat = buildMaterialFromPortableMaterial(resourceLoader, mate, texturebasepath, /*3.5.19obj.texture, */obj.geo/*list.get(0)*/.getNormals() != null, materialFactory);
                 model.setMaterial(nmat);
 
                 //Mesh mesh = new Mesh(new GenericGeometry(obj.geo/*list.get(0)*/).getNativeGeometry(), nmat/*mate*/, false, false);
@@ -193,7 +184,7 @@ public class PortableModelBuilder {
         }
 
         for (int i = 0; i < obj.kids.size(); i++) {
-            node.addChild(prepareObject(pml, resourceLoader, obj.kids.get(i), texturebasepath));
+            node.addChild(prepareObject(pml, resourceLoader, obj.kids.get(i), texturebasepath, materialFactory));
         }
         if (Config.modelloaddebuglog) {
             logger.debug("prepareObject complete " + model.name);
@@ -201,7 +192,7 @@ public class PortableModelBuilder {
         return node;
     }
 
-    private static SceneNode buildObject(TreeNode<PreparedObject>/*PortableModelDefinition*/ node) {
+    private static SceneNode buildObject(TreeNode<PreparedObject> node) {
 
         PreparedObject/*PortableModelDefinition*/ obj = node.getElement();
         SceneNode model = new SceneNode();
@@ -227,7 +218,7 @@ public class PortableModelBuilder {
         return model;
     }
 
-    static NativeMaterial buildMaterialFromPortableMaterial(ResourceLoader resourceLoader, /*Bundle bundle,*/ PortableMaterial portableMaterial, ResourcePath texturebasepath/*3.5.19, String objtexture*/, boolean hasnormals, MaterialFactory materialFactory) {
+    private static NativeMaterial buildMaterialFromPortableMaterial(ResourceLoader resourceLoader, PortableMaterial portableMaterial, ResourcePath texturebasepath, boolean hasnormals, AbstractMaterialFactory materialFactory) {
         NativeMaterial nmat;
         if (portableMaterial != null) {
             //Auf AC zugeschnitten, denn nur die(?) haben die Textur am Object.
@@ -281,7 +272,7 @@ public class PortableModelBuilder {
      * 2.5.19: Spaetestens seit Flat Shading ist es noch nicht sicher, wie das Material konkret angelegt werden muss. Darum
      * die Matlist nur mit MaterialDefinitionen anlegen
      */
-    private static List<PortableMaterial/*NativeMaterial*/> buildMatlist(PortableModel pml, PortableModelDefinition obj, /*MaterialPool matpool,*/ ResourcePath texturebasepath) {
+    private static List<PortableMaterial> buildMatlist(PortableModel pml, PortableModelDefinition obj, ResourcePath texturebasepath) {
         List<PortableMaterial> matlist = new ArrayList<PortableMaterial>();
         int index = 0;
         for (String matname : new String[]{obj.material/*geolistmaterial*/}) {

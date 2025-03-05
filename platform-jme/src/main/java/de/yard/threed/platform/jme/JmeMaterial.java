@@ -6,11 +6,12 @@ import com.jme3.material.RenderState;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Vector4f;
 import de.yard.threed.core.Matrix3;
+import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeUniform;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.Uniform;
+import de.yard.threed.core.platform.Uniform;
 
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeMaterial;
@@ -60,12 +61,21 @@ public class JmeMaterial implements NativeMaterial {
             String jmeUniformName = uniform.name.substring(2);
             switch (uniform.type) {
                 case BOOL:
-                    Util.notyet();
+                    uniforms.put(jmeUniformName, new JmeUniform<Boolean>() {
+                        @Override
+                        public void setValue(Boolean v) {
+                            material.setBoolean(jmeUniformName, v);
+                        }
+                    });
                     break;
                 case SAMPLER_2D:
                     uniforms.put(jmeUniformName, new JmeUniform<NativeTexture>() {
                         @Override
                         public void setValue(NativeTexture texture) {
+                            if (texture == null) {
+                                logger.warn("texture is null");
+                                return;
+                            }
                             material.setTexture(jmeUniformName, ((JmeTexture) texture).texture);
                         }
                     });
@@ -79,10 +89,10 @@ public class JmeMaterial implements NativeMaterial {
                     });
                     break;
                 case FLOAT_VEC4:
-                    uniforms.put(jmeUniformName, new JmeUniform<Vector4f>() {
+                    uniforms.put(jmeUniformName, new JmeUniform<Quaternion>() {
                         @Override
-                        public void setValue(Vector4f v) {
-                            material.setVector4(jmeUniformName, v);
+                        public void setValue(Quaternion v) {
+                            material.setVector4(jmeUniformName, new Vector4f(v.getX(),v.getY(),v.getZ(),v.getW()));
                         }
                     });
                     break;
@@ -177,7 +187,7 @@ public class JmeMaterial implements NativeMaterial {
         return new JmeMaterial(definition.name, mat/*, false*/, transparency != null, hasnormalmap, diffusemap, definition);
     }
 
-    public static NativeMaterial buildMaterial(JmeProgram program, boolean opaque) {
+    public static JmeMaterial buildMaterial(JmeProgram program, boolean opaque) {
         // No idea how jme shares shader. So for now create a new material for each using of a program.
         Material mat = JmeProgram.buildProgram(program);
         //Float transparency = NumericValue.transparency(definition.parameters);

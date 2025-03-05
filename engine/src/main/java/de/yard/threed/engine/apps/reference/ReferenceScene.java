@@ -3,19 +3,25 @@ package de.yard.threed.engine.apps.reference;
 import de.yard.threed.core.*;
 import de.yard.threed.core.geometry.ProportionalUvMap;
 import de.yard.threed.core.geometry.SimpleGeometry;
+import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PreparedModel;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.platform.*;
+import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
+import de.yard.threed.core.testutil.RuntimeTestUtil;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.apps.ModelSamples;
 import de.yard.threed.engine.apps.WoodenToyFactory;
 import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.gui.*;
+import de.yard.threed.engine.AbstractMaterialFactory;
+import de.yard.threed.engine.loader.DefaultMaterialFactory;
 import de.yard.threed.engine.loader.PortableModelBuilder;
+import de.yard.threed.engine.loader.CustomShaderMaterialFactory;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.platform.common.*;
@@ -50,7 +56,7 @@ import de.yard.threed.engine.test.MainTest;
  * v: Referenztests (war mal t). Es sollen etwa 4 FM kommen. Bei Erfolg kommt nachher ein grüner Cube, bei Fail ein roter.
  * f: enable/disable FPS Controller
  * c: enable/disable FPS Controller fuer weisse Box
- * m: Menu cycle: (Gridmenupanel), SecondMenu(greencube). Could also be used for help page.
+ * m: Menu cycle: (Gridmenupanel), SecondMenu(greencube). Could also be used for help page. Shifted cycles material.
  * e: cycle effects (eg. blend modes, transparency): toggle 'river wall' plane transparency.
  * l: toggle hiddencube layer
  * L: cycle lightNode
@@ -61,13 +67,18 @@ import de.yard.threed.engine.test.MainTest;
  * 22.7,16: Ein Zugriff auf externe Resourcen (z.B. ueber ModelSamples) soll von hier nicht erfolgen, nur Bundled. Externe gibts im Showroom.
  * 15.9.16: Jetzt auch mit FPS Controller für die weisse Box (unabhaengig von Camera). Die Box bleibt in ihrem local space.
  * 23.9.17: Backround left 'loc' added (instead of "windturbine")
- * 23.9.17: Hud shows picking ray den object name on hit.
+ * 23.9.17: Hud shows 'Hud' in first line, picking ray hit object name in second line,
+ * current material index in third line, current light in 4th line.
  * 5.12.18: VR Controller können hier nicht verwendet werden, weil es keine Avatar gibt/geben soll. ISt aber doof. TODO Controller ohne Avatar.
  * 2.5.19: left tower flat shaded.
+ * 19.2.25: After extending the custom shader "SimpleTexture" with textureMatrix and normalMatrix, we intensify using these shader for better
+ * testing of lighting. So now we use different materials and cycle material by 'shift-M'.
+ * right tower uses custom shading while left tower keeps platform shader.
+ * 03.03.25: model "waldo" from "bluebird" added for testing bundle subpath
  */
 public class ReferenceScene extends Scene {
     static Log logger = Platform.getInstance().getLog(ReferenceScene.class);
-    public ArrayList<SceneNode> towerrechts = new ArrayList<SceneNode>();
+    public ArrayList<SceneNode> towerright = new ArrayList<SceneNode>();
     public ArrayList<SceneNode> tower2 = new ArrayList<SceneNode>();
 
     public SceneNode flasche;
@@ -81,7 +92,7 @@ public class ReferenceScene extends Scene {
     Hud hud;
     MenuCycler menuCycler = null;
     FirstPersonController fps, fpswb;
-    static final String MOVEBOXNAME = "rechts 2";
+    static final String MOVEBOXNAME = "right 2";
     Quaternion wbrotation;
     Vector3 wbposition;
     Bundle databundle;
@@ -108,7 +119,9 @@ public class ReferenceScene extends Scene {
     Color controlPanelBackground = new Color(128, 193, 255, 128);
     String vrMode = null;
     int lightIndex = 0;
+    int materialIndex = 0;
     GeneralHandler[] lightCycle;
+    AbstractMaterialFactory[] materialCycle;
     int renderedLayer = -1;
     public static Vector3 INITIAL_CAMERA_POSITION = new Vector3(0, 5, 11);
     double DEFERRED_CAMERA_NEAR = 4.0;
@@ -118,6 +131,9 @@ public class ReferenceScene extends Scene {
     boolean remoteShuttleTriggered = false;
     GalleryWall galleryWall;
     int effectCycle = 0;
+    Color[] leftTowerColors = new Color[]{new Color(1.0f, 0, 1.0f), Color.WHITE};
+    Color[] rightTowerColors = new Color[]{Color.RED, new Color(1.0f, 1.0f, 0), Color.GREEN};
+    boolean relativeBundlePathModelTriggered = false;
 
     @Override
     public void init(SceneMode sceneMode) {
@@ -172,9 +188,9 @@ public class ReferenceScene extends Scene {
         // weit weg wie in FG mit Blick Richtung (0,0,0) für Test picking ray.
         tl.addEntryForLookat(new Vector3(50000, 30000, 20000), new Vector3(0, 0, 0));
         // shuttle back
-        tl.addEntryForLookat(new Vector3(-9.5, 2.9, -10), new Vector3(-8, 2, -10));
+        tl.addEntryForLookat(new Vector3(-9.5, 2.9, -9.5), new Vector3(-8, 2, -9.5));
         // shuttle front
-        tl.addEntryForLookat(new Vector3(-2, 3.9, -10), new Vector3(-8, 2, -10));
+        tl.addEntryForLookat(new Vector3(-2, 3.9, -9.5), new Vector3(-8, 2, -9.5));
         // and now back to beginning
         tl.addEntryForLookat(new Vector3(0, 5, 11), new Vector3(0, 0, 0));
 
@@ -201,14 +217,16 @@ public class ReferenceScene extends Scene {
     }
 
     /**
-     * 2.5.19: Der linke Tower jetzt flatshaded, der rechte weiterhin unshaded.
+     * The left tower uses platform material, the right custom shader.
+     * After changing the means of 'unshaded' the second left box is gray flat shaded, which is correct. Smooth shading of a box seems nonsense.
      */
     private void setupScene() {
-        movingboxgeo = buildTower("rechts", towerrechts, 4, 3, 1, new Color[]{Color.RED, new Color(1.0f, 1.0f, 0), Color.GREEN}, false);
-        towerrechts.get(0).getTransform().setPosition(new Vector3(4, 0, -3));
-        addToWorld(towerrechts.get(0));
+        initMaterialCycle();
+        movingboxgeo = buildTower("right", towerright, 4, 3, 1, rightTowerColors, null);
+        towerright.get(0).getTransform().setPosition(new Vector3(4, 0, -3));
+        addToWorld(towerright.get(0));
 
-        buildTower("links", tower2, 3, 2, 1, new Color[]{new Color(1.0f, 0, 1.0f), Color.WHITE}, true);
+        buildTower("left", tower2, 3, 2, 1, leftTowerColors, null);
         tower2.get(0).getTransform().rotateY(new Degree(30));
         tower2.get(0).getTransform().setPosition(new Vector3(-3, 1, 0));
         addToWorld(tower2.get(0));
@@ -234,8 +252,6 @@ public class ReferenceScene extends Scene {
 
         addOrReplaceEarth();
 
-        initLightCycle();
-        setLight();
 
         //20.5.16: Auch ein Hud, einfach um das bei wechselnden Camerapositionen einfach mittesten zu koennen.
         //3.12.18: Jetzt mit more far near plane???
@@ -246,6 +262,10 @@ public class ReferenceScene extends Scene {
             hud = Hud.buildForCameraAndAttach(FovElement.getDeferredCamera(null), 0);
             hud.setText(1, "Hud");
         }
+        // finally, after hud is available, set lighting add material to towers
+        initLightCycle();
+        setLight();
+        updateMaterials();
 
         // 28.4.21: Outside VR inventory is a FovElement at deferredcamera.
         if (deferredcamera != null) {
@@ -366,6 +386,9 @@ public class ReferenceScene extends Scene {
             }
         }, null);
 
+        // The default: one default bundle loader
+        RuntimeTestUtil.assertEquals("bundleResolver", 1, Platform.getInstance().bundleResolver.size());
+        Platform.getInstance().bundleResolver.get(0).addBundlePath("bluebird", "../../tcp-flightgear/bundles");
         logger.debug("setupScene completed");
     }
 
@@ -392,12 +415,13 @@ public class ReferenceScene extends Scene {
         Texture river = Texture.buildBundleTexture("data", "images/river.jpg");
         Texture sokobanTarget = Texture.buildBundleTexture("data", "textures/SokobanTarget.png");
         Texture normalMap = Texture.buildNormalMap(new WoodenToyFactory().buildWallNormalMap(6).image);
-        ShaderProgram program = ShaderPool.buildSimpleTextureEffect();
+        ShaderProgram program = ShaderPool.buildUniversalEffect();
 
         // row 0 (top line): opaque (nontransparent), with normalmap (not in custom shader for now)
         galleryWall.add(0, 0, Material.buildPhongMaterialWithNormalMap(river, normalMap, false),
                 "opaque, platform shader, normal map");
         Material mat = Material.buildCustomShaderMaterial(program, true);
+        mat.setName("gallery CustomShaderMaterial 0");
         galleryWall.add(1, 0, mat, "opaque, custom shader");
         mat.material.getUniform(Uniform.TEXTURE).setValue(river.texture);
 
@@ -405,6 +429,7 @@ public class ReferenceScene extends Scene {
         galleryWall.add(0, 1, Material.buildPhongMaterialWithNormalMap(river, normalMap, true),
                 "transparent, platform shader");
         mat = Material.buildCustomShaderMaterial(program, false);
+        mat.setName("gallery CustomShaderMaterial 1");
         galleryWall.add(1, 1, mat, "transparent, custom shader");
         mat.material.getUniform(Uniform.TEXTURE).setValue(river.texture);
         mat.material.getUniform(Uniform.TRANSPARENCY).setValue(Float.valueOf(0.5f));
@@ -413,6 +438,7 @@ public class ReferenceScene extends Scene {
         galleryWall.add(0, 2, Material.buildPhongMaterialWithNormalMap(sokobanTarget, normalMap, true),
                 "transparent, platform shader");
         mat = Material.buildCustomShaderMaterial(program, false);
+        mat.setName("gallery CustomShaderMaterial 2");
         galleryWall.add(1, 2, mat, "transparent, custom shader");
         mat.material.getUniform(Uniform.TEXTURE).setValue(sokobanTarget.texture);
         mat.material.getUniform(Uniform.TRANSPARENCY).setValue(Float.valueOf(0.5f));
@@ -526,11 +552,10 @@ public class ReferenceScene extends Scene {
     }
 
     private void setDefaultLight(boolean ambient) {
-        //22.3.17: Mal kein AmbientLight mehr, um erstmal DirectionalLight zu ergründen.
-        //Das DirectionalLight jetzt schräg von vorne  scheinen lassen (45 Grad). Dann ist die Pyramide gut beleuchtet
+        //22.3.17: No more AmbientLight as default for better testing DirectionalLight.
+        // light roughly from viewpoint where the camera is 45 degrees down. So pyramid is well lighted.
+
         //und es gibt einige Schatten nach unten. Aber nicht zu sehr in Blickrichtung der Camera, sonst sieht man keine Schatten.
-        //lightNode = new PointLight(Color.WHITE);
-        //lightNode.setPosition(new Vector3(0, 3, 2));
 
         //TODO 2.4.19: Bei JME macht der Wechsel des Lichts den Schatten dunkler/schwärzer. Komisch??.
         //29.4.19: Der Remove von Directional geht in JME offenbar nicht. Sieht zumindest so aus, wenn man mit ambient startet. Da kommt man nicht mehr hin.wegen DirectionalLightShadowRenderer?
@@ -550,22 +575,24 @@ public class ReferenceScene extends Scene {
      * Prinzipiell koennte man natuerlich auch die base* Angaben verkleiner.
      * <p/>
      * Liefert die Geometrie zurueck.
+     * 19.2.25: Misleading parameter 'flatshaded' replaced by 'base box is unshaded, other are shaded'. Flat shading should be used in any case (instead of
+     * smooth shading) because we use cubes.
      */
     public static Geometry buildTower(String basename, ArrayList<SceneNode> towerlist, double baselength, double basewidth,
-                                      double baseheight, Color[] color, boolean flatshaded) {
+                                      double baseheight, Color[] color, AbstractMaterialFactory materialFactory) {
         SceneNode tower = null;
         //Mesh basetower = null;
         double scale = 1;
         Geometry cuboid = null;
 
+        // Start with base box
         for (int i = 0; i < color.length; i++) {
             cuboid = Geometry.buildCube(baselength, baseheight, basewidth);
 
-            Material mat;
-            if (flatshaded) {
-                mat = Material.buildPhongMaterial(color[i], NumericValue.FLAT);
-            } else {
-                mat = Material.buildBasicMaterial(color[i]);
+            Material mat = null;
+            if (materialFactory != null) {
+                PortableMaterial pm = new PortableMaterial("no-name", color[i]);
+                mat = materialFactory.buildMaterial(null, pm, null, true);
             }
             SceneNode newtower = new SceneNode(new Mesh(cuboid, mat, true, true));
             newtower.setName(basename + " " + i);
@@ -634,7 +661,7 @@ public class ReferenceScene extends Scene {
      * rein farbigen Seite.
      */
     private void buildMultiMaterialCube(double size) {
-        multimatcube = ModelSamples.buildTexturedCube(size);
+        multimatcube = ModelSamples.buildTexturedCube(size, materialCycle[materialIndex]);
     }
 
     /**
@@ -721,7 +748,7 @@ public class ReferenceScene extends Scene {
         mat = Material.buildCustomShaderMaterial(program, true);
         mat.material.getUniform("u_texture0").setValue(textures[0].texture);
         mat.material.getUniform("u_texture1").setValue(textures[1].texture);
-
+        mat.setName("photo album material");
         //mat = Material.buildPhongMaterial(textures[0]);
         //3.5.21 eine wall by simple plane above
         SceneNode simplewall = new SceneNode(new Mesh(Primitives.buildSimpleXYPlaneGeometry(1.1, 1.8, new ProportionalUvMap()), mat));
@@ -731,7 +758,7 @@ public class ReferenceScene extends Scene {
     }
 
     public SceneNode getMovingbox() {
-        return towerrechts.get(2);
+        return towerright.get(2);
     }
 
     @Override
@@ -773,6 +800,10 @@ public class ReferenceScene extends Scene {
             logger.debug("b key was pressed. currentdelta=" + tpf);
             moveBox();
         }
+        // pure 'm' is handled in menuCycler
+        if (Input.getKeyDown(KeyCode.M) && Input.getKey(KeyCode.Shift)) {
+            cycleMaterial();
+        }
         menuCycler.update(mouselocation);
 
         //(V)alidate statt (T)est
@@ -785,23 +816,24 @@ public class ReferenceScene extends Scene {
             ReferenceTests.testLayer(this);
             ReferenceTests.testPyramideBackLeftFront(pyramideblf);
             ReferenceTests.mvpTest(getMainCamera(), getDimension(), usedeferred);
-            ReferenceTests.testOriginalScale(towerrechts.get(1));
-            ReferenceTests.testParent(towerrechts.get(1), towerrechts.get(0));
-            ReferenceTests.testParent(towerrechts.get(2), towerrechts.get(1));
-            ReferenceTests.testExtracts(towerrechts.get(2));
-            ReferenceTests.testIntersect(towerrechts, towerrechts.get(2));
+            ReferenceTests.testOriginalScale(towerright.get(1));
+            ReferenceTests.testParent(towerright.get(1), towerright.get(0));
+            ReferenceTests.testParent(towerright.get(2), towerright.get(1));
+            ReferenceTests.testExtracts(towerright.get(2));
+            ReferenceTests.testIntersect(towerright, towerright.get(2));
             ReferenceTests.testMovingboxView(this);
             ReferenceTests.testRayFromFarAway(getDimension(), this);
             //TODO should show yellow cube when tests were skipped.
             if (!ReferenceTests.isUnity()) {
                 ReferenceTests.testRay(getDimension(), getMainCamera());
             }
-            ReferenceTests.testFind(this, towerrechts.get(2));
-            ReferenceTests.testGetParent(this, towerrechts.get(2));
+            ReferenceTests.testFind(this, towerright.get(2));
+            ReferenceTests.testGetParent(this, towerright.get(2));
             ReferenceTests.testFindNodeByName(this);
             ReferenceTests.testJson();
             ReferenceTests.testLayer(this);
             ReferenceTests.testFirstPersonTransform(this);
+            ReferenceTests.testLights(this);
             logger.info("tests completed");
             //Der AsyncTest provoziert Fehler zum Test, so dass geloggte error Meldungen dabei korrekt sind.
             new AsyncTest().runtest(this);
@@ -878,25 +910,56 @@ public class ReferenceScene extends Scene {
                     int loaderoptions = 0;
 
                     logger.debug("Bundle " + bundle.name + " loaded");
-                    ModelLoader.buildModel(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new ModelBuildDelegate() {
-                        @Override
-                        public void modelBuilt(BuildResult r) {
-                            if (r.getNode() != null) {
-                                SceneNode shuttle = new SceneNode(r.getNode());
+                    // build model twice with different material factories, platform and custom shader
+                    buildRemoteModel(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new Vector3(-8, 2, -10), scale, new DefaultMaterialFactory());
+                    buildRemoteModel(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new Vector3(-8, 2, -9), scale, new CustomShaderMaterialFactory(ShaderPool.buildUniversalEffect()));
 
-                                //shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(180)));
-                                shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(0)));
-                                shuttle.getTransform().setScale(scale);
-                                shuttle.getTransform().setPosition(new Vector3(-8, 2, -10));
-                                addToWorld(shuttle);
-                                logger.debug("shuttle node added");
-                            }
-                        }
-                    });
                 }
             });
             remoteShuttleTriggered = true;
         }
+        if (!relativeBundlePathModelTriggered) {
+            // "waldo" has advantage of texture and no XML
+            String relativeModel = "Models/waldo.gltf";
+            Vector3 scale = new Vector3(0.1, 0.1, -0.1);
+            AbstractSceneRunner.getInstance().loadBundle("bluebird", new BundleLoadDelegate() {
+                @Override
+                public void bundleLoad(Bundle bundle) {
+                    // directory tcp-flightgear might not be available
+                    if (bundle != null) {
+                        // don't load via platform (which finally would be similar, but with possible waiting for bundle data).
+                        BundleResource file = new BundleResource(bundle, relativeModel);
+                        ResourcePath opttexturepath = new ResourcePath("Models/Textures");
+                        int loaderoptions = 0;
+
+                        logger.debug("Bundle " + bundle.name + " loaded");
+                        // build model twice with different material factories, platform and custom shader
+                        // put aside Goldhofert
+                        buildRemoteModel(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new Vector3(-7, 2, -10), scale, new DefaultMaterialFactory());
+                        buildRemoteModel(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new Vector3(-7, 2, -9), scale, new CustomShaderMaterialFactory(ShaderPool.buildUniversalEffect()));
+                    }
+                }
+            });
+            relativeBundlePathModelTriggered = true;
+        }
+    }
+
+    private void buildRemoteModel(ResourceLoaderFromBundle resourceLoaderFromBundle, ResourcePath opttexturepath, int loaderoptions, Vector3 position, Vector3 scale, AbstractMaterialFactory materialFactory) {
+        ModelLoader.buildModel(resourceLoaderFromBundle, opttexturepath, loaderoptions, new ModelBuildDelegate() {
+            @Override
+            public void modelBuilt(BuildResult r) {
+                if (r.getNode() != null) {
+                    SceneNode shuttle = new SceneNode(r.getNode());
+
+                    //shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(180)));
+                    shuttle.getTransform().setRotation(Quaternion.buildRotationX(new Degree(0)));
+                    shuttle.getTransform().setScale(scale);
+                    shuttle.getTransform().setPosition(position);
+                    addToWorld(shuttle);
+                    logger.debug("shuttle node added");
+                }
+            }
+        }, materialFactory);
     }
 
     private void cycleShading() {
@@ -905,6 +968,14 @@ public class ReferenceScene extends Scene {
             shading = 0;
         }
         addOrReplaceEarth();
+    }
+
+    private void cycleMaterial() {
+        materialIndex++;
+        if (materialIndex >= materialCycle.length) {
+            materialIndex = 0;
+        }
+        updateMaterials();
     }
 
     /**
@@ -967,7 +1038,7 @@ public class ReferenceScene extends Scene {
             // der Zufall dazu, welche wohl die erste gelieferte ist. Und dann wird entwder nur eine Box größer oder immer der Turm.
             // Evtl. ist die ganze Verwendung mit Model und Submodeln diesen Models fragwürdig.
             // 23.8.16: Man kann auch die root node zur picking object suche angeben.26.8.16:Im moment aber noch nicht.
-            List<NativeCollision> intersects = pickingray.getIntersections(towerrechts/*world*/, true);
+            List<NativeCollision> intersects = pickingray.getIntersections(towerright/*world*/, true);
             if (intersects.size() > 0) {
                 SceneNode intersect = new SceneNode(intersects.get(0).getSceneNode());
                 String names = "";
@@ -1026,7 +1097,7 @@ public class ReferenceScene extends Scene {
     private void moveBox() {
         //30.5.  decomposeMatrix(flasche.getLocalModelMatrix());
 
-        SceneNode movebox = towerrechts.get(2);
+        SceneNode movebox = towerright.get(2);
         // Die Parent ModelMatrix der Box
         Matrix4 parentmodel = movebox.getTransform().getParent().getWorldModelMatrix();
         Matrix4 currentmodel = (movebox.getTransform().getLocalModelMatrix());
@@ -1107,18 +1178,94 @@ public class ReferenceScene extends Scene {
     private void initLightCycle() {
         lightCycle = new GeneralHandler[]{
                 // 0: standard/initial light, no ambient
-                () -> setDefaultLight(false), () -> {
+                () -> {
+                    setDefaultLight(false);
+                    hud.setText(4, "Light(" + Platform.getInstance().getLights().size() + "): dir         ");
+                }, () -> {
             // 1: ambient
             setDefaultLight(true);
+            hud.setText(4, "Light(" + Platform.getInstance().getLights().size() + "): dir ,amb        ");
         },
                 // 2: point light
                 () -> {
                     PointLight pointLight = new PointLight(Color.WHITE);
                     this.lightNode = addLightToWorld(pointLight);
+                    hud.setText(4, "Light(" + Platform.getInstance().getLights().size() + "): point        ");
                 },
                 // 3: no light, just dark
                 () -> {
+                    hud.setText(4, "Light(" + Platform.getInstance().getLights().size() + "): no        ");
+
                 }};
+    }
+
+    private void initMaterialCycle() {
+        materialCycle = new AbstractMaterialFactory[]{
+                // 0: custom shader
+                new AbstractMaterialFactory() {
+                    @Override
+                    public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
+                        ShaderProgram program = ShaderPool.buildUniversalEffect();
+                        Material mat = Material.buildCustomShaderMaterial(program, true);
+
+                        mat.material.getUniform(Uniform.TEXTURED).setValue(pm.getTexture() != null);
+                        mat.material.getUniform(Uniform.SHADED).setValue(pm.isShaded());
+
+                        if (pm.getColor() != null) {
+                            mat.material.getUniform(Uniform.COLOR).setValue(new Quaternion(
+                                    pm.getColor().getR(),
+                                    pm.getColor().getG(),
+                                    pm.getColor().getB(),
+                                    pm.getColor().getAlpha()));
+                            mat.setName("colored CustomShaderMaterial");
+                        } else if (pm.getTexture() != null) {
+                            Texture texture = super.resolveTexture(pm.getTexture(), resourceLoader, texturebasepath, pm.getWraps(), pm.getWrapt(), logger);
+                            mat.material.getUniform(Uniform.TEXTURE).setValue(texture.texture);
+                            mat.setName("textured CustomShaderMaterial");
+                        }
+
+                        return mat;
+                    }
+                },
+                new AbstractMaterialFactory() {
+                    // 1: platform shader, shaded
+                    @Override
+                    public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
+                        // use platform material
+                        Material mat;
+                        if (pm.getTexture() != null) {
+                            Texture texture = super.resolveTexture(pm.getTexture(), resourceLoader, texturebasepath, pm.getWraps(), pm.getWrapt(), logger);
+                            mat = Material.buildPhongMaterial(texture);
+                            // only for testing we really come here.
+                            // mat = Material.buildPhongMaterial(Texture.buildBundleTexture("data", "images/river.jpg"));
+                            mat.setName("textured platform material");
+                        } else {
+                            if (pm.isShaded()) {
+                                mat = Material.buildPhongMaterial(pm.getColor(), 1);
+                            } else {
+                                mat = Material.buildBasicMaterial(pm.getColor());
+                            }
+                            mat.setName("colored platform material");
+                        }
+                        return mat;
+                    }
+                }
+        };
+    }
+
+    private void updateMaterials() {
+        for (int i = 0; i < tower2.size(); i++) {
+            PortableMaterial pm = new PortableMaterial("no-name", leftTowerColors[i]);
+            Material m = materialCycle[materialIndex].buildMaterial(null, pm, null, true);
+            tower2.get(i).getMesh().setMaterial(m);
+        }
+        for (int i = 0; i < towerright.size(); i++) {
+            PortableMaterial pm = new PortableMaterial("no-name", rightTowerColors[i]);
+            Material m = materialCycle[materialIndex].buildMaterial(null, pm, null, true);
+            towerright.get(i).getMesh().setMaterial(m);
+        }
+        multimatcube.getMesh().setMaterial(ModelSamples.buildTexturedCubeMaterial(materialCycle[materialIndex]));
+        hud.setText(3, materialIndex == 0 ? "custom shader   " : "platform shader   ");
     }
 }
 
@@ -1136,7 +1283,7 @@ class IconSetPanel {
                 ProportionalUvMap.buildForGridElement(16, 0, 0, false)));
         iconset = Texture.buildBundleTexture("engine", "Iconset-LightBlue.png");
 
-        ShaderProgram program = ShaderPool.buildSimpleTextureEffect();
+        ShaderProgram program = ShaderPool.buildUniversalEffect();
         mat = Material.buildCustomShaderMaterial(program, true);
         mat.setName("IconSetPanel");
         mat.material.getUniform(Uniform.TEXTURE).setValue(iconset.texture);

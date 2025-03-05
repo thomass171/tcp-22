@@ -1,17 +1,18 @@
-package de.yard.threed.engine.platform;
+package de.yard.threed.core.platform;
 
 
 import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.engine.Uniform;
+import de.yard.threed.core.platform.Uniform;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Abstract super class for all NativeProgram implementations.
+ * Abstract super class for all NativeProgram implementations. So only to be used
+ * inside a platform.
  */
 public abstract class AbstractShaderProgram {
 
@@ -42,6 +43,36 @@ public abstract class AbstractShaderProgram {
             // 'u_' is helpful for string replacement in JME
             throw new RuntimeException("Uniform names should have prefix 'u_'");
         }
+    }
+
+    public void addSampler2DUniform(String name) {
+        validate(name);
+        uniforms.add(new Uniform(name, UniformType.SAMPLER_2D));
+    }
+
+    public void addMatrix3Uniform(String name) {
+        validate(name);
+        uniforms.add(new Uniform(name, UniformType.MATRIX3));
+    }
+
+    public void addFloatVec3Uniform(String name) {
+        validate(name);
+        uniforms.add(new Uniform(name, UniformType.FLOAT_VEC3));
+    }
+
+    public void addFloatVec4Uniform(String name) {
+        validate(name);
+        uniforms.add(new Uniform(name, UniformType.FLOAT_VEC4));
+    }
+
+    public void addBooleanUniform(String name) {
+        validate(name);
+        uniforms.add(new Uniform(name, UniformType.BOOL));
+    }
+
+    public void addFloatUniform(String name) {
+        validate(name);
+        uniforms.add(new Uniform(name, UniformType.FLOAT));
     }
 
     protected static String loadShader(BundleResource shader) {

@@ -12,6 +12,9 @@ import de.yard.threed.core.platform.NativeLight;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.platform.Platform;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Wie ein Mesh Komponente einer SceneNode, obwohl es in JME eigentlich eigenstaendig ist.
@@ -20,6 +23,9 @@ import de.yard.threed.core.platform.Platform;
  */
 public class JmeLight implements NativeLight {
     Light light;
+
+    // registry for all lights
+    static List<JmeLight> lights = new ArrayList<>();
 
     private JmeLight(Light light) {
         this.light = light;
@@ -39,24 +45,30 @@ public class JmeLight implements NativeLight {
         dl.setColor(new ColorRGBA(col.getR(), col.getG(), col.getB(), col.getAlpha()));
         // 22.3.17 Laut Doku ist die direction auch bei JME die Herkunft.(??)
         // Da hab ich aber Zweifel, denn die default direction ist (0f, -1f, 0f), also von unten nach oben(??).
-        // Er scheint später dann ein negate() drauf zu machen. Crazy. normalize() ist jedenfalls nicht erforderlich.
+        // Er scheint später dann ein negate() drauf zu machen. Crazy.
+        // normalize() is later done internally.
+        // 20.2.25 negating seems correct, JME seems to have a different understanding.
         dl.setDirection(new JmeVector3((float) -direction.getX(), (float) -direction.getY(), (float) -direction.getZ()).vector3);
         final int SHADOWMAP_SIZE = 1024;
         DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(((PlatformJme) Platform.getInstance()).jmeResourceManager.am, SHADOWMAP_SIZE, 3);
         dlsr.setLight(dl);
         JmeSceneRunner.getInstance().jmecamera.getViewPort().addProcessor(dlsr);
 
-        return new JmeLight(dl);
+        JmeLight jmeLight = new JmeLight(dl);
+        lights.add(jmeLight);
+        return jmeLight;
     }
 
     public static JmeLight buildAmbientLight(Color col) {
         AmbientLight dl = new AmbientLight();
         dl.setColor(new ColorRGBA(col.getR(), col.getG(), col.getB(), col.getAlpha()));
-        // DAs Default ambient light ist sehr dunkel. Erhellen, damit es in etwa dem von ThreeJS entspricht
+        // The Default ambient light is quite dark. 20.2.25 Whatever that means.
+        // Making it brighter is no solution as it makes it to bright (well, mult() appears not appropriate).
         // https://wiki.jmonkeyengine.org/jme3/advanced/light_and_shadow.html
-        //11.4.19: Das wird dann aber viel zu grell. Erstmal nicht mehr aufhellen.
         //dl.setColor(dl.getColor().mult(3));
-        return new JmeLight(dl);
+        JmeLight jmeLight = new JmeLight(dl);
+        lights.add(jmeLight);
+        return jmeLight;
     }
 
     public void setPosition(Vector3 pos) {
@@ -75,4 +87,27 @@ public class JmeLight implements NativeLight {
     }
 
 
+    @Override
+    public Color getAmbientColor() {
+        if (light instanceof AmbientLight){
+             return new Color((light).getColor().asIntARGB());
+        }
+        return null;
+    }
+
+    @Override
+    public Color getDirectionalColor() {
+        if (light instanceof DirectionalLight){
+            return new Color((light).getColor().asIntARGB());
+        }
+        return null;
+    }
+
+    @Override
+    public Vector3 getDirectionalDirection() {
+        if (light instanceof DirectionalLight){
+            return JmeVector3.fromJme(((DirectionalLight)light).getDirection()).negate();
+        }
+        return null;
+    }
 }

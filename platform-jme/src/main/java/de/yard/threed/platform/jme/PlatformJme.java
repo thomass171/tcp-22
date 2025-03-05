@@ -23,6 +23,7 @@ import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
 
 
+import de.yard.threed.engine.loader.DefaultMaterialFactory;
 import de.yard.threed.engine.platform.common.*;
 import de.yard.threed.javacommon.*;
 import de.yard.threed.javacommon.JavaXmlDocument;
@@ -123,7 +124,7 @@ public class PlatformJme extends SimpleHeadlessPlatform {
         }
 
         //logger.debug("buildNativeModel "+filename+", delegateid="+delegateid);
-        ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate);
+        ModelLoader.buildModel(resourceLoader, opttexturepath, options, delegate, new DefaultMaterialFactory());
     }
 
     @Override
@@ -251,7 +252,9 @@ public class PlatformJme extends SimpleHeadlessPlatform {
 
     @Override
     public NativeMaterial buildMaterial(NativeProgram program, boolean opaque) {
-        return JmeMaterial.buildMaterial((JmeProgram) program, opaque);
+        JmeMaterial m = JmeMaterial.buildMaterial((JmeProgram) program, opaque);
+        // too early to call registerAndInitializeShaderMaterial() because defaults are not yet set
+        return m;
     }
 
     /*@Override
@@ -310,12 +313,23 @@ public class PlatformJme extends SimpleHeadlessPlatform {
 
     @Override
     public NativeLight buildAmbientLight(Color argb) {
-        return JmeLight.buildAmbientLight(argb);
+        NativeLight l = JmeLight.buildAmbientLight(argb);
+        updateShaderMaterials();
+        return l;
     }
 
     @Override
     public NativeLight buildDirectionalLight(Color argb, Vector3 direction) {
-        return JmeLight.buildDirectionalLight(argb, direction);
+        NativeLight l = JmeLight.buildDirectionalLight(argb, direction);
+        updateShaderMaterials();
+        return l;
+    }
+
+    @Override
+    public List<NativeLight> getLights() {
+        List<NativeLight> rs = new ArrayList<>();
+        JmeLight.lights.forEach(l -> rs.add(l));
+        return rs;
     }
 
     @Override
@@ -538,7 +552,8 @@ public class PlatformJme extends SimpleHeadlessPlatform {
 
     @Override
     public NativeProgram buildProgram(String name, BundleResource vertexShader, BundleResource fragmentShader) {
-        return new JmeProgram(name, vertexShader, fragmentShader);
+        JmeProgram program = new JmeProgram(name, vertexShader, fragmentShader);
+        return program;
     }
 
     /**

@@ -2,9 +2,9 @@ package de.yard.threed.platform.homebrew;
 
 import de.yard.threed.core.platform.NativeProgram;
 import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.engine.Uniform;
-import de.yard.threed.engine.UniformType;
-import de.yard.threed.engine.platform.AbstractShaderProgram;
+import de.yard.threed.core.platform.Uniform;
+import de.yard.threed.core.platform.UniformType;
+import de.yard.threed.core.platform.AbstractShaderProgram;
 
 /**
  * A material and uniform setter do not belong here because a program might be shared.

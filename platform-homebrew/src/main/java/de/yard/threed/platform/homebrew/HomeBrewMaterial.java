@@ -4,7 +4,7 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.platform.NativeUniform;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ShaderPool;
-import de.yard.threed.engine.Uniform;
+import de.yard.threed.core.platform.Uniform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeMaterial;
 import de.yard.threed.core.platform.NativeTexture;
