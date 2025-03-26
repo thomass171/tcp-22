@@ -69,8 +69,8 @@ public class TrafficHelper {
      * 7.5.19: Wenn ein Groundndet vorliegt, die Infos draus verwenden. Sonst kommen die Vehicle einfach so auf den Graph.
      * Der Graph muss ja nicht unbedingt von einem groundnet sein. Ueberhaupt muss es mittlerweile nicht unbedingt ein groundnet geben.
      */
-    public static void launchVehicles(/*ConfigNodeList*/List<Vehicle> vehiclelist, TrafficContext trafficContext/*27.12.21GroundNet groundnet*/, TrafficGraph graph, TeleportComponent avatarpc, SceneNode destinationnode,
-                                                        GraphProjection projection /*27.12.21AirportConfig airport*/, LocalTransform baseTransformForVehicleOnGraph/* SceneConfig sceneConfig*/,
+    public static void launchVehicles(/*ConfigNodeList*/List<Vehicle> vehiclelist, TrafficContext trafficContext/*27.12.21GroundNet groundnet*/, TrafficGraph graph, TeleportComponent avatarpc//, SceneNode destinationnode
+                                                        /*9.3.25, GraphProjection projection /*27.12.21AirportConfig airport*/, LocalTransform baseTransformForVehicleOnGraph/* SceneConfig sceneConfig*/,
                                                         VehicleLoader vehicleLoader, List<VehicleBuiltDelegate> genericVehicleBuiltDelegates) {
         logger.debug("launchVehicles groundnet=" + ",graph=" + graph);
         //27.12.21 TrafficWorldConfig tw = TrafficWorldConfig.getInstance();
@@ -78,7 +78,8 @@ public class TrafficHelper {
             //for (GroundServiceVehicleConfig c : config.vehicles) {
             Vehicle/*ConfigNode*/ vehicle = vehiclelist.get(i);
             //29.10.21 VehicleConfig vconfig = tw.getVehicleConfig(vehicle.getName());
-            VehicleDefinition vconfig = getVehicleConfigByDataprovider(vehicle.getName(), null);
+            //VehicleDefinition vconfig = getVehicleConfigByDataprovider(vehicle.getName(), null);
+            VehicleDefinition vconfig = ((TrafficSystem)SystemManager.findSystem(TrafficSystem.TAG)).getVehicleConfig(vehicle.getName(), null);
             if (vconfig == null) {
                 logger.warn("Vehicle not found:" + vehicle.getName());
                 return;
@@ -110,7 +111,7 @@ public class TrafficHelper {
                             graphposition = new GraphPosition(graph.getBaseGraph().getEdge((int) (millis % graph.getBaseGraph().getEdgeCount())));
                         }
                     }
-                    VehicleLauncher.launchVehicle(vehicle, vconfig, graph/*groundnet.groundnetgraph*/, graphposition, avatarpc, destinationnode, projection,
+                    VehicleLauncher.launchVehicle(vehicle, vconfig, new GraphVehiclePositioner(graph/*groundnet.groundnetgraph*/, graphposition), avatarpc, /*destinationnode,/*9.3.25 projection,*/
                             /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, genericVehicleBuiltDelegates, vehicleLoader, null);
                 }
                 vehicle.wasLoaded = true;
@@ -126,11 +127,13 @@ public class TrafficHelper {
             for (int i = 0; i < /*27.12.21airport*/trafficContext.getVehicleCount(); i++) {
                 LocatedVehicle vconf = /*27.12.21airport*/trafficContext.getVehicle(i);
                 VehicleDefinition config = null;// 27.12.21 tw.getVehicleConfig(vconf.getName());
-                config = getVehicleConfigByDataprovider(vconf.getName(), null);
+                //config = getVehicleConfigByDataprovider(vconf.getName(), null);
+                config = ((TrafficSystem)SystemManager.findSystem(TrafficSystem.TAG)).getVehicleConfig(vconf.getName(), null);
                 SmartLocation location = vconf.getLocation();
                 //buildArrivedAircraft(config, gsw.groundnet.getParkPos(location.getParkPos()));
                 //VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()),config, groundnet.groundnetgraph, groundnet.getParkingPosition(groundnet.getParkPos(location.getParkPos())), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, null, vehicleLoader);
-                VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()), config, trafficContext.getGraph(), trafficContext.getStartPositionFromLocation(location), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, new ArrayList<VehicleBuiltDelegate>(), vehicleLoader, null);
+                VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()), config,
+                        new GraphVehiclePositioner(trafficContext.getGraph(), trafficContext.getStartPositionFromLocation(location)), avatarpc,/*, destinationnode, /*9.3.25 projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, new ArrayList<VehicleBuiltDelegate>(), vehicleLoader, null);
             }
         }
         //}
@@ -174,8 +177,9 @@ public class TrafficHelper {
 
     /**
      * 24.11.23: Parameter 'type' added. 'name' is optional now.
+     * 7.3.25 Integrated to TrafficSystem
      */
-    public static VehicleDefinition getVehicleConfigByDataprovider(String vehicleName, String type) {
+    /*public static VehicleDefinition getVehicleConfigByDataprovider(String vehicleName, String type) {
         DataProvider vehicleConfigDataProvider = SystemManager.getDataProvider("vehicleconfig");
         if (vehicleConfigDataProvider == null) {
             logger.warn("no vehicleConfigDataProvider");
@@ -184,7 +188,7 @@ public class TrafficHelper {
 
         VehicleDefinition vehicleConfig = (VehicleDefinition) vehicleConfigDataProvider.getData(new String[]{vehicleName, type});
         return vehicleConfig;
-    }
+    }*/
 
     /**
      * Really needed? Time will tell.
@@ -258,7 +262,9 @@ public class TrafficHelper {
 
     /**
      * 22.7.24
+     * 7.3.25 is it really a good idea to couple these properties this way? Eg. This breaks the smart location idea. Set to deprecated.
      */
+    @Deprecated
     public static FlightLocation getInitialFlightLocation() {
         // have it int two separate properties due to complex parsing
         String initialLocation = Platform.getInstance().getConfiguration().getString("initialLocation");

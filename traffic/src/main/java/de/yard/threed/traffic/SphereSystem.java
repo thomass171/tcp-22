@@ -87,7 +87,6 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     private static SceneNode sphereNode;
     //29.11.21 public Tile activeTile; Stattdessen andere Kruecke.
     public boolean wasOsm;
-    private LightDefinition[] lightDefinitions;
     // Wofuer ist die world Zwsichenebene. Zum adjusten?
     // 20.3.18: Ja, zum komplettverschieben von allem, um Artefakte wegen Rundungsproblemen zu
     // vermeiden. Das ist was anderes als die Scene.world.
@@ -156,7 +155,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
             /*Tile*/
             BundleResource initialTile = null;
             List<NativeNode> xmlVPs = null;
-            LightDefinition[] lds = lightDefinitions;
+            LightDefinition[] lds = null;//15.3.25 lightDefinitions always from config
             String groundnetToLoad = null;
             // 18.3.24: null no longer leads hard coded to 3D in EDDK but is accepted but ignored
             if (basename != null) {
@@ -213,7 +212,11 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                         } // end of XML config
                         for (VehicleDefinition vd : XmlVehicleDefinition.convertVehicleDefinitions(
                                 xmlConfig.getVehicleDefinitions())) {
-                            TrafficSystem.knownVehicles.add(vd);
+                            //TrafficSystem.knownVehicles.add(vd);
+                            // 7.3.25 no longer static, but should use event. Especially during tests TrafficSystem might not be available.
+                            if (SystemManager.findSystem(TrafficSystem.TAG) != null) {
+                                ((TrafficSystem) SystemManager.findSystem(TrafficSystem.TAG)).addKnownVehicle(vd);
+                            }
                         }
                         // 28.11.23: Was in BasicTravelScene.customInit() before
                         //11.7.24 TrafficSystem.baseTransformForVehicleOnGraph = xmlConfig.getBaseTransformForVehicleOnGraph();
@@ -401,15 +404,6 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
         GraphProjection/*Flight3D*/ graphprojection = backProjectionProvider.getGraphBackProjection(forwardProjection);
         return graphprojection;
 
-    }
-
-    /**
-     * Only a default/workaround if no config file is used.
-     * 14.5.24: Deprecated now because 3D also moves to config files
-     */
-    @Deprecated
-    public void setDefaultLightDefinition(LightDefinition[] light) {
-        this.lightDefinitions = light;
     }
 
     /**

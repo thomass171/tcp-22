@@ -10,7 +10,6 @@ import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.test.testutil.TestUtil;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import de.yard.threed.traffic.config.VehicleConfigDataProvider;
 import de.yard.threed.traffic.config.VehicleDefinition;
 import de.yard.threed.traffic.config.XmlVehicleDefinition;
 import de.yard.threed.trafficcore.config.AirportDefinition;
@@ -40,10 +39,10 @@ public class TrafficConfigTest {
         BundleResource xmlfile = new BundleResource("xml-locomotive.xml");
 
         TrafficConfig trafficConfig = TrafficConfig.buildFromBundle(BundleRegistry.getBundle("test-resources"), xmlfile);
-        VehicleConfigDataProvider vcdp = new VehicleConfigDataProvider(
-                XmlVehicleDefinition.convertVehicleDefinitions(trafficConfig.getVehicleDefinitions()));
+        TrafficSystem trafficSystem = new TrafficSystem();
+        XmlVehicleDefinition.convertVehicleDefinitions(trafficConfig.getVehicleDefinitions()).forEach(vd->trafficSystem.addKnownVehicle(vd));
 
-        VehicleDefinition vc = vcdp.findVehicleDefinitionsByName("Locomotive").get(0);
+        VehicleDefinition vc = trafficSystem.findVehicleDefinitionsByName("Locomotive").get(0);
         assertNotNull(vc);
         Assertions.assertEquals("loc-lowres.xml", vc.getLowresFile());
 
@@ -63,9 +62,10 @@ public class TrafficConfigTest {
         EngineTestFactory.addTestResourcesBundle();
 
         TrafficConfig trafficConfig = TrafficConfig.buildFromBundle(BundleRegistry.getBundle("test-resources"), new BundleResource("vehicle-definitions.xml"));
-        VehicleConfigDataProvider vcdp = new VehicleConfigDataProvider(
-                XmlVehicleDefinition.convertVehicleDefinitions(trafficConfig.getVehicleDefinitions()));
-        VehicleDefinition vc = vcdp.findVehicleDefinitionsByName("FollowMe").get(0);
+        TrafficSystem trafficSystem = new TrafficSystem();
+        XmlVehicleDefinition.convertVehicleDefinitions(trafficConfig.getVehicleDefinitions()).forEach(vd->trafficSystem.addKnownVehicle(vd));
+
+        VehicleDefinition vc = trafficSystem.findVehicleDefinitionsByName("FollowMe").get(0);
         assertNotNull(vc);
         Assertions.assertEquals("fgaddon/followme.xml", vc.getModelfile());
 
@@ -75,7 +75,7 @@ public class TrafficConfigTest {
         assertEquals(0,vehicles.get(0).initialCount);
         assertEquals(3,vehicles.get(1).initialCount);
 
-        VehicleDefinition c172p = vcdp.findVehicleDefinitionsByName("c172p").get(0);
+        VehicleDefinition c172p = trafficSystem.findVehicleDefinitionsByName("c172p").get(0);
         assertNotNull(c172p.getViewpoints().get("Captain"));
         Assertions.assertEquals(16, c172p.getOptionals().length);
 
@@ -108,10 +108,10 @@ public class TrafficConfigTest {
     public void testLoc() throws Exception {
 
         TrafficConfig trafficConfig = TrafficConfig.buildFromBundle(BundleRegistry.getBundle("traffic"), new BundleResource("tiles/locomotive.xml"));
-        VehicleConfigDataProvider vcdp = new VehicleConfigDataProvider(
-                XmlVehicleDefinition.convertVehicleDefinitions(trafficConfig.getVehicleDefinitions()));
+        TrafficSystem trafficSystem = new TrafficSystem();
+        XmlVehicleDefinition.convertVehicleDefinitions(trafficConfig.getVehicleDefinitions()).forEach(vd->trafficSystem.addKnownVehicle(vd));
 
-        VehicleDefinition vc = vcdp.findVehicleDefinitionsByName("loc").get(0);
+        VehicleDefinition vc = trafficSystem.findVehicleDefinitionsByName("loc").get(0);
         assertNotNull(vc);
         Assertions.assertEquals("loc", vc.getName());
         Assertions.assertEquals("data", vc.getBundlename());
@@ -145,11 +145,11 @@ public class TrafficConfigTest {
     public void testDemo() throws Exception {
 
         TrafficConfig trafficConfig = TrafficConfig.buildFromBundle(BundleRegistry.getBundle("traffic"), new BundleResource("tiles/Demo.xml"));
-        VehicleConfigDataProvider vcdp = new VehicleConfigDataProvider(
-                XmlVehicleDefinition.convertVehicleDefinitions(trafficConfig.getVehicleDefinitions()));
+        TrafficSystem trafficSystem = new TrafficSystem();
+        XmlVehicleDefinition.convertVehicleDefinitions(trafficConfig.getVehicleDefinitions()).forEach(vd->trafficSystem.addKnownVehicle(vd));
 
         // 'loc' should be available via 'include'
-        VehicleDefinition vc = vcdp.findVehicleDefinitionsByName("loc").get(0);
+        VehicleDefinition vc = trafficSystem.findVehicleDefinitionsByName("loc").get(0);
         assertNotNull(vc);
         Assertions.assertEquals("loc", vc.getName());
 

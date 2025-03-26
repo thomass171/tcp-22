@@ -80,6 +80,8 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         if (hostdir == null) {
             throw new RuntimeException("HOSTDIR not set");
         }
+        // 15.3.25 do some inits for test stability
+        DummyLight.lights = new ArrayList<>();
     }
 
     /**

@@ -25,7 +25,7 @@ public class SceneVehicle extends ConfigNode implements LocatedVehicle {
         if (s == null) {
             return null;
         }
-        return new SmartLocation(s);
+        return SmartLocation.fromString(s);
     }
 
     /*super class 20.3.19 public String getName() {

@@ -225,7 +225,7 @@ public class ModelSamples {
     }
 
     /**
-     * Achenfarben wie Unity x=rot,y=green,z=blue
+     * Axis colors like Unity x=red,y=green,z=blue
      * TODO umstellen auf lines
      *
      * @param len

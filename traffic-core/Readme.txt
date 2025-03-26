@@ -1,0 +1,1 @@
+not dependent from engine! Should be usable from WebServices, but needs to be C# and GWT ready (using StringUtils)

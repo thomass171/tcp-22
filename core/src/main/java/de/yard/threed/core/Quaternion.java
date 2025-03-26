@@ -28,9 +28,7 @@ public class Quaternion implements Dumpable {
     }
 
     /**
-     * Der Axisvector muss normalisiert sein (oder auch nicht? Who knows). Verkehrt ist es sicher nicht.
-     * 26.2.2016: Es dürfte Quatsch sein, die Eingabe zu normalisieren. Das ist docvh überhaupt kein Vektor.
-     * <p/>
+     *
      * Es wird die UnityOrder verwendet. Nee lieber nicht, das ist left handed.
      * * Aus JME3 bzw.
      * <a href="http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm">http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm</a>
@@ -42,11 +40,11 @@ public class Quaternion implements Dumpable {
         return buildFromAngles(x_pitch.toRad(), y_yaw.toRad(), z_roll.toRad());
     }
 
+    /**
+     * From http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm
+     */
     public static Quaternion buildFromAngles(double xa, double ya, double za) {
 
-        // 13.4.16: Obv das mit dem mirror angle das wahre ist, ist voellig offen
-        // 18.4.16: Nicht, solange sich alles in der Mirrorworld befindet
-        //ya = Platform.getInstance().getWorld().mirrorAngle(ya);
         double sinY, sinZ, sinX, cosY, cosZ, cosX;
         sinX = Math.sin(xa * 0.5f);
         cosX = Math.cos(xa * 0.5f);

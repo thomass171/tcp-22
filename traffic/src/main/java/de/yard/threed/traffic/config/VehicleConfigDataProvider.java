@@ -13,18 +13,19 @@ import java.util.List;
 /**
  * Some systems (GroundServiceSystem) need to know both the available service vehicles and the dimensions of aircrafts.
  * Should be set during startup (events might also be an option)
+ * 20.3.25: Merged into TrafficSystem. Only finder remain here as static, eg. for tests
  */
-public class VehicleConfigDataProvider implements DataProvider {
+public class VehicleConfigDataProvider /*implements DataProvider */{
     //27.12.21TrafficWorldConfig tw;
     // TrafficConfig tw;
-    List<VehicleDefinition> vehicleDefinitions;
+   // List<VehicleDefinition> vehicleDefinitions;
 
-    public VehicleConfigDataProvider(List<VehicleDefinition> /*TrafficConfig*/ tw) {
+    /*public VehicleConfigDataProvider(List<VehicleDefinition> /*TrafficConfig* / tw) {
         if (tw == null) {
             Platform.getInstance().getLog(VehicleConfigDataProvider.class).error("Setting null tw!");
         }
         this.vehicleDefinitions = tw;
-    }
+    }*/
 
     /**
      * Finds by name basically.
@@ -33,7 +34,7 @@ public class VehicleConfigDataProvider implements DataProvider {
      * @param parameter
      * @return VehicleDefinition
      */
-    @Override
+    /*@Override
     public Object getData(Object[] parameter) {
         String vehicleName = (String) parameter[0];
 
@@ -59,7 +60,7 @@ public class VehicleConfigDataProvider implements DataProvider {
         //26.11.23 no longer
         vconfig = null;//ConfigHelper.getVehicleConfig(tw, vehicleName);
         return vconfig;
-    }
+    }*/
 
     /**
      * Was in TafficWorldConfig with name 'getAircraftConfiguration' once.
@@ -72,7 +73,7 @@ public class VehicleConfigDataProvider implements DataProvider {
         return null;
 
     }*/
-    public List<VehicleDefinition> findVehicleDefinitionsByName(String name) {
+    public static List<VehicleDefinition> findVehicleDefinitionsByName(List<VehicleDefinition> vehicleDefinitions, String name) {
         //List<NativeNode> result = XmlHelper.filter(getVehicleDefinitions(topNodes),
         //        n -> name.equals(XmlHelper.getStringAttribute(n, "name")));
         //List<NativeNode> result = XmlHelper.filter(getVehicleDefinitions(topNodes),
@@ -85,7 +86,11 @@ public class VehicleConfigDataProvider implements DataProvider {
         return result;//convertVehicleDefinitions(result);
     }
 
-    public List<VehicleDefinition> findVehicleDefinitionsByModelType(String modeltype) {
+    public static List<VehicleDefinition> findVehicleDefinitionsByNameFromXml(List<NativeNode> vds, String name) {
+        return findVehicleDefinitionsByName(XmlVehicleDefinition.convertVehicleDefinitions(vds), name);
+    }
+
+    public static List<VehicleDefinition> findVehicleDefinitionsByModelType(List<VehicleDefinition> vehicleDefinitions, String modeltype) {
         //List<NativeNode> result = XmlHelper.filter(getVehicleDefinitions(topNodes),
         //       n -> modeltype.equals(XmlHelper.getStringAttribute(n, "modeltype")));
         //return convertVehicleDefinitions(result);
@@ -98,4 +103,7 @@ public class VehicleConfigDataProvider implements DataProvider {
         return result;
     }
 
+    public static List<VehicleDefinition> findVehicleDefinitionsByModelTypeFromXml(List<NativeNode> vds, String modeltype) {
+        return findVehicleDefinitionsByModelType(XmlVehicleDefinition.convertVehicleDefinitions(vds), modeltype);
+    }
 }

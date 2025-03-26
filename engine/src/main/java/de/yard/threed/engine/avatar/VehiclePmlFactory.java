@@ -165,19 +165,20 @@ public class VehiclePmlFactory {
     }
 
     /**
-     * Baut ein Einsitzer Universalfahrzeug, eine Art FliWaTüt (Plastik oder Holz?). Etwa 2m lang und 1m breit. Als Strassenfahrzeug mit Rädern, kann aber auch fliegen wie ein Ufo
+     * A universal one seat vehicle (a 'FliWaTüt', Plastic or wood?). Appx 2m long und 1m breit. Als Strassenfahrzeug mit Rädern, kann aber auch fliegen wie ein Ufo
      * und sich auch im Maze bewegen.
      * <p>
-     * Erstreckt sich ueber die x-Achse (hier als "len" bezeichnet) mit vorne im negativen, y geht nach oben, z in die Tiefe/Quer (hier als "width" bezeichnet).
+     * Along x-axis (hier als "len" bezeichnet) mit front in negative, y is up, z is right (Tiefe/Quer, hier als "width" bezeichnet).
      * Die Dimensionen brauchen nicht uebergeben werden. Denn
      * dafuer hat man ja den scale. Standardmass hier ist Meter.
      * trackwidth auch für ein Auto als Basis.
-     * y=0 ist die Radunterkante, also das, was später auf einem Grund aufgesetzt wird. D.h., der Aufrufer positioniert es mit y=0 und die Unterkant
+     * y=0 is lower edge of wheels, so that what later is reaching ground. D.h., der Aufrufer positioniert es mit y=0 und die Unterkant
      * der Reifen berührt die y=0 Ebene.
+     * 10.3.25: Currently looks more like a car, so needs some adjustment in the future. Maybe a buildCar() can be branched.
      *
      * @return
      */
-    public static PortableModel/*List*/ buildMobi() {
+    public static PortableModel buildMobi() {
          float wheelwidth = 0.05f;
 
         // Grundelement 

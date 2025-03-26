@@ -8,7 +8,7 @@ import de.yard.threed.engine.FirstPersonTransformer;
 import de.yard.threed.engine.Transform;
 
 /**
- * .
+ * Intended to move the user entity transform.
  * <p>
  * Created by thomass on 24.08.23.
  */

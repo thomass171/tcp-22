@@ -4,7 +4,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
 /**
- * Wrapper for tests that are used during platform tests (ReferenceScene) and during unit tests (SimpleHeadless platform).
+ * Wrapper for tests that are used during platform tests (ReferenceScene) and during unit tests (SimpleHeadless platform in PlatformTest.java).
  *
  * 23.1.18: Added to ReferenceScene, so no dedicated test scene is needed.
  * <p/>

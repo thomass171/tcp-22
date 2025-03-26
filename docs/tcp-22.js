@@ -3,8 +3,8 @@
  */
 
 var mazeScenes = ["skbn/SokobanWikipedia.txt","skbn/Sokoban10x10.txt","skbn/SokobanTrivial.txt","maze/Maze15x10.txt"];
-// was ts171.de once
-var host = "https://yard.de/tcp-22";
+// was ts171.de once, then yard.de, but due to DOS protection changed again
+var host = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/publicweb/tcp-22";
 
 function addPanel(label, contentProvider, optionalElement) {
     //console.log("addPanel " + label);
@@ -42,13 +42,17 @@ function launchVrScene() {
     launchScene("VrScene",args);
 }
 
-function launchTrafficScene(vr) {
+function launchTrafficScene(tilename, vr) {
 
     var args = new Map();
     addCommonArgs(args, "tf_");
-    args.set("basename","traffic:tiles/Demo.xml");
+    args.set("basename","traffic:tiles/" + tilename + ".xml");
     if (vr != null) {
         args.set("vrMode",vr);
+    }
+    if (tilename == "Wayland") {
+        args.set("initialVehicle", "mobi");
+        args.set("initialLocation", "coordinate:90.0,110.5,76.0");
     }
     launchScene("BasicTravelScene",args);
 }

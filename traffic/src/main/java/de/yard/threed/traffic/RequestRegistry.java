@@ -17,6 +17,10 @@ public class RequestRegistry {
      * Typically this is a vehicle with a cockpit to where the user can teleport.
      * Needs to wait until everything is ready, eg. terrain and elevation available.
      * (Das soll bei client/server aber nicht mehr so sein.
+     * Das muss nicht unbedingt fuer Travel mit Avatar geeignet sein. Obs das ist, ist abhaengig vom Vehicle.
+     * Wird erst auf Anforderung gemacht, weil
+     * ein Vehicle viele Resourcen braucht und abhaengig von delayedload in der config (mit "initialVehicle" aber automatisch nach kurzer Zeit).
+     * Does not work by index but loads the vehicle passed in the request.
      * // 12.5.20: Doch, die brauchen ja auch ein richtige Elevation, also passend zum Client
      *
      * 31.10.23: TRAFFIC_REQUEST_LOADVEHICLE no longer deprecated. Its triggered eg. by property "initialVehicle".
@@ -25,11 +29,12 @@ public class RequestRegistry {
      */
     public static RequestType TRAFFIC_REQUEST_LOADVEHICLE = RequestType.register(4001, "TRAFFIC_REQUEST_LOADVEHICLE");
 
-    public static Request buildLoadVehicle(int userEntityId, String name, String smartLocation, String initialRoute) {
+    public static Request buildLoadVehicle(int userEntityId, String name, String smartLocation, String initialRoute, String initialHeading) {
         return new Request(TRAFFIC_REQUEST_LOADVEHICLE, new Payload()
                 .add("name", name)
                 .add("location", smartLocation)
                 .add("initialRoute", initialRoute)
+                .add("heading", initialHeading)
         );
     }
 

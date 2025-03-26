@@ -42,9 +42,6 @@ public class Setup {
             emulateVR(properties);
         }
 
-        //properties.put("argv.initialVehicle", "c172p");
-        //Evtl. Bluebird statt c172p wegen sonst verdecktem menu.
-        //properties.put("argv.initialVehicle", "bluebird");
         //properties.put("argv.basename","B55-B477");
         //properties.put("argv.basename","B55-B477-small");
         // properties.put("argv.basename","EDDK");
@@ -103,6 +100,10 @@ public class Setup {
             properties.put("basename", "traffic:tiles/Wayland.xml");
             properties.put("enableAutomove", "true");
             properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
+            // Default wayland only has a default vehicle (loc) moving around, but no 'initialVehicle'
+            properties.put("initialVehicle", "mobi");
+            properties.put("initialLocation", "coordinate:90.0,110.5,76.0");
+            //properties.put("enableFPC", "true");
         }
         boolean demo = false;
         if (demo) {

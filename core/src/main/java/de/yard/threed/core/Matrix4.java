@@ -424,9 +424,38 @@ public class Matrix4 /*30.5.implements Dumpable*/ {
         return getColumn(2).normalize();
     }
 
+    public void setColumn0(Vector3 v) {
+        a11 = v.getX();
+        a21 = v.getY();
+        a31 = v.getZ();
+    }
+
+    public void setColumn1(Vector3 v) {
+        a12 = v.getX();
+        a22 = v.getY();
+        a32 = v.getZ();
+    }
+
+    public void setColumn2(Vector3 v) {
+        a13 = v.getX();
+        a23 = v.getY();
+        a33 = v.getZ();
+    }
+
+    /**
+     * Aka setColumn3()
+     */
     public void setTranslation(Vector3 v) {
         a14 = v.getX();
         a24 = v.getY();
         a34 = v.getZ();
+    }
+
+    public static Matrix4 buildFromRightUpForward(Vector3 right, Vector3 up, Vector3 forward) {
+        Matrix4 m4 = new Matrix4();
+        m4.setColumn0(right);
+        m4.setColumn1(up);
+        m4.setColumn2(forward);
+        return m4;
     }
 }

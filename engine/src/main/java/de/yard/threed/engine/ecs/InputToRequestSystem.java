@@ -250,7 +250,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             lastDragPosition = possiblestartdrag;
 
             // will trigger a request on every mouse press. might not be the best choice. But not with open menu.
-            if (dragmapping != null && !isMenuOpen()) {
+            if (dragmapping != null && dragmapping[4] != null && !isMenuOpen()) {
                 SystemManager.putRequest(dragmapping[4].build(userEntityId));
             }
         }
@@ -276,16 +276,16 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                     // when no entity is dragged, maybe convert dragging to requests
                     logger.debug("offset.x=" + offset.getX());
                     if (dragmapping != null) {
-                        if (offset.getX() < 0) {
+                        if (offset.getX() < 0 && dragmapping[0] != null) {
                             SystemManager.putRequest(dragmapping[0].build(userEntityId));
                         }
-                        if (offset.getX() > 0) {
+                        if (offset.getX() > 0 && dragmapping[1] != null) {
                             SystemManager.putRequest(dragmapping[1].build(userEntityId));
                         }
-                        if (offset.getY() < 0) {
+                        if (offset.getY() < 0 && dragmapping[2] != null) {
                             SystemManager.putRequest(dragmapping[2].build(userEntityId));
                         }
-                        if (offset.getY() > 0) {
+                        if (offset.getY() > 0 && dragmapping[3] != null) {
                             SystemManager.putRequest(dragmapping[3].build(userEntityId));
                         }
                     }
@@ -336,7 +336,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             possiblestartdrag = null;
 
             // will trigger a request on every mouse release. might not be the best choice
-            if (dragmapping != null && !isMenuOpen()) {
+            if (dragmapping != null && dragmapping[5] != null && !isMenuOpen()) {
                 SystemManager.putRequest(dragmapping[5].build(userEntityId));
             }
         }

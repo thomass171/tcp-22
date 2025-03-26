@@ -8,3 +8,5 @@ tiles/Wayland-road.xml
 tiles/locomotive.xml
 tiles/Moon.xml
 traffic.xsd
+tiles/mobi.xml
+mobi.pcm

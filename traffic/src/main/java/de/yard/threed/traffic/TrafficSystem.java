@@ -3,11 +3,8 @@ package de.yard.threed.traffic;
 
 import de.yard.threed.core.BooleanHolder;
 import de.yard.threed.core.CharsetException;
-import de.yard.threed.core.Degree;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
-import de.yard.threed.core.GeneralParameterHandler;
-import de.yard.threed.core.IntHolder;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
@@ -25,8 +22,6 @@ import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.graph.*;
 import de.yard.threed.engine.platform.common.*;
-import de.yard.threed.traffic.config.ConfigNode;
-import de.yard.threed.traffic.config.ConfigNodeList;
 import de.yard.threed.traffic.config.VehicleConfigDataProvider;
 import de.yard.threed.traffic.config.VehicleDefinition;
 
@@ -77,6 +72,7 @@ import static de.yard.threed.engine.ecs.TeleporterSystem.EVENT_POSITIONCHANGED;
  * 27.2.18: TODO Dies System brauchts doch nur per group?
  * 14.3.19: Neues eigenes AutomoveSystem. Evtl. ist das TrafficSystem obselet, weil zu allgemein?
  * 24.11.20: Nicht obselet? Replaces RequestHandler in TrafficCommon zu ersetzen.
+ * 07.03.25: VehicleConfigDataProvider integrated here
  * <p>
  * Created by thomass on 31.03.17.
  */
@@ -113,12 +109,11 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
      * data is missing. These are the fields formerly in BasicTravelScene with null values.
      */
     public /*4.12.23ConfigNodeList*/ List<SmartLocation> locationList;
-    public SceneNode destinationNode;
     public NearView nearView;
 
-    // 27.11.23: Knows vehicle already, should also no vehicle definitions and provide these. static for now, but
+    // 27.11.23: Knows vehicle already, should also know vehicle definitions and provide these. static for now, but
     // should be per event.
-    public static List<VehicleDefinition> knownVehicles = new ArrayList<VehicleDefinition>();
+    private List<VehicleDefinition> knownVehicles = new ArrayList<VehicleDefinition>();
     private boolean sphereloaded = false;
     private boolean userAssembled = false;
 
@@ -163,7 +158,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         SystemManager.putDataProvider("trafficgraph", this);
 
         //27.11.23: Knows defs and should provide these
-        SystemManager.putDataProvider("vehicleconfig", new VehicleConfigDataProvider(knownVehicles));
+        //7.3.25  SystemManager.putDataProvider("vehicleconfig", new VehicleConfigDataProvider(knownVehicles));
     }
 
     @Override
@@ -300,7 +295,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 TrafficHelper.launchVehicles(vehiclelist,
                         trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
                         (UserSystem.getInitialUser() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
-                        SphereSystem.getSphereNode()/*getWorld()*/, null/*22.3.24sphereProjections.backProjection*/,
+                        /*getWorld()*//*9.3.25, null/*22.3.24sphereProjections.backProjection*/
                         /*27.12.21airportConfig,*/ null/*baseTransformForVehicleOnGraph*/, vehicleLoader, genericVehicleBuiltDelegates);
                 vehiclesLoaded++;
                 return true;
@@ -313,8 +308,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             logger.debug("Processing TRAFFIC_REQUEST_LOADVEHICLE request " + request);
 
             String vehiclename = (String) request.getPayload().get("name");
-            // TODO decode smartlocation
-            SmartLocation smartLocation = (SmartLocation) request.getPayload().get("location");
+            SmartLocation smartLocation = request.getPayload().get("location", s -> SmartLocation.fromString(s));
             GeoRoute initialRoute = request.getPayload().get("initialRoute", s -> GeoRoute.parse(s));
 
             // 10.5.24 also wait for user join? Hmm, maybe not because joining user can enter the
@@ -329,9 +323,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 return false;
             }
 
-            TrafficGraph graphToUse = null;
-            GraphPosition graphStartPosition = null;
             GraphPath optionalPath = null;
+            VehiclePositioner vehiclePositioner;
             if (initialRoute == null) {
 
                 // 20.3.24: Would be better to move graph detection below for knowing the vehicle and location we can find the graph. But this breaks nextlocationindex.
@@ -340,6 +333,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 // when a graph is available. Not sure this is really true always and not sure terrain is needed at all.
                 // graph appears sufficient. But is it always a groundnet??
                 // 20.2.24: For now use always the first
+                TrafficGraph graphToUse = null;
                 for (String cluster : trafficgraphs.keySet()) {
                     if (trafficgraphs.get(cluster) != null) {
                         graphToUse = trafficgraphs.get(cluster);
@@ -356,6 +350,10 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     //27.12.21  DefaultTrafficWorld.getInstance().getConfiguration().getLocationListByName(icao).get(nextlocationindex);
                 /*4.12.23 ConfigNode location = locationList/*getLocationList()* /.get(nextlocationindex);
                 smartLocation = new SmartLocation(icao, XmlHelper.getStringValue(location.nativeNode));*/
+                    if (locationList == null || nextlocationindex >= locationList.size()) {
+                        logger.warn("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing next location. Will not retry.");
+                        return true;
+                    }
                     smartLocation = locationList.get(nextlocationindex);
 
                     // 27.21.21 das ist jetzt schwierig zu pruefen. Es ist auch unklar, ob es wirklich noch noetig ist. Mal weglassen.
@@ -366,8 +364,11 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 }*/
                     nextlocationindex++;
                     logger.debug("No location in request. Now using " + smartLocation);
+                    vehiclePositioner = new GraphVehiclePositioner(graphToUse, getGraphStartPosition(smartLocation, graphToUse));
+                } else {
+                    // we have a smartlocation
+                    vehiclePositioner = buildVehiclePositioner(smartLocation);
                 }
-                graphStartPosition = getGraphStartPosition(smartLocation, graphToUse);
             } else {
                 // groundnet has a (back)projection. On a initialRoute we need something different. Geo graph will have a FG graph orientation.
                 BooleanHolder shouldAbort = new BooleanHolder(false);
@@ -389,25 +390,14 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
                 flightRoute.smooth();
                 Graph graph = flightRoute.getGraph();
-                graphToUse = new TrafficGraph(graph);
                 // using first edge as start should be ok
-                graphStartPosition = new GraphPosition(graph.getEdge(0));
+                vehiclePositioner = new GraphVehiclePositioner(new TrafficGraph(graph), new GraphPosition(graph.getEdge(0)));
                 // get smoothed flightpath
                 optionalPath = flightRoute.getPath();
                 // like FlightSystem does. Needed for visualization.
                 SystemManager.sendEvent(new Event(GraphEventRegistry.GRAPH_EVENT_PATHCREATED, new Payload(graph, optionalPath)));
             }
-            /**
-             * load eines Vehicle, z.B. per TRAFFIC_REQUEST_LOADVEHICLE. 24.11.20: Dafuer ist jetzt TRAFFIC_REQUEST_LOADVEHICLE2.
-             * Das muss nicht unbedingt fuer Travel mit Avatar geeignet sein. Obs das ist, ist abhaengig vom Vehicle.
-             * Wird erst auf Anforderung gemacht, weil
-             * ein Vehicle viele Resourcen braucht und abhaengig von delayedload in der config (mit "initialVehicle" aber automatisch nach kurzer Zeit).
-             * Geht nicht mehr ueber Index, sondern prüft was das nächste ist bzw. welces noch nicht geladen wurde
-             * Es wird auch nicht unbedingt das naechste, sondern einfach das uebergebene geladen.
-             * 26.3.20
-             */
             String name = vehiclename;
-
             if (name == null) {
                 List<Vehicle> vehiclelist = TrafficHelper.getVehicleListByDataprovider();
 
@@ -429,20 +419,34 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
             //22.3.24 SphereProjections sphereProjections = TrafficHelper.getProjectionByDataprovider();
 
-            VehicleDefinition config = TrafficHelper.getVehicleConfigByDataprovider(name, null);// tw.getVehicleConfig(name);
+            //VehicleDefinition config = TrafficHelper.getVehicleConfigByDataprovider(name, null);// tw.getVehicleConfig(name);
+            VehicleDefinition config = ((TrafficSystem) SystemManager.findSystem(TrafficSystem.TAG)).getVehicleConfig(name, null);// tw.getVehicleConfig(name);
+            if (config == null) {
+                logger.warn("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing config for vehicle " + name + ". Will not retry.");
+                return true;
+            }
             EcsEntity avatar = UserSystem.getInitialUser();
-            if (destinationNode == null) {
+            /*21.3.25 if (destinationNode == null) {
                 // the most ugly hack ever. Who sets destinationNode?
                 destinationNode = Scene.getCurrent().getWorld();
-            }
+            }*/
+
             // 21.3.24 Without login there's no avatar yet
-            VehicleLauncher.launchVehicle(new Vehicle(name), config, graphToUse, graphStartPosition,
+            VehicleLauncher.launchVehicle(new Vehicle(name), config, vehiclePositioner /*graphToUse, graphStartPosition*/,
                     avatar == null ? null : TeleportComponent.getTeleportComponent(avatar),
-                    destinationNode, null/*22.3.24 sphereProjections.backProjection*/, null/*baseTransformForVehicleOnGraphToUse*/, nearView, genericVehicleBuiltDelegates,
+                    /*destinationNode/*9.3.25 , null/*22.3.24 sphereProjections.backProjection*/ null/*baseTransformForVehicleOnGraphToUse*/, nearView, genericVehicleBuiltDelegates,
                     vehicleLoader, optionalPath);
             return true;
         }
         return false;
+    }
+
+    private VehiclePositioner buildVehiclePositioner(SmartLocation smartLocation) {
+        Vector3 v = smartLocation.getCoordinate();
+        if (v != null) {
+            return new SphereVehiclePositioner(v);
+        }
+        throw new RuntimeException("not supported " + smartLocation);
     }
 
     @Override
@@ -761,18 +765,102 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
      * 8.5.24: Extracted from a custom VehicleLauncher.lauchVehicleByName().
      * Currently fails for non "groundnet" smartlocations (neither used in Demo nor in Wayland because TRAFFIC_REQUEST_LOADVEHICLE
      * isn't used there).
+     * Returns some arbitrary position from graph if no start position can be derived from SmartLocation
      */
     private GraphPosition getGraphStartPosition(SmartLocation location, TrafficGraph trafficGraph) {
+        GraphEdge ed = null;
         String edge = location.getGroundnetLocation();
-        GraphEdge ed = trafficGraph.getBaseGraph().findEdgeByName(edge);
+        if (edge != null) {
+            ed = trafficGraph.getBaseGraph().findEdgeByName(edge);
+        }
         if (ed == null) {
             long millis = Platform.getInstance().currentTimeMillis();
-            logger.warn("edge not found for location: " + edge + ".Using random from millis " + millis);
+            logger.warn("edge not found for smart location: " + location + ".Using random from millis " + millis);
             ed = trafficGraph.getBaseGraph().getEdge((int) (millis % trafficGraph.getBaseGraph().getNodeCount()));
         }
         //27.12.21VehicleConfig config = tw.getVehicleConfig(name);
         GraphPosition start = new GraphPosition(ed/*, ed.getLength() , true*/);
         return start;
+    }
+
+    /**
+     * 7.3.25 Following methods integrated from class VehicleConfigDataProvider and replacing DataProvder
+     * Some systems (GroundServiceSystem) need to know both the available service vehicles and the dimensions of aircrafts.
+     * Should be set during startup (events might also be an option)
+     */
+    /*public class VehicleConfigDataProvider implements DataProvider {
+        //27.12.21TrafficWorldConfig tw;
+        // TrafficConfig tw;
+        private List<VehicleDefinition> vehicleDefinitions;
+
+        public VehicleConfigDataProvider(List<VehicleDefinition> /*TrafficConfig* / tw) {
+            if (tw == null) {
+                Platform.getInstance().getLog(VehicleConfigDataProvider.class).error("Setting null tw!");
+            }
+            // Heads up: The list might be extended later from outside(TrafficSystem)
+            this.vehicleDefinitions = tw;
+        }*/
+
+    /**
+     * Finds by name basically.
+     * 24.11.23: From AircraftConfigProvider find by type additionally.
+     * 7.3.25: Might return a list?? This is not consistent. Renamed from getVehicleConfigByDataprovider().
+     *
+     * @return VehicleDefinition
+     */
+    /*@Override
+    public Object getData(Object[] parameter) {
+        String vehicleName = (String) parameter[0];*/
+    public VehicleDefinition getVehicleConfig(String vehicleName, String type) {
+
+        if (knownVehicles == null) {
+            //25.11.23 return new LocConfig();
+            logger.error("no known vehicles yet");
+            return null;
+        }
+        if (vehicleName == null) {
+            return VehicleConfigDataProvider.findVehicleDefinitionsByModelType(knownVehicles, type).get(0);
+        }
+        //27.12.21 VehicleConfig vconfig = tw.getVehicleConfig(vehicleName);
+
+        //30.10.23: xsd layout getter
+        List<VehicleDefinition> vconfig = VehicleConfigDataProvider.findVehicleDefinitionsByName(knownVehicles, vehicleName);
+        if (vconfig.size() > 0) {
+            return vconfig.get(0);
+        }
+        logger.warn("vehicle " + vehicleName + " not found in " + knownVehicles.size() + " known.");
+
+        //30.10.23: Legacy getter
+        //26.11.23 no longer
+        vconfig = null;//ConfigHelper.getVehicleConfig(tw, vehicleName);
+        return null;//vconfig;
+    }
+
+    /**
+     * Was in TafficWorldConfig with name 'getAircraftConfiguration' once.
+     */
+    /*public VehicleDefinition getByType(String type) {
+        List<VehicleDefinition> vconfig = tw.findVehicleDefinitionsByModelType(type);
+        if (vconfig.size() > 0) {
+            return vconfig.get(0);
+        }
+        return null;
+
+    }*/
+    public List<VehicleDefinition> findVehicleDefinitionsByName(String name) {
+        return VehicleConfigDataProvider.findVehicleDefinitionsByName(knownVehicles, name);
+    }
+
+    public List<VehicleDefinition> findVehicleDefinitionsByModelType(String modeltype) {
+        return VehicleConfigDataProvider.findVehicleDefinitionsByModelType(knownVehicles, modeltype);
+    }
+
+    public void addKnownVehicle(VehicleDefinition vd) {
+        knownVehicles.add(vd);
+    }
+
+    public List<VehicleDefinition> getKnownVehicles() {
+        return knownVehicles;
     }
 }
 

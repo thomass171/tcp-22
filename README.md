@@ -63,6 +63,9 @@ sh bin/deployBundle.sh -m engine
 ```
 
 ## Unity
+
+Note as of 3/2025: This feature has not been upgraded for a while and is broken very likely.
+
 Convert the needed files to CS (be sure to use a zsh compatible shell like bash):
 ```
 for m in core engine maze outofbrowser-common
@@ -161,7 +164,7 @@ initialRoute:
 bundleResolver(in future?;or httpBundleResolver?): Similar to ADDITIONALBUNDLE, but not base64 encoded and adding the resolver
 **before** the default resolver. This allows overriding default bundles by custom bundles.
 
-initialLocation:  In traffic a (smart)location resulting/superseeded in FlightLocation. 
+initialLocation:  In traffic a (smart)location used in association with initialVehicle. Sometimes resulting/superseeded in FlightLocation. Competes with 'initialRoute'.
 
 initialHeading: Contributing to initialLocation(FlightLocation)
 
@@ -280,6 +283,12 @@ Major changes:
   * Reactivated 'Universalshader' as multi purpose shader (including textureMatrix).
   * Property ADDITIONALBUNDLE no longer for gwt dev mode but with http query param HOSTDIR
 
+## 2025-03-26
+  * ObserverSystem uses Shift-CUR* keys instead of CUR* for having CUR* available for movement control
+  * Speedup/Down with PGUP/DOWN keys instead of '+'/'-' because those keys might be inconvenient depending on keyboard layout
+  * FreeFlyingSystem added
+  * 'Wayland' added to home page
+
 # Technical Details
 
 ## Architecture
@@ -288,10 +297,13 @@ Major changes:
 <img src="docs/Architecture-base.svg" width="100%" alt="">
 
 ### Conventions
+This is a definition of phrases used througout the project.
 
-position: Consider a 3D coordinate (Vector3) like Payload and XML config (traffic.xsd) does.
+#### position
+Consider a 3D coordinate (Vector3) like Payload and XML config (traffic.xsd) does.
 
-location: Consider an abstract position, in traffic a (Smart/FlightLocation)
+#### location
+Consider an abstract position, in traffic a (Smart/FlightLocation)
 
 ## Design
 

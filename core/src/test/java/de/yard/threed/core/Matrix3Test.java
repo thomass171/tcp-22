@@ -74,4 +74,17 @@ public class Matrix3Test {
         m3.setTranslation(new Vector2(2, 3));
         TestUtils.assertVector2(new Vector2(2 + 4, 3 + 5), m3.transform(new Vector2(4, 5)), "");
     }
+
+    @Test
+    public void testExtractQuaternion() {
+        Degree d30 = new Degree(30);
+
+        Quaternion x30 = Quaternion.buildRotationX(d30);
+        TestUtils.assertQuaternion(x30, Matrix4.buildRotationXMatrix(d30).extractRotation().extractQuaternion());
+        Quaternion y30 = Quaternion.buildRotationY(d30);
+        TestUtils.assertQuaternion(y30, Matrix4.buildRotationYMatrix(d30).extractRotation().extractQuaternion());
+        Quaternion z30 = Quaternion.buildRotationZ(d30);
+        TestUtils.assertQuaternion(z30, Matrix4.buildRotationZMatrix(d30).extractRotation().extractQuaternion());
+
+    }
 }

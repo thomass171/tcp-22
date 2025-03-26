@@ -79,6 +79,7 @@ public class SimpleVehicleLoader implements VehicleLoader {
         basenode.setName("basenode");
         SceneNode node = new SceneNode(basenode);
         //6.11.21 name is likely to change later to "offsetnode/vehiclecontainer"(or not??)
+        //15.3.25 No, name doesn't change later
         node.setName("zoffsetnode");
         Vector3 p = node.getTransform().getPosition();
         p = new Vector3(p.getX(), p.getY(), p.getZ() + zoffset);

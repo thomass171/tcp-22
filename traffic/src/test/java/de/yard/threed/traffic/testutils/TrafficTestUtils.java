@@ -6,15 +6,17 @@ import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.testutil.TestUtils;
+import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
-import de.yard.threed.graph.DefaultEdgeBasedRotationProvider;
 import de.yard.threed.graph.Graph;
 import de.yard.threed.graph.GraphEdge;
 import de.yard.threed.graph.GraphMovingComponent;
 import de.yard.threed.graph.GraphPosition;
-import de.yard.threed.traffic.SimpleEllipsoidCalculations;
+import de.yard.threed.traffic.VehicleLauncher;
 import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import org.slf4j.Logger;
 
 import static de.yard.threed.core.testutil.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,5 +75,62 @@ public class TrafficTestUtils {
         assertFalse(gmc.hasAutomove());
         assertEquals(expectPath, gmc.getPath() != null);
         assertQuaternion(expectedModelRotation, gmc.customModelRotation);
+    }
+
+    /**
+     *
+     */
+    public static void assertVehicleEntity(EcsEntity entity, String vehicleName, double expectedZOffset, Vector3 expectedPosition, String expectedParent, Logger log) {
+        GraphMovingComponent gmc = GraphMovingComponent.getGraphMovingComponent(entity);
+        SceneNode entityNode = entity.getSceneNode();
+        log.debug("entityNode: {}", entityNode.dump("  ", 0));
+        assertEquals("vehiclecontainer-" + vehicleName, entityNode.getName());
+        if (expectedPosition != null) {
+            assertVector3(expectedPosition, entityNode.getTransform().getPosition());
+        }
+        SceneNode entityParentNode = entityNode.getTransform().getParent().getSceneNode();
+        assertEquals(expectedParent, entityParentNode.getName());
+        SceneNode vehicle_container = getSingleChild(entityNode, "vehicle-container");
+        assertVehicleNodeHierarchy(vehicle_container, expectedZOffset);
+    }
+
+    /**
+     * Tests in both node 'directions'
+     * Scetch 37
+     */
+    public static void assertVehicleNodeHierarchy(SceneNode container, double expectedZOffset) {
+        assertEquals("vehicle-container", container.getName());
+        // from top
+        SceneNode zoffsetnode1 = getSingleChild(container, "zoffsetnode");
+        TestUtils.assertQuaternion(new Quaternion(), zoffsetnode1.getTransform().getRotation());
+
+        SceneNode basenode = getSingleChild(zoffsetnode1, "basenode");
+        TestUtils.assertQuaternion(new Quaternion(), basenode.getTransform().getRotation());
+
+        // from bottom
+        SceneNode vehicleModelnode = VehicleLauncher.getModelNodeFromVehicleNode(container);
+        assertEquals("vehicle-container", container.getName());
+        TestUtils.assertQuaternion(new Quaternion(), container.getTransform().getRotation());
+
+        assertEquals("basenode", vehicleModelnode.getName());
+        TestUtils.assertQuaternion(new Quaternion(), vehicleModelnode.getTransform().getRotation());
+
+        SceneNode zoffsetnode = vehicleModelnode.getParent();
+        assertEquals("zoffsetnode", zoffsetnode.getName());
+        TestUtils.assertVector3(new Vector3(0, 0, expectedZOffset), zoffsetnode.getTransform().getPosition());
+        TestUtils.assertQuaternion(new Quaternion(), zoffsetnode.getTransform().getRotation());
+
+        // container1 is container again
+        SceneNode container1 = zoffsetnode.getParent();
+        assertEquals("vehicle-container", container1.getName());
+    }
+
+    public static SceneNode getSingleChild(SceneNode node, String expectedChildName) {
+        if (node.getTransform().getChildCount() != 1) {
+            fail("not one child");
+        }
+        SceneNode child = node.getTransform().getChild(0).getSceneNode();
+        assertEquals(expectedChildName, child.getName());
+        return child;
     }
 }

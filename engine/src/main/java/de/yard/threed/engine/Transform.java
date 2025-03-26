@@ -89,6 +89,10 @@ public class Transform implements SimpleTransform, GenericTreeNode {
         transform.rotateOnAxis(axis, (float) angle.toRad());
     }
 
+    public void rotateOnAxis(Vector3 axis, double angle) {
+        transform.rotateOnAxis(axis, (float) angle);
+    }
+
     /**
      * 06.12.16
      *
@@ -131,7 +135,7 @@ public class Transform implements SimpleTransform, GenericTreeNode {
     public Transform getChild(int index) {
         NativeTransform child = transform.getChild(index);
         if (child == null) {
-            logger.error("child isType null.index=" + index);
+            logger.error("child is null.index=" + index);
             return null;
         }
         return new Transform(child);

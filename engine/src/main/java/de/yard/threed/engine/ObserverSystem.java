@@ -52,7 +52,10 @@ public class ObserverSystem extends DefaultEcsSystem {
     public void update(EcsEntity entity, EcsGroup group, double tpf) {
         ObserverComponent oc = (ObserverComponent) group.cl.get(0);
 
-        if (!Input.getKey(KeyCode.Shift)) {
+        // 11.3.25: Now use shifted instead of not shifted to avoid conflicts with movement control in traffic
+        // where do we now have conflicts? In 'maze'?
+        //if (!Input.getKey(KeyCode.Shift)) {
+        if (Input.getKey(KeyCode.Shift)) {
 
             if (Input.getKey(KeyCode.RightArrow)) {
                 oc.incHeading(-tpf);

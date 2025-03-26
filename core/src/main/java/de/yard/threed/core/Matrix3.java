@@ -197,4 +197,10 @@ public class Matrix3 implements Dumpable {
     public Vector3 getCol2() {
         return new Vector3(e13, e23, e33);
     }
+
+    public Quaternion extractQuaternion() {
+        return MathUtil2.extractQuaternion(e11, e12, e13,
+                e21, e22, e23,
+                e31, e32, e33);
+    }
 }

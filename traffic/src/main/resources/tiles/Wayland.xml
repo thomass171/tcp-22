@@ -2,11 +2,13 @@
 
 <!-- Tile Definition for Wayland (y0 plane? nee, z0)
  Was meant to be "by convention" once, but that doesn't make sense, for example for vehicle lists and light.
+ 10.03.25 'mobi' added.
 -->
 
 <c:config xmlns:c="http://www.example.org/tcp-22" name="a">
 
     <include>locomotive.xml</include>
+    <include>mobi.xml</include>
 
     <terrain>
         <object name="Ground" modelfile="traffic:tiles/Wayland.gltf"/>
@@ -44,7 +46,9 @@
         </transform>
     </viewpoint>
 
+    <!-- loc definition was included from locomotive.xml -->
     <vehicle name="loc" delayedload="false" automove="true" location="*:firstEdge" initialcount="1"/>
+    <vehicle name="mobi" delayedload="true" automove="true" location="*:firstEdge" initialcount="1"/>
 
     <!--9.7.24<BaseTransformForVehicleOnGraph>
         <transform>

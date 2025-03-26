@@ -112,6 +112,8 @@ public class Base3DTest {
         RuntimeTestUtil.assertVector3(MathUtil2.DEFAULT_UP, transform.getLocalModelMatrix().getUp());
         RuntimeTestUtil.assertVector3(MathUtil2.DEFAULT_RIGHT, transform.getLocalModelMatrix().getRight());
         RuntimeTestUtil.assertVector3(new Vector3(0, 0, 0), transform.getPosition());
+
+        RuntimeTestUtil.assertMatrix4(new Matrix4(), Matrix4.buildFromRightUpForward(MathUtil2.DEFAULT_RIGHT, MathUtil2.DEFAULT_UP, MathUtil2.DEFAULT_FORWARD));
     }
 
     public static void testViewMatrixDefaults(Camera camera, Log logger) {

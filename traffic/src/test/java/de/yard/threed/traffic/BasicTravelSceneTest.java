@@ -1,13 +1,16 @@
 package de.yard.threed.traffic;
 
 
+import de.yard.threed.core.Color;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
+import de.yard.threed.core.platform.NativeLight;
 import de.yard.threed.core.platform.NativeSceneNode;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.ViewPoint;
@@ -38,6 +41,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static de.yard.threed.core.testutil.TestUtils.*;
+import static de.yard.threed.engine.test.testutil.TestUtil.assertColor;
 import static de.yard.threed.engine.testutil.EngineTestUtils.assertViewPoint;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -66,11 +70,19 @@ public class BasicTravelSceneTest {
      * A georoute cannot be used here because Wayland is native 2D without MapProjection.
      */
     @ParameterizedTest
-    @CsvSource(value = {"false;", "true;"}, delimiter = ';')
-    public void testWayland(boolean enableFPC, String initialVehicle) throws Exception {
+    @CsvSource(value = {
+            "false;;",
+            "true;;",
+            // coordinates just arbitrary
+            "false;mobi;coordinate:90.0,110.5,76.0",
+    }, delimiter = ';')
+    public void testWayland(boolean enableFPC, String initialVehicle, String initialLocation) throws Exception {
         HashMap<String, String> customProperties = new HashMap<String, String>();
         customProperties.put("enableFPC", Boolean.toString(enableFPC));
-        customProperties.put("initialVehicle", initialVehicle);
+        if (initialVehicle != null) {
+            customProperties.put("initialVehicle", initialVehicle);
+            customProperties.put("initialLocation", initialLocation);
+        }
         setup("traffic:tiles/Wayland.xml", customProperties);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
@@ -103,13 +115,23 @@ public class BasicTravelSceneTest {
         assertFalse(((GraphTerrainSystem) SystemManager.findSystem(GraphTerrainSystem.TAG)).enabled);
 
         sceneRunner.runLimitedFrames(50);
+        TrafficSystem trafficSystem = ((TrafficSystem) SystemManager.findSystem(TrafficSystem.TAG));
+        SphereSystem sphereSystem = ((SphereSystem) SystemManager.findSystem(SphereSystem.TAG));
+        // no projection in wayland, it is native.
+        assertNull(sphereSystem.projection);
+        testLights();
+
         // now 'loc' should have been loaded.
-        assertEquals(1, EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_VEHICLELOADED).size(), "TRAFFIC_EVENT_VEHICLELOADED.size");
+        assertEquals(1 + ((initialVehicle == null ? 0 : 1)), EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_VEHICLELOADED).size(), "TRAFFIC_EVENT_VEHICLELOADED.size");
         // vehicle loaded for each of the railway and road graphs
-        assertEquals(2, ((TrafficSystem) SystemManager.findSystem(TrafficSystem.TAG)).vehiclesLoaded);
+        assertEquals(2, trafficSystem.vehiclesLoaded);
+        // 10.3.25 'mobi' added. It's known independent from launching it.
+        assertEquals(1 + 1, trafficSystem.getKnownVehicles().size());
 
         EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
         assertNotNull(locEntity, "loc entity");
+        // position is random so cannot be tested
+        TrafficTestUtils.assertVehicleEntity(locEntity, "loc", 0.0, null, "TravelSphere", log);
 
         if (enableFPC) {
             assertNull(TeleportComponent.getTeleportComponent(userEntity));
@@ -117,7 +139,7 @@ public class BasicTravelSceneTest {
             assertEquals("oben5", ((FirstPersonMovingSystem) SystemManager.findSystem(FirstPersonMovingSystem.TAG)).viewPoints.get(4).name);
         } else {
             // 'loc' has two viewpoints. TODO check why is position
-            EcsTestHelper.assertTeleportComponent(userEntity, 5 + 2, 6, new Vector3());
+            EcsTestHelper.assertTeleportComponent(userEntity, 5 + 2 + ((initialVehicle == null ? 0 : 2)), 6 + ((initialVehicle == null ? 0 : 2)), new Vector3());
         }
 
         List<ViewPoint> vps = TrafficHelper.getViewpointsByDataprovider();
@@ -125,14 +147,23 @@ public class BasicTravelSceneTest {
         assertEquals(5, vps.size());
         assertViewPoint("oben5", new LocalTransform(new Vector3(0, 0, 4000), new Quaternion()), vps.get(4));
 
-        assertNotNull(TrafficHelper.getVehicleConfigByDataprovider("loc", null));
-        assertNull(TrafficHelper.getVehicleConfigByDataprovider("xx", null));
+        assertNotNull(trafficSystem.getVehicleConfig("loc", null));
+        assertNull(trafficSystem.getVehicleConfig("xx", null));
 
         GraphMovingComponent gmc = GraphMovingComponent.getGraphMovingComponent(locEntity);
         // loc should immediately move (without path, only by property automove set in config 'Wayland.xml' for vehicle 'loc')
         assertNotNull(gmc.getGraph());
         assertTrue(gmc.hasAutomove());
         assertNull(gmc.getPath());
+
+        if (initialVehicle != null) {
+            EcsEntity mobiEntity = SystemManager.findEntities(e -> "mobi".equals(e.getName())).get(0);
+            assertNotNull(mobiEntity, "mobiEntity");
+            TrafficTestUtils.assertVehicleEntity(mobiEntity, "mobi", 0.0, new Vector3(90.0, 110.5, 76.0), "TravelSphere"/*"sphereTransform"*/, log);
+            FreeFlyingComponent bmc = FreeFlyingComponent.getFreeFlyingComponent(mobiEntity);
+            assertNotNull(bmc);
+
+        }
     }
 
     @Test
@@ -165,6 +196,12 @@ public class BasicTravelSceneTest {
         EcsTestHelper.assertTeleportComponent(player, 1, 0, null);
 
         sceneRunner.runLimitedFrames(50);
+        TrafficSystem trafficSystem = ((TrafficSystem) SystemManager.findSystem(TrafficSystem.TAG));
+        SphereSystem sphereSystem = ((SphereSystem) SystemManager.findSystem(SphereSystem.TAG));
+        // no projection in demo, it is native.
+        assertNull(sphereSystem.projection);
+        testLights();
+
         // now 'loc' should have been loaded.
         // should start at externel overview point. For now its in vehicle. TODO: Check why 0,0,0 is correct position
         EcsTestHelper.assertTeleportComponent(player, 1 + 2, 2, new Vector3());
@@ -173,6 +210,8 @@ public class BasicTravelSceneTest {
         assertNotNull(userEntity, "user entity");
         EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
         assertNotNull(locEntity, "loc entity");
+        // assume position fits
+        TrafficTestUtils.assertVehicleEntity(locEntity, "loc", 0.0, new Vector3(48.56055289994228, 0.0, -20.03455336481473), "TravelSphere", log);
 
         SceneNode locNode = locEntity.getSceneNode();
         double xpos0 = locNode.getTransform().getPosition().getX();
@@ -230,7 +269,7 @@ public class BasicTravelSceneTest {
         // loc should *not* immediately move (even though a path there is no property automove set in config 'Moon.xml' for vehicle 'loc')
         TrafficTestUtils.assertEntityOnGraph(locEntity, true, VehicleLauncher.locToGraphRotation());
 
-        LocalTransform posrot = gmc.getGraph().getPosRot(gmc.getCurrentposition(),new Quaternion());
+        LocalTransform posrot = gmc.getGraph().getPosRot(gmc.getCurrentposition(), new Quaternion());
         log.debug("posrot={}", posrot);
 
         EllipsoidCalculations elliCalcs = TrafficHelper.getEllipsoidConversionsProviderByDataprovider();
@@ -263,5 +302,17 @@ public class BasicTravelSceneTest {
         properties.putAll(customProperties);
         sceneRunner = SceneRunnerForTesting.setupForScene(INITIAL_FRAMES, ConfigurationByEnv.buildDefaultConfigurationWithEnv(properties),
                 /*1.10.23 provided by scene new String[]{"engine", "data", "traffic"}*/null);
+    }
+
+    public void testLights() {
+
+        List<NativeLight> lights = Platform.getInstance().getLights();
+        assertEquals(2, lights.size(), "lights.size");
+        // directional
+        assertVector3(new Vector3(1, 1, 1).normalize(), lights.get(0).getDirectionalDirection());
+        assertColor("", Color.WHITE, lights.get(0).getDirectionalColor());
+        // ambient
+        assertNull(lights.get(1).getDirectionalDirection());
+        assertColor("", Color.WHITE, lights.get(1).getAmbientColor());
     }
 }

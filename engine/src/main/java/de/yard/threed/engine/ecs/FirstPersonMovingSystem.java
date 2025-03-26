@@ -23,8 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * First person movement of an entity. This typically should have the observer attached.
+ * First person movement of an entity with FirstPersonMovingComponent.
+ * Intended to move the user entity transform.
+ * This typically should have the observer attached.
  * Start position is unset, so on (0,0,0).
+ * For avoiding confusion with controls/requests 'aircraft flying' is covered by FreeFlyingSystem.
  * <p>
  * Created by thomass on 26.08.23.
  */

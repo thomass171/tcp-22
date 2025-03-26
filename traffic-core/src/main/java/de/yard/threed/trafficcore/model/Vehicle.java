@@ -14,7 +14,7 @@ public class Vehicle {
         this.delayedLoad = delayedLoad;
         this.automove = automove;
         if (location != null) {
-            this.location = new SmartLocation(location);
+            this.location = SmartLocation.fromString(location);
         }
         this.initialCount = initialCount;
     }

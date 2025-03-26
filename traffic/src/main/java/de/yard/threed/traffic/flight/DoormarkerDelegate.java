@@ -4,7 +4,8 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.apps.ModelSamples;
 import de.yard.threed.engine.ecs.EcsEntity;
-import de.yard.threed.traffic.TrafficHelper;
+import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.traffic.TrafficSystem;
 import de.yard.threed.traffic.VehicleBuiltDelegate;
 import de.yard.threed.traffic.VehicleComponent;
 import de.yard.threed.traffic.VehicleLauncher;
@@ -36,7 +37,7 @@ public class DoormarkerDelegate implements VehicleBuiltDelegate {
                 // 4.12.23 Avoid NPE
                 modelType="738";
             }
-            VehicleDefinition aircraftConfig = TrafficHelper.getVehicleConfigByDataprovider(null, modelType);
+            VehicleDefinition aircraftConfig = ((TrafficSystem) SystemManager.findSystem(TrafficSystem.TAG)).getVehicleConfig(null, modelType);
             Vector3 dp = aircraftConfig.getCateringDoorPosition();
             marker.getTransform().setPosition(dp);
 

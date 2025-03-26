@@ -4,6 +4,7 @@ import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.RuntimeTestUtil;
 import de.yard.threed.engine.*;
+import de.yard.threed.engine.apps.ModelSamples;
 import de.yard.threed.engine.avatar.AvatarSystem;
 import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.gui.*;
@@ -20,6 +21,7 @@ import de.yard.threed.traffic.LightDefinition;
 import de.yard.threed.traffic.MoonSceneryBuilder;
 import de.yard.threed.traffic.RequestRegistry;
 import de.yard.threed.traffic.EllipsoidCalculations;
+import de.yard.threed.traffic.FreeFlyingSystem;
 import de.yard.threed.traffic.ScenerySystem;
 import de.yard.threed.traffic.SphereSystem;
 import de.yard.threed.traffic.TrafficHelper;
@@ -30,7 +32,6 @@ import de.yard.threed.traffic.geodesy.GeoCoordinate;
 import de.yard.threed.graph.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
-import de.yard.threed.traffic.config.VehicleConfigDataProvider;
 import de.yard.threed.trafficcore.model.Vehicle;
 import de.yard.threed.engine.util.NearView;
 import de.yard.threed.engine.util.RandomIntProvider;
@@ -75,9 +76,9 @@ import java.util.Map;
  * <p>
  * Usermode
  * 26.10.18: Generic traffic keycodes (vor allem usermode):
- * (S)tart Einen DefaultTravel startem, in der Regel ein Rundflug
+ * not yet here! (S)tart a default trip, at an airport typically a round trip. Applies to 'current' vehicle and only if it is graph bound.
  * (M)TouchSegment1: Open/Toggle optional menu in (VR has control panel at left writst)
- * (L)oad vehicle. Das naechste aus der Config das noch nicht geladen wurde. Sollte erst nicht mehr dabei sein und wird im UserMode nicht unbedingt gebraucht.
+ * (L)oad vehicle. Applies to next configured but not yet loaded vehicle. Sollte erst nicht mehr dabei sein und wird im UserMode nicht unbedingt gebraucht.
  * Seit controlmenu weg ist aber ganz praktisch.
  * (V) run tests. internal.
  * (CursorKeys) for view Left/Right/Up/Down in non VR (via ObserverSystem).
@@ -85,8 +86,8 @@ import java.util.Map;
  * <p>
  * Folgende KEys sind da bewusst nicht bei: ,
  * <p>
- * Start Sequence:
- * - Splash screen und "Loading" (transparent) mit progress. In the background scenery isType loading.
+ * Start Sequence (in future):
+ * - Splash screen und "Loading" (transparent) mit progress. In the background scenery is loading.
  * - Vehicle is loaded by argument "initialVehicle".
  * - When vehicle is available fadeout, teleport, fadein.
  * - "Click for Start" Button. Das ist dann quasi der 's' Key.
@@ -97,7 +98,7 @@ import java.util.Map;
  * 05.03.24: control menu added to be prepared for touch screens.
  * Created on 28.09.18.
  */
-public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler */ {
+public class BasicTravelScene extends Scene {
     // Don't define a logger here by getLog(). Might result in NPE.
     // The default TravelScene has no hud.
     protected Hud hud;
@@ -105,20 +106,11 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     protected boolean enableFPC = false, enableNearView = false;
     //Manche Requests können wegen zu spezieller Abhängigkeiten nicht von ECS bearbeitet werden, sondern müssen aber auf App Ebene laufen.
 
-    // nur bei Flat, in 3D null! 7.10.21 static bis es wegkommt
-    //25.9.20 protected DefaultTrafficWorld trafficWorld;
     //22.10.21 wird noch einmal gebraucht
     protected TeleporterSystem teleporterSystem;
     RandomIntProvider rand = new RandomIntProvider();
 
     protected String vehiclelistname = "GroundServices";
-    /*31.1.22
-    RequestType REQUEST_MENU = RequestType.register("Menu");
-    RequestType REQUEST_CYCLE = RequestType.register("Cycle");
-    RequestType REQUEST_LOAD = RequestType.register("Load");
-    RequestType REQUEST_PLAY = RequestType.register("Play");
-    RequestType REQUEST_PLUS = RequestType.register("+");
-    RequestType REQUEST_MINUS = RequestType.register("-");*/
     protected NearView nearView = null;
     // 17.10.21: per argument oder default EDDK
     String tilename = null;
@@ -129,6 +121,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
     public TrafficSystem trafficSystem;
     // in non VR for menu and control menu
     protected Camera cameraForMenu = null;
+    private String waitsForInitialVehicle = null;
 
     @Override
     public void init(SceneMode sceneMode) {
@@ -142,10 +135,12 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
 
         SphereSystem sphereSystem = new SphereSystem(/*getRbcp(),*/ getGraphBackProjectionProvider()/*16.3.24, getCenter() getSceneConfig()*/);
         SystemManager.addSystem(sphereSystem);
-        ((SphereSystem) SystemManager.findSystem(SphereSystem.TAG)).setDefaultLightDefinition(getLight());
+        //((SphereSystem) SystemManager.findSystem(SphereSystem.TAG)).setDefaultLightDefinition(getLight());
         SystemManager.addSystem(new GraphMovingSystem());
         SystemManager.addSystem(new GraphTerrainSystem(getTerrainBuilder()));
-        //SystemManager.addSystem(new GroundServicesSystem());
+        FreeFlyingSystem freeFlyingSystem = FreeFlyingSystem.buildFromConfiguration();
+        SystemManager.addSystem(freeFlyingSystem);
+
         if (enableFPC) {
             FirstPersonMovingSystem firstPersonMovingSystem = FirstPersonMovingSystem.buildFromConfiguration();
             SystemManager.addSystem(firstPersonMovingSystem);
@@ -156,8 +151,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             //anim ist zu ruckelig/fehlerhaft
             teleporterSystem.setAnimated(false);
             SystemManager.addSystem(teleporterSystem);
-
-
         }
         // ObserverSystem is needed for attaching observer (not conflicting with FPC due to disabled components). But also in VR?
         SystemManager.addSystem(new ObserverSystem(), 0);
@@ -213,8 +206,12 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         //toggle auto move
         inputToRequestSystem.addKeyMapping(KeyCode.Alpha9, UserSystem.USER_REQUEST_AUTOMOVE);
 
+        // only one system should register for ROLL*, TURN* requests to avoid conflicts. So we have to decide. Typically it will be FreeFlyingSystem.
+        // Should be fixed by 'per avatar position' request.
         if (enableFPC) {
             FirstPersonMovingSystem.addDefaultKeyBindingsforContinuousMovement(inputToRequestSystem);
+        } else {
+            FreeFlyingSystem.addDefaultKeyBindingsforContinuousMovement(inputToRequestSystem);
         }
 
         if (vrInstance != null) {
@@ -271,6 +268,10 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             return moonSceneryBuilder;
         });
 
+        if (false) {
+            // The axis helper dimensions fit to 'wayland'
+            addToWorld(ModelSamples.buildAxisHelper(500, 10.0));
+        }
         customInit();
         postInit(sceneMode);
     }
@@ -327,13 +328,8 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
             if (enableFPC) {
                 getLog().info("Ignoring initialVehicle due to FPC");
             } else {
-                Request request;
-                // no userid known. Might not be user related. TODO Maybe the request via parameter isn't used any more.
-                // Its quite early to send this request now, but the receiver should wait until the time comes.
-                // 10.5.24: far too early. Sphere is not yet loaded.
-                request = RequestRegistry.buildLoadVehicle(-1, argv_initialVehicle, null,
-                        Platform.getInstance().getConfiguration().getString("initialRoute"));
-                SystemManager.putRequest(request);
+                // 7.3.25 'request send' moved to update()
+                waitsForInitialVehicle = argv_initialVehicle;
             }
         }
 
@@ -494,7 +490,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         }*/
         if (Input.getKeyDown(KeyCode.L)) {
             // load next not yet loaded vehicle. 1.2.24: What is using this? Hangar/Cockpit isn't. But FlatAirportScene does.
-            Request request = RequestRegistry.buildLoadVehicle(UserSystem.getInitialUser().getId(), null, null, null);
+            Request request = RequestRegistry.buildLoadVehicle(UserSystem.getInitialUser().getId(), null, null, null, null);
             SystemManager.putRequest(request);
         }
 
@@ -521,6 +517,19 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
 
             InputToRequestSystem inputToRequestSystem = (InputToRequestSystem) SystemManager.findSystem(InputToRequestSystem.TAG);
             inputToRequestSystem.addControlPanel(leftControllerPanel);
+        }
+
+        if (waitsForInitialVehicle != null) {
+            // one time runtime initialization
+            // 7.3.25 'Request send' was in init() before, but that's far too early, even though the request is queued.
+            // Sphere is not yet loaded at that time.
+            // no userid known? Might not be user related. TODO Maybe the request via parameter isn't used any more.7.3.25 todo still valid?
+            Request request = RequestRegistry.buildLoadVehicle(-1, waitsForInitialVehicle,
+                    Platform.getInstance().getConfiguration().getString("initialLocation"),
+                    Platform.getInstance().getConfiguration().getString("initialRoute"),
+                    Platform.getInstance().getConfiguration().getString("initialHeading"));
+            SystemManager.putRequest(request);
+            waitsForInitialVehicle = null;
         }
     }
 
@@ -553,10 +562,10 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
      * 9.10.19: Liefert das Vehicle, in dem der Avatar sitzt, ansonsten null.
      * 14.10.19 Jetzt nicht mehr ueber diese krude Suche.
      * Entity im SystemManager suchen? Eher vom Teleport. Die Frage ist, wo der Avatar gerade ist.
-     *
+     * 12.03.25: The implementation seems OK so far. So use it in FreeFlyingSystem?
      * @return
      */
-    protected EcsEntity getAvatarVehicle() {
+    public static EcsEntity getAvatarVehicle() {
         TeleportComponent tc = TeleportComponent.getTeleportComponent(/*24.10.21avatar*/UserSystem.getInitialUser());
         /*SceneNode avatarparent = tc.getParent();
         String parentname = avatarparent.getName();
@@ -571,7 +580,7 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
         */
         String name = tc.getTargetEntity();
         if (name == null) {
-            getLog().warn("no target entity in TC");
+            //21.3.25 getLog().warn("no target entity in TC");
             return null;
         }
         return TrafficHelper.findVehicleByName(name);
@@ -587,10 +596,6 @@ public class BasicTravelScene extends Scene /*31.10.23 implements RequestHandler
      * 7.10.21: Some defaults instead of using abstract. Defaults fit to 2D tiles.
      * and should be overridden by 3D and projecting scenes.
      */
-    public VehicleConfigDataProvider getVehicleConfigDataProvider() {
-        return new VehicleConfigDataProvider(null);
-    }
-
     protected Log getLog() {
         return Platform.getInstance().getLog(BasicTravelScene.class);
     }

@@ -15,11 +15,18 @@
     <dependencies>
         <!-- junit comes from parent -->
         <!-- own project dependencies-->
-        <!-- aber nicht abhaengig von engine! -->
+        <!-- but not dependent from engine! Should be usable from WebServices, but needs to be C# and GWT ready (using StringUtils)-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.yard.tcp-22</groupId>
+            <artifactId>module-core</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

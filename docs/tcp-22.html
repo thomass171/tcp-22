@@ -20,6 +20,8 @@ w3-half: Half (1/2) screen column container
 w3-row-padding: Row where all columns have a default padding (Responsive Class)
 w3-section:	Adds an 16px top and bottom margin to an element (Margin Class)
 w3-container: HTML container with 16px left and right padding (Container Class)
+
+w3-khaki is color for use cases 'maze', w3-blue(?) for use case traffic.
 -->
 <!-- Navigation (Stays on Top) -->
 <!--<div class="w3-top w3-bar w3-black">
@@ -299,13 +301,14 @@ w3-container: HTML container with 16px left and right padding (Container Class)
             <div id="acc_notation" class="w3-container w3-hide">
                 <p>t.b.c.</p>
             </div>-->
-            <button onclick="toggleAccordion('acc_gameplay')"
+            <button onclick="toggleAccordion('acc_mazegameplay')"
                     class="w3-button w3-block w3-round w3-khaki w3-left-align">Maze gameplay
             </button>
-            <div id="acc_gameplay" class="w3-container w3-show">
+            <div id="acc_mazegameplay" class="w3-container w3-show">
                 <p>Pulling a box needs a gap between box and player. Firing is only possible if the player has bullets
                     (see inventory) and orthogonally.</p>
             </div>
+
             <button onclick="toggleAccordion('acc_usercontrols')"
                     class="w3-button w3-block w3-round w3-khaki w3-left-align">Maze user controls
             </button>
@@ -363,16 +366,73 @@ w3-container: HTML container with 16px left and right padding (Container Class)
                                 around in non VR.
                                 VR has control panel at the left wrist.</p>
                             <p></p>
-                            <button class=" w3-button  w3-round w3-khaki " onclick="launchTrafficScene(null)">Launch</button>
-                            <button class=" w3-button  w3-round w3-khaki " onclick="launchTrafficScene('VR')">Launch VR</button>
+                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Demo',null)">Launch</button>
+                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Demo','VR')">Launch VR</button>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+                <!--Wayland-->
+                <div class="w3-half">
+                    <div class="w3-card-2">
+                        <div class="w3-container">
+                            <h3>Wayland</h3>
+                            <div class="w3-container w3-center">
+                                <!-- TODO add wayland-->
+                                <img src="WaylandTrafficPreview.png" style="width:100%">
+                            </div>
+                            <p>A draft scenery created with 'osm-world-mesh'. A 'loc' moves on graph based tracks. Teleport ('t') to 'mobi' and fly it manually
+                                with PGUP/DOWN for speed and CUR*/a/d for controlling orientation.
+                               </p>
+                            <p></p>
+                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Wayland',null)">Launch</button>
+                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Wayland','VR')">Launch VR</button>
                             <p></p>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <button onclick="toggleAccordion('acc_trafficusercontrols')"
+                    class="w3-button w3-block w3-round w3-blue w3-left-align">Traffic user controls
+            </button>
+            <div id="acc_trafficusercontrols" class="w3-container w3-show">
+                <div class="w3-row-padding w3-padding-16">
+                    <div class="w3-third">
+                        <div class="w3-card-2">
+                            <div class="w3-container">
+                                <h3>Keyboard</h3>
+                                <p>Use shift CURLEFT/RIGHT for looking around. PGUP/DOWN for speed up/down. 't' for teleport.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w3-third">
+                        <div class=" w3-card-2">
+                            <div class="w3-container">
+                                <h3>Touchscreen</h3>
+                                <p>Move by touching segments 3,5,7 on the screen.
+                                    <img src="SegmentGrid.png" style="width:50%">
+                                    Segment 1 is for opening the control menu.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w3-third">
+                        <div class=" w3-card-2">
+                            <div class="w3-container">
+                                <h3>VR</h3>
+                                <p>Use left or right controller stick for moving. The left controller has a wristwatch
+                                    menu with buttons for</p>
+                                <ul>
+                                    <li>Move VR position up/down</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="w3-panel w3-padding-large w3-section  w3-white">
-                <h1 class="">Launch Settings</h1>
+                <h1 class="">Traffic Launch Settings</h1>
                 <p class="">Settings for traffic scenes launched via the above buttons</p>
                 <div class="w3-panel">
                     <div>
@@ -391,7 +451,7 @@ w3-container: HTML container with 16px left and right padding (Container Class)
         <div class="w3-panel w3-padding-large w3-section  w3-white">
             <h1 class="">User Controls</h1>
             <p class="">Controlling depends on the platform. In general, keys x/y/z can be used to fine tune the cameras
-                position.</p>
+                position. See section 'maze' and 'traffic' for use case specific.</p>
 
         </div>
 

@@ -174,14 +174,10 @@ public abstract class Scene {
     }
 
     /**
-     * 10.10.18: Nicht mehr so global festlegen. Das soll der Nutzer machen, wenn das nicht geht, dann die Platform.
-     * Nur in Ausnahmen die App.
-     *
-     * @return
+     * 10.10.18: No longer global setting 800x600. The preferred was should be user decides or the platform.
+     * But the app only in special cases.
+     * 06.03.25: So scenes probably shouldn't extend this any more.
      */
-    /*public Dimension getPreferredDimension() {
-        return new Dimension(800, 600);
-    }*/
     public Dimension getPreferredDimension() {
         return null;
     }

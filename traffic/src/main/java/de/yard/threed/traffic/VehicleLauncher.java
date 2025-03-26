@@ -74,16 +74,12 @@ public class VehicleLauncher {
      * <p>
      *
      * @param config
-     * @param position
-     * @param vehiclebasetransform Das was ein Vehicle braucht um richtig rum auf dem Graph zu stehen, unabhaengig von der
-     *                             Rotation die sich durch den Graph selber ergibt. Das ist graph- nicht vehiclespezifisch. Sowas kann es zusätzlich noch
-     *                             vehiclespezifisch geben.
      * @return
      */
-    public static void launchVehicle(Vehicle vehicle, VehicleDefinition config, TrafficGraph graph, GraphPosition position, @Deprecated TeleportComponent avatarpc, SceneNode destinationnode, GraphProjection projectionforbackprojection,
+    public static void launchVehicle(Vehicle vehicle, VehicleDefinition config, VehiclePositioner vehiclePositioner /*TrafficGraph graph, GraphPosition position*/, @Deprecated TeleportComponent avatarpc/*, SceneNode destinationnode*//*, GraphProjection projectionforbackprojection*/,
                                      LocalTransform vehiclebasetransform, NearView nearView, List<VehicleBuiltDelegate> genericVehicleBuiltDelegates, VehicleLoader vehicleLoader,
                                      GraphPath optionalPath) {
-        vehicleLoader.loadVehicle(vehicle, config, (SceneNode offsetNode, VehicleLoaderResult loaderResult/*9.11.21List<SGAnimation> animationList, SGPropertyNode rootpropertyNode*/, SceneNode lowresNode) -> {
+        vehicleLoader.loadVehicle(vehicle, config, (SceneNode offsetNode, VehicleLoaderResult loaderResult, SceneNode lowresNode) -> {
             SceneNode modelNode = getModelNodeFromVehicleNode(offsetNode);
             SceneNode teleportParentNode = modelNode;
             SceneNode teleportSlaveNode = null;
@@ -100,12 +96,12 @@ public class VehicleLauncher {
                 teleportParentNode = lowresNode;
                 teleportSlaveNode = modelNode;
             }
-            //currentaircraft = rotateFgModelForGraph(currentaircraft);
-            //13.3.18: Das MovingSystem überschreibt doch die Rotation. Wieso hat das einen Effekt?
-            //Weils sofort gekapselt wird. FlighScene uebergibt da was anderes, weils nicht passt.
+            //13.3.18: MovingSystem will set rotation later on a different (sub?) node (which one?). So this is important here as the name says ("basetransform").
+            // FlighScene uebergibt da was anderes, weils nicht passt.
             if (vehiclebasetransform != null) {
-                offsetNode.getTransform().setPosition(vehiclebasetransform.position);
-                offsetNode.getTransform().setRotation(vehiclebasetransform.rotation);
+                /*21.3.25 offsetNode.getTransform().setPosition(vehiclebasetransform.position);
+                offsetNode.getTransform().setRotation(vehiclebasetransform.rotation);*/
+                throw new RuntimeException("still needed?");
             }
             //24.10.19: Das Konzept der ProxyNode muss sich noch bewähren (wegen Dependency zwischen Nodes), läuft erstmal aber ganz gut.
             //31.03.20: Aber nicht mit AI Aircraft, da geht dann die zoffsetnode verloren. Darum nur noch Proxy, wenn es wirklich einen Slave gibt.
@@ -119,13 +115,14 @@ public class VehicleLauncher {
             //offsetNode.setSlaveNode(teleportSlaveNode);
             offsetNode.setName("vehiclecontainer-" + config.getName());
             //Scene.getCurrent().addToWorld(currentaircraft);
-            destinationnode.attach(offsetNode);
+            //22.3.25 now in VehiclePositioner destinationnode.attach(offsetNode);
+            vehiclePositioner.getDestinationNode().attach(offsetNode);
             EntityBuilder entityBuilder = TrafficHelper.getVehicleEntityBuilderByService(config);
             //TODO pruefen 24.10.19: Ist die zoffset node auf dem Graph nicht "falsch" wenn dann um eine andere Achse rotiert wird? Dann fällt das Vehicle doch vom Graph.
             //TODO Ich glaube mittlerweile, das z offset Problem sollte nicht hierhin mitgeschleppt werden.
             //Ist dafuer nicht die basenode in der Entity? JungeJunge, das ist aber auch'n Driss.
             //31.3.20: In EDDK stehen die AI aircraft aber doch wohl richtig, scheinbar auch in der Höhe.
-            EcsEntity vehicleEntity = buildVehicleOnGraph(offsetNode, graph, position, config, projectionforbackprojection, entityBuilder, teleportParentNode);
+            EcsEntity vehicleEntity = buildVehicleOnGraph(offsetNode, vehiclePositioner, config, /*projectionforbackprojection,*/ entityBuilder, teleportParentNode);
             vehicleEntity.setName(config.getName());
             // 24.6.24: Have optional path
             if (optionalPath != null) {
@@ -179,16 +176,14 @@ public class VehicleLauncher {
      * TODO: Die projection ist die totale Kruecke. Die koennte vielleicht mit dem Graph zusammen in einen "GraphContext".
      * 29.8.23: teleportParentNode added
      */
-    public static EcsEntity buildVehicleOnGraph(SceneNode node, TrafficGraph graph, GraphPosition position, VehicleDefinition config,
-            /*Map*/GraphProjection projection, EntityBuilder entityBuilder, SceneNode teleportParentNode) {
+    public static EcsEntity buildVehicleOnGraph(SceneNode node, VehiclePositioner vehiclePositioner /*TrafficGraph graph, GraphPosition position,*/, VehicleDefinition config,
+            /*Map*//*GraphProjection projection,*/ EntityBuilder entityBuilder, SceneNode teleportParentNode) {
         GraphMovingComponent gmc = new GraphMovingComponent(node.getTransform());
-        //MA31: navigator hat keinen graph
-        if (projection != null && !(graph.getBaseGraph() instanceof ProjectedGraph)) {
-            throw new RuntimeException("should use ProjectedGraph");
-        }
-        gmc.setGraph((graph == null) ? null : graph.getBaseGraph(), position, null/*projection*/);
 
         EcsEntity e = new EcsEntity(node, gmc);
+
+        vehiclePositioner.positionVehicle(e);
+
         VelocityComponent vc = new VelocityComponent();
         vc.setMaximumSpeed(config.getMaximumSpeed());
         vc.setAcceleration(config.getAcceleration());

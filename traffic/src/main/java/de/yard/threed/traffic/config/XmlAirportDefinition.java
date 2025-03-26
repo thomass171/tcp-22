@@ -46,7 +46,7 @@ public class XmlAirportDefinition /*extends Airport*/ implements AirportDefiniti
         List<NativeNode> raw = XmlHelper.getChildren(nativeNode, "location");
         List<SmartLocation> result = new ArrayList<SmartLocation>();
         for (int i = 0; i < raw.size(); i++) {
-            result.add(new SmartLocation(XmlHelper.getStringValue(raw.get(i))));
+            result.add(SmartLocation.fromString(XmlHelper.getStringValue(raw.get(i))));
         }
         return result;
     }
