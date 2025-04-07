@@ -5,7 +5,6 @@ import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ViewPoint;
 import de.yard.threed.engine.ecs.DataProvider;
 import de.yard.threed.engine.ecs.EcsEntity;
@@ -20,7 +19,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.Payload;
 import de.yard.threed.traffic.flight.FlightLocation;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.traffic.geodesy.MapProjection;
 import de.yard.threed.trafficcore.config.LocatedVehicle;
 import de.yard.threed.trafficcore.model.SmartLocation;
@@ -262,7 +261,10 @@ public class TrafficHelper {
 
     /**
      * 22.7.24
-     * 7.3.25 is it really a good idea to couple these properties this way? Eg. This breaks the smart location idea. Set to deprecated.
+     * 7.3.25 is it really a good idea to couple these properties this way? Eg. This breaks the smart location idea.
+     * Set to deprecated.
+     * Moved to SmartLocation/PositionerFactory. But still needed in standalone scenes.
+     * Still used in FG.
      */
     @Deprecated
     public static FlightLocation getInitialFlightLocation() {

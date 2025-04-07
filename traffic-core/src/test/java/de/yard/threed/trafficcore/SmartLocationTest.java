@@ -39,8 +39,8 @@ public class SmartLocationTest {
         assertNull(smartLocation.getParkPos());
         assertEquals("52.2,7.3", smartLocation.getSubLocation());
         assertNull(smartLocation.getGroundnetLocation());
-        assertEquals(52.2, smartLocation.getLatLon().getLatDeg().getDegree());
-        assertEquals(7.3, smartLocation.getLatLon().getLonDeg().getDegree());
+        assertEquals(52.2, smartLocation.getGeoCoordinate().getLatDeg().getDegree());
+        assertEquals(7.3, smartLocation.getGeoCoordinate().getLonDeg().getDegree());
 
         smartLocation = SmartLocation.fromString("coordinate:52.2,7.3,3.6");
         assertNull(smartLocation.getParkPos());

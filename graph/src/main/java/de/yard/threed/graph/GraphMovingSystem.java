@@ -73,6 +73,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
 
         // hier ist extra kein "else", weil theoretisch auch beides aktiv sein koennte (aber nicht sollte). 9.1.19: Obwohl das
         // schalten von automove darueber geht. Irgendwie nicht rund. Muesste vielleicht aus dem if raus. Oder nicht. Lassen wirs mal so.
+        // TODO 3.4.25 change to requests (keys via InputtorequestSystem)
         if (gmc.keycontrolled) {
             if (Input.getKey(KeyCode.W)) {
                 moveForward(entity, gmc, vc, vc.maximumSpeed * tpf);
@@ -81,10 +82,11 @@ public class GraphMovingSystem extends DefaultEcsSystem {
                 moveForward(entity, gmc, vc, vc.maximumSpeed * (-tpf));
             }
             // Die speed Steuerung hier kommt sich doch mit adjustSpeed in die Quere. Velocity braucht auch einen auto...TODO
-            if (Input.getKey(KeyCode.Plus)) {
+            // 3.4.25 changed from +/- to PGUP/DOWN
+            if (Input.getKey(KeyCode.PageUp)) {
                 vc.incMovementSpeed(1);
             }
-            if (Input.getKey(KeyCode.Minus)) {
+            if (Input.getKey(KeyCode.PageDown)) {
                 vc.incMovementSpeed(-1);
             }
             if (Input.getKeyDown(KeyCode.A)) {

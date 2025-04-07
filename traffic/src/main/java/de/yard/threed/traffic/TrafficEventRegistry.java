@@ -5,7 +5,7 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.resource.BundleResource;
 
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 
 
 /**

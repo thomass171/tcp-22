@@ -4,10 +4,7 @@ import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.Payload;
-import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeNode;
@@ -25,19 +22,16 @@ import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.graph.GraphProjection;
 
-import de.yard.threed.traffic.config.ConfigAttributeFilter;
 import de.yard.threed.traffic.config.ConfigHelper;
 
 import de.yard.threed.traffic.config.VehicleDefinition;
-import de.yard.threed.traffic.config.ViewpointConfig;
 import de.yard.threed.traffic.config.XmlVehicleDefinition;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 
 import de.yard.threed.traffic.geodesy.MapProjection;
 import de.yard.threed.traffic.geodesy.SimpleMapProjection;

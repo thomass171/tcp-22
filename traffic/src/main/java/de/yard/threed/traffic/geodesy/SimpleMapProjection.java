@@ -6,7 +6,6 @@ import de.yard.threed.graph.GraphEdge;
 import de.yard.threed.graph.GraphNode;
 import de.yard.threed.graph.GraphOrientation;
 import de.yard.threed.traffic.EllipsoidCalculations;
-import de.yard.threed.traffic.flight.FlightLocation;
 
 /**
  * Ein 3D Mapping LatLon->2D xy Ebene.

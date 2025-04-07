@@ -9,7 +9,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.ecs.TeleporterSystem;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.traffic.geodesy.MapProjection;
 
 import de.yard.threed.traffic.geodesy.SimpleMapProjection;

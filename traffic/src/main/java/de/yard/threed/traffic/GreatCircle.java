@@ -2,7 +2,7 @@ package de.yard.threed.traffic;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.graph.Graph;
 import de.yard.threed.graph.GraphOrientation;
 import de.yard.threed.engine.util.CircleRotator;

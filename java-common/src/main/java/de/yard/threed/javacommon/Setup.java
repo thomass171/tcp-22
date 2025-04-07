@@ -115,10 +115,18 @@ public class Setup {
         if (moon) {
             // loc is too high above ground currently. Probably needs an elevation provider
             properties.put("basename", "traffic:tiles/Moon.xml");
-            properties.put("initialRoute", "wp:50.768,7.1672000->takeoff:50.7692,7.1617000->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.1317000->wp:50.8662999,7.1443999");
             // initialVehicle needed here different to Wayland where it is part of config
             properties.put("initialVehicle", "loc");
             properties.put("visualizeTrack", "true");
+
+            boolean useRoute = true;
+            if (useRoute) {
+                properties.put("initialRoute", "wp:50.768,7.1672000->takeoff:50.7692,7.1617000->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.1317000->wp:50.8662999,7.1443999");
+            } else {
+                // location like in initialRoute. elevation should be resolved by elevation provider.
+                properties.put("initialLocation", "geo:50.768,7.1672000");
+                properties.put("initialHeading", "320");
+            }
             properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }
 

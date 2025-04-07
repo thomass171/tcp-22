@@ -8,7 +8,7 @@ import de.yard.threed.graph.Graph;
 import de.yard.threed.graph.GraphNode;
 import de.yard.threed.graph.GraphOrientation;
 import de.yard.threed.traffic.geodesy.ElevationProvider;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.trafficcore.model.Runway;
 
 import java.util.ArrayList;

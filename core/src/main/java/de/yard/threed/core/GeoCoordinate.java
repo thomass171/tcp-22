@@ -1,10 +1,4 @@
-package de.yard.threed.traffic.geodesy;
-
-import de.yard.threed.core.Degree;
-import de.yard.threed.core.LatLon;
-import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Util;
-import de.yard.threed.core.Vector3;
+package de.yard.threed.core;
 
 /**
  * See https://en.wikipedia.org/wiki/Earth-centered,_Earth-fixed_coordinate_system and
@@ -14,7 +8,7 @@ import de.yard.threed.core.Vector3;
  * <p>
  * And note the difference between geocentric and geodetic!
  * 14.3.24: elevation made optional for cases where it is unknown/undefined.
- *
+ * 29.3.25: Moved from traffic to core
  * <p>
  * This class is an independent simplification.
  * <p>

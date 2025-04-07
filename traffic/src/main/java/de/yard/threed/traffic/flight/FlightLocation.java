@@ -6,7 +6,7 @@ import de.yard.threed.core.Quaternion;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.traffic.EllipsoidCalculations;
 import de.yard.threed.traffic.TrafficHelper;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 
 
 
@@ -19,7 +19,7 @@ import de.yard.threed.traffic.geodesy.GeoCoordinate;
  *
  * 27.12.21:Needed in FG, so it must be in "traffic".
  * 22.7.24: Has no parse() because its too complex. Needs to consider SmartLocation?
- *
+ * 29.3.25:See also PositionerFactory
  * Created by thomass on 05.01.17.
  */
 public class FlightLocation {
@@ -47,7 +47,7 @@ public class FlightLocation {
     }
 
     public LocalTransform toPosRot(EllipsoidCalculations rbcp) {
-        return new LocalTransform(rbcp.toCart(coordinates,null,null), rbcp.buildRotation(coordinates, heading, pitch));
+        return new LocalTransform(rbcp.toCart(coordinates,null,null), rbcp.buildZUpRotation(coordinates, heading, pitch));
     }
 
     /**

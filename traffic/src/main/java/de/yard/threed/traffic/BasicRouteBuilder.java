@@ -5,7 +5,7 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.graph.Graph;
 import de.yard.threed.traffic.flight.FlightRouteGraph;
 import de.yard.threed.traffic.geodesy.ElevationProvider;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 
 /**
  * Not really related to interface FlightRouteBuilder.

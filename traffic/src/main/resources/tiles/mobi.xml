@@ -28,6 +28,10 @@
         </viewpoint>
         <initialcount>0</initialcount>
 
+        <transform>
+            <!-- See FgVehicleSpace.getLocSpaceToFgSpace() -->
+            <angle>90,0,0</angle>
+        </transform>
 
     </vehicledefinition>
 

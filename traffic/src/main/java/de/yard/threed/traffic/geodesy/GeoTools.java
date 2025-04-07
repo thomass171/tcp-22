@@ -1,5 +1,6 @@
 package de.yard.threed.traffic.geodesy;
 
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.traffic.EllipsoidCalculations;

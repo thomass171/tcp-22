@@ -73,4 +73,9 @@ public interface VehicleDefinition {
     Vector3 getCateringDoorPosition();
 
     Vector3 getRearPoint();
+
+    /**
+     * 2.4.25 Transform from 'vehicle space' to 'standard/FG space'.
+     */
+    LocalTransform getTransform();
 }

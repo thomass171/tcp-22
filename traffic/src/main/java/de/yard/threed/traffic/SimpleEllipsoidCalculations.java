@@ -8,7 +8,7 @@ import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.traffic.geodesy.ElevationProvider;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 
 /**
  * Assuming the ellipsoid is a sphere.
@@ -21,7 +21,7 @@ import de.yard.threed.traffic.geodesy.GeoCoordinate;
  * See also https://stackoverflow.com/questions/378281/lat-lon-distance-heading-lat-lon
  * and http://edwilliams.org/avform147.htm
  */
-public class SimpleEllipsoidCalculations implements EllipsoidCalculations {
+public class SimpleEllipsoidCalculations extends EllipsoidCalculations {
 
     double radius;
 
@@ -30,12 +30,8 @@ public class SimpleEllipsoidCalculations implements EllipsoidCalculations {
     }
 
     @Override
-    public Quaternion buildRotation(GeoCoordinate location, Degree heading, Degree pitch) {
-        return null;
-    }
-
-    @Override
     public Vector3 getNorthHeadingReference(GeoCoordinate location) {
+        Util.notyet();
         return null;
     }
 

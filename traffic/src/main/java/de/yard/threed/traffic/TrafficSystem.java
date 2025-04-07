@@ -8,7 +8,6 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
-import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
@@ -30,7 +29,7 @@ import de.yard.threed.engine.util.NearView;
 
 
 import de.yard.threed.traffic.flight.FlightRouteGraph;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
 
@@ -310,6 +309,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             String vehiclename = (String) request.getPayload().get("name");
             SmartLocation smartLocation = request.getPayload().get("location", s -> SmartLocation.fromString(s));
             GeoRoute initialRoute = request.getPayload().get("initialRoute", s -> GeoRoute.parse(s));
+            String initialHeading = request.getPayload().get("heading", s -> s);
 
             // 10.5.24 also wait for user join? Hmm, maybe not because joining user can enter the
             // vehicle loaded here. But TRAFFIC_REQUEST_LOADVEHICLE typically is triggered by a joined
@@ -339,7 +339,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                         graphToUse = trafficgraphs.get(cluster);
                     }
                 }
-                if (graphToUse == null) {
+                // 27.3.25 Some locations can be used without a graph
+                if (graphToUse == null && (smartLocation == null || smartLocation.needsGraph())) {
                     logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing traffic graph. groundnet not loaded?");
                     return false;
                 }
@@ -367,9 +368,16 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     vehiclePositioner = new GraphVehiclePositioner(graphToUse, getGraphStartPosition(smartLocation, graphToUse));
                 } else {
                     // we have a smartlocation
-                    vehiclePositioner = buildVehiclePositioner(smartLocation);
+                    //vehiclePositioner = buildVehiclePositioner(smartLocation);
+                    PositionerFactory.PositionerFactoryResult result = PositionerFactory.buildFromLocation(smartLocation, initialHeading);
+                    if (result.status != PositionerFactory.SUCCESS) {
+                        logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE:" + result.msg);
+                        return result.status == PositionerFactory.NOTYET ? false : true;
+                    }
+                    vehiclePositioner = result.positioner;
                 }
             } else {
+                // process 'initialRoute'
                 // groundnet has a (back)projection. On a initialRoute we need something different. Geo graph will have a FG graph orientation.
                 BooleanHolder shouldAbort = new BooleanHolder(false);
                 FlightRouteGraph flightRoute = new BasicRouteBuilder(TrafficHelper.getEllipsoidConversionsProviderByDataprovider())
@@ -439,14 +447,6 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             return true;
         }
         return false;
-    }
-
-    private VehiclePositioner buildVehiclePositioner(SmartLocation smartLocation) {
-        Vector3 v = smartLocation.getCoordinate();
-        if (v != null) {
-            return new SphereVehiclePositioner(v);
-        }
-        throw new RuntimeException("not supported " + smartLocation);
     }
 
     @Override

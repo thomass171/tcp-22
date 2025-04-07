@@ -3,6 +3,7 @@ package de.yard.threed.engine;
 /**
  * A 'WASD' FPS controller for a transform in general. It is not grounded which means freely moves in 3D.
  * Uses 'R' for rolling.
+ * Moves in 'OpenGL' space, ie. z-axis points forward (orientation toggable), x-axis points right (pitch), y-axis points up (yaw/heading)
  *
  * <p>
  * Similar to THREE.FirstPersonControls, but without lookat.

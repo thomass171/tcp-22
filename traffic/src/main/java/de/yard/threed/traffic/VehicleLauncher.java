@@ -98,10 +98,12 @@ public class VehicleLauncher {
             }
             //13.3.18: MovingSystem will set rotation later on a different (sub?) node (which one?). So this is important here as the name says ("basetransform").
             // FlighScene uebergibt da was anderes, weils nicht passt.
-            if (vehiclebasetransform != null) {
-                /*21.3.25 offsetNode.getTransform().setPosition(vehiclebasetransform.position);
-                offsetNode.getTransform().setRotation(vehiclebasetransform.rotation);*/
-                throw new RuntimeException("still needed?");
+            //02.04.25: After defining FG space a standard, it is needed for 'loc' eg. But it is vehicle dependent. Unfortunatly graph conversions
+            // hided the need previously.'vehiclebasetransform' however is really not needed.
+            LocalTransform vehicletransform = config.getTransform();
+            if (vehicletransform != null) {
+                offsetNode.getTransform().setPosition(vehicletransform.position);
+                offsetNode.getTransform().setRotation(vehicletransform.rotation);
             }
             //24.10.19: Das Konzept der ProxyNode muss sich noch bewähren (wegen Dependency zwischen Nodes), läuft erstmal aber ganz gut.
             //31.03.20: Aber nicht mit AI Aircraft, da geht dann die zoffsetnode verloren. Darum nur noch Proxy, wenn es wirklich einen Slave gibt.
@@ -192,7 +194,8 @@ public class VehicleLauncher {
         if (config != null) {
             // its important to set the vehicle rotation before the final component is added
             // and an entity init is triggered.
-            gmc.customModelRotation = getModelBaseRotation(config);
+            // 1.4.25: Now that 'traffic' has 'FG space' as default, no special treatment is needed any more. We always set 'FG space'
+            gmc.customModelRotation = FgVehicleSpace.getFgVehicleForwardRotation();
 
             // 29.8.23: Why VehicleComponent only if config exists? Conatins eg. also the teleportParentNode
             VehicleComponent vhc = new VehicleComponent(config/*type,modeltype*/);
@@ -215,12 +218,14 @@ public class VehicleLauncher {
      * The rotation of a standard oriented vehicle to
      * the graph standard orientation (see README).
      */
+    /* 'loc' 'mobi' now is also rotated to FG, so handle it like an FG model.
     public static Quaternion locToGraphRotation() {
         return Quaternion.buildFromAngles(new Degree(0), new Degree(-90), new Degree(0));
     }
 
     private static Quaternion getModelBaseRotation(VehicleDefinition config) {
         String name = config.getName();
+
         if (name.toLowerCase().equals("loc") || name.toLowerCase().equals("locomotive")) {
             // Was 'BaseTransformForVehicleOnGraph' in Demo.xml once
             return locToGraphRotation();
@@ -240,7 +245,7 @@ public class VehicleLauncher {
         }
         logger.debug("no model rotation detected for " + config.getName());
         return new Quaternion();
-    }
+    }*/
 
     /**
      * TODO generell Pfadsuche in SceneNode.

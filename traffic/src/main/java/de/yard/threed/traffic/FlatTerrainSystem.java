@@ -1,10 +1,8 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.ObjectBuilder;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Util;
-import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleRegistry;
@@ -16,7 +14,7 @@ import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.traffic.config.ConfigHelper;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.traffic.geodesy.MapProjection;
 import de.yard.threed.traffic.geodesy.SimpleMapProjection;
 import de.yard.threed.core.platform.Log;

@@ -28,7 +28,7 @@ import de.yard.threed.traffic.TrafficHelper;
 import de.yard.threed.traffic.TrafficSystem;
 import de.yard.threed.traffic.TrafficVrControlPanel;
 import de.yard.threed.traffic.VehicleComponent;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.graph.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
@@ -226,7 +226,7 @@ public class BasicTravelScene extends Scene {
         } else {
             // nothing special (menu,hud,controlpanel) for non VR? But no in server mode where there is no camera.
             if (sceneMode.isClient()) {
-                inputToRequestSystem.setControlMenuBuilder(camera -> buildControlMenuForScene(camera));
+                inputToRequestSystem.setControlMenuBuilder(camera -> buildControlMenuForScene(camera, false));
 
                 // use dedicated camera for menu to avoid picking ray issues due to large/small dimensions conflicts
                 cameraForMenu = FovElement.getDeferredCamera(getDefaultCamera());
@@ -650,27 +650,42 @@ public class BasicTravelScene extends Scene {
     }
 
     /**
-     * The default non VR Control menu.
+     * The non VR Control menu.
      * Camera is a deferred camera defined during init.
-     * Might be overridden for custom menu.
+     * 4.4.25:Merged from BasicTravelScene, TravelScene(Bluebird) and -/+ added.
+     * No longer needs to be overridden for custom menu.
+     * Avoid gaps if buttons aren't needed.
+     * <p>
      */
-    public GuiGrid buildControlMenuForScene(Camera camera) {
+    public GuiGrid buildControlMenuForScene(Camera camera, boolean withLoad) {
 
-        GuiGrid controlmenu = GuiGrid.buildForCamera(camera, 2, 5, 1, Color.BLACK_FULLTRANSPARENT, true);
+        int columns = 5;
+        if (withLoad){
+            columns++;
+        }
+        GuiGrid controlmenu = GuiGrid.buildForCamera(camera, 2, columns, 1, Color.BLACK_FULLTRANSPARENT, true);
 
-        controlmenu.addButton(0, 0, 1, Icon.ICON_POSITION, () -> {
+        int col=0;
+        controlmenu.addButton(col++, 0, 1, Icon.ICON_POSITION, () -> {
             InputToRequestSystem.sendRequestWithId(new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{new IntHolder(0)})));
         });
-        controlmenu.addButton(1, 0, 1, Icon.ICON_MENU, () -> {
+        controlmenu.addButton(col++, 0, 1, Icon.ICON_MENU, () -> {
             InputToRequestSystem.sendRequestWithId(new Request(InputToRequestSystem.USER_REQUEST_MENU));
         });
-        controlmenu.addButton(2, 0, 1, Icon.ICON_HORIZONTALLINE, () -> {
-            //TODO incMovementSpeed
+        if (withLoad) {
+            // 'L' for load
+            controlmenu.addButton(col++, 0, 1, Icon.IconCharacter(11), () -> {
+                SystemManager.putRequest(RequestRegistry.buildLoadVehicle(UserSystem.getInitialUser().getId(), null, null, null, null));
+                //updateHud();
+            });
+        }
+        controlmenu.addButton(col++, 0, 1, Icon.ICON_HORIZONTALLINE, () -> {
+            InputToRequestSystem.sendRequestWithId(new Request(BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDDOWN));
         });
-        controlmenu.addButton(3, 0, 1, Icon.ICON_PLUS, () -> {
-            //TODO incMovementSpeed
+        controlmenu.addButton(col++, 0, 1, Icon.ICON_PLUS, () -> {
+            InputToRequestSystem.sendRequestWithId(new Request(BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDUP));
         });
-        controlmenu.addButton(4, 0, 1, Icon.ICON_CLOSE, () -> {
+        controlmenu.addButton(col++, 0, 1, Icon.ICON_CLOSE, () -> {
             InputToRequestSystem.sendRequestWithId(new Request(InputToRequestSystem.USER_REQUEST_CONTROLMENU));
         });
         return controlmenu;

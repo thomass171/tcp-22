@@ -14,17 +14,10 @@ import de.yard.threed.engine.ecs.EcsEntity;
 
 /**
  * For flying a plane that is not graph bound.
- * For easier handling vehicle moves in 'vehicle move space' and is transformed by a parent sphere node to sphere space.
- * #### vehicle move space
- * The standard OpenGL space with forward to +x, ..., where vehicle
- * movement should happen (however currently not used for graph movement). If a vehicle model
- * doesn't comply that space, it should be transformed 'below' the vehicle ECS node.
- * Transform to sphere space should happen above.
- *
- * 25.3.25 Not sure that is really easier. Try merged and with rotateOnAxis. Control is not so bad now.
+ * 02.02.25 Moves in 'FG vehicle' space, ie. x-axis points forward, y-axis points right (pitch), z-axis points up (yaw/heading)
  * <p>
- * auto-roll is really hard. See https://gamedev.stackexchange.com/questions/123535/unwanted-roll-when-rotating-camera-with-pitch-and-yaw
- * Created by thomass on 24.08.23.
+ * auto-roll is tricky. See https://gamedev.stackexchange.com/questions/123535/unwanted-roll-when-rotating-camera-with-pitch-and-yaw
+ * Created by thomass on 24.03.25.
  */
 public class FreeFlyingComponent extends EcsComponent {
     static Log logger = Platform.getInstance().getLog(FreeFlyingComponent.class);
@@ -39,24 +32,16 @@ public class FreeFlyingComponent extends EcsComponent {
     // In rad for more efficient calcs. default straight to -z
     double yaw = 0, pitch = 0, roll = 0;
     private Transform transform;
-    //private Quaternion baseRotation;
     // optionally try to roll without user controls. See below, it is really hard. So keep user controls for now
     //private boolean autoRoll = true;
 
-    // optional movement by more simple FirstPersonTransformer
-    FirstPersonTransformer firstPersonTransformer;
     boolean autoStabalize = true;
 
     /**
      *
      */
-    public FreeFlyingComponent(Transform transform/*,SceneNode sphereTransform*/, Quaternion baseRotation) {
-        //firstPersonTransformer = new FirstPersonTransformer(transform, FirstPersonTransformer.ROTATE_MODE_PERAXIS);
+    public FreeFlyingComponent(Transform transform) {
         this.transform = transform;
-        //this.baseRotation = baseRotation;
-        if (firstPersonTransformer != null) {
-        }
-        transform.setRotation(baseRotation);
     }
 
     @Override
@@ -76,10 +61,10 @@ public class FreeFlyingComponent extends EcsComponent {
             incYawByDelta(-delta);
         }
         if (autoTurnup) {
-            incPitchByDelta(-delta);
+            incPitchByDelta(delta);
         }
         if (autoTurndown) {
-            incPitchByDelta(delta);
+            incPitchByDelta(-delta);
         }
         if (autoRollleft) {
             incRollByDelta(delta);
@@ -94,18 +79,14 @@ public class FreeFlyingComponent extends EcsComponent {
             incSpeedByDelta(-delta);
         }
 
-        if (firstPersonTransformer == null) {
-
-            double sina = MathUtil2.sin(pitch);
+            /*
+            solution for unwanted roll? probably not.
+             double sina = MathUtil2.sin(pitch);
             double sinb = MathUtil2.sin(yaw);
             double sing = MathUtil2.sin(roll);
             double cosa = MathUtil2.cos(pitch);
             double cosb = MathUtil2.cos(yaw);
             double cosg = MathUtil2.cos(roll);
-
-            int rotateMode = 1;
-            switch (rotateMode) {
-                case 0: //matrix
                     // From https://msl.cs.uiuc.edu/planning/node102.html and others.
                     // But this matrix apparently doesn't solve the 'unwanted-roll' problem. Maybe our math is not corect.
                     Matrix3 rotation = new Matrix3(
@@ -114,18 +95,14 @@ public class FreeFlyingComponent extends EcsComponent {
                             -sinb, cosb * sing, cosb * cosg
                     );
                     transform.setRotation(rotation.extractQuaternion());
-                    break;
-                case 1:
-                    transform.rotateOnAxis(new Vector3(0, 1, 0), yaw / 100.0);
-                    transform.rotateOnAxis(new Vector3(0, 0, 1), pitch / 200.0);
-                    transform.rotateOnAxis(new Vector3(1, 0, 0), roll / 100.0);
-                    break;
-            }
-            // vehicle looks to -x, so movement also is to negative
-            transform.translateOnAxis(new Vector3(-1, 0, 0), movementSpeed * delta);
-        } else {
-            firstPersonTransformer.moveForward(movementSpeed * delta);
-        }
+             */
+
+        transform.rotateOnAxis(new Vector3(0, 0, 1), yaw / 100.0);
+        transform.rotateOnAxis(new Vector3(0, 1, 0), pitch / 200.0);
+        transform.rotateOnAxis(new Vector3(1, 0, 0), roll / 100.0);
+
+        // vehicle looks to -x, so movement also is to negative
+        transform.translateOnAxis(new Vector3(-1, 0, 0), movementSpeed * delta);
 
         if (autoStabalize) {
             /* no sense if (!autoTurnleft && !autoTurnright) {
@@ -179,24 +156,15 @@ public class FreeFlyingComponent extends EcsComponent {
     public void incPitchByDelta(double delta) {
         pitch += rotationSpeed * delta;
         logger.debug("pitch=" + pitch);
-        if (firstPersonTransformer != null) {
-            firstPersonTransformer.incPitchByDelta(delta);
-        }
     }
 
     public void incYawByDelta(double delta) {
         yaw += rotationSpeed * delta;
         logger.debug("yaw=" + yaw);
-        if (firstPersonTransformer != null) {
-            firstPersonTransformer.incHeadingByDelta(delta);
-        }
     }
 
     public void incRollByDelta(double delta) {
         roll += rotationSpeed * delta;
-        if (firstPersonTransformer != null) {
-            firstPersonTransformer.incRollByDelta(delta);
-        }
     }
 
     public void incSpeedByDelta(double delta) {

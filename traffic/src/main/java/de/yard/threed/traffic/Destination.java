@@ -1,6 +1,6 @@
 package de.yard.threed.traffic;
 
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.trafficcore.model.Runway;
 
 /**

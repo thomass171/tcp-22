@@ -4,6 +4,7 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.DimensionF;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Matrix3;
@@ -278,4 +279,10 @@ public class TestUtils {
         }
         return true;
     }
+
+    public static void assertGeoCoordinate(GeoCoordinate expected, GeoCoordinate actual, String label) {
+        assertEquals(expected.getLatDeg().getDegree(), actual.getLatDeg().getDegree(), 0.000001, "LatitudeDeg");
+        assertEquals(expected.getLonDeg().getDegree(), actual.getLonDeg().getDegree(), 0.000001, "LongitudeDeg");
+    }
+
 }

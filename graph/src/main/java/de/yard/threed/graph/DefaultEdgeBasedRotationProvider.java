@@ -53,14 +53,5 @@ public class DefaultEdgeBasedRotationProvider implements RotationProvider {
 
     }
 
-    /**
-     * Returns the rotation needed to place a FG oriented model to a graph.
-     * Because FG are not oriented like graph used to use.
-     */
-     public static Quaternion getFgVehicleForwardRotation() {
-        Quaternion rotation = Quaternion.buildFromAngles(new Degree(180), new Degree(0), new Degree(-90));
-        // Die Werte entstanden durch ausprobieren. :-) Vielleicht laesst sich das mal untermauern. TODO
-        rotation = Quaternion.buildFromAngles(new Degree(-90), new Degree(-90), new Degree(0));
-       return rotation;
-    }
+
 }

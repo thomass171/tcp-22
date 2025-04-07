@@ -12,15 +12,18 @@ import de.yard.threed.engine.ecs.EcsEntity;
  */
 public class SphereVehiclePositioner implements VehiclePositioner {
     Vector3 position;
-    // the node for transforming the 'vehicle move space' to sphere space.
-   // SceneNode sphereTransform;
+    Quaternion baseRotation;
 
-    public SphereVehiclePositioner(Vector3 position) {
+    public SphereVehiclePositioner(Vector3 position,  Quaternion baseRotation) {
         this.position = position;
-       /* sphereTransform = new SceneNode();
-        sphereTransform.setName("sphereTransform");
-        sphereTransform.getTransform().setParent(SphereSystem.getSphereNode().getTransform());*/
+        this.baseRotation=baseRotation;
+
     }
+
+    /*public SphereVehiclePositioner(LatLon latLon) {
+        SphereProjections projections = TrafficHelper.getProjectionByDataprovider(null);
+        Vector2 projectedPosition = projections.projection.project(latLon);
+    }*/
 
     /**
      *
@@ -29,17 +32,14 @@ public class SphereVehiclePositioner implements VehiclePositioner {
     public void positionVehicle(EcsEntity vehicle) {
         SceneNode sceneNode = vehicle.getSceneNode();
         sceneNode.getTransform().setPosition(position);
-        // TODO get correct rotation. X90 is for 'mobi' in 'wayland'.
-        Quaternion baseRotation = Quaternion.buildRotationX(new Degree(90));
-        //baseRotation = Quaternion.buildRotationY(new Degree(-90));
-        //baseRotation = Quaternion.buildFromAngles(new Degree(-90),new Degree(180),new Degree(90));
-        //baseRotation = Quaternion.buildFromAngles(new Degree(-90),new Degree(0),new Degree(0));
-        //sceneNode.getTransform().setRotation(baseRotation);
 
-        // quick hack for moving mobi. TODO improve
-        FreeFlyingComponent bmc = new FreeFlyingComponent(sceneNode.getTransform(), baseRotation);
+        // This is the 'default rotation fits' way, at least for vehicles like 'loc'.
+        Quaternion vehicleRotation = new Quaternion();//Quaternion.buildRotationX(new Degree(90));
+
+        sceneNode.getTransform().setRotation(baseRotation);//new Quaternion());//baseRotation.multiply(vehicleRotation));
+
+        FreeFlyingComponent bmc = new FreeFlyingComponent(sceneNode.getTransform());
         vehicle.addComponent(bmc);
-        //FirstPersonMovingSystem firstPersonMovingSystem= (FirstPersonMovingSystem) SystemManager.findSystem(FirstPersonMovingSystem.TAG);
 
        // sphereTransform.getTransform().setRotation(baseRotation);
        // sceneNode.getTransform().setParent(sphereTransform.getTransform());

@@ -4,7 +4,7 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

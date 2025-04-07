@@ -214,6 +214,11 @@ public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements Vehic
     }
 
     @Override
+    public LocalTransform getTransform() {
+        return  ConfigHelper.getTransform(XmlHelper.getChildren(nativeNode, "transform"));
+    }
+
+    @Override
     public Float getWingspread() {
         if (XmlHelper.getChild(nativeNode, WINGSPREAD, 0) == null) {
             return null;

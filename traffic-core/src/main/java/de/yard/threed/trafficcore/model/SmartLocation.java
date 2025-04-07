@@ -1,5 +1,6 @@
 package de.yard.threed.trafficcore.model;
 
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
@@ -59,11 +60,11 @@ public class SmartLocation {
     }
 
     /**
-     * class GeoCoordinate not available here
+     * Elevation is just optional and might need an elevationProvider
      */
-    public LatLon getLatLon() {
+    public GeoCoordinate getGeoCoordinate() {
         if (StringUtils.startsWith(location, "geo:")) {
-            return Util.parseLatLon(StringUtils.substringAfter(location, "geo:"));
+            return GeoCoordinate.parse(StringUtils.substringAfter(location, "geo:"));
         }
         return null;
     }
@@ -81,5 +82,15 @@ public class SmartLocation {
     @Override
     public String toString() {
         return "location=" + location + ",icao=" + icao;
+    }
+
+    public boolean needsGraph() {
+        if (StringUtils.startsWith(location, "parkpos:")) {
+            return true;
+        }
+        if (StringUtils.startsWith(location, "groundnet:")) {
+            return true;
+        }
+        return false;
     }
 }

@@ -6,7 +6,7 @@ import de.yard.threed.core.ParsingHelper;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.traffic.EllipsoidCalculations;
 import de.yard.threed.traffic.flight.FlightLocation;
-import de.yard.threed.traffic.geodesy.GeoCoordinate;
+import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.core.platform.NativeNode;
 
 

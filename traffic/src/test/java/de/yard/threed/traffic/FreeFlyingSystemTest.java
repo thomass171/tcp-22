@@ -68,7 +68,8 @@ public class FreeFlyingSystemTest {
         SceneNode node = new SceneNode();
         movingEntity = new EcsEntity(node);
         Quaternion baseRotation = new Quaternion();
-        movingEntity.addComponent(new FreeFlyingComponent(node.getTransform(), baseRotation));
+        node.getTransform().setRotation(baseRotation);
+        movingEntity.addComponent(new FreeFlyingComponent(node.getTransform()));
         movingEntity.setName("movingEntity");
     }
 }

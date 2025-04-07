@@ -289,6 +289,9 @@ Major changes:
   * FreeFlyingSystem added
   * 'Wayland' added to home page
 
+## 2025-04-02
+  * Define FG vehicle orientation the default in 'traffic'. This helps to avoid confusion with eg. method buildZUpRotation(). Previously there was no standard. Every use case had it's own.
+  * 
 # Technical Details
 
 ## Architecture

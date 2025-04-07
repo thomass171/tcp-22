@@ -136,6 +136,8 @@
             <!--first door is expected to be front left-->
             <!--14.11.17: z soll die door Unterkante im aircraft local space sein. Was hoffentlich im vom Ground ist. Ist es aber wohl nicht.-->
             <element name="door" type="string" minOccurs="0" maxOccurs="unbounded"/>
+            <!-- 02.04.25: optional transformation(rotation) from vehicle space to the new standard 'FG space' in traffic.-->
+            <element name="transform" type="c:TransformType" minOccurs="0" maxOccurs="1"/>
         </sequence>
 
         <attribute name="name" type="string"/>
