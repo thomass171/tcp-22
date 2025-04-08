@@ -16,11 +16,12 @@ import de.yard.threed.engine.ecs.EcsHelper;
 import de.yard.threed.engine.ecs.InputToRequestSystem;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
+import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.traffic.apps.BasicTravelScene;
 
 /**
  * Generic flying of a non graph bound plane entity with FreeFlyingComponent.
- *
+ * <p>
  * Characteristics are:
  * - vehicle can speed up/down
  * - vehicle will not ... terrain
@@ -60,7 +61,7 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
                 },
                 //not needed?
                 new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED
-        });
+                });
     }
 
     public static FreeFlyingSystem buildFromConfiguration() {
@@ -170,11 +171,19 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
         inputToRequestSystem.addKeyMapping(KeyCode.RightArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNRIGHT);
         inputToRequestSystem.addKeyReleaseMapping(KeyCode.RightArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNRIGHT);
 
-        inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNUP);
-        inputToRequestSystem.addKeyReleaseMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNUP);
-        inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNDOWN);
-        inputToRequestSystem.addKeyReleaseMapping(KeyCode.DownArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNDOWN);
-
+        if (VrInstance.getInstance() != null) {
+            // Moving the VR controller stick forward triggers UpArrow, thus pitch up. But that
+            // isn't intuitive for aircraft controlling, where moving the yoke forward pitches down. So revert.
+            inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNUP);
+            inputToRequestSystem.addKeyReleaseMapping(KeyCode.DownArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNUP);
+            inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNDOWN);
+            inputToRequestSystem.addKeyReleaseMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNDOWN);
+        } else {
+            inputToRequestSystem.addKeyMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNUP);
+            inputToRequestSystem.addKeyReleaseMapping(KeyCode.UpArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNUP);
+            inputToRequestSystem.addKeyMapping(KeyCode.DownArrow, BaseRequestRegistry.TRIGGER_REQUEST_START_TURNDOWN);
+            inputToRequestSystem.addKeyReleaseMapping(KeyCode.DownArrow, BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNDOWN);
+        }
         inputToRequestSystem.addKeyMapping(KeyCode.PageUp, BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDUP);
         inputToRequestSystem.addKeyReleaseMapping(KeyCode.PageUp, BaseRequestRegistry.TRIGGER_REQUEST_STOP_SPEEDUP);
         inputToRequestSystem.addKeyMapping(KeyCode.PageDown, BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDDOWN);
@@ -186,8 +195,8 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
         inputToRequestSystem.addKeyMapping(KeyCode.D, BaseRequestRegistry.TRIGGER_REQUEST_START_ROLLRIGHT);
         inputToRequestSystem.addKeyReleaseMapping(KeyCode.D, BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLRIGHT);
 
-        inputToRequestSystem.setDragMapping(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT,BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT,
-                BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN,BaseRequestRegistry.TRIGGER_REQUEST_TURNUP,
+        inputToRequestSystem.setDragMapping(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT, BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT,
+                BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN, BaseRequestRegistry.TRIGGER_REQUEST_TURNUP,
                 null, null);
 
     }
@@ -197,7 +206,7 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
 
         EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);*/
         EcsEntity vehicleEntity = BasicTravelScene.getAvatarVehicle();
-        if (vehicleEntity==null){
+        if (vehicleEntity == null) {
             logger.warn("no vehicle entity in TC");
             return;
         }
