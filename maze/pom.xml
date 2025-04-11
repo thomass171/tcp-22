@@ -13,7 +13,6 @@
     </parent>
 
     <dependencies>
-        <!-- junit, wiremock comes from parent -->
         <!-- own project dependencies-->
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
@@ -41,6 +40,24 @@
             <scope>test</scope>
         </dependency>
         <!-- 5.7.21 Tests need an implemented platform (and ConfigurationByEnv for HOSTDIR) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>2.25.1</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-java-common</artifactId>

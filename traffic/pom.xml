@@ -37,6 +37,18 @@
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <!-- tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
         <!-- 23.12.17: auch die core tests, eg. for TestFactory-->
         <dependency>
             <groupId>org.projectlombok</groupId>

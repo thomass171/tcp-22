@@ -1,5 +1,6 @@
 #!/bin/bash
 #
+# Launches maze services server
 #
 
 OWNDIR=`dirname $0`

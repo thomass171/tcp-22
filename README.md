@@ -412,6 +412,9 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--logging.level.de.yard.threed=
 
 The UI is then available on 'http://localhost:8080/servermanager.html'.
 
+### traffic-services
+A SpringBoot applications that provides traffic services like eg. airport information via HTTP.
+
 ### Tools
 
 #### ac3d

@@ -13,9 +13,20 @@
     </parent>
 
     <dependencies>
-        <!-- junit comes from parent -->
         <!-- own project dependencies-->
         <!-- but not dependent from engine! Should be usable from WebServices, but needs to be C# and GWT ready (using StringUtils)-->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-core</artifactId>

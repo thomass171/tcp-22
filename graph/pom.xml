@@ -13,7 +13,6 @@
     </parent>
 
     <dependencies>
-        <!-- junit comes from parent -->
         <!-- own project dependencies-->
 
         <dependency>
@@ -35,6 +34,18 @@
         </dependency>
 
         <!-- 23.12.17: auch die engine tests. Idea bekommt das auch direkt mit -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>de.yard.tcp-22</groupId>
             <artifactId>module-engine</artifactId>
