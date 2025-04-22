@@ -3,7 +3,7 @@ package de.yard.threed.traffic;
 
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.traffic.geodesy.MapProjection;
+import de.yard.threed.trafficcore.geodesy.MapProjection;
 import de.yard.threed.graph.DefaultGraphVisualizer;
 import de.yard.threed.graph.Graph;
 import de.yard.threed.graph.GraphEdge;

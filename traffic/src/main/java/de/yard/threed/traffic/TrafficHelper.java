@@ -20,7 +20,7 @@ import de.yard.threed.core.Event;
 import de.yard.threed.core.Payload;
 import de.yard.threed.traffic.flight.FlightLocation;
 import de.yard.threed.core.GeoCoordinate;
-import de.yard.threed.traffic.geodesy.MapProjection;
+import de.yard.threed.trafficcore.geodesy.MapProjection;
 import de.yard.threed.trafficcore.config.LocatedVehicle;
 import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;

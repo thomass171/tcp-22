@@ -11,7 +11,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.Texture;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.graph.GraphNode;
-import de.yard.threed.traffic.geodesy.MapProjection;
+import de.yard.threed.trafficcore.geodesy.MapProjection;
 
 /**
  * 9.5.24 just a draft.

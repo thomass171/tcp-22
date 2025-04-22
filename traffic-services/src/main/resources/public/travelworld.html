@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Travel World</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="Setup page for launching flights with or without VR">
+    <!--Viewport from w3.css-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
+          integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+            integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
+
+
+</head>
+
+<body class="w3-light-grey">
+<!--
+There are two basic design ideas:
+1) content first
+   - don't use static header, footer, navigation bars that only occupy space
+2) keep it simple
+   - don't use custom css but only w3.css
+   - don't use w3-model(content). It has difficult to maintain side effects
+Reminder:
+w3-card-2:  Container for any HTML content (2px bordered shadow)
+w3-half: Half (1/2) screen column container
+w3-row-padding: Row where all columns have a default padding (Responsive Class)
+w3-section:	Adds an 16px top and bottom margin to an element (Margin Class)
+w3-container: HTML container with 16px left and right padding (Container Class)
+w3-panel:	HTML container with 16px left and right padding and 16px top and bottom margin
+
+w3-khaki is color for use cases 'maze', w3-blue(?) for use case traffic.
+-->
+
+<!-- Start Content -->
+<div class="w3-container">
+
+    <header class="w3-container w3-center  w3-blue">
+        <h1 class="">Travel World</h1>
+        <p class="">Launch flights with or without VR</p>
+        <p class="w3-small">(still WiP on <a href="https://github.com/thomass171/tcp-22" target="_blank">Github</a>!)
+        </p>
+        <p id="debuginfo" style="font-size:8px;color:yellow"></p>
+    </header>
+
+    <div class="w3-panel">
+        <div id="map" class="w3-card-4"></div>
+        <br>
+    </div>
+
+    <div class="w3-panel">
+        <!-- currently not helpful <div class="w3-panel w3-blue">Flight Data</div>-->
+        <!--<form> will cause a page reload after onclick-->
+
+        <p><label>TakeOff From</label>
+            <input id="inp_takeoff_from" class="w3-input" type="text" list="dl_icaos_from" placeholder="Enter ICAO"
+                   oninput="icaoChanged('from')">
+            <datalist id="dl_icaos_from">
+            </datalist>
+
+            <!-- 'select' has no 'placeholder'. Solution from https://stackoverflow.com/questions/5805059/how-do-i-make-a-placeholder-for-a-select-box -->
+            <select id="sel_runway_from" class="w3-select">
+                <option value="" disabled selected>Choose runway</option>
+            </select>
+        </p>
+
+        <p><label>Aircraft</label>
+            <select id="sel_aircraft" class="w3-select">
+                <option value="c172p">c172p</option>
+            </select>
+        </p>
+
+        <button class=" w3-button w3-round w3-blue "
+                onclick="launchSingleScene(null)">
+            Launch
+        </button>
+        <button class=" w3-button w3-round w3-blue "
+                onclick="launchSingleScene('VR')">
+            Launch VR
+        </button>
+
+    </div>
+
+    <footer class="w3-container w3-center  w3-blue">
+        <h1 class=""></h1>
+    </footer>
+</div>
+
+
+<script src="util.js"></script>
+<script src="httputil.js"></script>
+<script src="travelworld.js"></script>
+
+<script>$(document).ready(function(){init();});</script>
+
+</body>
+</html>

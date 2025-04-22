@@ -26,5 +26,6 @@ public class AirportResponse {
         double toLon;
         String toNumber;
         double width;
+        double heading;
     }
 }

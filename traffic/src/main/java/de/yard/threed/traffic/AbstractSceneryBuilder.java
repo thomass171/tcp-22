@@ -4,7 +4,7 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.geometry.Rectangle;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.graph.GraphNode;
-import de.yard.threed.traffic.geodesy.MapProjection;
+import de.yard.threed.trafficcore.geodesy.MapProjection;
 
 /**
  * Might be more than just terrain but full scenery.

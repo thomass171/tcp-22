@@ -11,8 +11,8 @@ import de.yard.threed.graph.GraphUtils;
 import de.yard.threed.traffic.Destination;
 import de.yard.threed.traffic.EllipsoidCalculations;
 import de.yard.threed.traffic.WorldGlobal;
-import de.yard.threed.traffic.geodesy.MapProjection;
-import de.yard.threed.traffic.geodesy.SimpleMapProjection;
+import de.yard.threed.traffic.geodesy.GraphMapProjection;
+import de.yard.threed.trafficcore.geodesy.MapProjection;
 
 /**
  * A wrapper for a {@link FlightRoute} graph.
@@ -91,9 +91,12 @@ public class FlightRouteGraph {
         return (smoothedpath != null) ? smoothedpath : path;
     }
 
+    /**
+     * Used in other projects
+     */
     public void projectGraph(MapProjection projection, EllipsoidCalculations rbcp ) {
 
-        SimpleMapProjection.projectGraph(graph, projection,rbcp);
+        GraphMapProjection.projectGraph(graph, projection,rbcp);
     }
 
     public boolean isSmoothed() {

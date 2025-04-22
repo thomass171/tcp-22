@@ -1,7 +1,7 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.graph.GraphProjection;
-import de.yard.threed.traffic.geodesy.MapProjection;
+import de.yard.threed.trafficcore.geodesy.MapProjection;
 
 /**
  * Provides a back projection for a projection. This is used to convert a position on

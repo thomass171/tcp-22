@@ -20,7 +20,7 @@ import de.yard.threed.core.GeoCoordinate;
  * See also https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
  * and https://stackoverflow.com/questions/1185408/converting-from-longitude-latitude-to-cartesian-coordinates
  * <p>
- * 10.5.24: Merge with {@link de.yard.threed.traffic.geodesy.MapProjection}? At least toCart() appears similar. 1.4.25: Be careful with 'similar'!!
+ * 10.5.24: Merge with {@link de.yard.threed.trafficcore.geodesy.MapProjection}? At least toCart() appears similar. 1.4.25: Be careful with 'similar'!!
  */
 public abstract class EllipsoidCalculations {
 

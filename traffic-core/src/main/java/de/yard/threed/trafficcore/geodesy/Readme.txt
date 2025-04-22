@@ -8,4 +8,6 @@ Geodesy relevant classes.
  * And note the difference between geocentric and geodetic!
  *
  * Also https://stackoverflow.com/questions/1185408/converting-from-longitude-latitude-to-cartesian-coordinates
- *
+ * https://www.movable-type.co.uk/scripts/latlong.html
+
+18.4.25: Parts moved from module 'traffic' to 'traffic-core' to be available in 'traffic-services'

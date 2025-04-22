@@ -15,12 +15,12 @@ import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.traffic.config.ConfigHelper;
 import de.yard.threed.core.GeoCoordinate;
-import de.yard.threed.traffic.geodesy.MapProjection;
-import de.yard.threed.traffic.geodesy.SimpleMapProjection;
+import de.yard.threed.trafficcore.geodesy.MapProjection;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.trafficcore.geodesy.SimpleMapProjection;
 
 import java.util.List;
 

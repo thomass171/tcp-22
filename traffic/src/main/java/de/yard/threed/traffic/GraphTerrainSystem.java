@@ -10,11 +10,11 @@ import de.yard.threed.engine.ecs.DefaultEcsSystem;
 import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.ecs.TeleporterSystem;
 import de.yard.threed.core.GeoCoordinate;
-import de.yard.threed.traffic.geodesy.MapProjection;
+import de.yard.threed.trafficcore.geodesy.MapProjection;
 
-import de.yard.threed.traffic.geodesy.SimpleMapProjection;
 import de.yard.threed.graph.*;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.trafficcore.geodesy.SimpleMapProjection;
 
 
 /**

@@ -1,7 +1,8 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.graph.GraphProjection;
-import de.yard.threed.traffic.geodesy.SimpleMapProjection;
+import de.yard.threed.traffic.geodesy.GraphMapProjection;
+import de.yard.threed.trafficcore.geodesy.SimpleMapProjection;
 
 public class SphereProjections {
 

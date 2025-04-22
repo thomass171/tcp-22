@@ -1,9 +1,7 @@
-package de.yard.threed.traffic.geodesy;
+package de.yard.threed.trafficcore.geodesy;
 
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.Vector2;
-import de.yard.threed.traffic.flight.FlightLocation;
-
 
 /**
  * abstract map projection superclass with configurable coordinate origin

@@ -76,6 +76,7 @@ public class AirportControllerTest {
         assertEquals(7.165692, runwys.get(0).getToLon());
         assertEquals("32R", runwys.get(0).getToNumber());
         assertEquals(60.05, runwys.get(0).getWidth());
+        assertEquals(137.548, runwys.get(0).getHeading(), 0.001);
     }
 
     @Test

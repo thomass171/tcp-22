@@ -1,5 +1,7 @@
 package de.yard.threed.trafficservices.services;
 
+import de.yard.threed.core.LatLon;
+import de.yard.threed.trafficcore.geodesy.GeoTools;
 import de.yard.threed.trafficservices.util.AirportFilter;
 import de.yard.threed.trafficservices.util.AirportResponse;
 import de.yard.threed.trafficservices.util.AirportSearchResponse;
@@ -44,7 +46,8 @@ public class AirportService implements RepositoryRestConfigurer {
                 response.getRunways().add(new AirportResponse.Runway(
                         runwayLine.getFromLat(), runwayLine.getFromLon(), runwayLine.getFromNumber(),
                         runwayLine.getToLat(), runwayLine.getToLon(), runwayLine.getToNumber(),
-                        runwayLine.getWidth()));
+                        runwayLine.getWidth(), GeoTools.heading( LatLon.fromDegrees(runwayLine.getFromLat(), runwayLine.getFromLon()),
+                         LatLon.fromDegrees(runwayLine.getToLat(), runwayLine.getToLon())).getDegree()));
             }
         }
         return response;
