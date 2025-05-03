@@ -20,6 +20,11 @@ public class CustomSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(Customizer.withDefaults())
                 .csrf(CsrfConfigurer::disable)
+                // avoid 'x-frame-options: DENY' header (the spring default) which prevents rendering in an iframe
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions
+                                .disable()
+                        ))
         ;
 
         return http.build();
