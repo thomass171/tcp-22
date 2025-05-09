@@ -2,7 +2,9 @@
  * JS related to travelworld.html
  */
 
+// The host where the scene is launched. This is not the traffic-services host.
 var host = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/publicweb/tcp-flightgear";
+
 var TRAFFIC_SERVICES_BASEURL = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/traffic";
 var wellKnownAirports = [ "EDDK", "EDKB"];
 
@@ -222,7 +224,7 @@ function init() {
     var hostparam = url.searchParams.get("host");
     if (hostparam != null) {
         host = hostparam;
-        console.log("host="+host);
+        $("#debuginfo").html("(host="+hostparam+")");
     }
 
     var initialICAO = "EDDK";
