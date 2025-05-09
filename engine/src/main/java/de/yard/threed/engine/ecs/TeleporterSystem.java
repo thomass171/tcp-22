@@ -32,6 +32,7 @@ public class TeleporterSystem extends DefaultEcsSystem {
     //ein Request muss im update() gemacht werden, weils nur das die TCs gibt.
     IntHolder pendingRequest = null;
 
+    // See comment in TrafficEventRegistry
     public static EventType EVENT_POSITIONCHANGED = EventType.register(1009, "EVENT_POSITIONCHANGED");
 
     public TeleporterSystem() {
@@ -197,7 +198,9 @@ public class TeleporterSystem extends DefaultEcsSystem {
         }
         //logger.debug("distance to (0,0,0) isType " + Vector3.getDistance(posrot.position, new Vector3()));
         // Neue Position publishen (fuer Scenery)
-        SystemManager.sendEvent(new Event(EVENT_POSITIONCHANGED, new Payload(new Object[]{posrot})));
+        // 3.5.25: 'teleport' is one of the use cases for EVENT_POSITIONCHANGED.
+        // 4.5.25: Parameter change from "posrot" to position only.
+        SystemManager.sendEvent(buildPositionChanged(posrot.position));
 
         return posrot;
     }
@@ -250,5 +253,9 @@ public class TeleporterSystem extends DefaultEcsSystem {
      */
     public void setActivetc(TeleportComponent activetc) {
         this.activetc = activetc;
+    }
+
+    public static Event buildPositionChanged(Vector3 position) {
+        return new Event(TeleporterSystem.EVENT_POSITIONCHANGED, new Payload().addPosition(position));
     }
 }

@@ -5,6 +5,7 @@ import de.yard.threed.core.BooleanHolder;
 import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.core.LatLon;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
@@ -384,10 +385,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                         .fromGeoRoute(initialRoute, geoCoordinate -> {
                             logger.debug("No elevation for " + geoCoordinate + " of initialRoute");
                             if (!shouldAbort.getValue()) {
-                                // trigger terrain loading (but only once)
-                                GeoCoordinate tmpGeo = new GeoCoordinate(geoCoordinate.getLatDeg(), geoCoordinate.getLonDeg(), 0);
-                                LocalTransform loc = new LocalTransform(TrafficHelper.getEllipsoidConversionsProviderByDataprovider().toCart(tmpGeo), new Quaternion());
-                                SystemManager.sendEvent(new Event(EVENT_POSITIONCHANGED, new Payload(new Object[]{loc})));
+                                // trigger terrain loading (but only once, so set to abort. Anyway it might be triggered again later)
+                                SystemManager.putRequest(RequestRegistry.buildLoadScenery(new LatLon(geoCoordinate.getLatDeg(), geoCoordinate.getLonDeg())));
                                 shouldAbort.setValue(true);
                             }
                         });

@@ -1,5 +1,6 @@
 package de.yard.threed.traffic;
 
+import de.yard.threed.core.LatLon;
 import de.yard.threed.core.Payload;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
@@ -22,7 +23,7 @@ public class RequestRegistry {
      * ein Vehicle viele Resourcen braucht und abhaengig von delayedload in der config (mit "initialVehicle" aber automatisch nach kurzer Zeit).
      * Does not work by index but loads the vehicle passed in the request.
      * // 12.5.20: Doch, die brauchen ja auch ein richtige Elevation, also passend zum Client
-     *
+     * <p>
      * 31.10.23: TRAFFIC_REQUEST_LOADVEHICLE no longer deprecated. Its triggered eg. by property "initialVehicle".
      * 20.3.24: Optional parameter 'initialRoute' added. Main reason is that TrafficSystem.trafficgraphs map has no space for multiple
      * graph in same cluster. But the future might provide a better idea.
@@ -105,8 +106,16 @@ public class RequestRegistry {
     //public static RequestType TRAFFIC_REQUEST_LOADAIRPORT = RequestType.register("TRAFFIC_REQUEST_LOADAIRPORT");
 
     /**
-     * Gehoert hier evtl. gar nicht hin. Erstmal ohne und stattdessen basename per EVENT_LOCATIONCHANGED
-     * 7.10.21
+     * We also have tile/sphere loading via basename and TRAFFIC_EVENT_SPHERE_LOADED (was EVENT_LOCATIONCHANGED once)
+     * 4.5.25: Now have this for specific part of sphere
      */
-    //public static RequestType USER_REQUEST_TILE_LOAD = RequestType.register("USER_REQUEST_TILE_LOAD");
+    public static RequestType TRAFFIC_REQUEST_LOAD_SCENERY = RequestType.register(4008, "TRAFFIC_REQUEST_LOAD_SCENERY");
+
+    /**
+     * For now we probably can limit to latLon. 2D tiles probably don't need it for now.
+     * Using SmartLocation as payload appears too complex.
+     */
+    public static Request buildLoadScenery(LatLon latLon) {
+        return new Request(TRAFFIC_REQUEST_LOAD_SCENERY, new Payload().addLatLon(latLon));
+    }
 }

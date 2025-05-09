@@ -13,11 +13,11 @@ import de.yard.threed.core.Vector3;
  * [graphname|groundnet|parkpos]:[sublocation]
  * [geo]:[latlon]
  * [coordinate]:[vector3]
- *
+ * <p>
  * 09.03.25: 'icao' set to deprecated. But isn't it needed for groundnet? Top level 'graphname' ever used?
  */
 public class SmartLocation {
-    public String location;
+    private String location;
     @Deprecated
     public String icao;
 
@@ -73,7 +73,7 @@ public class SmartLocation {
         if (StringUtils.startsWith(location, "coordinate:")) {
             String s = StringUtils.substringAfter(location, "coordinate:");
             //if (StringUtils.split(s,",").length == 2){
-                return Util.parseVector3(s);
+            return Util.parseVector3(s);
             //}
         }
         return null;
@@ -92,5 +92,12 @@ public class SmartLocation {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns the original encoding of the smartLocation. Assume there is no icao.
+     */
+    public String getLocation() {
+        return location;
     }
 }

@@ -33,6 +33,7 @@ import de.yard.threed.traffic.apps.BasicTravelScene;
 import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.traffic.testutils.TrafficTestUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -66,6 +67,11 @@ public class BasicTravelSceneTest {
     VelocityComponent vc;
     SceneRunnerForTesting sceneRunner;
     static final int INITIAL_FRAMES = 10;
+
+    @BeforeEach
+    public void setup() {
+        MoonSceneryBuilder.updatedPositions.clear();
+    }
 
     /**
      * "Wayland" is loaded "by convention". 16.12.21: No longer by convention
@@ -265,6 +271,8 @@ public class BasicTravelSceneTest {
         // "Wayland" has two graph files that should have been loaded finally (via EVENT_LOCATIONCHANGED)
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
         assertEquals(1, completeEvents.size(), "TRAFFIC_EVENT_SPHERE_LOADED.size");
+
+        assertEquals(1, MoonSceneryBuilder.updatedPositions.size(), "");
 
         // Now we expect loc on the starting point of the graph of initialRoute
         EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);

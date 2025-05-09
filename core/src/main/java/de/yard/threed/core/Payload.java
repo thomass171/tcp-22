@@ -1,6 +1,5 @@
 package de.yard.threed.core;
 
-import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ public class Payload {
     public static String KEY_POSITION = "position";
     public static String KEY_ROTATION = "rotation";
     public static String KEY_SCALE = "scale";
+    public static String KEY_LATLON = "latlon";
     // 22.7.24: A location is considered abstract like FlightLocation
 
     // by index
@@ -96,6 +96,12 @@ public class Payload {
 
     public Payload addScale(Vector3 value) {
         values.put(KEY_SCALE, value);
+        return this;
+    }
+
+    public Payload addLatLon(LatLon value) {
+        // also works for super class GeoCoordinate
+        values.put(KEY_LATLON, value.toWGS84decimalString());
         return this;
     }
 

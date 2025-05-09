@@ -39,29 +39,30 @@ public class PositionerFactory {
         }
         if (geo != null) {
             // only 3D sphere
-            BooleanHolder shouldAbort = new BooleanHolder(false);
-            EllipsoidCalculations rbcp = TrafficHelper.getEllipsoidConversionsProviderByDataprovider();
-            ElevationProvider elevationProvider = (ElevationProvider) SystemManager.getDataProvider(SystemManager.DATAPROVIDERELEVATION);
-            EllipsoidCalculations ec = TrafficHelper.getEllipsoidConversionsProviderByDataprovider();
-            // GeoCoordinate gc = new GeoCoordinate(latLon.getLatDeg(), latLon.getLonDeg(), 0);
-            Vector3 cart = rbcp.toCart(geo, elevationProvider, geoCoordinate -> {
-                logger.debug("No elevation for " + geoCoordinate + " of initialLocation");
-                if (!shouldAbort.getValue()) {
-                    // trigger terrain loading (but only once)
-                    LocalTransform loc = new LocalTransform(ec.toCart(geo), new Quaternion());
-                    SystemManager.sendEvent(new Event(EVENT_POSITIONCHANGED, new Payload(new Object[]{loc})));
-                    shouldAbort.setValue(true);
+            Double elevation = geo.getElevationM();
+            if (elevation == null) {
+                ElevationProvider elevationProvider = (ElevationProvider) SystemManager.getDataProvider(SystemManager.DATAPROVIDERELEVATION);
+                if (elevationProvider == null) {
+                    logger.debug("No elevationProvider");
+                    // cannot be solved by waiting
+                    return new PositionerFactoryResult(null, NOTYET, " missing elevationProvider");
                 }
-            });
-            if (shouldAbort.getValue()) {
+                elevation = elevationProvider.getElevation(geo.getLatDeg().getDegree(), geo.getLonDeg().getDegree());
+            }
+            if (elevation == null) {
+                logger.debug("No elevation for " + geo + " of initialLocation");
+                SystemManager.putRequest(RequestRegistry.buildLoadScenery(geo));
                 return new PositionerFactoryResult(null, NOTYET, " missing elevation");
             }
+            geo = GeoCoordinate.fromLatLon(geo, elevation);
             if (optionalHeading == null) {
                 optionalHeading = "0";
             }
-            FlightLocation flightLocation = new FlightLocation(geo, new Degree(Util.parseDouble(optionalHeading)));
-            LocalTransform posrot = flightLocation.toPosRot(ec);
-            return new PositionerFactoryResult(new SphereVehiclePositioner(posrot.position, posrot.rotation), SUCCESS, null);
+            EllipsoidCalculations rbcp = TrafficHelper.getEllipsoidConversionsProviderByDataprovider();
+            Vector3 position = rbcp.toCart(geo, null, null);
+            Quaternion rotation = rbcp.buildZUpRotation(geo, new Degree(Util.parseDouble(optionalHeading)), new Degree(0));
+
+            return new PositionerFactoryResult(new SphereVehiclePositioner(position, rotation), SUCCESS, null);
         }
         return new PositionerFactoryResult(null, IMPOSSIBLE, "not supported " + smartLocation);
     }

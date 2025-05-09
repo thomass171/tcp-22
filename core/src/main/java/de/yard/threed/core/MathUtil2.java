@@ -123,7 +123,11 @@ public class MathUtil2 {
         double determinant = getDeterminant(m);
 
         if (determinant == 0.0f) {
-            // 5.12.24: This might really happen under circumstances we don't know currently (maybe at the poles?)
+            // 5.12.24: This might really happen under circumstances we don't know currently (maybe at the poles?). Happens eg. with
+            // 0.0,0.0,0.0,4002764.714870823,
+            // 0.0,0.0,0.0,500100.8977388771,
+            // 0.0,0.0,0.0,4924024.796370723,
+            // 0.0,0.0,0.0,1.0
             // So don't abort but return decision to caller
             getLogger().error("determinant is 0");
             return null;

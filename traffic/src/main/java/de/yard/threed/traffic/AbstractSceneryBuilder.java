@@ -1,5 +1,6 @@
 package de.yard.threed.traffic;
 
+import de.yard.threed.core.LatLon;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.geometry.Rectangle;
 import de.yard.threed.engine.SceneNode;
@@ -23,7 +24,11 @@ public interface AbstractSceneryBuilder {
      */
     //void initProjection(MapProjection projection);
 
-    void updateForPosition(Vector3 position, Vector3 direction);
+    /**
+     * 4.5.25: Parameter changed from Vector3 to LatLon, which appears to be more appropriate for most(all?) use cases.
+     * And direction appears useless.
+     */
+    void updateForPosition(LatLon position);
 
     /**
      * Gives a rough estimation for the user on how often to call updateForPosition().
@@ -41,4 +46,9 @@ public interface AbstractSceneryBuilder {
      * scenery requires exact the same calculations that were used for building the scenery.
      */
     EllipsoidCalculations getEllipsoidCalculations();
+
+    /**
+     * 7.5.25: Added as here the elevation really comes from.
+     */
+    Double getElevation(LatLon position);
 }

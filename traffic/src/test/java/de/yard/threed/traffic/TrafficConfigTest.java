@@ -97,9 +97,9 @@ public class TrafficConfigTest {
         List<LocatedVehicle> locatedVehicles = ac.getVehicles();
         assertEquals(3, locatedVehicles.size());
         assertEquals("737-800 AB", locatedVehicles.get(1).getName());
-        assertEquals("parkpos:B_8", locatedVehicles.get(1).getLocation().location);
+        assertEquals("parkpos:B_8", locatedVehicles.get(1).getLocation().getLocation());
 
-        assertEquals("groundnet:184-183", ac.getLocations().get(0).location);
+        assertEquals("groundnet:184-183", ac.getLocations().get(0).getLocation());
 
         assertNotNull(trafficConfig.getPoiByName("pname1"));
     }
