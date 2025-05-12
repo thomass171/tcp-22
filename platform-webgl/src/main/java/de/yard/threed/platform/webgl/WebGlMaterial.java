@@ -29,6 +29,7 @@ public class WebGlMaterial implements NativeMaterial {
     //6.7.17 String name;
     WebGlProgram webglProgram;
     public Map<String, NativeUniform> uniforms = null;
+    private boolean noUniformsLogged = false;
 
     /**
      * Constructor nur um Wrapper anzulegen, nicht das eigentliche Material.
@@ -209,8 +210,11 @@ public class WebGlMaterial implements NativeMaterial {
     @Override
     public NativeUniform getUniform(String name) {
         if (uniforms == null) {
-            // really log invalid program flow?
-            logger.warn("No uniforms in material " + getName());
+            // really log invalid program flow? Anyway, but only once
+            if (!noUniformsLogged) {
+                logger.warn("No uniforms in material " + getName());
+                noUniformsLogged = true;
+            }
             return null;
         }
         WebGlUniform uniform = (WebGlUniform) uniforms.get(name);
