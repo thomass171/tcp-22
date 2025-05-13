@@ -20,6 +20,8 @@ public class Payload {
     public static String KEY_ROTATION = "rotation";
     public static String KEY_SCALE = "scale";
     public static String KEY_LATLON = "latlon";
+    public static String KEY_MESSAGE = "message";
+    public static String KEY_DURATION = "duration";
     // 22.7.24: A location is considered abstract like FlightLocation
 
     // by index
@@ -112,6 +114,16 @@ public class Payload {
 
     public Payload addRotation(Quaternion value) {
         values.put(KEY_ROTATION, value);
+        return this;
+    }
+
+    public Payload addMessage(String msg) {
+        values.put(KEY_MESSAGE, msg);
+        return this;
+    }
+
+    public Payload addDuration(int duration) {
+        values.put(KEY_DURATION, Integer.toString(duration));
         return this;
     }
 

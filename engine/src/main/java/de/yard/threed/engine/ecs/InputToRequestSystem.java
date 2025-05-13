@@ -1,11 +1,14 @@
 package de.yard.threed.engine.ecs;
 
+import de.yard.threed.core.Color;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
 import de.yard.threed.core.IntHolder;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Point;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Util;
+import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeCollision;
 import de.yard.threed.core.platform.NativeSceneNode;
@@ -22,6 +25,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static de.yard.threed.engine.BaseRequestRegistry.REQUEST_USER_MESSAGE;
 
 /**
  * Convert user input to either events/requests immediately or preprocess input for some defined standard actions (eg. menus) and derive requests from that.
@@ -81,9 +86,14 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     private Camera cameraForMenu = null;
     // VR grabbing is different from dragging. Not sure whether entity dragging ever was more than an attempt/idea.
     boolean entityDraggingEnabled = false;
+    private ControlPanel msgBox = null;
+    private long msgBoxCloseAt = 0;
 
     public InputToRequestSystem() {
-        super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU}, new EventType[]{UserSystem.USER_EVENT_LOGGEDIN});
+        super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU,
+                        // InputToRequestSystem will always be on a client side, so it makes sense to also use it for displaying user messages.
+                        REQUEST_USER_MESSAGE},
+                new EventType[]{UserSystem.USER_EVENT_LOGGEDIN});
         updatepergroup = false;
 
         // segments 0,1,2 are reserved: 1=unused due to VR toggle area, 2=control menu toggle, besser 1? 0 und 2 auch fuer movement.
@@ -372,6 +382,11 @@ public class InputToRequestSystem extends DefaultEcsSystem {
                 processPointer(mi.ray, mi.left);
             }
         }
+
+        if (msgBox != null && msgBoxCloseAt < Platform.getInstance().currentTimeMillis()) {
+            msgBox.remove();
+            msgBox = null;
+        }
     }
 
     private Request buildRequestFromKeyMapping(KeyEntry key, Integer userEntityId) {
@@ -396,6 +411,22 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             openCloseControlMenu();
             return true;
         }
+        if (request.getType().equals(REQUEST_USER_MESSAGE)) {
+            String msg = request.getPayload().get("message", s -> s);
+            Long duration = request.getPayload().get("duration", s -> Util.parseLong(s));
+            // only one message can exist at a time. So if there already is one, overwrite it.
+            if (msgBox != null) {
+                msgBox.remove();
+            }
+            msgBox = ControlPanelHelper.buildForNearplaneBanner(Scene.getCurrent().getDefaultCamera(), Scene.getCurrent().getDimension(), Color.ORANGE);
+            if (msgBox != null) {
+                // headless?
+                ControlPanelHelper.addText(msgBox, msg, new Vector2(0, 0), msgBox.getSize());
+                msgBoxCloseAt = Platform.getInstance().currentTimeMillis() + duration;
+            }
+            return true;
+        }
+
         return false;
     }
 

@@ -8,8 +8,9 @@ import de.yard.threed.engine.platform.common.RequestType;
 /**
  * Different to events it might be useful to define requests inside of systems.
  * But some still are not really related to a system.
- *
+ * <p>
  * Some moving requests were moved from maze to here.
+ * 12.5.25: What does prefix 'TRIGGER_' mean?
  */
 public class BaseRequestRegistry {
 
@@ -52,7 +53,16 @@ public class BaseRequestRegistry {
     public static RequestType TRIGGER_REQUEST_START_SPEEDDOWN = RequestType.register(1130, "TRIGGER_REQUEST_START_SPEEDDOWN");
     public static RequestType TRIGGER_REQUEST_STOP_SPEEDDOWN = RequestType.register(1131, "TRIGGER_REQUEST_STOP_SPEEDDOWN");
 
+    public static RequestType REQUEST_USER_MESSAGE = RequestType.register(1132, "REQUEST_USER_MESSAGE");
+
     public static Request buildForwardRequest(int userEntityId) {
-        return new Request(TRIGGER_REQUEST_FORWARD, new Payload(),userEntityId);
+        return new Request(TRIGGER_REQUEST_FORWARD, new Payload(), userEntityId);
+    }
+
+    public static Request buildUserMessageRequest(int userEntityId, String message, int durationMillis) {
+        return new Request(REQUEST_USER_MESSAGE, new Payload()
+                .addMessage(message)
+                .addDuration(durationMillis),
+                userEntityId);
     }
 }

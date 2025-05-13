@@ -1401,23 +1401,20 @@ class MainMenuBuilder implements MenuProvider {
 
     @Override
     public Menu buildMenu(Camera camera) {
-        // 6 columns with 3 rows
+        // 6 columns with 3 rows each
         GuiGrid menu = GuiGrid.buildForCamera(camera, 1, 6, 3, GuiGrid.GREEN_SEMITRANSPARENT, true);
-        // In der Mitte rechts ein Button mit Image
-        menu.addButton(/*new Request(rs.REQUEST_CLOSE), */4, 1, 1, Icon.ICON_CLOSE, () -> {
-            rs.menuCycler.close();
-            ReferenceTests.testCycledMenu(new SceneNode[]{rs.hud, rs.controlMenu});
-        });
-        // und unten in der Mitte ein breiter Button mit Text
-        menu.addButton(/*new Request(rs.REQUEST_CLOSE),*/ 2, 0, 2, new Text("Close", Color.BLUE, Color.LIGHTBLUE), () -> {
-            rs.menuCycler.close();
-            ReferenceTests.testCycledMenu(new SceneNode[]{rs.hud, rs.controlMenu});
-        });
+        // mid line two buttons with image and one button with icon
         menu.addButton(null, 3, 1, 1, Texture.buildBundleTexture("data", "images/river.jpg"));
         menu.addButton(null, 2, 1, 1, Texture.buildBundleTexture("data", "images/river.jpg"));
-
-        //SceneNode testcube = ModelSamples.buildCube(0.3f, Color.LIGHTGREEN, new Vector3(0, 0, -2));
-        //menu.attach(testcube);
+        menu.addButton(4, 1, 1, Icon.ICON_CLOSE, () -> {
+            rs.menuCycler.close();
+            ReferenceTests.testCycledMenu(new SceneNode[]{rs.hud, rs.controlMenu});
+        });
+        // bottom row: a wide button with text
+        menu.addButton(2, 0, 2, new Text("Close", Color.BLUE, Color.LIGHTBLUE), () -> {
+            rs.menuCycler.close();
+            ReferenceTests.testCycledMenu(new SceneNode[]{rs.hud, rs.controlMenu});
+        });
         return menu;
     }
 
