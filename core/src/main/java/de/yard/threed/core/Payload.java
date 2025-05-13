@@ -22,6 +22,8 @@ public class Payload {
     public static String KEY_LATLON = "latlon";
     public static String KEY_MESSAGE = "message";
     public static String KEY_DURATION = "duration";
+    // Heads up: Requests always contain the requesting userEntityId. This is a second one for a different user.
+    public static String KEY_USERENTITYID = "userentityid";
     // 22.7.24: A location is considered abstract like FlightLocation
 
     // by index
@@ -124,6 +126,13 @@ public class Payload {
 
     public Payload addDuration(int duration) {
         values.put(KEY_DURATION, Integer.toString(duration));
+        return this;
+    }
+
+    public Payload addUserEntityId(Integer userEntityId) {
+        if (userEntityId != null) {
+            values.put(KEY_USERENTITYID, userEntityId.toString());
+        }
         return this;
     }
 
