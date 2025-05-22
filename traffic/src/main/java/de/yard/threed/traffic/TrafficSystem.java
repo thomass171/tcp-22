@@ -8,7 +8,6 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Payload;
-import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
@@ -30,7 +29,6 @@ import de.yard.threed.engine.util.NearView;
 
 
 import de.yard.threed.traffic.flight.FlightRouteGraph;
-import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
 
@@ -38,8 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static de.yard.threed.engine.ecs.TeleporterSystem.EVENT_POSITIONCHANGED;
 
 /**
  * Logically handles all generic traffic (but no advanced like ground services). Movement of vehicles is controlled by the GraphMovingSystem.
@@ -413,13 +409,13 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                     //SceneVehicle sv = sceneConfig.getVehicle(i);
                     if (TrafficHelper.findVehicleByName(vehiclelist.get(i).getName()) == null) {
                         name = vehiclelist.get(i).getName();
-                        logger.debug("found unloaded vehicle " + name);
+                        logger.debug("found not yet loaded vehicle " + name);
                         break;
                     }
                 }
             }
             if (name == null) {
-                logger.error("no unloaded vehicle found");
+                logger.error("no vehicle found to load. vehicle list reached end?");
                 //set request to done
                 return true;
             }

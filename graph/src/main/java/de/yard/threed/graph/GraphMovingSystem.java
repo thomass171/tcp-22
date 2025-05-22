@@ -67,7 +67,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
 
         if (gmc.hasAutomove()) {
             adjustSpeed(gmc, vc, tpf);
-            moveForward(entity, gmc, vc, tpf * vc.movementSpeed);
+            moveForward(entity, gmc, vc, tpf * vc.getMovementSpeed());
             //logger.debug("new position of "+entity.getName()+entity.getId()+" isType "+gmc.getPosition());
         }
 
@@ -168,7 +168,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
         }
 
         // erstmal checken, ob bremsen erfoderlich ist
-        //nicht immer hin und her pendeln am limit
+        // avoid ping/pong (by +1)
         if (vc.getMovementSpeed() > speedlimit + 1) {
             needsbraking = true;
         }
@@ -185,6 +185,9 @@ public class GraphMovingSystem extends DefaultEcsSystem {
             }
         }
 
+        if (needsbraking || needsspeedup) {
+            logger.debug("needsbraking=" + needsbraking + ",needsspeedup=" + needsspeedup);
+        }
         if (needsbraking) {
             vc.accelerate(-deltatime);
         }
@@ -204,8 +207,8 @@ public class GraphMovingSystem extends DefaultEcsSystem {
         }*/
         LocalTransform posrot;
         if (gmc.graph instanceof ProjectedGraph) {
-            posrot =  getPosRot(gmc/*24.5.24, ((ProjectedGraph) gmc.graph).backProjection*/);
-        }else {
+            posrot = getPosRot(gmc/*24.5.24, ((ProjectedGraph) gmc.graph).backProjection*/);
+        } else {
             posrot = getPosRot(gmc/*24.5.24, gmc.getProjection()*/);
         }
         if (posrot != null) {

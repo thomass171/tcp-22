@@ -7,9 +7,6 @@ import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.util.NearView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Positionen (Model oder auch Camera) inklusive Orientierung und optional ein parent (z.B. vehicle), an das attached ist.
  * Eine Component für einen Observer (Node mit attached camera).
@@ -71,6 +68,9 @@ public class TeleportComponent extends EcsComponent {
         teleportlist.removePosition(label);
     }
 
+    /**
+     * 19.5.25: Accepts "entity.label" now instead just label
+     */
     public int findPoint(String label) {
         return teleportlist.findPoint(label);
     }
@@ -139,6 +139,10 @@ public class TeleportComponent extends EcsComponent {
 
     public String getTargetEntity() {
         return teleportlist.getTargetEntity();
+    }
+
+    public String getLabel() {
+        return teleportlist.getLabel();
     }
 
     /**

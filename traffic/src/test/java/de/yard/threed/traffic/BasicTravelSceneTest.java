@@ -21,7 +21,9 @@ import de.yard.threed.engine.ecs.EntityFilter;
 import de.yard.threed.engine.ecs.FirstPersonMovingSystem;
 import de.yard.threed.engine.ecs.TeleportComponent;
 import de.yard.threed.engine.ecs.TeleporterSystem;
+import de.yard.threed.engine.ecs.TeleporterSystemTest;
 import de.yard.threed.engine.ecs.UserSystem;
+import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
@@ -44,6 +46,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static de.yard.threed.core.testutil.TestUtils.*;
+import static de.yard.threed.engine.BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDUP;
+import static de.yard.threed.engine.ecs.UserSystem.USER_REQUEST_TELEPORT;
 import static de.yard.threed.engine.test.testutil.TestUtil.assertColor;
 import static de.yard.threed.engine.testutil.EngineTestUtils.assertViewPoint;
 import static org.junit.jupiter.api.Assertions.*;
@@ -64,7 +68,6 @@ public class BasicTravelSceneTest {
 
     EcsEntity aircraft;
     VehicleComponent vhc;
-    VelocityComponent vc;
     SceneRunnerForTesting sceneRunner;
     static final int INITIAL_FRAMES = 10;
 
@@ -79,12 +82,13 @@ public class BasicTravelSceneTest {
      */
     @ParameterizedTest
     @CsvSource(value = {
-            "false;;",
-            "true;;",
+            "false;;;false",
+            "true;;;false",
             // coordinates just arbitrary
-            "false;mobi;coordinate:90.0,110.5,76.0",
+            "false;mobi;coordinate:90.0,110.5,76.0;false",
+            "false;mobi;coordinate:90.0,110.5,76.0;true",
     }, delimiter = ';')
-    public void testWayland(boolean enableFPC, String initialVehicle, String initialLocation) throws Exception {
+    public void testWayland(boolean enableFPC, String initialVehicle, String initialLocation, boolean teleportByDestination) throws Exception {
         HashMap<String, String> customProperties = new HashMap<String, String>();
         customProperties.put("enableFPC", Boolean.toString(enableFPC));
         if (initialVehicle != null) {
@@ -142,13 +146,14 @@ public class BasicTravelSceneTest {
         TrafficTestUtils.assertVehicleEntity(locEntity, "loc", 0.0, null,
                 "TravelSphere", Quaternion.buildRotationX(new Degree(90)), log);
 
+        TeleportComponent tc = TeleportComponent.getTeleportComponent(userEntity);
         if (enableFPC) {
-            assertNull(TeleportComponent.getTeleportComponent(userEntity));
+            assertNull(tc);
             assertEquals(5, ((FirstPersonMovingSystem) SystemManager.findSystem(FirstPersonMovingSystem.TAG)).viewPoints.size());
             assertEquals("oben5", ((FirstPersonMovingSystem) SystemManager.findSystem(FirstPersonMovingSystem.TAG)).viewPoints.get(4).name);
         } else {
             // 'loc' has two viewpoints. TODO check why is position
-            EcsTestHelper.assertTeleportComponent(userEntity, 5 + 2 + ((initialVehicle == null ? 0 : 2)), 6 + ((initialVehicle == null ? 0 : 2)), new Vector3());
+            EcsTestHelper.assertTeleportComponent(tc, 5 + 2 + ((initialVehicle == null ? 0 : 2)), 6 + ((initialVehicle == null ? 0 : 2)), new Vector3(), "loc");
         }
 
         List<ViewPoint> vps = TrafficHelper.getViewpointsByDataprovider();
@@ -172,7 +177,17 @@ public class BasicTravelSceneTest {
                     "TravelSphere"/*"sphereTransform"*/, Quaternion.buildRotationX(new Degree(90)), log);
             FreeFlyingComponent bmc = FreeFlyingComponent.getFreeFlyingComponent(mobiEntity);
             assertNotNull(bmc);
+            VelocityComponent vc = VelocityComponent.getVelocityComponent(mobiEntity);
+            assertNotNull(vc);
+            assertEquals(0.0, vc.getMovementSpeed());
 
+            // teleport to 'mobi'.
+            TeleporterSystemTest.teleportTo(sceneRunner, userEntity, tc, "mobi", "Driver", teleportByDestination);
+
+            SystemManager.putRequest(new Request(TRIGGER_REQUEST_START_SPEEDUP, userEntity.getId()));
+            sceneRunner.runLimitedFrames(5);
+            // delta is hardcoded to 0.1
+            assertEquals(5/*frames*/ * 0.1/*delta*/ * vc.getAcceleration(), vc.getMovementSpeed());
         }
     }
 
@@ -203,7 +218,8 @@ public class BasicTravelSceneTest {
 
         EcsEntity player = UserSystem.getInitialUser();
         // vehicle not yet loaded. So only 1 outside viewpoints.
-        EcsTestHelper.assertTeleportComponent(player, 1, 0, null);
+        TeleportComponent tc = TeleportComponent.getTeleportComponent(player);
+        EcsTestHelper.assertTeleportComponent(tc, 1, 0, null, null);
 
         sceneRunner.runLimitedFrames(50);
         TrafficSystem trafficSystem = ((TrafficSystem) SystemManager.findSystem(TrafficSystem.TAG));
@@ -214,7 +230,7 @@ public class BasicTravelSceneTest {
 
         // now 'loc' should have been loaded.
         // should start at externel overview point. For now its in vehicle. TODO: Check why 0,0,0 is correct position
-        EcsTestHelper.assertTeleportComponent(player, 1 + 2, 2, new Vector3());
+        EcsTestHelper.assertTeleportComponent(tc, 1 + 2, 2, new Vector3(), "loc");
 
         EcsEntity userEntity = SystemManager.findEntities(e -> BasicTravelScene.DEFAULT_USER_NAME.equals(e.getName())).get(0);
         assertNotNull(userEntity, "user entity");
@@ -283,11 +299,11 @@ public class BasicTravelSceneTest {
         Quaternion locRotation = locNode.getTransform().getRotation();
         TestUtils.assertVector3(new Vector3(1090002.4809054425, 137065.4318067892, 1345465.2202950467), locPosition);
         if (initialRoute != null) {
-            TestUtils.assertQuaternion(new Quaternion(0.17740762320706088,0.28500444813163406,0.5936359283605339,0.7313654246221457), locRotation);
+            TestUtils.assertQuaternion(new Quaternion(0.17740762320706088, 0.28500444813163406, 0.5936359283605339, 0.7313654246221457), locRotation);
         }
         // not sure why rotation differs between use cases. Assume these should be the same.
         // For now actual values just taken as expected after visual test.
-        if (initialLocation!=null) {
+        if (initialLocation != null) {
             //Not sure what correct rotation for heading is. New ref values due to FG space? But values for heading 320 just don't fit. Needs more analysis
             TestUtils.assertQuaternion(new Quaternion(-0.09487833677693658, -0.3220285905905743, -0.3768671850957026, -0.8632883717800975), locRotation);
         }
@@ -312,7 +328,7 @@ public class BasicTravelSceneTest {
             double distance = 100;//elliCalcs.distanceTo(first, second);
             // negate due to typical forward orientation confusion
             //Vector3 rotatedForward = MathUtil2.DEFAULT_FORWARD.negate().rotate(posrot.rotation);
-            Vector3 rotatedForward = new Vector3(1,0,0).negate().rotate(posrot.rotation);
+            Vector3 rotatedForward = new Vector3(1, 0, 0).negate().rotate(posrot.rotation);
             // rotatedForward should roughly have direction -x, -y, +z
             log.debug("distance={},rotatedForward={}", distance, rotatedForward);
             GeoCoordinate rotTarget = elliCalcs.fromCart(elliCalcs.toCart(first).add(rotatedForward.multiply(distance)));

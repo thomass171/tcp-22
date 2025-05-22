@@ -14,6 +14,8 @@ import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.ecs.EcsHelper;
 import de.yard.threed.engine.ecs.InputToRequestSystem;
+import de.yard.threed.engine.ecs.TeleporterSystem;
+import de.yard.threed.engine.ecs.VelocityComponent;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.vr.VrInstance;
@@ -40,11 +42,9 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
      *
      */
     private FreeFlyingSystem() {
-        super(new String[]{FreeFlyingComponent.TAG}, new RequestType[]{
-                        BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDUP,
-                        BaseRequestRegistry.TRIGGER_REQUEST_STOP_SPEEDUP,
-                        BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDDOWN,
-                        BaseRequestRegistry.TRIGGER_REQUEST_STOP_SPEEDDOWN,
+        // Add VelocityComponent for getting movement speed like we do in GraphMovingSystem
+        super(new String[]{FreeFlyingComponent.TAG, VelocityComponent.TAG},
+                new RequestType[]{
                         BaseRequestRegistry.TRIGGER_REQUEST_START_TURNLEFT,
                         BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNLEFT,
                         BaseRequestRegistry.TRIGGER_REQUEST_START_TURNRIGHT,
@@ -84,15 +84,10 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
     @Override
     final public void update(EcsEntity entity, EcsGroup group, double delta) {
 
-        FreeFlyingComponent rbmc = (FreeFlyingComponent) group.cl.get(0);
+        FreeFlyingComponent ffc = (FreeFlyingComponent) group.cl.get(0);
+        VelocityComponent vc = (VelocityComponent) group.cl.get(1);
 
-        /*if (!rbmc.initialLocated && viewPoints.size() > 0) {
-            // Set initial position to first viewpoint
-            rbmc.getFirstPersonTransformer().getTransform().setPosition(viewPoints.get(0).transform.position);
-            rbmc.getFirstPersonTransformer().getTransform().setRotation(viewPoints.get(0).transform.rotation);
-            rbmc.initialLocated = true;
-        }*/
-        rbmc.updateByDelta(delta);
+        ffc.updateByDelta(delta, vc.getMovementSpeed());
     }
 
     @Override
@@ -129,14 +124,7 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
             processOnComponent(request, rbmc -> rbmc.toggleAutoRollright());
             return true;
         }
-        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDUP) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_SPEEDUP)) {
-            processOnComponent(request, rbmc -> rbmc.toggleAutoSpeedUp());
-            return true;
-        }
-        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDDOWN) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_SPEEDDOWN)) {
-            processOnComponent(request, rbmc -> rbmc.toggleAutoSpeedDown());
-            return true;
-        }
+        // SPEEDUP/DOWN moved to VelocitySystem
         return false;
     }
 
@@ -205,7 +193,7 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
         /*int userEntityId = (int) request.getUserEntityId();
 
         EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);*/
-        EcsEntity vehicleEntity = BasicTravelScene.getAvatarVehicle();
+        EcsEntity vehicleEntity = TeleporterSystem.getTeleportEntity();
         if (vehicleEntity == null) {
             logger.warn("no vehicle entity in TC");
             return;

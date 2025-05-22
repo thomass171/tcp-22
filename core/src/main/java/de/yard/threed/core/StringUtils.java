@@ -95,8 +95,11 @@ public class StringUtils {
         return s == null || length(trim(s)) == 0;
     }
 
-    public static String[] split(String str, String s) {
-        return sh.split(str, s);
+    /**
+     * 22.5.25: Not the Java core logic, where separator is a pattern!
+     */
+    public static String[] split(String str, String separator) {
+        return sh.split(str, separator);
     }
 
     /**

@@ -25,9 +25,9 @@ public class FreeFlyingComponent extends EcsComponent {
     public boolean freeflyingcomponentdebuglog = true;
     // For now have nothing like FirstPersonTransformer but everything here to keep it simple
     public boolean initialLocated = false;
-    private boolean autoTurnleft, autoTurnright, autoTurnup, autoTurndown, autoRollleft, autoRollright, autoSpeedUp, autoSpeedDown;
+    // movementSpeed and autoSpeed is in VelocityComponent
+    private boolean autoTurnleft, autoTurnright, autoTurnup, autoTurndown, autoRollleft, autoRollright;
     // speed must fit to the scene. The default might be too high/low. No movement without a user request for speed.
-    private double movementSpeed = 0.0; //move 2 units per getSecond
     private double rotationSpeed = 0.1f; //move 10 units per getSecond
     // In rad for more efficient calcs. default straight to -z
     double yaw = 0, pitch = 0, roll = 0;
@@ -53,7 +53,10 @@ public class FreeFlyingComponent extends EcsComponent {
         return (FreeFlyingComponent) e.getComponent(FreeFlyingComponent.TAG);
     }
 
-    public void updateByDelta(double delta) {
+    /**
+     * movementSpeed comes from VelocityComponent
+     */
+    public void updateByDelta(double delta, double movementSpeed) {
         if (autoTurnleft) {
             incYawByDelta(delta);
         }
@@ -71,12 +74,6 @@ public class FreeFlyingComponent extends EcsComponent {
         }
         if (autoRollright) {
             incRollByDelta(-delta);
-        }
-        if (autoSpeedUp) {
-            incSpeedByDelta(delta);
-        }
-        if (autoSpeedDown) {
-            incSpeedByDelta(-delta);
         }
 
             /*
@@ -145,14 +142,6 @@ public class FreeFlyingComponent extends EcsComponent {
         autoRollright = !autoRollright;
     }
 
-    public void toggleAutoSpeedUp() {
-        autoSpeedUp = !autoSpeedUp;
-    }
-
-    public void toggleAutoSpeedDown() {
-        autoSpeedDown = !autoSpeedDown;
-    }
-
     public void incPitchByDelta(double delta) {
         pitch += rotationSpeed * delta;
         logger.debug("pitch=" + pitch);
@@ -167,22 +156,8 @@ public class FreeFlyingComponent extends EcsComponent {
         roll += rotationSpeed * delta;
     }
 
-    public void incSpeedByDelta(double delta) {
-        // probaly need a accelaration factor. 5 only for testing
-        movementSpeed += 5.0 * delta;
-        logger.debug("new movementSpeed:" + movementSpeed);
-    }
-
-    public void setMovementSpeed(double movementSpeed) {
-        this.movementSpeed = movementSpeed;
-    }
-
     public double getRotationSpeed() {
         return rotationSpeed;
-    }
-
-    public double getMovementSpeed() {
-        return movementSpeed;
     }
 
     public void setRotationSpeed(double rotationSpeed) {

@@ -47,13 +47,16 @@ public class BaseRequestRegistry {
     public static RequestType TRIGGER_REQUEST_START_GRABBING = RequestType.register(1126, "TRIGGER_REQUEST_START_GRABBING");
     public static RequestType TRIGGER_REQUEST_STOP_GRABBING = RequestType.register(1127, "TRIGGER_REQUEST_STOP_GRABBING");
 
-    // might be specific for 'traffic'
+    // might be specific for 'traffic'. 16.5.25: But relates to Velocity
     public static RequestType TRIGGER_REQUEST_START_SPEEDUP = RequestType.register(1128, "TRIGGER_REQUEST_START_SPEEDUP");
     public static RequestType TRIGGER_REQUEST_STOP_SPEEDUP = RequestType.register(1129, "TRIGGER_REQUEST_STOP_SPEEDUP");
     public static RequestType TRIGGER_REQUEST_START_SPEEDDOWN = RequestType.register(1130, "TRIGGER_REQUEST_START_SPEEDDOWN");
     public static RequestType TRIGGER_REQUEST_STOP_SPEEDDOWN = RequestType.register(1131, "TRIGGER_REQUEST_STOP_SPEEDDOWN");
 
     public static RequestType REQUEST_USER_MESSAGE = RequestType.register(1132, "REQUEST_USER_MESSAGE");
+
+    public static RequestType TRIGGER_REQUEST_SPEEDUP = RequestType.register(1133, "TRIGGER_REQUEST_SPEEDUP");
+    public static RequestType TRIGGER_REQUEST_SPEEDDOWN = RequestType.register(1134, "TRIGGER_REQUEST_SPEEDDOWN");
 
     public static Request buildForwardRequest(int userEntityId) {
         return new Request(TRIGGER_REQUEST_FORWARD, new Payload(), userEntityId);

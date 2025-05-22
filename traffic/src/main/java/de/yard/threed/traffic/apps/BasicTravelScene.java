@@ -140,6 +140,7 @@ public class BasicTravelScene extends Scene {
         SystemManager.addSystem(new GraphTerrainSystem(getTerrainBuilder()));
         FreeFlyingSystem freeFlyingSystem = FreeFlyingSystem.buildFromConfiguration();
         SystemManager.addSystem(freeFlyingSystem);
+        SystemManager.addSystem(new VelocitySystem());
 
         if (enableFPC) {
             FirstPersonMovingSystem firstPersonMovingSystem = FirstPersonMovingSystem.buildFromConfiguration();
@@ -558,34 +559,7 @@ public class BasicTravelScene extends Scene {
         }
     }
 
-    /**
-     * 9.10.19: Liefert das Vehicle, in dem der Avatar sitzt, ansonsten null.
-     * 14.10.19 Jetzt nicht mehr ueber diese krude Suche.
-     * Entity im SystemManager suchen? Eher vom Teleport. Die Frage ist, wo der Avatar gerade ist.
-     * 12.03.25: The implementation seems OK so far. So use it in FreeFlyingSystem?
-     * @return
-     */
-    public static EcsEntity getAvatarVehicle() {
-        TeleportComponent tc = TeleportComponent.getTeleportComponent(/*24.10.21avatar*/UserSystem.getInitialUser());
-        /*SceneNode avatarparent = tc.getParent();
-        String parentname = avatarparent.getName();
-        getLog().debug("avatarparent=" + parentname);
-        List<NativeSceneNode> navigatorresult = avatarparent.findNodeByName("navigator.gltf", true);
-        if (navigatorresult.size() > 0) {
- // 3.1.20: Aircraft ermitteln, in dem Avatar sitzt. Oder irgendwie anders.
-        EcsEntity aircraft = FlatTravelScene.findVehicleByName("c172p");
-        if (aircraft == null) {
-            aircraft = FlatTravelScene.findVehicleByName("bluebird");
-        }
-        */
-        String name = tc.getTargetEntity();
-        if (name == null) {
-            //21.3.25 getLog().warn("no target entity in TC");
-            return null;
-        }
-        return TrafficHelper.findVehicleByName(name);
 
-    }
 
     @Override
     public void initSettings(Settings settings) {
@@ -680,10 +654,10 @@ public class BasicTravelScene extends Scene {
             });
         }
         controlmenu.addButton(col++, 0, 1, Icon.ICON_HORIZONTALLINE, () -> {
-            InputToRequestSystem.sendRequestWithId(new Request(BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDDOWN));
+            InputToRequestSystem.sendRequestWithId(new Request(BaseRequestRegistry.TRIGGER_REQUEST_SPEEDDOWN));
         });
         controlmenu.addButton(col++, 0, 1, Icon.ICON_PLUS, () -> {
-            InputToRequestSystem.sendRequestWithId(new Request(BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDUP));
+            InputToRequestSystem.sendRequestWithId(new Request(BaseRequestRegistry.TRIGGER_REQUEST_SPEEDUP));
         });
         controlmenu.addButton(col++, 0, 1, Icon.ICON_CLOSE, () -> {
             InputToRequestSystem.sendRequestWithId(new Request(InputToRequestSystem.USER_REQUEST_CONTROLMENU));

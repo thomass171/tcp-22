@@ -16,7 +16,10 @@ public interface NativeStringHelper {
 
     char charAt(String s, int i);
 
-    String[] split(String str, String s);
+    /**
+     * 22.5.25: Not the Java core logic, where separator is a pattern! separator is just a string!
+     */
+    String[] split(String str, String separator);
 
     public String[] splitByWhitespace(String str) ;
 

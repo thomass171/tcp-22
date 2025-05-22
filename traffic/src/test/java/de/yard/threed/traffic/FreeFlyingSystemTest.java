@@ -6,6 +6,7 @@ import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.engine.ecs.VelocityComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,9 +40,10 @@ public class FreeFlyingSystemTest {
     public void testStepForwardWithDefaults() {
 
         initSimpleTest();
-        FreeFlyingComponent rbmc = FreeFlyingComponent.getFreeFlyingComponent(movingEntity);
+        FreeFlyingComponent ffc = FreeFlyingComponent.getFreeFlyingComponent(movingEntity);
+        VelocityComponent vc = VelocityComponent.getVelocityComponent(movingEntity);
         double movementSpeed = 3.4;
-        rbmc.setMovementSpeed(movementSpeed);
+        vc.setMovementSpeed(movementSpeed);
         Vector3 initialPosition = movingEntity.getSceneNode().getTransform().getPosition();
         assertVector3(new Vector3(0, 0, 0), initialPosition);
 
@@ -70,6 +72,7 @@ public class FreeFlyingSystemTest {
         Quaternion baseRotation = new Quaternion();
         node.getTransform().setRotation(baseRotation);
         movingEntity.addComponent(new FreeFlyingComponent(node.getTransform()));
+        movingEntity.addComponent(new VelocityComponent());
         movingEntity.setName("movingEntity");
     }
 }

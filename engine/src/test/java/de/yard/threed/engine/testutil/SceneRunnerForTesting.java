@@ -137,7 +137,7 @@ public class SceneRunnerForTesting extends AbstractSceneRunner {
     }
 
     public void runLimitedFrames(int frameCount) {
-        // tpf 0 ist unguenstig, dann bewegt sich nichts.
+        // have delta != 0, otherwise there will be no movement
         runLimitedFrames(frameCount, 0.1, 0);
     }
 

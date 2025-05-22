@@ -4,11 +4,15 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeStringHelper;
 import de.yard.threed.core.platform.Platform;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+
 /**
  * 9.5.20: Also for GWT, but not C# (excluded from conversion).
- *
+ * <p>
  * 16.1.24: Made abstract to have builder from byte[] platform dependent.
- *
+ * <p>
  * Created by thomass on 01.04.16.
  */
 public abstract class JavaStringHelper implements NativeStringHelper {
@@ -39,8 +43,14 @@ public abstract class JavaStringHelper implements NativeStringHelper {
     }
 
     @Override
-    public String[] split(String str, String s) {
-        return str.split(s);
+    public String[] split(String str, String separator) {
+        // avoid regex pattern confusion in core split() str.split(s);
+        List<String> tokens = new ArrayList<>();
+        SimpleStringTokenizer tokenizer = new SimpleStringTokenizer(str, separator);
+        while (tokenizer.hasMoreTokens()) {
+            tokens.add(tokenizer.nextToken());
+        }
+        return tokens.toArray(new String[0]);
     }
 
     public String[] splitByWhitespace(String str) {

@@ -139,13 +139,17 @@ public class EcsTestHelper {
         return result;
     }
 
-    public static void assertTeleportComponent(EcsEntity entity, int expectedPoints, int expectedIndex, Vector3 expectedPosition) {
-        TeleportComponent tc = TeleportComponent.getTeleportComponent(entity);
+    public static void assertTeleportComponent( TeleportComponent tc, int expectedPoints, int expectedIndex, Vector3 expectedPosition, String expectedAttachedEntityName) {
         assertNotNull(tc);
         assertEquals(expectedPoints, tc.getPointCount(), "teleport destinations");
         assertEquals(expectedIndex, tc.getIndex(), "teleport index");
         if (expectedPosition != null) {
             // not sure what parent is here assertVector3(expectedPosition, tc.getParent().getPosition());
+        }
+        if (expectedAttachedEntityName!=null){
+            EcsEntity attachedEntity = TeleporterSystem.getTeleportEntity(tc);
+            assertNotNull(attachedEntity);
+            assertEquals(expectedAttachedEntityName, attachedEntity.getName());
         }
     }
 }

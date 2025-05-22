@@ -6,6 +6,8 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
 
+import java.util.List;
+
 
 /**
  * Rapid movement of an object (EcsEntity).
@@ -153,7 +155,7 @@ public class TeleporterSystem extends DefaultEcsSystem {
                 SystemManager.processEntityGroups(this.getGroupId(), (entity, group) -> {
                     TeleportComponent tc = (TeleportComponent) group.cl.get(0);
                     int index = tc.findPoint(destination);
-                    logger.debug("teleport request 4 for entity " + entity.getName() + ",index=" + index);
+                    logger.debug("teleport request 4 for destination label '" + destination + "' in entity " + entity.getName() + ",index=" + index);
                     if (index != -1) {
                         tc.stepTo(index);
                     }
@@ -249,6 +251,7 @@ public class TeleporterSystem extends DefaultEcsSystem {
     /**
      * 7.7.20: Useful?
      * 25.5.24: At least in (external) tests its useful.
+     *
      * @param activetc
      */
     public void setActivetc(TeleportComponent activetc) {
@@ -257,5 +260,34 @@ public class TeleporterSystem extends DefaultEcsSystem {
 
     public static Event buildPositionChanged(Vector3 position) {
         return new Event(TeleporterSystem.EVENT_POSITIONCHANGED, new Payload().addPosition(position));
+    }
+
+    /**
+     * 9.10.19: Return the entity where teleport currently is attached.
+     * In travelling probably the vehicle where avatar is located.
+     * 12.03.25: The implementation seems OK so far.
+     * 17.05.25: Moved here from getAvatarVehicle() in BasicTravelScene.
+     * <p>
+     * Returns null when teleport isn't attached.
+     */
+    public static EcsEntity getTeleportEntity() {
+        return getTeleportEntity(TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()));
+    }
+
+    public static EcsEntity getTeleportEntity(TeleportComponent tc) {
+
+        String name = tc.getTargetEntity();
+        if (name == null) {
+            //21.3.25 no need for warning. Might just happen.
+            return null;
+        }
+        // 19.5.25 No longer limit to vehicles but be more generic
+        //return TrafficHelper.findVehicleByName(name);
+        List<EcsEntity> es = EcsHelper.findEntitiesByName(name);
+        if (es.size() == 0) {
+            return null;
+        }
+        // warn about multiple? But why? Just could happen. Mabye we need to find by id? Hmmm
+        return es.get(0);
     }
 }

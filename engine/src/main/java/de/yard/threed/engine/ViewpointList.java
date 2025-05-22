@@ -3,6 +3,7 @@ package de.yard.threed.engine;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
@@ -101,10 +102,21 @@ public class ViewpointList {
         return points.size();
     }
 
+    /**
+     * 19.5.25: Accepts "entity.label" now instead just label
+     */
     public int findPoint(String label) {
+        String[] parts = StringUtils.split(label,".");
         for (int i = 0; i < points.size(); i++) {
-            if (points.get(i).label != null && points.get(i).label.equals(label)) {
-                return i;
+            if (parts.length > 1) {
+                if (points.get(i).label != null && points.get(i).label.equals(parts[1]) &&
+                        points.get(i).targetEntity != null && points.get(i).targetEntity.equals(parts[0])) {
+                    return i;
+                }
+            }else {
+                if (points.get(i).label != null && points.get(i).label.equals(label)) {
+                    return i;
+                }
             }
         }
         return -1;

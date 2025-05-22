@@ -13,16 +13,15 @@ import de.yard.threed.engine.platform.common.RequestType;
 public class RequestRegistry {
 
     /**
-     * Load a vehicle from configuration. Either by name (property "initialVehicle") or just the next.
+     * Load a vehicle from configuration. Either by name (property "initialVehicle") or just the next from vehiclelist.
+     * Doing it on demand instead of instantly is because of the many resources a vehicle might need
+     * (and depending on 'delayedload' in config;  "initialVehicle" also triggers instant load).
+     *
      * Location also is by parameter or just the next by configuration.
-     * Typically this is a vehicle with a cockpit to where the user can teleport.
-     * Needs to wait until everything is ready, eg. terrain and elevation available.
-     * (Das soll bei client/server aber nicht mehr so sein.
-     * Das muss nicht unbedingt fuer Travel mit Avatar geeignet sein. Obs das ist, ist abhaengig vom Vehicle.
-     * Wird erst auf Anforderung gemacht, weil
-     * ein Vehicle viele Resourcen braucht und abhaengig von delayedload in der config (mit "initialVehicle" aber automatisch nach kurzer Zeit).
-     * Does not work by index but loads the vehicle passed in the request.
-     * // 12.5.20: Doch, die brauchen ja auch ein richtige Elevation, also passend zum Client
+     * Typically this is a vehicle with a cockpit to where the user can teleport, but this is not required. It just depends on the vehicle.
+     * Might need to wait until everything is ready, eg. terrain and elevation available (also in client/server? Probably yes,
+     * they also need elevation fitting to client).
+     *
      * <p>
      * 31.10.23: TRAFFIC_REQUEST_LOADVEHICLE no longer deprecated. Its triggered eg. by property "initialVehicle".
      * 20.3.24: Optional parameter 'initialRoute' added. Main reason is that TrafficSystem.trafficgraphs map has no space for multiple
@@ -35,8 +34,7 @@ public class RequestRegistry {
                 .add("name", name)
                 .add("location", smartLocation)
                 .add("initialRoute", initialRoute)
-                .add("heading", initialHeading)
-        );
+                .add("heading", initialHeading), userEntityId);
     }
 
     /**
