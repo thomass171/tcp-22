@@ -5,6 +5,7 @@ import de.yard.threed.trafficcore.geodesy.GeoTools;
 import de.yard.threed.trafficservices.util.AirportFilter;
 import de.yard.threed.trafficservices.util.AirportResponse;
 import de.yard.threed.trafficservices.util.AirportSearchResponse;
+import de.yard.threed.trafficservices.util.LatLonResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.stereotype.Service;
@@ -44,8 +45,8 @@ public class AirportService implements RepositoryRestConfigurer {
             if (aptLine instanceof RunwayLine){
                 RunwayLine runwayLine = (RunwayLine) aptLine;
                 response.getRunways().add(new AirportResponse.Runway(
-                        runwayLine.getFromLat(), runwayLine.getFromLon(), runwayLine.getFromNumber(),
-                        runwayLine.getToLat(), runwayLine.getToLon(), runwayLine.getToNumber(),
+                        new LatLonResponse(runwayLine.getFromLat(), runwayLine.getFromLon()), runwayLine.getFromNumber(),
+                        new LatLonResponse(runwayLine.getToLat(), runwayLine.getToLon()), runwayLine.getToNumber(),
                         runwayLine.getWidth(), GeoTools.heading( LatLon.fromDegrees(runwayLine.getFromLat(), runwayLine.getFromLon()),
                          LatLon.fromDegrees(runwayLine.getToLat(), runwayLine.getToLon())).getDegree()));
             }

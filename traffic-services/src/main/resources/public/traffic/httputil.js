@@ -12,7 +12,7 @@ function doGet(url, jsonHandler) {
         return response.json();
     })
     .then(json => {
-        console.log("json=", json);
+        //console.log("json=", json);
         jsonHandler(json);
     })
     .catch(error => {

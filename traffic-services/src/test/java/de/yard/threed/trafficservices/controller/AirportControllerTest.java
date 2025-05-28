@@ -69,11 +69,11 @@ public class AirportControllerTest {
         assertEquals("Koln Bonn", airportResponse.getName());
         List<AirportResponse.Runway> runwys = airportResponse.getRunways();
         assertEquals(3, runwys.size());
-        assertEquals(50.880469, runwys.get(0).getFromLat());
-        assertEquals(7.129075, runwys.get(0).getFromLon());
+        assertEquals(50.880469, runwys.get(0).getFrom().getLat());
+        assertEquals(7.129075, runwys.get(0).getFrom().getLon());
         assertEquals("14L", runwys.get(0).getFromNumber());
-        assertEquals(50.855194, runwys.get(0).getToLat());
-        assertEquals(7.165692, runwys.get(0).getToLon());
+        assertEquals(50.855194, runwys.get(0).getTo().getLat());
+        assertEquals(7.165692, runwys.get(0).getTo().getLon());
         assertEquals("32R", runwys.get(0).getToNumber());
         assertEquals(60.05, runwys.get(0).getWidth());
         assertEquals(137.548, runwys.get(0).getHeading(), 0.001);

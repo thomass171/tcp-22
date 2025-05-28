@@ -19,11 +19,9 @@ public class AirportResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Runway {
-        double fromLat;
-        double fromLon;
+        LatLonResponse from;
         String fromNumber;
-        double toLat;
-        double toLon;
+        LatLonResponse to;
         String toNumber;
         double width;
         double heading;

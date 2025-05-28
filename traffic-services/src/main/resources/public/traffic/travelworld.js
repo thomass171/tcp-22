@@ -4,13 +4,15 @@
 
 // The host where the scene is launched. This is not the traffic-services host.
 var host = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/publicweb/tcp-flightgear";
+// The host of traffic-services. Can be customized with query param, eg. '?serviceshost=http://localhost:8080'
+var serviceshost = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net";
 
-var TRAFFIC_SERVICES_BASEURL = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/traffic";
 var wellKnownAirports = [ "EDDK", "EDKB"];
 
 var allAirports = new Map();
 
 var map;
+var tileGroup = null;
 
 class AlbumElement {
     /**
@@ -31,25 +33,17 @@ class AlbumElement {
 function initMap() {
     $("#album_title").html("Karte");
 
-    // If favorites are used, show only favorites per default. Otherwise show all.
-    //$("#optFavorites").prop("checked", usesFavorites(albumDefinition));
+    // Just an arbirary start center
+    var center = new L.latLng(52.0,7.2);
+    console.log("center",center);
 
-var center = new L.latLng(52.0,7.2);
-        console.log("center",center);
-        //albumDefinition.map.area = area;
-        //albumDefinition.map.height = "280px";
-
-    //if (!isUndefined(albumDefinition.map)) {
-        setCss("map", "height", "280px");
-        var zoom = 13;
-        map = L.map('map').setView(center, zoom);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-    //}
-
-
+    setCss("map", "height", "280px");
+    var zoom = 13;
+    map = L.map('map').setView(center, zoom);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
 }
 
 /**
@@ -133,7 +127,7 @@ function icaoChanged(idsuffix) {
 }
 
 function loadAirport(icao, idsuffix) {
-    doGet(TRAFFIC_SERVICES_BASEURL+"/airport/"+icao, json => {
+    doGet(serviceshost+"/traffic/airport/"+icao, json => {
         //console.log("got " + json);
 
         allAirports.set(icao, json);
@@ -142,7 +136,7 @@ function loadAirport(icao, idsuffix) {
             //console.log("adding ", runway);
             addOption("sel_runway_"+idsuffix, runway.fromNumber);
             console.log("runway:", runway);
-            var latlng = new L.LatLng(runway.fromLat, runway.fromLon);
+            var latlng = buildLatLng(runway.from);
             var point = L.Projection.Mercator.project(latlng);
             console.log(latlng, point);
              var zoom = 11;
@@ -151,6 +145,18 @@ function loadAirport(icao, idsuffix) {
         });
         updateStatus();
     });
+}
+
+function buildLatLng(e) {
+    return new L.LatLng(e.lat, e.lon);
+}
+
+function buildPolygon(p) {
+    var latlngs = [];
+    p.points.forEach(point => {
+        latlngs.push(buildLatLng(point));
+    });
+    return L.polygon(latlngs, {color: 'red', weight: 1, fillOpacity: 0.0 });
 }
 
 function getICAO(idsuffix) {
@@ -215,6 +221,30 @@ function launchSingleScene(vrMode) {
     launchScene('TravelScene',args);
 }
 
+function showSceneryTilesChanged() {
+
+    if ($("#cb_scenerytiles").is(":checked")) {
+        clearTileGroup();
+        tileGroup = L.layerGroup();
+        doGet(serviceshost+"/traffic/tile/search/findByFilter", json => {
+            json.tiles.forEach(tile => {
+                buildPolygon(tile.polygon).addTo(tileGroup);
+            });
+        });
+        tileGroup.addTo(map);
+    } else {
+        clearTileGroup();
+    }
+    updateStatus();
+}
+
+function clearTileGroup() {
+    if (tileGroup != null) {
+        tileGroup.removeFrom(map);
+    }
+    tileGroup = null;
+}
+
 /**
  * init for travelworld.html
  */
@@ -225,6 +255,11 @@ function init() {
     if (hostparam != null) {
         host = hostparam;
         $("#debuginfo").html("(host="+hostparam+")");
+    }
+    var serviceshostparam = url.searchParams.get("serviceshost");
+    if (serviceshostparam != null) {
+        serviceshost = serviceshostparam;
+        $("#debuginfo").html("(serviceshost="+serviceshostparam+")");
     }
 
     var initialICAO = "EDDK";
