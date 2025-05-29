@@ -49,7 +49,7 @@ public class AirportController {
         }
         AirportResponse response = airportService.findAirport(icao);
         if (response == null) {
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(response);
     }

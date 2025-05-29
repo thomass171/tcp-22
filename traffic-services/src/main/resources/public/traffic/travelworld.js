@@ -75,6 +75,9 @@ function clearOptions(inputid) {
     }
 }
 
+/**
+ * Also for datalists of inputs
+ */
 function addOption(inputid, value) {
     var element = document.getElementById(inputid);
     //console.log("element:",element);
@@ -90,6 +93,28 @@ function addOption(inputid, value) {
         var option = document.createElement('option');
         option.value = value;
         datalist.appendChild(option);
+        return;
+    }
+}
+
+/**
+ * Also for datalists of inputs
+ */
+function clearOptions(inputid) {
+    var element = document.getElementById(inputid);
+    //console.log("element:",element,inputid);
+
+    if (element.options != null) {
+        //not working element.options.innerHTML = "";
+        //$("#droplist").empty();
+        while (element.options.length > 0) {
+                element.remove(0);
+            }
+        return;
+    }
+    if (element.list != null) {
+        var datalist = element.list;
+        datalist.replaceChildren();
         return;
     }
 }
@@ -123,14 +148,22 @@ function icaoChanged(idsuffix) {
 
     if (icao.length == 4) {
         loadAirport(icao, idsuffix);
+    } else {
+        if (icao.length >= 2) {
+            searchAirport(icao, idsuffix);
+        }
     }
 }
 
+/**
+ * No search. 'icao' must be the full pure icao.
+ */
 function loadAirport(icao, idsuffix) {
     doGet(serviceshost+"/traffic/airport/"+icao, json => {
         //console.log("got " + json);
 
         allAirports.set(icao, json);
+        clearOptions("sel_runway_"+idsuffix);
         addOption("sel_runway_"+idsuffix, " ");
         json.runways.forEach(runway => {
             //console.log("adding ", runway);
@@ -138,10 +171,23 @@ function loadAirport(icao, idsuffix) {
             console.log("runway:", runway);
             var latlng = buildLatLng(runway.from);
             var point = L.Projection.Mercator.project(latlng);
-            console.log(latlng, point);
+            //console.log(latlng, point);
              var zoom = 11;
              map.setView(latlng, zoom);
              var marker = L.marker([latlng.lat, latlng.lng]).addTo(map);
+        });
+        updateStatus();
+    });
+}
+
+function searchAirport(icao, idsuffix) {
+    doGet(serviceshost+"/traffic/airport/search/findByFilter?icao="+icao, json => {
+        //console.log("got " + json);
+
+        clearOptions("inp_takeoff_" + idsuffix);
+        json.airports.forEach(airport => {
+            //console.log("adding ", airport);
+            addOption("inp_takeoff_" + idsuffix, airport.icao + "(" + airport.name + ")");
         });
         updateStatus();
     });
@@ -159,8 +205,13 @@ function buildPolygon(p) {
     return L.polygon(latlngs, {color: 'red', weight: 1, fillOpacity: 0.0 });
 }
 
+/**
+ * Returns pure icao without appended name
+ */
 function getICAO(idsuffix) {
-    return $("#inp_takeoff_"+idsuffix).val();
+    var v= $("#inp_takeoff_"+idsuffix).val();
+    // ignore optional name
+    return v.substring(0,4);
 }
 
 function getRunway(idsuffix) {
@@ -215,7 +266,7 @@ function launchSingleScene(vrMode) {
     }
 
     // example: 'geo:50.85850600, 007.13874200 ,78.05
-    args.set("initialLocation","geo:" + runway.fromLat + "," + runway.fromLon);
+    args.set("initialLocation","geo:" + runway.from.lat + "," + runway.from.lon);
     args.set("initialHeading",runway.heading);
 
     launchScene('TravelScene',args);
