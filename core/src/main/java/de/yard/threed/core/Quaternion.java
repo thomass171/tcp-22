@@ -28,7 +28,6 @@ public class Quaternion implements Dumpable {
     }
 
     /**
-     *
      * Es wird die UnityOrder verwendet. Nee lieber nicht, das ist left handed.
      * * Aus JME3 bzw.
      * <a href="http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm">http://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm</a>
@@ -60,10 +59,10 @@ public class Quaternion implements Dumpable {
         double cosYXsinZ = cosY * sinZ;
         double sinYXcosZ = sinY * cosZ;
 
-        double    w = (cosYXcosZ * cosX - sinYXsinZ * sinX);
-        double     x = (cosYXcosZ * sinX + sinYXsinZ * cosX);
-        double     y = (sinYXcosZ * cosX + cosYXsinZ * sinX);
-        double    z = (cosYXsinZ * cosX - sinYXcosZ * sinX);
+        double w = (cosYXcosZ * cosX - sinYXsinZ * sinX);
+        double x = (cosYXcosZ * sinX + sinYXsinZ * cosX);
+        double y = (sinYXcosZ * cosX + cosYXsinZ * sinX);
+        double z = (cosYXsinZ * cosX - sinYXcosZ * sinX);
 
         if (MathUtil.mathvalidate) {
             if (java.lang.Double.isNaN(x)) {
@@ -79,7 +78,7 @@ public class Quaternion implements Dumpable {
                 throw new RuntimeException("NaN");
             }
         }
-        return new Quaternion(x,y,z,w).normalize();
+        return new Quaternion(x, y, z, w).normalize();
         //logger.debug("nach norm x="+getX())
     }
 
@@ -259,11 +258,11 @@ public class Quaternion implements Dumpable {
     }
 
     public static Quaternion buildRotationY(Degree degree) {
-        return  Quaternion.buildFromAngles(new Degree(0), degree, new Degree(0));
+        return Quaternion.buildFromAngles(new Degree(0), degree, new Degree(0));
     }
 
     public static Quaternion buildRotationZ(Degree degree) {
-        return  Quaternion.buildFromAngles(new Degree(0), new Degree(0), degree);
+        return Quaternion.buildFromAngles(new Degree(0), new Degree(0), degree);
     }
 
     /**
@@ -272,9 +271,9 @@ public class Quaternion implements Dumpable {
     public static Quaternion buildQuaternionFromAngleAxis(double angle, Vector3 axis) {
         axis = axis.normalize();
         double halfAngle = 0.5f * angle;
-        double sin =  Math.sin(halfAngle);
+        double sin = Math.sin(halfAngle);
 
-        double w =  Math.cos(halfAngle);
+        double w = Math.cos(halfAngle);
         double x = sin * axis.getX();
         double y = sin * axis.getY();
         double z = sin * axis.getZ();
@@ -286,7 +285,7 @@ public class Quaternion implements Dumpable {
     public static Quaternion buildQuaternionFromAngleAxis(Degree angle, Vector3 axis) {
         return buildQuaternionFromAngleAxis(angle.toRad(), axis);
     }
-    
+
     public static double getDotProduct(Quaternion p1, Quaternion p2) {
         double p = MathUtil2.getDotProduct(p1, p2);
         if (MathUtil.mathvalidate) {
@@ -299,5 +298,31 @@ public class Quaternion implements Dumpable {
 
     public double dot(Quaternion v) {
         return getDotProduct(this, v);
+    }
+
+    /**
+     * Aka vector part
+     */
+    Vector3 getImaginaryPart() {
+        return new Vector3(x, y, z);
+    }
+
+    /**
+     * Aka scalar part
+     */
+    double getRealPart() {
+        return w;
+    }
+
+    /**
+     * 12.6.25: One more rotation by quaternion, that provides better results than existing methods.
+     * From SGQuat. Is this the math from https://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/transforms/derivations/vectors/index.htm?
+     */
+    public Vector3 transform(Vector3 v) {
+        double r = 2.0 / MathUtil2.getDotProduct(this, this);
+        Vector3 qimag = getImaginaryPart();
+        double qr = getRealPart();
+        return v.multiply(r * qr * qr - 1.0).add(qimag.multiply(r * MathUtil2.getDotProduct(qimag, v)).subtract(MathUtil2.getCrossProduct(qimag, v).multiply(r * qr)));
+
     }
 }

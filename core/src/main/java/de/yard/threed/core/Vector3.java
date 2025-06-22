@@ -46,13 +46,13 @@ public class Vector3 implements Dumpable {
     }*/
 
     /**
-     * Die Rotation geht vielleicht auch ohne den Umweg über Matrix.
-     * In https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
-     * findet sich ein feiner Algorithmus.
+     * No matrix needed for rotation?
+     * https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion has a nice algorithmus.
      * 8.5.18: Den versuch ich mal. Laut Tests gehts.
-     *
+     * * 12.6.25: Deprecated in favor of Quaternion.transform() which provides more fitting results (in FG). But this looks very similar.
      * @return
      */
+    @Deprecated
     public Vector3 rotate(Quaternion q) {
         //Matrix4 m = Matrix4.buildRotationMatrix(rotation);
         //return m.transform(this);

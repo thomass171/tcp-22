@@ -22,10 +22,10 @@ public class MathUtil2 {
     public static Vector3 DEFAULT_RIGHT = new Vector3(1, 0, 0);
 
     /**
-     * Kopiert und laut (http://fabiensanglard.net/doom3_documentation/37726-293748.pdf) angepasst.
-     * Die Original scheint mir nicht ganz richtig zu sein. Diese angepasste Version liefert Ergebnisse
-     * wie nachgerechnet und ThreeJS.
-     *
+     * Copied and adjusted according to (http://fabiensanglard.net/doom3_documentation/37726-293748.pdf).
+     * The original appears not quite correct. Returns results manually checked
+     * and cross checked in ThreeJS.
+     * 12.6.25: But using it in FG for vector rotation leads to wrong(?) results. Hmmm.
      * @return
      */
     public static Matrix4 buildRotationMatrix(Quaternion q) {
@@ -72,10 +72,11 @@ public class MathUtil2 {
     }
 
     /**
-     * Aus JME.
-     *
+     * From JME.
+     * 12.6.25: Deprecated in favor of Quaternion.transform() which provides more fitting results (in FG).
      * @return
      */
+    @Deprecated
     public static Vector3 multiply(Quaternion q, Vector3 v) {
         if (v.getX() == 0 && v.getY() == 0 && v.getZ() == 0) {
             return new Vector3(0, 0, 0);
