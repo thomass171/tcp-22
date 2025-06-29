@@ -62,7 +62,7 @@ public class BaseRequestRegistry {
         return new Request(TRIGGER_REQUEST_FORWARD, new Payload(), userEntityId);
     }
 
-    public static Request buildUserMessageRequest(int userEntityId, String message, int durationMillis, Integer receiverUserEntityId) {
+    public static Request buildUserMessageRequest(Integer userEntityId, String message, int durationMillis, Integer receiverUserEntityId) {
         return new Request(REQUEST_USER_MESSAGE, new Payload()
                 .addMessage(message)
                 .addDuration(durationMillis)

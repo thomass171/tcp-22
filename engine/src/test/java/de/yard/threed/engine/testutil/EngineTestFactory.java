@@ -79,11 +79,16 @@ public class EngineTestFactory {
 
     /**
      * 22.12.23
+     * 27.6.25: Timeout 2000->30000 to be ready for external bundle (bundlepool). Also
+     * needs processAsync() for HTTP futures.
      */
     public static void loadBundleAndWait(String bundlename, boolean delayed) {
         AbstractSceneRunner.getInstance().loadBundle(bundlename + ((delayed) ? "-delayed" : ""), bundle -> BundleRegistry.registerBundle(bundlename, bundle));
         try {
-            TestUtils.waitUntil(() -> BundleRegistry.getBundle(bundlename) != null, 2000);
+            TestUtils.waitUntil(() -> {
+                TestHelper.processAsync();
+                return BundleRegistry.getBundle(bundlename) != null;
+            }, 30000);
         } catch (Exception e) {
             e.printStackTrace();
         }

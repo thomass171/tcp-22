@@ -313,10 +313,12 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             // user, so it seems more consistent to wait here. Use ASSEMBLED as we already have this event.
             if (!sphereloaded) {
                 logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing sphere load");
+                informUserAboutDelay("Waiting for sphere", request.getUserEntityId());
                 return false;
             }
             if (!userAssembled) {
                 logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing userAssembled");
+                informUserAboutDelay("Waiting for user to be ready", request.getUserEntityId());
                 return false;
             }
 
@@ -339,6 +341,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 // 27.3.25 Some locations can be used without a graph
                 if (graphToUse == null && (smartLocation == null || smartLocation.needsGraph())) {
                     logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing traffic graph. groundnet not loaded?");
+                    informUserAboutDelay("Waiting for traffic graph(groundnet)", request.getUserEntityId());
                     return false;
                 }
 
@@ -379,7 +382,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 BooleanHolder shouldAbort = new BooleanHolder(false);
                 FlightRouteGraph flightRoute = new BasicRouteBuilder(TrafficHelper.getEllipsoidConversionsProviderByDataprovider())
                         .fromGeoRoute(initialRoute, geoCoordinate -> {
-                            logger.debug("No elevation for " + geoCoordinate + " of initialRoute");
+                            logger.warn("No elevation for " + geoCoordinate + " of initialRoute");
                             if (!shouldAbort.getValue()) {
                                 // trigger terrain loading (but only once, so set to abort. Anyway it might be triggered again later)
                                 SystemManager.putRequest(RequestRegistry.buildLoadScenery(new LatLon(geoCoordinate.getLatDeg(), geoCoordinate.getLonDeg())));
@@ -388,6 +391,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                         });
                 if (shouldAbort.getValue()) {
                     logger.debug("Aborting TRAFFIC_REQUEST_LOADVEHICLE due to missing elevation");
+                    informUserAboutDelay("Waiting for scenery terrain", request.getUserEntityId());
                     return false;
                 }
 
@@ -442,6 +446,10 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             return true;
         }
         return false;
+    }
+
+    private void informUserAboutDelay(String msg, Integer receiverUserEntityId) {
+        SystemManager.putRequest(BaseRequestRegistry.buildUserMessageRequest(null, msg, 3000, receiverUserEntityId));
     }
 
     @Override

@@ -50,7 +50,7 @@ public class PositionerFactory {
                 elevation = elevationProvider.getElevation(geo.getLatDeg().getDegree(), geo.getLonDeg().getDegree());
             }
             if (elevation == null) {
-                logger.debug("No elevation for " + geo + " of initialLocation");
+                logger.warn("No elevation for " + geo + " of initialLocation");
                 SystemManager.putRequest(RequestRegistry.buildLoadScenery(geo));
                 return new PositionerFactoryResult(null, NOTYET, " missing elevation");
             }
