@@ -4,7 +4,7 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.LatLon;
 
 /**
- * Uebernommen aus osm.Runway.
+ * Like in osm.Runway.
  * <p>
  * 5.5.20
  */
@@ -26,7 +26,19 @@ public class Runway {
         this.toLon = toLon;
         this.toNumber=toNumber;
         this.width = width;
-        //TODO anders
+        //TODO change somehow
+        enternodefromgroundnet = "188";
+    }
+
+    public Runway(LatLon from, String fromNumber, LatLon to, String toNumber, double width) {
+        this.fromLat = from.getLatDeg().getDegree();
+        this.fromLon = from.getLonDeg().getDegree();
+        this.fromNumber = fromNumber;
+        this.toLat = to.getLatDeg().getDegree();
+        this.toLon = to.getLonDeg().getDegree();
+        this.toNumber=toNumber;
+        this.width = width;
+        //TODO change somehow
         enternodefromgroundnet = "188";
     }
 

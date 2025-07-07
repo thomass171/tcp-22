@@ -197,12 +197,32 @@ function buildLatLng(e) {
     return new L.LatLng(e.lat, e.lon);
 }
 
+function buildLatLngFromString(s) {
+    var parts = s.split(",");
+    return new L.LatLng(parts[0], parts[1]);
+}
+
 function buildPolygon(p) {
     var latlngs = [];
     p.points.forEach(point => {
         latlngs.push(buildLatLng(point));
     });
     return L.polygon(latlngs, {color: 'red', weight: 1, fillOpacity: 0.0 });
+}
+
+function showGeoRoute(geoRoute) {
+    console.log("geoRoute="+geoRoute);
+    var parts = geoRoute.split("->");
+    console.log(parts);
+    var lastlatLng = null;
+    parts.forEach(part => {
+        var subparts = part.split(":");
+        var latLng = buildLatLngFromString(subparts[1]);
+        if (lastlatLng != null) {
+            L.polyline([lastlatLng,latLng], {color: 'red'}).addTo(map);
+        }
+        lastlatLng = latLng;
+    });
 }
 
 /**
@@ -321,6 +341,12 @@ function init() {
     }
 
     initMap();
+
+    // debug helper for geoRoutes
+    var geoRouteparam = url.searchParams.get("geoRoute");
+    if (geoRouteparam != null) {
+        showGeoRoute(geoRouteparam);
+    }
 
     document.getElementById("inp_takeoff_from").value = initialICAO;
     loadAirport(initialICAO, "from");

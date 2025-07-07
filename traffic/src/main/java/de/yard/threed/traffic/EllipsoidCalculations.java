@@ -106,10 +106,13 @@ public abstract class EllipsoidCalculations {
     @Deprecated
     public abstract Vector3 toCart(GeoCoordinate geoCoordinate);
 
-    public abstract LatLon applyCourseDistance(LatLon latLon, Degree coursedeg, double dist);
+    public abstract LatLon applyCourseDistance(LatLon latLon, Degree coursedeg, double distkm);
 
     public abstract Degree courseTo(LatLon latLon, LatLon dest);
 
+    /**
+     * Distance is in km!
+     */
     public abstract double distanceTo(LatLon latLon, LatLon dest);
 
 

@@ -23,6 +23,8 @@ import de.yard.threed.trafficcore.geodesy.GeoTools;
  */
 public class SimpleEllipsoidCalculations extends EllipsoidCalculations {
 
+    public static double eQuatorialEarthRadius = 6378.1370D;
+    // to be more flexible
     double radius;
 
     public SimpleEllipsoidCalculations(double radius) {
@@ -38,9 +40,9 @@ public class SimpleEllipsoidCalculations extends EllipsoidCalculations {
     @Override
     public GeoCoordinate fromCart(Vector3 cart) {
         LatLon latLon = new LatLon(MathUtil2.asin(cart.getZ() / radius),
-         MathUtil2.atan2(cart.getY(), cart.getX()));
+                MathUtil2.atan2(cart.getY(), cart.getX()));
         // TODO elevation
-        return GeoCoordinate.fromLatLon(latLon,0);
+        return GeoCoordinate.fromLatLon(latLon, 0);
     }
 
     @Override
@@ -58,10 +60,20 @@ public class SimpleEllipsoidCalculations extends EllipsoidCalculations {
         return new Vector3(x, y, z);
     }
 
+    /**
+     * https://www.movable-type.co.uk/scripts/latlong.html
+     */
     @Override
-    public LatLon applyCourseDistance(LatLon latLon, Degree coursedeg, double dist) {
-        Util.notyet();
-        return null;
+    public LatLon applyCourseDistance(LatLon latLon, Degree brng, double distancekm) {
+
+        double d = distancekm / eQuatorialEarthRadius;
+        double lat = latLon.getLatRad();
+        double lon = latLon.getLonRad();
+        double lat2 = Math.asin(Math.sin(lat) * Math.cos(d) +
+                Math.cos(lat) * Math.sin(d) * Math.cos(brng.toRad()));
+        double lon2 = lon + Math.atan2(Math.sin(brng.toRad()) * Math.sin(d) * Math.cos(lat),
+                Math.cos(d) - Math.sin(lat) * Math.sin(lat2));
+        return new LatLon(lat2, lon2);
     }
 
     @Override
@@ -69,9 +81,20 @@ public class SimpleEllipsoidCalculations extends EllipsoidCalculations {
         return GeoTools.heading(latLon, dest);
     }
 
+    /**
+     * There are several algorithm known for this (complex) calculation and the results are more or less exact.
+     * This implementation is from https://stackoverflow.com/questions/365826/calculate-distance-between-2-gps-coordinates
+     */
     @Override
-    public double distanceTo(LatLon latLon, LatLon dest) {
-        Util.notyet();
-        return 0;
+    public double distanceTo(LatLon l1, LatLon dest) {
+
+        double dlong = (dest.getLonRad() - l1.getLonRad());
+        double dlat = (dest.getLatRad() - l1.getLatRad());
+        double a = Math.pow(Math.sin(dlat / 2D), 2D) + Math.cos(l1.getLatRad()/* * _d2r*/) * Math.cos(dest.getLatRad()/* * _d2r*/)
+                * Math.pow(Math.sin(dlong / 2D), 2D);
+        double c = 2D * Math.atan2(Math.sqrt(a), Math.sqrt(1D - a));
+        double d = eQuatorialEarthRadius * c;
+
+        return d;
     }
 }

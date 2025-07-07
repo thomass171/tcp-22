@@ -140,6 +140,6 @@ public class Destination {
 
     @Override
     public String toString() {
-        return "type=" + type + ",icao=" + icao;
+        return "type=" + type + ",icao=" + icao + ",pattern=" + getPattern();
     }
 }

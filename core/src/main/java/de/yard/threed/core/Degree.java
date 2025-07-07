@@ -108,5 +108,26 @@ public class Degree {
         }
         return new Degree(d);
     }
+
+    /**
+     * Returns the value that needs to be added to d1 for reaching d2.
+     * Range is from -180 to +180
+     */
+    public static Degree diff(Degree d1, Degree d2) {
+        Degree diff = new Degree(d2.getDegree() - d1.getDegree());
+        // using normalize() will break negative values!
+        if (diff.getDegree() > 180.0) {
+            return new Degree(360).subtract(diff).negate();
+        }
+        if (diff.getDegree() < -180.0) {
+            return new Degree(360).subtract(diff.abs());
+        }
+
+        return diff;
+    }
+
+    public Degree abs() {
+        return new Degree(degree >= 0 ? degree : -degree);
+    }
 }
 

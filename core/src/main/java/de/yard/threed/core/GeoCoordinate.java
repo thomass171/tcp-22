@@ -48,6 +48,10 @@ public class GeoCoordinate extends LatLon {
         return new GeoCoordinate(latLon.latRad, latLon.lonRad, elevationM);
     }
 
+    public static GeoCoordinate fromLatLon(LatLon latLon) {
+        return new GeoCoordinate(latLon.getLatDeg(), latLon.getLonDeg());
+    }
+
     @Override
     public String toString() {
         // 18.3.24: Prefer custom with specific format instead of super.toString();
