@@ -1,4 +1,4 @@
-package de.yard.threed.traffic;
+package de.yard.threed.trafficcore;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.GeneralParameterHandler;
@@ -6,8 +6,9 @@ import de.yard.threed.core.LatLon;
 import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.traffic.geodesy.ElevationProvider;
+import de.yard.threed.trafficcore.ElevationProvider;
 import de.yard.threed.core.GeoCoordinate;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.trafficcore.geodesy.GeoTools;
 
 /**

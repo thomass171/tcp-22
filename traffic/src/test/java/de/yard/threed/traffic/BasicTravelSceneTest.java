@@ -6,7 +6,6 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.Event;
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeLight;
@@ -34,6 +33,8 @@ import de.yard.threed.traffic.apps.BasicTravelScene;
 
 import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.traffic.testutils.TrafficTestUtils;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
+import de.yard.threed.trafficcore.SimpleEllipsoidCalculations;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import static de.yard.threed.core.testutil.TestUtils.*;
 import static de.yard.threed.engine.BaseRequestRegistry.TRIGGER_REQUEST_START_SPEEDUP;
-import static de.yard.threed.engine.ecs.UserSystem.USER_REQUEST_TELEPORT;
 import static de.yard.threed.engine.test.testutil.TestUtil.assertColor;
 import static de.yard.threed.engine.testutil.EngineTestUtils.assertViewPoint;
 import static org.junit.jupiter.api.Assertions.*;

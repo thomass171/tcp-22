@@ -1,23 +1,16 @@
 package de.yard.threed.traffic;
 
-import de.yard.threed.core.BooleanHolder;
 import de.yard.threed.core.Degree;
-import de.yard.threed.core.Event;
-import de.yard.threed.core.LatLon;
-import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.Payload;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.SystemManager;
-import de.yard.threed.traffic.flight.FlightLocation;
-import de.yard.threed.traffic.geodesy.ElevationProvider;
+import de.yard.threed.trafficcore.ElevationProvider;
 import de.yard.threed.core.GeoCoordinate;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.trafficcore.model.SmartLocation;
-
-import static de.yard.threed.engine.ecs.TeleporterSystem.EVENT_POSITIONCHANGED;
 
 public class PositionerFactory {
     private static Log logger = Platform.getInstance().getLog(PositionerFactory.class);

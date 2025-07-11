@@ -6,6 +6,7 @@ import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.graph.Graph;
 import de.yard.threed.graph.GraphOrientation;
 import de.yard.threed.engine.util.CircleRotator;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
 
 import java.util.List;
 

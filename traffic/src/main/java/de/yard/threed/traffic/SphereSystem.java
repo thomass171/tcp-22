@@ -33,8 +33,8 @@ import de.yard.threed.traffic.config.VehicleDefinition;
 import de.yard.threed.traffic.config.XmlVehicleDefinition;
 import de.yard.threed.core.GeoCoordinate;
 
+import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.trafficcore.geodesy.MapProjection;
-import de.yard.threed.traffic.geodesy.GraphMapProjection;
 import de.yard.threed.trafficcore.geodesy.SimpleMapProjection;
 import de.yard.threed.trafficcore.model.Airport;
 import de.yard.threed.trafficcore.model.Vehicle;

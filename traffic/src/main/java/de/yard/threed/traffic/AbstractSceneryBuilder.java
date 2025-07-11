@@ -1,10 +1,10 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.core.LatLon;
-import de.yard.threed.core.Vector3;
 import de.yard.threed.core.geometry.Rectangle;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.graph.GraphNode;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.trafficcore.geodesy.MapProjection;
 
 /**

@@ -1,6 +1,7 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.engine.ecs.DataProvider;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
 
 public class EllipsoidConversionsProvider implements DataProvider {
     EllipsoidCalculations ellipsoidCalculations;

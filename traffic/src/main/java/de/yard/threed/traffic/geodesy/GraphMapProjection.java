@@ -5,9 +5,8 @@ import de.yard.threed.graph.Graph;
 import de.yard.threed.graph.GraphEdge;
 import de.yard.threed.graph.GraphNode;
 import de.yard.threed.graph.GraphOrientation;
-import de.yard.threed.traffic.EllipsoidCalculations;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.trafficcore.geodesy.MapProjection;
-import de.yard.threed.trafficcore.geodesy.OriginMapProjection;
 
 /**
  * 22.4.25: Two graph related methods extracted from SimpleMapProjection

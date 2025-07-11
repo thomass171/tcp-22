@@ -196,8 +196,6 @@ function addCommonArgs(args, prefix) {
     args.set("teamSize",$("#inp_teamSize").val());
 }
 
-
-
 function launchScene(scenename,args) {
 
     const params = new URLSearchParams()

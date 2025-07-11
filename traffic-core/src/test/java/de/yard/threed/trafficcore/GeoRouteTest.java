@@ -1,21 +1,20 @@
-package de.yard.threed.traffic;
+package de.yard.threed.trafficcore;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.testutil.EngineTestFactory;
-import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import de.yard.threed.core.GeoCoordinate;
+import de.yard.threed.core.testutil.CoreTestFactory;
+import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 
 /**
  *
  */
 public class GeoRouteTest {
 
-    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "traffic"}, new SimpleHeadlessPlatformFactory());
+    static Platform platform = CoreTestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
 
     @Test
     public void testEDKB_EDDK() throws Exception {

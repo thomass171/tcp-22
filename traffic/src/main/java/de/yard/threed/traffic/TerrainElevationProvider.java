@@ -2,11 +2,9 @@ package de.yard.threed.traffic;
 
 
 import de.yard.threed.core.LatLon;
-import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.SceneNode;
-import de.yard.threed.traffic.geodesy.ElevationProvider;
+import de.yard.threed.trafficcore.ElevationProvider;
 
 /**
  * 26.2.24: defaultAltitude added

@@ -4,7 +4,7 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.engine.SceneNode;
-import de.yard.threed.traffic.EllipsoidCalculations;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.traffic.TrafficHelper;
 import de.yard.threed.core.GeoCoordinate;
 

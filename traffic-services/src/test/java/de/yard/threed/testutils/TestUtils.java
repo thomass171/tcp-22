@@ -3,6 +3,7 @@ package de.yard.threed.testutils;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.MultiValueMap;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,6 +14,12 @@ public class TestUtils {
 
     public static MvcResult doGet(MockMvc mockMvc, String url) throws Exception {
         MvcResult result = mockMvc.perform(get(url))
+                .andDo(print()).andReturn();
+        return result;
+    }
+
+    public static MvcResult doGet(MockMvc mockMvc, String url, MultiValueMap<String, String> params) throws Exception {
+        MvcResult result = mockMvc.perform(get(url).params(params))
                 .andDo(print()).andReturn();
         return result;
     }

@@ -10,7 +10,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PolygonResponse {
-    final List<WebLatLon> points = new ArrayList();
-private boolean closed=false;
+public class RouteBuildResponse {
+    String geoRoute;
 }

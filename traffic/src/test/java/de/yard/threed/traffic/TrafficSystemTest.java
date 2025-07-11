@@ -1,8 +1,10 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.core.InitMethod;
+import de.yard.threed.core.Vector3;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.testutil.SimpleEventBusForTesting;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsTestHelper;
 import de.yard.threed.engine.ecs.SystemManager;
@@ -66,6 +68,13 @@ public class TrafficSystemTest {
         assertNotNull(railwayGraph, "railwayGraph");
 
 
+    }
+
+    @Test
+    public void testLocSpaceToFgSpace() {
+        Vector3 v = new Vector3(1, 2, -3);
+
+        TestUtils.assertVector3(new Vector3(1, 3, 2), v.multiply(FgVehicleSpace.getLocSpaceToFgSpace()));
     }
 
     private void startSimpleTest(String tilename) {

@@ -7,25 +7,14 @@ var host = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/publicweb/tcp-fli
 // The host of traffic-services. Can be customized with query param, eg. '?serviceshost=http://localhost:8080'
 var serviceshost = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net";
 
-var wellKnownAirports = [ "EDDK", "EDKB"];
+var wellKnownAirports = [ "EDDK", "EDKB", "EHAM"];
 
 var allAirports = new Map();
 
 var map;
 var tileGroup = null;
-
-class AlbumElement {
-    /**
-     * fileName is always the 'real' name, even if a thumbnail exists.
-     */
-    constructor(fileName, thumbnailName) {
-        console.log("Building AlbumElement with fileName '" + fileName + "' and thumbnailName '" + thumbnailName + "'");
-        this.detailImageId = -1;
-    }
-
-    getHtmlFullImage() {
-    }
-}
+var foundGeoRoute = null;
+var map_routeMarker = null;
 
 /**
  *
@@ -55,26 +44,6 @@ function populateOptions(options, valueArray, getter, withEmptyLine) {
 
 }
 
-function clearOptions(inputid) {
-    var element = document.getElementById(inputid);
-    //console.log("element:",element);
-
-    if (element.options != null) {
-        while (element.options.length > 0) {
-            element.options.remove(0);
-        }
-        return;
-    }
-    if (element.list != null) {
-        var datalist = element.list;//document.getElementById(element.list);
-        //console.log("clear of datalist ", datalist, datalist.children.length);
-        while (datalist.children.length > 0) {
-            datalist.children[0].remove();
-        }
-        return;
-    }
-}
-
 /**
  * Also for datalists of inputs
  */
@@ -102,45 +71,116 @@ function addOption(inputid, value) {
  */
 function clearOptions(inputid) {
     var element = document.getElementById(inputid);
-    //console.log("element:",element,inputid);
+    if (element == null) {
+        console.warn("input not found:" + inputid);
+    }
 
     if (element.options != null) {
         //not working element.options.innerHTML = "";
         //$("#droplist").empty();
         while (element.options.length > 0) {
                 element.remove(0);
-            }
+        }
         return;
     }
     if (element.list != null) {
         var datalist = element.list;
+         /*while (datalist.children.length > 0) {
+                    datalist.children[0].remove();
+                }*/
         datalist.replaceChildren();
         return;
     }
 }
 
-function getRunwayOfAirport(airport, runway) {
+/**
+ * Returns the runway data structure
+ */
+function getRunwayOfAirport(airport, fromNumber) {
     for (var i = 0; i < airport.runways.length; i++) {
-        if (airport.runways[i].fromNumber == runway) {
+        if (airport.runways[i].fromNumber == fromNumber) {
             return airport.runways[i];
         }
     }
-    console.warn("runway not found", runway);
+    console.warn("runway " + fromNumber + " not found at airport ", airport);
     return null;
+}
+
+/**
+ * Returns the runway data structure
+ */
+function getRunwayFromUserSelection(idsuffix) {
+    var airport = allAirports.get(getInputIcao(idsuffix));
+    if (airport == null) {
+        return null;
+    }
+    var inputRunway = getInputRunway(idsuffix);
+    if (inputRunway == null) {
+        return null;
+    }
+    var runway = getRunwayOfAirport(airport, inputRunway);
+    return runway;
 }
 
 /**
  * After each action
  */
 function updateStatus() {
-    //$("#scanstatus").html("(" + loadResult.loaded +  "/" + loadResult.totalToScan + ", " + loadResult.failed + " failed)");
+    // disable all buttons as a default setting
+    $("#btn_launch").prop("disabled",true);
+    $("#btn_launch_vr").prop("disabled",true);
+    $("#btn_launch_route").prop("disabled",true);
+    $("#btn_launch_route_vr").prop("disabled",true);
+
+    // check for possible route
+    var fromRunway = getRunwayFromUserSelection("from");
+    var toRunway = getRunwayFromUserSelection('to');
+    //console.log("updateStatus:",fromRunway,toRunway);
+
+    if (fromRunway != null) {
+        $("#btn_launch").prop("disabled",false);
+        $("#btn_launch_vr").prop("disabled",false);
+    }
+    if (fromRunway != null && toRunway != null) {
+        // retrieve georoute
+        var params ="";
+        params += "runwayFromFrom=" + fromRunway.from.lat + "," + fromRunway.from.lon;
+        params += "&";
+        params += "runwayFromTo=" + fromRunway.to.lat + "," + fromRunway.to.lon;
+        params += "&";
+        params += "runwayToFrom=" + toRunway.from.lat + "," + toRunway.from.lon;
+        params += "&";
+        params += "runwayToTo=" + toRunway.to.lat + "," + toRunway.to.lon;
+
+        doGet(serviceshost+"/traffic/route/buildAirportToAirport?"+params, json => {
+            //console.log("got ", json);
+
+            if (json.geoRoute) {
+                showGeoRoute(json.geoRoute);
+                foundGeoRoute = json.geoRoute;
+            }
+            updateStatusForGeoRoute();
+        });
+        updateStatusForGeoRoute();
+    }
 }
 
 /**
- * 'oninput' callback for ICAO input field
+ * cannot be included above because of asny load of geoRoute
+ */
+function updateStatusForGeoRoute() {
+    if (foundGeoRoute != null) {
+        $("#btn_launch_route").prop("disabled",false);
+        $("#btn_launch_route_vr").prop("disabled",false);
+    }
+
+}
+
+/**
+ * 'oninput' callback for ICAO input field. idsuffix is 'from' or 'to'.
  */
 function icaoChanged(idsuffix) {
-    var icao = getICAO(idsuffix);
+    var icao = getInputIcao(idsuffix);
     console.log("icao changed to " + icao);
 
     var runwayoptions = document.getElementById("sel_runway_"+idsuffix).options;
@@ -159,6 +199,7 @@ function icaoChanged(idsuffix) {
  * No search. 'icao' must be the full pure icao.
  */
 function loadAirport(icao, idsuffix) {
+    console.log("Loading icao " + icao);
     doGet(serviceshost+"/traffic/airport/"+icao, json => {
         //console.log("got " + json);
 
@@ -180,14 +221,18 @@ function loadAirport(icao, idsuffix) {
     });
 }
 
+/**
+ * Found airports are added to the select/option list of input 'idsuffix'.
+ */
 function searchAirport(icao, idsuffix) {
+    console.log("Searching for icao " + icao);
     doGet(serviceshost+"/traffic/airport/search/findByFilter?icao="+icao, json => {
         //console.log("got " + json);
 
-        clearOptions("inp_takeoff_" + idsuffix);
+        clearOptions("inp_icao_" + idsuffix);
         json.airports.forEach(airport => {
             //console.log("adding ", airport);
-            addOption("inp_takeoff_" + idsuffix, airport.icao + "(" + airport.name + ")");
+            addOption("inp_icao_" + idsuffix, airport.icao + "(" + airport.name + ")");
         });
         updateStatus();
     });
@@ -211,44 +256,64 @@ function buildPolygon(p) {
 }
 
 function showGeoRoute(geoRoute) {
-    console.log("geoRoute="+geoRoute);
+    //console.log("geoRoute="+geoRoute);
+    if (map_routeMarker != null) {
+        map.removeLayer(map_routeMarker);
+        map_routeMarker = null;
+    }
     var parts = geoRoute.split("->");
     console.log(parts);
     var lastlatLng = null;
+    var latLngs = new Array();
     parts.forEach(part => {
         var subparts = part.split(":");
         var latLng = buildLatLngFromString(subparts[1]);
         if (lastlatLng != null) {
-            L.polyline([lastlatLng,latLng], {color: 'red'}).addTo(map);
+            //L.polyline([lastlatLng,latLng], {color: 'red'}).addTo(map);
+            latLngs.push([lastlatLng,latLng]);
         }
         lastlatLng = latLng;
     });
+    // this is no polygon, but just a line
+    map_routeMarker = L.polyline(latLngs, {color: 'blue'});
+    map_routeMarker.addTo(map);
 }
 
 /**
- * Returns pure icao without appended name
+ * Returns pure icao without appended name. idsuffix is 'from' or 'to'.
  */
-function getICAO(idsuffix) {
-    var v= $("#inp_takeoff_"+idsuffix).val();
+function getInputIcao(idsuffix) {
+    var v= $("#inp_icao_"+idsuffix).val();
     // ignore optional name
     return v.substring(0,4);
 }
 
-function getRunway(idsuffix) {
-    return $("#sel_runway_"+idsuffix).val();
+function getInputRunway(idsuffix) {
+    var val = $("#sel_runway_"+idsuffix).val();
+    // check for blank
+    if (!val) {
+        return null;
+    }
+    return val;
 }
 
 function getAircraft() {
     return $("#sel_aircraft").val();
 }
 
-function launchSingleScene(vrMode) {
+function launchSingleScene(vrMode, useRoute) {
 
     var args = new Map();
     //addCommonArgs(args, "");
     if (vrMode != null) {
         args.set("vrMode",vrMode);
+        args.set("vr-controlpanel-posrot", "0,0,0,200,90,0");
+        // offsetVR not needed, other examples just use (0,0,0)
+    } else {
+        // not sure, but currently there seems to be nothing displayed
+        args.set("enableHud", false);
     }
+
     //unused args.set("enableHud",hud);
     //unused args.set("enableNearView",nearview);
     var initialVehicle = getAircraft();
@@ -259,35 +324,30 @@ function launchSingleScene(vrMode) {
     }
     args.set("initialVehicle",getAircraft());
 
-    /*not yet if (initialRoute != null) {
-        args.set("initialRoute",initialRoute);
-    }*/
-    if (getICAO("from") == null) {
-        // should not happen
-        alert("no airport selected");
-        return;
-    }
-    if (getRunway("from") == null) {
-        // should not happen
-        alert("no runway selected");
-        return;
-    }
-    var airport = allAirports.get(getICAO("from"));
-    if (airport == null) {
-        // should not happen
-        alert("unknown airport");
-        return;
-    }
-    var runway = getRunwayOfAirport(airport, getRunway("from"));
-    if (runway == null) {
-        // should not happen
-        alert("unknown runway");
-        return;
-    }
+    if (useRoute) {
+        args.set("initialRoute", foundGeoRoute);
+    } else {
+        if (getInputIcao("from") == null) {
+            // should not happen
+            alert("no airport selected");
+            return;
+        }
+        if (getInputRunway("from") == null) {
+            // should not happen
+            alert("no runway selected");
+            return;
+        }
+        var runway = getRunwayFromUserSelection("from");
+        if (runway == null) {
+            // should not happen
+            alert("unknown airport/runway");
+            return;
+        }
 
-    // example: 'geo:50.85850600, 007.13874200 ,78.05
-    args.set("initialLocation","geo:" + runway.from.lat + "," + runway.from.lon);
-    args.set("initialHeading",runway.heading);
+        // example: 'geo:50.85850600, 007.13874200 ,78.05
+        args.set("initialLocation","geo:" + runway.from.lat + "," + runway.from.lon);
+        args.set("initialHeading",runway.heading);
+    }
 
     launchScene('TravelScene',args);
 }
@@ -348,11 +408,14 @@ function init() {
         showGeoRoute(geoRouteparam);
     }
 
-    document.getElementById("inp_takeoff_from").value = initialICAO;
+    // Setting a default value will reduce the datalist options displayed to only fitting values! This is 'intended by 'browser/spec'?
+    document.getElementById("inp_icao_from").value = initialICAO;
     loadAirport(initialICAO, "from");
 
-    clearOptions("inp_takeoff_from");
-    wellKnownAirports.forEach(a => addOption("inp_takeoff_from", a));
+    clearOptions("inp_icao_from");
+    wellKnownAirports.forEach(a => addOption("inp_icao_from", a));
+    clearOptions("inp_icao_to");
+    wellKnownAirports.forEach(a => addOption("inp_icao_to", a));
 
     updateStatus();
 }

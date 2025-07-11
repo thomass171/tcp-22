@@ -1,4 +1,4 @@
-package de.yard.threed.traffic;
+package de.yard.threed.trafficcore;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.GeoCoordinate;
@@ -6,9 +6,9 @@ import de.yard.threed.core.LatLon;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.testutil.CoreTestFactory;
+import de.yard.threed.core.testutil.PlatformFactoryTestingCore;
 import de.yard.threed.core.testutil.TestUtils;
-import de.yard.threed.engine.testutil.EngineTestFactory;
-import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import org.junit.jupiter.api.Test;
 
 import static de.yard.threed.core.testutil.TestUtils.assertLatLon;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  */
 public class EllipsoidCalculationsTest {
-    Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine"}, new SimpleHeadlessPlatformFactory());
+    Platform platform = CoreTestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
 
     GeoCoordinate southpole = new GeoCoordinate(new Degree(-90), new Degree(0), 0);
     GeoCoordinate northpole = new GeoCoordinate(new Degree(90), new Degree(0), 0);
@@ -51,12 +51,7 @@ public class EllipsoidCalculationsTest {
         TestUtils.assertQuaternion(refnullequator, uprotationnullequator, "nullequator");
     }
 
-    @Test
-    public void testLocSpaceToFgSpace() {
-        Vector3 v = new Vector3(1, 2, -3);
 
-        TestUtils.assertVector3(new Vector3(1, 3, 2), v.multiply(FgVehicleSpace.getLocSpaceToFgSpace()));
-    }
 
     @Test
     public void testDistance() {

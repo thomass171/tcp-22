@@ -21,7 +21,7 @@ public class TileResponse {
         if (outline != null){
             response.setPolygon(new PolygonResponse());
             for (int i=0;i<outline.getPointCount();i++){
-                response.getPolygon().points.add(LatLonResponse.buildFromLatLon(outline.getPoint(i)));
+                response.getPolygon().points.add(WebLatLon.buildFromLatLon(outline.getPoint(i)));
             }
             response.getPolygon().setClosed(outline.closed);
         }

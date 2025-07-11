@@ -2,7 +2,6 @@ package de.yard.threed.traffic;
 
 import de.yard.threed.core.LatLon;
 import de.yard.threed.core.NumericValue;
-import de.yard.threed.core.Vector3;
 import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.core.geometry.Rectangle;
 import de.yard.threed.core.geometry.SimpleGeometry;
@@ -12,8 +11,9 @@ import de.yard.threed.engine.Material;
 import de.yard.threed.engine.Mesh;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.Texture;
-import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.graph.GraphNode;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
+import de.yard.threed.trafficcore.SimpleEllipsoidCalculations;
 import de.yard.threed.trafficcore.geodesy.MapProjection;
 
 import java.util.ArrayList;

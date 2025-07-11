@@ -46,6 +46,7 @@ import java.util.Map;
  * 13.9.23: Also material and texture.
  * 23.9.23: Also geometry and ray (intersections).
  * 29.9.23: Also used for replacing ToolsPlatform.
+ * 08.7.25: We now also have MinimalisticPlatform that doesn't expect HOSTDIR.
  * <p>
  * Created on 05.12.18.
  */

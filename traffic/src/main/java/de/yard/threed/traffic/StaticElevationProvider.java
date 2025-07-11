@@ -2,7 +2,7 @@ package de.yard.threed.traffic;
 
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.traffic.geodesy.ElevationProvider;
+import de.yard.threed.trafficcore.ElevationProvider;
 
 /**
  * 7.5.25: Always providing a fixed elevation. Extracted from TerrainElevationProvider

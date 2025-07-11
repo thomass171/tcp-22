@@ -9,7 +9,7 @@ import de.yard.threed.graph.GraphPathConstraintProvider;
 import de.yard.threed.graph.GraphPosition;
 import de.yard.threed.graph.GraphUtils;
 import de.yard.threed.traffic.Destination;
-import de.yard.threed.traffic.EllipsoidCalculations;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.traffic.WorldGlobal;
 import de.yard.threed.traffic.geodesy.GraphMapProjection;
 import de.yard.threed.trafficcore.geodesy.MapProjection;

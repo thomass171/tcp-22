@@ -1,8 +1,7 @@
-package de.yard.threed.traffic;
+package de.yard.threed.trafficcore;
 
 import de.yard.threed.core.Degree;
 import de.yard.threed.core.LatLon;
-import de.yard.threed.traffic.EllipsoidCalculations;
 import de.yard.threed.trafficcore.model.Runway;
 
 public class RunwayHelper {

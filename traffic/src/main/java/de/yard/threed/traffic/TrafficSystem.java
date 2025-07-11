@@ -29,6 +29,7 @@ import de.yard.threed.engine.util.NearView;
 
 
 import de.yard.threed.traffic.flight.FlightRouteGraph;
+import de.yard.threed.trafficcore.GeoRoute;
 import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
 
@@ -380,8 +381,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 // process 'initialRoute'
                 // groundnet has a (back)projection. On a initialRoute we need something different. Geo graph will have a FG graph orientation.
                 BooleanHolder shouldAbort = new BooleanHolder(false);
-                FlightRouteGraph flightRoute = new BasicRouteBuilder(TrafficHelper.getEllipsoidConversionsProviderByDataprovider())
-                        .fromGeoRoute(initialRoute, geoCoordinate -> {
+                FlightRouteGraph flightRoute = BasicRouteBuilder
+                        .fromGeoRoute(TrafficHelper.getEllipsoidConversionsProviderByDataprovider(), initialRoute, geoCoordinate -> {
                             logger.warn("No elevation for " + geoCoordinate + " of initialRoute");
                             if (!shouldAbort.getValue()) {
                                 // trigger terrain loading (but only once, so set to abort. Anyway it might be triggered again later)

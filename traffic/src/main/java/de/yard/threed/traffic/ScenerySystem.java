@@ -16,6 +16,7 @@ import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.ecs.TeleporterSystem;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
 
 /**
  * Merge of TerrainSystem and FlatTerrainSystem discarded (MA49).

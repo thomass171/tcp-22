@@ -1,4 +1,4 @@
-package de.yard.threed.traffic.geodesy;
+package de.yard.threed.trafficcore;
 
 /**
  * Created on 29.03.18.
