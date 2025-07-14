@@ -19,8 +19,7 @@ public class RunwayHelper {
     }
 
     public LatLon getHoldingPoint() {
-        // distance is 'km', not 'm'!
-        return rbc.applyCourseDistance(runway.getFrom(), getHeading(), /*65*/0.065);
+        return rbc.applyCourseDistance(runway.getFrom(), getHeading(), 65);
     }
 
     /**
@@ -29,17 +28,14 @@ public class RunwayHelper {
      * @return
      */
     public LatLon getEntrypoint() {
-        // distance is 'km', not 'm'!
-        return rbc.applyCourseDistance(getHoldingPoint(), getHeading().reverse(), /*15*/0.015);
+        return rbc.applyCourseDistance(getHoldingPoint(), getHeading().reverse(), 15);
     }
 
     public LatLon getTakeoffPoint() {
-        // distance is 'km', not 'm'!
-        return rbc.applyCourseDistance(runway.getFrom(), getHeading(), /*600*/0.6);
+        return rbc.applyCourseDistance(runway.getFrom(), getHeading(), 600);
     }
 
     public LatLon getTouchdownpoint() {
-        // distance is 'km', not 'm'!
-        return rbc.applyCourseDistance(runway.getFrom(), getHeading(), /*200*/0.2);
+        return rbc.applyCourseDistance(runway.getFrom(), getHeading(), 200);
     }
 }

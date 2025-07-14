@@ -14,7 +14,7 @@ public class GeoRouteBuilder {
     private static Log logger = Platform.getInstance().getLog(GeoRouteBuilder.class);
     public static double circuitAltitude = 300;
     public static double cruisingAltitude = 900;
-    public static double takeoffToSidPointDistance = 3;//km;
+    public static double takeoffToSidPointDistance = 3000;//meter;
 
     protected EllipsoidCalculations rbcp;
 
@@ -50,7 +50,7 @@ public class GeoRouteBuilder {
                 GeoCoordinate.fromLatLon(runwayFromHelper.getTakeoffPoint()),
                 GeoCoordinate.fromLatLon(sidpoint));
 
-        double turnsegmentLen = 1;//km
+        double turnsegmentLen = 1000;//meter
 
         LatLon starpoint = rbcp.applyCourseDistance(runwayToHelper.getTouchdownpoint(), runwayToHelper.getHeading().reverse(), takeoffToSidPointDistance);
         Degree roughDirection = rbcp.courseTo(sidpoint, starpoint);

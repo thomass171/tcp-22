@@ -23,8 +23,8 @@ import de.yard.threed.trafficcore.geodesy.GeoTools;
  * and http://edwilliams.org/avform147.htm
  */
 public class SimpleEllipsoidCalculations extends EllipsoidCalculations {
-
-    public static double eQuatorialEarthRadius = 6378.1370D;
+    // differs fromFG by 1m
+    public static double eQuatorialEarthRadius = 6378137.0D;
     // to be more flexible
     double radius;
 
@@ -65,9 +65,9 @@ public class SimpleEllipsoidCalculations extends EllipsoidCalculations {
      * https://www.movable-type.co.uk/scripts/latlong.html
      */
     @Override
-    public LatLon applyCourseDistance(LatLon latLon, Degree brng, double distancekm) {
+    public LatLon applyCourseDistance(LatLon latLon, Degree brng, double distInMeter) {
 
-        double d = distancekm / eQuatorialEarthRadius;
+        double d = distInMeter / eQuatorialEarthRadius;
         double lat = latLon.getLatRad();
         double lon = latLon.getLonRad();
         double lat2 = Math.asin(Math.sin(lat) * Math.cos(d) +
@@ -85,6 +85,7 @@ public class SimpleEllipsoidCalculations extends EllipsoidCalculations {
     /**
      * There are several algorithm known for this (complex) calculation and the results are more or less exact.
      * This implementation is from https://stackoverflow.com/questions/365826/calculate-distance-between-2-gps-coordinates
+     * Returned distance is in meter.
      */
     @Override
     public double distanceTo(LatLon l1, LatLon dest) {

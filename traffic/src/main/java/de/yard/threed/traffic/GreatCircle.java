@@ -28,7 +28,7 @@ public class GreatCircle {
     public static GreatCircle fromDG(GeoCoordinate entry, Degree heading, EllipsoidCalculations rbcp) {
         //RoundBodyConversions rbcp = TrafficHelper.getRoundBodyConversionsProviderByDataprovider();
         return new GreatCircle(rbcp.toCart(entry,null,null),
-                rbcp.toCart(GeoCoordinate.fromLatLon(rbcp.applyCourseDistance(entry,heading,1000),0),null,null).subtract(rbcp.toCart(entry,null,null)));
+                rbcp.toCart(GeoCoordinate.fromLatLon(rbcp.applyCourseDistance(entry,heading,1000000),0),null,null).subtract(rbcp.toCart(entry,null,null)));
     }
     
     public GreatCircle (Vector3 entry, Vector3 entrydirection){

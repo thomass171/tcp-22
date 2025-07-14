@@ -60,8 +60,8 @@ public class EllipsoidCalculationsTest {
         LatLon cologne = LatLon.fromDegrees(50.941402, 6.957739);
         LatLon paris = LatLon.fromDegrees(48.853363, 2.349042);
         double distance = ec.distanceTo(cologne, paris);
-        // 403.46130 is reference value from an online calculator. Accept difference as result of different algorithms
-        assertEquals(403.91327, distance, 0.0001);
+        // 403461.30m is reference value from an online calculator. Accept difference as result of different algorithms
+        assertEquals(403913.27, distance, 0.005);
     }
 
     @Test
@@ -70,9 +70,9 @@ public class EllipsoidCalculationsTest {
         EllipsoidCalculations ec = new SimpleEllipsoidCalculations(SimpleEllipsoidCalculations.eQuatorialEarthRadius);
         LatLon cologne = LatLon.fromDegrees(50.941402, 6.957739);
         // expected values were validated by map.
-        LatLon destination = ec.applyCourseDistance(cologne, new Degree(30), 0.3);
+        LatLon destination = ec.applyCourseDistance(cologne, new Degree(30), 300);
         assertLatLon(LatLon.fromDegrees(50.9437358, 6.95987), destination, 0.0001, "");
-        destination = ec.applyCourseDistance(cologne, new Degree(270), 30);
+        destination = ec.applyCourseDistance(cologne, new Degree(270), 30000);
         assertLatLon(LatLon.fromDegrees(50.94062097, 6.53005258), destination, 0.0001, "");
     }
 }
