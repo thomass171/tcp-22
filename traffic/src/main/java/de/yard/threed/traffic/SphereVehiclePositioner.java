@@ -4,6 +4,7 @@ import de.yard.threed.core.Degree;
 import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.ecs.EcsEntity;
 
 /**
@@ -14,9 +15,9 @@ public class SphereVehiclePositioner implements VehiclePositioner {
     Vector3 position;
     Quaternion baseRotation;
 
-    public SphereVehiclePositioner(Vector3 position,  Quaternion baseRotation) {
+    public SphereVehiclePositioner(Vector3 position, Quaternion baseRotation) {
         this.position = position;
-        this.baseRotation=baseRotation;
+        this.baseRotation = baseRotation;
 
     }
 
@@ -31,19 +32,20 @@ public class SphereVehiclePositioner implements VehiclePositioner {
     @Override
     public void positionVehicle(EcsEntity vehicle) {
         SceneNode sceneNode = vehicle.getSceneNode();
-        sceneNode.getTransform().setPosition(position);
+        positionTransform(sceneNode.getTransform());
+
+        FreeFlyingComponent bmc = new FreeFlyingComponent(sceneNode.getTransform());
+        vehicle.addComponent(bmc);
+    }
+
+    @Override
+    public void positionTransform(Transform transform) {
+        transform.setPosition(position);
 
         // This is the 'default rotation fits' way, at least for vehicles like 'loc'.
         Quaternion vehicleRotation = new Quaternion();//Quaternion.buildRotationX(new Degree(90));
 
-        sceneNode.getTransform().setRotation(baseRotation);//new Quaternion());//baseRotation.multiply(vehicleRotation));
-
-        FreeFlyingComponent bmc = new FreeFlyingComponent(sceneNode.getTransform());
-        vehicle.addComponent(bmc);
-
-       // sphereTransform.getTransform().setRotation(baseRotation);
-       // sceneNode.getTransform().setParent(sphereTransform.getTransform());
-
+        transform.setRotation(baseRotation);//new Quaternion());//baseRotation.multiply(vehicleRotation));
     }
 
     @Override

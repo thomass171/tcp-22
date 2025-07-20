@@ -1,7 +1,9 @@
 package de.yard.threed.traffic;
 
+import de.yard.threed.core.Util;
 import de.yard.threed.engine.Scene;
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.graph.GraphMovingComponent;
 import de.yard.threed.graph.GraphPosition;
@@ -31,6 +33,11 @@ public class GraphVehiclePositioner implements VehiclePositioner {
                         }*/
         gmc.setGraph((graph == null) ? null : graph.getBaseGraph(), position, null/*projection*/);
 
+    }
+
+    @Override
+    public void positionTransform(Transform transform) {
+        Util.notyet();
     }
 
     @Override

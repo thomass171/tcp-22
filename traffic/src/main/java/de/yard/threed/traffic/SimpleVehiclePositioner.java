@@ -1,7 +1,9 @@
 package de.yard.threed.traffic;
 
+import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.ecs.EcsEntity;
 
 /**
@@ -20,6 +22,11 @@ public class SimpleVehiclePositioner implements VehiclePositioner {
     @Override
     public void positionVehicle(EcsEntity vehicle) {
         // nothing to do
+    }
+
+    @Override
+    public void positionTransform(Transform transform) {
+        Util.notyet();
     }
 
     @Override

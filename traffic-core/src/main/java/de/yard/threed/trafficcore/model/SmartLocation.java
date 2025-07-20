@@ -35,6 +35,10 @@ public class SmartLocation {
      * TODO needs decoding
      */
     public static SmartLocation fromString(String location) {
+        // just a convenience check
+        if (location == null) {
+            return null;
+        }
         return new SmartLocation(location);
     }
 

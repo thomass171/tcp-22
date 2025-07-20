@@ -265,9 +265,9 @@ public class TrafficHelper {
      * 7.3.25 is it really a good idea to couple these properties this way? Eg. This breaks the smart location idea.
      * Set to deprecated.
      * Moved to SmartLocation/PositionerFactory. But still needed in standalone scenes.
-     * Still used in FG.
+     * Still used in FG. 15.7.25 no longer
      */
-    @Deprecated
+    /*@Deprecated
     public static FlightLocation getInitialFlightLocation() {
         // have it int two separate properties due to complex parsing
         String initialLocation = Platform.getInstance().getConfiguration().getString("initialLocation");
@@ -280,5 +280,5 @@ public class TrafficHelper {
             return new FlightLocation(g, new Degree(0));
         }
         return new FlightLocation(g, new Degree(Util.parseDouble(initialHeading)));
-    }
+    }*/
 }

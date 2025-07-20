@@ -164,7 +164,7 @@ do
     case $SUFFIX in
       "ac")
         # nasty dependency for FG. Will only be possible from tcp-flightgear.
-        if [ ! -r $DESTDIR/$BASENAME.gltf -o "$FORCE" = "1" ]
+        if [ ! -r $DESTDIR/$DIRNAME/$BASENAME.gltf -o "$FORCE" = "1" ]
         then
           sh $TCP22DIR/../tcp-flightgear/bin/convertModel.sh $FNAME $DESTDIR/$DIRNAME
           relax
@@ -181,6 +181,21 @@ do
           # destdir also needs DIRNAME subdir
           processPcm $FNAME $DESTDIR $DIRECTORY $filename $DIRNAME
           checkrc processPcm
+        fi
+        ;;
+      # 13.7.25 convert deprecated 'rgb' to 'png'. BTW: LoaderAC renames references to 'rgb' in 'ac' files to 'png', so GLTF files will always use 'png'.
+      # '$FORCE' only for tcp-flightgear?
+      "rgb")
+        if [ ! -r $DESTDIR/$DIRNAME/$BASENAME.png -o "$FORCE" = "1" ]
+        then
+          # CmdLine tool of https://imagemagick.org. BTW, gimp knows how to display rgb files
+          #MAGICK_SIZE_CLAUSE=
+          #if [ $BASENAME = "clock-transparent" ]
+          #then
+          #  MAGICK_SIZE_CLAUSE="-size 128x128"
+          #fi
+          magick $MAGICK_SIZE_CLAUSE $FNAME $DESTDIR/$DIRNAME/$BASENAME.png
+          checkrc magick
         fi
         ;;
       *)

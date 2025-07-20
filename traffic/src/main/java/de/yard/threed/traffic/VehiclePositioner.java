@@ -1,6 +1,7 @@
 package de.yard.threed.traffic;
 
 import de.yard.threed.engine.SceneNode;
+import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.ecs.EcsEntity;
 
 /**
@@ -9,5 +10,10 @@ import de.yard.threed.engine.ecs.EcsEntity;
 //@FunctionalInterface
 public interface VehiclePositioner {
     void positionVehicle(EcsEntity vehicle);
+
+    /**
+     * More generic.
+     */
+    void positionTransform(Transform transform);
     SceneNode getDestinationNode();
 }

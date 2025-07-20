@@ -60,7 +60,7 @@ public class PositionerFactory {
         return new PositionerFactoryResult(null, IMPOSSIBLE, "not supported " + smartLocation);
     }
 
-    static class PositionerFactoryResult {
+    public static class PositionerFactoryResult {
         public VehiclePositioner positioner;
         int status;
         String msg;
@@ -69,6 +69,10 @@ public class PositionerFactory {
             this.positioner = positioner;
             this.status = status;
             this.msg = msg;
+        }
+
+        public int getStatus() {
+            return status;
         }
     }
 }
