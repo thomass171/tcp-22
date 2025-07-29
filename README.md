@@ -20,16 +20,6 @@ export HOSTDIR=$HOME/Sites/tcp-22
 and create that base directory. 
 
 Run the following steps either manually or use the script bin/buildAndDeploy.sh for running all.
-
-Deploy static content bundles needed for building to $HOSTDIR:
-
-```
-sh bin/deployBundle.sh data
-sh bin/deployBundle.sh corrupted
-sh bin/deployBundle.sh -m maze
-sh bin/deployBundle.sh -S -m engine
-sh bin/deployBundle.sh -m traffic
-```
  
 The module platform-jme requires customized JMonkeyEngine build artifact files, which were built
 from JMonkeyEngine 3.2.4-stable with all datatypes float replaced by double. These use the legacy version
@@ -39,18 +29,32 @@ These files reside in subfolder lib and should be installed in the local maven r
 ```
 for l in jme3-core jme3-desktop jme3-effects jme3-lwjgl
 do
-  mvn install:install-file -Dfile=./platform-jme/lib/jme3-core-3.2.4-dbl.jar -DgroupId=org.jmonkeyengine -DartifactId=jme3-core -Dversion=3.2.4-dbl -Dpackaging=jar
+  mvn install:install-file -Dfile=./platform-jme/lib/$l-3.2.4-dbl.jar -DgroupId=org.jmonkeyengine -DartifactId=$l -Dversion=3.2.4-dbl -Dpackaging=jar
 done  
 ```
 
-Maven is needed for building. Run
+Maven is needed for building. Run testless first to be ready to create test data.
 
+```
+mvn clean install -DskipTests=true
+```
+
+Deploy data bundles needed for testing to $HOSTDIR:
+
+```
+sh bin/deployBundle.sh data
+sh bin/deployBundle.sh corrupted
+sh bin/deployBundle.sh -m maze
+sh bin/deployBundle.sh -m engine
+sh bin/deployBundle.sh -m traffic
+```
+
+Run again with testing
 ```
 mvn clean install
 ```
 
-for building.
-Deploy the software:
+The build should succeed without error. After that deploy the software:
 
 ```
 sh bin/deploy.sh
