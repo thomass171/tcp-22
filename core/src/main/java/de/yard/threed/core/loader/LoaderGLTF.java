@@ -431,9 +431,7 @@ public class LoaderGLTF {
         if (gltfmaterial.emis != null) {
             lm.setEmis(gltfmaterial.emis);
         }
-        //Eine Kruecke, die nur bei AC geht. 3.1.19: Aber besser umgekehrte Logik, um shaded als default nicht unintended abzuschalten
-        //2.5.19: Umgestellt auf die passende GLTF Extension.
-        //if (StringUtils.startsWith(lm.name, "unshaded")) {
+        // Flag 'shaded' adopted from AC. For GLTF we use extension "KHR_materials_unlit". See also README.md for smooth/flat shading.
         lm.setShaded(gltfmaterial.shaded);
 
         return lm;

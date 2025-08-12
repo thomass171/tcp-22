@@ -9,13 +9,18 @@ import de.yard.threed.javacommon.BufferedImageUtils;
 import de.yard.threed.javacommon.ImageUtil;
 import de.yard.threed.javacommon.PNGDecoder;
 import de.yard.threed.javacommon.LoadedImage;
+import de.yard.threed.platform.homebrew.sample.LwjglExample;
+import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWKeyCallbackI;
+import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.Util;
+import org.lwjgl.system.MemoryStack;
 //OGL import org.lwjgl.util.glu.GLU;
 
 import java.awt.image.BufferedImage;
@@ -27,11 +32,17 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.HashMap;
 
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.glfwShowWindow;
+import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.NULL;
+
 /**
+ * LWJGL implementation of the abstract GL layer.
+ * <p>
  * Date: 14.02.14
  * Time: 17:45
  * <p/>
- * Ein GlImpl.
  */
 public class GlImplLwjgl implements GlInterface {
     HashMap<Integer, Integer> boundbuffer = new HashMap<Integer, Integer>();
@@ -131,7 +142,7 @@ public class GlImplLwjgl implements GlInterface {
     @Override
     public String glCompileShader(int shader) {
         GL20.glCompileShader(shader);
-        if (GL20.glGetShader(shader, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
+        if (GL20.glGetShaderi(shader, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
             String log = GL20.glGetShaderInfoLog(shader, 1000);
             return log;
         }
@@ -207,6 +218,7 @@ public class GlImplLwjgl implements GlInterface {
 
     /**
      * 5.9.16: Formatwechsel RGBA->BGRA, was wohl mehr Standard für GPUs ist. erstmal doch nicht.
+     *
      * @param width
      * @param height
      * @param buffer
@@ -260,12 +272,12 @@ public class GlImplLwjgl implements GlInterface {
 
     @Override
     public void glUniformMatrix3(int uniloc, FloatBuffer value) {
-        GL20.glUniformMatrix3(uniloc, false, value);
+        GL20.glUniformMatrix3fv(uniloc, false, value);
     }
 
     @Override
     public void glUniformMatrix4(int uniloc, FloatBuffer value) {
-        GL20.glUniformMatrix4(uniloc, false, value);
+        GL20.glUniformMatrix4fv(uniloc, false, value);
     }
 
     @Override
@@ -366,7 +378,7 @@ public class GlImplLwjgl implements GlInterface {
 
     @Override
     public String translateGLErrorString(int errorValue) {
-        return Util.translateGLErrorString(errorValue);
+        return "no longer?";//Util.translateGLErrorString(errorValue);
     }
 
     /**
@@ -421,7 +433,7 @@ public class GlImplLwjgl implements GlInterface {
     @Override
     public ImageData loadImageFromFile(NativeResource filename) {
         BufferedImage bi = ImageUtil.loadImageFromFile((filename));
-        if (bi == null){
+        if (bi == null) {
             return null;
         }
         //logger.debug(String.format("loadFromFile took %d ms", System.currentTimeMillis() - starttime));
@@ -473,9 +485,76 @@ public class GlImplLwjgl implements GlInterface {
         return gltextureid;
     }
 
-    /*28.4.20 @Override
-    public NativeEventBus getEventBus() {
-        return JAEventBus.getInstance();
-    }*/
+    /**
+     * From the example https://www.lwjgl.org/guide. See also {@link LwjglExample}
+     */
+    public static long initLwjgl3(int width, int height, String title, int major, int minor, GLFWKeyCallbackI keyCallback) {
+        // Setup an error callback. The default implementation
+        // will print the error message in System.err.
+        GLFWErrorCallback.createPrint(System.err).set();
 
+        // Initialize GLFW. Most GLFW functions will not work before doing this.
+        if (!glfwInit())
+            throw new IllegalStateException("Unable to initialize GLFW");
+
+        // Configure GLFW
+        glfwDefaultWindowHints(); // optional, the current window hints are already the default
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
+
+        // Needed on MAcOS only? From https://stackoverflow.com/questions/62085373/no-context-is-current-or-a-function-that-is-not-available-in-the-current-context
+        // For lwjgl 2 we did the same. However, 4.1 should also be possible, but might
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
+
+        // Create the window
+        long window = glfwCreateWindow(width, height, title, NULL, NULL);
+        if (window == NULL)
+            throw new RuntimeException("Failed to create the GLFW window");
+
+        // Setup a key callback. It will be called every time a key is pressed, repeated or released.
+        glfwSetKeyCallback(window, keyCallback);
+        // example for a callback:
+        // (window, key, scancode, action, mods) -> {
+        //if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
+        //    glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
+        //});
+
+        // Get the thread stack and push a new frame
+        try (MemoryStack stack = stackPush()) {
+            IntBuffer pWidth = stack.mallocInt(1); // int*
+            IntBuffer pHeight = stack.mallocInt(1); // int*
+
+            // Get the window size passed to glfwCreateWindow
+            glfwGetWindowSize(window, pWidth, pHeight);
+
+            // Get the resolution of the primary monitor
+            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+            // Center the window
+            glfwSetWindowPos(
+                    window,
+                    (vidmode.width() - pWidth.get(0)) / 2,
+                    (vidmode.height() - pHeight.get(0)) / 2
+            );
+        } // the stack frame is popped automatically
+
+        // Make the OpenGL context current
+        glfwMakeContextCurrent(window);
+        // Enable v-sync
+        glfwSwapInterval(1);
+
+        // Make the window visible
+        glfwShowWindow(window);
+
+        // This line is critical for LWJGL's interoperation with GLFW's
+        // OpenGL context, or any context that is managed externally.
+        // LWJGL detects the context that is current in the current thread,
+        // creates the GLCapabilities instance and makes the OpenGL
+        // bindings available for use.
+        GL.createCapabilities();
+        return window;
+    }
 }

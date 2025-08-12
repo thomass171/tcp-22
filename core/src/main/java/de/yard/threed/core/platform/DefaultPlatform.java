@@ -83,7 +83,7 @@ public class DefaultPlatform extends Platform {
 
     @Override
     public NativeTexture buildNativeTexture(NativeCanvas imagedata) {
-        return null;
+        throw new RuntimeException("NativeCanvas is not supported currently due to LWJGL3/AWT conflicts");
     }
 
     @Override

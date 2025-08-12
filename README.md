@@ -27,9 +27,9 @@ from JMonkeyEngine 3.2.4-stable with all datatypes float replaced by double. The
 
 These files reside in subfolder lib and should be installed in the local maven repository.
 ```
-for l in jme3-core jme3-desktop jme3-effects jme3-lwjgl
+for l in jme3-core jme3-effects jme3-lwjgl3
 do
-  mvn install:install-file -Dfile=./platform-jme/lib/$l-3.2.4-dbl.jar -DgroupId=org.jmonkeyengine -DartifactId=$l -Dversion=3.2.4-dbl -Dpackaging=jar
+  mvn install:install-file -Dfile=./platform-jme/lib/$l-3.8.1-dbl.jar -DgroupId=org.jmonkeyengine -DartifactId=$l -Dversion=3.8.1-dbl -Dpackaging=jar
 done  
 ```
 
@@ -82,7 +82,7 @@ The converted files are copied to _platform-unity/PlatformUnity/Assets/scripts-g
 Open the project platform-unity/PlatformUnity in Unity. It should compile all the
 files with some errors related to using delegates. Unfortunately the converter does not 
 remove the FunctionalInterface (which become delegates in CS) method names, so you need to remove these manually.
-In detail these are:
+In detail these are (list is not up to date):
 
 * ImageHelper:handler.handlePixel
 * AbstractSceneRunner:handler.handle
@@ -191,8 +191,23 @@ In your IDE you might create a launch configuration like the following.
 
 ![](docs/IDErunConfiguration.png)
 
+## LWJGL
 For running Java 3D software native libraries like 'lwjgl' are required.
 These are typically located in the current working directory or via LD_LIBRARY_PATH.
+As of 8/2025 the native libs are loaded via maven and LWJGL3s bom.
+
+Unfortunately LWJGL3 interferes with AWT on MacOS, so e.g. BufferedImage (for implementing NativeCanvas)
+cannot be used any more.
+
+JMonkeyEngine has an ImageWriter(https://github.com/jMonkeyEngine-Contributions/ImagePainter/blob/master/ImagePainter/src/com/zero_separation/plugins/imagepainter/ImagePainter.java) 
+for adding text and lines to a JME Image.
+
+An option in pure LWJGL (platform-homebrew) is org.lwjgl.stb.STBImage (demo in  https://github.com/LWJGL/lwjgl3/blob/master/modules/samples/src/test/java/org/lwjgl/demo/stb/Image.java)
+
+For now we set NativeCanvas to deprecated until we have a real use case
+that justifies the efford for implementation. Maybe we should remove it 
+at all, because other platforms (Unity) also have a lack of utils.
+Or have a complete homebrew implementation like JMEs ImagePainter.
 
 ## Build your own scene
 The best starting point is to use class [ReferenceScene](engine/src/main/java/de/yard/threed/engine/apps/reference/ReferenceScene.java) and modify it for your needs.
@@ -295,7 +310,12 @@ Major changes:
 
 ## 2025-04-02
   * Define FG vehicle orientation the default in 'traffic'. This helps to avoid confusion with eg. method buildZUpRotation(). Previously there was no standard. Every use case had it's own.
-  * 
+
+## 2025-08-01
+  * Migration from JME 3.2.4 to 3.8.1 (and thus LWJGL2 to LWJGL 3.3.6) to be prepared for Apple Silicon, which is supported as of LWJGL 3.3. Requires VM option '-XstartOnFirstThread' on MacOS.
+  * NativeCanvas deprecated roughly because of LWJGL/AWT conflicts on MacOS 
+  * Migration of platform-homebrew only started but not complete
+  
 # Technical Details
 
 ## Architecture
@@ -489,6 +509,48 @@ Changed from Java 8 to Java 11 in January 24 due to ClassCastExceptions in java.
 There was a kind of breaking change in the API after Java 8. Still needs care about Java 9
 limitation for C# conversion.
 
+## Material
+This is in most parts just a recap of well known issues in 3D graphics.
+
+As long as no (or just the default) shader are used, the
+appearance of material is defined by a few properties.
+
+Unshaded (basic) material is the most simple. A pixel has just the color of
+the object. Light has no effect.
+
+For shading the are two options, flat and smooth shading. Unfortunately model formats like AC and GLTF
+have no explicit property for the shading type. AC just has a 'shaded' flag, GLTF the extension "KHR_materials_unlit" (ie. no light effects).
+
+And a model doesn't necessarily contain normals. So
+what we do during import of a model is to analyse the geometry (eg. by ACs 'cease'), possibly calculate
+normals and than have the simple decision (in DefaultMaterialFactory) for shaded objects:
+  * hasNormals -> smooth shaded
+  * !hasNormals -> flat shaded (the shader might calculate the surface normal from vertices)
+
+### flat shading
+a.k.a. (per) fragment shading. The same color is set for all pixel of a fragment. The effective normal
+value is the average of the normals of the fragment vertices.
+
+### smooth shading
+Smooth shading typically has the best visual ...
+The effective normal is interpolated between the vertex normals.
+
+### visual edges
+Depending on the geometry edges should be visible (eg. a cube) or not visible (a sphere). Visual edges highly
+depend on the geometry and whether split shared vertices with different normals are used.
+
+Visible edges can be gained with flat shading, even though the resulting fragment might be too dark or bright. This depends on the
+normal values and whether shared vertices are used. If shared vertices are split and the normals are fitting the fragment will be good looking.
+But in that case also smooth shading is an option.
+
+Non visible edges is the typical result of smooth shading where the vertex normals are correct and no shared vertices
+are used.
+
+Flat or smooth shading should be specified as part of the model, because only the model designer knowns how the
+normals were built. 
+
+
+
 ## Shader
 Each platform seems to have its own special idea how to handle 
 shader (at least ThreeJS and JME have) and which GLSL versions are supported.
@@ -528,7 +590,6 @@ to the shader.
 
 So the question is, should we use the platform or create a generic helper. The
 main challenge for a helper (RegisteredShaderMaterial.java) is to know when a light was moved.
-
 
 ## Transparency
 Transparency can be done with platform shader or with custom shader. Important is to put the object at the end of

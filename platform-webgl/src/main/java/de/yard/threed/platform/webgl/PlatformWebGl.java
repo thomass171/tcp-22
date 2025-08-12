@@ -44,7 +44,7 @@ import java.util.List;
 /**
  * Created by thomass on 20.04.15.
  */
-public class PlatformWebGl extends Platform {
+public class PlatformWebGl extends DefaultPlatform {
     // Should be set by factory to consider log level
     Log logger;
     //Scenerunner ist Singleton
@@ -385,10 +385,10 @@ public class PlatformWebGl extends Platform {
         return new GwtDocument(XMLParser.parse(xmltext));
     }
 
-    @Override
+    /*8.8.25 @Override
     public NativeCanvas buildNativeCanvas(int width, int height) {
         return WebGlCanvas.create(width, height);
-    }
+    }*/
 
     @Override
     public NativeContentProvider getContentProvider(char type, String location, TestPdfDoc docid) {

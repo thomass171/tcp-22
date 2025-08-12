@@ -9,7 +9,9 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 /**
- * Die Dokumentation/Spezifikation stammt aus http://www.opengl.org/sdk/docs/man/html/...
+ * Abstraction of GL? Useful for having a headless implementation for testing.
+ *
+ * Spec is from http://www.opengl.org/sdk/docs/man/html/...
  * <p/>
  * Date: 31.05.14
  */

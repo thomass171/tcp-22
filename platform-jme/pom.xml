@@ -9,8 +9,12 @@
 
     <properties>
         <!-- custom build of JME with double instead of float-->
-        <jme.version>3.2.4-dbl</jme.version>
+        <jme.version>3.8.1-dbl</jme.version>
         <jme.groupid>org.jmonkeyengine</jme.groupid>
+        <!-- mac arm64 was introduced in lwjgl 3.3.0-->
+        <lwjgl.version>3.3.6</lwjgl.version>
+        <!--<lwjgl.natives>natives-macos-arm64</lwjgl.natives>-->
+        <lwjgl.natives>natives-macos</lwjgl.natives>
     </properties>
 
     <parent>
@@ -18,6 +22,18 @@
         <artifactId>main</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-bom</artifactId>
+                <version>${lwjgl.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- junit comes from parent -->
@@ -41,14 +57,14 @@
             <artifactId>jme3-core</artifactId>
             <version>${jme.version}</version>
         </dependency>
-        <dependency>
+        <!--8.8.25 apparently not needed<dependency>
             <groupId>${jme.groupid}</groupId>
             <artifactId>jme3-desktop</artifactId>
             <version>${jme.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>${jme.groupid}</groupId>
-            <artifactId>jme3-lwjgl</artifactId>
+            <artifactId>jme3-lwjgl3</artifactId>
             <version>${jme.version}</version>
         </dependency>
         <!--effects for SSAO (ambient occlusion)-->
@@ -57,13 +73,41 @@
             <artifactId>jme3-effects</artifactId>
             <version>${jme.version}</version>
         </dependency>
+
+        <!-- all the following is LWJGL3, LWJGL2 has different groupId -->
         <dependency>
-            <!-- The JME version used apparently needs lwjgl2.
-            So no upgrade of lwjgl is possible without upgrade/rebuild of JME-->
-            <groupId>org.lwjgl.lwjgl</groupId>
+            <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl</artifactId>
-            <version>2.9.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-glfw</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-opengl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl</artifactId>
+            <classifier>${lwjgl.natives}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-glfw</artifactId>
+            <classifier>${lwjgl.natives}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-opengl</artifactId>
+            <classifier>${lwjgl.natives}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-stb</artifactId>
+            <classifier>${lwjgl.natives}</classifier>
+        </dependency>
+
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>

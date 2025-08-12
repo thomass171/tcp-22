@@ -12,8 +12,8 @@ import de.yard.threed.engine.Scene;
 import de.yard.threed.core.platform.NativeSceneRunner;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.Display;
+//import org.lwjgl.input.Keyboard;
+//import org.lwjgl.opengl.Display;
 
 import java.util.HashMap;
 

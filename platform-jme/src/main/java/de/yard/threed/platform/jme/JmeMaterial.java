@@ -143,9 +143,10 @@ public class JmeMaterial implements NativeMaterial {
             }
 
         } else {
-            //2.5.19: Angepassten Lighting.j3md für Flatshading. Rein otpisch kann er vielleicht auch ohne ergänztes Flatshading, zumindest mit materialColor?
-            //mat = new Material(((JmeResourceManager) JmeResourceManager.getInstance()).am, "Common/MatDefs/Light/Lighting.j3md");
-            mat = new Material(((PlatformJme) Platform.getInstance()).jmeResourceManager.am, "MyLighting.j3md");
+            //7.8.25: With JME 3.2.4 we used a custom "MyLighting.j3md" derived from "Lighting.j3md" for doing "flatshading". It is
+            // unclear whether that is really needed/helpful.
+            // "MyLighting.j3md" doesn't work with JME 3.8.1 any more, so go back to "Lighting.j3md"
+            mat = new Material(((PlatformJme) Platform.getInstance()).jmeResourceManager.am, "Common/MatDefs/Light/Lighting.j3md");
             if (col != null) {
                 mat.setColor("Diffuse", PlatformJme.buildColor(col)); // with Lighting.j3md
                 //29.4.16: ambient mal rausgenommen, weil damit scheinbar das Licht (Pyramide refscene) zu wenig (oder keinen) Einfluss hat.
@@ -158,7 +159,8 @@ public class JmeMaterial implements NativeMaterial {
                 mat.setTexture("DiffuseMap", diffusemap.texture);
             }
             if (NumericValue.flatshading(definition.parameters)) {
-                mat.setBoolean("useFlatShading", true);
+                // is 'VertexLighting' for flat shading?
+                mat.setBoolean("VertexLighting", true);
             }
             NativeTexture normalmap = (definition.texture == null) ? null : definition.texture.get("normalmap");
             //normalmap=null;

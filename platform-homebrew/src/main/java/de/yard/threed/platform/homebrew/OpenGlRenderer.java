@@ -9,27 +9,24 @@ import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.engine.KeyCode;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.ARBMultisample;
-import org.lwjgl.opengl.ContextAttribs;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.PixelFormat;
 
 import java.util.List;
 
+import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
+import static org.lwjgl.glfw.GLFW.*;
 /**
  * Renderer to OpenGL display with keyboard and mouse input.
  */
 public class OpenGlRenderer extends HomeBrewRenderer {
 
     boolean inited;
-    boolean use32 = true;//Jetzt mal Default
+    boolean use32 = true;//now the Default
     Log logger;
     String window_title = "OpenGL";
+    // The window handle
+    private long window;
 
     public OpenGlRenderer() {
         this.glcontext = new GlImplLwjgl();
@@ -40,6 +37,7 @@ public class OpenGlRenderer extends HomeBrewRenderer {
     @Override
     protected void collectKeyboardAndMouseEvents(AbstractSceneRunner runner) {
         //distance in mouse movement from the last getDX() call.
+        /*TODO lwjgl3 from https://gamedev.stackexchange.com/questions/141665/lwjgl3-key-released-and-pressed
         final int dx = Mouse.getDX();
         //distance in mouse movement from the last getDY() call.
         final int dy = Mouse.getDY();
@@ -60,14 +58,14 @@ public class OpenGlRenderer extends HomeBrewRenderer {
             boolean pressed = Keyboard.getEventKeyState();
             //logger.debug("Key " + key + ", pressed=" + pressed);
             int k = KeyCode.lwjgl2Js(key);
-            runner./*runnerhelper.*/addKey(k, pressed);
+            runner./*runnerhelper.* /addKey(k, pressed);
         }
         if (dx != 0 || dy != 0) {
             //24.9.19: mousemove soll die absolute Position ab links/unten enthalten
-            runner./*runnerhelper.*/mousemove = new Point(/*dx, dy*/x, y);
+            runner./*runnerhelper.* /mousemove = new Point(/*dx, dy* /x, y);
         }
-
-    }
+ end   TODO lwjgl3*/
+}
 
     private void showStatistic() {
         logger.debug("totalvertexcnt=" + OpenGlIndexedVBO.totalvertexcnt + " : " + (float) OpenGlIndexedVBO.totalvertexcnt * (12 + 12 + 8) / (1024 * 1024) + " MB");
@@ -77,7 +75,8 @@ public class OpenGlRenderer extends HomeBrewRenderer {
 
     @Override
     protected void updateDisplay() {
-        Display.update();
+        //TODO lwjgl3
+        //Display.update();
     }
 
     @Override
@@ -98,12 +97,21 @@ public class OpenGlRenderer extends HomeBrewRenderer {
 
     @Override
     public boolean userRequestsTerminate() {
-        return Display.isCloseRequested() || Keyboard.isKeyDown(Keyboard.KEY_ESCAPE);
+        //return Display.isCloseRequested() || Keyboard.isKeyDown(Keyboard.KEY_ESCAPE);
+        return glfwWindowShouldClose(window);
     }
 
     @Override
     public void close() {
-        Display.destroy();
+        //Display.destroy();
+        // Free the window callbacks and destroy the window
+        glfwFreeCallbacks(window);
+        glfwDestroyWindow(window);
+
+        // Terminate GLFW and free the error callback
+        glfwTerminate();
+        glfwSetErrorCallback(null).free();
+
     }
 
     @Override
@@ -228,34 +236,17 @@ public class OpenGlRenderer extends HomeBrewRenderer {
         if (logger == null) {
             logger = PlatformHomeBrew.getInstance().getLog(OpenGlRenderer.class);
         }
-        try {
+        //try {
             //ContextCapabilities ctxCaps = GLContext.getCapabilities();
-            /*aus jmonkey if (ctxCaps.OpenGL20) {
-                caps.add(Caps.OpenGL20);
-                if (ctxCaps.OpenGL21) {
-                    caps.add(Caps.OpenGL21);
-                    if (ctxCaps.OpenGL30) {
-                        caps.add(Caps.OpenGL30);
-                        if (ctxCaps.OpenGL31) {
-                            caps.add(Caps.OpenGL31);
-                            if (ctxCaps.OpenGL32) {
-                                caps.add(Caps.OpenGL32);
-                            }
-                        }
-                    }
-                }
-            } */
+
             logger.debug("java.library.path=" + System.getProperty("java.library.path"));
             logger.debug("java.class.path=" + System.getProperty("java.class.path"));
 
-            // In Fusion laeuft das eh wegen nur OpenGL 2.1 nicht
+            // Not tested for a long time now
             if (System.getProperty("os.name").contains("indows")) {
                 System.setProperty("org.lwjgl.librarypath", "Y:/tmp/LwjglRuntime");
             }
-            // MAcos 10.9 (meins) muesste Opengl 4.1 koennen, laut Apple Seite.
-            // Setup an OpenGL context with API version 3.2
-            // Nur mit false/false lassen sich auch die alten !! Funktinonen nutzen (bracuht z.B. glulookat, aber nur wenn das
-            // implementiert ist. Bei Macos ist es nicht.
+            // Setup an OpenGL context with API version 3.2, however 4.1 should also be possible.
             Settings settings = new Settings();
             if (use32) {
                 int alphaSize = 8;
@@ -265,7 +256,8 @@ public class OpenGlRenderer extends HomeBrewRenderer {
                 if (settings.aasamples != null) {
                     samples = settings.aasamples;
                 }
-                PixelFormat pixelFormat = new PixelFormat().withDepthBits(depthSize).withSamples(samples);
+               /* the lwjgl2 way
+               PixelFormat pixelFormat = new PixelFormat().withDepthBits(depthSize).withSamples(samples);
                 ContextAttribs contextAtrributes = new ContextAttribs(3, 2)
                         .withForwardCompatible(true)
                         .withProfileCore(true)
@@ -279,16 +271,19 @@ public class OpenGlRenderer extends HomeBrewRenderer {
 
                 Display.setDisplayMode(new DisplayMode(size.width, size.height));
                 Display.setTitle(window_title);
-               /*OGL if (canvas == null) {
-                } else {
+                Display.create(pixelFormat, contextAtrributes);*/
 
-                    Display.setParent(canvas);
-                }*/
-                Display.create(pixelFormat, contextAtrributes);
+                //2.2.16: OpenGl 3.0 instead of 3.2 (GLSL 150) for using GLSL 1.2. But vertex arrays will not work then.
+                //1.8.25: Is this still true? Or was it ever? 3.0 is no longer available anyway
+                GlImplLwjgl.initLwjgl3(size.width, size.height, window_title,3,2,  (w, key, scancode, action, mods) -> {
+                    if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+                        System.out.println("Got ESC release");
+                        glfwSetWindowShouldClose(w, true); // We will detect this in the rendering loop
+                    }});
+
                 GL11.glViewport(0, 0, size.width, size.height);
-                // 9.3.16: Laut Doku muesste es mit backgroundColor gehen, tuts aber nicht
                 if (Settings.backgroundColor != null) {
-                    Display.setInitialBackground(Settings.backgroundColor.getR(), Settings.backgroundColor.getG(), Settings.backgroundColor.getB());
+                    //Display.setInitialBackground(Settings.backgroundColor.getR(), Settings.backgroundColor.getG(), Settings.backgroundColor.getB());
                     GL11.glClearColor(Settings.backgroundColor.getR(), Settings.backgroundColor.getG(), Settings.backgroundColor.getB(), 1);
                 }
                 GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -344,9 +339,9 @@ public class OpenGlRenderer extends HomeBrewRenderer {
 
 
             inited = true;
-        } catch (LWJGLException e) {
+       /* } catch (LWJGLException e) {
             e.printStackTrace();
             System.exit(0);
-        }
+        }*/
     }
 }

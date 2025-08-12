@@ -8,6 +8,7 @@ import java.util.HashMap;
 public class NumericValue {
     // geht nicht als final wegen C#
     public static NumericValue REPEAT = new NumericValue(1);
+    // 10.8.25 Tried a class/enum ShadingType, but it has no real benefit. Likely because SMOOTH tends to be good standard/default.
     public static int UNSHADED = 0;
     public static int SMOOTH = 1;
     public static int FLAT = 2;

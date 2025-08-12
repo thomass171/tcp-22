@@ -90,6 +90,9 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
         //settings.setResolution(640, 480);
         // Setting LWJGL_OPENGL3 provides the option to use GLSL >= 1.5, but causes JME internal shader to fail
         //settings.setRenderer(AppSettings.LWJGL_OPENGL3);
+        // 7.8.25: JME 3.8.1 with LWJGL3 apparently has some higher version as default, so go back
+        // to OpenGL with GLSL version 120 to avoid 'version '120' is not supported'
+        settings.setRenderer(AppSettings.LWJGL_OPENGL2);
         dimension = scene.getPreferredDimension();
         //10.10.18: Wenn es keine Vorgbe gibt, lege ich das fest.
         if (dimension == null) {

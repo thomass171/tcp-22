@@ -1,25 +1,24 @@
 package de.yard.threed.platform.homebrew.sample;
 
-import de.yard.threed.core.Matrix3;
 import de.yard.threed.core.Matrix4;
-import de.yard.threed.platform.homebrew.HomeBrewMaterial;
+import de.yard.threed.platform.homebrew.GlImplLwjgl;
 import de.yard.threed.platform.homebrew.OpenGlBufferUtils;
 import de.yard.threed.platform.homebrew.PlatformHomeBrew;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.ContextAttribs;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.PixelFormat;
+import org.lwjgl.system.Callback;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
 
 /**
  * A very simple native 3D OpenGL app without using a scene, platform and engine.
@@ -31,14 +30,17 @@ import java.util.List;
  * <p/>
  * 02.03.16: Also works with wireframe.
  * 20.02.23: Still working.
+ * 30.07.25: Migrated to lwjgl3 according to https://www.lwjgl.org/guide
  * <p/>
  * Date: 29.01.16
  */
 public class LwjglDuoQuadColored {
     public static boolean usevertexarray = true;
     public static boolean wireframe = false;
-    // 29.8.16: Wahrscheinlich ist "ohne Shader" völliger Quatsch.
+    // 29.8.16: Probably "without Shader" is nonsens.
     public static boolean useshader = true;
+    // from http://forum.lwjgl.org/index.php?topic=5745.0
+    private Callback debugProc;
 
     public static void main(String[] args) {
         PlatformHomeBrew.getInstance();
@@ -62,38 +64,50 @@ public class LwjglDuoQuadColored {
     private final String WINDOW_TITLE = "The Duo Quad: colored";
     private final int WIDTH = 800;
     private final int HEIGHT = 600;
-    private Quad linksunten, rechtsoben;
+    private Quad lowerLeft, upperRight;
     // Shader variables
     private VertexShader vsId = null;
     private FragmentShader fsId = null;
     private ShaderProgram pId = null;
     private int cycle = 0;
+    // The window handle
+    private long window;
 
     public LwjglDuoQuadColored() {
-        // Initialize OpenGL (Display)
-        this.setupOpenGL();
+        // Initialize OpenGL (Window)
+        window = this.setupOpenGL();
 
-        //camera = new Camera(45, (float) Display.getWidth() / (float) Display.getHeight(), 0.1f, 100f);
-        //camera.setPosition(new Vector3f(0, 0, -3));
-
-        linksunten = new Quad(0.5f, -0.5f, colorsred);
-        rechtsoben = new Quad(1f, +0.5f, colorsgreen);
+        lowerLeft = new Quad(0.5f, -0.5f, colorsred);
+        upperRight = new Quad(1f, +0.5f, colorsgreen);
         if (useshader) {
             this.setupShaders();
         }
 
-        while (!Display.isCloseRequested()) {
+        // Run the rendering loop until the user has attempted to close
+        // the window or has pressed the ESCAPE key.
+        while (!glfwWindowShouldClose(window)) {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+            this.loopCycle();
+
+            glfwSwapBuffers(window); // swap the color buffers
+
+            // Poll for window events. The key callback above will only be
+            // invoked during this call.
+            glfwPollEvents();
+        }
+        /*lwjgl2 while (!Display.isCloseRequested()) {
             this.loopCycle();
             // Force a maximum FPS of about 60
             Display.sync(60);
             // Let the CPU synchronize with the GPU if GPU isType tagging behind
             Display.update();
-        }
-        // Destroy OpenGL (Display)
+        }*/
+        // Destroy OpenGL (Window)
         this.destroyOpenGL();
     }
 
-    public void setupOpenGL() {
+    public long setupOpenGL() {
+        /*lwjgl2
         // Setup an OpenGL context with API version 3.2
         try {
             PixelFormat pixelFormat = new PixelFormat();
@@ -109,13 +123,23 @@ public class LwjglDuoQuadColored {
         } catch (LWJGLException e) {
             e.printStackTrace();
             System.exit(-1);
-        }
+        }*/
+
+        long window = GlImplLwjgl.initLwjgl3(WIDTH, HEIGHT, WINDOW_TITLE,3,2, (w, key, scancode, action, mods) -> {
+            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+                System.out.println("Got ESC release");
+                glfwSetWindowShouldClose(w, true); // We will detect this in the rendering loop
+            }
+        });
+
 
         // Setup an XNA like background color
         GL11.glClearColor(0.4f, 0.6f, 0.9f, 0f);
 
+        /*lwjgl2
         // Map the internal OpenGL coordinate system to the entire screen
-        GL11.glViewport(0, 0, WIDTH, HEIGHT);
+        GL11.glViewport(0, 0, WIDTH, HEIGHT);*/
+        return window;
     }
 
 
@@ -164,22 +188,22 @@ public class LwjglDuoQuadColored {
     }
 
     public void loopCycle() {
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+        glClear(GL11.GL_COLOR_BUFFER_BIT);
 
         if (useshader) {
             pId.use();
             pId.setUniformMatrix4("projection", OpenGlBufferUtils.toFloatBuffer(new Matrix4()));//camera.getProjectionMatrix()));
             pId.setUniformMatrix4("viewer", OpenGlBufferUtils.toFloatBuffer(new Matrix4()));//camera.getViewMatrix()));
-
-            pId.setUniformMatrix4("model", OpenGlBufferUtils.toFloatBuffer(linksunten.getModelMatrix(cycle)));
-        }        
-        linksunten.draw();
-        
-        if (useshader) {
-            pId.setUniformMatrix4("model", OpenGlBufferUtils.toFloatBuffer(rechtsoben.getModelMatrix(cycle)));
+            pId.setUniformMatrix4("model", OpenGlBufferUtils.toFloatBuffer(lowerLeft.getModelMatrix(cycle)));
         }
-        rechtsoben.draw();
-        
+        lowerLeft.draw();
+
+        if (useshader) {
+            pId.setUniformMatrix4("model", OpenGlBufferUtils.toFloatBuffer(upperRight.getModelMatrix(cycle)));
+        }
+
+        upperRight.draw();
+
         if (useshader) {
             GL20.glUseProgram(0);
         }
@@ -187,15 +211,22 @@ public class LwjglDuoQuadColored {
     }
 
     void destroyOpenGL() {
-        linksunten.destroyOpenGL();
-        Display.destroy();
+        lowerLeft.destroyOpenGL();
+
+        // Free the window callbacks and destroy the window
+        glfwFreeCallbacks(window);
+        glfwDestroyWindow(window);
+
+        // Terminate GLFW and free the error callback
+        glfwTerminate();
+        glfwSetErrorCallback(null).free();
     }
 }
 
 /**
- * Ein einzelnes Quadrat mit 2 Triangles.
+ * A single quad with 2 triangles.
  * <p/>
- * Eine Einheit fuer ein Vertex Array
+ * An example for Vertex Array?
  */
 class Quad {
     // Quad variables
@@ -447,7 +478,7 @@ class ShaderProgram {
     }*/
 
     public void setUniformMatrix4(String name, FloatBuffer value) {
-        GL20.glUniformMatrix4(GL20.glGetUniformLocation(shaderProgramid, name), false, value);
+        GL20.glUniformMatrix4fv(GL20.glGetUniformLocation(shaderProgramid, name), false, value);
         // OpenGlContext.getGlContext().exitOnGLError(glcontext, "setUniformMatrix4 (glUniform3f) name=" + name + ", value=" + value + ", shaderprogram=" + shaderProgramid);
     }
 

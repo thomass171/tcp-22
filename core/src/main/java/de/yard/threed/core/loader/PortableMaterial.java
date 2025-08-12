@@ -46,8 +46,11 @@ public class PortableMaterial {
     // which probably can be a property for both base color and texture
     // The ASI needle e.g. has color(1,1,1) and emis (0.15,0.15,0.15)
     private Color emis;
-    //3.1.19 shaded default true ist schon vernuenftig. Aber ob es so eine Property ueberhaupt geben sollte, stammt ja aus AC. Siehe Header
-    //2.5.19: Doch, die kann es geben. Es gibt die GLTF Extension "KHR_materials_unlit". Unlit, d.h. ohne Einfluss durch Beleuchtung.
+    //3.1.19 shaded default true appears reasonable. We adopted it from AC, but GLTF has something similar via
+    // extension "KHR_materials_unlit". Unlit, ie. no light effects.
+    // 9.8.25 But is this enough? Who decides about smooth/flat shading? Only the model can know for sure. So we only
+    // have the base flag 'shaded' here and decide in DefaultMaterialFactory depending on 'hasNormals'.
+    // See also README.md!
     private boolean shaded = true;
     // AC hat default texrep 1,1 und viele Modelle verlassen sich darauf. D.h. als default kein wrap.
     // TODO 8.6.18: wrap sollte ein Attribut mit Werten Repeaet, clamp, ... sein?
@@ -80,21 +83,20 @@ public class PortableMaterial {
      * Wiederherstellen aus serialisiertem Objekt
      * acpp reader? deprecated?
      *
-     * @param ins
      */
-    public PortableMaterial(ByteArrayInputStream ins) {
+    /*10.8.25 public PortableMaterial(ByteArrayInputStream ins) {
         name = ins.readString();
         color = new Color(ins);
         ambient = new Color(ins);
         specular = new Color(ins);
         shininess = new FloatHolder(ins.readFloat());
-        /* shininessstrengthpercent =*/
+        /* shininessstrengthpercent =* /
         new FloatHolder(ins.readFloat());
         transparency = new FloatHolder(ins.readFloat());
         shaded = ins.readInt() != 0;
         wraps = ins.readInt() != 0;
         wrapt = ins.readInt() != 0;
-    }
+    }*/
 
 
     public FloatHolder getShininess() {
@@ -111,19 +113,19 @@ public class PortableMaterial {
         return 0;
     }*/
 
-    public void serialize(NativeOutputStream outs) {
+    /*10.8.25public void serialize(NativeOutputStream outs) {
         outs.writeString(name);
         //  die drei Farben sind nie null
         color.serialize(outs);
         ambient.serialize(outs);
         specular.serialize(outs);
         outs.writeFloat(shininess.value);
-        outs.writeFloat(0/*shininessstrengthpercent.value*/);
+        outs.writeFloat(0/*shininessstrengthpercent.value* /);
         outs.writeFloat(transparency.value);
         outs.writeInt(shaded ? 1 : 0);
         outs.writeInt(wraps ? 1 : 0);
         outs.writeInt(wrapt ? 1 : 0);
-    }
+    }*/
 
     public PortableMaterial duplicate(String name) {
         PortableMaterial nmat = new PortableMaterial();

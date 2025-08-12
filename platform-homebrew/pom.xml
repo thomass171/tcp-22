@@ -7,6 +7,10 @@
     <name>platform-homebrew</name>
 
     <properties>
+        <!-- mac arm64 was introduced in lwjgl 3.3.0-->
+        <lwjgl.version>3.3.6</lwjgl.version>
+        <!--<lwjgl.natives>natives-macos-arm64</lwjgl.natives>-->
+        <lwjgl.natives>natives-macos</lwjgl.natives>
     </properties>
 
     <parent>
@@ -14,6 +18,18 @@
         <artifactId>main</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.lwjgl</groupId>
+                <artifactId>lwjgl-bom</artifactId>
+                <version>${lwjgl.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- junit comes from parent -->
@@ -62,12 +78,33 @@
             <artifactId>commons-cli</artifactId>
             <version>1.3.1</version>
         </dependency>
-	    <dependency>
-            <!-- The JME version used apparently needs lwjgl2.
-            So no upgrade of lwjgl is possible without upgrade/rebuild of JME-->
-            <groupId>org.lwjgl.lwjgl</groupId>
+
+        <dependency>
+            <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl</artifactId>
-            <version>2.9.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-glfw</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-opengl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl</artifactId>
+            <classifier>${lwjgl.natives}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-glfw</artifactId>
+            <classifier>${lwjgl.natives}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-opengl</artifactId>
+            <classifier>${lwjgl.natives}</classifier>
         </dependency>
 
         <!-- own project dependencies -->

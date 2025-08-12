@@ -389,10 +389,10 @@ public class PlatformHomeBrew extends DefaultPlatform {
         return null;
     }*/
 
-    @Override
+    /*8.8.25 @Override
     public NativeCanvas buildNativeCanvas(int width, int height) {
         return null;
-    }
+    }*/
 
     @Override
     public NativeContentProvider getContentProvider(char type, String location, TestPdfDoc docid) {

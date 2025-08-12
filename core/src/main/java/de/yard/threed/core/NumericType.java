@@ -9,9 +9,7 @@ public enum NumericType {
     TRANSPARENCY,
     TEXTURE_WRAP_S,
     TEXTURE_WRAP_T,
-    // 0:Einfaches Material ohne Lichteinfluss z.B. HUD
-    // 1:Smooth, the default
-    // 2:flat
+    // See class NumericValue for values
     SHADING,
 
 }

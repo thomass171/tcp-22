@@ -61,7 +61,7 @@ import de.yard.threed.engine.test.MainTest;
  * l: toggle hiddencube layer
  * L: cycle lightNode
  * r: cycle layer rendered
- * s: cycle shading of earth (nicht fertig)
+ * s: cycle shading of earth . Replaced by cycle material
  * <p>
  * 9.3.16: Toggable FPS Controller added. Dann geht aber je nach Einstellung im FPS z.B. Pickingray nicht (wegen Mausmovehandling)
  * 22.7,16: Ein Zugriff auf externe Resourcen (z.B. ueber ModelSamples) soll von hier nicht erfolgen, nur Bundled. Externe gibts im Showroom.
@@ -110,7 +110,6 @@ public class ReferenceScene extends Scene {
     //layer 2->9, damit es nicht zufaellig funktioniert
     int HIDDENCUBELAYER = 9;//1 << 8;
     SceneNode lightNode;
-    int shading = NumericValue.SMOOTH;
     RequestType REQUEST_CLOSE = RequestType.register(1008, "close");
     RequestType REQUEST_CYCLE = RequestType.register(1009, "cycle");
     // Outside VR inventory is in HIDDENCUBELAYER of derredcamera
@@ -121,7 +120,7 @@ public class ReferenceScene extends Scene {
     int lightIndex = 0;
     int materialIndex = 0;
     GeneralHandler[] lightCycle;
-    AbstractMaterialFactory[] materialCycle;
+    MaterialCycle[] materialCycle;
     int renderedLayer = -1;
     public static Vector3 INITIAL_CAMERA_POSITION = new Vector3(0, 5, 11);
     double DEFERRED_CAMERA_NEAR = 4.0;
@@ -132,7 +131,7 @@ public class ReferenceScene extends Scene {
     GalleryWall galleryWall;
     int effectCycle = 0;
     Color[] leftTowerColors = new Color[]{new Color(1.0f, 0, 1.0f), Color.WHITE};
-    Color[] rightTowerColors = new Color[]{Color.RED, new Color(1.0f, 1.0f, 0), Color.GREEN};
+    public static Color[] rightTowerColors = new Color[]{Color.RED, new Color(1.0f, 1.0f, 0), Color.GREEN};
     boolean relativeBundlePathModelTriggered = false;
 
     @Override
@@ -191,6 +190,8 @@ public class ReferenceScene extends Scene {
         tl.addEntryForLookat(new Vector3(-9.5, 2.9, -9.5), new Vector3(-8, 2, -9.5));
         // shuttle front
         tl.addEntryForLookat(new Vector3(-2, 3.9, -9.5), new Vector3(-8, 2, -9.5));
+        // before earth (Europe compass)
+        tl.addEntryForLookat(new Vector3(0, 3.9, -6), new Vector3(2, 2, -6.0));
         // and now back to beginning
         tl.addEntryForLookat(new Vector3(0, 5, 11), new Vector3(0, 0, 0));
 
@@ -218,10 +219,12 @@ public class ReferenceScene extends Scene {
 
     /**
      * The left tower uses platform material, the right custom shader.
-     * After changing the means of 'unshaded' the second left box is gray flat shaded, which is correct. Smooth shading of a box seems nonsense.
+     * After changing the means of 'unshaded' the second left box is gray flat shaded, which is correct.
+     * Smooth shading of a box seems nonsense. 9.8.25: No, even for a box smooth shading might be good, depending on normals.
      */
     private void setupScene() {
         initMaterialCycle();
+        // towers are built without material (factory) initially and updated during "material cycle" later.
         movingboxgeo = buildTower("right", towerright, 4, 3, 1, rightTowerColors, null);
         towerright.get(0).getTransform().setPosition(new Vector3(4, 0, -3));
         addToWorld(towerright.get(0));
@@ -250,7 +253,7 @@ public class ReferenceScene extends Scene {
         multimatcube.getTransform().setPosition(new Vector3(-2, 1, -4));
         addToWorld(multimatcube);
 
-        addOrReplaceEarth();
+        addEarth();
 
 
         //20.5.16: Auch ein Hud, einfach um das bei wechselnden Camerapositionen einfach mittesten zu koennen.
@@ -328,6 +331,7 @@ public class ReferenceScene extends Scene {
         //eine Plane für Canvas
         GenericGeometry canvasgeo = new GenericGeometry(Primitives.buildPlaneGeometry(0.7f, 1.1f, 2, 1));
 
+        /* 8.8.25 See README.md
         NativeCanvas canvas = Platform.getInstance().buildNativeCanvas(300, 200);
         SceneNode canvasNode = new SceneNode(new Mesh(canvasgeo, Material.buildBasicMaterial(new Texture(canvas))));
         // vor der linken Box, damit es nach dem ersten step ganz gut sehen kann.
@@ -336,6 +340,7 @@ public class ReferenceScene extends Scene {
         canvasNode.getTransform().setPosition(new Vector3(-2.0, 1.5, 2.5));
         canvasNode.setName("Canvas");
         addToWorld(canvasNode);
+        */
 
         AudioClip elevatorPingClip = AudioClip.buildAudioClipFromBundle("data", "audio/elevator-ping-01.wav");
         elevatorPing = Audio.buildAudio(elevatorPingClip);
@@ -534,12 +539,8 @@ public class ReferenceScene extends Scene {
         return cp;
     }
 
-    private void addOrReplaceEarth() {
-        if (earth != null) {
-            SceneNode.removeSceneNode(earth);
-            earth = null;
-        }
-        buildEarth(1.2f);
+    private void addEarth() {
+        buildEarthWithCompasses(1.2f);
         earth.getTransform().setPosition(new Vector3(2, 2, -6));
         addToWorld(earth);
     }
@@ -574,9 +575,12 @@ public class ReferenceScene extends Scene {
      * Die Verkleinerung der aufstehenden Bloecke mit scale, um das auch zu nutzen.
      * Prinzipiell koennte man natuerlich auch die base* Angaben verkleiner.
      * <p/>
-     * Liefert die Geometrie zurueck.
-     * 19.2.25: Misleading parameter 'flatshaded' replaced by 'base box is unshaded, other are shaded'. Flat shading should be used in any case (instead of
-     * smooth shading) because we use cubes.
+     * Will use a geometry with split shared vertices, so allows visual edges in both flat and smooth shading.
+     *
+     * 19.2.25: Misleading parameter 'flatshaded' replaced by 'base box is unshaded, other are shaded'. Flat shading should
+     * be used in any case (instead of smooth shading) because we use cubes.
+     * 9.8.25 That is not the point, its about normals. Even though we have materialFactory meanwhile, PortableMaterial decides about
+     * shaded and has default true.
      */
     public static Geometry buildTower(String basename, ArrayList<SceneNode> towerlist, double baselength, double basewidth,
                                       double baseheight, Color[] color, AbstractMaterialFactory materialFactory) {
@@ -661,18 +665,19 @@ public class ReferenceScene extends Scene {
      * rein farbigen Seite.
      */
     private void buildMultiMaterialCube(double size) {
-        multimatcube = ModelSamples.buildTexturedCube(size, materialCycle[materialIndex]);
+        multimatcube = ModelSamples.buildTexturedCube(size, materialCycle[materialIndex].materialFactory);
     }
 
     /**
      * Ein paar CompassNeedles dazu, um Orientierungen zu visualisieren.
      * Die Needle gibt es in ThreeJS nicht.
+     * The default material will later be updated in updateMaterial();
      *
      * @param radius
      */
-    private void buildEarth(double radius) {
-        // Earth hat radius 1
-        earth = ModelSamples.buildEarth();
+    private void buildEarthWithCompasses(double radius) {
+        // Earth has radius 1
+        earth = ModelSamples.buildEarth(32);
         // eine unrotierte Needle, auf die man direkt sieht
         SceneNode needle = PortableModelBuilder.buildModel(ModelSamples.buildCompassNeedle(0.3f, 0.1f), null);
         needle.getTransform().setPosition(new Vector3(0, 0, 1.01f));
@@ -887,9 +892,9 @@ public class ReferenceScene extends Scene {
                 hiddencube.getTransform().setLayer(((layer == HIDDENCUBELAYER)) ? 0 : HIDDENCUBELAYER);
             }
         }
-        if (Input.getKeyDown(KeyCode.S)) {
+        /*if (Input.getKeyDown(KeyCode.S)) {
             cycleShading();
-        }
+        }*/
         if (Input.getKeyDown(KeyCode.R)) {
             cycleRendering();
         }
@@ -962,13 +967,14 @@ public class ReferenceScene extends Scene {
         }, materialFactory);
     }
 
-    private void cycleShading() {
+    /*private void cycleShading() {
+    replaced by material cycle
         shading++;
-        if (shading > NumericValue.FLAT) {
+        if (shading > NumericValue.FLAT_SHADING) {
             shading = 0;
         }
         addOrReplaceEarth();
-    }
+    }*/
 
     private void cycleMaterial() {
         materialIndex++;
@@ -1200,72 +1206,105 @@ public class ReferenceScene extends Scene {
     }
 
     private void initMaterialCycle() {
-        materialCycle = new AbstractMaterialFactory[]{
+        materialCycle = new MaterialCycle[]{
                 // 0: custom shader
-                new AbstractMaterialFactory() {
-                    @Override
-                    public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
-                        ShaderProgram program = ShaderPool.buildUniversalEffect();
-                        Material mat = Material.buildCustomShaderMaterial(program, true);
+                new MaterialCycle(buildCustomMaterialFactory(NumericValue.SMOOTH), "cst.smooth"),
+                // 1: platform shader
+                new MaterialCycle(buildPlatformMaterialFactory(NumericValue.SMOOTH), "plt.smooth"),
+                new MaterialCycle(buildPlatformMaterialFactory(NumericValue.FLAT), "plt.flat"),
+                new MaterialCycle(buildPlatformMaterialFactory(NumericValue.UNSHADED), "plt.unshaded"),
+        };
+    }
 
-                        mat.material.getUniform(Uniform.TEXTURED).setValue(pm.getTexture() != null);
-                        mat.material.getUniform(Uniform.SHADED).setValue(pm.isShaded());
+    private AbstractMaterialFactory buildPlatformMaterialFactory(int shading) {
+        return new AbstractMaterialFactory() {
+            // 1: platform shader, shaded
+            @Override
+            public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
 
-                        if (pm.getColor() != null) {
-                            mat.material.getUniform(Uniform.COLOR).setValue(new Quaternion(
-                                    pm.getColor().getR(),
-                                    pm.getColor().getG(),
-                                    pm.getColor().getB(),
-                                    pm.getColor().getAlpha()));
-                            mat.setName("colored CustomShaderMaterial");
-                        } else if (pm.getTexture() != null) {
-                            Texture texture = super.resolveTexture(pm.getTexture(), resourceLoader, texturebasepath, pm.getWraps(), pm.getWrapt(), logger);
-                            mat.material.getUniform(Uniform.TEXTURE).setValue(texture.texture);
-                            mat.setName("textured CustomShaderMaterial");
-                        }
-
-                        return mat;
-                    }
-                },
-                new AbstractMaterialFactory() {
-                    // 1: platform shader, shaded
-                    @Override
-                    public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
-                        // use platform material
-                        Material mat;
-                        if (pm.getTexture() != null) {
-                            Texture texture = super.resolveTexture(pm.getTexture(), resourceLoader, texturebasepath, pm.getWraps(), pm.getWrapt(), logger);
-                            mat = Material.buildPhongMaterial(texture);
-                            // only for testing we really come here.
-                            // mat = Material.buildPhongMaterial(Texture.buildBundleTexture("data", "images/river.jpg"));
-                            mat.setName("textured platform material");
-                        } else {
-                            if (pm.isShaded()) {
-                                mat = Material.buildPhongMaterial(pm.getColor(), 1);
-                            } else {
-                                mat = Material.buildBasicMaterial(pm.getColor());
-                            }
-                            mat.setName("colored platform material");
-                        }
-                        return mat;
-                    }
+                // use platform material. 10.8.25:Default factory doesn't fit because we want to override the 'hasNormals->shading' rule.
+                // defaults to smooth shading
+                pm.setShaded(true);
+                hasnormals = true;
+                if (shading == NumericValue.UNSHADED) {
+                    pm.setShaded(false);
+                } else if (shading == NumericValue.FLAT) {
+                    hasnormals = false;
                 }
+                //Material m = materialCycle[materialIndex].materialFactory.buildMaterial(null, pm, null, hasNormals);
+                Material mat = new DefaultMaterialFactory().buildMaterial(null, pm, null, hasnormals);
+                /*if (pm.getTexture() != null) {
+                    Texture texture = super.resolveTexture(pm.getTexture(), resourceLoader, texturebasepath, pm.getWraps(), pm.getWrapt(), logger);
+                    mat = Material.buildPhongMaterial(texture, shading);
+                    // only for testing we really come here.
+                    // mat = Material.buildPhongMaterial(Texture.buildBundleTexture("data", "images/river.jpg"));
+                    mat.setName("textured platform phong material");
+                } else {
+                    if (pm.isShaded()) {
+                        mat = Material.buildPhongMaterial(pm.getColor(), shading);
+                    } else {
+                        mat = Material.buildBasicMaterial(pm.getColor());
+                    }
+                    mat.setName("colored platform material " + (pm.isShaded() ? "phong" : "unshaded"));
+                }*/
+                return mat;
+            }
+        };
+    }
+
+    private AbstractMaterialFactory buildCustomMaterialFactory(int shading) {
+        return new AbstractMaterialFactory() {
+            // custom shader
+            @Override
+            public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
+
+                ShaderProgram program = ShaderPool.buildUniversalEffect();
+                Material mat = Material.buildCustomShaderMaterial(program, true);
+
+                mat.material.getUniform(Uniform.TEXTURED).setValue(pm.getTexture() != null);
+
+                // custom shader only has no or flat?
+                boolean shaded = pm.isShaded();
+                mat.material.getUniform(Uniform.SHADED).setValue(shaded);
+
+                if (pm.getColor() != null) {
+                    mat.material.getUniform(Uniform.COLOR).setValue(new Quaternion(
+                            pm.getColor().getR(),
+                            pm.getColor().getG(),
+                            pm.getColor().getB(),
+                            pm.getColor().getAlpha()));
+                    mat.setName("colored CustomShaderMaterial " + (shaded ? "shaded" : "unshaded"));
+                } else if (pm.getTexture() != null) {
+                    Texture texture = new DefaultMaterialFactory().resolveTexture(pm.getTexture(), null, null, pm.getWraps(), pm.getWrapt(), logger);
+                    mat.material.getUniform(Uniform.TEXTURE).setValue(texture.texture);
+                    mat.setName("textured CustomShaderMaterial " + (shaded ? "shaded" : "unshaded"));
+                }
+
+                return mat;
+            }
         };
     }
 
     private void updateMaterials() {
         for (int i = 0; i < tower2.size(); i++) {
             PortableMaterial pm = new PortableMaterial("no-name", leftTowerColors[i]);
-            Material m = materialCycle[materialIndex].buildMaterial(null, pm, null, true);
+            Material m = updatedCycledMaterial(pm, true);
             tower2.get(i).getMesh().setMaterial(m);
         }
         for (int i = 0; i < towerright.size(); i++) {
             PortableMaterial pm = new PortableMaterial("no-name", rightTowerColors[i]);
-            Material m = materialCycle[materialIndex].buildMaterial(null, pm, null, true);
+            Material m = updatedCycledMaterial(pm, true);
             towerright.get(i).getMesh().setMaterial(m);
         }
-        multimatcube.getMesh().setMaterial(ModelSamples.buildTexturedCubeMaterial(materialCycle[materialIndex]));
-        hud.setText(3, materialIndex == 0 ? "custom shader   " : "platform shader   ");
+        multimatcube.getMesh().setMaterial(ModelSamples.buildTexturedCubeMaterial(materialCycle[materialIndex].materialFactory));
+
+        earth.getMesh().setMaterial(ModelSamples.buildEarthMaterial(materialCycle[materialIndex].materialFactory));
+
+        hud.setText(3, materialCycle[materialIndex].label);
+    }
+
+    Material updatedCycledMaterial(PortableMaterial pm, boolean hasNormals) {
+        return materialCycle[materialIndex].materialFactory.buildMaterial(null, pm, null, hasNormals);
     }
 }
 
@@ -1489,5 +1528,15 @@ class SecondMenuBuilder implements MenuProvider {
         ReferenceTests.testCycledMenu(new SceneNode[]{rs.hud, rs.controlMenu, new SceneNode(SceneNode.findByName("HudCube").get(0))});
     }
 
+}
+
+class MaterialCycle {
+    public AbstractMaterialFactory materialFactory;
+    public String label;
+
+    public MaterialCycle(AbstractMaterialFactory materialFactory, String label) {
+        this.materialFactory = materialFactory;
+        this.label = label;
+    }
 }
 

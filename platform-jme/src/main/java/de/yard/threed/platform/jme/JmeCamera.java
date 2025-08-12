@@ -412,7 +412,7 @@ public class JmeCamera implements NativeCamera/*, NativeTransform */ {
 
     @Override
     public void setFar(double far) {
-        camera.setFrustumFar(far);
+        camera.setFrustumFar( (float)far);
     }
 
     @Override

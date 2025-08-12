@@ -25,7 +25,7 @@ public class DefaultMaterialFactory extends AbstractMaterialFactory {
     Log logger = Platform.getInstance().getLog(DefaultMaterialFactory.class);
 
     /**
-     * 27.12.17: public static, um allgemeingueltig aus einem LoadedMaterial ein Material zu machen. War frueher in LoadedFile.
+     * 27.12.17: Was in LoadedFile once.
      * 30.12.18: For loading a texture, the model origin (eg. a bundle) and an optional different path is needed. The texture name is taken from the material.
      * Also an absolute path in texture name like "bundle:/xx/yy/zz.png" is possible. Then it can be loaded without further information.
      * <p>
@@ -36,7 +36,7 @@ public class DefaultMaterialFactory extends AbstractMaterialFactory {
     @Override
     public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial mat, ResourcePath texturebasepath, boolean hasnormals) {
         NativeMaterial nmat;
-        //SHADED ist der Defasult
+        // smooth shading is default in Platform(and in many platforms)
         HashMap<NumericType, NumericValue> parameters = new HashMap<NumericType, NumericValue>();
         if (!mat.isShaded()) {
             parameters.put(NumericType.SHADING, new NumericValue(NumericValue.UNSHADED));
@@ -47,7 +47,7 @@ public class DefaultMaterialFactory extends AbstractMaterialFactory {
         }
 
         if (mat.getTexture() != null) {
-            Texture texture = resolveTexture(mat.getTexture(), resourceLoader,texturebasepath, mat.getWraps(), mat.getWrapt(),logger);
+            Texture texture = resolveTexture(mat.getTexture(), resourceLoader, texturebasepath, mat.getWraps(), mat.getWrapt(), logger);
             if (texture == null) {
                 logger.warn("no texture. Not building material.");
                 return null;

@@ -19,7 +19,7 @@ import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModelDefinition;
 import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.engine.*;
-import de.yard.threed.core.platform.NativeMaterial;
+import de.yard.threed.engine.loader.DefaultMaterialFactory;
 import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 
 
@@ -45,7 +45,7 @@ public class ModelSamples {
 
         //NativeMaterial mat = Material.buildLambertMaterial(Texture.buildBundleTexture("data", "textures/texturedcube-atlas.jpg")).material;
         //Just have a loader pointing to bundle data, from which texture loader will be derived.
-        PortableMaterial pm = new PortableMaterial("no-name", "texturedcube-atlas.jpg");
+        PortableMaterial pm = new PortableMaterial("no-name", "data:textures/texturedcube-atlas.jpg");
         Material mat = materialFactory.buildMaterial(new ResourceLoaderFromBundle(new BundleResource(BundleRegistry.getBundle("data"), "xx")
         ), pm, new ResourcePath("textures"), true);
         return mat;
@@ -131,18 +131,27 @@ public class ModelSamples {
      * Die y-Achse geht durch die Pole (Nordpol im positivem y).
      */
     public static SceneNode buildEarth() {
-        return buildEarth(32, NumericValue.SMOOTH);
+        return buildEarth(32);
     }
 
-    public static SceneNode buildEarth(int segments, int shading) {
+    public static SceneNode buildEarth(int segments) {
         ShapeGeometry geoSphere = ShapeGeometry.buildSphere(segments, segments/*16*/, new Degree(360));
-        Material mat = Material.buildLambertMaterial((Texture.buildBundleTexture("data", "textures/earth/2_no_clouds_4k.jpg")), null, (shading == NumericValue.FLAT));
+        //Material mat = Material.buildLambertMaterial((Texture.buildBundleTexture("data", "textures/earth/2_no_clouds_4k.jpg")), null, (shading == NumericValue.FLAT_SHADING));
+        Material mat = buildEarthMaterial(new DefaultMaterialFactory());
         //mat.setWireframe(true);
         Mesh mesh = new Mesh(geoSphere, mat);
         SceneNode model = new SceneNode();
         model.setMesh(mesh);
         model.setName("Earth");
         return model;
+    }
+
+    public static Material buildEarthMaterial(AbstractMaterialFactory materialFactory) {
+        PortableMaterial pm = new PortableMaterial("earthMaterial","data:textures/earth/2_no_clouds_4k.jpg");
+        return materialFactory.buildMaterial(new ResourceLoaderFromBundle(new BundleResource(BundleRegistry.getBundle("data"),"textures/earth/2_no_clouds_4k.jpg")),
+                pm,null,true);
+        //return new Material(Platform.getInstance().buildMaterial(null, null,
+        //        Material.buildParam(NumericType.SHADING, new NumericValue(shading.value()))));
     }
 
     /**

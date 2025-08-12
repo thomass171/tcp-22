@@ -30,7 +30,8 @@ then
   usage
 fi
 
-mvn exec:java -Dexec.args="--scene=$1"
+# Option -XstartOnFirstThread is specific for MacOS
+mvn exec:java -XstartOnFirstThread -Dexec.args="--scene=$1"
 
 exit 0
 

@@ -155,18 +155,17 @@ public abstract class Platform {
     public abstract NativeCamera buildPerspectiveCamera(double fov, double aspect, double near, double far);
 
     /**
-     * TODO Solve Dependency on Effect.
-     * Der name hat keine funktionale Bedeutung. Er dient nur der Wiedererkennbarkeit.
-     * The names (keys) in the texture map must match to the uniforms defined in the Effect.
-     *
+     * 'name' has no functional purpose. It is just a kind of label.
+     * The names (keys) in the texture map must match to the uniforms defined in the Effect shader.
+     * 11.8.25: Smooth shading is (has always been) assumed to be default (by the platform itself)
+     * if neither unshaded nor flat shading is a parameter.
      * @param color
      * @param texture
      * @param parameters
      * @return
      */
-    public abstract NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap</*TextureType*/String, NativeTexture> texture,
-                                                 HashMap<NumericType, NumericValue> parameters /*MA36  Effect Object effect*/);
-    //return buildMaterial(new MaterialDefinition(name,color,texture,parameters),effect);
+    public abstract NativeMaterial buildMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture,
+                                                 HashMap<NumericType, NumericValue> parameters);
 
     /**
      * material name is taken from program or can later be set by setName()

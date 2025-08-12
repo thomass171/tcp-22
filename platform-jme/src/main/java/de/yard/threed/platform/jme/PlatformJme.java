@@ -300,11 +300,11 @@ public class PlatformJme extends SimpleHeadlessPlatform {
         return JmeTexture.buildFromImage((imagedata));
     }
 
-    @Override
+    /*8.8.25 run into default for failing @Override
     public NativeTexture buildNativeTexture(NativeCanvas canvas) {
         JmeTexture texture = JmeTexture.buildFromImage(((JmeCanvas) canvas).image);
         return texture;
-    }
+    }*/
 
     @Override
     public NativeLight buildPointLight(Color argb, double range) {
@@ -371,12 +371,12 @@ public class PlatformJme extends SimpleHeadlessPlatform {
 
     }
 
-    @Override
+    /*8.8.25 @Override
     public NativeCanvas buildNativeCanvas(int width, int height) {
         JmeCanvas canvas = new JmeCanvas(width, height);
 
         return canvas;
-    }
+    }*/
 
     @Override
     public NativeContentProvider getContentProvider(char type, String location, TestPdfDoc docid) {

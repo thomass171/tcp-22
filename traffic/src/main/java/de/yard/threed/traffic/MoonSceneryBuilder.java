@@ -30,7 +30,6 @@ public class MoonSceneryBuilder implements AbstractSceneryBuilder {
 
     @Override
     public void init(SceneNode destinationNode) {
-        int shading = NumericValue.SMOOTH;
         int segments = 512;
 
         SimpleGeometry geo = Primitives.buildSphereGeometry(MOON_RADIUS, segments, segments);

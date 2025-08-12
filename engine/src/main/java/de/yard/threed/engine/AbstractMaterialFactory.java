@@ -44,6 +44,9 @@ public abstract class AbstractMaterialFactory {
         if (StringUtils.contains(texturename, ":")) {
             // use case isn't gltf but manually build model definitions. Is a kind of absolute texture path.
             int index = StringUtils.indexOf(texturename, ":");
+            if (index == -1) {
+                logger.warn("No ':' found in texture name");
+            }
             texturebasepath = null;
             // texturename in resourceloader will be replaced later anyway, so just "" is ok.
             Bundle bundle = BundleRegistry.getBundle(StringUtils.substring(texturename, 0, index));
