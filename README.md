@@ -27,7 +27,7 @@ from JMonkeyEngine 3.2.4-stable with all datatypes float replaced by double. The
 
 These files reside in subfolder lib and should be installed in the local maven repository.
 ```
-for l in jme3-core jme3-effects jme3-lwjgl3
+for l in jme3-core jme3-effects jme3-lwjgl3 jme3-desktop
 do
   mvn install:install-file -Dfile=./platform-jme/lib/$l-3.8.1-dbl.jar -DgroupId=org.jmonkeyengine -DartifactId=$l -Dversion=3.8.1-dbl -Dpackaging=jar
 done  

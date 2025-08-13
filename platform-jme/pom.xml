@@ -57,11 +57,12 @@
             <artifactId>jme3-core</artifactId>
             <version>${jme.version}</version>
         </dependency>
-        <!--8.8.25 apparently not needed<dependency>
+        <!--8.8.25 desktop needed for AWTLoader and also included transitive in jme.lwjgl3-->
+        <dependency>
             <groupId>${jme.groupid}</groupId>
             <artifactId>jme3-desktop</artifactId>
             <version>${jme.version}</version>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>${jme.groupid}</groupId>
             <artifactId>jme3-lwjgl3</artifactId>

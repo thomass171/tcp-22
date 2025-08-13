@@ -8,7 +8,7 @@ source $OWNDIR/common.sh || exit 1
 
 validateHOSTDIR
 
-for l in jme3-core jme3-effects jme3-lwjgl3
+for l in jme3-core jme3-effects jme3-lwjgl3 jme3-desktop
 do
         mvn install:install-file -Dfile=./platform-jme/lib/$l-3.8.1-dbl.jar -DgroupId=org.jmonkeyengine -DartifactId=$l -Dversion=3.8.1-dbl -Dpackaging=jar
         checkrc mvn
