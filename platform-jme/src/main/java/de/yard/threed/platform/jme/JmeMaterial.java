@@ -159,7 +159,9 @@ public class JmeMaterial implements NativeMaterial {
                 mat.setTexture("DiffuseMap", diffusemap.texture);
             }
             if (NumericValue.flatshading(definition.parameters)) {
-                // is 'VertexLighting' for flat shading?
+                // is 'VertexLighting' for flat shading? Apparently not. The earth in ReferenceScene for no
+                // materialfactory shows
+                // visible edges like in other platforms like threejs.
                 mat.setBoolean("VertexLighting", true);
             }
             NativeTexture normalmap = (definition.texture == null) ? null : definition.texture.get("normalmap");
