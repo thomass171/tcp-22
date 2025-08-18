@@ -17,15 +17,27 @@ directory $HOME/Sites. Set shell variable HOSTDIR, eg.:
 ```
 export HOSTDIR=$HOME/Sites/tcp-22
 ```
-and create that base directory. 
+and create that base directory. If this is the first build or for making
+a getting started easier, the modules 'sceneserver' and 'servermanager' should be commented in the
+top level pom.xml:
+
+```
+   <!--<module>sceneserver</module>
+       <module>servermanager</module>-->
+```
+
+These are adanced modules that are not needed for starting. They need artifacts from other modules for testing, so tend to fail in
+fresh environments.
+
+In platform-jme/pom.xml you should set the property 'lwjgl.natives' with a fitting value for your platform.
 
 Run the following steps either manually or use the script bin/buildAndDeploy.sh for running all.
  
 The module platform-jme requires customized JMonkeyEngine build artifact files, which were built
-from JMonkeyEngine 3.2.4-stable with all datatypes float replaced by double. These use the legacy version
-2.9.3 of lwjgl (http://legacy.lwjgl.org).
+from JMonkeyEngine 3.8.1-stable with all datatypes float replaced by double. These use the lwjgl3 version
+3.3.6 (https://www.lwjgl.org).
 
-These files reside in subfolder lib and should be installed in the local maven repository.
+The files reside in subfolder lib and should be installed in the local maven repository.
 ```
 for l in jme3-core jme3-effects jme3-lwjgl3 jme3-desktop
 do
@@ -54,7 +66,10 @@ Run again with testing
 mvn clean install
 ```
 
-The build should succeed without error. After that deploy the software:
+The build should succeed without error. If it is the first build, it might
+fail in module 'sceneserver'. In this case it might help to just build again.
+
+After that deploy the software:
 
 ```
 sh bin/deploy.sh
@@ -68,7 +83,7 @@ sh bin/deployBundle.sh -m engine
 
 ## Unity
 
-Note as of 3/2025: This feature has not been upgraded for a while and is broken very likely.
+> **_NOTE:(3/2025)_**: This feature has not been maintained for a while and is broken very likely.
 
 Convert the needed files to CS (be sure to use a zsh compatible shell like bash):
 ```
@@ -111,7 +126,7 @@ Now the scene "SampleScene" is ready to be started.
 
 # JMonkeyEngine
 
-Nothing special to do any more. All is prepared to launch a scene in JMonkeyEngine.
+Nothing special to do any more (after setting the correct 'lwjgl.natives' value in pom.xml). All is prepared to launch a scene in JMonkeyEngine.
 
 # Running
 ## Browser

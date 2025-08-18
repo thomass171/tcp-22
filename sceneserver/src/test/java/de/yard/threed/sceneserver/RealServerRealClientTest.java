@@ -173,13 +173,14 @@ public class RealServerRealClientTest {
         assertNull(mazeVisualizationSystem.gridTeleporter);
 
         // Login request has already been sent
-        Thread.sleep(1000);
+        // 16.8.25: (timing issue?) 1000->5000
+        Thread.sleep(5000);
         sceneRunner.runLimitedFrames(5);
 
         List<Event> eventlist = EcsTestHelper.toEventList(systemTracker.getPacketsReceivedFromNetwork());
         eventlist = EcsTestHelper.filterEventList(eventlist, (e) -> e.getType().getType() != BaseEventRegistry.EVENT_ENTITYSTATE.getType());
         // should have MAZE_LOADED, LOGIN JOINED and ASSEMBLED from network
-        assertEquals(4, eventlist.size());
+        assertEquals(4, eventlist.size(), "eventlist.size");
         assertEquals(EVENT_MAZE_LOADED.getType(), eventlist.get(0).getType().getType());
         assertEquals(USER_EVENT_LOGGEDIN.getType(), eventlist.get(1).getType().getType());
         assertEquals(USER_EVENT_JOINED.getType(), eventlist.get(2).getType().getType());

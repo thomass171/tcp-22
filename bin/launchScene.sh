@@ -30,8 +30,9 @@ then
   usage
 fi
 
-# Option -XstartOnFirstThread is specific for MacOS
-mvn exec:java -XstartOnFirstThread -Dexec.args="--scene=$1"
+# Option -XstartOnFirstThread is needed and specific for MacOS. But passing it via MAVEN_OPTS has
+# no effect. So set it in pom.xml and use exec:exec
+mvn exec:exec -Dscene=$1
 
 exit 0
 

@@ -13,8 +13,9 @@
         <jme.groupid>org.jmonkeyengine</jme.groupid>
         <!-- mac arm64 was introduced in lwjgl 3.3.0-->
         <lwjgl.version>3.3.6</lwjgl.version>
-        <!--<lwjgl.natives>natives-macos-arm64</lwjgl.natives>-->
-        <lwjgl.natives>natives-macos</lwjgl.natives>
+        <lwjgl.natives>natives-macos-arm64</lwjgl.natives>
+        <!--<lwjgl.natives>natives-macos</lwjgl.natives>-->
+        <scene>passed-via-cmdline</scene>
     </properties>
 
     <parent>
@@ -231,7 +232,18 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <mainClass>de.yard.threed.platform.jme.Main</mainClass>
+                    <!--Option -XstartOnFirstThread is needed and specific for MacOS. But
+                    passing it via MAVEN_OPTS has no effect. So use exec:exec and set it here -->
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-classpath</argument>
+                        <!-- automatically creates the classpath using all project dependencies,
+                             also adding the project build directory -->
+                        <classpath/>
+                        <argument>-XstartOnFirstThread</argument>
+                        <argument>de.yard.threed.platform.jme.Main</argument>
+                        <argument>--scene=${scene}</argument>
+                    </arguments>
                 </configuration>
             </plugin>
         </plugins>
