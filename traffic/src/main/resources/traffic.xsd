@@ -112,6 +112,10 @@
 
     </complexType>
 
+    <!--
+    1.3.18: The general phrase here is 'vehicle', also for aircraft (even though vehicle in english isn't an aircraft?).
+       Instead we have attribute 'type'. Is shuttle an aircraft?
+    -->
     <complexType name="VehicleDefinitionType">
 
         <sequence>
@@ -124,7 +128,8 @@
             <element name="acceleration" type="double" minOccurs="0" maxOccurs="1"/>
             <element name="approachoffset" type="double" minOccurs="0" maxOccurs="1"/>
             <element name="turnradius" type="double" minOccurs="0" maxOccurs="1"/>
-            <!-- 28.11.23: Its not consistent to have a sublist here. So just unbounded -->
+            <!-- 28.11.23: Its not consistent to have a sublist here. So just unbounded
+            View points are relative to the vehicle -->
             <element name="viewpoint" type="c:ViewpointType" minOccurs="0" maxOccurs="unbounded"/>
             <!-- doesn't really belong here, but currently its used -->
             <element name="initialcount" type="int" minOccurs="0" maxOccurs="1"/>
@@ -142,6 +147,7 @@
 
         <attribute name="name" type="string"/>
         <attribute name="modeltype" type="string"/>
+        <!-- Instead of attribute 'simple' we have attribute "ai" for tagging simple (AI) aircraft. Unsure whether it is really used -->
         <attribute name="ai" type="boolean"/>
         <attribute name="type" type="string"/>
 

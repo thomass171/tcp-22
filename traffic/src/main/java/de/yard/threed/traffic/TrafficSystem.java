@@ -54,21 +54,9 @@ import java.util.Map;
  * Hier werden auch die Entities angelegt (über buildVehicle(), aber nicht die Model) und vorgehalten. Wobei vorgehalten werden muessen sie ja doch nicht wirklich.
  * Ob das so ganz sauber ist, muss sich noch zeigen.
  * <p>
- * Requests beginnen mit "request".
- * 15.7.17: Wenn dies ein ECS System per Vehicle ist, sollte es nicht alle Vehicles kennen. Dafür muesste es ein weiteres ECSSystem ohne ... geben. --> TrafficController
- * Der ist aber hier aufgegangen. Der SystemManager kennt alle Entities. Das duerfte reichen.
- * 12.02.2018: Sollte in 2D(GroundServices) wie in 3D(FlighScene) nutzbar sein. Das der immer ein groundnet kennt, ist eigentlich zu speziell. Hier kann es
- * auch mehrere Graphen geben; oder Rundfluege etc. Das sollte
- * zB. mit TrafficWorld entkoppelt werden. Oder ist das hier eigentlich ein GroundServiceSystem? Das könnte auch gut passen. Z.B. wegen der ganzen GroundService
- * spezifischen Use Cases. Dann kann er ein startendes Vehicle an ein anderes System übergeben oder übergeben bekommen?
- * 20.2.18: Und er könnte erkennen, wann ein Groundnet zu laden ist. Jetzt umbenannt: TrafficSystem->GroundServicesSystem.
- * 23.2.18: Nicht mehr Master der Projection. Die wird reingegeben (statt origin, das muesste hier irrelevant sein).
- * 27.2.18. Aber wenn das hier für GroundServices ist, gehoert Schedule und sowas nicht hier hin. Also brauchts doch zusaetzlich noch ein TrafficSystem, in dem
- * schedules liegen. Das hatte ich oben auch schon mal erwähnt. Ich starte mal eine Aufsplittung. Also gibts jetzt ein TrafficSystem und ein GroundServicesSystem.
- * Requests muessen auch gesplittet werden? Ich lass erstmal nur die schedules hier.
- * 27.2.18: TODO Dies System brauchts doch nur per group?
- * 14.3.19: Neues eigenes AutomoveSystem. Evtl. ist das TrafficSystem obselet, weil zu allgemein?
- * 24.11.20: Nicht obselet? Replaces RequestHandler in TrafficCommon zu ersetzen.
+ * 12.02.2018: For groundnet handling and managing schedules(??) we have GroundServicesSystem.
+ * 23.2.18: No longer master of projection.
+ * 27.2.18: TODO Only needed per group?
  * 07.03.25: VehicleConfigDataProvider integrated here
  * <p>
  * Created by thomass on 31.03.17.
@@ -79,14 +67,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
     //27.2.18:Kruecke
     private static TrafficSystem instance = null;
     private static Log logger = Platform.getInstance().getLog(TrafficSystem.class);
-    // Der Visualizer kann auch null sein. Er ist hier bekannt, weil ja je nach Traffic etwas neues anzuzeigen sein kann.
-    // 12.2.18: Dafuer gibt es aber doch das GraphVisualizationSystem, das über Event informiert wird. Dann sollte nur
-    // der den Visualizer kennen. Wenn das Terrain stimmig ist, ist vielleicht ohnehin nur was zu Debugzwecken anzuzeigen.
-    //20.3.18 ich glaub, der braucht keinen    GraphVisualizer visualizer;
     public static boolean trafficsystemdebuglog = true;
-    //public Map<Integer, Schedule> schedules = new HashMap<Integer, Schedule>();
-    //long lastscheduling = 0;
-    //static int schedulinginterval = 2;
     public List<VehicleBuiltDelegate> genericVehicleBuiltDelegates = new ArrayList<VehicleBuiltDelegate>();
     // 19.11.23 ugly workaround for testing until we have requests in eventqueue
     public int vehiclesLoaded = 0;
@@ -132,7 +113,6 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                         // 20.3.24 TRAFFIC_EVENT_GRAPHLOADED added
                         TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED,
                         BaseEventRegistry.EVENT_USER_ASSEMBLED});
-        //this.visualizer = visualizer;
 
         instance = this;
         this.name = "TrafficSystem";
@@ -204,7 +184,9 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
             }
         }*/
 
-        /*if (lastscheduling < ((Platform)Platform.getInstance()).currentTimeMillis() - schedulinginterval * 1000) {
+        /*19.8.25: Does this belong to GroundServicesSystem? Probably not, seems to be just old code.
+        Will we ever get schedules again?
+        if (lastscheduling < ((Platform)Platform.getInstance()).currentTimeMillis() - schedulinginterval * 1000) {
             lastscheduling = ((Platform)Platform.getInstance()).currentTimeMillis();
 
             // check for completed actions and schedules.
@@ -290,7 +272,7 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
                 // In server mode no user might be logged in yet, so maybe there is no TeleportComponent
                 // 19.11.23: TeleportComponent should be removed here in favor of EVENT_VIEWPOINT
                 TrafficHelper.launchVehicles(vehiclelist,
-                        trafficContext/*27.12.21groundNet*/, trafficGraph/*DefaultTrafficWorld.getInstance().getGroundNetGraph("EDDK")*/,
+                        trafficContext/*27.12.21groundNet*/, trafficGraph,
                         (UserSystem.getInitialUser() == null) ? null : TeleportComponent.getTeleportComponent(UserSystem.getInitialUser()),
                         /*getWorld()*//*9.3.25, null/*22.3.24sphereProjections.backProjection*/
                         /*27.12.21airportConfig,*/ null/*baseTransformForVehicleOnGraph*/, vehicleLoader, genericVehicleBuiltDelegates);

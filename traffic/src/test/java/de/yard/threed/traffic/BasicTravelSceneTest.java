@@ -191,9 +191,17 @@ public class BasicTravelSceneTest {
         }
     }
 
-    @Test
-    public void testDemo() throws Exception {
-        setup("traffic:tiles/Demo.xml", new HashMap<String, String>());
+    @ParameterizedTest
+    @CsvSource(value = {
+            "21;",
+            "356;vehicle.loc.maximumspeed=356",
+    }, delimiter = ';')
+    public void testDemo(double expectedMaximumSpeed, String property) throws Exception {
+        HashMap<String, String> customProperties = new HashMap<String, String>();
+        if (property != null) {
+            customProperties.put(property.split("=")[0], property.split("=")[1]);
+        }
+        setup("traffic:tiles/Demo.xml", customProperties);
 
         assertEquals(INITIAL_FRAMES, sceneRunner.getFrameCount());
         assertNotNull(UserSystem.getInitialUser(), "user entity");
@@ -239,7 +247,7 @@ public class BasicTravelSceneTest {
         // assume position fits
         TrafficTestUtils.assertVehicleEntity(locEntity, "loc", 0.0, new Vector3(48.56055289994228, 0.0, -20.03455336481473),
                 "TravelSphere", Quaternion.buildRotationX(new Degree(90)), log);
-
+        assertEquals(expectedMaximumSpeed, VehicleComponent.getVehicleComponent(locEntity).getVehicleDefinition().getMaximumSpeed());
         SceneNode locNode = locEntity.getSceneNode();
         double xpos0 = locNode.getTransform().getPosition().getX();
         sceneRunner.runLimitedFrames(50);

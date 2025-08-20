@@ -7,7 +7,15 @@ var host = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/publicweb/tcp-fli
 // The host of traffic-services. Can be customized with query param, eg. '?serviceshost=http://localhost:8080'
 var serviceshost = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net";
 
-var wellKnownAirports = [ "EDDK", "EDKB", "EHAM"];
+var wellKnownAirports = [
+  "EDDK", // Cologne
+  "EDKB", // Hangelar
+  "EGPF", // Glasgow
+  "EGPH", // Edinburgh
+  "EHAM", // Schiphol
+  "EHTX", // Texel
+  "EHLE", // Lelystad
+  ];
 
 var allAirports = new Map();
 
@@ -189,7 +197,9 @@ function icaoChanged(idsuffix) {
     if (icao.length == 4) {
         loadAirport(icao, idsuffix);
     } else {
-        if (icao.length >= 2) {
+        // Only start searching with 3 characters. Starting with 2 returns too much data that takes too long and doesn't
+        // fit into the select box
+        if (icao.length >= 3) {
             searchAirport(icao, idsuffix);
         }
     }
@@ -234,6 +244,8 @@ function searchAirport(icao, idsuffix) {
             //console.log("adding ", airport);
             addOption("inp_icao_" + idsuffix, airport.icao + "(" + airport.name + ")");
         });
+        // always keep well known airports at the end
+        addWellKnownAirportsToSelectBox(idsuffix);
         updateStatus();
     });
 }
@@ -322,7 +334,12 @@ function launchSingleScene(vrMode, useRoute) {
         alert("no aircraft selected");
         return;
     }
-    args.set("initialVehicle",getAircraft());
+    args.set("initialVehicle", initialVehicle);
+    if (initialVehicle == "bluebird") {
+        // double speed of sound
+        args.set("vehicle.bluebird.maximumspeed", 2 * 343);
+        args.set("vehicle.bluebird.acceleration", 343 * 0.02);
+    }
 
     if (useRoute) {
         args.set("initialRoute", foundGeoRoute);
@@ -376,6 +393,10 @@ function clearTileGroup() {
     tileGroup = null;
 }
 
+function addWellKnownAirportsToSelectBox(idsuffix) {
+    wellKnownAirports.forEach(a => addOption("inp_icao_" + idsuffix, a));
+}
+
 /**
  * init for travelworld.html
  */
@@ -413,9 +434,10 @@ function init() {
     loadAirport(initialICAO, "from");
 
     clearOptions("inp_icao_from");
-    wellKnownAirports.forEach(a => addOption("inp_icao_from", a));
+    addWellKnownAirportsToSelectBox("from");
+
     clearOptions("inp_icao_to");
-    wellKnownAirports.forEach(a => addOption("inp_icao_to", a));
+    addWellKnownAirportsToSelectBox("to");
 
     updateStatus();
 }

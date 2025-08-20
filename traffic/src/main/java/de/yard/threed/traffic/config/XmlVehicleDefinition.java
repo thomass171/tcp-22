@@ -4,6 +4,7 @@ import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeNode;
+import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.util.XmlHelper;
 
 import java.util.ArrayList;
@@ -14,10 +15,10 @@ import java.util.Map;
 /**
  * Konfiguration eines Vehicle. Wird im Moment aus XML gelesen.
  * 24.4.18: Soll wirklich nur ein Datencontainer ohne grosse Logik sein, weil es Attribut im VehicleComponent ist.
- *
+ * <p>
  * 27.12.21: Teilweise zwar Aircraft lastig, soll trotzdem aber nach "traffic".
  * renamed from XmlVehicleConfig to XmlVehicleDefinition to better meet naimg convetions.
- *
+ * <p>
  * 27.11.23: Setting default values here for unconfigured values seems not the best location.
  */
 public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements VehicleDefinition {
@@ -40,9 +41,11 @@ public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements Vehic
     public static final String APPROACHOFFSET = "approachoffset";
     public static final String UNSCHEDULEDMOVING = "unscheduledmoving";
     public static final String TURNRADIUS = "turnradius";
+    String name;
 
     public XmlVehicleDefinition(NativeNode nativeNode) {
         super(nativeNode);
+        name = XmlHelper.getStringAttribute(nativeNode, "name");
     }
 
     public String getBundlename() {
@@ -102,6 +105,11 @@ public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements Vehic
 
 
     public double getMaximumSpeed() {
+        Double overwrittenValue = getOverwrittenDouble(XmlVehicleDefinition.MAXIMUMSPEED);
+        if (overwrittenValue != null) {
+            Platform.getInstance().getLog(XmlVehicleDefinition.class).debug("Overwriting " + overwrittenValue);
+            return overwrittenValue;
+        }
         if (XmlHelper.getChild(nativeNode, XmlVehicleDefinition.MAXIMUMSPEED, 0) == null) {
             return 0;
         }
@@ -109,6 +117,10 @@ public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements Vehic
     }
 
     public double getAcceleration() {
+        Double overwrittenValue = getOverwrittenDouble(XmlVehicleDefinition.ACCELERATION);
+        if (overwrittenValue != null) {
+            return overwrittenValue;
+        }
         if (XmlHelper.getChild(nativeNode, XmlVehicleDefinition.ACCELERATION, 0) == null) {
             return 0;
         }
@@ -161,8 +173,8 @@ public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements Vehic
             return null;
         }
 
-        Vector3 p ;//= doors.get(0);
-        p = XmlHelper.getVector3Value(XmlHelper.getChild(nativeNode, DOOR,0).nativeNode);
+        Vector3 p;//= doors.get(0);
+        p = XmlHelper.getVector3Value(XmlHelper.getChild(nativeNode, DOOR, 0).nativeNode);
         //hier die ac Transformation? Wie auch immer. Das Minus ist fuer rechte Tür.
         //return new Vector3(p.getX(),p.getZ(),-p.getY());
         return new Vector3(p.getX(), -p.getY(), p.getZ());
@@ -179,11 +191,12 @@ public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements Vehic
         //float xoffset = 3;
         //Vector3 p = new Vector3(-xoffset, wingspread / 2 + yoffset, 0);
         //return Vector3.buildFromVector2(wingpassingpoint);
-        return Vector3.buildFromVector2(XmlHelper.getVector2Value(XmlHelper.getChild(nativeNode,WINGPASSINGPOINT,0).nativeNode));
+        return Vector3.buildFromVector2(XmlHelper.getVector2Value(XmlHelper.getChild(nativeNode, WINGPASSINGPOINT, 0).nativeNode));
     }
 
     /**
      * Auch erstmal so aus der Lameng.
+     *
      * @return
      */
     @Override
@@ -196,26 +209,27 @@ public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements Vehic
         //float xoffset = 13;
         //Vector3 p = new Vector3(xoffset, -wingspread / 4 , 0);
         //return Vector3.buildFromVector2(leftwingapproachpoint);
-        return Vector3.buildFromVector2(XmlHelper.getVector2Value(XmlHelper.getChild(nativeNode,LEFTWINGAPPROACHPOINT,0).nativeNode));
+        return Vector3.buildFromVector2(XmlHelper.getVector2Value(XmlHelper.getChild(nativeNode, LEFTWINGAPPROACHPOINT, 0).nativeNode));
     }
 
     /**
      * point appx. 5 meter behind the aircraft
      * Auch erstmal so aus der Lameng.
-     *
+     * <p>
      * TODO make it a config property.
+     *
      * @return
      */
     public Vector3 getRearPoint() {
 
         double xoffset = 28;
-        Vector3 p = new Vector3(xoffset, 0 , 0);
+        Vector3 p = new Vector3(xoffset, 0, 0);
         return p;
     }
 
     @Override
     public LocalTransform getTransform() {
-        return  ConfigHelper.getTransform(XmlHelper.getChildren(nativeNode, "transform"));
+        return ConfigHelper.getTransform(XmlHelper.getChildren(nativeNode, "transform"));
     }
 
     @Override
@@ -223,7 +237,7 @@ public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements Vehic
         if (XmlHelper.getChild(nativeNode, WINGSPREAD, 0) == null) {
             return null;
         }
-        return XmlHelper.getFloatValue(XmlHelper.getChild(nativeNode,WINGSPREAD,0).nativeNode);
+        return XmlHelper.getFloatValue(XmlHelper.getChild(nativeNode, WINGSPREAD, 0).nativeNode);
     }
 
     public static List<VehicleDefinition> convertVehicleDefinitions(List<NativeNode> vehicleDefinitions) {
@@ -232,5 +246,9 @@ public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements Vehic
             result.add(new XmlVehicleDefinition(vehicleDefinitions.get(i)));
         }
         return result;
+    }
+
+    private Double getOverwrittenDouble(String property) {
+        return Platform.getInstance().getConfiguration().getDouble("vehicle." + name + "." + property);
     }
 }

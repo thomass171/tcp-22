@@ -36,22 +36,17 @@ public class VehicleLauncher {
     private static Log logger = Platform.getInstance().getLog(VehicleLauncher.class);
 
     /**
-     * This is THE main method for loading and building a vehicle, setup ECS and position it on a graph.
+     * This is THE main method for loading and building a vehicle, setup ECS and position it via VehiclePositioner (might be on a graph).
      * For
      * 1) Avatars aircraft
      * 2) GroundService
      * 3) AI aircraft
      * 4) Railing
-     * Das Bundle muss noch nicht geladen sein. Hier wird die Entity angelegt.
+     * The bundle may not have been loaded yet. The ECS entity is created here.
      * Typically triggered via TRAFFIC_REQUEST_LOADVEHICLE and TRAFFIC_REQUEST_LOADVEHICLES
      * <p>
-     * * Nur die AI Aircrafts aus FG_Root(fgdata) rotieren um main gears.
-     * Das Vehicle kommt aus den Beginn der Edge (from) in Richtung "to".
-     * JEdes Vehicle bekommt einen Viewpont seitlich hinten, um seine Bewegung verfolgen zu können.
-     * <p>
-     * // Das FG Model in z0 Ebene nur von x-Richtung drehen mit Nase Richtung +y (Norden)
-     * // Die FG Aircraft Model haben die Spitze Richtung -x und z nach oben.
-     * // Das ist im Prinzip schon mal passend, weil wir in der z0 Ebene sind.
+     * Only AI Aircrafts from FG_Root(fgdata) rotate around main gears.
+     * Every vehicle gets viewpoints from its configuration.
      * <p>
      * Ein arrived aircraft kann irgendwo stehen, es kommt noch nicht auf den Graph. Obwohl das fuer eine Wegbewegung ja doof ist.
      * 1.3.18: Man koennte auch direkt eine Helperedge bauen. Aber betrachten wir das hier mal als einen statischen Flieger.
@@ -59,24 +54,17 @@ public class VehicleLauncher {
      * 3.3.18: Ein nicht statisches Aircraft faellt ja nicht vom Himmel und müsste eigentlich immer eine Graphposition in irgendeinem
      * Graph sein.
      * <p>
-     * Die destinationnode wird z.B. bei FlightScene gebraucht, wo es auch noch eine gekapselte "world" gibt.
-     * 17.4.18: Diese Methode muesste eigentlich woanders untergebracht werden.
      * <p>
      * 9.1.19: Liefert bewusst nicht die Entity zurück, damit nicht eine Multiple Referenzierung neben SystemManager entsteht.
      * Wer die Entity nach dem Launch braucht, kann den Delegate verwenden.
      * 17.1.19: Wenn graph null ist (z.B. bei einem Vehicle dass sich entlang Viewpoints bewegt), wird keine GraphMovingComponent angelegt.
-     * 24.11.20: avatarpc als Parameter ist deprecated. Das sollte ueber Events gehen. Gilt das nicht auch fuer den BuiltDelegate?
+     * 24.11.20: avatarpc Parameter is deprecated. Should use Events. Also BuiltDelegate?
      * 24.11.20: Triggered via TRAFFIC_REQUEST_LOADVEHICLE.
-     * MA31: Wegen VehicleHelperDecoupler nicht mehr static.
      * 27.12.21: Now with a list of delegates (for decoupling doormarker)
      * 24.6.24: Have optional path for immediate movement. However this doesn't work good with long loading vehicles
      * because they might move before they are visible. Maybe better disable automove?
-     * <p>
-     *
-     * @param config
-     * @return
      */
-    public static void launchVehicle(Vehicle vehicle, VehicleDefinition config, VehiclePositioner vehiclePositioner /*TrafficGraph graph, GraphPosition position*/, @Deprecated TeleportComponent avatarpc/*, SceneNode destinationnode*//*, GraphProjection projectionforbackprojection*/,
+    public static void launchVehicle(Vehicle vehicle, VehicleDefinition config, VehiclePositioner vehiclePositioner /*TrafficGraph graph, GraphPosition position*/, @Deprecated TeleportComponent avatarpc/*, GraphProjection projectionforbackprojection*/,
                                      LocalTransform vehiclebasetransform, NearView nearView, List<VehicleBuiltDelegate> genericVehicleBuiltDelegates, VehicleLoader vehicleLoader,
                                      GraphPath optionalPath) {
         vehicleLoader.loadVehicle(vehicle, config, (SceneNode offsetNode, VehicleLoaderResult loaderResult, SceneNode lowresNode) -> {
@@ -136,36 +124,18 @@ public class VehicleLauncher {
             //26.10.19vehicleEntity.setBasenode(modelNode);
 
             //27.12.21 doormarker extracted to DoormarkerDelegate
-            //9.1.19:TODO viel zu GroundServices/Flight spezifisch
-            /*if (((Platform) Platform.getInstance()).isDevmode() && VehicleComponent.VEHICLE_AIRCRAFT.equals(config.getType())) {
-                // ein kleiner doormarker im local space.
-                SceneNode marker = ModelSamples.buildAxisHelper(8, 0.3f);
-                marker.setName("localdoormarker");
-                Util.notyet();
-                Vector3 dp = null;//227.12.21 TODO TrafficWorldConfig.getInstance().getAircraftConfiguration(config.getModelType()).getCateringDoorPosition();
-                marker.getTransform().setPosition(dp);
-                modelNode.attach(marker);
-            }*/
 
             loaderResult.applyResultsToEntity(vehicleEntity);
 
             GraphMovingComponent.getGraphMovingComponent(vehicleEntity).setUnscheduledmoving(config.getUnscheduledmoving());
 
-            // 26.10.18: Erst jetzt zum Schluss die Teleportlocations für z.B. "Captain" eintragen.Scheint einfach sauberer.
-            // 24.11.20: Ist jetzt besser in AvatarSystem untergebracht.
             // 26.01.22: Meanwhile the logic for attaching the vehicles view points to the vatar(s) was
             // exactly (first copied) moved to {@link TrafficSystem.attachAllAvatarsToNewVehicle()} for event TRAFFIC_EVENT_VEHICLELOADED.
-
-            // Vehicle ist schon in den Scene Space (oder graph space?) rotiert. Etwas ueberraschend: x=seitlich,y=hoehe,z vor zurueck. 28.10.17: Wirklich?
-            // ist noch in FG space. Dann muss ich aber rotieren. Aber warum so? 22.10.10: Ausserdem muss das in die Config
-            /*jetzt in config if (avatarpc != null) {
-                avatarpc.addPosition("BackSide", modelNode, new LocalTransform(new Vector3(90, 20, 15), Quaternion.buildFromAngles(new Degree(0), new Degree(90), new Degree(90))));
-            }*/
 
             for (VehicleBuiltDelegate d : genericVehicleBuiltDelegates) {
                 d.vehicleBuilt(vehicleEntity, config);
             }
-            // 24.11.20: ein paar Parameter mehr fuer TRAFFIC_EVENT_VEHICLELOADED, um da teleportcomponent zu befuellen.
+            // 24.11.20: more parameter for TRAFFIC_EVENT_VEHICLELOADED, for filling teleportcomponent there.
             SystemManager.sendEvent(new Event(TrafficEventRegistry.TRAFFIC_EVENT_VEHICLELOADED, new Payload(vehicleEntity, avatarpc, config, teleportParentNode, nearView)));
         });
     }

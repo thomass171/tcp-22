@@ -21,6 +21,8 @@ public class VelocityComponent extends DefaultEcsComponent {
     //Mit HyperSpeed kann ein Vehicle unrealistisch hohe Geschwindkeiten erreichen, z.B. fürn Weltraum.
     private Double hyperSpeedAltitude = null;
     private boolean autoSpeedUp, autoSpeedDown;
+    // avoid to much logging
+    private long lastLog = 0;
 
     public VelocityComponent() {
 
@@ -50,8 +52,8 @@ public class VelocityComponent extends DefaultEcsComponent {
 
     public void setAcceleration(Double acceleration) {
         this.acceleration = acceleration;
-        // bremsen geht drei mal staerker als beschleunigen. 
-        // das ist hablbwegs plausibel: https://de.wikipedia.org/wiki/Größenordnung_(Beschleunigung)
+        // decelerate is 2.5 times stronger than accelerate
+        // Sounds plausible: https://de.wikipedia.org/wiki/Größenordnung_(Beschleunigung)
         if (acceleration == null) {
             deceleration = null;
         } else {
@@ -59,14 +61,14 @@ public class VelocityComponent extends DefaultEcsComponent {
         }
     }
 
-    public double getAcceleration(){
+    public double getAcceleration() {
         return acceleration;
     }
 
     public void accelerate(double deltatime) {
         // deltatime can be < 0 when it is negated for slowing down.
         if (deltatime < 0) {
-            // Nicht zum Stillstand bremsen, sonst komm ich vielleicht nie ans Ziel.
+            // Don't finally stop, otherwise we might never reach our target.
             double diff = (double) deceleration * deltatime;
             movementSpeed += diff;
             //logger.debug("accelerate:diff=" + diff + ",movementSpeed=" + movementSpeed + ",acceleration=" + acceleration);
@@ -76,7 +78,14 @@ public class VelocityComponent extends DefaultEcsComponent {
         } else {
             movementSpeed += (double) acceleration * deltatime;
         }
-        logger.debug("new movementSpeed for delta " + deltatime + ":" + movementSpeed);
+        if (Platform.getInstance().currentTimeMillis() > lastLog + 1000) {
+            if (deltatime < 0) {
+                logger.debug("decelerated for delta " + deltatime + " and deceleration " + deceleration + " to " + movementSpeed);
+            } else {
+                logger.debug("accelerated for delta " + deltatime + " and acceleration " + acceleration + " to " + movementSpeed);
+            }
+            lastLog = Platform.getInstance().currentTimeMillis();
+        }
     }
 
     public double getMaximumSpeed() {

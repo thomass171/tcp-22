@@ -13,7 +13,7 @@ import de.yard.threed.traffic.config.VehicleDefinition;
  * Fuer alles Ground(Service)Vehicle, aber auch für Aircraft. Sind in FG ja durch AI da.
  * <p>
  * Die Granularitaet der Typisierung ist uneinheitlich. Darum gibt es type und modeltype
- *
+ * <p>
  * 13.3.19 MA30 schedules: Jetzt nur noch die Gruppierung AIRCRAFT, CAR
  * 26.3.19 Das ist jetzt die zentrale Stelle, die festhält, ob ein Vehicle 'locked/busy' ist, unabhängig davon, was das konkret ist.
  * Created by thomass on 13.04.17.
@@ -35,12 +35,12 @@ public class VehicleComponent extends DefaultEcsComponent {
     //wird bei arrival gesetzt und bei departure genullt.
     //28.3.20. aber von wem? besser in trafficgraph. Aber manchmal ist der Graph gemsmoothed, dann ist es kein TrafficGraph mehr. Also doch besser hier.
     //vielleicht ist es verzichtbar  public String currentAirportIcao;
-    public FlightRouteBuilder flightRouteBuilder=null;
+    public FlightRouteBuilder flightRouteBuilder = null;
     // 29.8.23
     public SceneNode teleportParentNode;
 
     public VehicleComponent(VehicleDefinition config/*String type,String modeltype*/) {
-        this.config=config;
+        this.config = config;
     }
 
     @Override
@@ -51,6 +51,10 @@ public class VehicleComponent extends DefaultEcsComponent {
     public static VehicleComponent getVehicleComponent(EcsEntity e) {
         VehicleComponent vc = (VehicleComponent) e.getComponent(VehicleComponent.TAG);
         return vc;
+    }
+
+    public VehicleDefinition getVehicleDefinition() {
+        return config;
     }
 }
 

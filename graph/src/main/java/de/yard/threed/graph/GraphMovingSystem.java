@@ -185,9 +185,10 @@ public class GraphMovingSystem extends DefaultEcsSystem {
             }
         }
 
+        /* Logging in vc.accelerate() should be sufficient
         if (needsbraking || needsspeedup) {
             logger.debug("needsbraking=" + needsbraking + ",needsspeedup=" + needsspeedup);
-        }
+        }*/
         if (needsbraking) {
             vc.accelerate(-deltatime);
         }
