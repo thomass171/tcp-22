@@ -40,15 +40,12 @@ public class TrafficEventRegistry {
      * EVENT_POSITIONCHANGED is triggered by teleport, not every movement. Event
      * EVENT_LOCATIONCHANGED (18.3.24 now TRAFFIC_EVENT_SPHERE_LOADED) is for sphere change. Not happening by Teleport, at least not implicitly.
      *
-     * EVENT_POSITIONCHANGED is the event that ScenerySystem observes for updating scenery.
-     * Flying to some airport wird damit nicht so ohne weiteres wie in FG zu einem UnLoad/Load führen. Denn woran soll
-     * man das festmachen. Es gibt ja nicht wie in FG ein main aircraft, auf das sich alles bezieht.
-     *
      * 26.5.24: Must be defined in TeleporterSystem and not here due to packages, even though it
      * doesn't really belong there (Hmm). Probably GraphMovingSystem should also send these events from time to time, so maybe its ok to have it there.
-     * 3.5.25 Payload changed from LocalTransform to smartLocation string,
-     * and TRAFFIC_REQUEST_LOAD_SCENERY extracted. Now EVENT_POSITIONCHANGED
+     *
+     * 3.5.25 Event TRAFFIC_REQUEST_LOAD_SCENERY with payload LatLon extracted for decoupling and for having a specific scenery load request. Now EVENT_POSITIONCHANGED
      * is just an event what the name says, a position changed.
+     * EVENT_POSITIONCHANGED is the event that ScenerySystem observes for updating scenery for having scenery load during world wide teleport.
      */
 
     /**

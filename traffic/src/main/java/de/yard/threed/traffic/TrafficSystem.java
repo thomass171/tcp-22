@@ -152,37 +152,8 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
         GraphMovingComponent gmc = GraphMovingComponent.getGraphMovingComponent(entity);
 
         // check for completed movment
+        // where is that?
         GraphPath p;
-        // 13.2.18: Einen Request hier im Entity update kann aber auch etwas unpassend sein.
-        /*if (request != null) {
-            switch (request.type) {
-                case 'f':
-                    /*if (vhc.type == VehicleComponent.VEHICLE_FOLLOME) {
-                        createFollowMe(request.aircraft.entity, group.entity, request.from, request.destination);
-                        request = null;
-                    }* /
-                    break;
-                case 'm':
-                    if (vhc.type.equals(request.vehicletype)) {
-                        spawnMoving(group.entity, request.destination.node);
-                        request = null;
-                    }
-                    break;
-                /*ueber event case 'c':
-                    if (vhc.type.equals(request.vehicletype)) {
-                        spawnMoving(group.entity, request.destination.node);
-                        request = null;
-                    }
-                    break;* /
-                case 'd':
-                    //depart
-                    if (group.entity.equals(request.aircraft.entity)) {
-                        spawnMoving(group.entity, request.holding);
-                        request = null;
-                    }
-                    break;
-            }
-        }*/
 
         /*19.8.25: Does this belong to GroundServicesSystem? Probably not, seems to be just old code.
         Will we ever get schedules again?

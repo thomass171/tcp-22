@@ -88,6 +88,8 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
         VelocityComponent vc = (VelocityComponent) group.cl.get(1);
 
         ffc.updateByDelta(delta, vc.getMovementSpeed());
+
+        ffc.checkForPositionUpdate();
     }
 
     @Override

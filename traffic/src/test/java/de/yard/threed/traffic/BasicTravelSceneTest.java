@@ -184,10 +184,23 @@ public class BasicTravelSceneTest {
             // teleport to 'mobi'.
             TeleporterSystemTest.teleportTo(sceneRunner, userEntity, tc, "mobi", "Driver", teleportByDestination);
 
+            // Starting a 'default trip' via request currently only exists in tcp-flightgear (needs FlightSystem!).
+            // 'S' will trigger movement in GraphMovingSystem! But we can just speed up for 'mobi' free flight.
+
             SystemManager.putRequest(new Request(TRIGGER_REQUEST_START_SPEEDUP, userEntity.getId()));
             sceneRunner.runLimitedFrames(5);
             // delta is hardcoded to 0.1
             assertEquals(5/*frames*/ * 0.1/*delta*/ * vc.getAcceleration(), vc.getMovementSpeed());
+
+            // let 'mobi' move further to see position/terrain update requests. It is not on a graph but free flying, so we just need to set movementspeed.
+            //vc.setMaximumSpeed(2000);
+            //vc.setAcceleration(20.0);
+            List<Event> positionChangedEvents = EcsTestHelper.getEventsFromHistory(TeleporterSystem.EVENT_POSITIONCHANGED);
+            vc.setMovementSpeed(2000);
+            SystemManager.putRequest(new Request(TRIGGER_REQUEST_START_SPEEDUP, userEntity.getId()));
+            sceneRunner.runLimitedFrames(500, 1.0);
+            int additionalPositionChangedEvents = EcsTestHelper.getEventsFromHistory(TeleporterSystem.EVENT_POSITIONCHANGED).size() - positionChangedEvents.size();
+            assertTrue(additionalPositionChangedEvents > 10, "additionalPositionChangedEvents lower 10:" + additionalPositionChangedEvents);
         }
     }
 
@@ -266,24 +279,26 @@ public class BasicTravelSceneTest {
     }
 
     /**
-     * 21.3.24: 3D scene with initial route by geolocation.
-     * Not possible until we have EllipsoidCalculations implementation?
-     * The route is the SAMPLE_EDKB_EDDK
+     * 21.3.24: 3D scene similar to typical scenes in tcp-flightgear, except that the sphere here (the moon) is smaller.
+     * And we have a 'loc' that apparently can fly, but well, it is just a vehicle for now until we don't
+     * check for vehicle type. But we also have 'mobi'.
      */
     @ParameterizedTest
     @CsvSource(value = {
-            "loc;wp:50.768,7.1672000->takeoff:50.7692,7.1617000->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.1317000->wp:50.8662999,7.1443999;;",
+            // The route SAMPLE_EDKB_EDDK
+            "EDKB-EDDK;loc;wp:50.768,7.1672000->takeoff:50.7692,7.1617000->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.1317000->wp:50.8662999,7.1443999;;",
             // what is corresponding heading? 320? TODO
-            "loc;;geo:50.768,7.1672000;320",
+            "simple;loc;;geo:50.768,7.1672000;320",
+            // Route from EDDK 14L to EHAM 18L
+            "EDDK-EHAM;mobi;wp:50.8800381,7.1296996->takeoff:50.8764919,7.1348404->wp:50.8566037,7.1636556->wp:50.8480166,7.1594773->wp:50.8459351,7.1456370->wp:50.8524115,7.1357771->wp:52.3457417,4.8181967->wp:52.3522189,4.8080071->wp:52.3525042,4.7933074->wp:52.3464347,4.7824657->touchdown:52.3195264,4.7800279->wp:52.2908234,4.7774309;;",
     }, delimiter = ';')
-    public void testMoon(String initialVehicle, String initialRoute, String initialLocation, String initialHeading) throws Exception {
+    public void testMoon(String testCaseName, String initialVehicle, String initialRoute, String initialLocation, String initialHeading) throws Exception {
         HashMap<String, String> customProperties = new HashMap<String, String>();
-        //if (initialVehicle!=null){
+
         customProperties.put("initialVehicle", initialVehicle);
         customProperties.put("initialRoute", initialRoute);
         customProperties.put("initialLocation", initialLocation);
         customProperties.put("initialHeading", initialHeading);
-        //}
 
         setup("traffic:tiles/Moon.xml", customProperties);
 
@@ -292,22 +307,23 @@ public class BasicTravelSceneTest {
         EllipsoidCalculations elliCalcs = TrafficHelper.getEllipsoidConversionsProviderByDataprovider();
         assertNotNull(elliCalcs);
 
-        // "Wayland" has two graph files that should have been loaded finally (via EVENT_LOCATIONCHANGED)
         List<Event> completeEvents = EcsTestHelper.getEventsFromHistory(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED);
         assertEquals(1, completeEvents.size(), "TRAFFIC_EVENT_SPHERE_LOADED.size");
 
         assertEquals(1, MoonSceneryBuilder.updatedPositions.size(), "");
 
-        // Now we expect loc on the starting point of the graph of initialRoute
-        EcsEntity locEntity = SystemManager.findEntities(e -> "loc".equals(e.getName())).get(0);
-        assertNotNull(locEntity, "loc entity");
+        EcsEntity locEntity = SystemManager.findEntities(e -> initialVehicle.equals(e.getName())).get(0);
+        assertNotNull(locEntity, "initialVehicle entity");
 
         SceneNode locNode = locEntity.getSceneNode();
         Vector3 locPosition = locNode.getTransform().getPosition();
         Quaternion locRotation = locNode.getTransform().getRotation();
-        TestUtils.assertVector3(new Vector3(1090002.4809054425, 137065.4318067892, 1345465.2202950467), locPosition);
-        if (initialRoute != null) {
-            TestUtils.assertQuaternion(new Quaternion(0.17740762320706088, 0.28500444813163406, 0.5936359283605339, 0.7313654246221457), locRotation);
+        if (testCaseName.equals("EDKB-EDDK")) {
+            // Now we expect loc on the starting point of the graph of the initialRoute
+            TestUtils.assertVector3(new Vector3(1090002.4809054425, 137065.4318067892, 1345465.2202950467), locPosition);
+            if (initialRoute != null) {
+                TestUtils.assertQuaternion(new Quaternion(0.17740762320706088, 0.28500444813163406, 0.5936359283605339, 0.7313654246221457), locRotation);
+            }
         }
         // not sure why rotation differs between use cases. Assume these should be the same.
         // For now actual values just taken as expected after visual test.
@@ -316,11 +332,13 @@ public class BasicTravelSceneTest {
             TestUtils.assertQuaternion(new Quaternion(-0.09487833677693658, -0.3220285905905743, -0.3768671850957026, -0.8632883717800975), locRotation);
         }
         // there is no elevation currently(?), so the position should be quite simple to validate. Position should be the same in both test cases.
-        assertVector3(new SimpleEllipsoidCalculations(MoonSceneryBuilder.MOON_RADIUS).toCart(new GeoCoordinate(new Degree(50.768), new Degree(7.1672000))), locPosition);
+        if (!testCaseName.equals("EDDK-EHAM")) {
+            assertVector3(new SimpleEllipsoidCalculations(MoonSceneryBuilder.MOON_RADIUS).toCart(new GeoCoordinate(new Degree(50.768), new Degree(7.1672000))), locPosition);
+        }
 
         GraphMovingComponent gmc = GraphMovingComponent.getGraphMovingComponent(locEntity);
         assertNotNull(gmc, "gmc");
-        if (initialRoute != null) {
+        if (testCaseName.equals("EDKB-EDDK")) {
             assertNotNull(gmc.getCurrentposition(), "getCurrentposition");
             // loc should *not* immediately move (even though a path there is no property automove set in config 'Moon.xml' for vehicle 'loc')
             TrafficTestUtils.assertEntityOnGraph(locEntity, true, FgVehicleSpace.getFgVehicleForwardRotation());
@@ -344,7 +362,8 @@ public class BasicTravelSceneTest {
             assertLatLon(LatLon.fromDegrees(50.7690336, 7.1622472), rotTarget, 0.001, "rotTarget");
 
         }
-
+        // Starting a 'default trip' via request currently only exists in tcp-flightgear (needs FlightSystem!).
+        // 'S' will trigger movement in GraphMovingSystem!
 
     }
 

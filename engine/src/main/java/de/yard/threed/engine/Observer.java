@@ -73,14 +73,14 @@ public class Observer implements SimpleTransform {
     }
 
     /**
-     * Nur ausserhalb VR
+     * Outside VR only
      */
     public void incHeading(Degree inc) {
         Transform.incHeading(observer, inc);
     }
 
     /**
-     * Nur ausserhalb VR
+     * Outside VR only
      */
     public void incPitch(Degree inc) {
         Transform.incPitch(observer, inc);

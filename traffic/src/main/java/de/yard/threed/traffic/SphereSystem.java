@@ -1,27 +1,13 @@
 package de.yard.threed.traffic;
 
-import de.yard.threed.core.CharsetException;
-import de.yard.threed.core.Degree;
-import de.yard.threed.core.EventType;
-import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Vector3;
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.engine.AmbientLight;
-import de.yard.threed.engine.BaseEventRegistry;
-import de.yard.threed.engine.DirectionalLight;
-import de.yard.threed.engine.Scene;
-import de.yard.threed.engine.SceneNode;
-import de.yard.threed.engine.ViewPoint;
-import de.yard.threed.engine.ecs.DataProvider;
-import de.yard.threed.engine.ecs.DefaultEcsSystem;
-import de.yard.threed.engine.ecs.EcsEntity;
-import de.yard.threed.engine.ecs.EcsGroup;
-import de.yard.threed.engine.ecs.SystemManager;
+import de.yard.threed.engine.*;
+import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.util.XmlHelper;
@@ -31,7 +17,6 @@ import de.yard.threed.traffic.config.ConfigHelper;
 
 import de.yard.threed.traffic.config.VehicleDefinition;
 import de.yard.threed.traffic.config.XmlVehicleDefinition;
-import de.yard.threed.core.GeoCoordinate;
 
 import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.trafficcore.geodesy.MapProjection;
@@ -64,10 +49,8 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
     public static String TAG = "SphereSystem";
 
-    //projection fuer 2D, bei 3D gibts das nicht.
-    //Die Projection ist null bei 3D Scene, obwohl groundnet dann trotzdem projected (Groundnet hat ja seine eigene Projection, die haelt Groundservicessystem vor).
-    //7.5.19 Projection ist in 2D erforderlich, weil sowas wie Routen immer erst in 3D erstellt werden.
-    //14.10.21 projection aus DefaultTrafficWorld hierhin.
+    //projection for 2D only. Needed because routes etc are always created in 3D.
+    //It is null in 3D Scenes, even though groundnet is projected (Groundnet has its own projection in Groundservicessystem).
     public SimpleMapProjection projection;
 
     //25.5.24 private boolean needsBackProjection = false;
@@ -76,31 +59,22 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
     // Das was mal world in TravelScenes war. Eine destination node an der alles(?) haengt, zumindest statischer Content(terrain), der
     // sich damit dann komplett verschieben läßt. Könnte/sollte evtl. per DataProvider zur Verfügung gestellt werden.
-    // Kommentar von TravelScene.world: Wofuer ist die world Zwsichenebene. Zum adjusten?
-    // 20.3.18: Ja, zum komplettverschieben von allem, um Artefakte wegen Rundungsproblemen zu
-    // vermeiden. Das ist was anderes als die Scene.world.
+    // Kommentar von TravelScene.world: Wofuer ist die world Zwsichenebene.
     private static SceneNode sphereNode;
     //29.11.21 public Tile activeTile; Stattdessen andere Kruecke.
     public boolean wasOsm;
-    // Wofuer ist die world Zwsichenebene. Zum adjusten?
-    // 20.3.18: Ja, zum komplettverschieben von allem, um Artefakte wegen Rundungsproblemen zu
-    // vermeiden. Das ist was anderes als die Scene.world.
+    // Have a 'world' for easy adjusting/moving/scaling and to avoid rounding artifacts
+    // Different to Scene.world, which is only a technical layer.
     // 11.5.24: Moved here from 3D scenes. Might also be useful for shrinking in AR/VR
     public SceneNode world;
 
     /**
      * backProjectionProvider needed for 3D (only for groundnet?), otherwise null.
      * <p>
-     * 27.12.21: SceneConfig (das ist NUR der scene sub Part) und center mal reinstecken.
      */
-    public SphereSystem(/*EllipsoidCalculations/*Flight3D* / ellipsoidCalculations,*/ GraphBackProjectionProvider backProjectionProvider) {
+    public SphereSystem(GraphBackProjectionProvider backProjectionProvider) {
         super(new String[]{}, new RequestType[]{USER_REQUEST_SPHERE}, new EventType[]{});
-        //??updatepergroup = false;
-        //this.ellipsoidCalculations = ellipsoidCalculations;
         this.backProjectionProvider = backProjectionProvider;
-        /*if (ellipsoidCalculations != null) {
-            SystemManager.putDataProvider("ellipsoidconversionprovider", new EllipsoidConversionsProvider(ellipsoidCalculations));
-        }*/
 
         // need to be set in contructor because other will use it before init()
         world = new SceneNode();
@@ -139,18 +113,15 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
             }
             logger.debug("requested tile '" + basename + "' with " + vehicleList.size() + " vehicles");
 
-            // 7.5.19: Anhand der initialPosition kann Terrain, groundnet, vehicles geladen werden und Projection gesetzt werden.
-            // Das ist eigentlich unabhängig vom Avatar, denn dessen Position ist nicht klar, weils Vehicle erst später gibt.
-            // Aber anhand der Configuration oder Parameter muesste die Position festgelegt sein.
-            // 20.6.20: Das ist aber noch nicht die initiale Teleportposition? 7.10.21 static bis es wegkommt
-            /*SGGeod*/
+            // 7.5.19: By initialPosition terrain, groundnet, vehicles can be loaded and projection gesetzt werden.
+            // Independent from avatar.
+            // 20.6.20: This is also not the initial teleport position
             GeoCoordinate initialPosition = null;
 
-            // das war aber nur in "Flat". Unterscheiden 2D/3D am tilename, den gibts in 3D nicht(?).
-            /*Tile*/
             BundleResource initialTile = null;
             List<NativeNode> xmlVPs = null;
-            LightDefinition[] lds = null;//15.3.25 lightDefinitions always from config
+            //15.3.25 lightDefinitions always from config
+            LightDefinition[] lds = null;
             String groundnetToLoad = null;
             // 18.3.24: null no longer leads hard coded to 3D in EDDK but is accepted but ignored
             if (basename != null) {
@@ -228,8 +199,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                     }
                 } else {
                     // basename is no bundle resource (tilename). Assume geo coordinate.
-                    //16.6.20 3D: request geht hier noch nicht wegen "not inited". Darum weiter vereinfacht initialposition.
-                    //18.3.24: Is this comment still true? Now we get initialPosition from basename.
+                    //18.3.24: Now we get initialPosition from basename.
                     //15.5.24: basename as initialPosition might be deprecated now as also 3D scenes use (tile) configs
                     initialPosition = GeoCoordinate.parse(basename);
                     logger.debug("Retrieved initialPosition from basename: " + initialPosition);
@@ -259,7 +229,6 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                 sendInitialEvents(initialPosition, initialTile, groundnetToLoad);
 
 
-                // 24.10.21: Das kommt jetzt erstmal einfach hier hin.
                 // Viewpoints koennte auch TeleporterSystem kennen, aber irgendwo muss ein neu dazugekommener Player sie ja herholen können.
                 // 17.11.23: But TeleporterSystem can collect these. Additionally send traffic independent event
                 SystemManager.putDataProvider("viewpoints", new SphereViewPointProvider(this, xmlVPs));
@@ -290,16 +259,6 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     }
 
     /**
-     * Hier kommt jetzt der Kram, der vorher in Basic/FlatTravelScene war.
-     */
-
-
-    /**
-     * // 7.5.19: Anhand der initialPosition kann dann Terrain, groundnet, vehicles geladen werden und Projection gesetzt werden.
-     * // Das ist eigentlich unabhängig vom Avatar, denn dessen Position ist nicht klar, weils Vehicle erst später gibt.
-     * // Aber anhand der Configuration oder Parameter muesste die Position festgelegt sein.
-     * 7.10.21: Nicht mehr durch expliziten Aufruf, sondern per Request. Aber der macht doch eigentlich gar nichts? ausser initialtile setzen.
-     * Genau, der setzt nur globale Variablen. Dann kann das auch so bleiben, obwohl es irgendwie hintenrum ist.
      * <p>
      * 23.5.24: Returns projection center or(!!) initialPosition
      *
@@ -307,8 +266,8 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
      */
     private GeoCoordinate activateTile(/*Tile*/BundleResource tile) {
         logger.debug("activateTile " + tile);
-        //27.12.21 AirportConfig nearestairport1 = null;
-        //das ist ja voelliger Quatsch. Geht nur, weil alles 0 basiert ist, verzerrt nur etwas. TODO 27.12.21 aber mal wirklich
+
+        //Complete nonsense??. TODO 27.12.21 really fix it
         GeoCoordinate center = /*WorldGlobal.elsdorf0*/new GeoCoordinate(new Degree(50.937770f), new Degree(6.580982f), 0);
 
         // 5.12.23: Now uses EDDK-flat.xml instead of just "EDDK" from "dummy:EDDK". Still this is a workaround
@@ -330,28 +289,18 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     }
 
     /**
-     * 7.10.21: Das war frueher der erste Schritt im update(), sowohl Flat wie 3D.
-     * Den initial tile nur noch zu backwar compatibility. TODO weg damit.
+     * 7.10.21: Was once first step in update(), flat and 3D. 'groundnetToLoad' comes from config.
+     * Shouldn't need initialTile?? TODO remove.
      *
      * @param initialPosition
      */
     private void sendInitialEvents(GeoCoordinate initialPosition, /*Tile*/BundleResource initialTile, String groundnetToLoad) {
         logger.debug("sendInitialEvents initialPosition=" + initialPosition + ", initialTile=" + initialTile);
 
-        //TrafficTile.loadTile(basename);??
-        //Das GraphTerrainSystem wird das terrain laden oder ground visualisieren. GroundNetSystem wird groundnet laden.
-        //Wer laedt andere Graphen? Sagen wir doch mal TrafficSystem.
-
-        //16.10.21DefaultTrafficWorld.getInstance().setProjection(projection);
-        //DefaultTrafficWorld.getInstance().currentairport = DefaultTrafficWorld.getInstance().nearestairport;
-        //DefaultTrafficWorld.getInstance().nearestairport = null;
-        //27.3.20: Groundnet jetzt eigenstaendig ueber request, damit es auf terrain warten kann. Das mit der projection ist aber doof.
+        // Send event to trigger eg. graph loading in other systems. Groundnet however is ICAO specific and comes from config via 'groundnetToLoad'.
         // 10.5.24: Isn't this too early. Should be at least at end of method.
         SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(initialTile, initialPosition));
 
-        //24.5.20 Event fuer Ground wird nicht mehr gebraucht, weil Airport per Init da ist und der Rest ueber Pending groundnet geht.
-        //wird doch gebraucht, um groundnetXML zu lesen.
-        // 16.10.21:Aber initial doch nur, wenn ein icao geladen wird. Zumindest solange tiles so simple sind wie jetzt.Aber 3D immer. Irgendwie frickelig.
         // 14.5.24: Now 3D EDDK might also use config files
         boolean loadEDDK = false;
         // 23.5.24: Now decide by defined projection. But theres nothing to decide? loadEDDK and needsBackProjection are no longer used?
@@ -425,11 +374,9 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 }
 
 /**
- * War mal in FlatTravelScene
+ * Was in FlatTravelScene once. Only kept to remember what spheres we once had.
  */
 class TileKram {
-    //Tiles sind alle aus dem Bundle "osmscenery".
-    //TODO tilelist in config? Oder in inputtorequest als Auswahl?
     static Tile[] tilelist = new Tile[]{
             new Tile("EDDK"),
             new Tile("B55-B477-small"),
@@ -444,33 +391,6 @@ class TileKram {
             new Tile("Wayland"),
     };
     static int major = 0;
-
-    /**
-     * 9.5.19: Ich glaube, das lasse ich erstmal, oder? Ziemlich tricky, und man kann ja neu starten.
-     * 7.10.21: Genau, und wenn, sollte es ueber Input2Request gehen.
-     */
-    /*private void cycleMajor(int inc, int cnt) {
-        major += inc;
-        if (major < 0) {
-            major = cnt - 1;
-        }
-        if (major >= cnt) {
-            major = 0;
-        }
-        logger.info("cycled to " + "." + major);
-        Tile tile = tilelist[major];
-        unloadCurrentTile();
-        activateTile(tile);
-    }*/
-    public static Tile findTile(String tilename) {
-        boolean found = false;
-        for (int i = 0; i < tilelist.length; i++) {
-            if (tilelist[i].file.equals(tilename)) {
-                return tilelist[i];
-            }
-        }
-        return null;
-    }
 }
 
 /**
@@ -505,7 +425,7 @@ class SphereViewPointProvider implements DataProvider {
                 Util.nomore();
         if (sphereSystem.wasOsm) {
             logger.debug("Using outside view points from osmscenery");
-            // Outside von oben
+
             List<ViewPoint> vps = new ArrayList<ViewPoint>();
             vps.add(new ViewPoint("oben1", new LocalTransform(new Vector3(0, 0, 137), Quaternion.buildRotationX(new Degree(/*-9* /0)))));
             vps.add(new ViewPoint("oben1", new LocalTransform(new Vector3(0, 0, 500), Quaternion.buildRotationX(new Degree(0)))));

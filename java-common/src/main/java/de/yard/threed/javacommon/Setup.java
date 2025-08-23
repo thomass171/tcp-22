@@ -30,7 +30,7 @@ public class Setup {
     public static HashMap<String, String> setUp() {
         HashMap<String, String> properties = new HashMap<String, String>();
 
-        properties.put("enableUsermode", "false");
+        // 21.8.25 Property "enableUsermode" removed
         properties.put("visualizeTrack", "true");
         // VR control panel visible for debugging 25.1.23:TODO check count values not visible?
         //properties.put("enableHud", "true");
@@ -100,7 +100,8 @@ public class Setup {
             properties.put("basename", "traffic:tiles/Wayland.xml");
             properties.put("enableAutomove", "true");
             properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
-            // Default wayland only has a default vehicle (loc) moving around, but no 'initialVehicle'
+            // Default wayland only has a default vehicle (loc) moving around, but no 'initialVehicle'.'mobi' can do free flying
+            // while loc is auto moving
             properties.put("initialVehicle", "mobi");
             properties.put("initialLocation", "coordinate:90.0,110.5,76.0");
             //properties.put("enableFPC", "true");

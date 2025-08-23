@@ -116,9 +116,6 @@ public class TeleporterSystem extends DefaultEcsSystem {
         }
         //17.2.20: der needsupdate muss für alle gemacht werden, nicht nur der aktive.
         if (tc.needsupdate) {
-            // 26.10.18: Das kann man doch ueber stepTo() machen, oder nicht?
-            // Ich weiss nicht mehr woher das kam, fuer usermode ist es aber genau das richtige. Also stepTo().
-            // 17.1.20: Es muss ja auch ein Event verschickt werden.
             doTeleport(tc);
             tc.needsupdate = false;
         }
@@ -258,6 +255,9 @@ public class TeleporterSystem extends DefaultEcsSystem {
         this.activetc = activetc;
     }
 
+    /**
+     * See comment in TrafficEventRegistry
+     */
     public static Event buildPositionChanged(Vector3 position) {
         return new Event(TeleporterSystem.EVENT_POSITIONCHANGED, new Payload().addPosition(position));
     }

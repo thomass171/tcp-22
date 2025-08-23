@@ -43,47 +43,34 @@ import java.util.Map;
 /**
  * Basic generic scene for traffic scene definitions like "traffic:tiles/Wayland.xml" and "traffic:tiles/Demo.xml".
  * <p>
- * MA37: Entwicklung zu einer BasicTravelScene.
+ * Was (Flat)TravelScene and TrafficCommon once (also merged former OsmSceneryScene, GroundServicesScene,RailingScene)
+ * to a single scene.
  * <p>
- * Konsolidierung von (Flat)TravelScene (früher OsmSceneryScene und GroundServicesScene) und RailingScene
- * in eine einzige Scene. Die TravelScene kann dann von hier ableiten und TerrainSystem zur Darstellung von FG
- * Sceneries verwenden.
+ * Loads terrain und graphs from a sphere.
+ * Other TravelScene can extends from here and use TerrainSystem for showing FG Sceneries.
  * <p>
- * Verzichtet auf das unübersichtliche TrafficWorld. Nutzt aber eine simplere Vehicleconfig.
+ * No more using a complex TrafficWorld, but a more simple Vehicleconfig.
  * <p>
- * Ob Flat (y0 oder z0) oder 3D sollte hier eigentlich egal bzw. transparent sein.
+ * Flat (y0 or z0) or 3D shouldn't make a difference here or should be transparent (via a projection callback?).
  * <p>
- * Features sind:
- * - Flat und Earth 3D (aber ohne 2D Projection, das ergibt sich aus dem Tile/Sphere)
- * - Standalone und als MP Server
- * - Keine Dependency zu FG bzw GPL. FG Modelle müssen von einer ableitenden Scene verwendet werden mit einer Art FG Plugin.
- * - Teleport zu POIs und in Vehivles, Cockpits. Alternativ auch Moving (Helikopter like?).
+ * Features are:
+ * - Flat und Earth 3D (depending on the initial Tile/Sphere)
+ * - This is also super class of FG TravelScenes.
+ * - No Dependency to FG or GPL. Extending FG classes know how to load a FG model.
+ * - Teleport to POIs and to vehicles, Cockpits.
  *
  * <p>
  * Options:
  * enableFPC: FPC movement, no Teleporting, no Observer, no initialVehicle(why?),no Avatar (to avoid attaching to vehicles?).
  *
  * <p>
- * Funktionsweise:
- * 1) wie gehabt löst ein EVENT_LOCATIONCHANGED das Laden von Terrain und Graphen aus (innerhalb einer Sphere).
- * <p>
- * Offene Fragen:
- * - ist EVENT_LOCATIONCHANGED 2D/3D?
- * - Was ist denn initial? Eine Location? Oder ein Tile? Eine Sphere? Hilft Single/MultiTile Sphere?
- * - Gibt es eine 2DProjection? Vielleicht einfacher besser nicht. Der Routebuilder muesste dann abstrhiert werden.
- *
- * <p>
- * Usermode
- * 26.10.18: Generic traffic keycodes (vor allem usermode):
- * not yet here! (S)tart a default trip, at an airport typically a round trip. Applies to 'current' vehicle and only if it is graph bound.
- * (M)TouchSegment1: Open/Toggle optional menu in (VR has control panel at left writst)
- * (L)oad vehicle. Applies to next configured but not yet loaded vehicle. Sollte erst nicht mehr dabei sein und wird im UserMode nicht unbedingt gebraucht.
- * Seit controlmenu weg ist aber ganz praktisch.
+ * 26.10.18: Generic traffic keycodes:
+ * not yet here(needs FlightSystem)! (S)tart a default trip, at an airport typically a round trip. Applies to 'current' vehicle and only if it is graph bound.
+ * (M)TouchSegment1: Open/Toggle optional menu in (VR has control panel at left wrist)
+ * (L)oad vehicle. Applies to next configured but not yet loaded vehicle.
  * (V) run tests. internal.
  * (CursorKeys) for view Left/Right/Up/Down in non VR (via ObserverSystem).
  * (X/Y/Z) for fine tuning of avatar position
- * <p>
- * Folgende KEys sind da bewusst nicht bei: ,
  * <p>
  * Start Sequence (in future):
  * - Splash screen und "Loading" (transparent) mit progress. In the background scenery is loading.
@@ -91,8 +78,7 @@ import java.util.Map;
  * - When vehicle is available fadeout, teleport, fadein.
  * - "Click for Start" Button. Das ist dann quasi der 's' Key.
  * <p>
- * 4.10.21: MA37: Renamed TrafficCommon->BasicTravelScene und nicht mehr abstract. Auch standalone fuer tiles ohne FG.
- * This is also super class of TravelScene.
+ *
  * 14.11.23: never really existing 'help' and 'reset' removed. Could be added to menu.
  * 05.03.24: control menu added to be prepared for touch screens.
  * Created on 28.09.18.
@@ -159,8 +145,6 @@ public class BasicTravelScene extends Scene {
 
         SystemManager.addSystem(new ScenerySystem(sphereSystem.world));
 
-        //visualizeTrack soll auch im usermode verfuegbar sein.
-        /*29.12.23 was commented, but back now with abstract provider for visualizer*/
         if (visualizeTrack) {
             SystemManager.addSystem(new GraphVisualizationSystem(getGraphVisualizer()));
         }
@@ -304,11 +288,6 @@ public class BasicTravelScene extends Scene {
     }
 
     protected void processArguments() {
-       /*21.3.19  String argv_enableusermode = ((Platform) Platform.getInstance()).getSystemProperty("enableUsermode");
-        //argv_enableusermode="1";
-        if (!Util.isFalse(argv_enableusermode)) {
-            usermode = new Usermode();
-        }*/
 
 
         String argv_visualizeTrack = Platform.getInstance().getConfiguration().getString("visualizeTrack");
@@ -394,30 +373,11 @@ public class BasicTravelScene extends Scene {
     }
 
     private void postInit(SceneMode sceneMode) {
-        //27.10.21 War sonst früher
-        //8.12.21 addLight();
 
-        //1.2.24 already created in init() SystemManager.addSystem(new InputToRequestSystem());
-
-        //29.10.21: Damit lauchVehicles noch geht. TODO anders.
-        //28.11.23 scenconfig is no longer used. 'baseTransformForVehicleOnGraph' is now set in SphereSystem for now.
-        /*28.11.23 TrafficSystem.sceneConfig = sceneConfig;
-        if (sceneConfig != null) {
-            TrafficSystem.baseTransformForVehicleOnGraph = sceneConfig.getBaseTransformForVehicleOnGraph();
-        } else {
-            //8.11.21: position part apparently ignored
-            //28.11.23:For what is this fix value? Seems not to be any known rotation. Its for Demo/Wayland.
-            TrafficSystem.baseTransformForVehicleOnGraph = new LocalTransform(new Vector3(0, 0, 0), Quaternion.buildFromAngles(new Degree(0), new Degree(-90), new Degree(0)));
-        }*/
-
-        //erst jetzt, wenn ECS schon inited ist? Nee, muesste auch schon vorher gehen. Ist aber auch egal. Obwohl die Darstellung richtiger ist
-        //als wenn man es im commoninit macht.
         initSpheres();
 
-        //27.11.23 Now in TrafficSystem SystemManager.putDataProvider("vehicleconfig", getVehicleConfigDataProvider());
-
-        //7.10.21:Jetzt hier statt als erstes im Update. Aber fuer die Initialposition muss man das tile kennen. Darum als erstes Tile per
-        //Sphere laden. Von da wird dann das alte "sendInitialEvents" gemacht.
+        //27.11.23 VehicleConfigDataProvider now in TrafficSystem
+        //7.10.21:Load tile per Sphere laden. SphereSystem will then send initial events
         SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE, new Payload(tilename, getVehicleList())));
 
         // create player/Avatar (via login)
@@ -426,7 +386,7 @@ public class BasicTravelScene extends Scene {
         }
         // 24.1.22: State ready to join now needed for 'login'
         SystemState.state = SystemState.STATE_READY_TO_JOIN;
-        //sendInitialEvents(initialPosition);
+
     }
 
     /**
@@ -434,9 +394,9 @@ public class BasicTravelScene extends Scene {
      * Das ist nach allgemeiner Lehre wohl die richtige Kombination; ein directional und ein ambient. In JME sind die Taxiways zu dunkel, in GWT ok.
      * Und in JME scheint ambient bei Buildings nicht zugreifen (wegen flat shading?). Die Nordseiten sind zu dunkel.
      * 27.10.21: Aus FlatTravelScene hierhin verschoben.
-     * 14.5.24: Deprecated now because 3D also moves to config files
+     * 14.5.24: Deprecated now because 3D also moved to config files
      */
-    @Deprecated
+    /*21.8.25 @Deprecated
     public LightDefinition[] getLight() {
         // quasi senkrecht von oben
         //9.5.19 DirectionalLight light = new DirectionalLight(Color.WHITE, new Vector3(0, 0, 2));
@@ -445,12 +405,12 @@ public class BasicTravelScene extends Scene {
         /*7.12.21 Light light = new DirectionalLight(Color.WHITE, new Vector3(3, -3, 3));
         addLightToWorld(light);
         light = new AmbientLight(Color.WHITE);
-        addLightToWorld(light);*/
+        addLightToWorld(light);* /
         return new LightDefinition[]{
                 new LightDefinition(Color.WHITE, new Vector3(3, -3, 3)),
                 new LightDefinition(Color.WHITE, null),
         };
-    }
+    }*/
 
     @Override
     public void update() {
@@ -467,27 +427,6 @@ public class BasicTravelScene extends Scene {
 
     private void commonUpdate() {
 
-
-        /*7.10.21 jetzt im postinit
-             if (initialPosition != null) {
-            //7.5.19 zunaechst mal nur einmalig beim Start.
-            sendInitialEvents(initialPosition);
-             initialPosition = null;
-        }*/
-
-        /*if (usermode != null) {
-            if (!usermode.reachedposition) {
-                TeleportComponent teleportComponent = TeleportComponent.getTeleportComponent(avatar.avatarE);
-                int captainpos = teleportComponent.findPoint("Captain");
-                if (captainpos != -1) {
-                    teleportComponent.stepTo(captainpos);
-                    usermode.reachedposition = true;
-                }
-            }
-            if (usermode.reachedposition) {
-                // 26.10.18: ein menu geht manchmal (z.B. in VR oder bei Bewegung) noch nicht so gut. Darum erstmal nur mit key 's' starten.
-            }
-        }*/
         if (Input.getKeyDown(KeyCode.L)) {
             // load next not yet loaded vehicle. 1.2.24: What is using this? Hangar/Cockpit isn't. But FlatAirportScene does.
             Request request = RequestRegistry.buildLoadVehicle(UserSystem.getInitialUser().getId(), null, null, null, null);
@@ -573,6 +512,9 @@ public class BasicTravelScene extends Scene {
         return Platform.getInstance().getLog(BasicTravelScene.class);
     }
 
+    /**
+     * Custom init for extending scenes
+     */
     protected void initSpheres() {
     }
 

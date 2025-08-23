@@ -2,7 +2,9 @@ package de.yard.threed.graph;
 
 
 import de.yard.threed.core.Quaternion;
+import de.yard.threed.core.Threshold;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.engine.PositionUpdateTrigger;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.engine.SceneNode;
@@ -60,7 +62,9 @@ public class GraphMovingComponent extends EcsComponent {
     public boolean unscheduledmoving;
     // (vehicle)model specific rotation
     public Quaternion customModelRotation = new Quaternion();
-
+    private PositionUpdateTrigger positionUpdateTrigger = new PositionUpdateTrigger();
+    // Execute each 10th of code reaches
+    private Threshold positionCheckThreshold = new Threshold(10);
     /**
      * mover darf null sein, z.B. fuer Tests. Aber auch fuer etwas unsichtbares. visualizer natuerlich auch.
      * 29.5.17: Mir dünkt, dass mover hier doch obselet ist.
@@ -435,6 +439,13 @@ public class GraphMovingComponent extends EcsComponent {
 
     public boolean hasAutomove() {
         return automove;
+    }
+
+    public void checkForPositionUpdate() {
+        // don't execute each frame
+        if (positionCheckThreshold.reached(1)) {
+            positionUpdateTrigger.checkForPositionUpdate(mover);
+        }
     }
 }
 

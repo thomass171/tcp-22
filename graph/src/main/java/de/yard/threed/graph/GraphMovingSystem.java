@@ -5,7 +5,6 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Input;
 import de.yard.threed.engine.KeyCode;
 import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.ecs.*;
@@ -21,7 +20,7 @@ import de.yard.threed.core.Payload;
  */
 public class GraphMovingSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(GraphMovingSystem.class);
-    //MA31 Kruecke zur Entkopplung von SGGeod.
+    //decouple of SGGeod.
     public static GraphAltitudeProvider graphAltitudeProvider;
     public static String TAG = "GraphMovingSystem";
 
@@ -33,8 +32,8 @@ public class GraphMovingSystem extends DefaultEcsSystem {
     }
 
     /**
-     * Die initiale Position auch darstellen.
-     * Der init() wird auch bei neuen Entities/Components aufgerufen.
+     * Also shows initial position.
+     * init() also called for new Entities/Components.
      *
      * @param group
      */
@@ -59,10 +58,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
     final public void update(EcsEntity entity, EcsGroup group, double tpf) {
         boolean changed = false;
         GraphMovingComponent gmc = (GraphMovingComponent) group.cl.get(0);
-       /*5.3.18  moveForward(group, tpf);
-    }    
-    public void moveForward(EcsGroup group, float tpf) {
-        GraphMovingComponent gmc = (GraphMovingComponent) group.cl.get(0);*/
+
         VelocityComponent vc = (VelocityComponent) group.cl.get(1);
 
         if (gmc.hasAutomove()) {
@@ -71,8 +67,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
             //logger.debug("new position of "+entity.getName()+entity.getId()+" isType "+gmc.getPosition());
         }
 
-        // hier ist extra kein "else", weil theoretisch auch beides aktiv sein koennte (aber nicht sollte). 9.1.19: Obwohl das
-        // schalten von automove darueber geht. Irgendwie nicht rund. Muesste vielleicht aus dem if raus. Oder nicht. Lassen wirs mal so.
+        // Intentionally no "else", because theoretically we could have both (but shouldn't, Hmm, don't know because of automove toggle).
         // TODO 3.4.25 change to requests (keys via InputtorequestSystem)
         if (gmc.keycontrolled) {
             if (Input.getKey(KeyCode.W)) {
@@ -81,7 +76,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
             if ((Input.getKey(KeyCode.W) && Input.getKey(KeyCode.Shift)) || Input.getKey(KeyCode.S)) {
                 moveForward(entity, gmc, vc, vc.maximumSpeed * (-tpf));
             }
-            // Die speed Steuerung hier kommt sich doch mit adjustSpeed in die Quere. Velocity braucht auch einen auto...TODO
+            // speed control interferes with adjustSpeed?. Velocity also needs an auto...TODO
             // 3.4.25 changed from +/- to PGUP/DOWN
             if (Input.getKey(KeyCode.PageUp)) {
                 vc.incMovementSpeed(1);
@@ -92,7 +87,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
             if (Input.getKeyDown(KeyCode.A)) {
                 gmc.setAutomove(!gmc.hasAutomove());
                 if (!gmc.hasAutomove()) {
-                    // zuruecksetzen
+                    // reset
                     vc.setMovementSpeed(0);
                 }
             }
@@ -107,6 +102,8 @@ public class GraphMovingSystem extends DefaultEcsSystem {
             pc.setSpeed(vc.getMovementSpeed());
         }*/
         //return changed;
+
+        gmc.checkForPositionUpdate();
     }
 
     @Override

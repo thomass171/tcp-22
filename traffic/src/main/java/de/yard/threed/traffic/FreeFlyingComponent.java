@@ -1,13 +1,11 @@
 package de.yard.threed.traffic;
 
 
-import de.yard.threed.core.MathUtil2;
-import de.yard.threed.core.Matrix3;
-import de.yard.threed.core.Quaternion;
-import de.yard.threed.core.Vector3;
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.FirstPersonTransformer;
+import de.yard.threed.engine.PositionUpdateTrigger;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.ecs.EcsComponent;
 import de.yard.threed.engine.ecs.EcsEntity;
@@ -36,6 +34,9 @@ public class FreeFlyingComponent extends EcsComponent {
     //private boolean autoRoll = true;
 
     boolean autoStabalize = true;
+    private PositionUpdateTrigger positionUpdateTrigger = new PositionUpdateTrigger();
+    // Execute each 12th of code reaches
+    private Threshold positionCheckThreshold = new Threshold(12);
 
     /**
      *
@@ -171,4 +172,10 @@ public class FreeFlyingComponent extends EcsComponent {
         return d;
     }
 
+    public void checkForPositionUpdate() {
+        // don't execute each frame
+        if (positionCheckThreshold.reached(1)) {
+            positionUpdateTrigger.checkForPositionUpdate(transform);
+        }
+    }
 }

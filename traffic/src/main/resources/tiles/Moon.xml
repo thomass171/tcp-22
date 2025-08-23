@@ -6,6 +6,8 @@
 <c:config xmlns:c="http://www.example.org/tcp-22" name="a">
 
     <include>locomotive.xml</include>
+    <!-- 21.8.25 'mobi' added because it can fly, different from 'loc' -->
+    <include>mobi.xml</include>
 
     <terrain>
         <builder type="scenery" name="MoonSceneryBuilder"/>
