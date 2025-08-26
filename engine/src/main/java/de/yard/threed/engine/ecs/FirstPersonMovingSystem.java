@@ -38,7 +38,7 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
     // Mouse movement is different between platforms and hard to unify. So stay with key control
     // and focus on VR
     boolean useMouseControl = false;
-    // update by delta time to honor defined speeds
+    // For a step request like 'TURNLEFT' update by delta time to honor defined speeds
     static public double assumedDeltaTimeWhenStepping = 0.1;
     public List<ViewPoint> viewPoints = new ArrayList<ViewPoint>();
 
@@ -235,7 +235,6 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
 
     /**
      * Binds keys for continuous movement, which is more intuitive. So there are requests for start and for stop moving.
-     * 19.7.24 Now also mouse drag for moving (useful for touchscreen)
      */
     public static void addDefaultKeyBindingsforContinuousMovement(InputToRequestSystem inputToRequestSystem) {
         inputToRequestSystem.addKeyMapping(KeyCode.W, BaseRequestRegistry.TRIGGER_REQUEST_START_FORWARD);
@@ -259,12 +258,15 @@ public class FirstPersonMovingSystem extends DefaultEcsSystem {
         inputToRequestSystem.addKeyReleaseMapping(KeyCode.A, BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLLEFT);
         inputToRequestSystem.addKeyMapping(KeyCode.D, BaseRequestRegistry.TRIGGER_REQUEST_START_ROLLRIGHT);
         inputToRequestSystem.addKeyReleaseMapping(KeyCode.D, BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLRIGHT);
+    }
 
-        // 19.7.24 mouse drag for moving (useful for touchscreen)
+    /**
+     * 19.7.24 mouse drag for moving (useful for touchscreen). But unfortunately has no 'roll'.
+     */
+    public static void setMouseDragBindingsforMovement(InputToRequestSystem inputToRequestSystem) {
         inputToRequestSystem.setDragMapping(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT,BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT,
                 BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN,BaseRequestRegistry.TRIGGER_REQUEST_TURNUP,
                 BaseRequestRegistry.TRIGGER_REQUEST_START_FORWARD, BaseRequestRegistry.TRIGGER_REQUEST_STOP_FORWARD);
-
     }
 
     private void firstPersonMovingComponent(Request request, GeneralParameterHandler<FirstPersonMovingComponent> handler) {

@@ -128,12 +128,14 @@ public class GalleryScene extends Scene {
             if (!vrInstance.isAR()) {
                 SystemManager.addSystem(FirstPersonMovingSystem.buildFromConfiguration());
                 FirstPersonMovingSystem.addDefaultKeyBindingsforContinuousMovement(inputToRequestSystem);
+                FirstPersonMovingSystem.setMouseDragBindingsforMovement(inputToRequestSystem);
             }
 
         } else {
 
             SystemManager.addSystem(FirstPersonMovingSystem.buildFromConfiguration());
             FirstPersonMovingSystem.addDefaultKeyBindingsforContinuousMovement(inputToRequestSystem);
+            FirstPersonMovingSystem.setMouseDragBindingsforMovement(inputToRequestSystem);
         }
 
         modellist = getModelList();

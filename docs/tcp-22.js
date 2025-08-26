@@ -42,13 +42,16 @@ function launchVrScene() {
     launchScene("VrScene",args);
 }
 
-function launchTrafficScene(tilename, vr) {
+function launchTrafficScene(tilename, vr, dragControl) {
 
     var args = new Map();
     addCommonArgs(args, "tf_");
     args.set("basename","traffic:tiles/" + tilename + ".xml");
     if (vr != null) {
         args.set("vrMode",vr);
+    }
+    if (dragControl != null) {
+        args.set("dragControl",dragControl);
     }
     if (tilename == "Wayland") {
         args.set("initialVehicle", "mobi");

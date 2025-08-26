@@ -197,6 +197,7 @@ public class InputToRequestSystemTest {
         login();
 
         FirstPersonMovingSystem.addDefaultKeyBindingsforContinuousMovement(inputToRequestSystem);
+        FirstPersonMovingSystem.setMouseDragBindingsforMovement(inputToRequestSystem);
 
         assertFalse(inputToRequestSystem.isMenuOpen());
         if (withMenu) {

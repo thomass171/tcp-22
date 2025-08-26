@@ -139,6 +139,7 @@ public class ShowroomScene extends Scene {
 
         InputToRequestSystem inputToRequestSystem = new InputToRequestSystem();
         FirstPersonMovingSystem.addDefaultKeyBindingsforContinuousMovement(inputToRequestSystem);
+        FirstPersonMovingSystem.setMouseDragBindingsforMovement(inputToRequestSystem);
         SystemManager.addSystem(inputToRequestSystem);
 
         // ObserverSystem also needed in VR

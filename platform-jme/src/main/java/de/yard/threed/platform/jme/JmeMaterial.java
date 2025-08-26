@@ -149,9 +149,10 @@ public class JmeMaterial implements NativeMaterial {
             mat = new Material(((PlatformJme) Platform.getInstance()).jmeResourceManager.am, "Common/MatDefs/Light/Lighting.j3md");
             if (col != null) {
                 mat.setColor("Diffuse", PlatformJme.buildColor(col)); // with Lighting.j3md
-                //29.4.16: ambient mal rausgenommen, weil damit scheinbar das Licht (Pyramide refscene) zu wenig (oder keinen) Einfluss hat.
-                //Evtl. widerspricht es auch "Diffuse" und man sollte nur eines der beiden setzen.
-                //mat.setColor("Ambient", PlatformJme.buildColor(col)); // with Lighting.j3md
+                //29.4.16: No longer 'ambient' because light (pyramid in refscene) has no or limited effect.
+                //25.8.25: Hmm, but doc (https://wiki.jmonkeyengine.org/docs/3.8/core/material/how_to_use_materials.html) says
+                //both should be set in standard case. And indeed, only with this wayland terrain isn't just black.
+                mat.setColor("Ambient", PlatformJme.buildColor(col)); // with Lighting.j3md
                 mat.setBoolean("UseMaterialColors", true); // with Lighting.j3md
             }
             if (texture != null) {
@@ -162,7 +163,7 @@ public class JmeMaterial implements NativeMaterial {
                 // is 'VertexLighting' for flat shading? Apparently not. The earth in ReferenceScene for no
                 // materialfactory shows
                 // visible edges like in other platforms like threejs.
-                mat.setBoolean("VertexLighting", true);
+                //mat.setBoolean("VertexLighting", true);
             }
             NativeTexture normalmap = (definition.texture == null) ? null : definition.texture.get("normalmap");
             //normalmap=null;

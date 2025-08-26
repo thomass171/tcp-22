@@ -58,6 +58,8 @@ public class BaseRequestRegistry {
     public static RequestType TRIGGER_REQUEST_SPEEDUP = RequestType.register(1133, "TRIGGER_REQUEST_SPEEDUP");
     public static RequestType TRIGGER_REQUEST_SPEEDDOWN = RequestType.register(1134, "TRIGGER_REQUEST_SPEEDDOWN");
 
+    // range of numbers continued in ObserverSystem up to 1138
+
     public static Request buildForwardRequest(int userEntityId) {
         return new Request(TRIGGER_REQUEST_FORWARD, new Payload(), userEntityId);
     }

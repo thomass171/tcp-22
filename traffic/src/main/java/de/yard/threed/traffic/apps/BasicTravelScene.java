@@ -17,7 +17,6 @@ import de.yard.threed.traffic.GraphBackProjectionProvider;
 import de.yard.threed.traffic.GraphTerrainSystem;
 
 import de.yard.threed.traffic.GraphVisualizationSystem;
-import de.yard.threed.traffic.LightDefinition;
 import de.yard.threed.traffic.MoonSceneryBuilder;
 import de.yard.threed.traffic.RequestRegistry;
 import de.yard.threed.trafficcore.EllipsoidCalculations;
@@ -78,7 +77,7 @@ import java.util.Map;
  * - When vehicle is available fadeout, teleport, fadein.
  * - "Click for Start" Button. Das ist dann quasi der 's' Key.
  * <p>
- *
+ * <p>
  * 14.11.23: never really existing 'help' and 'reset' removed. Could be added to menu.
  * 05.03.24: control menu added to be prepared for touch screens.
  * Created on 28.09.18.
@@ -194,8 +193,10 @@ public class BasicTravelScene extends Scene {
         // Should be fixed by 'per avatar position' request.
         if (enableFPC) {
             FirstPersonMovingSystem.addDefaultKeyBindingsforContinuousMovement(inputToRequestSystem);
+            FirstPersonMovingSystem.setMouseDragBindingsforMovement(inputToRequestSystem);
         } else {
             FreeFlyingSystem.addDefaultKeyBindingsforContinuousMovement(inputToRequestSystem);
+            FreeFlyingSystem.setMouseDragBindingsforMovement(inputToRequestSystem);
         }
 
         if (vrInstance != null) {
@@ -255,6 +256,23 @@ public class BasicTravelScene extends Scene {
         if (false) {
             // The axis helper dimensions fit to 'wayland'
             addToWorld(ModelSamples.buildAxisHelper(500, 10.0));
+        }
+
+        String dragControl = Platform.getInstance().getConfiguration().getString("dragControl", "movement");
+        if (dragControl.equals("movement")) {
+            // The default. Only one of these systems should be set up.
+            if (SystemManager.findSystem(FirstPersonMovingSystem.TAG) != null) {
+                FirstPersonMovingSystem.setMouseDragBindingsforMovement(inputToRequestSystem);
+            }
+            if (SystemManager.findSystem(FreeFlyingSystem.TAG) != null) {
+                FreeFlyingSystem.setMouseDragBindingsforMovement(inputToRequestSystem);
+            }
+        } else if (dragControl.equals("view")) {
+            if (SystemManager.findSystem(ObserverSystem.TAG) != null) {
+                ObserverSystem.setMouseDragBindingsforOrientation(inputToRequestSystem);
+            }
+        } else {
+            getLog().warn("Unknown dragControl:" + dragControl);
         }
         customInit();
         postInit(sceneMode);
@@ -411,7 +429,6 @@ public class BasicTravelScene extends Scene {
                 new LightDefinition(Color.WHITE, null),
         };
     }*/
-
     @Override
     public void update() {
         double tpf = getDeltaTime();
@@ -498,7 +515,6 @@ public class BasicTravelScene extends Scene {
     }
 
 
-
     @Override
     public void initSettings(Settings settings) {
         settings.vrready = true;
@@ -575,12 +591,12 @@ public class BasicTravelScene extends Scene {
     public GuiGrid buildControlMenuForScene(Camera camera, boolean withLoad) {
 
         int columns = 5;
-        if (withLoad){
+        if (withLoad) {
             columns++;
         }
         GuiGrid controlmenu = GuiGrid.buildForCamera(camera, 2, columns, 1, Color.BLACK_FULLTRANSPARENT, true);
 
-        int col=0;
+        int col = 0;
         controlmenu.addButton(col++, 0, 1, Icon.ICON_POSITION, () -> {
             InputToRequestSystem.sendRequestWithId(new Request(UserSystem.USER_REQUEST_TELEPORT, new Payload(new Object[]{new IntHolder(0)})));
         });

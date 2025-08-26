@@ -109,6 +109,7 @@ public class Setup {
         boolean demo = false;
         if (demo) {
             properties.put("basename", "traffic:tiles/Demo.xml");
+            properties.put("dragControl", "view");
             // automove is enabled in Demo.xml.
             properties.put("scene", "de.yard.threed.traffic.apps.BasicTravelScene");
         }

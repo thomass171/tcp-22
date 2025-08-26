@@ -2,14 +2,12 @@ package de.yard.threed.engine;
 
 import de.yard.threed.core.Event;
 import de.yard.threed.core.EventType;
+import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.engine.ecs.DefaultEcsSystem;
-import de.yard.threed.engine.ecs.EcsEntity;
-import de.yard.threed.engine.ecs.EcsGroup;
-import de.yard.threed.engine.ecs.EcsHelper;
-import de.yard.threed.engine.ecs.UserSystem;
+import de.yard.threed.engine.ecs.*;
+import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.vr.VrInstance;
 
@@ -21,6 +19,7 @@ import de.yard.threed.engine.vr.VrInstance;
  * <p>
  * Not for teleporting, movement or viewports, which is something different.
  * 1.9.23: Should not host observer instance because that is not related to a specific entity.
+ * 25.8.25: VIEW LEFT/RIGHT/UP/DOWN requests added
  * <p>
  * Created by thomass on 16.09.16.
  */
@@ -32,12 +31,26 @@ public class ObserverSystem extends DefaultEcsSystem {
     // offset to attachment (player,avatar etc)
     private LocalTransform viewTransform;
     public boolean withComponent = false;
+    private boolean observersystemdebuglog = true;
+    // For a step request like 'VIEWLEFT' update by delta time to honor defined speeds
+    // value found by trial and error
+    static public double assumedDeltaTimeWhenStepping = 0.03;
+
+    public static RequestType TRIGGER_REQUEST_VIEWLEFT = RequestType.register(1135, "TRIGGER_REQUEST_VIEWLEFT");
+    public static RequestType TRIGGER_REQUEST_VIEWRIGHT = RequestType.register(1136, "TRIGGER_REQUEST_VIEWRIGHT");
+    public static RequestType TRIGGER_REQUEST_VIEWUP = RequestType.register(1137, "TRIGGER_REQUEST_VIEWUP");
+    public static RequestType TRIGGER_REQUEST_VIEWDOWN = RequestType.register(1138, "TRIGGER_REQUEST_VIEWDOWN");
 
     /**
      *
      */
     public ObserverSystem(boolean withComponent) {
-        super(new String[]{"ObserverComponent"}, new RequestType[]{}, new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED/*UserSystem.USER_EVENT_JOINED*/});
+        super(new String[]{"ObserverComponent"}, new RequestType[]{
+                TRIGGER_REQUEST_VIEWLEFT,
+                TRIGGER_REQUEST_VIEWRIGHT,
+                TRIGGER_REQUEST_VIEWUP,
+                TRIGGER_REQUEST_VIEWDOWN
+        }, new EventType[]{BaseEventRegistry.EVENT_USER_ASSEMBLED/*UserSystem.USER_EVENT_JOINED*/});
         this.withComponent = withComponent;
     }
 
@@ -70,6 +83,26 @@ public class ObserverSystem extends DefaultEcsSystem {
                 oc.incPitch(-tpf);
             }
         }
+    }
+
+    @Override
+    public boolean processRequest(Request request) {
+        if (observersystemdebuglog) {
+            logger.debug("got request " + request.getType());
+        }
+
+        int userEntityId = (int) request.getUserEntityId();
+        EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
+
+        if (request.isType(TRIGGER_REQUEST_VIEWLEFT) || request.isType(TRIGGER_REQUEST_VIEWRIGHT)) {
+            processOnComponent(request, rbmc -> rbmc.incHeading(request.isType(TRIGGER_REQUEST_VIEWLEFT) ? assumedDeltaTimeWhenStepping : -assumedDeltaTimeWhenStepping));
+            return true;
+        }
+        if (request.isType(TRIGGER_REQUEST_VIEWUP) || request.isType(TRIGGER_REQUEST_VIEWDOWN)) {
+            processOnComponent(request, rbmc -> rbmc.incPitch(request.isType(TRIGGER_REQUEST_VIEWUP) ? assumedDeltaTimeWhenStepping : -assumedDeltaTimeWhenStepping));
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -128,6 +161,13 @@ public class ObserverSystem extends DefaultEcsSystem {
         this.viewTransform = viewTransform;
     }
 
+
+    public static void setMouseDragBindingsforOrientation(InputToRequestSystem inputToRequestSystem) {
+        inputToRequestSystem.setDragMapping(TRIGGER_REQUEST_VIEWLEFT, TRIGGER_REQUEST_VIEWRIGHT,
+                TRIGGER_REQUEST_VIEWDOWN, TRIGGER_REQUEST_VIEWUP,
+                null, null);
+    }
+
     /**
      * A user joined.
      * Moved here from AvatarSystem.
@@ -155,6 +195,18 @@ public class ObserverSystem extends DefaultEcsSystem {
             return true;
         }
         return false;//isFirstJoin;
+    }
+
+    private void processOnComponent(Request request, GeneralParameterHandler<ObserverComponent> handler) {
+        EcsEntity userEntity = UserSystem.getInitialUser();
+        if (userEntity == null) {
+            logger.warn("no user entity found");
+            return;
+        }
+        ObserverComponent oc = ObserverComponent.getObserverComponent(userEntity);
+        if (oc != null) {
+            handler.handle(oc);
+        }
     }
 
 }

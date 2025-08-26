@@ -9,17 +9,10 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.BaseEventRegistry;
 import de.yard.threed.engine.BaseRequestRegistry;
 import de.yard.threed.engine.KeyCode;
-import de.yard.threed.engine.ecs.DefaultEcsSystem;
-import de.yard.threed.engine.ecs.EcsEntity;
-import de.yard.threed.engine.ecs.EcsGroup;
-import de.yard.threed.engine.ecs.EcsHelper;
-import de.yard.threed.engine.ecs.InputToRequestSystem;
-import de.yard.threed.engine.ecs.TeleporterSystem;
-import de.yard.threed.engine.ecs.VelocityComponent;
+import de.yard.threed.engine.ecs.*;
 import de.yard.threed.engine.platform.common.Request;
 import de.yard.threed.engine.platform.common.RequestType;
 import de.yard.threed.engine.vr.VrInstance;
-import de.yard.threed.traffic.apps.BasicTravelScene;
 
 /**
  * Generic flying of a non graph bound plane entity with FreeFlyingComponent.
@@ -37,6 +30,8 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
     private static Log logger = Platform.getInstance().getLog(FreeFlyingSystem.class);
     public static String TAG = "FreeFlyingSystem";
     public boolean freeflyingsystemdebuglog = true;
+    // For a step request like 'TURNLEFT' update by delta time to honor defined speeds
+    static public double assumedDeltaTimeWhenStepping = 0.1;
 
     /**
      *
@@ -45,6 +40,14 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
         // Add VelocityComponent for getting movement speed like we do in GraphMovingSystem
         super(new String[]{FreeFlyingComponent.TAG, VelocityComponent.TAG},
                 new RequestType[]{
+                        // The non continuous requests are important for touchscreen/mouse grab
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNUP,
+                        BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN,
+                        BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT,
+                        BaseRequestRegistry.TRIGGER_REQUEST_ROLLRIGHT,
+                        //
                         BaseRequestRegistry.TRIGGER_REQUEST_START_TURNLEFT,
                         BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNLEFT,
                         BaseRequestRegistry.TRIGGER_REQUEST_START_TURNRIGHT,
@@ -101,6 +104,18 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
         int userEntityId = (int) request.getUserEntityId();
         EcsEntity userEntity = EcsHelper.findEntityById(userEntityId);
 
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT)) {
+            processOnComponent(request, rbmc -> rbmc.incYawByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT) ? assumedDeltaTimeWhenStepping : -assumedDeltaTimeWhenStepping));
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNUP) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN)) {
+            processOnComponent(request, rbmc -> rbmc.incPitchByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_TURNUP) ? assumedDeltaTimeWhenStepping : -assumedDeltaTimeWhenStepping));
+            return true;
+        }
+        if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLRIGHT)) {
+            processOnComponent(request, rbmc -> rbmc.incRollByDelta(request.isType(BaseRequestRegistry.TRIGGER_REQUEST_ROLLLEFT) ? assumedDeltaTimeWhenStepping : -assumedDeltaTimeWhenStepping));
+            return true;
+        }
 
         if (request.isType(BaseRequestRegistry.TRIGGER_REQUEST_START_TURNLEFT) || request.isType(BaseRequestRegistry.TRIGGER_REQUEST_STOP_TURNLEFT)) {
             processOnComponent(request, rbmc -> rbmc.toggleAutoTurnleft());
@@ -152,7 +167,6 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
     /**
      * Binds keys for movement control, which is more intuitive. So there are requests for start and stop of roll/turn
      * by cursor keys. PGUP/DOWN is for speed up/down.
-     * Also mouse drag for moving (useful for touchscreen).
      */
     public static void addDefaultKeyBindingsforContinuousMovement(InputToRequestSystem inputToRequestSystem) {
         // forward/back is part of auto move of the rigid body
@@ -184,11 +198,16 @@ public class FreeFlyingSystem extends DefaultEcsSystem {
         inputToRequestSystem.addKeyReleaseMapping(KeyCode.A, BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLLEFT);
         inputToRequestSystem.addKeyMapping(KeyCode.D, BaseRequestRegistry.TRIGGER_REQUEST_START_ROLLRIGHT);
         inputToRequestSystem.addKeyReleaseMapping(KeyCode.D, BaseRequestRegistry.TRIGGER_REQUEST_STOP_ROLLRIGHT);
+    }
 
+    /**
+     * Mouse drag for moving (useful for touchscreen). But unfortunately has no 'roll'.
+     */
+    public static void setMouseDragBindingsforMovement(InputToRequestSystem inputToRequestSystem) {
+        // No start/stop drag setting because movement is controlled by flying?
         inputToRequestSystem.setDragMapping(BaseRequestRegistry.TRIGGER_REQUEST_TURNLEFT, BaseRequestRegistry.TRIGGER_REQUEST_TURNRIGHT,
                 BaseRequestRegistry.TRIGGER_REQUEST_TURNDOWN, BaseRequestRegistry.TRIGGER_REQUEST_TURNUP,
                 null, null);
-
     }
 
     private void processOnComponent(Request request, GeneralParameterHandler<FreeFlyingComponent> handler) {

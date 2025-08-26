@@ -41,6 +41,7 @@ w3-khaki is color for use cases 'maze', w3-blue(?) for use case traffic.
         <p id="debuginfo" style="font-size:8px;color:yellow"></p>
     </header>
 
+    <!-- Begin Content -->
     <div class="w3-container" style="padding:32px">
         <div class="w3-panel w3-padding-large w3-section w3-white">
             <h1>The idea</h1>
@@ -326,7 +327,7 @@ w3-khaki is color for use cases 'maze', w3-blue(?) for use case traffic.
                         <div class=" w3-card-2">
                             <div class="w3-container">
                                 <h3>Touchscreen</h3>
-                                <p>Move by touching segments 3,5,7 on the screen.
+                                <p>Move in maze by touching segments 3,5,7 on the screen.
                                     <img src="SegmentGrid.png" style="width:50%">
                                     Segment 1 is for opening the control menu. Segment 4 is for firing.
                             </div>
@@ -364,10 +365,10 @@ w3-khaki is color for use cases 'maze', w3-blue(?) for use case traffic.
                             </div>
                             <p>Vehicles moving on graph based tracks. Use 'M'/TouchSegment1 to open/toggle a menu and cursor keys for looking
                                 around in non VR.
-                                VR has control panel at the left wrist.</p>
+                                VR has control panel at the left wrist. Use shifted cursor keys or dragging for looking around.</p>
                             <p></p>
-                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Demo',null)">Launch</button>
-                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Demo','VR')">Launch VR</button>
+                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Demo',null,'view')">Launch</button>
+                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Demo','VR',null)">Launch VR</button>
                             <p></p>
                         </div>
                     </div>
@@ -378,15 +379,14 @@ w3-khaki is color for use cases 'maze', w3-blue(?) for use case traffic.
                         <div class="w3-container">
                             <h3>Wayland</h3>
                             <div class="w3-container w3-center">
-                                <!-- TODO add wayland-->
                                 <img src="WaylandTrafficPreview.png" style="width:100%">
                             </div>
                             <p>A draft scenery created with 'osm-world-mesh'. A 'loc' moves on graph based tracks. Teleport ('t') to 'mobi' and fly it manually
-                                with PGUP/DOWN for speed and CUR*/a/d for controlling orientation.
+                                with PGUP/DOWN(or +/- control icons) for speed and CUR*/a/d for flight control (also touchscreen/mouse grab).
                                </p>
                             <p></p>
-                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Wayland',null)">Launch</button>
-                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Wayland','VR')">Launch VR</button>
+                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Wayland',null,null)">Launch</button>
+                            <button class=" w3-button  w3-round w3-blue " onclick="launchTrafficScene('Wayland','VR',null)">Launch VR</button>
                             <p></p>
                         </div>
                     </div>
@@ -396,13 +396,16 @@ w3-khaki is color for use cases 'maze', w3-blue(?) for use case traffic.
             <button onclick="toggleAccordion('acc_trafficusercontrols')"
                     class="w3-button w3-block w3-round w3-blue w3-left-align">Traffic user controls
             </button>
+            <!-- id 'acc_trafficusercontrols' is also used for referencing from tcp-flightgear.html-->
             <div id="acc_trafficusercontrols" class="w3-container w3-show">
+                <p>The options for controlling a vehicle depend on the vehicle and the scene. Only 'free' vehicles can be controlled, 'bound' vehicles are bound to a graph (eg. rails) or a flight route
+                    and cannot be controlled by the user.</p>
                 <div class="w3-row-padding w3-padding-16">
                     <div class="w3-third">
                         <div class="w3-card-2">
                             <div class="w3-container">
                                 <h3>Keyboard</h3>
-                                <p>Use shift CURLEFT/RIGHT for looking around. PGUP/DOWN for speed up/down. 't' for teleport.</p>
+                                <p>Use shifted CURLEFT/RIGHT/UP/DOWN for looking around. PGUP/DOWN for speed up/down. 't' for teleport.</p>
                             </div>
                         </div>
                     </div>
@@ -410,9 +413,9 @@ w3-khaki is color for use cases 'maze', w3-blue(?) for use case traffic.
                         <div class=" w3-card-2">
                             <div class="w3-container">
                                 <h3>Touchscreen</h3>
-                                <p>Move by touching segments 3,5,7 on the screen.
+                                <p>Move by touching segments 3,5,7 on the screen (or by dragging).
                                     <img src="SegmentGrid.png" style="width:50%">
-                                    Segment 1 is for opening the control menu.
+                                    Segment 1 is for opening the control menu. In scenes with a 'bound' vehicle the view orientation is controlled by dragging.
                             </div>
                         </div>
                     </div>
@@ -431,18 +434,18 @@ w3-khaki is color for use cases 'maze', w3-blue(?) for use case traffic.
                 </div>
             </div>
 
-            <div class="w3-panel w3-padding-large w3-section  w3-white">
-                <h1 class="">Traffic Launch Settings</h1>
+            <button onclick="toggleAccordion('acc_trafficlaunchsettings')"
+                    class="w3-button w3-block w3-round w3-blue w3-left-align">Traffic Launch Settings
+            </button>
+            <div id="acc_trafficlaunchsettings" class="w3-container w3-show">
                 <p class="">Settings for traffic scenes launched via the above buttons</p>
-                <div class="w3-panel">
-                    <div>
-                        <table>
-                            <tr>
-                                <td>offsetVR</td>
-                                <td><input class=" " id="inp_tf_offsetVR"></td>
-                            </tr>
-                        </table>
-                    </div>
+                <div>
+                    <table>
+                        <tr>
+                            <td>offsetVR</td>
+                            <td><input class=" " id="inp_tf_offsetVR"></td>
+                        </tr>
+                    </table>
                 </div>
             </div>
 

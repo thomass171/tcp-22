@@ -161,7 +161,8 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     }
 
     /**
-     * Mapping for dragging.
+     * Mapping for dragging. There can be only one binding, so it's a 'set', no 'add'.
+     * 25.8.25: Is 'mouse press' already a 'start drag'?
      */
     public void setDragMapping(RequestType requestTypeLeft, RequestType requestTypeRight,
                                RequestType requestTypeDown, RequestType requestTypeUp,
@@ -237,7 +238,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
 
         Camera camera = Scene.getCurrent().getDefaultCamera();
 
-        // Mouse input
+        // Mouse input. Also for touchpads.
 
         Point mouseMoveLocation = Input.getMouseMove();
         if (mouseMoveLocation != null) {
