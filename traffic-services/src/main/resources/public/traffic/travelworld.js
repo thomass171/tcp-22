@@ -343,6 +343,7 @@ function launchSingleScene(vrMode, useRoute) {
 
     if (useRoute) {
         args.set("initialRoute", foundGeoRoute);
+        args.set("dragControl", "view");
     } else {
         if (getInputIcao("from") == null) {
             // should not happen

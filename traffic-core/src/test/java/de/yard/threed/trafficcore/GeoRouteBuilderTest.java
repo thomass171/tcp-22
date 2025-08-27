@@ -73,5 +73,22 @@ public class GeoRouteBuilderTest {
         log.debug("geoRoute={}", geoRoute);
         assertEquals("wp:50.7690095,7.1625727->takeoff:50.7674421,7.1697561->wp:50.7586475,7.2100295->wp:50.7617634,7.2233489->wp:50.7695139,7.2305295->wp:50.7783873,7.2283157->wp:50.8602005,7.2066196->wp:50.8690739,7.2044019->wp:50.8754893,7.1944375->wp:50.8770663,7.1804221->touchdown:50.8655304,7.1418276->wp:50.8625,7.1317000", geoRoute.toString());
     }
+
+    /**
+     * A route with 6 segments
+     */
+    @Test
+    public void testEDDK14L_EHAM18L() {
+        GeoCoordinate eddk14From = GeoCoordinate.fromLatLon(LatLon.fromDegrees(50.880469, 7.129075));
+        GeoCoordinate eddk14To = GeoCoordinate.fromLatLon(LatLon.fromDegrees(50.855194, 7.165692));
+        GeoCoordinate eham18To = GeoCoordinate.fromLatLon(LatLon.fromDegrees(52.29082345, 4.77743092));
+        GeoCoordinate eham18From = GeoCoordinate.fromLatLon(LatLon.fromDegrees(52.32132036, 4.78019039));
+
+        GeoRouteBuilder geoRouteBuilder = new GeoRouteBuilder(new SimpleEllipsoidCalculations(SimpleEllipsoidCalculations.eQuatorialEarthRadius));
+        GeoRoute geoRoute = geoRouteBuilder.buildAirportToAirportRoute(eddk14From, eddk14To, eham18From, eham18To);
+
+        log.debug("geoRoute={}", geoRoute);
+        assertEquals("wp:50.8800381,7.1296996->takeoff:50.8764919,7.1348404->wp:50.8566037,7.1636556->wp:50.8480166,7.1594773->wp:50.8459351,7.1456370->wp:50.8524115,7.1357771->wp:51.1010208,6.7543302->wp:51.3483757,6.3687690->wp:51.5944513,5.9790336->wp:51.8392223,5.5850637->wp:52.0826629,5.1867984->wp:52.3457417,4.8181967->wp:52.3522189,4.8080071->wp:52.3525042,4.7933074->wp:52.3464347,4.7824657->touchdown:52.3195264,4.7800279->wp:52.2908234,4.7774309", geoRoute.toString());
+    }
 }
 

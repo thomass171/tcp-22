@@ -85,7 +85,7 @@ public class SimpleEllipsoidCalculations extends EllipsoidCalculations {
     /**
      * There are several algorithm known for this (complex) calculation and the results are more or less exact.
      * This implementation is from https://stackoverflow.com/questions/365826/calculate-distance-between-2-gps-coordinates
-     * Returned distance is in meter.
+     * Returned distance is in kilometer.
      */
     @Override
     public double distanceTo(LatLon l1, LatLon dest) {
@@ -97,6 +97,6 @@ public class SimpleEllipsoidCalculations extends EllipsoidCalculations {
         double c = 2D * Math.atan2(Math.sqrt(a), Math.sqrt(1D - a));
         double d = eQuatorialEarthRadius * c;
 
-        return d;
+        return d / 1000.0;
     }
 }

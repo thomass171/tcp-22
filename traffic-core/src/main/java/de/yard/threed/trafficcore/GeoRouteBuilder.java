@@ -72,6 +72,8 @@ public class GeoRouteBuilder {
         for (int i = 0; i < departPoints.size(); i++) {
             geoRoute.addWaypoint(GeoCoordinate.fromLatLon(departPoints.get(i)));
         }
+        // Now TOC is reached
+        LatLon toc = departPoints.get(departPoints.size() - 1);
 
         // Prepare 'approach' before adding main airway (though currently only a direct connection)
 
@@ -82,12 +84,23 @@ public class GeoRouteBuilder {
         degreeStep = diff.multiply(1.0 / descendElements);
         Degree approachHeading = runwayToHelper.getHeading();
         LatLon approachEntryPoint = starpoint;
-        logger.debug("roughDirection=" + roughDirection +",runwayTo.heading=" + runwayToHelper.getHeading() +  ",diff=" + diff + ",degreeStep=" + degreeStep);
+        logger.debug("roughDirection=" + roughDirection + ",runwayTo.heading=" + runwayToHelper.getHeading() + ",diff=" + diff + ",degreeStep=" + degreeStep);
         for (int i = 0; i < descendElements; i++) {
             approachHeading = approachHeading.subtract(degreeStep);
             logger.debug("approachHeading=" + approachHeading + "diff=" + diff);
             approachEntryPoint = rbcp.applyCourseDistance(approachEntryPoint, approachHeading.reverse(), turnsegmentLen);
             approachPoints.add(approachEntryPoint);
+        }
+
+        // before adding descend add several crusing segments to avoid long segments that might intersect earth surface
+        // due to curvature of earch. In principle this shouldn't be needed becuse route->graph conversion should be aware of
+        // curvature, but as long as it isn't have more segments.
+        double cruisingDistance = rbcp.distanceTo(departPoints.get(departPoints.size() - 1), approachPoints.get(approachPoints.size() - 1));
+        int numberOfSegments = (int) (cruisingDistance / 40) + 1;
+        double segmentLength = cruisingDistance / numberOfSegments;
+        logger.debug("cruisingDistance=" + cruisingDistance + ",numberOfSegments=" + numberOfSegments + ",segmentLength=" + segmentLength);
+        for (int i = 1; i < numberOfSegments; i++) {
+            geoRoute.addWaypoint(GeoCoordinate.fromLatLon(rbcp.applyCourseDistance(toc, roughDirection, i * segmentLength * 1000)));
         }
 
         for (int i = approachPoints.size() - 1; i >= 0; i--) {

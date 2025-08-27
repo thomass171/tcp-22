@@ -61,7 +61,7 @@ public class EllipsoidCalculationsTest {
         LatLon paris = LatLon.fromDegrees(48.853363, 2.349042);
         double distance = ec.distanceTo(cologne, paris);
         // 403461.30m is reference value from an online calculator. Accept difference as result of different algorithms
-        assertEquals(403913.27, distance, 0.005);
+        assertEquals(403.91327, distance, 0.005);
     }
 
     @Test
