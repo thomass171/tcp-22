@@ -151,6 +151,10 @@ public class BundleResource implements NativeResource {
     }
 
     public String getBundlename() {
+        // 1.9.25: Finally be more safe
+        if (bundlename == null && bundle != null) {
+            return bundle.name;
+        }
         return bundlename;
     }
 

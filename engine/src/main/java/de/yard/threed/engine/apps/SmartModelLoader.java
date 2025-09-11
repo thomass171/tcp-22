@@ -1,13 +1,11 @@
 package de.yard.threed.engine.apps;
 
-import de.yard.threed.core.BuildResult;
-import de.yard.threed.core.ModelBuildDelegate;
-import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Vector3;
+import de.yard.threed.core.*;
 import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.loader.LoaderAC;
 import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.loader.StringReader;
+import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleRegistry;
@@ -32,11 +30,12 @@ import java.util.Map;
  * Intended for testing and analyzing.
  */
 public abstract class SmartModelLoader {
-
+    static private Log logger = Platform.getInstance().getLog(SmartModelLoader.class);
     static Map<String, SmartModelLoader> registry = new HashMap<>();
     public static SmartModelLoader defaultSmartModelLoader;
     //a regular bundle load of plain GLTF (no XML) including bundle loading
     public static SmartModelLoader simpleSmartModelLoader;
+    private static Map<String, GeneralFunction<PortableModel, String>> creatorClass = new HashMap<>();
 
     /**
      * Load errors might be forwarded via delegate. In that case no node should be passed
@@ -60,7 +59,9 @@ public abstract class SmartModelLoader {
                 // Pseudo Bundle
                 //logger.debug("Building pcm for model " + modelname);
                 PortableModel pml;
-                if (modelname.equals("loc")) {
+                if (creatorClass.containsKey(modelname)) {
+                    pml = creatorClass.get(modelname).handle(null);
+                } else if (modelname.equals("loc")) {
                     pml = VehiclePmlFactory.buildLocomotive();
                 } else if (modelname.equals("bike")) {
                     pml = VehiclePmlFactory.buildBike();
@@ -100,8 +101,13 @@ public abstract class SmartModelLoader {
 
     public static void loadAndScaleModelByDefinitions(String modelDefinition, ModelBuildDelegate delegate) {
         String[] parts = StringUtils.split(modelDefinition, ";");
+        if (parts.length == 0) {
+            logger.warn("Invalid modelDefinition:" + modelDefinition);
+            return;
+        }
         String modelpart = parts[0];
         double scale = Double.valueOf(parse(parts, "scale", "1.0"));
+        Vector3 offset = Util.parseVector3(parse(parts, "offset", "0.0,0.0,0.0"));
 
         // Consider external http bundle
         String bundleUrl = parse(parts, "bundleUrl", null);
@@ -118,7 +124,9 @@ public abstract class SmartModelLoader {
         smartModelLoader.loadModelBySource(prefix, modelname, bundleUrl, result -> {
             if (result.getNode() != null) {
                 result.getNode().setName(modelname);
+                // 5.9.25 TODO scale needs extra node? Zumindest geht es so nicht.
                 result.getNode().getTransform().setScale(new Vector3(scale, scale, scale));
+                result.getNode().getTransform().setPosition((offset));
             }
             delegate.modelBuilt(result);
         });
@@ -176,5 +184,9 @@ public abstract class SmartModelLoader {
         PortableModel portableModel = ac.buildPortableModel();
         SceneNode node = PortableModelBuilder.buildModel(portableModel, null);
         delegate.modelBuilt(new BuildResult(node.nativescenenode));
+    }
+
+    public static void addCreatorClass(String name, GeneralFunction<PortableModel, String> creator) {
+        creatorClass.put(name, creator);
     }
 }

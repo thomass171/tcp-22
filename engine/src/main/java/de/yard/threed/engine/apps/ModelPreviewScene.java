@@ -1,42 +1,14 @@
 package de.yard.threed.engine.apps;
 
-import de.yard.threed.core.BuildResult;
 import de.yard.threed.core.Color;
 import de.yard.threed.core.Degree;
-import de.yard.threed.core.Dimension;
-import de.yard.threed.core.ModelBuildDelegate;
-import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Vector3;
-import de.yard.threed.core.geometry.FaceList;
-import de.yard.threed.core.loader.InvalidDataException;
-import de.yard.threed.core.loader.LoadedObject;
-import de.yard.threed.core.loader.LoaderAC;
-import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleRegistry;
-import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.engine.DirectionalLight;
-import de.yard.threed.engine.Geometry;
-import de.yard.threed.engine.Input;
-import de.yard.threed.engine.KeyCode;
-import de.yard.threed.engine.Light;
-import de.yard.threed.engine.Material;
-import de.yard.threed.engine.Mesh;
-import de.yard.threed.engine.ModelFactory;
-import de.yard.threed.engine.Scene;
-import de.yard.threed.engine.SceneMode;
-import de.yard.threed.engine.SceneNode;
-import de.yard.threed.engine.avatar.AvatarPmlFactory;
-import de.yard.threed.engine.avatar.VehiclePmlFactory;
+import de.yard.threed.engine.*;
 import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.gui.Hud;
-import de.yard.threed.core.loader.PortableModel;
-import de.yard.threed.engine.loader.PortableModelBuilder;
-import de.yard.threed.engine.platform.EngineHelper;
-import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
-import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.platform.common.Settings;
 import de.yard.threed.core.geometry.SimpleGeometry;
 
@@ -44,21 +16,27 @@ import de.yard.threed.core.geometry.SimpleGeometry;
  * A simple model preview scene.
  * <p>
  * Verwendet das FG Koordinatensystem?
- * z-axis points up, y to the left and x-axis to the viewpoint.
+ * z-axis points up, y to the left(isn't it right?) and x-axis to the viewpoint.
  * Die Camera steht auf positivem x und blickt Richtung negativem X.
  * No ECS to keep it simple.
+ * 5.9.25: Rotation node decoupled, ambient light added
+ * Keys:
+ * - 'x'(shift): moves camera forward(backward)
+ * -'+','-': scale up/down
+ * cur/up/down/pg/up/down: rotate
  */
 public class ModelPreviewScene extends Scene {
     public Log logger = Platform.getInstance().getLog(ModelPreviewScene.class);
     Light light;
     public double scale = 1;
-    public SceneNode model = null;
+    public SceneNode scaleNode, modelHolderNode;
     public int major = 4;
     String[] modellist;
     Hud hud;
     double rotationspeed = 10;
     SceneNode ground = null;
     public double elapsedsec = 0;
+    private double cameraDistance = 120;
 
     /**
      *
@@ -93,7 +71,7 @@ public class ModelPreviewScene extends Scene {
 
         // Wegen FG Modelorientierung von etwas erhöht auf z=0 aus Osten in Richtung Westen blicken
         // Die Hoehe ist etwas schwierig universell
-        getDefaultCamera().getCarrier().getTransform().setPosition(new Vector3(120, 0, 30));
+        getDefaultCamera().getCarrier().getTransform().setPosition(new Vector3(cameraDistance, 0, cameraDistance / 4.0));
         getDefaultCamera().lookAt(new Vector3(0, 0, 0), new Vector3(0, 0, 1));
 
         hud = Hud.buildForCameraAndAttach(getDefaultCamera(), 0);
@@ -101,6 +79,11 @@ public class ModelPreviewScene extends Scene {
         SmartModelLoader.init();
 
         customInit();
+
+        scaleNode = new SceneNode();
+        modelHolderNode = new SceneNode();
+        modelHolderNode.getTransform().setParent(scaleNode.getTransform());
+        addToWorld(scaleNode);
 
         newModel();
         addToWorld(ModelSamples.buildAxisHelper(50));
@@ -113,16 +96,16 @@ public class ModelPreviewScene extends Scene {
     }
 
     private void redraw() {
-        if (model != null) {
-            // maybe not loaded yet
-            model.getTransform().setScale(new Vector3(scale, scale, scale));
-        }
-        hud.setText(2, "scale: " + scale);
+        // model maybe not loaded yet, but safe to scale
+        scaleNode.getTransform().setScale(new Vector3(scale, scale, scale));
+        updateHud();
     }
 
     private void addLight() {
         Light light = new DirectionalLight(Color.WHITE, new Vector3(0, 3, 2));
         addLightToWorld(light);
+        // 5.9.25: Also ambient to avoid complete darkness
+        addLightToWorld(new AmbientLight(new Color(0.3f, 0.3f, 0.3f)));
     }
 
     private void cycleMajor(int inc, int cnt) {
@@ -133,43 +116,43 @@ public class ModelPreviewScene extends Scene {
         if (major >= cnt) {
             major = 0;
         }
-        logger.info("cycled to " + "." + major);
+        logger.info("cycled to major " + major);
         newModel();
     }
 
     private void newModel() {
-        if (model != null) {
-            SceneNode.removeSceneNode(model);
+        if (modelHolderNode.getTransform().getChildCount() > 0) {
+            SceneNode.removeSceneNode(modelHolderNode.getTransform().getChild(0).getSceneNode());
         }
+        scale = 1.0;
         //redCube.getTransform().setPosition(new Vector3(1000, 1000, 1000));
         addModel();
-        if (model != null) {
-            model.getTransform().setScale(new Vector3(scale, scale, scale));
-        }
+        updateHud();
+    }
+
+    private void updateHud() {
         if (hud != null) {
             hud.clear();
             hud.setText(1, "major: " + major);
             hud.setText(2, "scale: " + scale);
+            hud.setText(3, "distance: " + cameraDistance);
         }
     }
 
     private void addModel() {
-        model = null;
         String modelname = modellist[major];
-
         final SceneNode destination = new SceneNode();
         SmartModelLoader.loadAndScaleModelByDefinitions(modelname, result -> {
 
             if (result.getNode() != null) {
-                model = new SceneNode(result.getNode());
+                SceneNode model = new SceneNode(result.getNode());
                 logger.info("Building imported model. scale=" + scale);
 
-                model.getTransform().setScale(new Vector3(scale, scale, scale));
-                addToWorld(model);
+                model.getTransform().setParent(modelHolderNode.getTransform());
             } else {
                 //cube as a 'not loaded indicator'
                 logger.warn("Showing cube ");
-                model = ModelSamples.buildCube(10, new Color(0xCC, 00, 00));
+                ModelSamples.buildCube(10, new Color(0xCC, 00, 00)).getTransform().setParent(modelHolderNode.getTransform());
             }
         });
     }
@@ -186,12 +169,12 @@ public class ModelPreviewScene extends Scene {
         double tpf = getDeltaTime();
 
         if (Input.getKeyDown(KeyCode.Alpha1)) {
-            logger.debug("3 key was pressed. currentdelta=" + tpf);
+            logger.debug("key '1' was pressed. currentdelta=" + tpf);
             cycleMajor(1, modellist.length);
             //doppelt newModel();
         }
         if (Input.getKeyDown(KeyCode.Alpha2)) {
-            logger.debug("4 key was pressed. currentdelta=" + tpf);
+            logger.debug("key '2' was pressed. currentdelta=" + tpf);
             cycleMajor(-1, modellist.length);
             //doppelt newModel();
         }
@@ -209,23 +192,39 @@ public class ModelPreviewScene extends Scene {
             toggleGround();
         }
         if (Input.getKeyDown(KeyCode.KEY_D)) {
-            logger.info("model tree:" + model.dump("", 1));
+            logger.info("model tree:" + modelHolderNode.dump("", 1));
         }
         if (Input.getKey(KeyCode.KEY_LEFT)) {
-            model.getTransform().rotateZ(new Degree(rotationspeed * 1f));
+            scaleNode.getTransform().rotateZ(new Degree(rotationspeed * 1f));
         }
         if (Input.getKey(KeyCode.KEY_RIGHT)) {
-            model.getTransform().rotateZ(new Degree(rotationspeed * -1f));
+            scaleNode.getTransform().rotateZ(new Degree(rotationspeed * -1f));
+        }
+        if (Input.getKey(KeyCode.KEY_PAGEDOWN)) {
+            scaleNode.getTransform().rotateY(new Degree(rotationspeed * 1f));
+        }
+        if (Input.getKey(KeyCode.KEY_PAGEUP)) {
+            scaleNode.getTransform().rotateY(new Degree(rotationspeed * -1f));
         }
         if (Input.getKey(KeyCode.KEY_UP)) {
-            model.getTransform().rotateX(new Degree(rotationspeed * 1f));
+            scaleNode.getTransform().rotateX(new Degree(rotationspeed * 1f));
         }
         if (Input.getKey(KeyCode.KEY_DOWN)) {
-            model.getTransform().rotateX(new Degree(rotationspeed * -1f));
+            scaleNode.getTransform().rotateX(new Degree(rotationspeed * -1f));
         }
         if (Input.getKeyDown(KeyCode.KEY_R)) {
             // mal als Test wegen memory
             BundleRegistry.clear();
+        }
+        if (Input.getKeyDown(KeyCode.X)) {
+            // 10%
+            double d = -cameraDistance / 10.0;
+            if (Input.getKey(KeyCode.Shift)) {
+                d = -d;
+            }
+            cameraDistance += d;
+            getDefaultCamera().getCarrier().getTransform().setPosition(new Vector3(cameraDistance, 0, cameraDistance / 4.0));
+            updateHud();
         }
         elapsedsec += tpf;
         customUpdate();
@@ -253,5 +252,9 @@ public class ModelPreviewScene extends Scene {
     public static SceneNode buildErrorIndicator() {
         SceneNode redCube = new SceneNode(new Mesh(Geometry.buildCube(0.3, 0.3, 0.3), Material.buildBasicMaterial(Color.RED)));
         return redCube;
+    }
+
+    public void setRotationSpeed(double rotationspeed) {
+        this.rotationspeed = rotationspeed;
     }
 }

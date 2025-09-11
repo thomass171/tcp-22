@@ -10,6 +10,7 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -36,5 +37,11 @@ public class BundleTest {
         // what about this? Normalize and find it.
         bundleResource = new BundleResource(bundle, "./plane-darkgreen.bin");
         assertNotNull(bundle.getResource(bundleResource));
+    }
+
+    @Test
+    public void testSimplifyPath(){
+        assertEquals("Models/Effects/interior", Bundle.simplifyPath("Models/Interior/Panel/Instruments/digital-clock/../../../../Effects/interior"));
+        assertEquals("../../../Effects/interior", Bundle.simplifyPath("../../../Effects/interior"));
     }
 }

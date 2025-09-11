@@ -47,7 +47,7 @@ public class Bundle {
         // 14.2.24: Be more consistent with path names and do not allow leading "./" or "/".
         for (String d : directory) {
             // Consider comments in directory
-            if (!StringUtils.startsWith(d,"#")) {
+            if (!StringUtils.startsWith(d, "#")) {
                 if (StringUtils.startsWith(d, ".") || StringUtils.startsWith(d, "./")) {
                     throw new RuntimeException("invalid prefix in directory entry");
                 }
@@ -84,7 +84,7 @@ public class Bundle {
     //21.4.17 @Deprecated
     public BundleData/*byte[]*/ getResource(BundleResource bpath) {
         String key = bpath.getFullName();
-        BundleData data = resources.get(key);
+        BundleData data = resources.get(simplifyPath(key));
         if (data != null && data.b != null) {
             //16.10.18 das ist ja wohl nicht mehr noetig. data.b.reset();
         }
@@ -93,7 +93,7 @@ public class Bundle {
 
     public BundleData/*byte[]*/ getResource(String bpath) {
         //TODO hier vielleicht eine Art Notaus Fehlermeldung, wenn die Resource null ist?
-        return resources.get(bpath);
+        return resources.get(simplifyPath(bpath));
     }
 
     public int getSize() {
@@ -135,7 +135,7 @@ public class Bundle {
      * Returns true if data for the resource is really available.
      */
     public boolean contains(String r) {
-        return resources.get(r) != null;
+        return resources.get(simplifyPath(r)) != null;
     }
 
     /**
@@ -143,7 +143,7 @@ public class Bundle {
      * When it couldn't be loaded due to an error, its considered to not exist, even it is listed in the directory!
      */
     public boolean exists(String r) {
-        return resources.containsKey(r);
+        return resources.containsKey(simplifyPath(r));
     }
 
     /**
@@ -264,5 +264,23 @@ public class Bundle {
 
     public boolean isDelayed() {
         return delayed;
+    }
+
+    public static String simplifyPath(String r) {
+        String[] parts = StringUtils.split(r, "/");
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < parts.length; i++) {
+            // keep '..' if no part exists where to simplify with
+            if (parts[i].equals("..") && result.size() > 0 && !"..".equals(result.get(result.size() - 1))) {
+                result.remove(result.size() - 1);
+            } else {
+                result.add(parts[i]);
+            }
+        }
+        String s = "";
+        for (int j = 0; j < result.size(); j++) {
+            s += ((j > 0) ? "/" : "") + result.get(j);
+        }
+        return s;
     }
 }

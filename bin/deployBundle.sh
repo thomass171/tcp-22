@@ -1,18 +1,14 @@
 #!/bin/sh
 #
-# Copies all files defined in filelist.txt from $CWD/$1 to the
-# bundle destination directory BUNDLEDIR ($HOSTDIR/bundles/$1).
+# Copies all files defined in $FILELIST from $CWD/$1 to the
+# bundle destination directory BUNDLEDIR (defaults to $HOSTDIR/bundles/$1).
 # Also does preprocess of pcm-files.
-# Each copied file from filelist.txt plus those created are added to directory.txt in destination folder.
+# Each copied file from $FILELIST plus those created are added to directory.txt in destination folder.
 #
-# 14.11.18: Needs config files filelist.
-#
-# Die Ausgabe am besten umleiten, da kommt viel.
-# Muesste vielleicht mal pro Preprocess gemacht werden, sonst nutzt es nicht viel.
-#
+# 14.11.18: Needs config file filelist.
 # 30.09.23: Also used by external projects, so strictly relying on HOSTDIR, cwd and parameter
-#
 # 26.10.23: Also model conversion here (eg. 'ac'->'gltf')
+# 28.08.25: Filelist file might be a parameter to be used for FG aircraft conversion
 #
 
 OWNDIR=`dirname $0`
@@ -25,7 +21,8 @@ validateHOSTDIR
 usage() {
 	echo "$0: [-S] [-s] <bundlename>"
 	echo "$0: [-S] [-s] -m <modulename>"
-	echo "option -S for skipping pcm files."
+	echo "option -S for skipping pcm files. 'filelist' defaults to 'filelist.txt' in source sub directory."
+	echo "'bundlename' is the pure name, no path. The source sub dir is expected in the current directory."
 	exit 1
 }
 
@@ -90,7 +87,10 @@ fi
 BUNDLE=$1
 shift
 
-BUNDLEDIR=$HOSTDIR/bundles
+if [ -z "$BUNDLEDIR" ]
+then
+	BUNDLEDIR=$HOSTDIR/bundles
+fi
 mkdir -p $BUNDLEDIR
 checkrc mkdir
 
@@ -104,8 +104,23 @@ fi
 if [ $BUNDLEISMODULE = "1" ]
 then
 	SOURCE=$BUNDLE/src/main/resources
+	FILELIST=$SOURCE/filelist.txt
 else
-	SOURCE=$BUNDLE
+  # check whether we have a bundle definition (relative to current path), otherwise just assume its a sub directory
+  if [ -r bundledefs/$BUNDLE.bundledef ]
+  then
+    BUNDLEDEF=bundledefs/$BUNDLE.bundledef
+    FILELIST=bundledefs/$BUNDLE.filelist
+
+    if [ ! -s $BUNDLEDEF ]
+    then
+    	error "$BUNDLEDEF not found"
+    fi
+    source $BUNDLEDEF
+  else
+  	SOURCE=$BUNDLE
+  	FILELIST=$SOURCE/filelist.txt
+  fi
 fi
 
 if [ ! -d "$SOURCE" ]
@@ -113,11 +128,12 @@ then
 	error "$SOURCE not found"
 fi
 
-if [ ! -r $SOURCE/filelist.txt ]
+if [ ! -s $FILELIST ]
 then
-  error "$SOURCE/filelist.txt not found"
+  error "filelist $FILELIST not found"
 fi
 
+export FILELIST
 DESTDIR=$BUNDLEDIR/$BUNDLE
 if [ ! -d $DESTDIR ]
 then
@@ -130,7 +146,7 @@ rm -f $DIRECTORY
 echo Ready to deploy bundle $BUNDLE from $SOURCE to $DESTDIR. Hit CR
 read
 
-cat $SOURCE/filelist.txt | egrep -v "^#" | while read filename
+cat $FILELIST | egrep -v "^#" | while read filename
 do
 	if [ -z "$filename" ]
 	then
@@ -155,7 +171,7 @@ do
 
   if [ -d $FNAME ]
   then
-    error "only single files allowed"
+    error "$FNAME is a directory. Only single files allowed. "
   fi
   if [ -f $FNAME ]
   then
@@ -166,7 +182,7 @@ do
         # nasty dependency for FG. Will only be possible from tcp-flightgear.
         if [ ! -r $DESTDIR/$DIRNAME/$BASENAME.gltf -o "$FORCE" = "1" ]
         then
-          sh $TCP22DIR/../tcp-flightgear/bin/convertModel.sh $FNAME $DESTDIR/$DIRNAME
+          sh $TCP22DIR/bin/convertSingleModelToGltf.sh $FNAME $DESTDIR/$DIRNAME
           relax
         fi
         # keep suffix 'ac' in directory? 31.10.23: No, was never that way and BundleRegistry.exists() is aware of that and checks for gltf
