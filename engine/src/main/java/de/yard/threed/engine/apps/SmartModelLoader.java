@@ -124,9 +124,13 @@ public abstract class SmartModelLoader {
         smartModelLoader.loadModelBySource(prefix, modelname, bundleUrl, result -> {
             if (result.getNode() != null) {
                 result.getNode().setName(modelname);
-                // 5.9.25 TODO scale needs extra node? Zumindest geht es so nicht.
-                result.getNode().getTransform().setScale(new Vector3(scale, scale, scale));
+                // 5.9.25 scale needs extra node. But outer around offset. Otherwise small deviations inside offset
+                // will also scale (like in digital-clock model)
                 result.getNode().getTransform().setPosition((offset));
+                // decouple model node to keep scale etc. Needed 'twice' because getNode() returns native
+                SceneNode translateNode = new SceneNode(new SceneNode(result.getNode()));
+                translateNode.getTransform().setScale(new Vector3(scale, scale, scale));
+                result = new BuildResult(translateNode.nativescenenode);
             }
             delegate.modelBuilt(result);
         });
