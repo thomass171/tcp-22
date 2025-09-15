@@ -185,7 +185,7 @@ public class SceneNode {
                 //4.10.17: knifflig
                 Material material = getMesh().getMaterial();
                 material.material.getName();
-                NativeTexture[] maps = material.material.getMaps();
+                NativeTexture[] maps = material.material.getTextures();
                 mapstring = "[";
                 for (int i = 0; i < maps.length; i++) {
                     NativeTexture t = maps[i];

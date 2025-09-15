@@ -10,6 +10,7 @@ textures/MazeHome-green.png
 textures/MazeHome-darkgreen.png
 textures/MazeHome-monster.png
 textures/texturedcube-atlas.jpg
+textures/simple-lightmap.png
 textures/earth/2_no_clouds_4k.jpg
 textures/gimp/Ground.png
 textures/gimp/SampleNormalMap.png

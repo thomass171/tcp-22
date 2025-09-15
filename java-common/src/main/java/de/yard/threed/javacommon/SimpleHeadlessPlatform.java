@@ -757,9 +757,11 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         String name;
         public HashMap<NumericType, NumericValue> parameters;
         public Map<String, NativeUniform> uniforms = new HashMap<>();
+        public HashMap<String, NativeTexture> textures;
 
         DummyMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameters, Object effect) {
             this.name = name;
+            this.textures=texture;
             this.parameters = parameters;
             this.color = color;
         }
@@ -838,7 +840,12 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         }
 
         @Override
-        public NativeTexture[] getMaps() {
+        public void addTexture(String name, NativeTexture texture) {
+            textures.put(name, texture);
+        }
+
+        @Override
+        public NativeTexture[] getTextures() {
             return new NativeTexture[0];
         }
 

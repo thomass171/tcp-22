@@ -44,7 +44,7 @@ public class GallerySceneTest {
         assertNotNull(BundleRegistry.getBundle("data"));
 
         // wait for entities. No load error will occur for 'yy.gltf' in SimpleHeadlessPlatform!
-        TestUtils.waitUntil(() -> SystemManager.findEntities(null).size() >= 8, 10000);
+        TestUtils.waitUntil(() -> SystemManager.findEntities(null).size() >= 6/*objects*/+2/*??*/, 10000);
 
         List<EcsEntity> entities = SystemManager.findEntities(null);
         assertEquals(6/*objects*/ + 1/*yy.gltf*/ + 1/*user*/, entities.size());

@@ -203,7 +203,15 @@ public class WebGlMaterial implements NativeMaterial {
     }
 
     @Override
-    public NativeTexture[] getMaps() {
+    public void addTexture(String name, NativeTexture texture) {
+        // Maybe only works with unshaded
+        if (name.equalsIgnoreCase("lightmap")) {
+            setLightMap(material, ((WebGlTexture) texture).texture);
+        }
+    }
+
+    @Override
+    public NativeTexture[] getTextures() {
         return new NativeTexture[0];
     }
 
@@ -405,5 +413,9 @@ for (var i=0; i < 64; i++) {
 
     private static native String getName(JavaScriptObject mat)  /*-{
        return mat.name;
+    }-*/;
+
+    private static native JavaScriptObject setLightMap(JavaScriptObject mat, JavaScriptObject texture)  /*-{
+       mat.lightMap = texture;
     }-*/;
 }

@@ -9,11 +9,14 @@ import de.yard.threed.core.platform.NativeTexture;
 import java.util.HashMap;
 
 /**
- * Container zum einfachen Transport von Material Definitionen.
- * Effect ist eine Abstraktionsebene höher und har hier nicht mehr zu suchen.
+ * Container for simple transport of material definitions.
+ *
  * Der name hat keine funktionale Bedeutung. Er dient nur der Wiedererkennbarkeit.
  * Wird im Speicher vorgehalten. Sollte daher klein bleiben.
+ *
+ * 13.9.25: Maybe no good idea. Deprecated
  */
+@Deprecated
 public class MaterialDefinition {
     public  String name;
     public HashMap<ColorType, Color> color;

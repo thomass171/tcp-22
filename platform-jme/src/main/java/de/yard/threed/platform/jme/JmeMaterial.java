@@ -92,7 +92,7 @@ public class JmeMaterial implements NativeMaterial {
                     uniforms.put(jmeUniformName, new JmeUniform<Quaternion>() {
                         @Override
                         public void setValue(Quaternion v) {
-                            material.setVector4(jmeUniformName, new Vector4f(v.getX(),v.getY(),v.getZ(),v.getW()));
+                            material.setVector4(jmeUniformName, new Vector4f(v.getX(), v.getY(), v.getZ(), v.getW()));
                         }
                     });
                     break;
@@ -259,7 +259,22 @@ public class JmeMaterial implements NativeMaterial {
     }
 
     @Override
-    public NativeTexture[] getMaps() {
+    public void addTexture(String name, NativeTexture texture) {
+        // Maybe only works with unshaded
+        if (name.equalsIgnoreCase("lightmap")) {
+            name = "LightMap";
+
+            if (material.getMaterialDef().getMaterialParam(name) == null) {
+                logger.warn("Ignoring texture parameter '" + name + "'");
+            } else {
+                material.setTexture("LightMap", ((JmeTexture) texture).texture);
+                logger.warn("Set texture parameter '" + name + "'");
+            }
+        }
+    }
+
+    @Override
+    public NativeTexture[] getTextures() {
         return new NativeTexture[]{basetex};
     }
 

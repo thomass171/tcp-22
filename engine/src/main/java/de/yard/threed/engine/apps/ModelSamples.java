@@ -12,6 +12,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.geometry.GeometryHelper;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.engine.geometry.ShapeGeometry;
 import de.yard.threed.core.platform.Log;
@@ -41,13 +42,18 @@ import java.util.List;
 public class ModelSamples {
     static Log logger = Platform.getInstance().getLog(ModelSamples.class);
 
+    /**
+     * 13.9.25: Now with lightmap.
+     */
     public static Material buildTexturedCubeMaterial(AbstractMaterialFactory materialFactory) {
 
         //NativeMaterial mat = Material.buildLambertMaterial(Texture.buildBundleTexture("data", "textures/texturedcube-atlas.jpg")).material;
         //Just have a loader pointing to bundle data, from which texture loader will be derived.
         PortableMaterial pm = new PortableMaterial("no-name", "data:textures/texturedcube-atlas.jpg");
-        Material mat = materialFactory.buildMaterial(new ResourceLoaderFromBundle(new BundleResource(BundleRegistry.getBundle("data"), "xx")
-        ), pm, new ResourcePath("textures"), true);
+        ResourceLoader resourceLoader = new ResourceLoaderFromBundle(new BundleResource(BundleRegistry.getBundle("data"), "xx"));
+        Material mat = materialFactory.buildMaterial(resourceLoader, pm, new ResourcePath("textures"), true);
+
+        // lightmap currently not handled in MaterialFactory, maybe that is good because is is an edge case?
         return mat;
     }
 

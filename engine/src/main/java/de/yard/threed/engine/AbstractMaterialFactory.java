@@ -22,6 +22,14 @@ import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 public abstract class AbstractMaterialFactory {
 
     /**
+     * 13.9.25: Considered a good idea to have loader in constructor, but meanwhile I doubt, so keep previous way.
+     * @param resourceLoader  Typically this is the loader for the model file, from which further loader eg. for textures can be derived.
+     */
+    /*public AbstractMaterialFactory(ResourceLoader resourceLoader){
+        this.resourceLoader=resourceLoader;
+    }*/
+
+    /**
      * Needs to be async because resource(texture) loading might be async.
      * Texture loading is hidden in the platform (desktop can wait, threejs
      * has async), so we can set a texture uniform without really having loaded the texture.

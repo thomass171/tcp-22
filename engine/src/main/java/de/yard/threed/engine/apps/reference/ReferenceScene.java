@@ -576,7 +576,7 @@ public class ReferenceScene extends Scene {
      * Prinzipiell koennte man natuerlich auch die base* Angaben verkleiner.
      * <p/>
      * Will use a geometry with split shared vertices, so allows visual edges in both flat and smooth shading.
-     *
+     * <p>
      * 19.2.25: Misleading parameter 'flatshaded' replaced by 'base box is unshaded, other are shaded'. Flat shading should
      * be used in any case (instead of smooth shading) because we use cubes.
      * 9.8.25 That is not the point, its about normals. Even though we have materialFactory meanwhile, PortableMaterial decides about
@@ -916,8 +916,9 @@ public class ReferenceScene extends Scene {
 
                     logger.debug("Bundle " + bundle.name + " loaded");
                     // build model twice with different material factories, platform and custom shader
-                    buildRemoteModel(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new Vector3(-8, 2, -10), scale, new DefaultMaterialFactory());
-                    buildRemoteModel(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new Vector3(-8, 2, -9), scale, new CustomShaderMaterialFactory(ShaderPool.buildUniversalEffect()));
+                    ResourceLoaderFromBundle resourceLoader = new ResourceLoaderFromBundle(file);
+                    buildRemoteModel(resourceLoader, opttexturepath, loaderoptions, new Vector3(-8, 2, -10), scale, new DefaultMaterialFactory());
+                    buildRemoteModel(resourceLoader, opttexturepath, loaderoptions, new Vector3(-8, 2, -9), scale, new CustomShaderMaterialFactory(ShaderPool.buildUniversalEffect()));
 
                 }
             });
@@ -940,8 +941,9 @@ public class ReferenceScene extends Scene {
                         logger.debug("Bundle " + bundle.name + " loaded");
                         // build model twice with different material factories, platform and custom shader
                         // put aside Goldhofert
-                        buildRemoteModel(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new Vector3(-7, 2, -10), scale, new DefaultMaterialFactory());
-                        buildRemoteModel(new ResourceLoaderFromBundle(file), opttexturepath, loaderoptions, new Vector3(-7, 2, -9), scale, new CustomShaderMaterialFactory(ShaderPool.buildUniversalEffect()));
+                        ResourceLoaderFromBundle resourceLoader = new ResourceLoaderFromBundle(file);
+                        buildRemoteModel(resourceLoader, opttexturepath, loaderoptions, new Vector3(-7, 2, -10), scale, new DefaultMaterialFactory());
+                        buildRemoteModel(resourceLoader, opttexturepath, loaderoptions, new Vector3(-7, 2, -9), scale, new CustomShaderMaterialFactory(ShaderPool.buildUniversalEffect()));
                     }
                 }
             });
@@ -1206,33 +1208,45 @@ public class ReferenceScene extends Scene {
     }
 
     private void initMaterialCycle() {
+        ResourceLoader resourceLoader = new ResourceLoaderFromBundle(new BundleResource(BundleRegistry.getBundle("data"), "xx"));
+
         materialCycle = new MaterialCycle[]{
                 // 0: custom shader
-                new MaterialCycle(buildCustomMaterialFactory(NumericValue.SMOOTH), "cst.smooth"),
+                new MaterialCycle(new CustomMaterialFactory/*buildPlatformMaterialFactory*/(NumericValue.SMOOTH), "cst.smth"),
                 // 1: platform shader
-                new MaterialCycle(buildPlatformMaterialFactory(NumericValue.SMOOTH), "plt.smooth"),
-                new MaterialCycle(buildPlatformMaterialFactory(NumericValue.FLAT), "plt.flat"),
-                new MaterialCycle(buildPlatformMaterialFactory(NumericValue.UNSHADED), "plt.unshaded"),
+                new MaterialCycle(new PlatformMaterialFactory/*buildPlatformMaterialFactory*/(NumericValue.SMOOTH), "plt.smth"),
+                new MaterialCycle(new PlatformMaterialFactory/*buildPlatformMaterialFactory*/(NumericValue.FLAT), "plt.flat"),
+                new MaterialCycle(new PlatformMaterialFactory/*buildPlatformMaterialFactory*/(NumericValue.UNSHADED), "plt.unshaded"),
+                new MaterialCycle(new PlatformMaterialFactoryWithLightMap/*buildPlatformMaterialFactory*/(NumericValue.SMOOTH), "plt.smth.lm"),
+                new MaterialCycle(new PlatformMaterialFactoryWithLightMap/*buildPlatformMaterialFactory*/(NumericValue.FLAT), "plt.flat.lm"),
+                new MaterialCycle(new PlatformMaterialFactoryWithLightMap/*buildPlatformMaterialFactory*/(NumericValue.UNSHADED), "plt.unshaded.lm"),
         };
     }
 
-    private AbstractMaterialFactory buildPlatformMaterialFactory(int shading) {
-        return new AbstractMaterialFactory() {
-            // 1: platform shader, shaded
-            @Override
-            public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
+    //private AbstractMaterialFactory buildPlatformMaterialFactory(int shading) {
+    class PlatformMaterialFactory extends AbstractMaterialFactory/* buildCustomMaterialFactory(int shading) */ {
+        int shading;
 
-                // use platform material. 10.8.25:Default factory doesn't fit because we want to override the 'hasNormals->shading' rule.
-                // defaults to smooth shading
-                pm.setShaded(true);
-                hasnormals = true;
-                if (shading == NumericValue.UNSHADED) {
-                    pm.setShaded(false);
-                } else if (shading == NumericValue.FLAT) {
-                    hasnormals = false;
-                }
-                //Material m = materialCycle[materialIndex].materialFactory.buildMaterial(null, pm, null, hasNormals);
-                Material mat = new DefaultMaterialFactory().buildMaterial(null, pm, null, hasnormals);
+        PlatformMaterialFactory(int shading) {
+            this.shading = shading;
+        }
+
+        // return new AbstractMaterialFactory() {
+        // 1: platform shader, shaded
+        @Override
+        public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
+
+            // use platform material. 10.8.25:Default factory doesn't fit because we want to override the 'hasNormals->shading' rule.
+            // defaults to smooth shading
+            pm.setShaded(true);
+            hasnormals = true;
+            if (shading == NumericValue.UNSHADED) {
+                pm.setShaded(false);
+            } else if (shading == NumericValue.FLAT) {
+                hasnormals = false;
+            }
+            //Material m = materialCycle[materialIndex].materialFactory.buildMaterial(null, pm, null, hasNormals);
+            Material mat = new DefaultMaterialFactory().buildMaterial(null, pm, null, hasnormals);
                 /*if (pm.getTexture() != null) {
                     Texture texture = super.resolveTexture(pm.getTexture(), resourceLoader, texturebasepath, pm.getWraps(), pm.getWrapt(), logger);
                     mat = Material.buildPhongMaterial(texture, shading);
@@ -1247,42 +1261,61 @@ public class ReferenceScene extends Scene {
                     }
                     mat.setName("colored platform material " + (pm.isShaded() ? "phong" : "unshaded"));
                 }*/
-                return mat;
-            }
-        };
+            return mat;
+        }
     }
 
-    private AbstractMaterialFactory buildCustomMaterialFactory(int shading) {
-        return new AbstractMaterialFactory() {
-            // custom shader
-            @Override
-            public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
+    class PlatformMaterialFactoryWithLightMap extends PlatformMaterialFactory {
 
-                ShaderProgram program = ShaderPool.buildUniversalEffect();
-                Material mat = Material.buildCustomShaderMaterial(program, true);
+        PlatformMaterialFactoryWithLightMap(int shading) {
+            super(shading);
+        }
 
-                mat.material.getUniform(Uniform.TEXTURED).setValue(pm.getTexture() != null);
+        @Override
+        public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
+            Material mat = super.buildMaterial(resourceLoader,pm,texturebasepath,hasnormals);
+            // lightmap currently not handled in MaterialFactory, maybe that is good because it is an edge case?
+            // uvs do not fit to cube texture!
+            mat.addTexture(Material.LIGHTMAP, resolveTexture("data:textures/simple-lightmap.png", null, null, false, false, logger));
+            return mat;
+        }
+    }
 
-                // custom shader only has no or flat?
-                boolean shaded = pm.isShaded();
-                mat.material.getUniform(Uniform.SHADED).setValue(shaded);
+    class CustomMaterialFactory extends AbstractMaterialFactory/* buildCustomMaterialFactory(int shading) */ {
+        int shading;
 
-                if (pm.getColor() != null) {
-                    mat.material.getUniform(Uniform.COLOR).setValue(new Quaternion(
-                            pm.getColor().getR(),
-                            pm.getColor().getG(),
-                            pm.getColor().getB(),
-                            pm.getColor().getAlpha()));
-                    mat.setName("colored CustomShaderMaterial " + (shaded ? "shaded" : "unshaded"));
-                } else if (pm.getTexture() != null) {
-                    Texture texture = new DefaultMaterialFactory().resolveTexture(pm.getTexture(), null, null, pm.getWraps(), pm.getWrapt(), logger);
-                    mat.material.getUniform(Uniform.TEXTURE).setValue(texture.texture);
-                    mat.setName("textured CustomShaderMaterial " + (shaded ? "shaded" : "unshaded"));
-                }
+        CustomMaterialFactory(int shading) {
+            this.shading = shading;
+        }
 
-                return mat;
+        // custom shader
+        @Override
+        public Material buildMaterial(ResourceLoader resourceLoader, PortableMaterial pm, ResourcePath texturebasepath, boolean hasnormals) {
+
+            ShaderProgram program = ShaderPool.buildUniversalEffect();
+            Material mat = Material.buildCustomShaderMaterial(program, true);
+
+            mat.material.getUniform(Uniform.TEXTURED).setValue(pm.getTexture() != null);
+
+            // custom shader only has no or flat?
+            boolean shaded = pm.isShaded();
+            mat.material.getUniform(Uniform.SHADED).setValue(shaded);
+
+            if (pm.getColor() != null) {
+                mat.material.getUniform(Uniform.COLOR).setValue(new Quaternion(
+                        pm.getColor().getR(),
+                        pm.getColor().getG(),
+                        pm.getColor().getB(),
+                        pm.getColor().getAlpha()));
+                mat.setName("colored CustomShaderMaterial " + (shaded ? "shaded" : "unshaded"));
+            } else if (pm.getTexture() != null) {
+                Texture texture = new DefaultMaterialFactory().resolveTexture(pm.getTexture(), null, null, pm.getWraps(), pm.getWrapt(), logger);
+                mat.material.getUniform(Uniform.TEXTURE).setValue(texture.texture);
+                mat.setName("textured CustomShaderMaterial " + (shaded ? "shaded" : "unshaded"));
             }
-        };
+
+            return mat;
+        }
     }
 
     private void updateMaterials() {
@@ -1296,7 +1329,8 @@ public class ReferenceScene extends Scene {
             Material m = updatedCycledMaterial(pm, true);
             towerright.get(i).getMesh().setMaterial(m);
         }
-        multimatcube.getMesh().setMaterial(ModelSamples.buildTexturedCubeMaterial(materialCycle[materialIndex].materialFactory));
+        Material multimatcubeMaterial = ModelSamples.buildTexturedCubeMaterial(materialCycle[materialIndex].materialFactory);
+        multimatcube.getMesh().setMaterial(multimatcubeMaterial);
 
         earth.getMesh().setMaterial(ModelSamples.buildEarthMaterial(materialCycle[materialIndex].materialFactory));
 

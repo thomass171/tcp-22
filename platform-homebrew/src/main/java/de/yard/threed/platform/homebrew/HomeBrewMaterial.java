@@ -229,8 +229,15 @@ end TODO
     }
 
     @Override
-    public NativeTexture[] getMaps() {
+    public NativeTexture[] getTextures() {
         return new NativeTexture[]{basetex};
+    }
+
+    public void addTexture(String name, NativeTexture texture) {
+        // Maybe only works with unshaded
+        if (name.equalsIgnoreCase("lightmap")) {
+            //TODO
+        }
     }
 
     @Override

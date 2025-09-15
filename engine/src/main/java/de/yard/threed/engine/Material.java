@@ -25,6 +25,10 @@ import java.util.HashMap;
  */
 public class Material {
     public NativeMaterial material;
+    public static String BASETEX = "basetex";
+    public static String NORMALMAP = "normalmap";
+    public static String BUMPMAP = "bumpmap";
+    public static String LIGHTMAP = "lightmap";
 
     public Material(NativeMaterial material) {
         this.material = material;
@@ -38,23 +42,27 @@ public class Material {
 
     protected static HashMap<String, NativeTexture> buildTextureMap(Texture texture, Texture normalmap) {
         HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
-        map.put("basetex", texture.texture);
-        map.put("normalmap", normalmap.texture);
+        map.put(BASETEX, texture.texture);
+        map.put(NORMALMAP, normalmap.texture);
         return map;
     }
 
     public static HashMap<String, NativeTexture> buildTextureMapNormal(Texture normalmap) {
         HashMap<String, NativeTexture> map = new HashMap<String, NativeTexture>();
-        map.put("normalmap", normalmap.texture);
+        map.put(NORMALMAP, normalmap.texture);
         return map;
     }
 
     private static void addNormalMap(HashMap<String, NativeTexture> map, Texture normalmap) {
-        map.put("normalmap", normalmap.texture);
+        map.put(NORMALMAP, normalmap.texture);
     }
 
     private static void addBumpMap(HashMap<String, NativeTexture> map, Texture bumpmap) {
-        map.put("bumpmap", bumpmap.texture);
+        map.put(BUMPMAP, bumpmap.texture);
+    }
+
+    private static void addLightMap(HashMap<String, NativeTexture> map, Texture lightmap) {
+        map.put(LIGHTMAP, lightmap.texture);
     }
 
     public static HashMap<ColorType, Color> buildColorMap(Color color) {
@@ -225,6 +233,10 @@ public class Material {
 
     public void setName(String name) {
         material.setName(name);
+    }
+
+    public void addTexture(String mapName, Texture texture) {
+        material.addTexture(mapName, texture.texture);
     }
 }
 

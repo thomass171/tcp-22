@@ -35,7 +35,12 @@ public interface NativeMaterial {
     void setName(String name);
 
     //27.2.25 what's this??
-    NativeTexture[] getMaps();
+    NativeTexture[] getTextures();
+
+    /**
+     * 13.9.25: Might be useful for lightmaps, which maybe are added after inital material building.
+     */
+    void addTexture(String name, NativeTexture texture);
 
      NativeUniform getUniform(String name);
 }
