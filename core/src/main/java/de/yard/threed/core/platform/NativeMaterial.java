@@ -22,6 +22,8 @@ public interface NativeMaterial {
      * 6.10.17:Ob das aber mit nativen Loadern (z.B. gltf) geht, ist fraglich. Der Weg, wie FG Effects baut, ist vielleicht schon sehr sepziell.
      * 10.10.17: jetzt boolean und erstmal nicht deprecated, solane es nutzbar ist und keine Probleme macht.
      * 10.8.24:Again deprecated. Cannot be set later. This is nonsense. Building new material is the way to go.
+     * 19.10.25: Building as new material is not really needed. There are many ways to achieve transparency, eg. by shader.
+     * So setting a uniform might be sufficient. If we have really a setter method here, its better a generic setBlending(Mode)
      */
     @Deprecated
     void setTransparency(boolean enabled);

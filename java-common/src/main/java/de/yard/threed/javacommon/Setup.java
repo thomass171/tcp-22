@@ -79,13 +79,13 @@ public class Setup {
         //6.3.23 if (System.getProperty("scene") == null) {
 
         properties.put("scene", "de.yard.threed.engine.apps.reference.ReferenceScene");
-        //properties.put("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
+        properties.put("scene", "de.yard.threed.engine.apps.ModelPreviewScene");
         //properties.put("scene", "de.yard.threed.maze.MazeScene");
         //properties.put("scene", "de.yard.threed.engine.apps.vr.VrScene");
         //properties.put("scene", "de.yard.threed.engine.apps.showroom.ShowroomScene");
         //System.setProperty("scene", "de.yard.threed.apps.DisplayClient");
         //properties.put("scene", "de.yard.threed.engine.apps.FirstPersonScene");
-        properties.put("scene", "de.yard.threed.engine.apps.GalleryScene");
+        //properties.put("scene", "de.yard.threed.engine.apps.GalleryScene");
 
         boolean testFireTargetMarker = false;
         if (testFireTargetMarker) {

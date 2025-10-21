@@ -56,7 +56,7 @@ public class PlatformBundleLoader {
      */
     public void loadBundle(String bundlename, boolean delayed, BundleLoadDelegate bundleLoadDelegate, NativeBundleResourceLoader resourceLoader) {
 
-        logger.debug("Loading effective bundle " + bundlename + " from " + ((resourceLoader==null)?null:resourceLoader.getBasePath()));
+        logger.info("Loading effective bundle " + bundlename + " from " + ((resourceLoader==null)?null:resourceLoader.getBasePath()));
 
         if (resourceLoader == null) {
             logger.error("No resourceLoader. Bundle '" + bundlename + "' not resolvable?");

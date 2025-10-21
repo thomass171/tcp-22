@@ -44,6 +44,7 @@ public class Mesh /*extends Object3D /*implements Renderable*/ {
     public Mesh(SimpleGeometry geometry, Material material) {
         this(new GenericGeometry(geometry), material, false, false/*,false*/);
     }
+
     public Mesh(Geometry geometry, Material material) {
         this(geometry, material, false, false/*,false*/);
     }
@@ -55,27 +56,28 @@ public class Mesh /*extends Object3D /*implements Renderable*/ {
     /*public Mesh(Geometry geometry, Material material, boolean castShadow, boolean receiveShadow, boolean isLine) {
         this(geometry.getNativeGeometry(), material, castShadow, receiveShadow,isLine);
     }*/
-    
+
     public Mesh(NativeGeometry geometry, Material material, boolean castShadow, boolean receiveShadow/*, boolean isLine*/) {
         //logger.debug("Building mesh with geo "+geometry.getId());
-        nativemesh = Platform.getInstance().buildMesh(geometry, (material!=null)?material.material:null, castShadow, receiveShadow/*,isLine*/);
+        nativemesh = Platform.getInstance().buildMesh(geometry, (material != null) ? material.material : null, castShadow, receiveShadow/*,isLine*/);
     }
 
     public Mesh(NativeGeometry geometry, NativeMaterial material, boolean castShadow, boolean receiveShadow) {
-        this(geometry,material,castShadow,receiveShadow,false);
+        this(geometry, material, castShadow, receiveShadow, false);
     }
-    
+
     public Mesh(NativeGeometry geometry, NativeMaterial material, boolean castShadow, boolean receiveShadow, boolean isLine) {
         nativemesh = Platform.getInstance().buildMesh(geometry, material, castShadow, receiveShadow/*,isLine*/);
     }
 
     public Mesh(CustomGeometry geometry, Material material) {
-        this(geometry, material, false, false,false);
+        this(geometry, material, false, false, false);
     }
 
-    public Mesh(CustomGeometry geometry, Material material, boolean castShadow, boolean receiveShadow){
-        this(geometry,material,castShadow,receiveShadow,false);
+    public Mesh(CustomGeometry geometry, Material material, boolean castShadow, boolean receiveShadow) {
+        this(geometry, material, castShadow, receiveShadow, false);
     }
+
     /**
      * Ein Mesh aus einer CustomGeometrie bauen.
      */
@@ -105,9 +107,9 @@ public class Mesh /*extends Object3D /*implements Renderable*/ {
         if (normals == null && vertices != null && faces != null) {
             normals = GeometryHelper.calculateSmoothVertexNormals(vertices, faces3);
         }*/
-        Platform.getInstance().updateMesh(mesh,(geo==null)?null:geo.getNativeGeometry()/* vertices, faces3*/, material/*,normals*/);
+        Platform.getInstance().updateMesh(mesh, (geo == null) ? null : geo.getNativeGeometry()/* vertices, faces3*/, material/*,normals*/);
     }
-    
+
     /**
      * 30.1.15: Eine neue Geometry setzen. Dann muss auch der VBO neu erstellt werden.
      * Der update ist sehr aufwändig, weil der ganze VBO neu erstellt werden muss.
@@ -117,7 +119,7 @@ public class Mesh /*extends Object3D /*implements Renderable*/ {
      * dynamisch definiert ist.
      */
     public void updateGeometry(CustomGeometry geometry) {
-       updateGeometry(GenericGeometry.buildGenericGeometry(geometry));
+        updateGeometry(GenericGeometry.buildGenericGeometry(geometry));
     }
 
     public void updateGeometry(Geometry geometry) {
@@ -131,29 +133,31 @@ public class Mesh /*extends Object3D /*implements Renderable*/ {
         //buildMesh(geometry, material, material.getDefaultShader(), uvmap);
         //needssetup=true;
     }
-    
+
     @Deprecated
     public void updateMaterial(Material material) {
-        updateMeshG((NativeMesh) nativemesh, null,  material.material);
+        updateMeshG((NativeMesh) nativemesh, null, material.material);
         //needssetup=true;
     }
 
     /**
      * 13.12.18: Besserer Name statt update
+     *
      * @param material
      */
     public void setMaterial(Material material) {
-        updateMeshG((NativeMesh) nativemesh, null,  material.material);
+        updateMeshG((NativeMesh) nativemesh, null, material == null ? null : material.material);
         //needssetup=true;
     }
-    
+
     /**
      * 31.12.17: null liefern, wenn native null ist
+     *
      * @return
      */
     public Material getMaterial() {
         NativeMaterial n = nativemesh.getMaterial();
-        if (n==null){
+        if (n == null) {
             return null;
         }
         return new Material(n);

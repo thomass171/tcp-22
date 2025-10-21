@@ -2,8 +2,10 @@ package de.yard.threed.engine.apps;
 
 import de.yard.threed.core.Color;
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.Point;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.NativeCollision;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.engine.*;
@@ -11,6 +13,8 @@ import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.gui.Hud;
 import de.yard.threed.engine.platform.common.Settings;
 import de.yard.threed.core.geometry.SimpleGeometry;
+
+import java.util.List;
 
 /**
  * A simple model preview scene.
@@ -37,6 +41,7 @@ public class ModelPreviewScene extends Scene {
     SceneNode ground = null;
     public double elapsedsec = 0;
     private double cameraDistance = 120;
+    SceneNode selectedObject = null;
 
     /**
      *
@@ -136,6 +141,7 @@ public class ModelPreviewScene extends Scene {
             hud.setText(1, "major: " + major);
             hud.setText(2, "scale: " + scale);
             hud.setText(3, "distance: " + cameraDistance);
+            hud.setText(4, "selected: " + ((selectedObject == null) ? "" : selectedObject.getName()));
         }
     }
 
@@ -171,12 +177,10 @@ public class ModelPreviewScene extends Scene {
         if (Input.getKeyDown(KeyCode.Alpha1)) {
             logger.debug("key '1' was pressed. currentdelta=" + tpf);
             cycleMajor(1, modellist.length);
-            //doppelt newModel();
         }
         if (Input.getKeyDown(KeyCode.Alpha2)) {
             logger.debug("key '2' was pressed. currentdelta=" + tpf);
             cycleMajor(-1, modellist.length);
-            //doppelt newModel();
         }
         if (Input.getKeyDown(KeyCode.Plus)) {
             scale *= 1.5f;
@@ -213,7 +217,7 @@ public class ModelPreviewScene extends Scene {
             scaleNode.getTransform().rotateX(new Degree(rotationspeed * -1f));
         }
         if (Input.getKeyDown(KeyCode.KEY_R)) {
-            // mal als Test wegen memory
+            // For testing memory consumption?
             BundleRegistry.clear();
         }
         if (Input.getKeyDown(KeyCode.X)) {
@@ -226,11 +230,15 @@ public class ModelPreviewScene extends Scene {
             getDefaultCamera().getCarrier().getTransform().setPosition(new Vector3(cameraDistance, 0, cameraDistance / 4.0));
             updateHud();
         }
+        checkForPickingRay();
         elapsedsec += tpf;
         customUpdate();
 
     }
 
+    /**
+     * to be overridden
+     */
     public void customUpdate() {
     }
 
@@ -256,5 +264,31 @@ public class ModelPreviewScene extends Scene {
 
     public void setRotationSpeed(double rotationspeed) {
         this.rotationspeed = rotationspeed;
+    }
+
+    private void checkForPickingRay() {
+        Point mouselocation;
+        if ((mouselocation = Input.getMouseUp()) != null) {
+            // Mousebutton released
+            int x = mouselocation.getX();
+            int y = mouselocation.getY();
+            //logger.debug("Mouse moved to x" + x + ", y=" + y);
+            Ray pickingray = getMainCamera().buildPickingRay(getMainCamera().getCarrier().getTransform(), mouselocation);
+            //logger.debug("built pickingray=" + pickingray + " for x=" + x + ",y=" + y + ", dimension=" + ((Platform) Platform.getInstance()).getDimension());
+            List<NativeCollision> intersects = pickingray.getIntersections();
+            if (intersects.size() > 0) {
+                SceneNode firstIntersect = new SceneNode(intersects.get(0).getSceneNode());
+                String names = "";
+                for (int i = 0; i < intersects.size(); i++) {
+                    names += "," + intersects.get(i).getSceneNode().getName();
+                }
+                logger.debug("" + intersects.size() + " intersections detected: " + names + ", getFirst = " + firstIntersect.getName());
+                selectedObject = firstIntersect;
+            } else {
+                logger.debug("no intersection found");
+                selectedObject = null;
+            }
+            updateHud();
+        }
     }
 }

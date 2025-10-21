@@ -146,7 +146,39 @@ rm -f $DIRECTORY
 echo Ready to deploy bundle $BUNDLE from $SOURCE to $DESTDIR. Hit CR
 read
 
+TMPFILELIST=$HOME/tmp/tmpfilelist.txt
+rm -f $TMPFILELIST
 cat $FILELIST | egrep -v "^#" | while read filename
+do
+	if [ -z "$filename" ]
+	then
+		error "empty file name"
+	fi
+	#echo $filename
+
+  FNAME=$SOURCE/$filename
+  if [ ! -r "$FNAME" ]
+  then
+    error "$FNAME not found"
+  fi
+
+  if [ -d $FNAME ]
+  then
+    echo "Expanding directory $FNAME"
+    cd $SOURCE
+    checkrc cd
+    find $filename -type f | grep -v .dirhash | grep -v .dirindex >> $TMPFILELIST
+    checkrc find
+    cd - > /dev/null
+    checkrc cd
+  else
+    echo $filename >> $TMPFILELIST
+  fi
+done
+checkrc "Building $TMPFILELIST"
+
+# Now really process the file list
+cat $TMPFILELIST | while read filename
 do
 	if [ -z "$filename" ]
 	then
@@ -214,6 +246,7 @@ do
           checkrc magick
         fi
         ;;
+      # 24.9.25: Checking suffix and aborting is difficult as there are many many file types and some even without suffix (like 'AUTHORS','LICENCE')
       *)
         cp -p $FNAME $DESTDIR/$filename
         checkrc cp
