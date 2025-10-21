@@ -195,7 +195,7 @@ function icaoChanged(idsuffix) {
     clearOptions("sel_runway_"+idsuffix);
 
     if (icao.length == 4) {
-        loadAirport(icao, idsuffix);
+        loadAirport(icao, idsuffix, null);
     } else {
         // Only start searching with 3 characters. Starting with 2 returns too much data that takes too long and doesn't
         // fit into the select box
@@ -208,7 +208,7 @@ function icaoChanged(idsuffix) {
 /**
  * No search. 'icao' must be the full pure icao.
  */
-function loadAirport(icao, idsuffix) {
+function loadAirport(icao, idsuffix, selectValue) {
     console.log("Loading icao " + icao);
     doGet(serviceshost+"/traffic/airport/"+icao, json => {
         //console.log("got " + json);
@@ -223,10 +223,13 @@ function loadAirport(icao, idsuffix) {
             var latlng = buildLatLng(runway.from);
             var point = L.Projection.Mercator.project(latlng);
             //console.log(latlng, point);
-             var zoom = 11;
-             map.setView(latlng, zoom);
-             var marker = L.marker([latlng.lat, latlng.lng]).addTo(map);
+            var zoom = 11;
+            map.setView(latlng, zoom);
+            var marker = L.marker([latlng.lat, latlng.lng]).addTo(map);
         });
+        if (selectValue != null) {
+            $("#sel_runway_"+ idsuffix).val(selectValue);
+        }
         updateStatus();
     });
 }
@@ -398,6 +401,19 @@ function addWellKnownAirportsToSelectBox(idsuffix) {
     wellKnownAirports.forEach(a => addOption("inp_icao_" + idsuffix, a));
 }
 
+function populateFromPredefinedFlight() {
+    var v= $("#sel_predefined_flights").val();
+    console.log("populateFromPredefinedFlight", v);
+    var parts = v.split(",");
+    $("#inp_icao_from").val(parts[0]);
+    loadAirport(parts[0], "from", parts[1]);
+    //$("#sel_runway_from").val(parts[1]);
+    $("#inp_icao_to").val(parts[2]);
+    loadAirport(parts[2], "to", parts[3]);
+    //$("#sel_runway_to").val(parts[3]);
+    updateStatus();
+}
+
 /**
  * init for travelworld.html
  */
@@ -432,7 +448,7 @@ function init() {
 
     // Setting a default value will reduce the datalist options displayed to only fitting values! This is 'intended by 'browser/spec'?
     document.getElementById("inp_icao_from").value = initialICAO;
-    loadAirport(initialICAO, "from");
+    loadAirport(initialICAO, "from", null);
 
     clearOptions("inp_icao_from");
     addWellKnownAirportsToSelectBox("from");

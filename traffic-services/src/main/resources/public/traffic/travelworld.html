@@ -57,56 +57,70 @@ w3-khaki is color for use cases 'maze', w3-blue(?) for use case traffic.
         </p>
     </div>
 
-    <div class="w3-panel">
-        <h2>Departure</h2>
-        <!-- currently not helpful <div class="w3-panel w3-blue">Flight Data</div>-->
-        <!--<form> will cause a page reload after onclick-->
+    <div class="w3-row">
+        <div class="w3-container w3-half">
+            <div class="w3-panel">
+                <h2>Departure</h2>
+                <!-- currently not helpful <div class="w3-panel w3-blue">Flight Data</div>-->
+                <!--<form> will cause a page reload after onclick-->
 
-        <p><label>TakeOff From</label>
-            <input id="inp_icao_from" class="w3-input" type="text" list="dl_icaos_from" placeholder="Enter ICAO"
-                   oninput="icaoChanged('from')">
-            <datalist id="dl_icaos_from"></datalist>
+                <p><label>TakeOff From</label>
+                    <input id="inp_icao_from" class="w3-input" type="text" list="dl_icaos_from" placeholder="Enter ICAO"
+                           oninput="icaoChanged('from')">
+                    <datalist id="dl_icaos_from"></datalist>
 
 
-            <!-- 'select' has no 'placeholder'. Solution from https://stackoverflow.com/questions/5805059/how-do-i-make-a-placeholder-for-a-select-box -->
-            <select id="sel_runway_from" class="w3-select" oninput="updateStatus()">
-                <option value="" disabled selected>Choose runway</option>
-            </select>
-        </p>
+                    <!-- 'select' has no 'placeholder'. Solution from https://stackoverflow.com/questions/5805059/how-do-i-make-a-placeholder-for-a-select-box -->
+                    <select id="sel_runway_from" class="w3-select" oninput="updateStatus()">
+                        <option value="" disabled selected>Choose runway</option>
+                    </select>
+                </p>
 
-        <p><label>Aircraft</label>
-            <select id="sel_aircraft" class="w3-select" >
-                <option value="c172p">c172p</option>
-                <option value="bluebird">bluebird</option>
-            </select>
-        </p>
+                <p><label>Aircraft</label>
+                    <select id="sel_aircraft" class="w3-select">
+                        <option value="c172p">c172p</option>
+                        <option value="bluebird">bluebird</option>
+                    </select>
+                </p>
 
-        Start a self controlled flight from above departure runway. Use PGUP/DOWN (or +/- icons) for speed control and
-        cursor keys for controlling (a/d for rolling)
-        <br>
-        <button id="btn_launch" class=" w3-button w3-round w3-blue " onclick="launchSingleScene(null, false)"> Regular</button>
-        <button id="btn_launch_vr" class=" w3-button w3-round w3-blue " onclick="launchSingleScene('VR', false)"> VR</button>
+                Start a self controlled flight from above departure runway. Use PGUP/DOWN (or +/- icons) for speed control and
+                cursor keys for controlling (a/d for rolling)
+                <br>
+                <button id="btn_launch" class=" w3-button w3-round w3-blue " onclick="launchSingleScene(null, false)">Regular</button>
+                <button id="btn_launch_vr" class=" w3-button w3-round w3-blue " onclick="launchSingleScene('VR', false)">VR</button>
 
-    </div>
+            </div>
 
-    <div class="w3-panel">
-        <h2>Guided Flight</h2>
-        <!--<form> will cause a page reload after onclick-->
+            <div class="w3-panel">
+                <h2>Guided Flight</h2>
+                <!--<form> will cause a page reload after onclick-->
 
-        <p><label>Destination</label>
-            <input id="inp_icao_to" class="w3-input" type="text" list="dl_icaos_to" placeholder="Enter ICAO"
-                   oninput="icaoChanged('to')">
-            <datalist id="dl_icaos_to"></datalist>
-            <!-- 'select' has no 'placeholder'. Solution from https://stackoverflow.com/questions/5805059/how-do-i-make-a-placeholder-for-a-select-box -->
-            <select id="sel_runway_to" class="w3-select" oninput="updateStatus()">
-                <option value="" disabled selected>Choose runway</option>
-            </select>
-        </p>
+                <p><label>Destination</label>
+                    <input id="inp_icao_to" class="w3-input" type="text" list="dl_icaos_to" placeholder="Enter ICAO"
+                           oninput="icaoChanged('to')">
+                    <datalist id="dl_icaos_to"></datalist>
+                    <!-- 'select' has no 'placeholder'. Solution from https://stackoverflow.com/questions/5805059/how-do-i-make-a-placeholder-for-a-select-box -->
+                    <select id="sel_runway_to" class="w3-select" oninput="updateStatus()">
+                        <option value="" disabled selected>Choose runway</option>
+                    </select>
+                </p>
 
-        Start a guided flight from above departure to destination, relax and enjoy the flight. Just press 's' for starting after the aircraft is loaded.
-        <br>
-        <button id="btn_launch_route" class=" w3-button w3-round w3-blue " onclick="launchSingleScene(null, true)"> Regular</button>
-        <button id="btn_launch_route_vr" class=" w3-button w3-round w3-blue " onclick="launchSingleScene('VR', true)"> VR</button>
+                Start a guided flight from above departure to destination, relax and enjoy the flight. Just press 's' for starting after the aircraft is loaded.
+                <br>
+                <button id="btn_launch_route" class=" w3-button w3-round w3-blue " onclick="launchSingleScene(null, true)"> Regular</button>
+                <button id="btn_launch_route_vr" class=" w3-button w3-round w3-blue " onclick="launchSingleScene('VR', true)"> VR</button>
+            </div>
+        </div>
+        <div class="w3-container w3-half">
+            <div class="w3-panel">
+                <h2>Predefined Flights</h2>
+                <select id="sel_predefined_flights" class="w3-select" oninput="populateFromPredefinedFlight()">
+                    <option value="" disabled selected></option>
+                    <option value="EHAM,06,EHTX,4">EHAM-06 -> EHTX-4</option>
+                    <option value="EGPH,06,EGPF,05">EGPH-06 -> EGPF-05</option>
+                </select>
+            </div>
+        </div>
     </div>
 
     <footer class="w3-container w3-center  w3-blue">
