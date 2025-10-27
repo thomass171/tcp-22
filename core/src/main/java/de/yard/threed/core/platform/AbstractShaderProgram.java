@@ -75,6 +75,11 @@ public abstract class AbstractShaderProgram {
         uniforms.add(new Uniform(name, UniformType.FLOAT));
     }
 
+    public void addIntUniform(String name) {
+        validate(name);
+        uniforms.add(new Uniform(name, UniformType.INT));
+    }
+
     protected static String loadShader(BundleResource shader) {
         Bundle bundle = shader.bundle;
         if (bundle == null) {

@@ -37,6 +37,8 @@ public abstract class WebGlUniform<T> implements NativeUniform<T> {
                 return "float";
             case FLOAT_VEC3:
                 return "Vector3";
+            case INT:
+                return "Int";
             default:
                 throw new RuntimeException("unknown uniform type " + type);
                 //return "unknown";
@@ -57,6 +59,10 @@ public abstract class WebGlUniform<T> implements NativeUniform<T> {
 
     public void setVector4(float x, float y, float z, float w) {
         setVector4(uniform, x, y, z, w);
+    }
+
+    public void setInt(int i) {
+        setInt(uniform, i);
     }
 
     private static native JavaScriptObject buildUniform(String ptype)  /*-{

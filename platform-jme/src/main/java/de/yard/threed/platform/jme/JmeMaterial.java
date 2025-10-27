@@ -118,6 +118,14 @@ public class JmeMaterial implements NativeMaterial {
                         }
                     });
                     break;
+                case INT:
+                    uniforms.put(jmeUniformName, new JmeUniform<Integer>() {
+                        @Override
+                        public void setValue(Integer i) {
+                            material.setInt(jmeUniformName, i);
+                        }
+                    });
+                    break;
                 default:
                     throw new RuntimeException("unhandled uniform type " + uniform.type);
             }

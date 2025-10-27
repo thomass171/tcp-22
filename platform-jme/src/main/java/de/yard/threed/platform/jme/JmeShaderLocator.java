@@ -115,6 +115,7 @@ public class JmeShaderLocator implements AssetLocator {
                     source = source.replaceAll("u_ambient_light_color", "m_ambient_light_color");
                     source = source.replaceAll("u_directional_light_color", "m_directional_light_color");
                     source = source.replaceAll("u_directional_light_direction", "m_directional_light_direction");
+                    source = source.replaceAll("u_debug_mode", "m_debug_mode");
 
                     if (source.contains("u_")){
                         throw new RuntimeException("unconverted 'u_...' uniform?");

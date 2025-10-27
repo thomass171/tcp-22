@@ -18,6 +18,8 @@ uniform bool u_textured;
 uniform vec3 u_ambient_light_color;
 uniform vec3 u_directional_light_color;
 uniform vec3 u_directional_light_direction;
+// 0=no debug, 1=debug normal,2=full color orange
+uniform int u_debug_mode;
 
 void main() {
 
@@ -25,7 +27,7 @@ void main() {
     // use light direction from view space
     vec3 directional_light_direction = inout_light_direction;//u_directional_light_direction;
 
-    if (false) {
+    if (u_debug_mode == 1) {
         // illustrate normal by color. Might be useful for debugging
         FRAGCOLOR  = vec4((normal),1.0);
         return;
@@ -37,6 +39,11 @@ void main() {
     }
     if (false && length(u_directional_light_direction) < 0.99) {
         FRAGCOLOR  = vec4(1.0,1.0,0.0,1.0);
+        return;
+    }
+    if (u_debug_mode == 2) {
+        // just orange
+        FRAGCOLOR  = vec4(1.0,0.5,0.0,1.0);
         return;
     }
 

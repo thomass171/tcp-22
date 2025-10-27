@@ -60,7 +60,10 @@ public class EngineTestUtils {
             return s + "]";
         }
         // up: Even with 'up' arrow goes to the right(children)
-        return getHierarchy(t.getParent().getSceneNode(), maxlevel - 1, false) + "->" + s;
+        if (t.getParent() == null) {
+            return s;
+        }
+        return getHierarchy(t.getParent().getSceneNode(), maxlevel - 1, down) + "->" + s;
     }
 
     /**

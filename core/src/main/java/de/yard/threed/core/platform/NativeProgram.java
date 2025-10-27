@@ -8,6 +8,7 @@ public interface NativeProgram {
     void addFloatVec3Uniform(String name);
     void addBooleanUniform(String name);
     void addFloatUniform(String name);
+    void addIntUniform(String name);
 
     void compile();
 

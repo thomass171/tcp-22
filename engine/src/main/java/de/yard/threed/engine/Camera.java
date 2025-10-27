@@ -176,7 +176,7 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
     }
 
     /**
-     * Liefert die Groesse der Plane in WorldCoordinate Einheiten
+     * Size of near plane in WorldCoordinate units
      *
      * @return
      */
@@ -185,7 +185,7 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
     }
 
     /**
-     * Liefert die Groesse der Plane in WorldCoordinate Einheiten
+     * Size of far plane in WorldCoordinate units
      *
      * @return
      */

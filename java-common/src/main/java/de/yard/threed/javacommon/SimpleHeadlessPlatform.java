@@ -60,6 +60,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     public static List<Point> mockedMouseUpInput = new ArrayList<>();
     protected Configuration configuration;
     public List<NativeSceneNode> sceneNodes = new ArrayList<>();
+    public static GeneralParameterHandler<String> uniformHook = null;
 
     /**
      * Needs access from extending classes.
@@ -758,10 +759,11 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         public HashMap<NumericType, NumericValue> parameters;
         public Map<String, NativeUniform> uniforms = new HashMap<>();
         public HashMap<String, NativeTexture> textures;
+        public Map<String, String> uniformValue = new HashMap<>();
 
         DummyMaterial(String name, HashMap<ColorType, Color> color, HashMap<String, NativeTexture> texture, HashMap<NumericType, NumericValue> parameters, Object effect) {
             this.name = name;
-            this.textures=texture;
+            this.textures = texture;
             this.parameters = parameters;
             this.color = color;
         }
@@ -776,7 +778,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
                         uniforms.put(uniformName, new DummyUniform<Boolean>() {
                             @Override
                             public void setValue(Boolean b) {
-
+                                uniformValue.put(uniformName, b.toString());
                             }
                         });
                         break;
@@ -784,7 +786,13 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
                         uniforms.put(uniformName, new DummyUniform<NativeTexture>() {
                             @Override
                             public void setValue(NativeTexture texture) {
-
+                                String v;
+                                if (texture == null) {
+                                    v = "null";
+                                } else {
+                                    v = (((DummyTexture) texture).name + "," + ((DummyTexture) texture).getName());
+                                }
+                                saveUniformValue(uniformName, v);
                             }
                         });
                         break;
@@ -792,7 +800,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
                         uniforms.put(uniformName, new DummyUniform<Vector3>() {
                             @Override
                             public void setValue(Vector3 v) {
-
+                                uniformValue.put(uniformName, v.toString());
                             }
                         });
                         break;
@@ -800,7 +808,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
                         uniforms.put(uniformName, new DummyUniform<Quaternion>() {
                             @Override
                             public void setValue(Quaternion v) {
-
+                                uniformValue.put(uniformName, v.toString());
                             }
                         });
                         break;
@@ -808,7 +816,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
                         uniforms.put(uniformName, new DummyUniform<Float>() {
                             @Override
                             public void setValue(Float f) {
-
+                                uniformValue.put(uniformName, f.toString());
                             }
                         });
                         break;
@@ -816,6 +824,15 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
                         uniforms.put(uniformName, new DummyUniform<Matrix3>() {
                             @Override
                             public void setValue(Matrix3 v) {
+                                uniformValue.put(uniformName, v.toString());
+                            }
+                        });
+                        break;
+                    case INT:
+                        uniforms.put(uniformName, new DummyUniform<Matrix3>() {
+                            @Override
+                            public void setValue(Matrix3 v) {
+                                uniformValue.put(uniformName, v.toString());
                             }
                         });
                         break;
@@ -824,6 +841,14 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
                 }
             }
         }
+
+        void saveUniformValue(String k, String v) {
+            uniformValue.put(k, v);
+            if (uniformHook!=null){
+                uniformHook.handle(v);
+            }
+        }
+
 
         @Override
         public void setTransparency(boolean enabled) {

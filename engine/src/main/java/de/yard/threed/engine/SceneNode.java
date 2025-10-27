@@ -178,7 +178,8 @@ public class SceneNode {
     public String dump(String indent, int details) {
         String detailstring = "";
         if (details > 0) {
-            detailstring = "(pos=" + getTransform().getPosition() + ",";
+            // 'scale' is useful to see if a object was made invisible by that
+            detailstring = "(pos=" + getTransform().getPosition() + ",scale=" + getTransform().getScale() + ",";
             String mapstring = "";
             Mesh mesh;
             if ((mesh = getMesh()) != null) {

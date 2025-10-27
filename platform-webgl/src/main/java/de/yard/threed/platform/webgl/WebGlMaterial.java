@@ -357,6 +357,14 @@ public class WebGlMaterial implements NativeMaterial {
                         }
                     });
                     break;
+                case INT:
+                    buildUniform(nativeUniformMap, uniforms, uniform, new WebGlUniform<Integer>(uniform.type) {
+                        @Override
+                        public void setValue(Integer i) {
+                            setInt(i);
+                        }
+                    });
+                    break;
                 default:
                     throw new RuntimeException("unhandled uniform type " + uniform.type);
             }

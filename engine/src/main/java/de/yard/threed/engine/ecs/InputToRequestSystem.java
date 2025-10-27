@@ -6,9 +6,7 @@ import de.yard.threed.core.EventType;
 import de.yard.threed.core.IntHolder;
 import de.yard.threed.core.Payload;
 import de.yard.threed.core.Point;
-import de.yard.threed.core.Quaternion;
 import de.yard.threed.core.Util;
-import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeCollision;
 import de.yard.threed.core.platform.NativeSceneNode;
@@ -16,7 +14,6 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 
 import de.yard.threed.engine.gui.*;
-import de.yard.threed.engine.vr.VRController;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
@@ -86,8 +83,7 @@ public class InputToRequestSystem extends DefaultEcsSystem {
     private Camera cameraForMenu = null;
     // VR grabbing is different from dragging. Not sure whether entity dragging ever was more than an attempt/idea.
     boolean entityDraggingEnabled = false;
-    private ControlPanel msgBox = null;
-    private long msgBoxCloseAt = 0;
+    private MessageBox msgBox = null;
 
     public InputToRequestSystem() {
         super(new String[]{}, new RequestType[]{USER_REQUEST_MENU, USER_REQUEST_CONTROLMENU,
@@ -384,9 +380,8 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             }
         }
 
-        if (msgBox != null && msgBoxCloseAt < Platform.getInstance().currentTimeMillis()) {
-            msgBox.remove();
-            msgBox = null;
+        if (msgBox != null) {
+            msgBox.hideIfExpired();
         }
     }
 
@@ -416,15 +411,10 @@ public class InputToRequestSystem extends DefaultEcsSystem {
             String msg = request.getPayload().get("message", s -> s);
             Long duration = request.getPayload().get("duration", s -> Util.parseLong(s));
             // only one message can exist at a time. So if there already is one, overwrite it.
-            if (msgBox != null) {
-                msgBox.remove();
+            if (msgBox == null) {
+                msgBox = new MessageBox(Color.ORANGE);
             }
-            msgBox = ControlPanelHelper.buildForNearplaneBanner(Scene.getCurrent().getDefaultCamera(), Scene.getCurrent().getDimension(), Color.ORANGE);
-            if (msgBox != null) {
-                // headless?
-                ControlPanelHelper.addText(msgBox, msg, new Vector2(0, 0), msgBox.getSize());
-                msgBoxCloseAt = Platform.getInstance().currentTimeMillis() + duration;
-            }
+            msgBox.showMessage(msg, duration);
             return true;
         }
 

@@ -19,6 +19,7 @@ public class Uniform {
     public static String DIRECTIONAL_LIGHT_COLOR = "u_directional_light_color";
     // vector TO the lights origin
     public static String DIRECTIONAL_LIGHT_DIRECTION = "u_directional_light_direction";
+    public static String DEBUG_MODE = "u_debug_mode";
 
     public Uniform(String name, UniformType type) {
         this.name = name;

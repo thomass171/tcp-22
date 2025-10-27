@@ -4,5 +4,5 @@ package de.yard.threed.core.platform;
  * Created by thomass on 30.10.15.
  */
 public enum UniformType {
-    SAMPLER_2D,   FLOAT_VEC4, BOOL, MATRIX3, FLOAT, FLOAT_VEC3
+    SAMPLER_2D, FLOAT_VEC4, BOOL, MATRIX3, FLOAT, FLOAT_VEC3, INT
 }

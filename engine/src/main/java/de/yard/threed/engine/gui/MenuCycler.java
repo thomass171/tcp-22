@@ -31,23 +31,17 @@ public class MenuCycler {
             cycle();
         }
 
-        //linke Controller Button cycled
-        //12.5.21 nicht mehr
-        /*if (Input.getControllerButtonDown(0)) {
-            logger.debug(" found controller button down 0 (left)");
-            cycle();
-        }*/
         //rechts macht irgendwas (z.B.markiert rote Box) und auch menu.
 
         //eine menuausführung koennte 'menu' auf null setzen. Darum ist das nicht unten im Block
-        if (Input.getKeyDown(KeyCode.Alpha3) && menu!=null) {
+        /*27.10.25 not sure whether selectionbykey was an option ever? if (Input.getKeyDown(KeyCode.Alpha3) && menu!=null) {
             logger.debug("3 key was pressed. ");
             menu.checkForSelectionByKey(3);
         }
         if (Input.getKeyDown(KeyCode.Alpha2)&& menu!=null) {
             logger.debug("2 key was pressed. ");
             menu.checkForSelectionByKey(2);
-        }
+        }*/
 
         boolean consumed = false;
         if (menu != null) {
@@ -65,11 +59,7 @@ public class MenuCycler {
                 checkForClick(ray);
             }
             if (mouseClickLocation != null) {
-                //4.10.19 Generischer ueber Ray
-                //Request command = menu.checkForClickedButton(mouselocation);
-                //if (cameraOfMenu != null) {
-                Ray pickingray;//= cameraOfMenu.buildPickingRay(mouselocation);
-                pickingray = menuBuilders[index].getRayForUserClick(mouseClickLocation);
+                Ray pickingray = menuBuilders[index].getRayForUserClick(mouseClickLocation);
                 logger.debug("menu for mouse click (menuWorldPos=" + menuWorldPos + ") picking ray isType " + pickingray);
                 consumed = checkForClick(pickingray);
             }
@@ -78,17 +68,10 @@ public class MenuCycler {
     }
 
     /**
-     * Es ist doch inkonsistent, hier (nur!) auf Close zu pruefen und andere Aktionen per Delegate zu machen.
      *
-     * @param
      */
     private boolean checkForClick(Ray pickingray) {
-        /*Request command =*/
         return menu.checkForClickedArea(pickingray);
-        // 4.10.19 Pruefung auf close sollte/muss anders gehen
-        /*31.12.19if (command != null && command.getType().getLabel() != null && command.getType().getLabel().equals("close")) {
-            cycle();
-        }*/
     }
 
     public void cycle() {
@@ -104,7 +87,7 @@ public class MenuCycler {
     }
 
     /**
-     * Zum programmatischen close
+     * programmatic close
      */
     public void close() {
         if (menu != null) {

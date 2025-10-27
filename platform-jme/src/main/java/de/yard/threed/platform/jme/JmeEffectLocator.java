@@ -113,6 +113,8 @@ public class JmeEffectLocator implements AssetLocator {
                 return "Float";
             case FLOAT_VEC3:
                 return "Vector3";
+            case INT:
+                return "Int";
             default:
                 // no option to just continue
                 throw new RuntimeException("unknown uniform type " + type);

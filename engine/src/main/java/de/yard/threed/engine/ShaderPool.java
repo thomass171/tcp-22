@@ -74,6 +74,7 @@ public class ShaderPool {
         program.program.addFloatVec3Uniform(Uniform.AMBIENT_LIGHT_COLOR);
         program.program.addFloatVec3Uniform(Uniform.DIRECTIONAL_LIGHT_COLOR);
         program.program.addFloatVec3Uniform(Uniform.DIRECTIONAL_LIGHT_DIRECTION);
+        program.program.addIntUniform(Uniform.DEBUG_MODE);
         program.program.compile();
 
         program.defaultSetter = mat -> {
