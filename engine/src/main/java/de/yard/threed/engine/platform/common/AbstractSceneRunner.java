@@ -699,6 +699,11 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
     public SystemTracker getSystemTracker() {
         return systemTracker;
     }
+
+    public int getPendingAsyncCount(){
+        // is there more like invokelater?
+        return futures.size();
+    }
 }
 
 class AsyncJobInfo {

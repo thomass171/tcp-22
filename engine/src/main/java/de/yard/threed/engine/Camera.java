@@ -124,6 +124,10 @@ public /*abstract*/ class Camera /*implements NativeTransform*/ {
         lookAt(lookat, null);
     }
 
+    /**
+     * Returns positive value?
+     * @return
+     */
     public double getNear() {
         return nativecamera.getNear();
     }

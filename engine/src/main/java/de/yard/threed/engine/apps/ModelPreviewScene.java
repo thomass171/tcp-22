@@ -8,6 +8,7 @@ import de.yard.threed.core.geometry.Primitives;
 import de.yard.threed.engine.gui.*;
 import de.yard.threed.engine.platform.common.Settings;
 import de.yard.threed.core.geometry.SimpleGeometry;
+import de.yard.threed.engine.shading.ShaderDebugger;
 
 import java.util.List;
 
@@ -36,9 +37,9 @@ public class ModelPreviewScene extends Scene {
     SceneNode ground = null;
     public double elapsedsec = 0;
     private double cameraDistance = 120;
-    protected SceneNode selectedObject = null;
     MenuCycler menuCycler = null;
     public MessageBox msgBox = null;
+    ShaderDebugger shaderDebugger = null;
 
     /**
      *
@@ -53,7 +54,11 @@ public class ModelPreviewScene extends Scene {
                 // 5
                 "pcm:avatarA",
                 "ac:sample",
-                "ac:hard-coded"
+                "ac:hard-coded",
+                // 8
+                "data:gltf-sample-assets/AlphaBlendModeTest/AlphaBlendModeTest.gltf",
+                // cesiumbox currently not visible for unknown reasons?
+                "engine:cesiumbox/BoxTextured.gltf"
         };
     }
 
@@ -91,14 +96,14 @@ public class ModelPreviewScene extends Scene {
         newModel();
         addToWorld(ModelSamples.buildAxisHelper(50));
 
+      PickingRayObjectSelector  objectSelector = new PickingRayObjectSelector(getMainCamera(), "modelHolderNode");
+        shaderDebugger = new ShaderDebugger(objectSelector);
         menuCycler = new MenuCycler(new MenuProvider[]{
-                new DefaultMenuProvider(getDefaultCamera(), (Camera camera) -> {
-                    ShaderDebugMenu sdm = new ShaderDebugMenu(this);
-                    Menu menu = sdm.buildMenu(camera);
-                    return menu;
-                })
+                shaderDebugger.getMenuProvider(getDefaultCamera(), 3.0)
         });
         msgBox = new MessageBox(Color.ORANGE);
+        shaderDebugger.setMessageBox(msgBox);
+
     }
 
     @Override
@@ -148,7 +153,6 @@ public class ModelPreviewScene extends Scene {
             hud.setText(1, "major: " + major);
             hud.setText(2, "scale: " + scale);
             hud.setText(3, "distance: " + cameraDistance);
-            hud.setText(4, "selected: " + ((selectedObject == null) ? "" : selectedObject.getName()));
         }
     }
 
@@ -239,13 +243,10 @@ public class ModelPreviewScene extends Scene {
         }
 
         Point mouselocation = Input.getMouseUp();
-        if (mouselocation != null) {
-            // Mousebutton released
-            checkForPickingRay(mouselocation);
-        }
+        // Mousebutton released?
         menuCycler.update(mouselocation);
-
         msgBox.hideIfExpired();
+        shaderDebugger.update();
 
         elapsedsec += tpf;
         customUpdate();
@@ -280,115 +281,6 @@ public class ModelPreviewScene extends Scene {
 
     public void setRotationSpeed(double rotationspeed) {
         this.rotationspeed = rotationspeed;
-    }
-
-    private void checkForPickingRay(Point mouselocation) {
-        int x = mouselocation.getX();
-        int y = mouselocation.getY();
-        //logger.debug("Mouse moved to x" + x + ", y=" + y);
-        Ray pickingray = getMainCamera().buildPickingRay(getMainCamera().getCarrier().getTransform(), mouselocation);
-        //logger.debug("built pickingray=" + pickingray + " for x=" + x + ",y=" + y + ", dimension=" + ((Platform) Platform.getInstance()).getDimension());
-        List<NativeCollision> intersects = pickingray.getIntersections();
-        if (intersects.size() > 0) {
-            SceneNode foundModelObject = findIntersectedObject(intersects);
-            if (foundModelObject != null) {
-                selectedObject = foundModelObject;
-            }
-        } else {
-            logger.debug("no intersection found");
-            selectedObject = null;
-        }
-        updateHud();
-    }
-
-    /**
-     * Only consider parts of the model, but no hud or menu parts
-     */
-    private SceneNode findIntersectedObject(List<NativeCollision> intersects) {
-        String names = "";
-        for (int i = 0; i < intersects.size(); i++) {
-            names += "," + intersects.get(i).getSceneNode().getName();
-        }
-        for (NativeCollision intersect : intersects) {
-            SceneNode firstIntersect = new SceneNode(intersect.getSceneNode());
-            if (isPartOfPreviewModel(firstIntersect)) {
-                logger.debug("" + intersects.size() + " intersections detected: " + names + ", getFirst = " + firstIntersect.getName());
-                return firstIntersect;
-            }
-        }
-        return null;
-    }
-
-    private boolean isPartOfPreviewModel(SceneNode n) {
-        if ("modelHolderNode".equals(n.getName())) {
-            return true;
-        }
-        if (n.getParent() == null) {
-            return false;
-        }
-        return isPartOfPreviewModel(n.getParent());
-    }
-}
-
-
-/**
- * Dedicated to CustomShaderMaterial. Just a draft for now, not yet tested due to missing model with that shader.
- */
-class ShaderDebugMenu {
-    public Log logger = Platform.getInstance().getLog(ShaderDebugMenu.class);
-    ModelPreviewScene modelPreviewScene;
-
-    private static double PropertyControlPanelWidth = 0.3;
-    private static double PropertyControlPanelRowHeight = 0.1;
-    private static double PropertyControlPanelMargin = 0.005;
-
-    public ShaderDebugMenu(ModelPreviewScene modelPreviewScene) {
-        this.modelPreviewScene = modelPreviewScene;
-    }
-
-    public ControlPanelMenu buildMenu(Camera camera) {
-        Material mat = Material.buildBasicMaterial(Color.DARKGREEN, null);
-
-        DimensionF rowsize = new DimensionF(PropertyControlPanelWidth, PropertyControlPanelRowHeight);
-        int rows = 1;
-        ControlPanel cp = new ControlPanel(new DimensionF(PropertyControlPanelWidth, rows * PropertyControlPanelRowHeight), mat, 0.01);
-
-        // bottom line. debug mode value spinner, starting at 0
-        // for some unknown reason LabeledSpinnerControlPanel desn't display the current value??
-        IntHolder debugModeSpinnedValue = new IntHolder(0);
-        cp.add(new Vector2(0,
-                        ControlPanelHelper.calcYoffsetForRow(0, rows, PropertyControlPanelRowHeight)),
-                new LabeledSpinnerControlPanel("debug mode", rowsize, PropertyControlPanelMargin, mat, new NumericSpinnerHandler(1, value -> {
-                    if (value != null) {
-                        debugModeSpinnedValue.setValue(value.intValue());
-                    }
-                    double newval = Double.valueOf(debugModeSpinnedValue.getValue());
-                    updateShaderDebugMode((int) newval);
-                    return newval;
-                }, 2, new NumericDisplayFormatter(0)), Color.RED));
-
-        ControlPanelHelper.positionToNearPlaneByGrid(camera, new Dimension(3, 6),
-                new Point(2, 0), cp, new DimensionF(PropertyControlPanelWidth, PropertyControlPanelRowHeight * rows));
-
-        return new ControlPanelMenu(cp);
-    }
-
-    private void updateShaderDebugMode(int debugMode) {
-        if (modelPreviewScene.selectedObject == null) {
-            modelPreviewScene.msgBox.showMessage("no selected object", 3000);
-            return;
-        }
-        if (modelPreviewScene.selectedObject.getMesh() == null || modelPreviewScene.selectedObject.getMesh().getMaterial() == null) {
-            modelPreviewScene.msgBox.showMessage("no mesh/material in select object", 3000);
-            return;
-        }
-        Material material = modelPreviewScene.selectedObject.getMesh().getMaterial();
-        NativeUniform u = material.material.getUniform(Uniform.DEBUG_MODE);
-        if (u == null) {
-            modelPreviewScene.msgBox.showMessage("no uniform '" + Uniform.DEBUG_MODE + "' in selected object material", 3000);
-            return;
-        }
-        u.setValue(debugMode);
     }
 }
 

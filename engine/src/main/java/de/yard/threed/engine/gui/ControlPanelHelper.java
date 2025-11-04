@@ -123,6 +123,11 @@ public class ControlPanelHelper {
         return textArea;
     }
 
+    public static void setText(ControlPanelArea cp, String text) {
+        TextTexture textTexture = new TextTexture(Color.LIGHTGRAY);
+        cp.setTexture(textTexture.getTextureForText(text, Color.RED));
+    }
+
     /**
      * @return
      */
@@ -153,24 +158,20 @@ public class ControlPanelHelper {
      * Position to a cell in a x-y grid counting from top left
      * Headsup: Parameters are in "grid" cells, not pixel!
      */
-    public static void positionToNearPlaneByGrid(Camera camera, Dimension gridDimension, Point panelPosition, ControlPanel panel, DimensionF nativePanelSize) {
+    public static void positionToNearPlaneByGrid(Camera camera, double distanceToNearplane, Dimension gridDimension, Point panelPosition, ControlPanel panel, DimensionF nativePanelSize) {
+        double distance = camera.getNear() + distanceToNearplane;
+        DimensionF planeSize = camera.getPlaneSize(distance);
+        logger.debug("nearPlaneSize=" + planeSize);
 
-        // 'near' might be too near in ModelPreviewScene(?)
-        double distance = camera.getNear();
-        distance = 3.0;
-
-        DimensionF nearPlaneSize = camera.getPlaneSize(distance);//camera.getNearplaneSize();
-        logger.debug("nearPlaneSize=" + nearPlaneSize);
-
-        DimensionF gridCellSize = new DimensionF(nearPlaneSize.width / gridDimension.getWidth(), nearPlaneSize.height / gridDimension.getHeight());
-        Vector2 position = new Vector2(gridCellSize.width / 2.0 - nearPlaneSize.width / 2.0, gridCellSize.height / 2.0 - nearPlaneSize.height / 2.0);
+        DimensionF gridCellSize = new DimensionF(planeSize.width / gridDimension.getWidth(), planeSize.height / gridDimension.getHeight());
+        Vector2 position = new Vector2(gridCellSize.width / 2.0 - planeSize.width / 2.0, gridCellSize.height / 2.0 - planeSize.height / 2.0);
         position = position.add(new Vector2(panelPosition.getX() * gridCellSize.width, panelPosition.getY() * gridCellSize.height));
         // avoid z-fighting on near. TODO: again: why negating? Because near is just a (positive) distance, no coordinate?
         logger.debug("distance=" + distance);
         logger.debug("gridCellSize=" + gridCellSize);
         logger.debug("position" + position);
         logger.debug("");
-        panel.getTransform().setPosition(new Vector3(position.getX(), position.getY(), -(distance + 0.0001)));
+        panel.getTransform().setPosition(new Vector3(position.getX(), position.getY(), -(distance + 0.0001/*protect againt distance 0**/)));
         panel.getTransform().setScale(new Vector3(gridCellSize.getWidth() / nativePanelSize.width, gridCellSize.getHeight() / nativePanelSize.getHeight(), 1.0));
 
         // attach to camera is done by caller (eg. menuCycler)

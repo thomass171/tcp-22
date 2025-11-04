@@ -1,5 +1,7 @@
 package de.yard.threed.core.platform;
 
+import de.yard.threed.core.Vector3;
+
 import java.util.List;
 
 /**
@@ -21,7 +23,9 @@ public class RegisteredShaderMaterial {
 
         for (NativeLight light : lights) {
             if (light.getAmbientColor() != null && mat.getUniform(Uniform.AMBIENT_LIGHT_COLOR) != null) {
-                mat.getUniform(Uniform.AMBIENT_LIGHT_COLOR).setValue(light.getAmbientColor().asVector3());//new Vector3(0.2, 0.2, 0.2));
+                Vector3 lightColor = light.getAmbientColor().asVector3();
+                //logger.debug("Setting Uniform.AMBIENT_LIGHT_COLOR to "+lightColor);
+                mat.getUniform(Uniform.AMBIENT_LIGHT_COLOR).setValue(lightColor);//new Vector3(0.2, 0.2, 0.2));
             }
             if (light.getDirectionalColor() != null && mat.getUniform(Uniform.DIRECTIONAL_LIGHT_COLOR) != null) {
                 mat.getUniform(Uniform.DIRECTIONAL_LIGHT_COLOR).setValue(light.getDirectionalColor().asVector3());//new Vector3(1, 1, 1));

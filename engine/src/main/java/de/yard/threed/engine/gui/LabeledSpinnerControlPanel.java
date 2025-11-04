@@ -21,6 +21,7 @@ public class LabeledSpinnerControlPanel extends ControlPanel {
 
         textTexture = new TextTexture(Color.LIGHTGRAY);
 
+        // label occupying 50% of space
         labelArea = addArea(new Vector2(-(size.width / 4), 0), new DimensionF(size.width / 2, size.height), null);
         // empty string fails due to length 0
         labelArea.setTexture(textTexture.getTextureForText(" " + label, textColor));

@@ -10,6 +10,7 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.engine.ModelFactory;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.avatar.AvatarPmlFactory;
@@ -43,19 +44,19 @@ public abstract class SmartModelLoader {
      * <p>
      * bundleUrl is used for external HTTP bundle, otherwise null
      */
-    public abstract void loadModelBySource(String prefix, String modelname, String bundleUrl, ModelBuildDelegate delegate);
+    public abstract void loadModelBySource(String prefix, String modelname, String bundleUrl, ResourcePath optTexturePath, ModelBuildDelegate delegate);
 
     public static void init() {
         registry = new HashMap<>();
         register("ac", new SmartModelLoader() {
             @Override
-            public void loadModelBySource(String prefix, String modelname, String bundleUrl, ModelBuildDelegate delegate) {
+            public void loadModelBySource(String prefix, String modelname, String bundleUrl, ResourcePath optTexturePath, ModelBuildDelegate delegate) {
                 buildhardCodedAC(StringUtils.substringAfterLast(modelname, ":"), delegate);
             }
         });
         register("pcm", new SmartModelLoader() {
             @Override
-            public void loadModelBySource(String prefix, String modelname, String bundleUrl, ModelBuildDelegate delegate) {
+            public void loadModelBySource(String prefix, String modelname, String bundleUrl, ResourcePath optTexturePath, ModelBuildDelegate delegate) {
                 // Pseudo Bundle
                 //logger.debug("Building pcm for model " + modelname);
                 PortableModel pml;
@@ -82,14 +83,14 @@ public abstract class SmartModelLoader {
         // Default is a regular bundle load of plain GLTF (no XML) including bundle loading
         defaultSmartModelLoader = simpleSmartModelLoader = new SmartModelLoader() {
             @Override
-            public void loadModelBySource(String bundlename, String modelname, String bundleUrl, ModelBuildDelegate delegate) {
+            public void loadModelBySource(String bundlename, String modelname, String bundleUrl, ResourcePath optTexturePath, ModelBuildDelegate delegate) {
                 Bundle bundle = BundleRegistry.getBundle(bundlename);
                 if (bundle == null) {
                     AbstractSceneRunner.instance.loadBundle(bundlename, (Bundle b) -> {
-                        addSimpleModelFromBundle(b, modelname, delegate);
+                        addSimpleModelFromBundle(b, modelname, optTexturePath,delegate);
                     });
                 } else {
-                    addSimpleModelFromBundle(bundle, modelname, delegate);
+                    addSimpleModelFromBundle(bundle, modelname,optTexturePath, delegate);
                 }
             }
         };
@@ -108,7 +109,11 @@ public abstract class SmartModelLoader {
         String modelpart = parts[0];
         double scale = Double.valueOf(parse(parts, "scale", "1.0"));
         Vector3 offset = Util.parseVector3(parse(parts, "offset", "0.0,0.0,0.0"));
-
+        String optTexturePathString = parse(parts, "optTexturePath", null);
+        ResourcePath optTexturePath = null;
+        if (optTexturePathString != null) {
+            optTexturePath = new ResourcePath(optTexturePathString);
+        }
         // Consider external http bundle
         String bundleUrl = parse(parts, "bundleUrl", null);
 
@@ -121,7 +126,7 @@ public abstract class SmartModelLoader {
             smartModelLoader = defaultSmartModelLoader;
         }
 
-        smartModelLoader.loadModelBySource(prefix, modelname, bundleUrl, result -> {
+        smartModelLoader.loadModelBySource(prefix, modelname, bundleUrl, optTexturePath, result -> {
             if (result.getNode() != null) {
                 // 5.9.25 scale needs extra node. But outer around offset. Otherwise small deviations inside offset
                 // will also scale (like in digital-clock model)
@@ -147,12 +152,12 @@ public abstract class SmartModelLoader {
     }
 
     /**
-     * Add a simple/plain GLTF model
+     * Add a simple/plain GLTF model. Uses platform building, so no option for a custom material factory?
      */
-    private static void addSimpleModelFromBundle(Bundle bundle, String modelname, ModelBuildDelegate delegate) {
+    private static void addSimpleModelFromBundle(Bundle bundle, String modelname, ResourcePath optTexturePath, ModelBuildDelegate delegate) {
         BundleResource br = BundleResource.buildFromFullString(modelname);
         br.bundle = bundle;
-        Platform.getInstance().buildNativeModelPlain(new ResourceLoaderFromBundle(br), null, delegate, EngineHelper.LOADER_USEGLTF);
+        Platform.getInstance().buildNativeModelPlain(new ResourceLoaderFromBundle(br), optTexturePath, delegate, EngineHelper.LOADER_USEGLTF);
     }
 
     /**

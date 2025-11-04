@@ -27,6 +27,7 @@ public class SpinnerControlPanel extends ControlPanel {
         double iconareasize = size.height;
         double textareawidth = size.width - 2 * iconareasize;
 
+        //logger.debug("SpinnerControlPanel:size="+size+",textareawidth="+textareawidth);
         addArea(new Vector2(-(textareawidth / 2 + iconareasize / 2), 0), new DimensionF(iconsize, iconsize), () -> {
             logger.debug("left arrow clicked");
             if (handler != null) {
