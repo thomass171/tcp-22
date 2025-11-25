@@ -150,6 +150,13 @@ public class SceneNode {
     }
 
     /**
+     * Also self!
+     */
+    public SceneNode findParentByName(String name) {
+        return findParentByName(name, this);
+    }
+
+    /**
      * @param s
      */
     public static void removeSceneNodeByName(String s) {
@@ -208,15 +215,13 @@ public class SceneNode {
 
         String s = indent + getName() + detailstring + "\n";
         for (NativeTransform n : nativescenenode.getTransform().getChildren()) {
-            s += new SceneNode(n.getSceneNode()).dump(indent + "  ", details);
+            s += new SceneNode(n.getSceneNode()).dump(indent + "    ", details);
         }
         return s;
     }
 
     /**
-     * Liefert den Weg von der root node bis hierhin. Praktisch um Suchergebnisse einzuordnen.
-     *
-     * @return
+     * Returns path from root to this node
      */
     public String getPath() {
         String p = "";
@@ -298,5 +303,15 @@ public class SceneNode {
             }
         }, startnode);
         return result;
+    }
+
+    public static SceneNode findParentByName(String name, SceneNode startnode) {
+        if (name.equals(startnode.getName())) {
+            return startnode;
+        }
+        if (startnode.getParent() == null) {
+            return null;
+        }
+        return findParentByName(name, startnode.getParent());
     }
 }

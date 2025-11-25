@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static de.yard.threed.core.testutil.TestUtils.assertTransform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -109,5 +110,11 @@ public class EngineTestUtils {
         // 15.12.23 Those extracted from AsyncHelper
         AbstractSceneRunner.getInstance().processFutures();
         AbstractSceneRunner.getInstance().processInvokeLaters();
+    }
+
+    public static SceneNode findSingleNodeByName(SceneNode root, String name) {
+        List<SceneNode> foundNodes = root.findNodeByName(name);
+        assertEquals(1, foundNodes.size());
+        return foundNodes.get(0);
     }
 }

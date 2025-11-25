@@ -37,7 +37,7 @@ public class ModelPreviewScene extends Scene {
     SceneNode ground = null;
     public double elapsedsec = 0;
     private double cameraDistance = 120;
-    MenuCycler menuCycler = null;
+    protected MenuCycler menuCycler = null;
     public MessageBox msgBox = null;
     ShaderDebugger shaderDebugger = null;
 
@@ -85,18 +85,13 @@ public class ModelPreviewScene extends Scene {
 
         SmartModelLoader.init();
 
-        customInit();
-
         scaleNode = new SceneNode();
         modelHolderNode = new SceneNode();
         modelHolderNode.getTransform().setParent(scaleNode.getTransform());
         modelHolderNode.setName("modelHolderNode");
         addToWorld(scaleNode);
 
-        newModel();
-        addToWorld(ModelSamples.buildAxisHelper(50));
-
-      PickingRayObjectSelector  objectSelector = new PickingRayObjectSelector(getMainCamera(), "modelHolderNode");
+        PickingRayObjectSelector  objectSelector = new PickingRayObjectSelector(getMainCamera(), "modelHolderNode");
         shaderDebugger = new ShaderDebugger(objectSelector);
         menuCycler = new MenuCycler(new MenuProvider[]{
                 shaderDebugger.getMenuProvider(getDefaultCamera(), 3.0)
@@ -104,6 +99,10 @@ public class ModelPreviewScene extends Scene {
         msgBox = new MessageBox(Color.ORANGE);
         shaderDebugger.setMessageBox(msgBox);
 
+        customInit();
+
+        newModel();
+        addToWorld(ModelSamples.buildAxisHelper(50));
     }
 
     @Override

@@ -140,6 +140,14 @@ public class Util {
         return list;
     }
 
+    public static <T> List<T> toList(T[] ts) {
+        List<T> list = new ArrayList<T>();
+        for (T t : ts) {
+            list.add(t);
+        }
+        return list;
+    }
+
     /*public static <T>T[] buildArrayFromList(List<T> o) {
     //public static Object[] buildArrayFromList(List o) {
        return new T[]{};
@@ -597,7 +605,7 @@ public class Util {
      * Returns an iterator pointing to the first element in the container whose key is considered to go after k.
      * <p>
      * The function uses its internal comparison object (key_comp) to determine this, returning an iterator to the first element for which key_comp(k,element_key) would return true.
-     *
+     * <p>
      * Not really usable like in C++, so probably not used at all.
      */
     public static <K, V> Iterator<K> upperBound(Map<K, V> map, K k, Comparator<K> comparator) {

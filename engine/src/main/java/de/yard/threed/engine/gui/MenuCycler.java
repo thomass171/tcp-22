@@ -2,10 +2,13 @@ package de.yard.threed.engine.gui;
 
 
 import de.yard.threed.core.Point;
+import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.*;
 import de.yard.threed.core.platform.Log;
+
+import java.util.List;
 
 /**
  * Helper for open,close,cycle menus (MenuProvider) on 'M'.
@@ -13,12 +16,16 @@ import de.yard.threed.core.platform.Log;
  */
 public class MenuCycler {
     Log logger = Platform.getInstance().getLog(MenuCycler.class);
-    MenuProvider[] menuBuilders;
+    List<MenuProvider> menuBuilders;
     Menu menu = null;
     int index = 0;
 
     public MenuCycler(MenuProvider[] menuBuilders) {
-        this.menuBuilders = menuBuilders;
+        this.menuBuilders = Util.toList(menuBuilders);
+    }
+
+    public void add(MenuProvider menuProvider){
+        menuBuilders.add(menuProvider);
     }
 
     /**
@@ -54,12 +61,12 @@ public class MenuCycler {
                 //if (controller != null && menu != null) {
                 //logger.debug("che")
                 Ray ray;// = controller.getRay();
-                ray = menuBuilders[index].getRayForUserClick(null);
+                ray = menuBuilders.get(index).getRayForUserClick(null);
                 logger.debug("menu for VR (menuWorldPos=" + menuWorldPos + ") picking ray isType " + ray);
                 checkForClick(ray);
             }
             if (mouseClickLocation != null) {
-                Ray pickingray = menuBuilders[index].getRayForUserClick(mouseClickLocation);
+                Ray pickingray = menuBuilders.get(index).getRayForUserClick(mouseClickLocation);
                 logger.debug("menu for mouse click (menuWorldPos=" + menuWorldPos + ") picking ray isType " + pickingray);
                 consumed = checkForClick(pickingray);
             }
@@ -76,10 +83,10 @@ public class MenuCycler {
 
     public void cycle() {
         if (menu == null) {
-            menu = menuBuilders[index].buildMenu(Scene.getCurrent().getDefaultCamera());
+            menu = menuBuilders.get(index).buildMenu(Scene.getCurrent().getDefaultCamera());
             //27.1.22 menuBuilders[index].getAttachNode().attach(menu.getNode());
-            menu.getNode().getTransform().setParent(menuBuilders[index].getAttachNode());
-            menuBuilders[index].menuBuilt();
+            menu.getNode().getTransform().setParent(menuBuilders.get(index).getAttachNode());
+            menuBuilders.get(index).menuBuilt();
         } else {
             close();
 
@@ -94,7 +101,7 @@ public class MenuCycler {
             menu.remove();
             menu = null;
             index++;
-            if (index >= menuBuilders.length) {
+            if (index >= menuBuilders.size()) {
                 index = 0;
             }
         }
