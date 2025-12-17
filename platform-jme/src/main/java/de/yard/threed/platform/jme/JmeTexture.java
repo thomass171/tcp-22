@@ -5,16 +5,11 @@ import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.plugins.AWTLoader;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.engine.platform.EngineHelper;
 import de.yard.threed.core.ImageData;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeTexture;
 import de.yard.threed.engine.platform.common.Settings;
-import de.yard.threed.javacommon.FileReader;
-import de.yard.threed.javacommon.ImageUtil;
-import de.yard.threed.javacommon.ImageUtils;
-import de.yard.threed.javacommon.LoadedImage;
 
 
 import java.awt.image.BufferedImage;
@@ -74,10 +69,10 @@ public class JmeTexture implements NativeTexture {
     /**
      * 9.11.15: No longer uses the assetmanager, that is focusing on relative directories.
      * 11.4.17: Returns null on (already logged) error.
-     *
+     * xx.xx.24: Builds the texture from buffered image without any IO. 'texturename' is only for logging etc.
      * @return
      */
-    static JmeTexture loadFromFile(String/*NativeResource*/ textureresource, BufferedImage li) {
+    static JmeTexture buildFromBufferedImage(String/*NativeResource*/ texturename, BufferedImage li) {
         long starttime = System.currentTimeMillis();
         //4.5.16: Ohne Zwischenschritt ImageData versuchen. Erscheint aber nicht wirklich schneller
         //JmeTexture tex = buildFromImage(ImageUtil.loadImageFromFile(new File(filename)));
@@ -94,9 +89,9 @@ public class JmeTexture implements NativeTexture {
         // 28.8.23: Since there is no longer an intermediate LoadedImage (which contained a unintended flip conversion),
         // flip needs to be done here.
         Image img = new AWTLoader().load(li/*Image.Format.BGRA8,li.width,li.height,li.buffer*/, true);
-        tex = new JmeTexture(new Texture2D(img), textureresource/*.getName()*/);
+        tex = new JmeTexture(new Texture2D(img), texturename/*.getName()*/);
         logger.debug(String.format("building JmeTexture for %s took %d ms",
-                textureresource/*.getFullName()*/, System.currentTimeMillis() - starttime));
+                texturename, System.currentTimeMillis() - starttime));
 
         return tex;
     }

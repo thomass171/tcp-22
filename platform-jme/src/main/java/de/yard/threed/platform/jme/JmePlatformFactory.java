@@ -8,6 +8,7 @@ public class JmePlatformFactory implements PlatformFactory {
     @Override
     public PlatformInternals createPlatform(Configuration configuration) {
         PlatformInternals platformInternals = PlatformJme.init(configuration);
+        JmeSceneRunner.init(platformInternals);
         return platformInternals;
     }
 }

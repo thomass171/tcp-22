@@ -5,6 +5,7 @@ import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeAudioClip;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.URL;
 
 /**
  * Use native threejs loader like for textures to avoid binary data muddle.
@@ -16,13 +17,22 @@ public class WebGlAudioClip implements NativeAudioClip {
     int id;
     static int gid = 1;
 
-    private WebGlAudioClip(BundleResource br) {
+    private WebGlAudioClip(String br) {
         id =gid++;
-        audioClip = loadClip(br.getFullName(), this, id);
+        audioClip = loadClip(br/*.getFullName()*/, this, id);
     }
 
-    public static WebGlAudioClip loadFromBundle(BundleResource br) {
+  /*  public static WebGlAudioClip loadFromBundle(BundleResource br) {
         return new WebGlAudioClip(br);
+    }*/
+
+    /**
+     * 12.12.25 Load like a texture
+     */
+    public static WebGlAudioClip loadAudioClip(/*2.1.24BundleResource*/URL url) {
+        String filename=url.getAsString();
+        logger.debug("Loading audioclip " + filename);
+        return new WebGlAudioClip(filename);
     }
 
     /**

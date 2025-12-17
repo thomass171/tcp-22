@@ -193,6 +193,7 @@ public class PlatformBundleLoader {
             case 'T'://GLTF
                 // C# conform fall through
             case 't':
+                // text like XML
                 loadRessource(resource, listener, false, resourceLoader);
                 break;
             case 'B'://GLTF binary

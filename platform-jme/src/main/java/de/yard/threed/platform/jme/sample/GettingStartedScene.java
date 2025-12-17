@@ -30,7 +30,8 @@ public class GettingStartedScene extends Scene {
         HashMap<String, String> properties = new HashMap<String, String>();
         Configuration configuration = ConfigurationByEnv.buildDefaultConfigurationWithArgsAndEnv(args, properties);
         PlatformFactory platformFactory = new JmePlatformFactory();
-        JmeSceneRunner sceneRunner = JmeSceneRunner.init(platformFactory.createPlatform(configuration));
+        platformFactory.createPlatform(configuration);
+        JmeSceneRunner sceneRunner = JmeSceneRunner.getInstance();
 
         Scene updater = new GettingStartedScene();
         sceneRunner.runScene(updater);

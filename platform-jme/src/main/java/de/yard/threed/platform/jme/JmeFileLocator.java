@@ -19,6 +19,8 @@ import java.io.InputStream;
  * hier doch IN der Platform JME. Nee, nicht unbedingt. Custom shader werden aus Bundles geladen,
  * allerdings nicht hier.
  * 16.8.23: Using BundleResource is confusing. This locator is not related to bundle.
+ * 11.12.25: We also have JmeShaderLocator and JmeBundleFileLocator. And we have JavaBundleHelper for textures to load textures eg. from the web
+ * without involving any JME locator at all(??). Hmm, the locator is needed for binary data?
  */
 public class JmeFileLocator implements AssetLocator {
     Log logger = Platform.getInstance().getLog(JmeFileLocator.class);

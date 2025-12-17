@@ -46,6 +46,28 @@ public class WebGlAudio implements NativeAudio {
         setLoop(audio, b);
     }
 
+    @Override
+    public void stop() {
+        if (audio == null) {
+            logger.warn("No audio");
+            return;
+        }
+        if (!hasBuffer) {
+            logger.warn("No audio buffer");
+            return;
+        }
+        stop(audio);
+    }
+
+    /*@Override*/
+    /*not possible?? public boolean isLooping() {
+        return audioNode.isLooping();
+    }*/
+
+    @Override
+    public boolean isPlaying() {
+        return isPlaying(audio);
+    }
 
     private static native JavaScriptObject buildAudioListener()  /*-{
         var listener = new $wnd.THREE.AudioListener();
@@ -65,6 +87,10 @@ public class WebGlAudio implements NativeAudio {
         audio.play();
     }-*/;
 
+    private static native void stop(JavaScriptObject audio)  /*-{
+        audio.stop();
+    }-*/;
+
     private static native void setLoop(JavaScriptObject audio, boolean b)  /*-{
         audio.setLoop(b);
     }-*/;
@@ -73,9 +99,15 @@ public class WebGlAudio implements NativeAudio {
         var buffer = $wnd.loadedaudiobuffer.get(clipId);
         if (buffer != null) {
             audio.setBuffer(buffer);
-            console.log("buffer set " + clipId);
+            // too often console.log("buffer set " + clipId);
             return true;
+        } else {
+            console.log("audio buffer set failed for clipid " + clipId);
         }
         return false;
+    }-*/;
+
+    private static native boolean isPlaying(JavaScriptObject audio)  /*-{
+        return audio.isPlaying;
     }-*/;
 }

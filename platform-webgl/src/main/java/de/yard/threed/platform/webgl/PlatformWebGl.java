@@ -621,12 +621,8 @@ public class PlatformWebGl extends DefaultPlatform {
     }
 
     @Override
-    public NativeAudioClip buildNativeAudioClip(BundleResource br) {
-        String bundlebasedir = BundleResolver.resolveBundle(br.bundle.name, Platform.getInstance().bundleResolver).getPath();
-        // TODO don't use filename/bundlebasedir for HTTP part
-        BundleResource resource = new BundleResource(bundlebasedir + "/" + br.getFullName());
-
-        WebGlAudioClip audioClip = WebGlAudioClip.loadFromBundle(resource);
+    public NativeAudioClip buildNativeAudioClip(URL br) {
+        WebGlAudioClip audioClip = WebGlAudioClip.loadAudioClip(br);
         return audioClip;
     }
 

@@ -267,7 +267,7 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public NativeAudioClip buildNativeAudioClip(BundleResource filename) {
+    public NativeAudioClip buildNativeAudioClip(URL filename) {
         logger.warn("NativeAudioClip not implemented");
         return null;
     }

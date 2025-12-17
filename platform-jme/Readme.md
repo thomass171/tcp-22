@@ -1,3 +1,4 @@
+Notes about using JmonkeyEngine
 
 # The IllegalStateException issue
 In certain circumstances the exception
@@ -17,3 +18,13 @@ reason can be the sequence in the same frame.
 2) Transform that node (which dirties its refresh state)
 
 The renderer does a state refresh from root and gui node and will miss that node. But then it will detect the dirty state and throw the exception.
+
+# Resource Loading
+We have JmeFileLocator.
+We also have JmeShaderLocator and JmeBundleFileLocator. And we have JavaBundleHelper for textures to load textures eg. from the web
+ without involving any JME locator at all.
+
+But JME insists on using the assetmanager (needed to do internal conversion of png and wav files), so
+we need FileLocator even it is not for file loading any more.
+
+Now also JmeUrlFileLocator

@@ -43,11 +43,29 @@ public class Audio {
         }
     }
 
+    public void stop() {
+        if (audio == null) {
+            logger.warn("audio is null");
+        } else {
+            audio.stop();
+        }
+    }
+
     public void setLooping(boolean b) {
         if (audio == null) {
             logger.warn("audio is null");
         } else {
             audio.setLooping(b);
+        }
+    }
+    //not in threejs? boolean isLooping();
+
+    public boolean isPlaying() {
+        if (audio == null) {
+            logger.warn("audio is null");
+            return false;
+        } else {
+            return audio.isPlaying();
         }
     }
 }

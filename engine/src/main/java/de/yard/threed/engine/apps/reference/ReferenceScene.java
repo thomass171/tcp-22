@@ -5,13 +5,8 @@ import de.yard.threed.core.geometry.ProportionalUvMap;
 import de.yard.threed.core.geometry.SimpleGeometry;
 import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PreparedModel;
-import de.yard.threed.core.resource.Bundle;
-import de.yard.threed.core.resource.BundleLoadDelegate;
-import de.yard.threed.core.resource.BundleRegistry;
-import de.yard.threed.core.resource.BundleResource;
+import de.yard.threed.core.resource.*;
 import de.yard.threed.core.platform.*;
-import de.yard.threed.core.resource.ResourceLoader;
-import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.core.testutil.RuntimeTestUtil;
 import de.yard.threed.engine.*;
 import de.yard.threed.engine.apps.ModelSamples;
@@ -75,6 +70,7 @@ import de.yard.threed.engine.test.MainTest;
  * testing of lighting. So now we use different materials and cycle material by 'shift-M'.
  * right tower uses custom shading while left tower keeps platform shader.
  * 03.03.25: model "waldo" from "bluebird" added for testing bundle subpath
+ * 15.12.25: Plays remote FG sound jet.nav when started
  */
 public class ReferenceScene extends Scene {
     static Log logger = Platform.getInstance().getLog(ReferenceScene.class);
@@ -923,6 +919,18 @@ public class ReferenceScene extends Scene {
                 }
             });
             remoteShuttleTriggered = true;
+
+            // 12.12.25: Also play a sound from remote
+            URL soundURL = new URL("https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/publicweb/bundlepool/fgdatabasic",new ResourcePath("Sounds"),"jet.wav");
+            AudioClip jetAudioClip = new AudioClip(soundURL);
+            Audio jetAudio = Audio.buildAudio(jetAudioClip);
+            if (jetAudio != null && jetAudio != null) {
+                jetAudio.setVolume(0.5);
+                jetAudio.setLooping(false);
+                // might be too early for async platforms
+                jetAudio.play();
+            }
+
         }
         if (!relativeBundlePathModelTriggered) {
             // "waldo" has advantage of texture and no XML

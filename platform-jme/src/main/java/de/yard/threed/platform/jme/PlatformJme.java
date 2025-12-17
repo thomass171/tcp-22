@@ -267,12 +267,16 @@ public class PlatformJme extends SimpleHeadlessPlatform {
         return JmeMaterial.buildLambertMaterialWithNormalMap(null, texture);
     }*/
 
-    private NativeTexture buildNativeTextureJme(/*2.1.24BundleResource*/URL textureresource, BufferedImage li, HashMap<NumericType, NumericValue> params) {
+    /**
+     * No further IO here.
+     * @param texturename Just the name for logging etc
+     */
+    private NativeTexture buildNativeTextureJme(/*2.1.24BundleResource*/String texturename, BufferedImage li, HashMap<NumericType, NumericValue> params) {
         //logger.debug("buildNativeTexture " + textureresource.getName());
-        JmeTexture tex = JmeTexture.loadFromFile(textureresource.getAsString()/*getFullName()*/, li);
+        JmeTexture tex = JmeTexture.buildFromBufferedImage(texturename, li);
         if (tex == null) {
-            logger.warn("Loading texture " + textureresource.getUrl() + " failed. Using default");
-            return null;//defaulttexture;
+            logger.warn("Loading texture " + texturename + " failed.");
+            return null;
         }
         NumericValue wraps = params.get(NumericType.TEXTURE_WRAP_S);
         if (wraps != null) {
@@ -292,7 +296,7 @@ public class PlatformJme extends SimpleHeadlessPlatform {
         // existing code extracted to JavaBundleHelper.loadBundleTexture
         // load texture from FS, cache or web
         BufferedImage li = JavaBundleHelper.loadBundleTexture(filename);
-        return buildNativeTextureJme(filename, li, parameters);
+        return buildNativeTextureJme(filename.getAsString(), li, parameters);
     }
 
     @Override
@@ -534,8 +538,8 @@ public class PlatformJme extends SimpleHeadlessPlatform {
     }
 
     @Override
-    public NativeAudioClip buildNativeAudioClip(BundleResource br) {
-        JmeAudioClip audioClip = JmeAudioClip.loadFromFile(br, jmeResourceManager.am);
+    public NativeAudioClip buildNativeAudioClip(/*11.12.25BundleResource*/URL filename) {
+        JmeAudioClip audioClip = JmeAudioClip.loadFromFile(filename, jmeResourceManager.am);
         return audioClip;
     }
 

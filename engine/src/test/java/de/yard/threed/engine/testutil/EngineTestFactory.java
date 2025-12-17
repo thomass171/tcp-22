@@ -56,7 +56,7 @@ public class EngineTestFactory {
         //7.7.21 Reset aus EngineHelper (geht nicht beim ersten mal wegen fehlender Platform)
         resetInit();
 
-        //7.7.21: Wie "im echten Leben" vor der Platform immer einen SceneRunner anlegen.
+        //7.7.21: platform and then scene runner are built in init()
         SceneRunnerForTesting.init(configuration, platformFactory, sceneIinitMethod, bundlelist);
         Platform pl = Platform.getInstance();
 

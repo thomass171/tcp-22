@@ -26,7 +26,8 @@ public class Main {
 
         Configuration configuration = ConfigurationByEnv.buildDefaultConfigurationWithArgsAndEnv(args, getInitialProperties());
         PlatformFactory platformFactory=getPlatformFactory(configuration);
-        JmeSceneRunner nsr = JmeSceneRunner.init(platformFactory.createPlatform(configuration));
+        platformFactory.createPlatform(configuration);
+        JmeSceneRunner nsr = JmeSceneRunner.getInstance();//now in platformfactory init(platformFactory.createPlatform(configuration));
 
         logger = Platform.getInstance().getLog(Main.class);
         logger.info("Loading JME Client");

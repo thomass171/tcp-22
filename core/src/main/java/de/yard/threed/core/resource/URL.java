@@ -146,4 +146,11 @@ public class URL implements NativeResource {
         String base = StringUtils.substringBeforeLast(url.getUrl(),"/");
         return new URL(base + "/" + reference);
     }*/
+
+    /**
+     * 12.12.25: Just as reminder: There is no way to reliably rebuild a URL from a string.
+     */
+    public static URL fromString(String s){
+       throw new RuntimeException("not possible");
+    }
 }

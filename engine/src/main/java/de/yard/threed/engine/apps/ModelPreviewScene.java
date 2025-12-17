@@ -248,14 +248,14 @@ public class ModelPreviewScene extends Scene {
         shaderDebugger.update();
 
         elapsedsec += tpf;
-        customUpdate();
+        customUpdate(tpf);
 
     }
 
     /**
      * to be overridden
      */
-    public void customUpdate() {
+    public void customUpdate(double tpf) {
     }
 
     private void toggleGround() {

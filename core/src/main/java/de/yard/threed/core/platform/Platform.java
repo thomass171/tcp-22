@@ -460,7 +460,10 @@ public abstract class Platform {
         logger/*24.10.23 getLog()*/.warn("setOption not implemented: " + option);
     }
 
-    public abstract NativeAudioClip buildNativeAudioClip(BundleResource filename);
+    /**
+     * 11.12.25 Be more generic about where the audio file comes from like we do it for textures
+     */
+    public abstract NativeAudioClip buildNativeAudioClip(/*BundleResource*/URL filename);
 
     public abstract NativeAudio buildNativeAudio(NativeAudioClip audioClip);
 

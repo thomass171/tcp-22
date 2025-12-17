@@ -31,6 +31,21 @@ public class JmeAudio implements NativeAudio {
     }
 
     @Override
+    public void stop() {
+        audioNode.stop();
+    }
+
+    /*@Override*/
+    public boolean isLooping() {
+        return audioNode.isLooping();
+    }
+
+    @Override
+    public boolean isPlaying() {
+       return audioNode.getStatus() == com.jme3.audio.AudioSource.Status.Playing;
+    }
+
+    @Override
     public void setLooping(boolean b) {
         audioNode.setLooping(b);
     }

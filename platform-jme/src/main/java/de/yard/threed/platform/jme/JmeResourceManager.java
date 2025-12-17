@@ -35,6 +35,8 @@ public class JmeResourceManager extends DefaultResourceReader/*5.8.21 JAResource
             // isn't used because bundleResolver is used. Called only when previous locator fail, so it
             // shouldn't affect shader/effects.
             am.registerLocator(null, JmeBundleFileLocator.class);
+            // 12.12.25: Even more generic via URL. Also without using rootPath
+            am.registerLocator(null, JmeUrlFileLocator.class);
         }
     }
 

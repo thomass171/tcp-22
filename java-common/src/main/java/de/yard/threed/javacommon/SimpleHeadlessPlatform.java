@@ -404,6 +404,16 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         return new DummyProgram(name, vertexShader, fragmentShader);
     }
 
+    @Override
+    public NativeAudioClip buildNativeAudioClip(URL url) {
+        return new DummyAudioClip(url);
+    }
+
+    @Override
+    public NativeAudio buildNativeAudio(NativeAudioClip audioClip) {
+        return new DummyAudio(audioClip);
+    }
+
     static class DummySceneNode implements NativeSceneNode {
 
         NativeTransform transform;
@@ -844,7 +854,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
 
         void saveUniformValue(String k, String v) {
             uniformValue.put(k, v);
-            if (uniformHook!=null){
+            if (uniformHook != null) {
                 uniformHook.handle(v);
             }
         }
@@ -1086,6 +1096,57 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
         @Override
         public Vector3 getDirectionalDirection() {
             return direction;
+        }
+    }
+
+    /**
+     *
+     */
+    class DummyAudioClip implements NativeAudioClip {
+
+        URL url;
+
+        public DummyAudioClip(URL url) {
+            this.url = url;
+        }
+
+    }
+
+    /**
+     *
+     */
+    class DummyAudio implements NativeAudio {
+
+        NativeAudioClip clip;
+        boolean playing = false;
+
+        public DummyAudio(NativeAudioClip clip) {
+            this.clip = clip;
+        }
+
+        @Override
+        public void setVolume(double v) {
+
+        }
+
+        @Override
+        public void play() {
+            playing = true;
+        }
+
+        @Override
+        public void stop() {
+            playing = false;
+        }
+
+        @Override
+        public void setLooping(boolean b) {
+
+        }
+
+        @Override
+        public boolean isPlaying() {
+            return playing;
         }
     }
 }

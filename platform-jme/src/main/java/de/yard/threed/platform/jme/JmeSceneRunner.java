@@ -38,8 +38,8 @@ import de.yard.threed.engine.platform.common.*;
  */
 public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRunner {
     Log logger = Platform.getInstance().getLog(JmeSceneRunner.class);
-    // SceneRunner ist Singleton
-    static private JmeSceneRunner scenerunner = null;
+    // SceneRunner ist Singleton. Super class knows instance
+    //static private JmeSceneRunner scenerunner = null;
     public JmeCamera jmecamera;
     //3.12.18 super class Dimension dimension;
     public Node rootnode;
@@ -56,20 +56,20 @@ public class JmeSceneRunner extends AbstractSceneRunner implements NativeSceneRu
     }
 
     public static JmeSceneRunner init(PlatformInternals platformInternals) {
-        if (scenerunner != null) {
+        if (instance != null) {
             throw new RuntimeException("already inited");
         }
-        scenerunner = new JmeSceneRunner(platformInternals);
+        instance = new JmeSceneRunner(platformInternals);
         //MA36 ((EngineHelper) PlatformJme.getInstance()).runner = scenerunner;
         //MA36 scenerunner./*((PlatformJme) PlatformJme.getInstance()).*/httpClient = new AirportDataProviderMock();
-        return scenerunner;
+        return (JmeSceneRunner) instance;
     }
 
     public static JmeSceneRunner getInstance() {
-        if (scenerunner == null) {
+        if (instance == null) {
             throw new RuntimeException("not inited");
         }
-        return scenerunner;
+        return (JmeSceneRunner) instance;
     }
 
     @Override
