@@ -377,7 +377,7 @@ public class SimpleHeadlessPlatform extends DefaultPlatform {
     }
 
     @Override
-    public NativeBundleResourceLoader buildResourceLoader(String bundlename, String location) {
+    public NativeResourceLoader buildResourceLoader(String bundlename, String location) {
 
         return JavaBundleResolverFactory.buildResourceLoader(bundlename, location, bundleResolver);
     }

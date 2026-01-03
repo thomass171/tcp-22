@@ -33,9 +33,7 @@ public class LoadingBundle {
     }
 
     /**
-     * Ob die Erkennung so zuverlaessig ist? Ist vielleicht zu empfindlich. Andererseits...
-     *
-     * @return
+     * Is this really reliable? Until now there is no evidence it isn't.
      */
     public boolean isReady() {
 
@@ -47,10 +45,13 @@ public class LoadingBundle {
             logger.debug("isReady true");
             return true;
         }
-        //TODO config. Beim Laden auf Jupiter über WLAN dauert das auch noch länger. Darum 200 statt 100. Besser 400
+        // Give it a maximum of 400 seconds. But why? The app very likely will fail later. Needs a retry.
+        // And which user will wait that long time? Needs some improvement.
         int timeoutms = 400 * 1000;
         if (doneloading > 0 && Platform.getInstance().currentTimeMillis() - doneloading > timeoutms) {
-            logger.error("Loading bundle " + bundlename + " isType overdue. Expected " + bundle.getExpectedSize() + " items, got only " + bundle.getSize() + ". Aborting.");
+            String msg = "Loading bundle " + bundlename + " is overdue. Expected " + bundle.getExpectedSize() + " items, got only " + bundle.getSize() + ". Aborting.";
+            logger.error(msg);
+            Platform.getInstance().fatal(msg);
             // releases an inconsistent bundle.
             for (String s : bundle.directory) {
                 if (!bundle.contains(s)) {

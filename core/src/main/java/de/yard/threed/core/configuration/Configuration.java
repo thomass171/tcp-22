@@ -1,5 +1,6 @@
 package de.yard.threed.core.configuration;
 
+import de.yard.threed.core.ParseException;
 import de.yard.threed.core.Util;
 
 import java.util.ArrayList;
@@ -76,7 +77,11 @@ public abstract class Configuration {
         if ((s = getString(property)) == null) {
             return defaultValue;
         }
-        return new Double(Util.parseDouble(s));
+        try {
+            return Double.valueOf(Util.parseDouble(s));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Configuration addConfiguration(Configuration configuration, boolean after) {

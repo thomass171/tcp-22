@@ -242,13 +242,10 @@ public class WebGlSceneRenderer implements AnimationController {
     private void updateRender() {
         //logger.debug("updateRender");
 
-        //5.5.21 Was in loopback only before changing loopback
-        //WebGlResourceManager.getInstance().checkBundleCompleted();
-        //15.12.23 rely on preload callback and init chain to have all bundles loaded
-        // ((WebGlBundleLoader) Platform.getInstance().bundleLoader).checkBundleCompleted();
+        //5.5.21 checkBundleCompleted() was in loopback once only before changing loopback
 
         List<NativeCamera> cameras = AbstractSceneRunner.getInstance().getCameras();
-        // erst Scene oder erst camera?
+        // first Scene oder erst camera?
 
         long time = System.currentTimeMillis();
         // tpf ist in Sekunden
@@ -276,11 +273,12 @@ public class WebGlSceneRenderer implements AnimationController {
             int releasedkey = jsreleasedkeys.get(i);
             AbstractSceneRunner.getInstance().releasedkeys.add(releasedkey);
         }
-        // attach model load by platform internal (GLTF)loader.
+        // attach model loaded by platform internal (GLTF)loader (Typically not is use).
         List<WebGlLoaderData> loadedmodel = WebGlInput.getLoadedmodelList();
         for (WebGlLoaderData ld : loadedmodel) {
             int delegateid = ld.getDelegateid();
-            logger.debug("loaded model detected: delegateid=" + delegateid);
+            logger.debug("platform loaded GLTF model detected: delegateid=" + delegateid);
+            // 18.12.2025: Once we tried to attach a ProcessPolicy (eg. AC) here, but where should it come from (generic from platform)?
             //TODO BuildResult und SceneNode sollte nicht IN der platform verwendet werden.28.11.18: wirklich nicht
             SceneNode node = new SceneNode(new WebGlSceneNode(ld.getNode()));
             //TODO dynamisch nur fuer FG und generisch in platform

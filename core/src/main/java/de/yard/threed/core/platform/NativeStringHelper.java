@@ -6,6 +6,9 @@ import de.yard.threed.core.CharsetException;
  * Created by thomass on 01.04.16.
  */
 public interface NativeStringHelper {
+    /**
+     * trim leading and trailing space (all characters <= 0x20)
+     */
     String trim(String s);
 
     int length(String s);
@@ -18,8 +21,8 @@ public interface NativeStringHelper {
 
     /**
      * 22.5.25: Not the Java core logic, where separator is a pattern! separator is just a string!
-     */
-    String[] split(String str, String separator);
+     * /
+    String[] split(String str, String separator);*/
 
     public String[] splitByWhitespace(String str) ;
 

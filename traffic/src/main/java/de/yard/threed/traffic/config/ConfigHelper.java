@@ -1,11 +1,6 @@
 package de.yard.threed.traffic.config;
 
-import de.yard.threed.core.Degree;
-import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.ParsingHelper;
-import de.yard.threed.core.Quaternion;
-import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Vector3;
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.engine.ViewPoint;
@@ -35,7 +30,12 @@ public class ConfigHelper {
             }
             String angle = XmlHelper.getChildValue(node, "angle");
             if (!StringUtils.empty(angle)) {
-                double[] d = ParsingHelper.getTriple(angle);
+                double[] d = null;
+                try {
+                    d = ParsingHelper.getTriple(angle);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
                 rotation = Quaternion.buildFromAngles(new Degree(d[0]), new Degree(d[1]), new Degree(d[2]));
             }
             String s_scale = XmlHelper.getChildValue(node, "scale");
@@ -55,7 +55,12 @@ public class ConfigHelper {
      */
     public static Vector3 getVector3(String s) {
 
-        double[] p = ParsingHelper.getTriple(s);
+        double[] p = null;
+        try {
+            p = ParsingHelper.getTriple(s);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         if (p.length != 3) {
             return null;
         }

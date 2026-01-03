@@ -186,6 +186,9 @@ public class Color {
     }
 
     public static Color parseString(String data) {
+        // 31.12.25 Be more tolerant for leading/trailing space
+        data = StringUtils.trim(data);
+
         if (StringUtils.toLowerCase(data).equals("green")) {
             return Color.GREEN;
         }
@@ -204,7 +207,7 @@ public class Color {
         if (StringUtils.toLowerCase(data).equals("white")) {
             return Color.WHITE;
         }
-        String[] s = StringUtils.split(data, " ");
+        String[] s = StringUtils.splitByWholeSeparator(data, " ");
         if (s.length != 4) {
             getLogger().error("parseString: invalid color data");
         }

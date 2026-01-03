@@ -3,20 +3,15 @@ package de.yard.threed.tools;
 import de.yard.threed.core.PortableModelTest;
 import de.yard.threed.core.loader.LoaderGLTF;
 import de.yard.threed.core.loader.PortableModel;
-import de.yard.threed.core.loader.PortableModelDefinition;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleResource;
 
-import de.yard.threed.core.loader.InvalidDataException;
 import de.yard.threed.core.platform.NativeJsonValue;
 import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.core.testutil.InMemoryBundle;
 import de.yard.threed.core.testutil.TestUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

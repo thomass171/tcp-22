@@ -24,8 +24,12 @@ public class Packet {
         }
         Packet packet = new Packet();
         for (String s : block) {
-            String[] parts = StringUtils.split(s, "=");
-            if (parts.length == 1) {
+            String[] parts = StringUtils.splitByWholeSeparator(s, "=");
+            // 3.1.26 There has never been an empty string.  A '=' at the end will result in null always.
+            if (parts.length != 2) {
+                throw new RuntimeException("");
+            }
+            if (parts[1].length() == 0) {
                 packet.add(parts[0], null);
             } else {
                 packet.add(parts[0], parts[1]);

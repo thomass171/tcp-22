@@ -1,6 +1,7 @@
 package de.yard.threed.trafficservices.controller;
 
 
+import de.yard.threed.core.ParseException;
 import de.yard.threed.core.Util;
 import de.yard.threed.trafficcore.GeoRoute;
 import de.yard.threed.trafficservices.services.RouteService;
@@ -31,11 +32,16 @@ public class RouteController {
             @RequestParam("runwayToFrom") String runwayToFrom,
             @RequestParam("runwayToTo") String runwayToTo) {
 
-        GeoRoute geoRoute = routeService.buildAirportToAirportRoute(
-                Util.parseLatLon(runwayFromFrom),
-                Util.parseLatLon(runwayFromTo),
-                Util.parseLatLon(runwayToFrom),
-                Util.parseLatLon(runwayToTo));
+        GeoRoute geoRoute = null;
+        try {
+            geoRoute = routeService.buildAirportToAirportRoute(
+                    Util.parseLatLon(runwayFromFrom),
+                    Util.parseLatLon(runwayFromTo),
+                    Util.parseLatLon(runwayToFrom),
+                    Util.parseLatLon(runwayToTo));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
 
         return ResponseEntity.ok(new RouteBuildResponse(geoRoute.toString()));
     }

@@ -1,11 +1,7 @@
 package de.yard.threed.engine.vr;
 
-import de.yard.threed.core.Color;
-import de.yard.threed.core.Util;
-import de.yard.threed.core.Vector2;
-import de.yard.threed.core.Vector3;
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Camera;
 import de.yard.threed.engine.Observer;
@@ -86,15 +82,23 @@ public class VrInstance {
         Vector3 val = new Vector3();
         String s_offsetVR = Platform.getInstance().getConfiguration().getString("offsetVR");
         if (s_offsetVR != null) {
-            val = Util.parseVector3(s_offsetVR);
+            try {
+                val = Util.parseVector3(s_offsetVR);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
         instance = new VrInstance(emulated ? MODE_EMULATED : MODE_OBSERVER, val);
 
         String cpposrot = (Platform.getInstance()).getConfiguration().getString("vr-controlpanel-posrot");
         if (cpposrot != null) {
 
-            if ((instance.cpTransform = LocalTransform.buildFromConfig(cpposrot)) == null) {
-                logger.warn("Ignoring invalid vr-controlpanel-posrot " + cpposrot);
+            try {
+                if ((instance.cpTransform = LocalTransform.buildFromConfig(cpposrot)) == null) {
+                    logger.warn("Ignoring invalid vr-controlpanel-posrot " + cpposrot);
+                }
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
             }
         }
         if (emulated) {

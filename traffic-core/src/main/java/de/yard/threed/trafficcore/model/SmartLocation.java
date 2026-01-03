@@ -1,10 +1,6 @@
 package de.yard.threed.trafficcore.model;
 
-import de.yard.threed.core.GeoCoordinate;
-import de.yard.threed.core.LatLon;
-import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Util;
-import de.yard.threed.core.Vector3;
+import de.yard.threed.core.*;
 
 /**
  * 26.3.20 No ICAO here? Das nehm ich aber optional mal mit rein.
@@ -68,7 +64,11 @@ public class SmartLocation {
      */
     public GeoCoordinate getGeoCoordinate() {
         if (StringUtils.startsWith(location, "geo:")) {
-            return GeoCoordinate.parse(StringUtils.substringAfter(location, "geo:"));
+            try {
+                return GeoCoordinate.parse(StringUtils.substringAfter(location, "geo:"));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
         return null;
     }
@@ -77,7 +77,11 @@ public class SmartLocation {
         if (StringUtils.startsWith(location, "coordinate:")) {
             String s = StringUtils.substringAfter(location, "coordinate:");
             //if (StringUtils.split(s,",").length == 2){
-            return Util.parseVector3(s);
+            try {
+                return Util.parseVector3(s);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
             //}
         }
         return null;

@@ -34,7 +34,7 @@ function ThreedonDocumentKeyUp(event) {
     gotkeydown.delete(event.keyCode);
 }
 
-//die async geladenenen GLTF model
+// GLTF model async loaded by platform GLTF loader (typically not in use)
 var loadedmodel = new Array();
 var loadedaudiobuffer = new Map();
 

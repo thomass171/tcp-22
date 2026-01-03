@@ -50,7 +50,7 @@ public class SimpleBundleResolver extends BundleResolver {
         List<BundleResolver> l = new ArrayList<BundleResolver>();
 
         if (bundlepathFromEnv != null) {
-            String[] parts = StringUtils.split(bundlepathFromEnv, ":");
+            String[] parts = StringUtils.splitByWholeSeparator(bundlepathFromEnv, ":");
             for (int i = 0; i < parts.length; i++) {
                 l.add(new SimpleBundleResolver(parts[i], resourceReader));
             }

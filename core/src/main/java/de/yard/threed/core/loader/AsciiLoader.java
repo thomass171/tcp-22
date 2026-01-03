@@ -511,7 +511,7 @@ class ObjFaceTokenizer extends Tokenizer {
             throw new InvalidDataException("not a face3: " + input);
         }
         for (String s : parts) {
-            String[] s2 = StringUtils.split(s, "/");
+            String[] s2 = StringUtils.splitByWholeSeparator(s, "/");
             token.vi[index] = Integer.parseInt(s2[0]);
 
             switch (s2.length) {

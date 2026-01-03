@@ -7,10 +7,11 @@ import de.yard.threed.core.GeneralParameterHandler;
 import de.yard.threed.core.HttpBundleResourceLoader;
 import de.yard.threed.core.loader.LoaderGLTF;
 import de.yard.threed.core.loader.PortableModel;
-import de.yard.threed.core.platform.NativeBundleResourceLoader;
+import de.yard.threed.core.platform.AsyncHttpResponse;
+import de.yard.threed.core.platform.AsyncJobDelegate;
+import de.yard.threed.core.platform.NativeResourceLoader;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
-import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.core.resource.HttpBundleResolver;
@@ -18,9 +19,9 @@ import de.yard.threed.core.resource.ResourceLoader;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.platform.PlatformBundleLoader;
 import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
-import de.yard.threed.engine.platform.ResourceLoaderFromDelayedBundle;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.engine.testutil.EngineTestFactory;
+import de.yard.threed.engine.testutil.EngineTestUtils;
 import de.yard.threed.engine.testutil.TestHelper;
 import de.yard.threed.core.testutil.WireMockHelper;
 import de.yard.threed.engine.util.BooleanMethod;
@@ -56,6 +57,7 @@ public class PlatformBundleLoaderTest {
         wireMockServer.start();
 
         JavaWebClient.close();
+        BundleRegistry.clear();
     }
 
     @AfterEach
@@ -66,7 +68,14 @@ public class PlatformBundleLoaderTest {
     @Test
     public void testHttpBundleLoad() throws Exception {
         Bundle bundle = runHttpBundleLoad(false);
-        assertNotNull(bundle.getResource("model.gltf"));
+        assertNull(bundle.getResource("model.gltf"));
+        assertFalse(bundle.contains("model.gltf"));
+
+        // now load it delayed
+        loadDelayedContentOfBundle(new BundleResource(bundle, "model.gltf"), response -> {
+            assertNotNull(bundle.getResource("model.gltf"));
+            assertTrue(bundle.contains("model.gltf"));
+        });
     }
 
     @Test
@@ -99,8 +108,8 @@ public class PlatformBundleLoaderTest {
         assertFalse(bundle.contains("cesiumbox/BoxTextured.gltf"));
         assertFalse(bundle.contains("cesiumbox/BoxTextured.bin"));
 
-        ResourceLoader resourceLoader = new ResourceLoaderFromDelayedBundle(new BundleResource(bundle,"cesiumbox/BoxTextured.gltf"),
-                Platform.getInstance().buildResourceLoader(bundle.name, null));
+        // 18.12.25: Was ResourceLoaderFromDelayedBundle before
+        ResourceLoader resourceLoader = new ResourceLoaderFromBundle(new BundleResource(bundle, "cesiumbox/BoxTextured.gltf"));
 
         // LoaderGLTF will use "reference" for bin
         BooleanHolder handled = new BooleanHolder(false);
@@ -141,7 +150,7 @@ public class PlatformBundleLoaderTest {
 
         String bundleName = "unknownBundle";
         // location is retrieved from resolver
-        NativeBundleResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, null);
+        NativeResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, null);
 
         bundleLoader.loadBundle(bundleName, false, bundle -> {
             loadedBundle.add(bundle);
@@ -156,7 +165,7 @@ public class PlatformBundleLoaderTest {
 
         String bundleName = "httpBundle";
         // location is retrieved from resolver
-        NativeBundleResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, null);
+        NativeResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, null);
         // cannot be resolved without resolver
         assertNull(resourceLoader);
 
@@ -180,7 +189,7 @@ public class PlatformBundleLoaderTest {
         String bundleName = "fgdatabasic";
         List<Bundle> loadedBundle = new ArrayList();
         String baseUrl = "https://ubuntu-server.udehlavj1efjeuqv.myfritz.net/publicweb/bundlepool";
-        NativeBundleResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, baseUrl);
+        NativeResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, baseUrl);
 
         bundleLoader.loadBundle(bundleName, false, bundle -> {
             log.debug("got it");
@@ -213,7 +222,7 @@ public class PlatformBundleLoaderTest {
 
         List<Bundle> loadedBundle = new ArrayList();
         String baseUrl = "http://localhost:" + wireMockServer.port() + "/bundles";
-        NativeBundleResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, baseUrl);
+        NativeResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, baseUrl);
 
         // launch twice to validate concurrent loading. Delegate should be executes twice, but download only once.
         bundleLoader.loadBundle(bundleName, false, bundle -> {
@@ -233,12 +242,13 @@ public class PlatformBundleLoaderTest {
 
         assertEquals(2, loadedBundle.size());
         assertEquals(0, bundleLoader.getLoadingbundles().size());
-        wireMockServer.verify(3, RequestPatternBuilder.allRequests());
+        wireMockServer.verify(1/*19.12.25 delyed GLTF 3*/, RequestPatternBuilder.allRequests());
 
         assertEquals(0, AbstractSceneRunner.getInstance().futures.size());
         Bundle bundle = loadedBundle.get(0);
         assertNotNull(bundle);
         assertEquals(baseUrl + "/bundle1", bundle.getBasePath());
+        BundleRegistry.registerBundle(bundleName, bundle);
         return bundle;
     }
 
@@ -267,7 +277,7 @@ public class PlatformBundleLoaderTest {
         List<Bundle> loadedBundle = new ArrayList();
 
         // location is retrieved from resolver
-        NativeBundleResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, null);
+        NativeResourceLoader resourceLoader = Platform.getInstance().buildResourceLoader(bundleName, null);
 
         // launch twice to validate concurrent loading. Delegate should be executes twice, but download only once.
         // But Filesystem will be sync anyway, so here one after the other.
@@ -293,8 +303,21 @@ public class PlatformBundleLoaderTest {
         Bundle bundle = loadedBundle.get(0);
         assertNotNull(bundle);
         assertEquals(((SimpleHeadlessPlatform) Platform.getInstance()).hostdir + "/bundles/engine", bundle.getBasePath());
+        BundleRegistry.registerBundle(bundleName, bundle);
         return bundle;
     }
 
+    private void loadDelayedContentOfBundle(BundleResource br, AsyncJobDelegate<AsyncHttpResponse> delegate) throws Exception {
+        BooleanHolder delegateCalled = new BooleanHolder(false);
 
+        new ResourceLoaderFromBundle(br).loadResource(response -> {
+            delegate.completed(response);
+            delegateCalled.setValue(true);
+        });
+
+        TestUtils.waitUntil(() -> {
+            TestHelper.processAsync();
+            return delegateCalled.getValue();
+        }, 10000);
+    }
 }

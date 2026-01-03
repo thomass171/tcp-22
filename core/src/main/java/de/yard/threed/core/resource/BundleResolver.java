@@ -21,6 +21,7 @@ public abstract class BundleResolver {
     }
 
     /**
+     * Lookup where to look for a bundle. Used for bundle loading.
      * Returns path to location where directory is expected.
      * Returns null if bundle couldn't be resolved (was RuntimeException until 15.11.23).
      */

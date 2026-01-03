@@ -50,12 +50,13 @@ public class ImageData {
      * @param ins
      */
     public static ImageData buildFromMyargb(String ins) {
-        String[] data = StringUtils.split(ins, "\n");
+        String[] data = StringUtils.splitByWholeSeparator(ins, "\n");
         int width = Util.parseInt(data[0]);
         int height = Util.parseInt(data[1]);
         logger.info("buildFromMyargb: image loaded. length=" + data.length + ", width=" + width + ", height=" + height);
-        int[] pixel = new int[data.length - 2];
-        for (int i = 2; i < data.length; i ++) {
+        // 27.12.25 After change in split() there is one more "" element at the end that needs to be ignored
+        int[] pixel = new int[data.length - 2 -1];
+        for (int i = 2; i < data.length-1; i ++) {
             pixel[i-2] = Util.parseInt(data[i]);
             if (pixel[i-2] != 0) {
                 //logger.info("image loaded. pixel i="+pixel[i]);

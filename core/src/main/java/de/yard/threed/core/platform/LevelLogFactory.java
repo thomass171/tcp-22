@@ -53,7 +53,7 @@ public class LevelLogFactory implements NativeLogFactory{
 
     private int getLevel(String name) {
         int level = defaultLevel;
-        String[] parts = StringUtils.split(name, "\\.");
+        String[] parts = StringUtils.splitByWholeSeparator(name, ".");
         if (parts.length != 0) {
 
             String key = "";

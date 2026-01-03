@@ -279,7 +279,7 @@ public class DefaultPlatform extends Platform {
     }
 
     @Override
-    public NativeBundleResourceLoader buildResourceLoader(String basedir, String location) {throw new RuntimeException("not implemented"); }
+    public NativeResourceLoader buildResourceLoader(String basedir, String location) {throw new RuntimeException("not implemented"); }
 
     /**
      * 20.8.24: Just a simple default implementation. The platform might do it more efficiently.

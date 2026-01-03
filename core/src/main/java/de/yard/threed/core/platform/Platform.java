@@ -74,25 +74,17 @@ public abstract class Platform {
      * 15.2.24: Decoupled from bundle(Resource)
      * 11.10.24: In case of an error no node should be passed to delegate.
      * 06.02.25: Has no option for a material factory because that would be specific for our GLTF loader.
+     * @Param resourceLoader Needs to point to a GLTF file
      */
     public abstract void buildNativeModelPlain(ResourceLoader resourceLoader, ResourcePath opttexturepath, ModelBuildDelegate modeldelegate, int options);
 
     /**
-     * Das Bundle wird in jedem Fall asynchron, aber nicht multithreaded ueber die Platform geladen.
-     * async analog zu Modeln
-     * 20.2.18: Wenn ein Bundle schon geladen wurde, wird es nicht doppelt geladen (Eine Race Condition gibt es aber trotzdem).
-     * Das Verhalten ist unabhaengig davon, ob das Model schon geladen wurde oder nicht.
-     *
-     * 22.7.21: Aus Platform hier hin. Nicht static. Muss von webgl overrided werden!
-     * GHenerell async aber ohne MT.
+     * Up to 2021 we had a
+     * loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed)
+     * here, but meanwhile we have
+     * buildResourceLoader()
+     * for a more generic approach.
      */
-    /*public abstract void loadBundle(String bundlename, BundleLoadDelegate bundleLoadDelegate, boolean delayed);/* {
-        AsyncHelper.asyncBundleLoad(bundlename, AbstractSceneRunner.getInstance().invokeLater(bundleLoadDelegate), delayed);
-    }* /
-
-    public  void loadBundle(String bundlename, BundleLoadDelegate loadlistener) {
-        loadBundle(bundlename, loadlistener, false);
-    }*/
 
     /**
      * Kann auch destroyte enthalten, weil Unity recursiv destroyed.
@@ -468,18 +460,22 @@ public abstract class Platform {
     public abstract NativeAudio buildNativeAudio(NativeAudioClip audioClip);
 
     /**
+     * Build a resource loader for loading a bundle. Uses bundleresolver to know where to look for the bundle.
+     * Wrong comment(?? Isn't it only for loading a bundle?):
      * Build a loader for loading a single resource(file) either from some web/HTTP bundle location or from
      * a local(HOSTDIR) bundle. Provides the option to get a single file from a bundle without loading the complete bundle.
+     * End of wrong comment
+     *
      * This method is also used internally for loading a bundle!
      * <p>
-     * "bundlename" to make clear its for bundle content loading with resolver (or abs HTTP).
+     * "bundlename" to make clear it's for bundle content loading with resolver (or abs HTTP).
      * if location is null, the resolver will be used.
      * Should location end with bundlename or not? Probably not, because bundlename is standalone parameter.
      * Examples:
      * - buildResourceLoader("engine", null) for loading from a local bundle
      * - buildResourceLoader("some-bundle", "http://somehost:8085/bundles") for loading from a remote bundle
      */
-    public abstract NativeBundleResourceLoader buildResourceLoader(String bundlename, String location);
+    public abstract NativeResourceLoader buildResourceLoader(String bundlename, String location);
 
     /**
      * Do a recursive depth first search for a node like SceneNode.findNodeByName(String name, SceneNode startnode) does.
@@ -505,5 +501,13 @@ public abstract class Platform {
         for (RegisteredShaderMaterial m : shaderMaterials) {
             m.updateLightUniforms(lights);
         }
+    }
+
+    /**
+     * Inform the user that something bad happened which might cause the screen staying blank or an app
+     * freeze.
+     */
+    public void fatal(String msg) {
+        // default implementation doing nothing
     }
 }

@@ -1,9 +1,6 @@
 package de.yard.threed.trafficcore;
 
-import de.yard.threed.core.GeoCoordinate;
-import de.yard.threed.core.LatLon;
-import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Util;
+import de.yard.threed.core.*;
 import de.yard.threed.trafficcore.model.Runway;
 
 import java.util.ArrayList;
@@ -82,12 +79,12 @@ public class GeoRoute {
         waypointsAfterTouchdown.add(end);
     }
 
-    public static GeoRoute parse(String s) {
+    public static GeoRoute parse(String s) throws ParseException {
         GeoRoute route = new GeoRoute();
-        String[] mp = StringUtils.split(s, "->");
+        String[] mp = StringUtils.splitByWholeSeparator(s, "->");
         List<GeoCoordinate> l = route.waypointsBeforeTakeoff;
         for (int i = 0; i < mp.length; i++) {
-            String[] ip = StringUtils.split(mp[i], ":");
+            String[] ip = StringUtils.splitByWholeSeparator(mp[i], ":");
             if (ip[0].equals("wp")) {
                 l.add(toGeoCoordinate(Util.parseLatLon(ip[1])));
             } else if (ip[0].equals("takeoff")) {

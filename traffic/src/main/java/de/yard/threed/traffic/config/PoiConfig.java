@@ -1,12 +1,9 @@
 package de.yard.threed.traffic.config;
 
-import de.yard.threed.core.Degree;
-import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.ParsingHelper;
+import de.yard.threed.core.*;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.traffic.flight.FlightLocation;
-import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.core.platform.NativeNode;
 
 
@@ -20,7 +17,12 @@ public class PoiConfig extends ConfigNode {
 
     public PoiConfig(NativeNode nativeNode) {
         super(nativeNode);
-        double[] d = ParsingHelper.getTriple(nativeNode.getTextValue());
+        double[] d = null;
+        try {
+            d = ParsingHelper.getTriple(nativeNode.getTextValue());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         longitude = new Degree(d[0]);
         latitude = new Degree(d[1]);
         elevation = d[2];

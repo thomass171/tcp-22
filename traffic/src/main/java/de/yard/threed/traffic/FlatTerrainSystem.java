@@ -1,8 +1,6 @@
 package de.yard.threed.traffic;
 
-import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.Payload;
-import de.yard.threed.core.Util;
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.BundleRegistry;
@@ -14,12 +12,9 @@ import de.yard.threed.engine.ecs.EcsGroup;
 import de.yard.threed.engine.platform.ResourceLoaderFromBundle;
 import de.yard.threed.engine.util.XmlHelper;
 import de.yard.threed.traffic.config.ConfigHelper;
-import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.trafficcore.geodesy.MapProjection;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.resource.Bundle;
-import de.yard.threed.core.Event;
-import de.yard.threed.core.EventType;
 import de.yard.threed.trafficcore.geodesy.SimpleMapProjection;
 
 import java.util.List;
@@ -119,7 +114,13 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
 
         if (evt.getType().equals(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED)) {
             Payload payload = evt.getPayload();
-            GeoCoordinate initialPosition = payload.get("initialPosition", s -> GeoCoordinate.parse(s));
+            GeoCoordinate initialPosition = payload.get("initialPosition", s -> {
+                try {
+                    return GeoCoordinate.parse(s);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            });
             // 28.10.21 index 1 is deprecated  nearestairport and thus always null.
             //projection = (SimpleMapProjection) evt.getPayloadByIndex(1);
             Tile initialTile = null;//18.3.24 always null in the past? (Tile) evt.getPayloadByIndex(/*16.10.21 2 mal 1 doch wider 2*/1);

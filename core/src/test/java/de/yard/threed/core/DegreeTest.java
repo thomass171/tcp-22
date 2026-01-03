@@ -17,7 +17,7 @@ public class DegreeTest {
     static Platform platform = CoreTestFactory.initPlatformForTest(new PlatformFactoryTestingCore(), null);
 
     @Test
-    public void test1() {
+    public void test1() throws ParseException {
         Degree d = new Degree(6.580982);
         assertEquals("6.580982", d.toString());
 

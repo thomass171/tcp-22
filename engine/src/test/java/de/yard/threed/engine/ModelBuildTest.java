@@ -110,12 +110,13 @@ public class ModelBuildTest {
             BundleResource controllight = new BundleResource(cb, "ControlLight.gltf");
             assertFalse(cb.failed(controllight));
             // 15.12.23: After removing 'delayed' three value changed
-            assertTrue/*False*/(cb.contains(controllight));
+            // 19.12.25: Changed again due to deplayed GLTF loading
+            assertFalse(cb.contains(controllight));
             assertTrue(cb.exists(controllight));
             BundleResource controllightbin = new BundleResource(cb, "ControlLight.bin");
-            assertTrue/*False*/(cb.failed(controllightbin));
+            assertFalse(cb.failed(controllightbin));
             assertFalse(cb.contains(controllightbin));
-            assertFalse/*True*/(cb.exists(controllightbin));
+            assertTrue(cb.exists(controllightbin));
             BundleResource nonutf8 = new BundleResource(cb, "non-utf8.txt");
             assertFalse(cb.failed(nonutf8));
             assertTrue(cb.contains(nonutf8));

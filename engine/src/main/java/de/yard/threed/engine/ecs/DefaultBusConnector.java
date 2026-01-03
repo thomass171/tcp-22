@@ -1,12 +1,6 @@
 package de.yard.threed.engine.ecs;
 
-import de.yard.threed.core.Event;
-import de.yard.threed.core.EventType;
-import de.yard.threed.core.GeneralHandlerMap;
-import de.yard.threed.core.Packet;
-import de.yard.threed.core.Payload;
-import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.Util;
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.NativeSocket;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.platform.Log;
@@ -117,7 +111,13 @@ public abstract class DefaultBusConnector {
         if (request != null) {
             RequestType requestType = RequestType.findById(Util.atoi(request));
 
-            Payload payload = Payload.decode(packet);
+            Payload payload = null;
+            try {
+                payload = Payload.decode(packet);
+            } catch (ParseException e) {
+                // TODO dsicard packet?
+                throw new RuntimeException(e);
+            }
             String s_userEntityId = packet.getValue("userentityid");
             if (s_userEntityId == null) {
                 return new Request(requestType, payload);
@@ -143,7 +143,13 @@ public abstract class DefaultBusConnector {
                 logger.warn("Discarding event due to unknown event type " + evt);
                 return null;
             }
-            Payload payload = Payload.decode(packet);
+            Payload payload = null;
+            try {
+                payload = Payload.decode(packet);
+            } catch (ParseException e) {
+                // TODO discard event?
+                throw new RuntimeException(e);
+            }
             return new Event(eventType, payload);
         }
         logger.warn("no event in packet " + packet.getData());

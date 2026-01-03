@@ -9,12 +9,14 @@ package de.yard.threed.core.platform;
  * Working async.
  * 
  * 11.12.2023: Used for platform independent bundle loading, but also other??. So doesn't use BundleResource(??)
+ * 18.12.2025: Renamed from NativeBundleResourceLoader to make clear it doesn't really relate to bundles. The implementation
+ * should be aware of where the resource comes from.
  * Date: 05.08.21
  */
-public interface NativeBundleResourceLoader {
+public interface NativeResourceLoader {
 
     /**
-     * 'resource' is relative to some 'basepath'.
+     * 'resource' is relative to some 'basepath' that is known in the implementation.
      */
     void loadFile(String resource, AsyncJobDelegate<AsyncHttpResponse> asyncJobDelegate);
 
@@ -23,8 +25,4 @@ public interface NativeBundleResourceLoader {
      *
      */
     String getBasePath();
-
-    //not until it is really needed. public abstract boolean exists(String resource);
-
-    //??public abstract String getBasedir();
 }

@@ -106,7 +106,7 @@ public class ViewpointList {
      * 19.5.25: Accepts "entity.label" now instead just label
      */
     public int findPoint(String label) {
-        String[] parts = StringUtils.split(label,".");
+        String[] parts = StringUtils.splitByWholeSeparator(label,".");
         for (int i = 0; i < points.size(); i++) {
             if (parts.length > 1) {
                 if (points.get(i).label != null && points.get(i).label.equals(parts[1]) &&

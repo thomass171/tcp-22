@@ -14,7 +14,7 @@ import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeCamera;
 import de.yard.threed.core.platform.NativeFuture;
-import de.yard.threed.core.platform.NativeBundleResourceLoader;
+import de.yard.threed.core.platform.NativeResourceLoader;
 import de.yard.threed.core.platform.NativeHttpClient;
 import de.yard.threed.core.platform.NativeScene;
 import de.yard.threed.core.platform.NativeSceneRunner;
@@ -515,8 +515,7 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
     /**
      * The main mathod for an app to load a bundle. Loading is always async (like model) via the platform, but not multithreaded.
      * After loaded the bundle is added to the BundleRegistry and the delegate delegated to Asynchelper invokelater for consistent program flow
-     * 20.2.18: Wenn ein Bundle schon geladen wurde, wird es nicht doppelt geladen (Eine Race Condition gibt es aber trotzdem).
-     * Das Verhalten ist unabhaengig davon, ob das Model schon geladen wurde oder nicht.
+     * 20.2.18: What happens when a already loaded bundle is loaded again?
      * <p>
      * 22.7.21: Moved from Platform to here. Not static. Muss von webgl overrided werden!
      * In general async but without MT.
@@ -528,7 +527,7 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
         //2.8.21 AsyncHelper.asyncBundleLoad(bundlename, AbstractSceneRunner.getInstance().invokeLater(bundleLoadDelegate), delayed);
 
         boolean delayed = false;
-        NativeBundleResourceLoader resourceLoader;
+        NativeResourceLoader resourceLoader;
         if (StringUtils.startsWith(bundlename, "http")) {
             // full qualified bundle
             //new HttpBundleLoader().asyncBundleLoad(bundlename, bundleLoadDelegate, delayed);
@@ -553,8 +552,14 @@ public abstract class AbstractSceneRunner implements NativeSceneRunner {
             // the loader doesn't register the bundle
             if (bundle == null) {
                 logger.error("Bundle load failed");
+                // Showing a message to the user is good and bad. Good idea to inform about possible failures,
+                // but annoying for unavailable TerraSync bundles. Suspend for now.
+                //Platform.getInstance().fatal("Loading bundle " + loadBundlename + " failed");
             } else {
                 BundleRegistry.registerBundle(loadBundlename, bundle);
+                if (bundle.getFailuredSize() > 0) {
+                    Platform.getInstance().fatal("Loading bundle " + loadBundlename + " had " + bundle.getFailuredSize() + " failures, maybe due to network or other limited resources problems");
+                }
             }
             // delegate via Asynchelper for consistent program flow.
             invokeLater(() -> bundleLoadDelegate.bundleLoad(bundle));

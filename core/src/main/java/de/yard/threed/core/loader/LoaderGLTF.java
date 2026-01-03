@@ -3,9 +3,7 @@ package de.yard.threed.core.loader;
 import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.FloatHolder;
 import de.yard.threed.core.GeneralParameterHandler;
-import de.yard.threed.core.ModelBuildDelegate;
 import de.yard.threed.core.Quaternion;
-import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleResource;
@@ -27,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * AsciiLoader just because the origin is ASCII. Needs a JSON Parser and lineno likely cannot be used.
- * Used inside platforms that have no own GLTF reader or from an app that cannot use an platform internal
+ * Used inside platforms that either have no own GLTF reader or don't want to use it)
+ * or from tools. an app that cannot use an platform internal
  * loader, eg. because external material definition is used (eg. FG scenery).
  * Resides in core to be available in tools(?).
  * The 'bin' file is split into Vector3Array and int[].
@@ -37,6 +35,7 @@ import java.util.Map;
  * So use a more flexible solution via ResourceLoader. It also means:
  * - no longer InvalidDataException is thrown
  * - no longer extend AsciiLoader
+ * 18.12.25 This loader doesn't care about loading the files (loading is done in static load() below). So better rename from LoaderGLTF?
  * <p>
  * Created by thschonh on 08.12.17.
  */
@@ -73,14 +72,14 @@ public class LoaderGLTF {
 
         this.texturebasepath = texturebasepath;
         if (binbuffer == null) {
-            // 6.3.21: Das macht doch keinen Sinn, oder?
+            // 6.3.21: Is this useful?
             logger.warn("no bin. Intended?");
         }
     }
 
     /**
-     * Helper, um den Loader fuer eine BundleResource zu bauen.
-     * 14.2.24: Only for tools,
+     * Helper for building a loader for a BundleResource.
+     * 14.2.24: Only for tools
      */
     public static LoaderGLTF buildLoader(BundleResource file, ResourcePath texturebasepath) throws InvalidDataException {
         BundleData bd = file.bundle.getResource(file);

@@ -87,10 +87,10 @@ public abstract class SmartModelLoader {
                 Bundle bundle = BundleRegistry.getBundle(bundlename);
                 if (bundle == null) {
                     AbstractSceneRunner.instance.loadBundle(bundlename, (Bundle b) -> {
-                        addSimpleModelFromBundle(b, modelname, optTexturePath,delegate);
+                        addSimpleModelFromBundle(b, modelname, optTexturePath, delegate);
                     });
                 } else {
-                    addSimpleModelFromBundle(bundle, modelname,optTexturePath, delegate);
+                    addSimpleModelFromBundle(bundle, modelname, optTexturePath, delegate);
                 }
             }
         };
@@ -101,14 +101,19 @@ public abstract class SmartModelLoader {
     }
 
     public static void loadAndScaleModelByDefinitions(String modelDefinition, ModelBuildDelegate delegate) {
-        String[] parts = StringUtils.split(modelDefinition, ";");
+        String[] parts = StringUtils.splitByWholeSeparator(modelDefinition, ";");
         if (parts.length == 0) {
             logger.warn("Invalid modelDefinition:" + modelDefinition);
             return;
         }
         String modelpart = parts[0];
         double scale = Double.valueOf(parse(parts, "scale", "1.0"));
-        Vector3 offset = Util.parseVector3(parse(parts, "offset", "0.0,0.0,0.0"));
+        Vector3 offset = null;
+        try {
+            offset = Util.parseVector3(parse(parts, "offset", "0.0,0.0,0.0"));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         String optTexturePathString = parse(parts, "optTexturePath", null);
         ResourcePath optTexturePath = null;
         if (optTexturePathString != null) {
@@ -126,11 +131,12 @@ public abstract class SmartModelLoader {
             smartModelLoader = defaultSmartModelLoader;
         }
 
+        Vector3 foffset = offset;
         smartModelLoader.loadModelBySource(prefix, modelname, bundleUrl, optTexturePath, result -> {
             if (result.getNode() != null) {
                 // 5.9.25 scale needs extra node. But outer around offset. Otherwise small deviations inside offset
                 // will also scale (like in digital-clock model)
-                result.getNode().getTransform().setPosition((offset));
+                result.getNode().getTransform().setPosition((foffset));
                 // decouple model node to keep scale etc. Needed 'twice' because getNode() returns native
                 SceneNode translateNode = new SceneNode(new SceneNode(result.getNode()));
                 translateNode.getTransform().setScale(new Vector3(scale, scale, scale));

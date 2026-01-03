@@ -11,7 +11,7 @@ public class Server {
 
     public Server(String server) {
         if (StringUtils.contains(server, ":")) {
-            String[] parts = StringUtils.split(server, ":");
+            String[] parts = StringUtils.splitByWholeSeparator(server, ":");
             this.host = parts[0];
             this.port = Util.atoi(parts[1]);
             if (parts.length > 2) {

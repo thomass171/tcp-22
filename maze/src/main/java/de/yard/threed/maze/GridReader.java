@@ -228,7 +228,7 @@ class GridDraft {
     }
 
     private boolean collectTag(String row, Map<String, String> tags) {
-        String[] parts = StringUtils.split(row, "=");
+        String[] parts = StringUtils.splitByWholeSeparator(row, "=");
         if (parts.length != 2) {
             return false;
         }

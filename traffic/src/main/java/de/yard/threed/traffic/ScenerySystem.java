@@ -1,11 +1,6 @@
 package de.yard.threed.traffic;
 
-import de.yard.threed.core.Event;
-import de.yard.threed.core.EventType;
-import de.yard.threed.core.LatLon;
-import de.yard.threed.core.Payload;
-import de.yard.threed.core.Util;
-import de.yard.threed.core.Vector3;
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.SceneNode;
@@ -58,7 +53,13 @@ public class ScenerySystem extends DefaultEcsSystem {
         }
         if (request.getType().equals(RequestRegistry.TRAFFIC_REQUEST_LOAD_SCENERY)) {
             // 4.5.25 Was part of TeleporterSystem.EVENT_POSITIONCHANGED before, but now separate request
-            LatLon latlon = request.getPayload().get(Payload.KEY_LATLON, s -> Util.parseLatLon(s));
+            LatLon latlon = request.getPayload().get(Payload.KEY_LATLON, s -> {
+                try {
+                    return Util.parseLatLon(s);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
             if (terrainBuilder != null) {
                 terrainBuilder.updateForPosition(latlon);

@@ -1,6 +1,7 @@
 package de.yard.threed.traffic.config;
 
 import de.yard.threed.core.LocalTransform;
+import de.yard.threed.core.ParseException;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.NativeNode;
@@ -77,7 +78,11 @@ public class XmlVehicleDefinition extends ConfigNode/*XmlNode*/ implements Vehic
         if (s == null) {
             return 0;
         }
-        return (double) Util.parseDouble(s);
+        try {
+            return (double) Util.parseDouble(s);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /*public Vector3 getPilotPosition() {

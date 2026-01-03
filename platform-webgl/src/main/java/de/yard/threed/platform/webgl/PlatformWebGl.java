@@ -201,6 +201,7 @@ public class PlatformWebGl extends DefaultPlatform {
                 } else {
                     ArrayBuffer buffer = xhr.getResponseArrayBuffer();
                     if (buffer == null) {
+                        // Might happen in QUEST as result of ERR_INSUFFICIENT_RESOURCES independent from CORS
                         logger.error("no data (CORS problem?) from url " + url);
                         r = new AsyncHttpResponse(xhr.getStatus(), null, null, -1);
                     } else {
@@ -633,7 +634,7 @@ public class PlatformWebGl extends DefaultPlatform {
     }
 
     @Override
-    public NativeBundleResourceLoader buildResourceLoader(String bundlename, String location) {
+    public NativeResourceLoader buildResourceLoader(String bundlename, String location) {
         if (location != null && StringUtils.startsWith(location, "http")) {
             return new HttpBundleResourceLoader(location + "/" + bundlename);
         }
@@ -657,6 +658,11 @@ public class PlatformWebGl extends DefaultPlatform {
         return new WebGlInitChain(initExecutor/*,new WebGlAsyncRunner()*/);
     }
 
+    @Override
+    public void fatal(String msg) {
+        MiscWrapper.alert(msg);
+    }
+
     /**
      * Used to parse 'ADDITIONALBUNDLE'
      * 1.3.25 Still an option even though no longer used for gwt dev mode.
@@ -665,7 +671,7 @@ public class PlatformWebGl extends DefaultPlatform {
         List<BundleResolver> l = new ArrayList<BundleResolver>();
 
         if (bundlepathFromEnv != null) {
-            String[] parts = StringUtils.split(bundlepathFromEnv, ":");
+            String[] parts = StringUtils.splitByWholeSeparator(bundlepathFromEnv, ":");
             for (int i = 0; i < parts.length; i++) {
                 // base64 natively uses '+','=' and '/' and might replace these by URL conform letters like '-'. Very confusing
                 // and finally not very helpful. So also accept pure (URL encoded) strings. But these conflict with ':' separator.

@@ -1,14 +1,10 @@
 package de.yard.threed.traffic;
 
-import de.yard.threed.core.Degree;
-import de.yard.threed.core.Quaternion;
-import de.yard.threed.core.Util;
-import de.yard.threed.core.Vector3;
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.trafficcore.ElevationProvider;
-import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.trafficcore.model.SmartLocation;
 
@@ -53,7 +49,12 @@ public class PositionerFactory {
             }
             EllipsoidCalculations rbcp = TrafficHelper.getEllipsoidConversionsProviderByDataprovider();
             Vector3 position = rbcp.toCart(geo, null, null);
-            Quaternion rotation = rbcp.buildZUpRotation(geo, new Degree(Util.parseDouble(optionalHeading)), new Degree(0));
+            Quaternion rotation = null;
+            try {
+                rotation = rbcp.buildZUpRotation(geo, new Degree(Util.parseDouble(optionalHeading)), new Degree(0));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
 
             return new PositionerFactoryResult(new SphereVehiclePositioner(position, rotation), SUCCESS, null);
         }

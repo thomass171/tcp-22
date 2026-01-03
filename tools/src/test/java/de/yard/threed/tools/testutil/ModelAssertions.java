@@ -1,7 +1,6 @@
 package de.yard.threed.tools.testutil;
 
 import de.yard.threed.core.Color;
-import de.yard.threed.core.Degree;
 import de.yard.threed.core.PortableModelTest;
 import de.yard.threed.core.Vector2;
 import de.yard.threed.core.Vector3;

@@ -45,7 +45,7 @@ public class BundleResourceTest {
 
     @Test
     public void testConstructor(){
-        TestBundle bundle=new TestBundle("test",new String[]{},"/xy");
+        TestBundle bundle=new TestBundle("test",new String[]{},"/xy",null);
         BundleResource bundleResource=new BundleResource(bundle, "cesiumbox/BoxTextured.gltf");
 
         assertEquals("cesiumbox",bundleResource.getPath().getPath());

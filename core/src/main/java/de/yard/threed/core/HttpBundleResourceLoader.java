@@ -2,7 +2,7 @@ package de.yard.threed.core;
 
 import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
-import de.yard.threed.core.platform.NativeBundleResourceLoader;
+import de.yard.threed.core.platform.NativeResourceLoader;
 import de.yard.threed.core.platform.Platform;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.List;
  * For using from outside platform (needs future processing by scene runner).
  * Alternative is NativeHttpClient.
  */
-public class HttpBundleResourceLoader implements NativeBundleResourceLoader {
+public class HttpBundleResourceLoader implements NativeResourceLoader {
 
     String url;
 

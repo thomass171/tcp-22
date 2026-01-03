@@ -1,10 +1,6 @@
 package de.yard.threed.traffic;
 
-import de.yard.threed.core.CharsetException;
-import de.yard.threed.core.Color;
-import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.Util;
-import de.yard.threed.core.XmlException;
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.NativeDocument;
 import de.yard.threed.core.platform.NativeNode;
@@ -40,6 +36,10 @@ public class TrafficConfig {
     private List<NativeNode> topNodes;
 
     private TrafficConfig(List<NativeNode> topNodes/*NativeDocument tw*/) {
+        // be resilient
+        if (topNodes == null) {
+            topNodes = new ArrayList<>();
+        }
         this.topNodes = topNodes;
     }
 
@@ -253,7 +253,11 @@ public class TrafficConfig {
             Color color = Color.parseString(XmlHelper.getStringAttribute(nn, "color"));
             String direction = XmlHelper.getStringAttribute(nn, "direction");
             if (direction != null) {
-                lds[index] = new LightDefinition(color, Util.parseVector3(direction));
+                try {
+                    lds[index] = new LightDefinition(color, Util.parseVector3(direction));
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 lds[index] = new LightDefinition(color, null);
             }

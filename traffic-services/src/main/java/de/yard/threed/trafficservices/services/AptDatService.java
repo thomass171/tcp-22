@@ -1,5 +1,6 @@
 package de.yard.threed.trafficservices.services;
 
+import de.yard.threed.core.ParseException;
 import de.yard.threed.core.Util;
 import de.yard.threed.trafficservices.util.AirportFilter;
 import de.yard.threed.trafficservices.util.TrafficServicesUtil;
@@ -181,11 +182,11 @@ class RunwayLine extends AptLine {
         return parts[4];
     }
 
-    public double getFromLat(){
+    public double getFromLat() throws ParseException {
         return Util.parseDouble(parts[9]);
     }
 
-    public double getFromLon(){
+    public double getFromLon() throws ParseException {
         return Util.parseDouble(parts[10]);
     }
 
@@ -193,11 +194,11 @@ class RunwayLine extends AptLine {
         return parts[8];
     }
 
-    public double getToLat(){
+    public double getToLat() throws ParseException {
         return Util.parseDouble(parts[18]);
     }
 
-    public  double getToLon(){
+    public  double getToLon() throws ParseException {
         return Util.parseDouble(parts[19]);
     }
 
@@ -205,7 +206,7 @@ class RunwayLine extends AptLine {
         return parts[17];
     }
 
-    public double getWidth(){
+    public double getWidth() throws ParseException {
         return Util.parseDouble(parts[1]);
     }
 }

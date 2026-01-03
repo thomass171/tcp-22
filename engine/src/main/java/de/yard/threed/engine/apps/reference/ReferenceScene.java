@@ -292,8 +292,7 @@ public class ReferenceScene extends Scene {
 
         buildPhotoalbumPage();
 
-        // loc nur zum Test des async gltf Ladens, aber ohne Animation um keine Abhaengigkeit zu FG zu haben.
-        // A rotation or scale of loc is not needed.
+        // loc only for testing async gltf loading. A rotation or scale of loc is not needed.
         Platform.getInstance().buildNativeModelPlain(new ResourceLoaderFromBundle(new BundleResource(BundleRegistry.getBundle("data"), "models/loc.gltf")), null, (result) -> {
             locomotive = new SceneNode(result.getNode());
             if (locomotive != null) {

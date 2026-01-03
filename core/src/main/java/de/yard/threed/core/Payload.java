@@ -228,7 +228,7 @@ public class Payload {
         }
     }
 
-    public static Payload decode(Packet packet) {
+    public static Payload decode(Packet packet) throws ParseException {
 
         Payload payload;
 
@@ -246,7 +246,7 @@ public class Payload {
             Map<String, Object> m = new HashMap<String, Object>();
             for (String s : packet.getData()) {
                 if (StringUtils.startsWith(s, "p_")) {
-                    String[] parts = StringUtils.split(s, "=");
+                    String[] parts = StringUtils.splitByWholeSeparator(s, "=");
                     m.put(StringUtils.substring(parts[0], 2), decodeObject(parts[1]));
                 }
             }
@@ -255,7 +255,7 @@ public class Payload {
         return payload;
     }
 
-    private static Object decodeObject(String s_p) {
+    private static Object decodeObject(String s_p) throws ParseException {
 
         if (StringUtils.length(s_p) == 0) {
             // empty string will start with 's:'

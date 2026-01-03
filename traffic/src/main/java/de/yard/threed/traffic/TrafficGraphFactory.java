@@ -210,7 +210,12 @@ public class TrafficGraphFactory {
         //23.8.18: Warum ist hier denn noch Default? Jetzt z0
 
         List<Long> tripNodes = new ArrayList<Long>();
-        TrafficGraph graph = new TrafficGraph(GraphFactory.buildfromXML(s, tripNodes));
+        TrafficGraph graph = null;
+        try {
+            graph = new TrafficGraph(GraphFactory.buildfromXML(s, tripNodes));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         graph.tripnodes = tripNodes;
         return graph;
 

@@ -5,16 +5,13 @@ import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleFactory;
 import de.yard.threed.core.resource.BundleLoadDelegate;
 import de.yard.threed.core.resource.ResourcePath;
-import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.core.testutil.TestBundle;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.Observer;
 import de.yard.threed.engine.Texture;
-import de.yard.threed.engine.TexturePool;
 import de.yard.threed.engine.platform.PlatformBundleLoader;
 import de.yard.threed.engine.vr.VrInstance;
 import de.yard.threed.javacommon.ConfigurationByEnv;
-import de.yard.threed.javacommon.DefaultResourceReader;
 import de.yard.threed.core.platform.*;
 import de.yard.threed.core.resource.BundleRegistry;
 
@@ -22,14 +19,12 @@ import de.yard.threed.engine.SceneAnimationController;
 import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.platform.common.AbstractSceneRunner;
 import de.yard.threed.core.InitMethod;
-import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.javacommon.JavaWebClient;
 import de.yard.threed.javacommon.SimpleHeadlessPlatform;
 import de.yard.threed.outofbrowser.FileSystemBundleResourceLoader;
 
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.function.BooleanSupplier;
 
 /**
  * Has access to ConfigurationByEnv, other than CoreTestFactory.
@@ -147,8 +142,10 @@ public class EngineTestFactory {
 
     /**
      * Loaded from local module working dir.
+     *
+     * @return
      */
-    public static void addTestResourcesBundle() {
+    public static Bundle addTestResourcesBundle() throws Exception {
         if (BundleRegistry.getBundle("test-resources") == null) {
             ResourcePath bundlebasedir = new ResourcePath("src/test/resources");
             //15.12.23 SyncBundleLoader.loadBundleSyncInternal("test-resources",  /*13.12.23 null,*/ false, new DefaultResourceReader(), bundlebasedir);
@@ -156,8 +153,8 @@ public class EngineTestFactory {
             PlatformBundleLoader bundleLoader = new PlatformBundleLoader();
             bundleLoader.setBundleFactory(new BundleFactory() {
                 @Override
-                public Bundle createBundle(String name, boolean delayed, String[] directory, String basepath) {
-                    return new TestBundle(name, directory, basepath);
+                public Bundle createBundle(String name, boolean delayed, String[] directory, String basepath, NativeResourceLoader resourceLoader) {
+                    return new TestBundle(name, directory, basepath, resourceLoader);
                 }
             });
             bundleLoader.loadBundle("test-resources", false, new BundleLoadDelegate() {
@@ -166,7 +163,14 @@ public class EngineTestFactory {
                     BundleRegistry.registerBundle("test-resources", bundle);
                 }
             }, new FileSystemBundleResourceLoader(bundlebasedir));
+
+            // 19.12.25 why didn't we wait here?
+            TestUtils.waitUntil(() -> {
+                TestHelper.processAsync();
+                return BundleRegistry.getBundle("test-resources") != null;
+            }, 10000);
         }
+        return BundleRegistry.getBundle("test-resources");
     }
 
 

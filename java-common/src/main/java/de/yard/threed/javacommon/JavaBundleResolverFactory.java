@@ -2,26 +2,15 @@ package de.yard.threed.javacommon;
 
 import de.yard.threed.core.HttpBundleResourceLoader;
 import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.buffer.NativeByteBuffer;
-import de.yard.threed.core.platform.AsyncHttpResponse;
-import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.platform.NativeBundleResourceLoader;
+import de.yard.threed.core.platform.NativeResourceLoader;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.Bundle;
-import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResolver;
 import de.yard.threed.core.resource.BundleResolverFactory;
-import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.core.resource.NativeResource;
 import de.yard.threed.core.resource.ResourcePath;
 import de.yard.threed.outofbrowser.FileSystemBundleResourceLoader;
-import de.yard.threed.outofbrowser.FileSystemResource;
 import de.yard.threed.outofbrowser.SimpleBundleResolver;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 public class JavaBundleResolverFactory implements BundleResolverFactory {
@@ -42,9 +31,10 @@ public class JavaBundleResolverFactory implements BundleResolverFactory {
     }
 
     /**
+     * Build a resource loader for loading a bundle. Uses bundleresolver to know where to look for the bundle.
      * 15.12.23: Not the perfect location, but not too bad.
      */
-    public static NativeBundleResourceLoader buildResourceLoader(String bundlename, String location, List<BundleResolver> bundleResolver) {
+    public static NativeResourceLoader buildResourceLoader(String bundlename, String location, List<BundleResolver> bundleResolver) {
 
         if (location != null && StringUtils.startsWith(location, "http")) {
             return new HttpBundleResourceLoader(location + "/" + bundlename);

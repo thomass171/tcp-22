@@ -1,6 +1,7 @@
 package de.yard.threed.trafficcore;
 
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.ParseException;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.core.testutil.CoreTestFactory;
@@ -47,6 +48,27 @@ public class GeoRouteTest {
         assertNotNull(route);
         assertEquals(2, route.waypointsBeforeTakeoff.size());
         assertNull(route.takeoff);
+    }
+
+    @Test
+    public void testWithNegative() throws Exception {
+        GeoRoute route = GeoRoute.parse("wp:50.768,-7.1672000->wp:50.8662999,7.1443999");
+        assertNotNull(route);
+        assertEquals(2, route.waypointsBeforeTakeoff.size());
+        assertNull(route.takeoff);
+    }
+
+    @Test
+    public void testBrokenRoute() throws Exception {
+        // From NumberFormatException
+        assertThrows(ParseException.class,()->GeoRoute.parse("wp:55.9442996,-3.3892534->takeoff:55.9467891,-3.3819122->wp:55.9758200,-3.3507778->wp:55.8461119,-4.4814731->touchdown:55.8647208,...->wp:55.8799744,-4.4182359"));
+
+        // From failed split
+        assertThrows(ParseException.class,()->GeoRoute.parse("wp:55.9442996,-3.3892534->takeoff:55.9467891,-3.3819122->wp:55.97->wp:55.8461119,-4.4814731->touchdown:55.8647208,...->wp:55.8799744,-4.4182359"));
+
+        // From failed waypoint type
+        assertThrows(ParseException.class,()->GeoRoute.parse("wp:55.9442996,-3.3892534->xxx:55.9467891,-3.3819122->wp:55.97->wp:55.8461119,-4.4814731->touchdown:55.8647208,...->wp:55.8799744,-4.4182359"));
+
     }
 }
 

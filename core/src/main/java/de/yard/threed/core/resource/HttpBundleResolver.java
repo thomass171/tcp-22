@@ -49,9 +49,9 @@ public class HttpBundleResolver extends BundleResolver {
             getLog().warn("no @ in " + path);
             return false;
         }
-        String[] parts = StringUtils.split(path, "@");
+        String[] parts = StringUtils.splitByWholeSeparator(path, "@");
         url = parts[1];
-        bundlelist = StringUtils.split(parts[0], ",");
+        bundlelist = StringUtils.splitByWholeSeparator(parts[0], ",");
         return true;
     }
 

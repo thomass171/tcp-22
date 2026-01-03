@@ -1,7 +1,12 @@
 package de.yard.threed.engine.testutil;
 
+import de.yard.threed.core.BooleanHolder;
 import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.loader.PortableModelDefinition;
+import de.yard.threed.core.platform.AsyncHttpResponse;
+import de.yard.threed.core.platform.AsyncJobDelegate;
+import de.yard.threed.core.platform.NativeResourceLoader;
+import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.engine.ViewPoint;
@@ -17,8 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static de.yard.threed.core.testutil.TestUtils.assertTransform;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EngineTestUtils {
 
@@ -96,7 +100,7 @@ public class EngineTestUtils {
     }
 
     /**
-     * Das, was sonst im Runnerhelper laeuft.
+     * Stuff that runs in Runnerhelper typically.
      */
     public static void processAsync() {
         /*13.12.23 not sure whether still needed. But AsyncHelper should trigger BundleLoadDelegate
@@ -116,5 +120,22 @@ public class EngineTestUtils {
         List<SceneNode> foundNodes = root.findNodeByName(name);
         assertEquals(1, foundNodes.size());
         return foundNodes.get(0);
+    }
+
+    /**
+     * This method doesn't fill up a bundle!
+     */
+    public static void testLoadedResource(NativeResourceLoader resourceLoader, String resource, AsyncJobDelegate<AsyncHttpResponse> delegate) throws Exception {
+        BooleanHolder delegateCalled = new BooleanHolder(false);
+        resourceLoader.loadFile(resource, response -> {
+            delegate.completed(response);
+            delegateCalled.setValue(true);
+        });
+        TestUtils.waitUntil(() -> {
+            TestHelper.processAsync();
+            return delegateCalled.getValue();
+        }, 10000);
+
+        assertTrue(delegateCalled.getValue());
     }
 }

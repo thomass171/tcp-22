@@ -28,7 +28,7 @@ public class ConfigurationByProperties extends Configuration {
         String[] rows = StringUtils.splitByLineBreak(s);
         for (String row : rows) {
             if (StringUtils.contains(row, "=")) {
-                String[] parts = StringUtils.split(row, "=");
+                String[] parts = StringUtils.splitByWholeSeparator(row, "=");
                 properties.put(parts[0], parts[1]);
             }
         }

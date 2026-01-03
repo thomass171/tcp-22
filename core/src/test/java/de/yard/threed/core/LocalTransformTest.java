@@ -12,7 +12,7 @@ public class LocalTransformTest {
     static Platform platform = CoreTestFactory.initPlatformForTest(new PlatformFactoryTestingCore(),null);
 
     @Test
-    public void testSimple() {
+    public void testSimple() throws ParseException {
 
         LocalTransform lt = LocalTransform.buildFromConfig("0.2,0.3,-0.6,60.4,-70,+88.88");
         TestUtils.assertVector3(new Vector3(0.2, 0.3,-0.6), lt.position);

@@ -77,13 +77,13 @@ public class GeoCoordinate extends LatLon {
         this.elevationM = e;
     }
 
-    public static GeoCoordinate parse(String data) {
+    public static GeoCoordinate parse(String data) throws ParseException {
         if (data == null) {
             // might happen eg. when it is optional payload
             return null;
         }
         String[] s;
-        s = StringUtils.split(data, ",");
+        s = StringUtils.splitByWholeSeparator(data, ",");
         if (s.length == 2) {
             return new GeoCoordinate(Util.parseDegree(s[0]), Util.parseDegree(s[1]));
         }

@@ -27,8 +27,8 @@ public class LocalTransform {
      * Builds from pattern x,y,z,xdeg,ydeg,zdeg
      *
      */
-    public static LocalTransform buildFromConfig(String posrot) {
-        String[] parts = StringUtils.split(posrot, ",");
+    public static LocalTransform buildFromConfig(String posrot) throws ParseException {
+        String[] parts = StringUtils.splitByWholeSeparator(posrot, ",");
         if (parts.length != 6) {
             return null;
         }

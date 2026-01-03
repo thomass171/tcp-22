@@ -70,6 +70,9 @@ public class MainTest {
             logger.info("Running StringUtilsTest.test1()");
             StringUtilsTest stringUtilsTest = new StringUtilsTest();
             stringUtilsTest.test1();
+            stringUtilsTest.testSplit();
+            stringUtilsTest.testSubstringAfter();
+            stringUtilsTest.testSubstringBefore();
             logger.info("Running UtilTest.testFormat()");
             UtilTest utilTest = new UtilTest();
             utilTest.testFormat();

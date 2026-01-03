@@ -42,7 +42,7 @@ public abstract class JavaStringHelper implements NativeStringHelper {
         return s.charAt(i);
     }
 
-    @Override
+    /*@Override
     public String[] split(String str, String separator) {
         // avoid regex pattern confusion in core split() str.split(s);
         List<String> tokens = new ArrayList<>();
@@ -51,7 +51,7 @@ public abstract class JavaStringHelper implements NativeStringHelper {
             tokens.add(tokenizer.nextToken());
         }
         return tokens.toArray(new String[0]);
-    }
+    }*/
 
     public String[] splitByWhitespace(String str) {
         return str.split("\\s+");

@@ -299,7 +299,7 @@ public class GraphFactory {
      * @param s
      * @return
      */
-    public static Graph buildfromXML(String s, List<Long> tripnodes) {
+    public static Graph buildfromXML(String s, List<Long> tripnodes) throws ParseException {
 
         XmlDocument xmlDocument;
         try {

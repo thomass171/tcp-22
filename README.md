@@ -507,6 +507,14 @@ https://yard.de/bundlepool/fgdatabasicmodel
 ```
 The bundle name will be derived from the last segment of the URL.
 
+There are two ways for loading a bundle, either by the platform before the app starts ('preloaded' bundle) 
+or explicitly by the app by doing a
+
+```
+AbstractSceneRunner.getInstance().loadBundle(bundlename, bundleLoadDelegate);
+```
+Loading is async with the delegate called at the end. 
+
 ## Async Operations
 These occur when blocking operations (network IO) use a callback. Multithreading
 related asyncs are not considered as MT isn't used at all. Game engines

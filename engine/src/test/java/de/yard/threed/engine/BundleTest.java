@@ -10,8 +10,7 @@ import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -30,13 +29,14 @@ public class BundleTest {
     public void testKeysInMap() {
         Bundle bundle = BundleRegistry.getBundle("engine");
         BundleResource bundleResource = new BundleResource("plane-darkgreen.bin");
-        assertNotNull(bundle.getResource(bundleResource));
+        // 18.12.25 bin files are no longer loaded immediately
+        assertNull(bundle.getResource(bundleResource));
         // what about this? Normalize and find it.
         bundleResource = new BundleResource(bundle, new ResourcePath("."), "plane-darkgreen.bin");
-        assertNotNull(bundle.getResource(bundleResource));
+        assertNull(bundle.getResource(bundleResource));
         // what about this? Normalize and find it.
         bundleResource = new BundleResource(bundle, "./plane-darkgreen.bin");
-        assertNotNull(bundle.getResource(bundleResource));
+        assertNull(bundle.getResource(bundleResource));
     }
 
     @Test

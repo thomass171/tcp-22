@@ -1,19 +1,10 @@
 package de.yard.threed.tools;
 
-import de.yard.threed.core.PortableModelTest;
-import de.yard.threed.core.Vector3;
-import de.yard.threed.core.geometry.Face3;
-import de.yard.threed.core.loader.InvalidDataException;
-import de.yard.threed.core.loader.LoadedObject;
-import de.yard.threed.core.loader.LoaderAC;
+import de.yard.threed.core.loader.*;
 import de.yard.threed.core.loader.LoaderGLTF;
-import de.yard.threed.core.loader.PortableModel;
-import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.core.platform.NativeJsonValue;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.BundleRegistry;
 import de.yard.threed.core.resource.BundleResource;
-import de.yard.threed.core.testutil.Assert;
 import de.yard.threed.core.testutil.CoreTestFactory;
 import de.yard.threed.core.testutil.InMemoryBundle;
 import de.yard.threed.core.testutil.TestUtils;
@@ -23,7 +14,6 @@ import de.yard.threed.tools.testutil.ModelAssertions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Optional;
 

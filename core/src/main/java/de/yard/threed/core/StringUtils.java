@@ -97,9 +97,18 @@ public class StringUtils {
 
     /**
      * 22.5.25: Not the Java core logic, where separator is a pattern!
+     * 22.12.25: Should have always been according to StringUtils.splitByWholeSeparator, but wasn't really.
+     * Renamed from just split() to make it more clear.
      */
-    public static String[] split(String str, String separator) {
-        return sh.split(str, separator);
+    public static String[] splitByWholeSeparator(String str, String separator) {
+        List<String> parts = new ArrayList<>();
+        while (contains(str, separator)) {
+            parts.add(substringBefore(str, separator));
+            str = substringAfter(str, separator);
+        }
+        parts.add(str);
+
+        return parts.toArray(new String[0]);
     }
 
     /**
@@ -122,7 +131,7 @@ public class StringUtils {
         if (contains(str, "\r\n")) {
             separator = "\r\n";
         }
-        return split(str, separator);
+        return splitByWholeSeparator(str, separator);
     }
 
     public static int indexOf(String s, char c) {

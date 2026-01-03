@@ -77,7 +77,7 @@ public class EcsGroup {
     private static List<EcsComponent> matchesgroupid(List<EcsComponent> components, String groupid) {
         List<EcsComponent> group = new ArrayList<EcsComponent>();
 
-        String[] cname = StringUtils.split(groupid, ",");
+        String[] cname = StringUtils.splitByWholeSeparator(groupid, ",");
         for (int i = 0; i < cname.length; i++) {
             int index;
             if ((index = indexOfComponent(cname[i], components)) != -1) {

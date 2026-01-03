@@ -100,7 +100,13 @@ public class GraphTerrainSystem extends DefaultEcsSystem {
         }
         if (evt.getType().equals(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED) && enabled) {
             //GeoCoordinate initialPosition = (GeoCoordinate) evt.getPayloadByIndex(0);
-            GeoCoordinate initialPosition = evt.getPayload().get("initialPosition", s -> GeoCoordinate.parse(s));
+            GeoCoordinate initialPosition = evt.getPayload().get("initialPosition", s -> {
+                try {
+                    return GeoCoordinate.parse(s);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
             //projection = (SimpleMapProjection) evt.getPayloadByIndex(1);
             //7.10.21 Tile initialTile = (Tile) evt.getPayloadByIndex(2);

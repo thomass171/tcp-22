@@ -140,7 +140,7 @@ public class XmlHelper {
 
 
     public static Vector2 getVector2Value(NativeNode nativeNode) {
-        String[] p = StringUtils.split(nativeNode.getTextValue(), ",");
+        String[] p = StringUtils.splitByWholeSeparator(nativeNode.getTextValue(), ",");
         if (p.length != 2) {
             return null;
         }
@@ -148,7 +148,7 @@ public class XmlHelper {
     }
 
     public static Vector3 getVector3Value(NativeNode nativeNode) {
-        String[] p = StringUtils.split(nativeNode.getTextValue(), ",");
+        String[] p = StringUtils.splitByWholeSeparator(nativeNode.getTextValue(), ",");
         if (p.length != 3) {
             return null;
         }

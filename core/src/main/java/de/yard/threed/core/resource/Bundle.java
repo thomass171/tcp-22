@@ -1,9 +1,8 @@
 package de.yard.threed.core.resource;
 
 import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.platform.AsyncHttpResponse;
-import de.yard.threed.core.platform.AsyncJobDelegate;
 import de.yard.threed.core.platform.Log;
+import de.yard.threed.core.platform.NativeResourceLoader;
 import de.yard.threed.core.platform.Platform;
 
 
@@ -33,17 +32,21 @@ public class Bundle {
     private String basepath;
     long createdAt = Platform.getInstance().currentTimeMillis();
     long completedAt = 0;
+    private static List<String> knownSuffixes = setupKnownSuffixes();
+    // The loader used to load the bundle. Might be reused for loading delayed content (eg. GLTFs and bins).
+    private NativeResourceLoader originalResourceLoader;
 
     /**
      * @param name
      * @param directory
      * @param basepath  is location + bundlename
      */
-    public Bundle(String name, boolean delayed, String[] directory, String basepath) {
+    public Bundle(String name, boolean delayed, String[] directory, String basepath, NativeResourceLoader resourceLoader) {
         this.name = name;
         this.directory = new ArrayList<>();
         this.delayed = delayed;
         this.basepath = basepath;
+        this.originalResourceLoader = resourceLoader;
         // 14.2.24: Be more consistent with path names and do not allow leading "./" or "/".
         for (String d : directory) {
             // Consider comments in directory
@@ -56,19 +59,20 @@ public class Bundle {
         }
     }
 
-    public void addResource(String resource, BundleData/*byte[]*/ bytes) {
+    public void addResource(String resource, BundleData/*byte[]*/ bytes, boolean delayed) {
         /*if (!StringUtils.startsWith(resource,"/")){
             resource = "/"+resource;
         }*/
 
-        if (isCompleted()) {
+        if (isCompleted() && !delayed) {
             throw new RuntimeException("add after complete");
         }
+        /*19.12.25
         // Ugly handling of "btg.gz" suffix
         if (StringUtils.endsWith(resource, ".btg.gz")) {
             // Auch bei Fehler die Endung entfernen.
             resource = StringUtils.substringBeforeLast(resource, ".gz");
-        }
+        }*/
         resources.put(resource, bytes);
         if (bytes != null) {
             size += bytes.getSize();
@@ -96,6 +100,9 @@ public class Bundle {
         return resources.get(simplifyPath(bpath));
     }
 
+    /**
+     * Returns the full size (complying to directory) independent from loaded/delayed resources
+     */
     public int getSize() {
         return resources.size();
     }
@@ -139,8 +146,8 @@ public class Bundle {
     }
 
     /**
-     * exists, prueft, ob es den Eintrag gibt (unabhaengig von schon geladen oder nicht).
-     * When it couldn't be loaded due to an error, its considered to not exist, even it is listed in the directory!
+     * Check whether resource exists (independen from loading).
+     * When it couldn't be loaded due to an error, it's considered to not exist, even it is listed in the directory!
      */
     public boolean exists(String r) {
         return resources.containsKey(simplifyPath(r));
@@ -167,7 +174,8 @@ public class Bundle {
     }
 
     /**
-     * The file type specifies when the entry isType loaded. GLTF and the corresponding bin are special cases which might be loaded delayed. So the have their own filetype:
+     * The file type specifies when the entry is loaded. GLTF and the corresponding
+     * bin are special cases which might be loaded delayed. So the have their own filetype:
      * - immediately: t(ext),b(inary)
      * - alternatively delayed: T(ext),B(inary)
      * - delayed: i(mage),s(ound)
@@ -176,30 +184,27 @@ public class Bundle {
      * @param filename
      * @return
      */
-    public static char filetype(String filename) {
+    public static boolean filetype(String filename) {
         if (isImage(filename)) {
-            return 'i';
+            return false;//'i';
         }
         if (StringUtils.endsWith(filename, ".acpp") || StringUtils.endsWith(filename, ".3ds") || StringUtils.endsWith(filename, ".btg")) {
-            return 'b';
+            return true;//traditionally was a immediate load 'b';
         }
         if (StringUtils.endsWith(filename, ".wav")) {
             // 19.12.23: avoiding immediately load.
-            return 's';
+            return false;//'s';
         }
-        /*6.1.18 if (StringUtils.endsWith(filename,".btg.gz")) {
-            //4.1.18 now model file return 'b';//wegen fehlendem uncompress browser 'z';
-            return 'b';
-        }*/
         if (StringUtils.endsWith(filename, ".gltf")) {
-            return 'T';
+            return false;//traditionally was a immediate load! return 'T';
         }
         if (StringUtils.endsWith(filename, ".bin")) {
             // GLTF bin
-            return 'B';
+            return false;//traditionally was a immediate load! 'B';
         }
-        //sonst Text
-        return 't';
+        // otherwise rely on known suffixes
+        String suffix = StringUtils.substringAfterLast(filename, ".");
+        return knownSuffixes.contains(suffix);
     }
 
     /**
@@ -267,7 +272,7 @@ public class Bundle {
     }
 
     public static String simplifyPath(String r) {
-        String[] parts = StringUtils.split(r, "/");
+        String[] parts = StringUtils.splitByWholeSeparator(r, "/");
         List<String> result = new ArrayList<>();
         for (int i = 0; i < parts.length; i++) {
             // keep '..' if no part exists where to simplify with
@@ -282,5 +287,28 @@ public class Bundle {
             s += ((j > 0) ? "/" : "") + result.get(j);
         }
         return s;
+    }
+
+    private static List<String> setupKnownSuffixes() {
+        List<String> l = new ArrayList<>();
+        l.add("txt");
+        l.add("xml");
+        l.add("xsd");
+        l.add("xsl");
+        l.add("frag");
+        l.add("vert");
+        l.add("properties");
+        l.add("ac");
+        return l;
+    }
+
+    public static void registerSuffix(String suffix) {
+        if (!knownSuffixes.contains(suffix)) {
+            knownSuffixes.add(suffix);
+        }
+    }
+
+    public NativeResourceLoader getOriginalResourceLoader() {
+        return originalResourceLoader;
     }
 }

@@ -94,7 +94,7 @@ public class Degree {
      * @param s
      * @return
      */
-    public static Degree parseDegree(String s) {
+    public static Degree parseDegree(String s) throws ParseException {
         char f = StringUtils.charAt(s, 0);
         if (Util.isDigit(f)) {
             return new Degree(Util.parseDouble(s));

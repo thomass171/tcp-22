@@ -1,13 +1,7 @@
 package de.yard.threed.traffic;
 
 
-import de.yard.threed.core.BooleanHolder;
-import de.yard.threed.core.CharsetException;
-import de.yard.threed.core.Event;
-import de.yard.threed.core.EventType;
-import de.yard.threed.core.LatLon;
-import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.Payload;
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.NativeNode;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.resource.Bundle;
@@ -259,7 +253,13 @@ public class TrafficSystem extends DefaultEcsSystem implements DataProvider {
 
             String vehiclename = (String) request.getPayload().get("name");
             SmartLocation smartLocation = request.getPayload().get("location", s -> SmartLocation.fromString(s));
-            GeoRoute initialRoute = request.getPayload().get("initialRoute", s -> GeoRoute.parse(s));
+            GeoRoute initialRoute = request.getPayload().get("initialRoute", s -> {
+                try {
+                    return GeoRoute.parse(s);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            });
             String initialHeading = request.getPayload().get("heading", s -> s);
 
             // 10.5.24 also wait for user join? Hmm, maybe not because joining user can enter the

@@ -1,15 +1,8 @@
 package de.yard.threed.core;
 
-import de.yard.threed.core.geometry.FaceList;
-import de.yard.threed.core.geometry.FaceN;
-import de.yard.threed.core.geometry.SimpleGeometry;
-import de.yard.threed.core.loader.InvalidDataException;
-import de.yard.threed.core.loader.LoaderAC;
 import de.yard.threed.core.loader.LoaderGLTF;
-import de.yard.threed.core.loader.PortableMaterial;
 import de.yard.threed.core.loader.PortableModel;
 import de.yard.threed.core.loader.PortableModelDefinition;
-import de.yard.threed.core.loader.StringReader;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.core.testutil.CoreTestFactory;
 import de.yard.threed.core.testutil.PlatformFactoryTestingCore;

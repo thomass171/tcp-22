@@ -180,7 +180,7 @@ public class SphereSystemTest {
     @Test
     public void testLoadGroundnet() {
 
-        TestBundle tmpBundle = new TestBundle("tmpBnd",new String[]{}, "");
+        TestBundle tmpBundle = new TestBundle("tmpBnd",new String[]{}, "", null);
         String configXml = "<c:config xmlns:c=\"http://www.example.org/tcp-22\" name=\"a\">\n" +
                 "    <trafficgraph groundnet=\"gnetname\"/>\n" +
                 "<projection center=\"50.86538,7.139103\"/>  </c:config>";

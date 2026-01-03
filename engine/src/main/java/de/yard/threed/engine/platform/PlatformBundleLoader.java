@@ -3,11 +3,8 @@ package de.yard.threed.engine.platform;
 import de.yard.threed.core.CharsetException;
 import de.yard.threed.core.Pair;
 import de.yard.threed.core.StringUtils;
-import de.yard.threed.core.platform.AsyncHttpResponse;
-import de.yard.threed.core.platform.AsyncJobDelegate;
-import de.yard.threed.core.platform.Log;
-import de.yard.threed.core.platform.NativeBundleResourceLoader;
-import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.platform.*;
+import de.yard.threed.core.platform.NativeResourceLoader;
 import de.yard.threed.core.resource.Bundle;
 import de.yard.threed.core.resource.BundleData;
 import de.yard.threed.core.resource.BundleFactory;
@@ -30,7 +27,7 @@ import java.util.Map;
  * <p>
  * Not for user code usage to avoid MT effects. Should be called via Scenerunner.
  * 'delayed' not implemented
- * Derived from WebGlBundleLoader and HttpBundleLoader.
+ * Derived from former WebGlBundleLoader and HttpBundleLoader.
  * Located in 'engine' to have SimpleHeadlessPlatform for testing.
  * Bundle resolution and full qualified bundle handling is done outside and capsuled in NativeResourceLoader.
  */
@@ -46,7 +43,7 @@ public class PlatformBundleLoader {
 
     public PlatformBundleLoader() {
         this.url = url;
-        bundleFactory = (name, delayed, directory, basepath) -> new Bundle(name, delayed, directory, basepath);
+        bundleFactory = (name, delayed, directory, basepath, resourceLoader) -> new Bundle(name, delayed, directory, basepath, resourceLoader);
     }
 
     /**
@@ -54,9 +51,9 @@ public class PlatformBundleLoader {
      * 'bundlename' must be a full qualified name (URL)
      * 27.8.24:'delayed' reactivated.
      */
-    public void loadBundle(String bundlename, boolean delayed, BundleLoadDelegate bundleLoadDelegate, NativeBundleResourceLoader resourceLoader) {
+    public void loadBundle(String bundlename, boolean delayed, BundleLoadDelegate bundleLoadDelegate, NativeResourceLoader resourceLoader) {
 
-        logger.info("Loading effective bundle " + bundlename + " from " + ((resourceLoader==null)?null:resourceLoader.getBasePath()));
+        logger.info("Loading effective bundle " + bundlename + " from " + ((resourceLoader == null) ? null : resourceLoader.getBasePath()));
 
         if (resourceLoader == null) {
             logger.error("No resourceLoader. Bundle '" + bundlename + "' not resolvable?");
@@ -97,20 +94,17 @@ public class PlatformBundleLoader {
                         throw new RuntimeException(e);
                     }
 
-                    lb.bundle = bundleFactory.createBundle(lb.bundlename, delayed, StringUtils.split(d, "\n"), resourceLoader.getBasePath());
+                    lb.bundle = bundleFactory.createBundle(lb.bundlename, delayed, StringUtils.splitByWholeSeparator(d, "\n"), resourceLoader.getBasePath(), resourceLoader);
                     for (String filename : lb.bundle.directory) {
-                        String resource = /*13.12.23 url + "/" +*/ filename;
-                        loadBundleData(lb.bundle, BundleResource.buildFromFullString(resource), filename, delayed, lb/*, bundlebasedir*/, resourceLoader);
+                        loadBundleData(lb.bundle, BundleResource.buildFromFullString(filename), filename, delayed, lb, resourceLoader);
                     }
                 } else {
-                    logger.error("Unexpected response " + response);
                     // Assume bundle doesn't exist. Anyway we need to avoid an endless wait, so inform requester.
-                    logger.error("No directory loaded. Bundle '" + bundlename + "' not existing?");
+                    logger.error("No directory loaded. Bundle '" + bundlename + "' not existing? Response was: " + response);
                     bundleLoadDelegate.bundleLoad(null);
                 }
             }
-        }/*, false*/);
-
+        });
     }
 
     public ArrayList<String> getLoadingbundles() {
@@ -120,7 +114,7 @@ public class PlatformBundleLoader {
     /**
      * Not needed here because it is async on its own?
      */
-    public List<Pair<BundleLoadDelegate, Bundle>> processAsync() {
+    /*18.12.25 not in use for a long time public List<Pair<BundleLoadDelegate, Bundle>> processAsync() {
 
         //Sicherheitshalber mal prefen. Wird aber offenbar auch in webgl verwendet.Siehe header.
         if (true || Platform.getInstance().hasOwnAsync()) {
@@ -130,24 +124,23 @@ public class PlatformBundleLoader {
         List<Pair<BundleLoadDelegate, Bundle>> result = new ArrayList<Pair<BundleLoadDelegate, Bundle>>();
 
         return result;
-    }
+    }*/
 
 
     /**
      * Nicht relevant, weil sync geladen wird.
      *
-     * @param file
+     * @param
      * @return
      */
-    public boolean isLoading(BundleResource file) {
+    /*18.12.25 not in use for a long time public boolean isLoading(BundleResource file) {
         return false;
-    }
-
+    }*/
     public void setBundleFactory(BundleFactory bundleFactory) {
         this.bundleFactory = bundleFactory;
     }
 
-    public static void addLoadedBundleData(AsyncHttpResponse response, Bundle bundle, String filename, Log logger){
+    public static void addLoadedBundleData(AsyncHttpResponse response, Bundle bundle, String filename, Log logger, boolean delayed) {
         if (response.getStatus() == 200) {
             logger.trace(filename + " loaded with response " + response);
 
@@ -160,67 +153,82 @@ public class PlatformBundleLoader {
             if (bundle.contains(filename)) {
                 logger.error("duplicate directory entry " + filename + " or data already loaded: " + bundle.getResource(filename).getSize() + " bytes");
             }
-            bundle.addResource(filename, bundleData);
+            bundle.addResource(filename, bundleData, delayed);
         } else {
+            // Might happen in QUEST as result of ERR_INSUFFICIENT_RESOURCES
             logger.error(filename + " failed with response " + response);
             if (bundle.contains(filename)) {
                 logger.error("onError, but data exists for " + filename);
             }
-            bundle.addFailure(filename, "" + response.getStatus());
+            // 19.12.25 It is a failure now. Don't have it in the resources. Really? How are failures handled? TODO find a strategy for delayed failure
+            if (!delayed) {
+                bundle.addFailure(filename, "" + response.getStatus());
+            }
         }
     }
 
-    private void loadBundleData(Bundle bundle, BundleResource resource, String filename, boolean delayed, LoadingBundle lb/*, String bundlebasedir*/,
-                                NativeBundleResourceLoader resourceLoader) {
+    /**
+     * Load a single resource of a bundle
+     */
+    private void loadBundleData(Bundle bundle, BundleResource resource, String filename, boolean delayed, LoadingBundle lb,
+                                NativeResourceLoader resourceLoader) {
 
         AsyncJobDelegate listener = new AsyncJobDelegate<AsyncHttpResponse>() {
             @Override
             public void completed(AsyncHttpResponse response) {
-                addLoadedBundleData(response, bundle, filename, logger);
+                addLoadedBundleData(response, bundle, filename, logger, false);
                 checkCompleted(lb, bundle);
 
             }
         };
 
         // 27.8.24: To be more intuitive, handle 'delayed' in general, not per file type.
-        if (delayed){
-            bundle.addResource(filename, null);
+        if (delayed) {
+            bundle.addResource(filename, null, true);
             checkCompleted(lb, bundle);
             return;
         }
-        char filetype = Bundle.filetype(filename);
-        switch (filetype) {
-            case 'T'://GLTF
+        // 18.12.25: Logic simplified. It doesn't make sense to handle eg binary data likes images, zips, GLTF bins and audios here.
+        // The app very likely has no way to process binary data, it is up to the platform. So for those 'useless' resources just
+        // have an entry in the directory, but no data. The platform will load these when needed.
+        if (Bundle.filetype(filename)) {
+            loadRessource(resource, listener, resourceLoader);
+        } else {
+            //Will be loaded later on demand internally by platform itself. Nevertheless have an entry in the bundle to
+            //be consistent.
+            bundle.addResource(filename, null, false);
+            // important if image is the last entry
+            checkCompleted(lb, bundle);
+        }
+
+        /*switch (filetype) {
+            /*case 'T'://GLTF
                 // C# conform fall through
             case 't':
                 // text like XML
                 loadRessource(resource, listener, false, resourceLoader);
                 break;
-            case 'B'://GLTF binary
+            /*case 'B'://GLTF binary
                 // C# conform fall through
-            case 'b':
+            /*case 'b':
                 BundleResource res = resource;
-                /*if (StringUtils.endsWith(filename, ".btg.gz")) {
-                    // uncompressed lesen weil ein uncompress in js oder Browser offenbar nicht geht.
-                    res = new BundleResource(bundlebasedir + "/" + StringUtils.substringBeforeLast(filename, ".gz"));
-                }*/
                 loadRessource(res, listener, true, resourceLoader);
-                break;
-            case 'i':
+                break;*/
+            /*case 'i':
                 //Image/Texture will be loaded later on demand internally by platform itself. Nevertheless have an entry in the bundle to
                 //be more consistent.
                 bundle.addResource(filename, null);
                 // important if image is the last entry
                 checkCompleted(lb, bundle);
-                break;
-            case 's':
+                break;*/
+            /*case 's':
                 //sound will be loaded later on demand internally by platform itself. Nevertheless have an entry in the bundle to
                 //be more consistent.
                 bundle.addResource(filename, null);
                 // important if image is the last entry
                 checkCompleted(lb, bundle);
-                break;
-            case 'z':
+                break;*/
+            /*case 'z':
                 //zipped binary (btg.gz). Der unzip wird schon hier statt beim getRersource gemacht, weil dies hier
                 //in der Platform ist.
                 //19.8.23: zip download was never a real option in JS.
@@ -234,13 +242,13 @@ public class PlatformBundleLoader {
                                     } else {
                                         lb.bundle.addResource(filename, null);
                                     }
-                                    break;*/
+                                    break;* /
             default:
                 //unknown
                 logger.warn("unknown filetype " + filetype);
                 bundle.addResource(filename, null);
                 break;
-        }
+        }*/
     }
 
     private void checkCompleted(LoadingBundle lb, Bundle bundle) {
@@ -258,7 +266,7 @@ public class PlatformBundleLoader {
         loadingbundles.remove(bundle.name);
     }
 
-    private/*public*/ void loadRessource(final NativeResource ressource, final AsyncJobDelegate loadlistener, boolean binary, NativeBundleResourceLoader resourceLoader) {
+    private/*public*/ void loadRessource(final NativeResource ressource, final AsyncJobDelegate loadlistener, NativeResourceLoader resourceLoader) {
         //logger.debug("loadRessource:" + ressource.getFullName());
 
         resourceLoader.loadFile(ressource.getFullName(), loadlistener);

@@ -3,17 +3,15 @@ package de.yard.threed.outofbrowser;
 import de.yard.threed.core.buffer.SimpleByteBuffer;
 import de.yard.threed.core.platform.AsyncHttpResponse;
 import de.yard.threed.core.platform.AsyncJobDelegate;
-import de.yard.threed.core.platform.NativeFuture;
-import de.yard.threed.core.platform.NativeBundleResourceLoader;
+import de.yard.threed.core.platform.NativeResourceLoader;
 import de.yard.threed.core.platform.Platform;
-import de.yard.threed.core.resource.ResourceNotFoundException;
 import de.yard.threed.core.resource.ResourcePath;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class FileSystemBundleResourceLoader implements NativeBundleResourceLoader {
+public class FileSystemBundleResourceLoader implements NativeResourceLoader {
 
     ResourcePath basedir;
 

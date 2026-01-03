@@ -1,6 +1,7 @@
 package de.yard.threed.trafficservices.services;
 
 import de.yard.threed.core.LatLon;
+import de.yard.threed.core.ParseException;
 import de.yard.threed.trafficcore.geodesy.GeoTools;
 import de.yard.threed.trafficservices.util.AirportFilter;
 import de.yard.threed.trafficservices.util.AirportResponse;
@@ -44,11 +45,15 @@ public class AirportService implements RepositoryRestConfigurer {
         for (AptLine aptLine : airportLines){
             if (aptLine instanceof RunwayLine){
                 RunwayLine runwayLine = (RunwayLine) aptLine;
-                response.getRunways().add(new AirportResponse.Runway(
-                        new WebLatLon(runwayLine.getFromLat(), runwayLine.getFromLon()), runwayLine.getFromNumber(),
-                        new WebLatLon(runwayLine.getToLat(), runwayLine.getToLon()), runwayLine.getToNumber(),
-                        runwayLine.getWidth(), GeoTools.heading( LatLon.fromDegrees(runwayLine.getFromLat(), runwayLine.getFromLon()),
-                         LatLon.fromDegrees(runwayLine.getToLat(), runwayLine.getToLon())).getDegree()));
+                try {
+                    response.getRunways().add(new AirportResponse.Runway(
+                            new WebLatLon(runwayLine.getFromLat(), runwayLine.getFromLon()), runwayLine.getFromNumber(),
+                            new WebLatLon(runwayLine.getToLat(), runwayLine.getToLon()), runwayLine.getToNumber(),
+                            runwayLine.getWidth(), GeoTools.heading( LatLon.fromDegrees(runwayLine.getFromLat(), runwayLine.getFromLon()),
+                             LatLon.fromDegrees(runwayLine.getToLat(), runwayLine.getToLon())).getDegree()));
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         return response;

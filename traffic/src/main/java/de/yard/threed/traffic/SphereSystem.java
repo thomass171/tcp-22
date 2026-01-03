@@ -171,7 +171,12 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                             if (xmlProjections.size() > 0) {
 
                                 String xmlCenter = XmlHelper.getStringAttribute(xmlProjections.get(0), "center");
-                                GeoCoordinate center = GeoCoordinate.parse(xmlCenter);
+                                GeoCoordinate center = null;
+                                try {
+                                    center = GeoCoordinate.parse(xmlCenter);
+                                } catch (ParseException e) {
+                                    throw new RuntimeException(e);
+                                }
                                 projection = new SimpleMapProjection(center);
 
                             }
@@ -201,7 +206,11 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                     // basename is no bundle resource (tilename). Assume geo coordinate.
                     //18.3.24: Now we get initialPosition from basename.
                     //15.5.24: basename as initialPosition might be deprecated now as also 3D scenes use (tile) configs
-                    initialPosition = GeoCoordinate.parse(basename);
+                    try {
+                        initialPosition = GeoCoordinate.parse(basename);
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
                     logger.debug("Retrieved initialPosition from basename: " + initialPosition);
                     // 24.5.24: Try again to exit here
                 }
@@ -281,7 +290,11 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
         if (StringUtils.endsWith(tile.getName(), "EDDK-sphere.xml")) {
             // 18.3.24 From former hard coded EDDK setup.
             GeoCoordinate formerInitialPositionEDDK = new GeoCoordinate(new Degree(50.843675), new Degree(7.109709), 1150);
-            return GeoCoordinate.parse(formerInitialPositionEDDK.toString());
+            try {
+                return GeoCoordinate.parse(formerInitialPositionEDDK.toString());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         wasOsm = true;

@@ -103,7 +103,7 @@ public class Util {
 
     public static String format(double value, int total, int precision) {
         String s = "" + value;
-        String[] parts = StringUtils.split(s, "\\.");
+        String[] parts = StringUtils.splitByWholeSeparator(s, ".");
         if (parts.length == 1) {
             return s;
         }
@@ -249,8 +249,16 @@ public class Util {
         return bestint;
     }
 
-    public static double parseDouble(String s) {
-        return java.lang.Double.parseDouble(s);
+    /**
+     * Throws ParseException instead of unchecked (aborting) NumberFormatException
+     */
+    public static double parseDouble(String s) throws ParseException {
+        try {
+            return java.lang.Double.parseDouble(s);
+        }
+        catch (NumberFormatException e){
+            throw new ParseException(e.getMessage());
+        }
     }
 
     public static float parseFloat(String s) {
@@ -280,7 +288,7 @@ public class Util {
     }
 
     public static Point parsePoint(String s) {
-        String[] parts = StringUtils.split(s, ",");
+        String[] parts = StringUtils.splitByWholeSeparator(s, ",");
         if (parts.length != 2) {
             return null;
         }
@@ -543,28 +551,30 @@ public class Util {
         return (int) (Platform.getInstance().currentTimeMillis() / 1000);
     }
 
-    public static Vector3 parseVector3(String data) {
+    public static Vector3 parseVector3(String data) throws ParseException {
         String[] s;
+        // 31.12.25 Be more tolerant for leading/trailing space
+        data = StringUtils.trim(data);
         if (StringUtils.contains(data, ",")) {
-            s = StringUtils.split(data, ",");
+            s = StringUtils.splitByWholeSeparator(data, ",");
         } else {
-            s = StringUtils.split(data, " ");
+            s = StringUtils.splitByWholeSeparator(data, " ");
         }
         if (s.length != 3) {
-            throw new RuntimeException("parseString: invalid vector3 data " + data);
+            throw new ParseException("parseString: invalid vector3 data " + data);
         }
         return new Vector3(Util.parseDouble(s[0]), Util.parseDouble(s[1]), Util.parseDouble(s[2]));
     }
 
-    public static Quaternion parseQuaternion(String data) {
+    public static Quaternion parseQuaternion(String data) throws ParseException {
         String[] s;
         if (StringUtils.contains(data, ",")) {
-            s = StringUtils.split(data, ",");
+            s = StringUtils.splitByWholeSeparator(data, ",");
         } else {
-            s = StringUtils.split(data, " ");
+            s = StringUtils.splitByWholeSeparator(data, " ");
         }
         if (s.length != 4) {
-            throw new RuntimeException("parseString: invalid quaternion data " + data);
+            throw new ParseException("parseString: invalid quaternion data " + data);
         }
         return new Quaternion(Util.parseDouble(s[0]), Util.parseDouble(s[1]), Util.parseDouble(s[2]), Util.parseDouble(s[3]));
     }
@@ -572,16 +582,16 @@ public class Util {
     /**
      * GeoCoordinate has its own parser.
      */
-    public static LatLon parseLatLon(String data) {
+    public static LatLon parseLatLon(String data) throws ParseException {
         String[] s;
-        s = StringUtils.split(data, ",");
+        s = StringUtils.splitByWholeSeparator(data, ",");
         if (s.length != 2) {
-            throw new RuntimeException("parseLatLon: invalid LatLon data " + data);
+            throw new ParseException("parseLatLon: invalid LatLon data " + data);
         }
         return new LatLon(Util.parseDegree(s[0]), Util.parseDegree(s[1]));
     }
 
-    public static Degree parseDegree(String data) {
+    public static Degree parseDegree(String data) throws ParseException {
         return new Degree(Util.parseDouble(data));
     }
 

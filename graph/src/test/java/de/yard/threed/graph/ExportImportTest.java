@@ -1,5 +1,6 @@
 package de.yard.threed.graph;
 
+import de.yard.threed.core.ParseException;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.testutil.EngineTestFactory;
 import de.yard.threed.javacommon.SimpleHeadlessPlatformFactory;
@@ -22,7 +23,7 @@ public class ExportImportTest {
      * Railing Beispiel 1
      */
     @Test
-    public void testExportImportRailSample1() {
+    public void testExportImportRailSample1() throws ParseException {
         float innerradius = RailingDimensions.innerarcradius;
         //float umfang = (float) (2 * Math.PI * innerradius);
         //float x = 50, y1 = 50, y2 = 150;
