@@ -117,8 +117,8 @@ public class GraphMovingSystem extends DefaultEcsSystem {
         adjustVisual(gmc);
         if (completedpath != null) {
             vc.setMovementSpeed(0);
-            //8.5.19 hier schon den Layer löschen, weil sonst unklar ist, welches System das macht.
-            gmc.graph.removeLayer(completedpath.layer);
+            //8.5.19 delete layer immediately because it is unclear which system will do it.
+            gmc.getGraph().removeLayer(completedpath.layer);
             SystemManager.sendEvent(new Event(GraphEventRegistry.GRAPH_EVENT_PATHCOMPLETED, new Payload(gmc.getGraph(), completedpath, entity)));
         }
     }
@@ -204,11 +204,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
             offset = gmc.visualizer.getPositionOffset();
         }*/
         LocalTransform posrot;
-        if (gmc.graph instanceof ProjectedGraph) {
-            posrot = getPosRot(gmc/*24.5.24, ((ProjectedGraph) gmc.graph).backProjection*/);
-        } else {
-            posrot = getPosRot(gmc/*24.5.24, gmc.getProjection()*/);
-        }
+        posrot = getPosRot(gmc);
         if (posrot != null) {
             gmc.setPosRot(posrot);
             //MA31 der Rest war schon kommentiert. SGGeod geod = SGGeod.fromCart(posrot.position);
@@ -229,11 +225,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
      * @return
      */
     public static LocalTransform getTransform(GraphMovingComponent gmc) {
-        if (gmc.graph instanceof ProjectedGraph) {
-            return getPosRot(gmc/*24.5.24), ((ProjectedGraph) gmc.graph).backProjection*/);
-        }
-        // keep old way for now
-        return getPosRot(gmc/*24.5.24, gmc.getProjection()*/);
+        return getPosRot(gmc);
     }
 
     /**

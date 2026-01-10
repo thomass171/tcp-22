@@ -538,7 +538,7 @@ public class GraphUtilsTest {
         GraphPathConstraintProvider  graphPathConstraintProvider = new DefaultGraphPathConstraintProvider(0, 0);
         GraphPath path = GraphUtils.createPathFromGraphPosition(graph, start, n3, new DefaultGraphWeightProvider(graph, new GraphEdge[]{}), graphPathConstraintProvider, 0, false, false, null);
         GraphMovingComponent gmc = new GraphMovingComponent(null);
-        gmc.setGraph(graph, start, null);
+        gmc.setGraph(graph, start);
         gmc.setPath(path, true);
         gmc.moveForward(baselen + 0.2f);
         //position auf turn0

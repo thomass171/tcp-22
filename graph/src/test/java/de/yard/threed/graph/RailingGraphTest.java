@@ -39,7 +39,7 @@ public class RailingGraphTest {
         RailingBranchSelector railingselector = new RailingBranchSelector();
         GraphPosition railingpos = new GraphPosition(rails.getEdge(0));
         GraphMovingComponent gmc = new GraphMovingComponent();
-        gmc.setGraph(rails, railingpos, null);
+        gmc.setGraph(rails, railingpos);
         gmc.setSelector(railingselector);
         TestUtils.assertVector3(new Vector3(x, 0, -y1 + innerradius), railingpos.get3DPosition());
         gmc.moveForward(umfang / 4 + (y2 - y1));

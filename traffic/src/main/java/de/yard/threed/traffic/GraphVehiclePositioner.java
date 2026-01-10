@@ -31,7 +31,7 @@ public class GraphVehiclePositioner implements VehiclePositioner {
                         /*no longer used?? if (projection != null && !(graph.getBaseGraph() instanceof ProjectedGraph)) {
                             throw new RuntimeException("should use ProjectedGraph");
                         }*/
-        gmc.setGraph((graph == null) ? null : graph.getBaseGraph(), position, null/*projection*/);
+        gmc.setGraph((graph == null) ? null : graph.getBaseGraph(), position);
 
     }
 

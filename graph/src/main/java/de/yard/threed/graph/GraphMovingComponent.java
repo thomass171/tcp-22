@@ -15,11 +15,13 @@ import de.yard.threed.engine.ecs.EcsEntity;
 import de.yard.threed.engine.util.RandomIntProvider;
 
 /**
- * Eine Component, die sich in einem Graphen bewegt bzw. daran gebunden/fixiert ist.
- * Auf die velocity hat der Graph keinen Einfluss.
+ * A component for an entity that is attached or moves on a graph.
+ * The graph doens't affect velocity.
  * <p>
- * Der Graph und damit die projection koennen sich auch aendern. Darum sind die nicht im Konstruktor.
- * 21.3.24: Isn't projection for groundnet and thus icao and graph dependent? Anyway, having it here makes things really complex.
+ * In 2018 we attempted a flag 'antijitter' to avoid jittering, but it not only was no solution but also broke functionality.
+ * <p>
+ * 21.3.24: Projection (for groundnet and thus icao and graph dependent?) removed from here because having it here makes things really complex.
+ * Instead 'graph' might be a ProjectedGraph.
  * <p>
  * 20.6.24: Flag 'automoveenabled' removed
  * Created by thomass on 24.11.16.
@@ -37,34 +39,27 @@ public class GraphMovingComponent extends EcsComponent {
     // 15.11.23: deprecated. TODO 3.4.25 change to requests (keys via InputtorequestSystem)
     public boolean keycontrolled = false;
 
-    //1.3.18 GraphVisualizer visualizer;
-    //16.2.18: zwar ungewöhnlich, darf aber null sein. Bei einemnormalen "path completed" bleibt es jedenfalls gesetzt.
+    //16.2.18: Indeed unusual, but might be null. After a regular "path completed" it remains set.
     private GraphPosition currentposition;
     private Transform mover;
-    GraphPath path;
+    // Temporarily set when the entity is moving. null when not moving?
+    private GraphPath path;
     public static String TAG = "GraphMovingComponent";
     private GraphSelector selector;
     //wo ist "vorne"
     public long statechangetimestamp = 0;
-    // die totale? Kruecke, damit GraphMovingSystem die Position in GraphKoordinaten nach 3D Koordinaten mappen kann.
-    // 26.4.18: Das ist ja nun wirklich keine Eigenschaft der Componenet oder des Graphen. Tja, aber wo gehoert eine solche Info hin?
-    // 10.1.19: Man koennte es mit Graph hier in einen GraphContext legen. Auch wenn es keine Eigenschaft der Component ist,
-    // muss die Component dem System diese Daten bereitstellen. Oder es gibt eine Graph Registry.
-    private GraphProjection projection = null;
-    // Speziell fuer GroundServices 
-    //public MapProjection projection;
-    //31.3.20: Das kann/darf kein TrafficGraph sein, auch wenn das manchmal so scheint. Denn nach einem Smoothing ist es auf jeden Fall keiner mehr.
-    //9.3.21: Manchmal ist/war es aber doch einer. Das ist/war reichlich unsauber (nur um icao durchzureichen?)
-    Graph graph;
-    SceneNode pos, rot;
-    //10.4.18: hilft aber nicht. Wieder inaktiv, weil er damit den Servicepoint nicht mehr findet.
-    boolean antijitter = false;
+    // The graph to which the entity is attached. During moving 'path' is set/used temporarily.
+    // 31.3.20: Once we thought it might not be a TrafficGraph (for passing properties like 'icao', which indeed is bad coupling)
+    // but of cource it is valid for sub classes. However TrafficGraph no longer is a sub class of Graph.
+    // 22.3.24 Might also be a ProjectedGraph.
+    private Graph graph;
     public boolean unscheduledmoving;
     // (vehicle)model specific rotation
     public Quaternion customModelRotation = new Quaternion();
     private PositionUpdateTrigger positionUpdateTrigger = new PositionUpdateTrigger();
     // Execute each 10th of code reaches
     private Threshold positionCheckThreshold = new Threshold(10);
+
     /**
      * mover darf null sein, z.B. fuer Tests. Aber auch fuer etwas unsichtbares. visualizer natuerlich auch.
      * 29.5.17: Mir dünkt, dass mover hier doch obselet ist.
@@ -82,12 +77,6 @@ public class GraphMovingComponent extends EcsComponent {
         this.currentposition = currentposition;
         // ein Default Selector
         selector = new RandomGraphSelector(new RandomIntProvider());
-        if (antijitter && mover != null) {
-            rot = new SceneNode();
-            pos = new SceneNode(rot);
-            pos.getTransform().setParent(mover.getParent());
-            mover.setParent(rot.getTransform());
-        }
     }
     /*public GraphMovingComponent(/*Graph graph,* /Transform mover/*, GraphVisualizer visualizer, GraphPosition currentposition* /) {
         this(mover/*graph,mover, currentposition* /);
@@ -135,13 +124,9 @@ public class GraphMovingComponent extends EcsComponent {
     /**
      * Wenn sich der Graph aendert. Aber fuer Einheitlichkeit auch bei Erstnutzung.
      */
-    public void setGraph(Graph graph, GraphPosition position, GraphProjection projection) {
+    public void setGraph(Graph graph, GraphPosition position) {
         this.graph = graph;
         this.currentposition = position;
-        //21.3.24 this.projection = projection;
-        if (projection != null) {
-            throw new RuntimeException("should use ProjectedGraph");
-        }
     }
 
     /**
@@ -401,10 +386,6 @@ public class GraphMovingComponent extends EcsComponent {
         this.currentposition = currentposition;
     }
 
-    public GraphProjection getProjection() {
-        return projection;
-    }
-
     public void setAutomove(boolean enabled) {
         automove = enabled;
     }
@@ -421,20 +402,11 @@ public class GraphMovingComponent extends EcsComponent {
 
 
     public void setPosRot(LocalTransform posRot) {
-        if (antijitter) {
-            pos.getTransform().setPosition(posRot.position);
-            rot.getTransform().setRotation(posRot.rotation);
-        } else {
-            mover.setPosRot(posRot);
-        }
+        mover.setPosRot(posRot);
     }
 
     public Vector3 getPosition() {
-        if (antijitter) {
-            return pos.getTransform().getPosition();
-        } else {
-            return mover.getPosition();
-        }
+        return mover.getPosition();
     }
 
     public boolean hasAutomove() {

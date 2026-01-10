@@ -60,7 +60,7 @@ public class SolarSystem {
         GraphMovingComponent gmc = GraphMovingComponent.getGraphMovingComponent(ecsEntity);
         Graph orbit = buildGlobalOrbitGraph(radius);
         GraphPosition startPosition = new GraphPosition(orbit.getEdge(0));
-        gmc.setGraph(orbit, startPosition, null);
+        gmc.setGraph(orbit, startPosition);
         orbit.setRotationProvider(new OrbitRotationProvider());
         VelocityComponent vc = VelocityComponent.getVelocityComponent(ecsEntity);
         vc.setMovementSpeed(speed);

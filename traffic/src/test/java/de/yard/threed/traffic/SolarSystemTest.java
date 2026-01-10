@@ -85,7 +85,7 @@ public class SolarSystemTest {
         Assertions.assertEquals(  4, orbit.getEdgeCount(),"orbit.nodes");
 
         GraphMovingComponent gmc = new GraphMovingComponent();
-        gmc.setGraph(orbit, new GraphPosition(edge0), null);
+        gmc.setGraph(orbit, new GraphPosition(edge0));
         LocalTransform posrot = GraphMovingSystem.getPosRot(gmc/*, null*/);
         TestUtils.assertVector3( new Vector3(0, WorldGlobal.DISTANCEMOONEARTH, 0), posrot.position,"start position");
         gmc.moveForward(umfang12);

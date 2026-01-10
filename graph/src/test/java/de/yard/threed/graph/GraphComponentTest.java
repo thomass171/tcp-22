@@ -39,7 +39,7 @@ public class GraphComponentTest {
         GraphMovingComponent gmc = new GraphMovingComponent();
         GraphPosition start = new GraphPosition(geoGraphForTest.e0);
 
-        gmc.setGraph(geoGraphForTest.graph, start, null);
+        gmc.setGraph(geoGraphForTest.graph, start);
 
         LocalTransform projectedLocalTransform;
         double expectedX;

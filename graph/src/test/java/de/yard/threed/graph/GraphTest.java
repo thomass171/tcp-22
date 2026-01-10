@@ -93,7 +93,7 @@ public class GraphTest {
         GraphEdge edgerechts = graph.connectNodes(rechts, start, "rechts");
         GraphPosition pos = new GraphPosition(edgelinks);
         GraphMovingComponent gmc = new GraphMovingComponent();
-        gmc.setGraph(graph, pos, null);
+        gmc.setGraph(graph, pos);
         gmc.setSelector(new RandomGraphSelector(new DeterministicIntProvider(new int[]{1, 0})));
         move(gmc);
         LocalTransform posrot = GraphMovingSystem.getPosRot(gmc/*, null*/);
@@ -103,7 +103,7 @@ public class GraphTest {
         // auf ganz links positionieren und beide Kanten reverse gehen.
         pos = new GraphPosition(edgelinks, 0, true);
         gmc = new GraphMovingComponent();
-        gmc.setGraph(graph, pos, null);
+        gmc.setGraph(graph, pos);
         gmc.setSelector(new RandomGraphSelector(new DeterministicIntProvider(new int[]{0, 1, 0})));
         Assertions.assertEquals(0, gmc.getCurrentposition().edgeposition, "position");
         gmc.moveForward(1);
@@ -141,14 +141,14 @@ public class GraphTest {
         GraphEdge edgerechts = graph.connectNodes(start, rechts, "rechts");
         GraphPosition pos = new GraphPosition(edgelinks);
         GraphMovingComponent gmc = new GraphMovingComponent();
-        gmc.setGraph(null, pos, null);
+        gmc.setGraph(null, pos);
         gmc.setSelector(new RandomGraphSelector(new DeterministicIntProvider(new int[]{1, 0})));
         move(gmc);
 
         RailingBranchSelector railingselector = new RailingBranchSelector();
         GraphPosition railingpos = new GraphPosition(edgelinks);
         gmc = new GraphMovingComponent();
-        gmc.setGraph(null, railingpos, null);
+        gmc.setGraph(null, railingpos);
         gmc.setSelector(railingselector);
         TestUtils.assertVector3(new Vector3(x, 0, 0), railingpos.get3DPosition());
         gmc.moveForward(777);
@@ -157,7 +157,7 @@ public class GraphTest {
         // auf ganz links positionieren und nach rechts gehen.
         pos = new GraphPosition(edgelinks, 0, true);
         gmc = new GraphMovingComponent();
-        gmc.setGraph(null, pos, null);
+        gmc.setGraph(null, pos);
         gmc.setSelector(new RandomGraphSelector(new DeterministicIntProvider(new int[]{0, 1, 0})));
         Assertions.assertEquals(0, gmc.getCurrentposition().edgeposition, "position");
         gmc.moveForward(1);
@@ -181,7 +181,7 @@ public class GraphTest {
         // ganz links positionieren.
         pos = new GraphPosition(edgelinks, 0/*edgelinks.getLength()*/, true);
         gmc = new GraphMovingComponent();
-        gmc.setGraph(graph, pos, null);
+        gmc.setGraph(graph, pos);
         gmc.setSelector(new RandomGraphSelector(new DeterministicIntProvider(new int[]{0, 1, 0})));
         Assertions.assertEquals(0, gmc.getCurrentposition().edgeposition, "position");
         gmc.moveForward(1);
@@ -220,7 +220,7 @@ public class GraphTest {
         // auf ganz links positionieren und nach rechts gehen.
         GraphPosition pos = new GraphPosition(edgelinks, 0, false);
         GraphMovingComponent gmc = new GraphMovingComponent();
-        gmc.setGraph(null, pos, null);
+        gmc.setGraph(null, pos);
         gmc.setSelector(new RandomGraphSelector(new DeterministicIntProvider(new int[]{0, 1, 0})));
         Assertions.assertEquals(0, gmc.getCurrentposition().edgeposition, "position");
         gmc.moveForward(1);
@@ -285,7 +285,7 @@ public class GraphTest {
         }
         GraphPosition pos = new GraphPosition(edgelinks);
         GraphMovingComponent gmc = new GraphMovingComponent();
-        gmc.setGraph(null, pos, null);
+        gmc.setGraph(null, pos);
         gmc.setSelector(selector);
         TestUtils.assertVector3(new Vector3(15 + radius + radius, 0, 0), pos.get3DPosition());
         TestUtils.assertQuaternion(new Degree(0), new Degree(90), new Degree(0), get3DRotation(graph, pos), "");
@@ -343,7 +343,7 @@ public class GraphTest {
         selector = new RailingBranchSelector();
         GraphPosition pos = new GraphPosition(edgelinks);
         GraphMovingComponent gmc = new GraphMovingComponent();
-        gmc.setGraph(null, pos, null);
+        gmc.setGraph(null, pos);
         gmc.setSelector(selector);
 
         // ganz rum auf das Ende der Extension
@@ -382,7 +382,7 @@ public class GraphTest {
 
         GraphPosition pos = new GraphPosition(edgelinks);
         GraphMovingComponent gmc = new GraphMovingComponent();
-        gmc.setGraph(null, pos, null);
+        gmc.setGraph(null, pos);
         gmc.setSelector(new RandomGraphSelector(new DeterministicIntProvider(new int[]{1, 0, 1, 0, 1, 0, 1})));
         // der up Vector ist der default. Trotzdem mal setzen zum Testen.
         //pos.setUpVector(new Vector3(0, 1, 0));
@@ -536,7 +536,7 @@ public class GraphTest {
         path = GraphUtils.createPathFromGraphPosition(graph, start, b, null, graphPathConstraintProvider, layer, true, false, null);
         Assertions.assertEquals("eins:teardrop.smootharc--ex-->smoothbegin.zero(1)--smootharcfrom-->smootharc@zero(1)--smootharcto-->smoothbegin.a(1)--smootharcfrom-->smootharc@a(2)--smootharcto-->smoothend.a(1)", path.getDetailedString(), "path");
         GraphMovingComponent gmc = new GraphMovingComponent(null);
-        gmc.setGraph(graph, start, null);
+        gmc.setGraph(graph, start);
         gmc.setPath(path, true);
         gmc.moveForward(18);
         //muss jetzt am Ende stehen, und zwar umgesetzt wieder auf layer 0.
@@ -572,7 +572,7 @@ public class GraphTest {
         Assertions.assertEquals("eins:teardrop.smootharc--ex-->smoothbegin.zero(1)--smootharcfrom-->smootharc@zero(1)--smootharcto-->smoothbegin.a(1)--smootharcfrom-->smootharc@a(2)--smootharcto-->smoothend.a(1)", path.getDetailedString(), "path");
         Assertions.assertEquals("smootharcfrom", path.getSegment(4).getEnterNode().getName(), "enternode darf nicht a sein");
         GraphMovingComponent gmc = new GraphMovingComponent(null);
-        gmc.setGraph(graph, start, null);
+        gmc.setGraph(graph, start);
         gmc.setPath(path, true);
         gmc.moveForward(7);
         //steht jetzt irgendwo auf dem Path, aber nicht am Ende
@@ -673,7 +673,7 @@ public class GraphTest {
         GraphEdge edgelinks = graph.connectNodes(oben, links);
         GraphPosition pos = new GraphPosition(edgeunten);
         GraphMovingComponent gmc = new GraphMovingComponent();
-        gmc.setGraph(graph, pos, null);
+        gmc.setGraph(graph, pos);
 
         LocalTransform posrot = GraphMovingSystem.getPosRot(gmc/*, null*/);
         //Die Rotation muss eine x 90 Grad sein
@@ -792,7 +792,7 @@ public class GraphTest {
         GraphEdge closing = graph.findEdgeByName("closing");
 
         GraphMovingComponent gmc = new GraphMovingComponent();
-        gmc.setGraph(null, new GraphPosition(edgelinks), null);
+        gmc.setGraph(null, new GraphPosition(edgelinks));
         // nicht den kurzen Pfad nehmen
         DefaultGraphWeightProvider gwp = new DefaultGraphWeightProvider(graph, new GraphEdge[]{closing});
         GraphPath path = graph.findPath(start, oben, gwp);
