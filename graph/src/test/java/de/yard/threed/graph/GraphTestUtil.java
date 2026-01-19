@@ -52,4 +52,16 @@ public class GraphTestUtil {
         return projection;
     }
 
+    public static void assertGraphPath(boolean[] expectedIsArc, double[] expectedLength, GraphPath actual) {
+
+        assertEquals(expectedIsArc.length, expectedLength.length);
+        assertEquals(actual.getSegmentCount(), expectedLength.length);
+
+        for (int i = 0; i < expectedIsArc.length; i++) {
+            GraphPathSegment segment = actual.getSegment(i);
+            assertEquals(expectedIsArc[i],segment.edge.isArc(),  i + ":GraphPathSegment.isArc");
+            assertEquals(expectedLength[i], segment.edge.getLength(), 0.1, i + ":GraphPathSegment.length");
+        }
+    }
+
 }

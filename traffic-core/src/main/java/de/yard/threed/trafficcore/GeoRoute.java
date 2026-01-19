@@ -32,6 +32,7 @@ public class GeoRoute {
     private static String LABEL_WAYPOINT = "wp";
 
     public static String SAMPLE_EDKB_EDDK = "wp:50.768,7.1672000->takeoff:50.7692,7.1617000->wp:50.7704,7.1557->wp:50.8176,7.0999->wp:50.8519,7.0921->touchdown:50.8625,7.1317000->wp:50.8662999,7.1443999";
+    public static String SAMPLE_EGPH06_EGPF05 = "wp:55.9442996,-3.3892534->takeoff:55.9467891,-3.3819122->wp:55.9607437,-3.3407320->wp:55.9696781,-3.3390629->wp:55.9758200,-3.3507778->wp:55.9743070,-3.3666025->wp:55.9204845,-3.9163328->wp:55.8329947,-4.4526218->wp:55.8314837,-4.4683891->wp:55.8371362,-4.4808215->wp:55.8461119,-4.4814731->touchdown:55.8647208,-4.4467436->wp:55.8799744,-4.4182359";
 
     public GeoCoordinate takeoff, touchdown;
     public List<GeoCoordinate> waypointsBeforeTakeoff = new ArrayList<>();

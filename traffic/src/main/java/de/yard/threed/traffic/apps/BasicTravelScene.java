@@ -120,7 +120,7 @@ public class BasicTravelScene extends Scene {
         SphereSystem sphereSystem = new SphereSystem(/*getRbcp(),*/ getGraphBackProjectionProvider()/*16.3.24, getCenter() getSceneConfig()*/);
         SystemManager.addSystem(sphereSystem);
         //((SphereSystem) SystemManager.findSystem(SphereSystem.TAG)).setDefaultLightDefinition(getLight());
-        SystemManager.addSystem(new GraphMovingSystem());
+        SystemManager.addSystem(GraphMovingSystem.buildFromConfiguration());
         SystemManager.addSystem(new GraphTerrainSystem(getTerrainBuilder()));
         FreeFlyingSystem freeFlyingSystem = FreeFlyingSystem.buildFromConfiguration();
         SystemManager.addSystem(freeFlyingSystem);

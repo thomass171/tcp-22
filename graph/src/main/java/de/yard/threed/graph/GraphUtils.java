@@ -158,7 +158,7 @@ public class GraphUtils {
             logger.debug("calc arc from " + start.getName() + start.getLocation() + " by " + intersection + " to " + end.getName() + end.getLocation());
         }
         //suitable for meter dimensions
-        //v1 und v2 erstmal nur als normalisierte Richtung
+        //v1 and v2 are the normalized directions
         Vector3 v1 = e1.getEffectiveOutboundDirection(start);
         Vector3 v2 = e2.getEffectiveInboundDirection(end);
         // mit getAngleBetween erkennt man nicht die Richtung (alpha>180) bzw dann gegenüberliegenden KReis. Aber toangles ist viel zu anfaellig.
@@ -174,7 +174,7 @@ public class GraphUtils {
         // Über das Kreuzprodukt die Orientierung ermitteln (auf welcher Seite liegt der KReis).
         // Der Knackpunkt, warum es auf z=0 Eben beschraenkt ist.?
         //15.3.18: Fuer das KP muss die Orientierung gedreht werden. Aus Kompatitbilaet mit Tests negiere ich den jetzt. Oder besser nicht?
-        Vector3 kp = Vector3.getCrossProduct(v1, v2);//.negate();
+        Vector3 crossProduct = Vector3.getCrossProduct(v1, v2);//.negate();
         Vector3 upVector = new Vector3(0, 0, 1);
         //MA21: wegen 3D darum jetzt kp als upVector.
         //Hmmm upVector=kp;
@@ -196,8 +196,8 @@ public class GraphUtils {
             logger.debug("distancefromintersection=" + distancefromintersection + ",radius=" + radius + ",alpha=" + alpha + ",beta=" + beta);
         }
         Vector3 radiusvector;// = Vector3.getCrossProduct(v1, upVector).normalize().multiply(radius);
-        Vector3 ex = Vector3.getCrossProduct(v1, kp).normalize();
-        Vector3 ey = Vector3.getCrossProduct(v2, kp).normalize();
+        Vector3 ex = Vector3.getCrossProduct(v1, crossProduct).normalize();
+        Vector3 ey = Vector3.getCrossProduct(v2, crossProduct).normalize();
         //v1 = v1.multiply(e1len - distancefromintersection);
         v2 = v2.multiply(distancefromintersection);
 
@@ -214,7 +214,7 @@ public class GraphUtils {
         if (!inner) {
             beta = beta - MathUtil2.PI2;
         }
-        return new GraphArcParameter(arccenter, radius, distancefromintersection, arcbeginloc, beta, v2, kp, ex, kp);
+        return new GraphArcParameter(arccenter, radius, distancefromintersection, arcbeginloc, beta, v2, crossProduct, ex, crossProduct);
     }
 
     /**

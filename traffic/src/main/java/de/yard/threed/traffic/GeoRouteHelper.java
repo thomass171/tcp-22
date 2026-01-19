@@ -42,9 +42,10 @@ public class GeoRouteHelper {
     }
 
     private void add(Graph graph, GeoCoordinate gc, EllipsoidCalculations rbcp, ElevationProvider elevationProvider, GeneralParameterHandler<GeoCoordinate> missingElevationHandler) {
-        GraphNode n = graph.addNode("", rbcp.toCart(gc, elevationProvider, missingElevationHandler));
+        // 15.1.26: Give more reasonable names for nodes and edges than just ""
+        GraphNode n = graph.addNode("n" + graph.getNodeCount(), rbcp.toCart(gc, elevationProvider, missingElevationHandler));
         if (graph.getNodeCount() > 1) {
-            graph.connectNodes(graph.getNode(graph.getNodeCount() - 2), n, "");
+            graph.connectNodes(graph.getNode(graph.getNodeCount() - 2), n, "e" + graph.getEdgeCount());
         }
     }
 

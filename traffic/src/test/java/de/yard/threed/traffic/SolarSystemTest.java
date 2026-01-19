@@ -33,7 +33,7 @@ public class SolarSystemTest {
         double distanceEarthMoon=WorldGlobal.km(12000);
 
         //SystemManager.reinit();
-        GraphMovingSystem graphMovingSystem=new GraphMovingSystem();
+        GraphMovingSystem graphMovingSystem= GraphMovingSystem.buildFromConfiguration();
         //SystemManager.initSystems();
 
         SceneNode sunNode = solarSystem.build(distanceSunEarth,distanceEarthMoon);

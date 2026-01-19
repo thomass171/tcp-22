@@ -18,18 +18,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static de.yard.threed.core.testutil.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Es wird zwar RailingFactory zum Spiegeln verwendet, Trotzdem ein abstrakter Graphtest.
- * 19.12.16: Teilweise aber doch auch fuer railing, weil die Tests vielfach gut wiederverwendbar sind.
- * Auch fuer GraphNode,GraphPosition und GraphEdge. Aber nicht fuer GraphUtil.
+ * Also for GraphNode,GraphPosition and GraphEdge. But not for GraphUtil.
  * <p>
  * <p>
  * Created by thomass on 13.09.16.
  */
 public class GraphTest {
-    //static Platform platform = TestFactory.initPlatformForTest(false, null, false);
-    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "data"/*,"data-old","railing"*/}, new SimpleHeadlessPlatformFactory());
+    Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "data"}, new SimpleHeadlessPlatformFactory());
 
     @Test
     public void testSplit() {
@@ -54,7 +53,7 @@ public class GraphTest {
     }
 
     /**
-     * split mit Nachfolger
+     * split with successor
      */
     @Test
     public void testSplit2() {
@@ -87,10 +86,10 @@ public class GraphTest {
         Graph graph = new Graph();
         // Graph ist in xz Ebene!
         GraphNode start = GraphFactory.addNode(graph, 20, 0, "start");
-        GraphNode links = GraphFactory.addNode(graph, 15, 0, "links");
-        GraphEdge edgelinks = graph.connectNodes(start, links, "links");
-        GraphNode rechts = GraphFactory.addNode(graph, 33, 0, "rechts");
-        GraphEdge edgerechts = graph.connectNodes(rechts, start, "rechts");
+        GraphNode links = GraphFactory.addNode(graph, 15, 0, "left");
+        GraphEdge edgelinks = graph.connectNodes(start, links, "left");
+        GraphNode rechts = GraphFactory.addNode(graph, 33, 0, "right");
+        GraphEdge edgerechts = graph.connectNodes(rechts, start, "right");
         GraphPosition pos = new GraphPosition(edgelinks);
         GraphMovingComponent gmc = new GraphMovingComponent();
         gmc.setGraph(graph, pos);
@@ -112,17 +111,17 @@ public class GraphTest {
         Assertions.assertEquals(4, gmc.getCurrentposition().edgeposition, "position");
         gmc.moveForward(-3);
         Assertions.assertEquals(1, gmc.getCurrentposition().edgeposition, "position");
-        // auf die rechts Kante gehen
+        // go to right edge
         gmc.moveForward(7);
         Assertions.assertEquals(3, gmc.getCurrentposition().edgeposition, "position");
-        Assertions.assertEquals("rechts", gmc.getCurrentposition().currentedge.getName(), "kante");
+        Assertions.assertEquals("right", gmc.getCurrentposition().currentedge.getName(), "edge");
         // Stueck weiter
         gmc.moveForward(2);
         Assertions.assertEquals(5, gmc.getCurrentposition().edgeposition, "position");
         // wieder zurueck auf die linke Kante gehen
         gmc.moveForward(-8);
         Assertions.assertEquals(2, gmc.getCurrentposition().edgeposition, "position");
-        Assertions.assertEquals("links", gmc.getCurrentposition().currentedge.getName(), "kante");
+        Assertions.assertEquals("left", gmc.getCurrentposition().currentedge.getName(), "edge");
     }
 
     /**
@@ -135,10 +134,10 @@ public class GraphTest {
         int xl = 15, x = 20, xr = 33;
         Graph graph = new Graph();
         GraphNode start = GraphFactory.addNode(graph, x, 0, "start");
-        GraphNode links = GraphFactory.addNode(graph, xl, 0, "links");
-        GraphEdge edgelinks = graph.connectNodes(start, links, "links");
-        GraphNode rechts = GraphFactory.addNode(graph, xr, 0, "rechts");
-        GraphEdge edgerechts = graph.connectNodes(start, rechts, "rechts");
+        GraphNode links = GraphFactory.addNode(graph, xl, 0, "left");
+        GraphEdge edgelinks = graph.connectNodes(start, links, "left");
+        GraphNode rechts = GraphFactory.addNode(graph, xr, 0, "right");
+        GraphEdge edgerechts = graph.connectNodes(start, rechts, "right");
         GraphPosition pos = new GraphPosition(edgelinks);
         GraphMovingComponent gmc = new GraphMovingComponent();
         gmc.setGraph(null, pos);
@@ -162,20 +161,20 @@ public class GraphTest {
         Assertions.assertEquals(0, gmc.getCurrentposition().edgeposition, "position");
         gmc.moveForward(1);
         Assertions.assertEquals(1, gmc.getCurrentposition().edgeposition, "position");
-        Assertions.assertTrue(gmc.getCurrentposition().isReverseOrientation(), "reverse");
+        assertTrue(gmc.getCurrentposition().isReverseOrientation(), "reverse");
         // auf die rechts Kante gehen
         gmc.moveForward(7);
         Assertions.assertEquals(3, gmc.getCurrentposition().edgeposition, "position");
-        Assertions.assertEquals("rechts", gmc.getCurrentposition().currentedge.getName(), "kante");
-        Assertions.assertFalse(gmc.getCurrentposition().isReverseOrientation(), "reverse");
+        Assertions.assertEquals("right", gmc.getCurrentposition().currentedge.getName(), "edge");
+        assertFalse(gmc.getCurrentposition().isReverseOrientation(), "reverse");
         // Stueck weiter
         gmc.moveForward(2);
         Assertions.assertEquals(5, gmc.getCurrentposition().edgeposition, "position");
         // wieder zurueck auf die linke Kante gehen
         gmc.moveForward(-8);
         Assertions.assertEquals(2, gmc.getCurrentposition().edgeposition, "position");
-        Assertions.assertEquals("links", gmc.getCurrentposition().currentedge.getName(), "kante");
-        Assertions.assertTrue(gmc.getCurrentposition().isReverseOrientation(), "reverse");
+        Assertions.assertEquals("left", gmc.getCurrentposition().currentedge.getName(), "edge");
+        assertTrue(gmc.getCurrentposition().isReverseOrientation(), "reverse");
 
 
         // ganz links positionieren.
@@ -193,18 +192,18 @@ public class GraphTest {
         // auf die rechts Kante gehen
         gmc.moveForward(7);
         Assertions.assertEquals(3, gmc.getCurrentposition().edgeposition, "position");
-        Assertions.assertEquals("rechts", gmc.getCurrentposition().currentedge.getName(), "kante");
+        Assertions.assertEquals("right", gmc.getCurrentposition().currentedge.getName(), "edge");
         // Stueck weiter
         gmc.moveForward(2);
         Assertions.assertEquals(5, gmc.getCurrentposition().edgeposition, "position");
         // wieder zurueck auf die linke Kante gehen
         gmc.moveForward(-8);
         Assertions.assertEquals(2, gmc.getCurrentposition().edgeposition, "position");
-        Assertions.assertEquals("links", gmc.getCurrentposition().currentedge.getName(), "kante");
+        Assertions.assertEquals("left", gmc.getCurrentposition().currentedge.getName(), "edge");
     }
 
     /**
-     * Wie oben, aber wieder andere Ausrichtung
+     * Like above, but different orientation
      * <p>
      * ->#<-
      */
@@ -213,10 +212,10 @@ public class GraphTest {
         int xl = 15, x = 20, xr = 33;
         Graph graph = new Graph();
         GraphNode start = GraphFactory.addNode(graph, x, 0, "start");
-        GraphNode links = GraphFactory.addNode(graph, xl, 0, "links");
-        GraphEdge edgelinks = graph.connectNodes(links, start, "links");
-        GraphNode rechts = GraphFactory.addNode(graph, xr, 0, "rechts");
-        GraphEdge edgerechts = graph.connectNodes(rechts, start, "rechts");
+        GraphNode links = GraphFactory.addNode(graph, xl, 0, "left");
+        GraphEdge edgelinks = graph.connectNodes(links, start, "left");
+        GraphNode rechts = GraphFactory.addNode(graph, xr, 0, "right");
+        GraphEdge edgerechts = graph.connectNodes(rechts, start, "right");
         // auf ganz links positionieren und nach rechts gehen.
         GraphPosition pos = new GraphPosition(edgelinks, 0, false);
         GraphMovingComponent gmc = new GraphMovingComponent();
@@ -226,13 +225,13 @@ public class GraphTest {
         gmc.moveForward(1);
         Assertions.assertEquals(1, gmc.getCurrentposition().edgeposition, "position");
         Assertions.assertEquals(1, gmc.getCurrentposition().getAbsolutePosition(), "absoluteposition");
-        Assertions.assertFalse(gmc.getCurrentposition().isReverseOrientation(), "reverse");
+        assertFalse(gmc.getCurrentposition().isReverseOrientation(), "reverse");
         // auf die rechts Kante gehen
         gmc.moveForward(7);
         Assertions.assertEquals(3, gmc.getCurrentposition().edgeposition, "position");
         Assertions.assertEquals(10, gmc.getCurrentposition().getAbsolutePosition(), "absoluteposition");
-        Assertions.assertEquals("rechts", gmc.getCurrentposition().currentedge.getName(), "kante");
-        Assertions.assertTrue(gmc.getCurrentposition().isReverseOrientation(), "reverse");
+        Assertions.assertEquals("right", gmc.getCurrentposition().currentedge.getName(), "edge");
+        assertTrue(gmc.getCurrentposition().isReverseOrientation(), "reverse");
         // Stueck weiter
         gmc.moveForward(2);
         Assertions.assertEquals(5, gmc.getCurrentposition().edgeposition, "position");
@@ -240,8 +239,8 @@ public class GraphTest {
         gmc.moveForward(-8);
         Assertions.assertEquals(2, gmc.getCurrentposition().edgeposition, "position");
         Assertions.assertEquals(2, gmc.getCurrentposition().getAbsolutePosition(), "absoluteposition");
-        Assertions.assertEquals("links", gmc.getCurrentposition().currentedge.getName(), "kante");
-        Assertions.assertFalse(gmc.getCurrentposition().isReverseOrientation(), "reverse");
+        Assertions.assertEquals("left", gmc.getCurrentposition().currentedge.getName(), "edge");
+        assertFalse(gmc.getCurrentposition().isReverseOrientation(), "reverse");
 
         //outline von links nach rechts (unten). upVector ist y. Dann geht rechts nach +z
         float offset = 7;
@@ -335,7 +334,7 @@ public class GraphTest {
         float umfang4 = umfang / 4;
         float umfang8 = umfang / 8;
 
-        Graph graph = GraphFactory.buildReturnKreis(radius, true);
+        Graph graph = GraphFactory.buildReturnCircle(radius, true);
         GraphEdge edgelinks = graph.getEdge(0);
         GraphEdge halbkreis = graph.getEdge(1);
 
@@ -350,16 +349,16 @@ public class GraphTest {
         gmc.moveForward(200000);
         Assertions.assertEquals("extension", pos.currentedge.getName(), "edgename");
         Assertions.assertEquals(9, pos.edgeposition, "position");
-        Assertions.assertFalse(pos.isReverseOrientation(), "reverse");
+        assertFalse(pos.isReverseOrientation(), "reverse");
         TestUtils.assertVector3(new Vector3(15 + radius + radius + 9, 0, 0), pos.get3DPosition());
         //rotation bezieht sich auf -z
         TestUtils.assertQuaternion(new Degree(0), new Degree(-90), new Degree(0), get3DRotation(graph, pos), "");
 
         //jetzt zurueck auf den Beginn des Halbkreis
         gmc.moveForward(-2 * radius - 9 - 0.00001f);
-        Assertions.assertEquals("firsthalbkreis", pos.currentedge.getName(), "edgename");
+        Assertions.assertEquals("firstsemicircle", pos.currentedge.getName(), "edgename");
         Assertions.assertEquals(halbumfang, pos.edgeposition, 0.0001, "position");
-        Assertions.assertTrue(pos.isReverseOrientation(), "reverse");
+        assertTrue(pos.isReverseOrientation(), "reverse");
         //rotation bezieht sich auf -z
         TestUtils.assertQuaternion(new Degree(0), new Degree(-90), new Degree(0), get3DRotation(graph, pos), "");
 
@@ -510,7 +509,7 @@ public class GraphTest {
         Assertions.assertEquals(-offset, Vector3.getDistance(outline.get(0), arc.from.getLocation()), 0.0001, "distance.arcbeginloc");
         //knifflig zu testen. 
         //TestUtil.assertVector3( letztergeraderoutline, outline.get(0));
-        Assertions.assertTrue(outline.get(0).getX() < arc.from.getLocation().getX());
+        assertTrue(outline.get(0).getX() < arc.from.getLocation().getX());
         TestUtils.assertVector3(new Vector3(-2.075736f, 0, -2), outline.get(8));
     }
 
@@ -540,14 +539,14 @@ public class GraphTest {
         gmc.setPath(path, true);
         gmc.moveForward(18);
         //muss jetzt am Ende stehen, und zwar umgesetzt wieder auf layer 0.
-        Assertions.assertEquals( "ab", gmc.getCurrentposition().currentedge.getName(),"currentposition.edge");
-        Assertions.assertFalse(gmc.getCurrentposition().isReverseOrientation(), "currentposition.reverseorientation");
-        Assertions.assertEquals(2.828427f, gmc.getCurrentposition().edgeposition, 0.00001,"currentposition.position");
+        Assertions.assertEquals("ab", gmc.getCurrentposition().currentedge.getName(), "currentposition.edge");
+        assertFalse(gmc.getCurrentposition().isReverseOrientation(), "currentposition.reverseorientation");
+        Assertions.assertEquals(2.828427f, gmc.getCurrentposition().edgeposition, 0.00001, "currentposition.position");
         gmc.moveForward(15);
         //und da muss er jetzt immer noch stehen
-        Assertions.assertEquals("ab", gmc.getCurrentposition().currentedge.getName(),"currentposition.edge");
-        Assertions.assertFalse(gmc.getCurrentposition().isReverseOrientation(), "currentposition.reverseorientation");
-        Assertions.assertEquals(2.828427f, gmc.getCurrentposition().edgeposition, 0.00001,"currentposition.position");
+        Assertions.assertEquals("ab", gmc.getCurrentposition().currentedge.getName(), "currentposition.edge");
+        assertFalse(gmc.getCurrentposition().isReverseOrientation(), "currentposition.reverseorientation");
+        Assertions.assertEquals(2.828427f, gmc.getCurrentposition().edgeposition, 0.00001, "currentposition.position");
     }
 
     /**
@@ -580,13 +579,13 @@ public class GraphTest {
         //jetzt muss er wieder auf dem start des path stehen. Wobei das evtl. nicht sauber ist, er koennte doch auch weiter back. Aber nee, er hat ja den GraphSelector,
         //und der geht nicht weiter zurueck.
         Assertions.assertEquals("teardrop.smootharc", gmc.getCurrentposition().currentedge.getName(), "currentposition.edge");
-        Assertions.assertTrue(gmc.getCurrentposition().isReverseOrientation(), "currentposition.reverseorientation");
-        Assertions.assertEquals(1.3462735f, gmc.getCurrentposition().edgeposition,0.00001, "currentposition.position");
+        assertTrue(gmc.getCurrentposition().isReverseOrientation(), "currentposition.reverseorientation");
+        Assertions.assertEquals(1.3462735f, gmc.getCurrentposition().edgeposition, 0.00001, "currentposition.position");
         gmc.moveForward(-8);
         //immer noch
         Assertions.assertEquals("teardrop.smootharc", gmc.getCurrentposition().currentedge.getName(), "currentposition.edge");
-        Assertions.assertTrue(gmc.getCurrentposition().isReverseOrientation(), "currentposition.reverseorientation");
-        Assertions.assertEquals(1.3462735f, gmc.getCurrentposition().edgeposition,0.00001, "currentposition.position");
+        assertTrue(gmc.getCurrentposition().isReverseOrientation(), "currentposition.reverseorientation");
+        Assertions.assertEquals(1.3462735f, gmc.getCurrentposition().edgeposition, 0.00001, "currentposition.position");
 
 
     }
@@ -784,7 +783,7 @@ public class GraphTest {
         float umfang4 = umfang / 4;
         float umfang8 = umfang / 8;
 
-        Graph graph = GraphFactory.buildReturnKreis(radius, true);
+        Graph graph = GraphFactory.buildReturnCircle(radius, true);
         GraphEdge edgelinks = graph.getEdge(0);
         GraphEdge halbkreis = graph.getEdge(1);
         GraphNode start = graph.getNode(0);
@@ -1006,9 +1005,9 @@ public class GraphTest {
     public static Graph buildReturnKreis(float radius) {
 
         float halbumfang = (float) (Math.PI * radius);
-        Graph graph = GraphFactory.buildReturnKreis(radius, false);
+        Graph graph = GraphFactory.buildReturnCircle(radius, false);
 
-        GraphEdge halbkreis = graph.findEdgeByName("firsthalbkreis");
+        GraphEdge halbkreis = graph.findEdgeByName("firstsemicircle");
         Assertions.assertEquals(-180, (float) halbkreis.getAngle().getDegree(), "halbkreis.angle");
         GraphEdge closing = graph.findEdgeByName("closing");
         Assertions.assertEquals(90, (float) closing.getAngle().getDegree(), "closing.angle");
@@ -1023,23 +1022,15 @@ public class GraphTest {
         // und bei der Gelegenheit auch den Selector testen
         RailingBranchSelector selector = new RailingBranchSelector();
         GraphEdge edgelinks = graph.findEdgeByName("getFirst");
-        Assertions.assertEquals("firsthalbkreis", selector.findNextEdgeAtNode(edgelinks, edgelinks.to).edge.getName(), "selector");
+        Assertions.assertEquals("firstsemicircle", selector.findNextEdgeAtNode(edgelinks, edgelinks.to).edge.getName(), "selector");
         Assertions.assertEquals("first4", selector.findNextEdgeAtNode(halbkreis, halbkreis.to).edge.getName(), "selector");
         Assertions.assertNull(selector.findNextEdgeAtNode(closing, closing.to), "selector");
         return graph;
     }
 
-
-    /**
-     * Aus GraphPosition hierhin verschoben, weil es nur in Tests verwendet wird und auch fragwürdigen Kontext dort hat.
-     *
-     * @return
-     */
-    /*19.4.17 eigentlich keine Sache des Graphen?? Und auf was beziht sich diese Rotation? Bei Railing wohl -z*/
     public Quaternion get3DRotation(Graph graph, GraphPosition position) {
         return DefaultEdgeBasedRotationProvider.get3DRotation(position.reverseorientation, position.currentedge.getEffectiveDirection(position.getAbsolutePosition()),
-                /*graph.getGraphOrientation().getForwardRotation(),*/graph.getGraphOrientation().getUpVector(position.currentedge/*,graph.orientation.orientation*/));
-        //return currentedge.get3DRotation(edgeposition, upVector,reverseorientation);
+                graph.getGraphOrientation().getUpVector(position.currentedge));
     }
 
     /**

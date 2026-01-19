@@ -1,13 +1,7 @@
 package de.yard.threed.traffic.flight;
 
 import de.yard.threed.core.Vector3;
-import de.yard.threed.graph.Graph;
-import de.yard.threed.graph.GraphEdge;
-import de.yard.threed.graph.GraphNode;
-import de.yard.threed.graph.GraphPath;
-import de.yard.threed.graph.GraphPathConstraintProvider;
-import de.yard.threed.graph.GraphPosition;
-import de.yard.threed.graph.GraphUtils;
+import de.yard.threed.graph.*;
 import de.yard.threed.traffic.Destination;
 import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.traffic.WorldGlobal;
@@ -16,22 +10,22 @@ import de.yard.threed.trafficcore.geodesy.MapProjection;
 
 /**
  * A wrapper for a {@link FlightRoute} graph.
- *
+ * <p>
  * Ein Graph mit GraphPath von einer Takeoff Runway (quasi erste Edge des Graph)
  * bis zu
  * - einer landing runway (quasi letzte Edge des Graph)
  * - einem Holding, wenn die landing runway noch nicht bekannt ist.
- *
+ * <p>
  * 29.2.2020: Obwohl es doch nur ein Graph ist, oder?
  * Es muesste noch vermerkt werden, wo das Ende des Graph ist (Runway,Holding,Orbit) um zu wissen, ob er noch fortgesetzt werden muss, z.B.
  * weil es für die Destination noch keine Elevation gibt.
- *
+ * <p>
  * The end of the graph might be undetermined (Runway,Holding,Orbit) at the beginning and be determined during flight, eg. if destination
  * elevation or landing runway is not yet known. Even 'destination' is not required at the beginning, when the route ends in a holding.
  * <p>
  * 21.3.24: No longer limited to flight, so the 'Flight' part could be removed from name. Is it still needed at all? Probably
  * yes, for having a location for the smoothed GraphPath. And maybe an open destination.
- *
+ * <p>
  * Created on 21.11.18.
  */
 public class FlightRouteGraph {
@@ -75,6 +69,22 @@ public class FlightRouteGraph {
             smoothedpath = GraphUtils.createPathFromGraphPositionAndPath(graph, path, startedge.from, null, to, graphPathConstraintProvider, layer, true, false, null);
             // start position muss im Path gesetzt werden, weil ja ein Graphwechsel geschieht. Aber auf die smoothedge, nicht die Original.
             smoothedpath.startposition = new GraphPosition(smoothedpath.getSegment(0).edge);
+
+            // For now consider all arc edges except first and last to be rolling. This is the currently most simple solution.
+            GraphEdge firstArc = null;
+            GraphEdge lastEnabled = null;
+            for (int i = 0; i < smoothedpath.getSegmentCount(); i++) {
+                GraphPathSegment segment = smoothedpath.getSegment(i);
+                if (segment.edge.isArc()) {
+                    if (firstArc == null) {
+                        firstArc = segment.edge;
+                    } else {
+                        segment.edge.needsRolling = true;
+                        lastEnabled = segment.edge;
+                    }
+                }
+            }
+            lastEnabled.needsRolling = false;
         }
     }
 
@@ -94,13 +104,13 @@ public class FlightRouteGraph {
     /**
      * Used in other projects
      */
-    public void projectGraph(MapProjection projection, EllipsoidCalculations rbcp ) {
+    public void projectGraph(MapProjection projection, EllipsoidCalculations rbcp) {
 
-        GraphMapProjection.projectGraph(graph, projection,rbcp);
+        GraphMapProjection.projectGraph(graph, projection, rbcp);
     }
 
     public boolean isSmoothed() {
-        return smoothedpath!=null;
+        return smoothedpath != null;
     }
 }
 

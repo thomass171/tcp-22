@@ -21,6 +21,7 @@ import de.yard.threed.traffic.config.VehicleDefinition;
 
 import de.yard.threed.engine.util.NearView;
 
+import de.yard.threed.traffic.flight.AircraftVehicleRotation;
 import de.yard.threed.trafficcore.model.Vehicle;
 
 import java.util.List;
@@ -141,15 +142,14 @@ public class VehicleLauncher {
     }
 
     /**
-     * Ein graphgebundenes Vehicle mit den Vehicle typischen Components als ECS Entity bauen.
-     * Moving- und Velocity Components sind mandatory. Vehicle optional.
-     * type ist der
+     * Build a typical (optionally graph bound) vehicle ECS entity with typical components.
+     * Moving- und Velocity Components are mandatory. VehicleComponent optional.
      * <p>
-     * TODO: Die projection ist die totale Kruecke. Die koennte vielleicht mit dem Graph zusammen in einen "GraphContext".
      * 29.8.23: teleportParentNode added
+     * xx.xx.2024: "TrafficGraph, GraphPosition, GraphProjection" parameter replaced by 'vehiclePositioner'
      */
-    public static EcsEntity buildVehicleOnGraph(SceneNode node, VehiclePositioner vehiclePositioner /*TrafficGraph graph, GraphPosition position,*/, VehicleDefinition config,
-            /*Map*//*GraphProjection projection,*/ EntityBuilder entityBuilder, SceneNode teleportParentNode) {
+    public static EcsEntity buildVehicleOnGraph(SceneNode node, VehiclePositioner vehiclePositioner, VehicleDefinition config,
+                                                EntityBuilder entityBuilder, SceneNode teleportParentNode) {
         GraphMovingComponent gmc = new GraphMovingComponent(node.getTransform());
 
         EcsEntity e = new EcsEntity(node, gmc);
@@ -165,8 +165,13 @@ public class VehicleLauncher {
             // its important to set the vehicle rotation before the final component is added
             // and an entity init is triggered.
             // 1.4.25: Now that 'traffic' has 'FG space' as default, no special treatment is needed any more. We always set 'FG space'
-            gmc.customModelRotation = FgVehicleSpace.getFgVehicleForwardRotation();
-
+            boolean isAircraft = "aircraft".equals(config.getType());
+            if (isAircraft) {
+                // assume 100m a good rampup distance
+                gmc.setVehicleRotation(new AircraftVehicleRotation(new Degree(45), 100.0));
+            } else {
+                gmc.setVehicleRotation(new DefaultGraphVehicleRotation());
+            }
             // 29.8.23: Why VehicleComponent only if config exists? Conatins eg. also the teleportParentNode
             VehicleComponent vhc = new VehicleComponent(config/*type,modeltype*/);
             vhc.teleportParentNode = teleportParentNode;

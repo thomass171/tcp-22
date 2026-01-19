@@ -304,8 +304,8 @@ class GraphOrientationZ0 extends GraphOrientation {
 }
 
 /**
- * In der XZ Ebene.
- * upVector ist dann (0,1,0)
+ * In XZ layer.
+ * upVector is (0,1,0)
  */
 class GraphOrientationY0/*Default*/ extends GraphOrientation {
 

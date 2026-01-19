@@ -13,6 +13,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static de.yard.threed.core.testutil.Assert.assertEquals;
+import static de.yard.threed.core.testutil.RuntimeTestUtil.assertVector3;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * <p>
@@ -38,13 +41,13 @@ public class GraphUtilsTest {
         float radius = 3;
         GraphEdge arc = GraphUtils.addAlternateRouteByArc(graph, start, e1, mid, e2, end, radius, 0);
         RuntimeTestUtil.assertFloat("arc.angle", 90f, (float) arc.getAngle().getDegree());
-        RuntimeTestUtil.assertVector3("arc.center", new Vector3(3, 3, 0), arc.getCenter());
+        assertVector3("arc.center", new Vector3(3, 3, 0), arc.getCenter());
         // Zwar falsches Testthema, da ich aber gerade dabei bin.
         CustomGeometry geo = GraphFactory.buildGraphGeometry(arc, 0.5f, 2);
-        RuntimeTestUtil.assertVector3("erster vertex", new Vector3(0.25f, 6 - radius, 0), geo.getVertices().get(0));
-        RuntimeTestUtil.assertVector3("zweiter vertex", new Vector3(-0.25f, 6 - radius, 0), geo.getVertices().get(1));
-        RuntimeTestUtil.assertVector3("5.vertex", new Vector3(radius, 6 - 0.25f, 0), geo.getVertices().get(4));
-        RuntimeTestUtil.assertVector3("6.vertex", new Vector3(radius, 6 + 0.25f, 0), geo.getVertices().get(5));
+        assertVector3("erster vertex", new Vector3(0.25f, 6 - radius, 0), geo.getVertices().get(0));
+        assertVector3("zweiter vertex", new Vector3(-0.25f, 6 - radius, 0), geo.getVertices().get(1));
+        assertVector3("5.vertex", new Vector3(radius, 6 - 0.25f, 0), geo.getVertices().get(4));
+        assertVector3("6.vertex", new Vector3(radius, 6 + 0.25f, 0), geo.getVertices().get(5));
 
         // Und jetzt mit y nach links
         graph = new Graph();
@@ -56,15 +59,15 @@ public class GraphUtilsTest {
         e2 = graph.connectNodes(mid, end);
 
         arc = GraphUtils.addAlternateRouteByArc(graph, start, e1, mid, e2, end, 3, 0);
-        RuntimeTestUtil.assertVector3("arc.center", new Vector3(-3, 3, 0), arc.getCenter());
+        assertVector3("arc.center", new Vector3(-3, 3, 0), arc.getCenter());
         RuntimeTestUtil.assertFloat("arc.angle", 90f, (float) arc.getAngle().getDegree());
 
         // Zwar falsches Testthema, da ich aber gerade dabei bin.
         geo = GraphFactory.buildGraphGeometry(arc, 0.5f, 2);
-        RuntimeTestUtil.assertVector3("erster vertex", new Vector3(-0.25f, 6 - radius, 0), geo.getVertices().get(0));
-        RuntimeTestUtil.assertVector3("zweiter vertex", new Vector3(0.25f, 6 - radius, 0), geo.getVertices().get(1));
-        RuntimeTestUtil.assertVector3("5.vertex", new Vector3(-radius, 6 - 0.25f, 0), geo.getVertices().get(4));
-        RuntimeTestUtil.assertVector3("6.vertex", new Vector3(-radius, 6 + 0.25f, 0), geo.getVertices().get(5));
+        assertVector3("erster vertex", new Vector3(-0.25f, 6 - radius, 0), geo.getVertices().get(0));
+        assertVector3("zweiter vertex", new Vector3(0.25f, 6 - radius, 0), geo.getVertices().get(1));
+        assertVector3("5.vertex", new Vector3(-radius, 6 - 0.25f, 0), geo.getVertices().get(4));
+        assertVector3("6.vertex", new Vector3(-radius, 6 + 0.25f, 0), geo.getVertices().get(5));
 
     }
 
@@ -83,25 +86,25 @@ public class GraphUtilsTest {
 
         GraphEdge arc = GraphUtils.addAlternateRouteByArc(graph, start, e1, mid, e2, end, 3, 0);
         //y zufaellig genau 3?
-        RuntimeTestUtil.assertVector3("arc.center", new Vector3(5.6055512f, 3, 0), arc.getCenter());
+        assertVector3("arc.center", new Vector3(5.6055512f, 3, 0), arc.getCenter());
         RuntimeTestUtil.assertFloat("arc.angle", 56.30994f, (float) arc.getAngle().getDegree());
 // Zwar falsches Testthema, da ich aber gerade dabei bin.
         CustomGeometry geo = GraphFactory.buildGraphGeometry(arc, 0.5f, 2);
         //Refwerte durch ausprobieren
-        RuntimeTestUtil.assertVector3("erster vertex", new Vector3(3.3174129f, 4.5254254f, 0), geo.getVertices().get(0));
-        RuntimeTestUtil.assertVector3("zweiter vertex", new Vector3(2.9013877f, 4.8027754f, 0), geo.getVertices().get(1));
+        assertVector3("erster vertex", new Vector3(3.3174129f, 4.5254254f, 0), geo.getVertices().get(0));
+        assertVector3("zweiter vertex", new Vector3(2.9013877f, 4.8027754f, 0), geo.getVertices().get(1));
 
         // gleich Anordnung, aber andere Richtung. Muss dasselbe Ergebnis bringen, aber Winkel positiv
 
         arc = GraphUtils.addAlternateRouteByArc(graph, end, e2, mid, e1, start, 3, 0);
         //y zufaellig genau 3?
-        RuntimeTestUtil.assertVector3("arc.center", new Vector3(5.6055512f, 3, 0), arc.getCenter());
+        assertVector3("arc.center", new Vector3(5.6055512f, 3, 0), arc.getCenter());
         RuntimeTestUtil.assertFloat("arc.angle", 56.30994f, (float) arc.getAngle().getDegree());
         geo = GraphFactory.buildGraphGeometry(arc, 0.5f, 2);
         //TestUtil.assertVector3("erster vertex", new Vector3(-0.25f, 6 - radius, 0), geo.getVertices().getElement(0));
         //TestUtil.assertVector3("zweiter vertex", new Vector3(0.25f, 6 - radius, 0), geo.getVertices().getElement(1));
-        RuntimeTestUtil.assertVector3("5.vertex", new Vector3(3.3174129f, 4.5254254f, 0), geo.getVertices().get(4));
-        RuntimeTestUtil.assertVector3("6.vertex", new Vector3(2.9013877f, 4.8027754f, 0), geo.getVertices().get(5));
+        assertVector3("5.vertex", new Vector3(3.3174129f, 4.5254254f, 0), geo.getVertices().get(4));
+        assertVector3("6.vertex", new Vector3(2.9013877f, 4.8027754f, 0), geo.getVertices().get(5));
 
     }
 
@@ -119,7 +122,7 @@ public class GraphUtilsTest {
         GraphEdge e2 = graph.connectNodes(mid, end);
 
         GraphEdge arc = GraphUtils.addAlternateRouteByArc(graph, start, e1, mid, e2, end, 2f, 0);
-        RuntimeTestUtil.assertVector3("arc.center", new Vector3(3.039798f, 3, 0), arc.getCenter());
+        assertVector3("arc.center", new Vector3(3.039798f, 3, 0), arc.getCenter());
         RuntimeTestUtil.assertFloat("arc.angle", 146.6015f, (float) arc.getAngle().getDegree());
         // Zwar falsches Testthema, da ich aber gerade dabei bin.
         CustomGeometry geo = GraphFactory.buildGraphGeometry(arc, 0.5f, 2);
@@ -139,7 +142,7 @@ public class GraphUtilsTest {
         GraphEdge e2 = graph.connectNodes(mid, end);
 
         GraphEdge arc = GraphUtils.addArcToAngleSimple(graph, start, e1, mid.getLocation(), e2, end, 2f, false, false, 0,false);
-        RuntimeTestUtil.assertVector3("arc.center", new Vector3(3.039798f, 3, 0), arc.getCenter());
+        assertVector3("arc.center", new Vector3(3.039798f, 3, 0), arc.getCenter());
         RuntimeTestUtil.assertFloat("arc.angle", 146.6015f - 360, (float) arc.getAngle().getDegree());
 
     }
@@ -167,7 +170,7 @@ public class GraphUtilsTest {
     @Test
     public void testfindPath() {
         float radius = 8;
-        Graph graph = GraphFactory.buildReturnKreis(radius, true);
+        Graph graph = GraphFactory.buildReturnCircle(radius, true);
         GraphEdge first = graph.findEdgeByName("getFirst");
         GraphEdge extension = graph.findEdgeByName("extension");
         GraphPosition pos = new GraphPosition(first, 0);
@@ -191,15 +194,15 @@ public class GraphUtilsTest {
     @Test
     public void testBackwards() {
         float radius = 8;
-        Graph graph = GraphFactory.buildReturnKreis(radius, true);
+        Graph graph = GraphFactory.buildReturnCircle(radius, true);
         GraphEdge first = graph.findEdgeByName("getFirst");
         GraphEdge extension = graph.findEdgeByName("extension");
         GraphPosition start = new GraphPosition(extension, extension.getLength(), true);
 
         // Back ist hier entartet, weil es exakt gerade weitergeht.
         TurnExtension turn = GraphUtils.createBack(graph, extension.to, extension, first, 1);
-        RuntimeTestUtil.assertVector3("", extension.to.getLocation(), turn.edge.to.getLocation());
-        RuntimeTestUtil.assertVector3("", extension.to.getLocation(), turn.arc.getCenter());
+        assertVector3("", extension.to.getLocation(), turn.edge.to.getLocation());
+        assertVector3("", extension.to.getLocation(), turn.arc.getCenter());
     }
 
 
@@ -247,15 +250,15 @@ public class GraphUtilsTest {
 
         Vector3 intersection = GraphUtils.getIntersection(e, e1a);
         RuntimeTestUtil.assertNotNull("intersection", intersection);
-        RuntimeTestUtil.assertVector3("intersection", new Vector3(0, 4, 0), intersection);
+        assertVector3("intersection", new Vector3(0, 4, 0), intersection);
 
         GraphArcParameter arcpara = GraphUtils.calcArcParameter(n1, e, intersection, e1a, n4, radius, true, false);
         RuntimeTestUtil.assertNotNull("arcpara", arcpara);
-        RuntimeTestUtil.assertVector3("arcpara.arccenter", new Vector3(radius, 3.08873f, 0), arcpara.arccenter);
+        assertVector3("arcpara.arccenter", new Vector3(radius, 3.08873f, 0), arcpara.arccenter);
         RuntimeTestUtil.assertEquals("distancefromintersection", 0.91126996f, arcpara.distancefromintersection);
         GraphPathConstraintProvider graphPathConstraintProvider = new DefaultGraphPathConstraintProvider(0, radius);
         GraphTransition transition = GraphUtils.createTransition(graph, position, e1a, n4, graphPathConstraintProvider, 233);
-        RuntimeTestUtil.assertVector3("transition.arc.center", new Vector3(radius, 3.08873f, 0), transition.seg.get(1).edge.getCenter());
+        assertVector3("transition.arc.center", new Vector3(radius, 3.08873f, 0), transition.seg.get(1).edge.getCenter());
 
         // 4d
         n3 = graph.addNode("n3", new Vector3(3, 1, 0));
@@ -263,11 +266,11 @@ public class GraphUtilsTest {
         GraphEdge e4d = graph.connectNodes(n3, n4);
         intersection = GraphUtils.getIntersection(e, e4d);
         RuntimeTestUtil.assertNotNull("intersection", intersection);
-        RuntimeTestUtil.assertVector3("intersection", new Vector3(0, 2.5f, 0), intersection);
+        assertVector3("intersection", new Vector3(0, 2.5f, 0), intersection);
 
         arcpara = GraphUtils.calcArcParameter(n1, e, intersection, e4d, n4, radius, false, false);
         RuntimeTestUtil.assertNotNull("arcpara", arcpara);
-        RuntimeTestUtil.assertVector3("arcpara.arccenter", new Vector3(radius, -1.0596745f, 0), arcpara.arccenter);
+        assertVector3("arcpara.arccenter", new Vector3(radius, -1.0596745f, 0), arcpara.arccenter);
         RuntimeTestUtil.assertEquals("distancefromintersection", 3.5596745f, arcpara.distancefromintersection);
         
         transition = GraphUtils.createTransition(graph, position, e4d, n4, graphPathConstraintProvider, 233);
@@ -279,11 +282,11 @@ public class GraphUtilsTest {
         GraphEdge e5e = graph.connectNodes(n3, n4);
         intersection = GraphUtils.getIntersection(e, e5e);
         RuntimeTestUtil.assertNotNull("intersection", intersection);
-        RuntimeTestUtil.assertVector3("intersection", new Vector3(0, 5f, 0), intersection);
+        assertVector3("intersection", new Vector3(0, 5f, 0), intersection);
 
         transition = GraphUtils.createTransition(graph, position, e4d, n4, graphPathConstraintProvider, 233);
         //Werte wegen turnloop extend 20
-        RuntimeTestUtil.assertVector3("transition.arc.center", new Vector3(32.360676f, 25, 0), transition.seg.get(1).edge.getCenter());
+        assertVector3("transition.arc.center", new Vector3(32.360676f, 25, 0), transition.seg.get(1).edge.getCenter());
 
         // 6f, (mit Ziel weit genug weg.)
         n3 = graph.addNode("n3", new Vector3(-1, 6, 0));
@@ -291,10 +294,10 @@ public class GraphUtilsTest {
         GraphEdge e6f = graph.connectNodes(n3, n4);
         intersection = GraphUtils.getIntersection(e, e6f);
         RuntimeTestUtil.assertNotNull("intersection", intersection);
-        RuntimeTestUtil.assertVector3("intersection", new Vector3(0, 7.5f, 0), intersection);
+        assertVector3("intersection", new Vector3(0, 7.5f, 0), intersection);
 
         transition = GraphUtils.createTransition(graph, position, e6f, n4, graphPathConstraintProvider, 233);
-        RuntimeTestUtil.assertVector3("transition.arc.center", new Vector3(2.2f, 6.833894f, 0), transition.seg.get(1).edge.getCenter());
+        assertVector3("transition.arc.center", new Vector3(2.2f, 6.833894f, 0), transition.seg.get(1).edge.getCenter());
 
     }
 
@@ -324,9 +327,9 @@ public class GraphUtilsTest {
         }
         GraphEdge arc = GraphUtils.addArcToAngleSimple(graph, start, e1, mid.getLocation(), e2, end, e1.getLength(), false, true, 0,false);
 
-        RuntimeTestUtil.assertVector3("arc.center", new Vector3(-0.9f, 3, 0), arc.getCenter());
-        RuntimeTestUtil.assertVector3("arc.n", new Vector3(0, 0, ((startendreverse) ? -1 : 1)), arc.arcParameter.n);
-        RuntimeTestUtil.assertVector3("arc.ex", new Vector3(0.28734788f, ((startendreverse) ? -1 : 1) * -0.9578263f, 0), arc.arcParameter.ex);
+        assertVector3("arc.center", new Vector3(-0.9f, 3, 0), arc.getCenter());
+        assertVector3("arc.n", new Vector3(0, 0, ((startendreverse) ? -1 : 1)), arc.arcParameter.n);
+        assertVector3("arc.ex", new Vector3(0.28734788f, ((startendreverse) ? -1 : 1) * -0.9578263f, 0), arc.arcParameter.ex);
         RuntimeTestUtil.assertFloat("arc.angle", ((startendreverse) ? /*-*/1 : 1) * (146.6015f - 360), (float) arc.getAngle().getDegree());
         RuntimeTestUtil.assertFloat("arc.radius", 3.132f, arc.getArc().getRadius());
         RuntimeTestUtil.assertEquals("nodes", 4, graph.getNodeCount());
@@ -355,15 +358,15 @@ public class GraphUtilsTest {
         GraphEdge edge1 = gr.connectNodes(i, n1);
         GraphArcParameter p = GraphUtils.calcArcParameterAtConnectedEdges(start, edge1, radius, true, radiusisdistance);
         System.out.println("center=" + p.arccenter);
-        RuntimeTestUtil.assertVector3("center", new Vector3(1.5f, 1.5f, 0), p.arccenter);
+        assertVector3("center", new Vector3(1.5f, 1.5f, 0), p.arccenter);
         RuntimeTestUtil.assertEquals("distancefromintersection", 0.5f,
                 p.distancefromintersection);
-        RuntimeTestUtil.assertVector3("ex", new Vector3(-1f, 0, 0), p.arc.ex);
+        assertVector3("ex", new Vector3(-1f, 0, 0), p.arc.ex);
         RuntimeTestUtil.assertFloat("beta", MathUtil2.PI_2, p.arc.getBeta());
-        RuntimeTestUtil.assertVector3("n", new Vector3(0, 0, -1), p.arc.n);
+        assertVector3("n", new Vector3(0, 0, -1), p.arc.n);
         //TestUtil.assertVector3("ey", new Vector3(0, 1, 0), p.arc.ey);
         Vector3 er = p.arc.getRotatedEx(0.5f, 0);
-        RuntimeTestUtil.assertVector3("er", new Vector3(-0.35355335f, 0.3535534f, 0), er);
+        assertVector3("er", new Vector3(-0.35355335f, 0.3535534f, 0), er);
 
         // /
         // |
@@ -373,14 +376,14 @@ public class GraphUtilsTest {
         p = GraphUtils.calcArcParameterAtConnectedEdges(start, edge2, radius, true,
                 radiusisdistance);
         System.out.println("center=" + p.arccenter);
-        RuntimeTestUtil.assertVector3("center", new Vector3(1.5f, 1.7928932f, 0), p.arccenter);
+        assertVector3("center", new Vector3(1.5f, 1.7928932f, 0), p.arccenter);
         RuntimeTestUtil.assertEquals("distancefromintersection", 0.2071068f,
                 p.distancefromintersection);
-        RuntimeTestUtil.assertVector3("ex", new Vector3(-1f, 0, 0), p.arc.ex);
+        assertVector3("ex", new Vector3(-1f, 0, 0), p.arc.ex);
         //TestUtil.assertVector3("ey", new Vector3(-0.70710677f, 0.70710677f, 0), p.arc.ey);
         er = p.arc.getRotatedEx(0.5f, 0);
-        RuntimeTestUtil.assertVector3("er0.5", new Vector3(-0.46193975f, 0.19134171f, 0), er);
-        RuntimeTestUtil.assertVector3("er0", p.arc.ex, p.arc.getRotatedEx(0.0f, 0).normalize());
+        assertVector3("er0.5", new Vector3(-0.46193975f, 0.19134171f, 0), er);
+        assertVector3("er0", p.arc.ex, p.arc.getRotatedEx(0.0f, 0).normalize());
         //TestUtil.assertVector3("er1", p.arc.ey, p.arc.getRotatedEx(1.0f, 0).normalize());
 
         //
@@ -392,15 +395,15 @@ public class GraphUtilsTest {
         GraphEdge edge1a = gr.connectNodes(i, n1a);
         p = GraphUtils.calcArcParameterAtConnectedEdges(start, edge1a, radius, true, radiusisdistance);
         System.out.println("center=" + p.arccenter);
-        RuntimeTestUtil.assertVector3("center", new Vector3(0.5f, 1.5f, 0), p.arccenter);
+        assertVector3("center", new Vector3(0.5f, 1.5f, 0), p.arccenter);
         RuntimeTestUtil.assertEquals("distancefromintersection", 0.5f,
                 p.distancefromintersection);
         RuntimeTestUtil.assertFloat("beta", MathUtil2.PI_2, p.arc.getBeta());
-        RuntimeTestUtil.assertVector3("n", new Vector3(0, 0, 1), p.arc.n);
-        RuntimeTestUtil.assertVector3("ex", new Vector3(1f, 0, 0), p.arc.ex);
+        assertVector3("n", new Vector3(0, 0, 1), p.arc.n);
+        assertVector3("ex", new Vector3(1f, 0, 0), p.arc.ex);
         //TestUtil.assertVector3("ey", new Vector3(0, 1, 0), p.arc.ey);
         er = p.arc.getRotatedEx(0.5f, 0);
-        RuntimeTestUtil.assertVector3("er", new Vector3(0.35355335f, 0.3535534f, 0), er);
+        assertVector3("er", new Vector3(0.35355335f, 0.3535534f, 0), er);
 
         //
         // || fast parallel, fast schon eine Singularitaet
@@ -410,12 +413,12 @@ public class GraphUtilsTest {
         p = GraphUtils.calcArcParameterAtConnectedEdges(start, edge3, radius, true,
                 radiusisdistance);
         System.out.println("center=" + p.arccenter);
-        RuntimeTestUtil.assertVector3("center", new Vector3(1.5f, 1.9998779f, 0), p.arccenter);
+        assertVector3("center", new Vector3(1.5f, 1.9998779f, 0), p.arccenter);
         er = p.arc.getRotatedEx(0.5f, 0);
         //hier muss ex nach link und ey quasi auch gehen
-        RuntimeTestUtil.assertVector3("ex", new Vector3(-1f, 0f, 0), p.arc.ex);
+        assertVector3("ex", new Vector3(-1f, 0f, 0), p.arc.ex);
         //TestUtil.assertVector3("ey", new Vector3(-1f, 0, 0), p.arc.ey);
-        RuntimeTestUtil.assertVector3("er", new Vector3(-0.5f, 0.000122f, 0), er);
+        assertVector3("er", new Vector3(-0.5f, 0.000122f, 0), er);
 
         // | - 45 Grad rechts hoch
         //end = new Vector3(3, 2, 2);
@@ -423,14 +426,14 @@ public class GraphUtilsTest {
         GraphEdge edge4 = gr.connectNodes(i, n4);
         p = GraphUtils.calcArcParameterAtConnectedEdges(start, edge4, radius, true, radiusisdistance);
         System.out.println("center=" + p.arccenter);
-        RuntimeTestUtil.assertVector3("center", new Vector3(1.3535534f, 1.5f, 0.35355338f), p.arccenter);
+        assertVector3("center", new Vector3(1.3535534f, 1.5f, 0.35355338f), p.arccenter);
         RuntimeTestUtil.assertEquals("distancefromintersection", 0.5f,
                 p.distancefromintersection);
-        RuntimeTestUtil.assertVector3("ex", new Vector3(-0.70710677f, 0, -0.70710677f), p.arc.ex);
+        assertVector3("ex", new Vector3(-0.70710677f, 0, -0.70710677f), p.arc.ex);
         //TestUtil.assertVector3("ey", new Vector3(0, 1, 0), p.arc.ey);
         er = p.arc.getRotatedEx(0.5f, 0);
-        RuntimeTestUtil.assertVector3("er", new Vector3(-0.25f, 0.35355335f, -0.25f), er);
-        RuntimeTestUtil.assertVector3("er0", p.arc.ex, p.arc.getRotatedEx(0.0f, 0).normalize());
+        assertVector3("er", new Vector3(-0.25f, 0.35355335f, -0.25f), er);
+        assertVector3("er0", p.arc.ex, p.arc.getRotatedEx(0.0f, 0).normalize());
         //TestUtil.assertVector3("er1", p.arc.ey, p.arc.getRotatedEx(1.0f, 0).normalize());
 
         // -| 45 Grad links hoch
@@ -439,14 +442,14 @@ public class GraphUtilsTest {
         GraphEdge edge5 = gr.connectNodes(i, n5);
         p = GraphUtils.calcArcParameterAtConnectedEdges(start, edge5, radius, true, radiusisdistance);
         System.out.println("center=" + p.arccenter);
-        RuntimeTestUtil.assertVector3("center", new Vector3(0.6464466f, 1.5f, 0.35355338f), p.arccenter);
+        assertVector3("center", new Vector3(0.6464466f, 1.5f, 0.35355338f), p.arccenter);
         RuntimeTestUtil.assertEquals("distancefromintersection", 0.5f,
                 p.distancefromintersection);
-        RuntimeTestUtil.assertVector3("ex", new Vector3(0.70710677f, 0, -0.70710677f), p.arc.ex);
+        assertVector3("ex", new Vector3(0.70710677f, 0, -0.70710677f), p.arc.ex);
         //TestUtil.assertVector3("ey", new Vector3(0, 1, 0), p.arc.ey);
         er = p.arc.getRotatedEx(0.5f, 0);
-        RuntimeTestUtil.assertVector3("er", new Vector3(0.25f, 0.35355335f, -0.25f), er);
-        RuntimeTestUtil.assertVector3("er0", p.arc.ex, p.arc.getRotatedEx(0.0f, 0).normalize());
+        assertVector3("er", new Vector3(0.25f, 0.35355335f, -0.25f), er);
+        assertVector3("er0", p.arc.ex, p.arc.getRotatedEx(0.0f, 0).normalize());
         //TestUtil.assertVector3("er1", p.arc.ey, p.arc.getRotatedEx(1.0f, 0).normalize());
     }
 
@@ -463,11 +466,11 @@ public class GraphUtilsTest {
         Vector3 p3 = new Vector3(3, 3, 0);
 
         Vector3 start = Bezier.CalculateBezierPoint(0.01f, p0, p1, p2, p3);
-        RuntimeTestUtil.assertVector3("start", new Vector3(1.000299f, 0.0597f, 0), start);
+        assertVector3("start", new Vector3(1.000299f, 0.0597f, 0), start);
         Vector3 mid = Bezier.CalculateBezierPoint(0.5f, p0, p1, p2, p3);
-        RuntimeTestUtil.assertVector3("mid", new Vector3(1.625f, 2.25f, 0), mid);
+        assertVector3("mid", new Vector3(1.625f, 2.25f, 0), mid);
         Vector3 end = Bezier.CalculateBezierPoint(0.99f, p0, p1, p2, p3);
-        RuntimeTestUtil.assertVector3("end", new Vector3(2.97f, 2.9997f, 0), end);
+        assertVector3("end", new Vector3(2.97f, 2.9997f, 0), end);
 
         //
         // raise to z1
@@ -477,11 +480,11 @@ public class GraphUtilsTest {
         p3 = new Vector3(3, 3, 1);
 
         start = Bezier.CalculateBezierPoint(0.01f, p0, p1, p2, p3);
-        RuntimeTestUtil.assertVector3("start", new Vector3(1.000299f, 0.0597f, 0.00029f), start);
+        assertVector3("start", new Vector3(1.000299f, 0.0597f, 0.00029f), start);
         mid = Bezier.CalculateBezierPoint(0.5f, p0, p1, p2, p3);
-        RuntimeTestUtil.assertVector3("mid", new Vector3(1.625f, 2.25f, 0.5f), mid);
+        assertVector3("mid", new Vector3(1.625f, 2.25f, 0.5f), mid);
         end = Bezier.CalculateBezierPoint(0.99f, p0, p1, p2, p3);
-        RuntimeTestUtil.assertVector3("end", new Vector3(2.97f, 2.9997f, 0.9997f), end);
+        assertVector3("end", new Vector3(2.97f, 2.9997f, 0.9997f), end);
 
     }
 
@@ -526,13 +529,13 @@ public class GraphUtilsTest {
         GraphEdge e1 = graph.connectNodes(n2, n3);
         float radius = 2;
         TurnExtension uturn = GraphUtils.addUTurn(graph, n1, e0, n2, e1, distance, radius, 22);
-        RuntimeTestUtil.assertVector3("arc0.center", new Vector3(9, -2, 0), uturn.edge.getArc().getCenter());
-        RuntimeTestUtil.assertVector3("n0", new Vector3(10.322876f, -0.5f, 0), uturn.edge.getTo().getLocation());
+        assertVector3("arc0.center", new Vector3(9, -2, 0), uturn.edge.getArc().getCenter());
+        assertVector3("n0", new Vector3(10.322876f, -0.5f, 0), uturn.edge.getTo().getLocation());
 
-        RuntimeTestUtil.assertVector3("arc1.center", new Vector3(11.645751f, 1, 0), uturn.arc.getArc().getCenter());
+        assertVector3("arc1.center", new Vector3(11.645751f, 1, 0), uturn.arc.getArc().getCenter());
 
-        RuntimeTestUtil.assertVector3("arc2.center", new Vector3(9, 4, 0), uturn.branch.getArc().getCenter());
-        RuntimeTestUtil.assertVector3("n1", new Vector3(10.322876f, 2.5f, 0), uturn.branch.getFrom().getLocation());
+        assertVector3("arc2.center", new Vector3(9, 4, 0), uturn.branch.getArc().getCenter());
+        assertVector3("n1", new Vector3(10.322876f, 2.5f, 0), uturn.branch.getFrom().getLocation());
 
         GraphPosition start = new GraphPosition(e0);
         GraphPathConstraintProvider  graphPathConstraintProvider = new DefaultGraphPathConstraintProvider(0, 0);
@@ -548,10 +551,10 @@ public class GraphUtilsTest {
         RuntimeTestUtil.assertEquals("currentposition.position", 0.2f, gmc.getCurrentposition().edgeposition);
         RuntimeTestUtil.assertEquals("currentposition.edge", uturn.edge.getId(), gmc.getCurrentposition().currentedge.getId());
         RuntimeTestUtil.assertFalse("currentposition.reverse", gmc.getCurrentposition().isReverseOrientation());
-        RuntimeTestUtil.assertVector3("uturn0.arc.ex", new Vector3(0, 1, 0), uturn.edge.getArc().ex);
-        RuntimeTestUtil.assertVector3("uturn2.arc.exrotated0", new Vector3(0, 2, 0), uturn.edge.getArc().getRotatedEx(0));
-        RuntimeTestUtil.assertVector3("uturn2.arc.exrotated1", new Vector3(1.32f, 1.5f, 0), uturn.edge.getArc().getRotatedEx(1));
-        RuntimeTestUtil.assertVector3("uturn0.arc.n", new Vector3(0, 0, 1), uturn.edge.getArc().n);
+        assertVector3("uturn0.arc.ex", new Vector3(0, 1, 0), uturn.edge.getArc().ex);
+        assertVector3("uturn2.arc.exrotated0", new Vector3(0, 2, 0), uturn.edge.getArc().getRotatedEx(0));
+        assertVector3("uturn2.arc.exrotated1", new Vector3(1.32f, 1.5f, 0), uturn.edge.getArc().getRotatedEx(1));
+        assertVector3("uturn0.arc.n", new Vector3(0, 0, 1), uturn.edge.getArc().n);
         RuntimeTestUtil.assertEquals("uturn0.arc.beta", -0.7227342f, uturn.edge.getArc().getBeta());
 
         gmc.moveForward(5);
@@ -568,10 +571,10 @@ public class GraphUtilsTest {
         RuntimeTestUtil.assertEquals("currentposition.position", 6 - (arclen1 - (5 - arclen0und2 + 0.2f)), gmc.getCurrentposition().edgeposition);
         RuntimeTestUtil.assertEquals("currentposition.edge", uturn.branch.getId(), gmc.getCurrentposition().currentedge.getId());
         RuntimeTestUtil.assertFalse("currentposition.reverse", gmc.getCurrentposition().isReverseOrientation());
-        RuntimeTestUtil.assertVector3("uturn2.arc.ex", new Vector3(0.6614378f, -0.75f, 0), uturn.branch.getArc().ex);
-        RuntimeTestUtil.assertVector3("uturn2.arc.exrotated", new Vector3(1.32f, -1.5f, 0), uturn.branch.getArc().getRotatedEx(0));
-        RuntimeTestUtil.assertVector3("uturn2.arc.exrotated1", new Vector3(0, -2, 0), uturn.branch.getArc().getRotatedEx(1));
-        RuntimeTestUtil.assertVector3("uturn2.arc.n", new Vector3(0, 0, 1), uturn.branch.getArc().n);
+        assertVector3("uturn2.arc.ex", new Vector3(0.6614378f, -0.75f, 0), uturn.branch.getArc().ex);
+        assertVector3("uturn2.arc.exrotated", new Vector3(1.32f, -1.5f, 0), uturn.branch.getArc().getRotatedEx(0));
+        assertVector3("uturn2.arc.exrotated1", new Vector3(0, -2, 0), uturn.branch.getArc().getRotatedEx(1));
+        assertVector3("uturn2.arc.n", new Vector3(0, 0, 1), uturn.branch.getArc().n);
         RuntimeTestUtil.assertEquals("uturn2.arc.beta", -0.7227342f, uturn.branch.getArc().getBeta());
 
 
@@ -593,7 +596,7 @@ public class GraphUtilsTest {
         GraphEdge zeroeins = graph.findEdgeByName("zeroeins");
         float offset = -0.3f;
         List<Vector3> outline = graph.getGraphOrientation().getOutlineFromNode(zero, offset);
-        RuntimeTestUtil.assertVector3("", new Vector3(0.21213204f, 0, -0.21213204f), outline.get(0));
+        assertVector3("", new Vector3(0.21213204f, 0, -0.21213204f), outline.get(0));
 
         // start ist auf zero Richtung links oben. Dann passt ein U-Turn
         GraphPosition from = new GraphPosition(zeroeins, zeroeins.getLength(), true);
@@ -607,7 +610,7 @@ public class GraphUtilsTest {
 
         RuntimeTestUtil.assertEquals("path", "zero:uturn0->uturn1(1)->uturn2(0)->smoothbegin.outline1(1)->smootharc(0)->smoothbegin.zwei(1)->smootharc(0)->smoothend.zwei(2)", path.toString());
         RuntimeTestUtil.assertEquals("path", "zero:uturn0--n0-->uturn1(1)--n1-->uturn2(0)--outline0-->smoothbegin.outline1(1)--smootharcfrom-->smootharc@outline1(0)--smootharcto-->smoothbegin.zwei(1)--smootharcfrom-->smootharc@zwei(0)--smootharcto-->smoothend.zwei(2)", path.getDetailedString());
-        RuntimeTestUtil.assertVector3("", new Vector3(-0.14142135f, 0, 0.14142135f), path.getSegment(3).getEnterNode().getLocation());
+        assertVector3("", new Vector3(-0.14142135f, 0, 0.14142135f), path.getSegment(3).getEnterNode().getLocation());
 
 
     }
@@ -640,4 +643,47 @@ public class GraphUtilsTest {
         GraphTestUtil.assertGraphPathSegment("seg3",new String[]{"zwei","drei"},path.getSegment(3));
     }
 
+    /**
+     */
+    @Test
+    public void testArcDirection() {
+        Graph graph = new Graph();
+        graph.setGraphOrientation(GraphOrientation.buildForZ0());
+        GraphNode n0 = graph.addNode("n0", new Vector3(1, 0, 0));
+        GraphNode n1 = graph.addNode("n1", new Vector3(1, 2, 0));
+        GraphNode n2 = graph.addNode("n2", new Vector3(3, 4, 0));
+        GraphNode n3 = graph.addNode("n3", new Vector3(-1, 4, 0));
+        GraphEdge base = graph.connectNodes(n0, n1, "base");
+
+        GraphPosition from = new GraphPosition(base);
+        float smoothingradius = 0.2f;
+        GraphPathConstraintProvider  graphPathConstraintProvider = new DefaultGraphPathConstraintProvider(0, smoothingradius);
+        GraphEdge toRight = graph.connectNodes(n1, n2, "toRight");
+        GraphEdge toLeft = graph.connectNodes(n1, n3, "toLeft");
+
+        // /
+        // |
+        GraphPath path = GraphUtils.createPathFromGraphPosition(graph, from, n2, null, graphPathConstraintProvider, 2, true, true, null);
+        GraphTestUtil.assertGraphPath(
+                new boolean[]{false, true, false},
+                new double[]{1.917, 0.157, 2.746},
+                path);
+
+        GraphEdge arcToRight = path.getSegment(1).edge;
+        assertVector3(new Vector3(0,0,-1),arcToRight.arcParameter.n);
+        assertFalse(arcToRight.arcDirectionLeft(true, graph.getGraphOrientation()));
+
+        // \
+        // |
+        path = GraphUtils.createPathFromGraphPosition(graph, from, n3, null, graphPathConstraintProvider, 2, true, true, null);
+        GraphTestUtil.assertGraphPath(
+                new boolean[]{false, true, false},
+                new double[]{1.917, 0.157, 2.746},
+                path);
+
+        GraphEdge arcToLeft = path.getSegment(1).edge;
+        // normal points 'up' in arc to left
+        assertVector3(new Vector3(0,0,1),arcToLeft.arcParameter.n);
+        assertTrue(arcToLeft.arcDirectionLeft(true, graph.getGraphOrientation()));
+    }
 }

@@ -107,26 +107,25 @@ public class GraphFactory {
 
 
     /**
-     * Ein gerades Stueck und dann ein "Zurückkreis". Skizze 12.
-     * 18.5.17: Extension fuer bessere Sichtbarkeit vegrößert.
+     * A straight edge and then a "circle back". Sketch 12.
+     * 18.5.17: Extension increased for better visibilitySichtbarkeit.
+     * 19.1.26: This graph isn't appropriate for arc/smooth testing because arc parameter are set explicitly.
      */
-    public static /*MA31 Traffic*/Graph buildReturnKreis(double radius, boolean extended) {
-        /*Traffic*/
-        Graph graph = new /*Traffic*/Graph(GraphOrientation.buildDefault());
-        //15.3.18 graph.upVector = new Vector3(0, 1, 0);
-        //Railing liegt in y0 und hat Defaultausrichtung
-        return addReturnKreis(graph, radius, extended, false);
+    public static Graph buildReturnCircle(double radius, boolean extended) {
+        Graph graph = new Graph(GraphOrientation.buildDefault());
+        //Railing is in y0 and has Default orientation
+        return addReturnCircle(graph, radius, extended, false);
     }
 
-    public static /*MA31 Traffic*/Graph addReturnKreis(/*Traffic*/Graph graph, double radius, boolean extended, boolean z0) {
+    public static Graph addReturnCircle(Graph graph, double radius, boolean extended, boolean z0) {
         double umfang = 2 * (double) (Math.PI * radius);
         double halbumfang = (double) (Math.PI * radius);
         GraphNode start = addNode(graph, 15 + radius + radius, 0, "start", z0);
         GraphNode links = addNode(graph, 15, 0, "links", z0);
         GraphEdge edgelinks = graph.connectNodes(start, links, "getFirst");
         GraphNode linksoben = addNode(graph, 15, 2 * radius, "", z0);
-        GraphEdge halbkreis = graph.connectNodes(links, linksoben, "firsthalbkreis");
-        halbkreis.setArcAtFrom(buildVector3(new Vector2(15, radius), z0), radius, -MathUtil2.PI, new Vector3(0, 1, 0));
+        GraphEdge semicircle = graph.connectNodes(links, linksoben, "firstsemicircle");
+        semicircle.setArcAtFrom(buildVector3(new Vector2(15, radius), z0), radius, -MathUtil2.PI, new Vector3(0, 1, 0));
         GraphNode wendepunkt = addNode(graph, 15 + radius, radius, "", z0);
         graph.connectNodes(linksoben, wendepunkt, "first4").setArcAtFrom(buildVector3(new Vector2(15, radius), z0), radius, -MathUtil2.PI_2, new Vector3(0, 1, 0));
         GraphEdge closing = graph.connectNodes(wendepunkt, start, "closing");

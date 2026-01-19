@@ -11,16 +11,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests, die wirklich Railing spezifisch sind und nicht generisch fuer Graphen.
+ * Railing specific tests (not generic for graph).
  * <p>
  * Created by thomass on 28.11.16.
  */
 public class RailingGraphTest {
-    //static Platform platform = TestFactory.initPlatformForTest(false,false,null,true);
-    static Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "data"}, new SimpleHeadlessPlatformFactory());
+    Platform platform = EngineTestFactory.initPlatformForTest(new String[]{"engine", "data"}, new SimpleHeadlessPlatformFactory());
 
     /**
-     * Railing Beispiel 1 mit Extensions
+     * Railing example 1 with Extensions
      */
     @Test
     public void testRailSample1_0() {
@@ -52,7 +51,7 @@ public class RailingGraphTest {
 
     @Test
     public void testBranch() {
-        Graph graph = RailingFactory.buildRailSample2();
+        Graph graph = RailingFactory.buildRailSampleStraightSingleEdge();
         Assertions.assertEquals(1, graph.getEdgeCount(), "Anzahl edges");
         GraphEdge branch = RailingFactory.addBranch(graph, graph.getEdge(0), 6, false, false, null);
         Assertions.assertEquals(3, graph.getEdgeCount(), "Anzahl edges");

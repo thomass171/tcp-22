@@ -7,7 +7,6 @@ import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.PositionUpdateTrigger;
 import de.yard.threed.engine.Transform;
 import de.yard.threed.core.LocalTransform;
-import de.yard.threed.engine.SceneNode;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.ecs.EcsComponent;
@@ -55,7 +54,7 @@ public class GraphMovingComponent extends EcsComponent {
     private Graph graph;
     public boolean unscheduledmoving;
     // (vehicle)model specific rotation
-    public Quaternion customModelRotation = new Quaternion();
+    private GraphVehicleRotation customModelRotation;
     private PositionUpdateTrigger positionUpdateTrigger = new PositionUpdateTrigger();
     // Execute each 10th of code reaches
     private Threshold positionCheckThreshold = new Threshold(10);
@@ -418,6 +417,17 @@ public class GraphMovingComponent extends EcsComponent {
         if (positionCheckThreshold.reached(1)) {
             positionUpdateTrigger.checkForPositionUpdate(mover);
         }
+    }
+
+    public Quaternion getModelRotation() {
+        if (customModelRotation == null) {
+            return new Quaternion();
+        }
+        return customModelRotation.getVehicleOrientation(getCurrentposition(), graph);
+    }
+
+    public void setVehicleRotation(GraphVehicleRotation graphVehicleRotation) {
+        customModelRotation = graphVehicleRotation;
     }
 }
 

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Ein Weg durch einen Graph.
+ * A way through a graph.
  * Die erste Edge ist die nächste(!) von der aktuellen Position. 16.2.18:Ist das immer so? Passt das dann zu start?
  * 11.4.18: brauch ich den start ueberhaupt noch? Das ist doch die enternode des ersten Segments.weg damit.
  * <p>

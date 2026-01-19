@@ -16,7 +16,7 @@ public class GraphMovingSystemTest {
     @BeforeEach
     public void setup() {
         EcsTestHelper.setup(() -> {
-            SystemManager.addSystem(new GraphMovingSystem());
+            SystemManager.addSystem(GraphMovingSystem.buildFromConfiguration());
         });
     }
 

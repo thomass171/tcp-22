@@ -8,7 +8,7 @@ import de.yard.threed.trafficcore.ElevationProvider;
 
 /**
  * 26.2.24: defaultAltitude added
- * 7.5.25: Moved here from tcp-flightgear. Coupled to AbstractSceneryBuilder to be more universal. StaticElevationProvider extracted.
+ * 7.5.25: Moved here from tcp-flightgear. Coupled to AbstractSceneryBuilder to be more universal. {@link StaticElevationProvider} extracted.
  * <p>
  * Created on 28.03.18.
  */

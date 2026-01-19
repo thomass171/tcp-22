@@ -7,16 +7,19 @@ import de.yard.threed.core.platform.Log;
 
 /**
  * Definition of an arc 3D segment from direction ex to direction ey with center and radius.
- * Dies hier sind die daten für einen Innen/Aussenkreis(?,ja, auch aussen, dann aber anderes beta) im Schenkel. Es gibt auch GraphArcParameter.
+ * Dies hier sind die daten für einen Innen/Aussenkreis(?,ja, auch aussen, dann aber anderes beta) im Schenkel.
+ * We also have {@link GraphArcParameter}.
  */
 public class GraphArc {
     private static Log logger = Platform.getInstance().getLog(GraphArc.class);
 
-    public Vector3 arccenter/*11.4.18, arcbeginloc, v2*/, crossproduct;
-    //ex,ey sind wegen Weiterverwendung in Berechnungen normalisiert.
+    public Vector3 arccenter/*11.4.18, arcbeginloc, v2*/;
+    // 16.1.26 confusing because not set but normal should be normalized value of cross product crossproduct;
+    //ex is the normalized vector from arc center to the 'entry/start point'(??). Hmm, maybe only sometimes?
     //muss besser e1 e2 heissen, weil es nicht wirklich ex ey ist.
-    public Vector3 ex/*, 15.3.18 brauchts nicht ey*/;
-    //Normale auf den Kreis. Kann bei Halbkreisen nicht aus e1 und e2 berechnet werden.
+    public Vector3 ex/*, 15.3.18 not needed ey*/;
+    //Normal of the circle. Kann bei Halbkreisen nicht aus e1 und e2 berechnet werden.
+    // normal points 'down' in arc to right (is this always true??)
     public Vector3 n;
     private double radius;
     // eigentlich wird beta hier doch nicht wirklich gebraucht. 11.4.18: Zumindest ist der Name in der edge verwirrend.

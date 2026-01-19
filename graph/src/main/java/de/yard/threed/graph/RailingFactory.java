@@ -22,8 +22,8 @@ import java.util.List;
 
 
 /**
- * Gedanklich in x/y, als Vector3 in y=0 Ebene.
- * 8.12.16: Groessenangaben alle in Meter.
+ * Uses abstract x/y coordinates, mapped in 3D to y=0 layer.
+ * Sizes in Meter.
  * <p>
  * <p>
  * Created by thomass on 28.11.16.
@@ -43,6 +43,9 @@ public class RailingFactory {
         return buildRailSample1(-1);
     }
 
+    /**
+     * The well known tracks (one outer, one inner) from eg. DemoScene with optional extensions
+     */
     public static Graph buildRailSample1(int extension) {
         //TODO Groessenordnugn abhaengig von trackwidth. Aber nicht unnötig zu viel ändern. Das hier ist ja auch Test/Referenz
         int x = 50, y1 = 50, y2 = 150;
@@ -81,11 +84,9 @@ public class RailingFactory {
     }
 
     /**
-     * Ein gerades Stück. Für Tests.
      *
-     * @return
      */
-    public static Graph buildRailSample2() {
+    public static Graph buildRailSampleStraightSingleEdge() {
         int x = 50, y1 = 50, y2 = 150;
         Graph graph = new Graph();
         GraphNode start = GraphFactory.addNode(graph, x, y1, "");
@@ -96,11 +97,9 @@ public class RailingFactory {
     }
 
     /**
-     * Einfach ein Halbkreis. Für Tests der Normalen.
      *
-     * @return
      */
-    public static Graph buildRailSample3() {
+    public static Graph buildRailSampleSemiCircle() {
         int x = 50, y1 = 50, y2 = 150;
         Graph graph = new Graph();
         GraphNode start = GraphFactory.addNode(graph, x, y1, "");

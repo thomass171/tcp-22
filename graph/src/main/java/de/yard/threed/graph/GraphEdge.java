@@ -1,6 +1,7 @@
 package de.yard.threed.graph;
 
 import de.yard.threed.core.Degree;
+import de.yard.threed.core.MathUtil2;
 import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.core.platform.Platform;
@@ -37,10 +38,12 @@ public class GraphEdge {
     //29.3.17: bloeder hack
     //15.3.18 boolean iszEbene = false;
     public GraphComponent customdata;
+    // needsRolling also is custom data, but have it explicit until we find a good location or in general a better solution.
+    public boolean needsRolling = false;
     // Eine Edge gehört zu genau einem Layer. Soll sie doch zu mehreren gehören, muss die Edge dupliziert werden.
     private int layer;
     //16.3.18  private Vector3 upVector;
-    //9.2.18: Neue 3D faehige Arc Definition
+    //9.2.18: New 3D ready arc definition
     public GraphArc arcParameter = null;
 
     /**
@@ -399,5 +402,21 @@ public class GraphEdge {
         this.dir = to.getLocation().subtract(from.getLocation());
         len = to.getLocation().subtract(from.getLocation()).length();
         checklen();
+    }
+
+    /**
+     * The direction (left/right) of an arc depends on the point of view and the up-vector.
+     * Returns null if it is no arc.
+     * Mathmatically unproven to derive the result from arc normal?? But accroding to visual FG tests it's OK.
+     */
+    public Boolean arcDirectionLeft(boolean viewPointFrom, GraphOrientation graphOrientation){
+        if (!isArc()){
+            return null;
+        }
+        double angle = Vector3.getAngleBetween(graphOrientation.getUpVector(this),arcParameter.n);
+        if (angle < MathUtil2.PI_2){
+            return true;
+        }
+        return false;
     }
 }

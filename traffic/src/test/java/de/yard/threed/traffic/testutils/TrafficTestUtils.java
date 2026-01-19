@@ -1,22 +1,21 @@
 package de.yard.threed.traffic.testutils;
 
-import de.yard.threed.core.LatLon;
-import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.MathUtil2;
-import de.yard.threed.core.Quaternion;
-import de.yard.threed.core.Util;
-import de.yard.threed.core.Vector3;
+import de.yard.threed.core.*;
 import de.yard.threed.core.testutil.TestUtils;
 import de.yard.threed.engine.SceneNode;
 import de.yard.threed.engine.ecs.EcsEntity;
+import de.yard.threed.engine.ecs.SystemManager;
 import de.yard.threed.engine.testutil.SceneRunnerForTesting;
-import de.yard.threed.graph.Graph;
-import de.yard.threed.graph.GraphEdge;
-import de.yard.threed.graph.GraphMovingComponent;
-import de.yard.threed.graph.GraphPosition;
+import de.yard.threed.graph.*;
+import de.yard.threed.traffic.BasicRouteBuilder;
 import de.yard.threed.traffic.FgVehicleSpace;
+import de.yard.threed.traffic.StaticElevationProvider;
 import de.yard.threed.traffic.VehicleLauncher;
-import de.yard.threed.core.GeoCoordinate;
+import de.yard.threed.traffic.flight.AircraftVehicleRotation;
+import de.yard.threed.traffic.flight.FlightRouteGraph;
+import de.yard.threed.trafficcore.EllipsoidCalculations;
+import de.yard.threed.trafficcore.GeoRoute;
+import de.yard.threed.trafficcore.SimpleEllipsoidCalculations;
 import org.slf4j.Logger;
 
 import static de.yard.threed.core.testutil.TestUtils.*;
@@ -71,7 +70,7 @@ public class TrafficTestUtils {
         assertNotNull(gmc.getGraph());
         assertFalse(gmc.hasAutomove());
         assertEquals(expectPath, gmc.getPath() != null);
-        assertQuaternion(expectedModelRotation, gmc.customModelRotation);
+        assertQuaternion(expectedModelRotation, gmc.getModelRotation());
     }
 
     /**
@@ -130,4 +129,21 @@ public class TrafficTestUtils {
         assertEquals(expectedChildName, child.getName());
         return child;
     }
+
+    public static FlightRouteGraph buildFlightRouteGraph(GeoRoute geoRoute) throws Exception {
+        EllipsoidCalculations ellipsoidCalculations = new SimpleEllipsoidCalculations(SimpleEllipsoidCalculations.eQuatorialEarthRadius);
+        SystemManager.putDataProvider(SystemManager.DATAPROVIDERELEVATION, StaticElevationProvider.buildForStaticAltitude(17));
+
+        FlightRouteGraph flightRoute = BasicRouteBuilder
+                .fromGeoRoute(ellipsoidCalculations, geoRoute, geoCoordinateWithoutElevation -> {
+                    throw new RuntimeException("No elevation for " + geoCoordinateWithoutElevation + " of initialRoute");
+
+                });
+        flightRoute.smooth();
+        GraphPath path = flightRoute.getPath();
+        assertNotNull(path);
+        return flightRoute;
+    }
+
+
 }

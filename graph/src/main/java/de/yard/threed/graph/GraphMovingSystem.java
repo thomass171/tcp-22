@@ -1,15 +1,12 @@
 package de.yard.threed.graph;
 
 
+import de.yard.threed.core.*;
 import de.yard.threed.core.platform.Platform;
 import de.yard.threed.engine.Input;
 import de.yard.threed.engine.KeyCode;
-import de.yard.threed.core.LocalTransform;
-import de.yard.threed.core.Vector3;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.ecs.*;
-import de.yard.threed.core.Event;
-import de.yard.threed.core.Payload;
 
 /**
  * Movement of an entity with a GraphMovingComponent along a graph(path).
@@ -23,12 +20,23 @@ public class GraphMovingSystem extends DefaultEcsSystem {
     //decouple of SGGeod.
     public static GraphAltitudeProvider graphAltitudeProvider;
     public static String TAG = "GraphMovingSystem";
+    // just an option for debugging/analyzing
+    private Integer graphstep = null;
 
     /**
      *
      */
-    public GraphMovingSystem() {
+    private GraphMovingSystem() {
         super(new String[]{GraphMovingComponent.TAG, VelocityComponent.TAG});
+    }
+
+    public static GraphMovingSystem buildFromConfiguration() {
+        GraphMovingSystem graphMovingSystem = new GraphMovingSystem();
+        String argv_enableGraphStep = Platform.getInstance().getConfiguration().getString("enableDebugGraphStep");
+        if (argv_enableGraphStep != null) {
+            graphMovingSystem.graphstep = Util.atoi(argv_enableGraphStep);
+        }
+        return graphMovingSystem;
     }
 
     /**
@@ -104,6 +112,19 @@ public class GraphMovingSystem extends DefaultEcsSystem {
         //return changed;
 
         gmc.checkForPositionUpdate();
+
+        if (graphstep != null) {
+            // Will apply to all entities with a current position.
+            if ((Input.getKey(KeyCode.S) && Input.getKey(KeyCode.Shift))) {
+                GraphPosition currentPosition = gmc.getCurrentposition();
+                if (currentPosition != null) {
+                    if (currentPosition.getAbsolutePosition() + graphstep < currentPosition.getEdge().getLength()) {
+                        currentPosition.edgeposition += graphstep;
+                    }
+                    adjustVisual(gmc);
+                }
+            }
+        }
     }
 
     @Override
@@ -241,7 +262,7 @@ public class GraphMovingSystem extends DefaultEcsSystem {
     public static LocalTransform getPosRot(GraphMovingComponent gmc/*, /*Map* /GraphProjection projection*/) {
         GraphPosition cp = gmc.getCurrentposition();
         if (cp != null) {
-            return gmc.getGraph().getPosRot(cp, gmc.customModelRotation);
+            return gmc.getGraph().getPosRot(cp, gmc.getModelRotation());
         }
         return null;
     }
