@@ -45,6 +45,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     Log logger = Platform.getInstance().getLog(SphereSystem.class);
 
     // contains optional full qualified tilename and optional vehiclelist
+    // 19.1.26: No more the list but the list name. null if there is no such list.
     public static RequestType USER_REQUEST_SPHERE = RequestType.register(4000, "USER_REQUEST_SPHERE");
 
     public static String TAG = "SphereSystem";
@@ -105,12 +106,10 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
         if (request.getType().equals(USER_REQUEST_SPHERE)) {
 
             // muss tile kennen/laden um die initialposition und projection festzulegen.
-            String basename = (String) request.getPayloadByIndex(0);
-            List<Vehicle> vehicleList = (List<Vehicle>) request.getPayloadByIndex(1);
-            if (vehicleList == null) {
-                // just to be sure to avoid NPE
-                vehicleList = new ArrayList<Vehicle>();
-            }
+            Payload payload = request.getPayload();
+            String basename = payload.get("tilename", s->s);
+            String vehicleListName = payload.get("vehiclelistname", s->s);
+            List<Vehicle> vehicleList = TrafficHelper.getVehicleListByName(vehicleListName);
             logger.debug("requested tile '" + basename + "' with " + vehicleList.size() + " vehicles");
 
             // 7.5.19: By initialPosition terrain, groundnet, vehicles can be loaded and projection gesetzt werden.

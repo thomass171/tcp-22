@@ -207,7 +207,10 @@ public class SphereSystemTest {
 
     private void startSimpleTest(String tilename) {
 
-        SystemManager.putRequest(new Request(USER_REQUEST_SPHERE, new Payload(tilename, new ArrayList())));
+        SystemManager.putRequest(new Request(USER_REQUEST_SPHERE,
+                new Payload()
+                        .add("tilename", tilename)
+                        .add("vehiclelistname", (String)null)));
         //ein Request muss anliegen
         assertEquals(1, SystemManager.getRequestCount(), "requests ");
         //EcsTestHelper.processRequests();

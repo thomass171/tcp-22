@@ -5,6 +5,8 @@ import de.yard.threed.core.LocalTransform;
 import de.yard.threed.core.StringUtils;
 import de.yard.threed.core.Util;
 import de.yard.threed.core.platform.Platform;
+import de.yard.threed.core.resource.BundleRegistry;
+import de.yard.threed.core.resource.BundleResource;
 import de.yard.threed.engine.ViewPoint;
 import de.yard.threed.engine.ecs.DataProvider;
 import de.yard.threed.engine.ecs.EcsEntity;
@@ -70,7 +72,7 @@ public class TrafficHelper {
      * Der Graph muss ja nicht unbedingt von einem groundnet sein. Ueberhaupt muss es mittlerweile nicht unbedingt ein groundnet geben.
      */
     public static void launchVehicles(/*ConfigNodeList*/List<Vehicle> vehiclelist, TrafficContext trafficContext/*27.12.21GroundNet groundnet*/, TrafficGraph graph, TeleportComponent avatarpc//, SceneNode destinationnode
-                                                        /*9.3.25, GraphProjection projection /*27.12.21AirportConfig airport*/, LocalTransform baseTransformForVehicleOnGraph/* SceneConfig sceneConfig*/,
+            /*9.3.25, GraphProjection projection /*27.12.21AirportConfig airport*/, LocalTransform baseTransformForVehicleOnGraph/* SceneConfig sceneConfig*/,
                                                         VehicleLoader vehicleLoader, List<VehicleBuiltDelegate> genericVehicleBuiltDelegates) {
         logger.debug("launchVehicles groundnet=" + ",graph=" + graph);
         //27.12.21 TrafficWorldConfig tw = TrafficWorldConfig.getInstance();
@@ -79,7 +81,7 @@ public class TrafficHelper {
             Vehicle/*ConfigNode*/ vehicle = vehiclelist.get(i);
             //29.10.21 VehicleConfig vconfig = tw.getVehicleConfig(vehicle.getName());
             //VehicleDefinition vconfig = getVehicleConfigByDataprovider(vehicle.getName(), null);
-            VehicleDefinition vconfig = ((TrafficSystem)SystemManager.findSystem(TrafficSystem.TAG)).getVehicleConfig(vehicle.getName(), null);
+            VehicleDefinition vconfig = ((TrafficSystem) SystemManager.findSystem(TrafficSystem.TAG)).getVehicleConfig(vehicle.getName(), null);
             if (vconfig == null) {
                 logger.warn("Vehicle not found:" + vehicle.getName());
                 return;
@@ -128,7 +130,7 @@ public class TrafficHelper {
                 LocatedVehicle vconf = /*27.12.21airport*/trafficContext.getVehicle(i);
                 VehicleDefinition config = null;// 27.12.21 tw.getVehicleConfig(vconf.getName());
                 //config = getVehicleConfigByDataprovider(vconf.getName(), null);
-                config = ((TrafficSystem)SystemManager.findSystem(TrafficSystem.TAG)).getVehicleConfig(vconf.getName(), null);
+                config = ((TrafficSystem) SystemManager.findSystem(TrafficSystem.TAG)).getVehicleConfig(vconf.getName(), null);
                 SmartLocation location = vconf.getLocation();
                 //buildArrivedAircraft(config, gsw.groundnet.getParkPos(location.getParkPos()));
                 //VehicleLauncher.launchVehicle(new Vehicle(vconf.getName()),config, groundnet.groundnetgraph, groundnet.getParkingPosition(groundnet.getParkPos(location.getParkPos())), avatarpc, destinationnode, projection, /*sceneConfig.getBaseTransformForVehicleOnGraph()*/baseTransformForVehicleOnGraph, null, null, vehicleLoader);
@@ -281,4 +283,20 @@ public class TrafficHelper {
         }
         return new FlightLocation(g, new Degree(Util.parseDouble(initialHeading)));
     }*/
+
+    /**
+     * 20.11.23: Was in TrafficWorlConfig. Now here a temp wrapper.
+     * 19.1.26: Moved here from tcp-flightgear. Base source was always hard coded with "traffic-advanced" and "vehicle-definitions.xml". "vehiclelistname"
+     * is part of that source.
+     */
+    public static List<Vehicle> getVehicleListByName(String vehiclelistname) {
+
+        if (vehiclelistname == null) {
+            return new ArrayList<>();
+        }
+        TrafficConfig vdefs = TrafficConfig.buildFromBundle(BundleRegistry.getBundle("traffic-advanced"), new BundleResource("vehicle-definitions.xml"));
+        return vdefs.getVehicleListByName(vehiclelistname);
+
+    }
+
 }

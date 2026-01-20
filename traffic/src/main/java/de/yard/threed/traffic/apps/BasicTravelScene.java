@@ -97,7 +97,7 @@ public class BasicTravelScene extends Scene {
     protected String vehiclelistname = "GroundServices";
     protected NearView nearView = null;
     // 17.10.21: per argument oder default EDDK
-    String tilename = null;
+    private String tilename = null;
     VrInstance vrInstance;
     public Map<String, ButtonDelegate> buttonDelegates = new HashMap<String, ButtonDelegate>();
     ControlPanel leftControllerPanel = null;
@@ -395,8 +395,11 @@ public class BasicTravelScene extends Scene {
         initSpheres();
 
         //27.11.23 VehicleConfigDataProvider now in TrafficSystem
-        //7.10.21:Load tile per Sphere laden. SphereSystem will then send initial events
-        SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE, new Payload(tilename, getVehicleList())));
+        //7.10.21:Load tile per SphereSystem. SphereSystem will then send initial events
+        SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE,
+                new Payload()
+                .add("tilename", tilename)
+                .add("vehiclelistname", getVehicleListName())));
 
         // create player/Avatar (via login)
         if (sceneMode.isClient()) {
@@ -572,12 +575,10 @@ public class BasicTravelScene extends Scene {
      * Or is dataprovider sufficient?
      * <p>
      * 28.10.21
-     *
-     * @return
+     * 19.1.26: No more the list but the list name. null if there is no such list. Overridden by subclasses
      */
-    public List<Vehicle> getVehicleList() {
-        List<Vehicle> vehicleList = new ArrayList<Vehicle>();
-        return vehicleList;
+    protected String getVehicleListName() {
+        return null;
     }
 
     /**
