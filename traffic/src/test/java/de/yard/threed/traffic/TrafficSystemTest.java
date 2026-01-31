@@ -79,7 +79,7 @@ public class TrafficSystemTest {
 
     private void startSimpleTest(String tilename) {
 
-        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(BundleResource.buildFromFullQualifiedString(tilename), null));
+        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(BundleResource.buildFromFullQualifiedString(tilename)));
         //too many assertEquals("events ", 1, SystemManager.getEventCount());
         EcsTestHelper.processSeconds(2);
     }

@@ -37,18 +37,12 @@ import de.yard.threed.trafficcore.geodesy.SimpleMapProjection;
  * 03.10.21: Nur Behelf wegen dürftiger Visualisierung und fehlender Elevation. Weiterhin als einfache Visualisierung eines (Traffic)Graphen (per GROUNDNET_EVENT_LOADED).
  * Groundnet ist eigentlich nur ein Spezialfall davon. Das Event muesste da wohl etwas geaendert werden. Oder TRAFFIC_EVENT_GRAPHLOADED?
  * 09.12.21: Ob das wirklich ein eigenes System sein sollte? Vielleicht schon, mal sehen.
+ * 21.01.26: 'projection' removed because SphereSystem already derives projection from XML and provides it (used by eg. FlatAirportScene)
  * <p>
  * Created by thomass on 23.02.18.
  */
 public class GraphTerrainSystem extends DefaultEcsSystem {
     Log logger = Platform.getInstance().getLog(GraphTerrainSystem.class);
-    //10.12.21 SceneNode world, earth;
-    public MapProjection projection;
-    //der ist jetzt evtl. mehrfach vorhanden.
-    //13.12.21 public /*20.11.20 GraphTerrain*/ GraphVisualizer visualizer;
-    //String basename;
-    //10.12.21 Scene scene;
-    //AirportConfig airport = null;
     SceneNode terrain = null;
 
     public static String TAG = "GraphTerrainSystem";
@@ -59,12 +53,8 @@ public class GraphTerrainSystem extends DefaultEcsSystem {
 
     public GraphTerrainSystem(/*10.12.21 Scene scene, SceneNode world/*, SGGeod origin* /, MapProjection projection, AirportConfig airport*/AbstractSceneryBuilder terrainBuilder) {
         super(new EventType[]{TeleporterSystem.EVENT_POSITIONCHANGED, TrafficEventRegistry.GROUNDNET_EVENT_LOADED,
-                TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED, TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED});
-        //10.12.21 this.scene = scene;
-        //10.12.21 this.world = world;
-        // this.projection = projection;
-        // this.airport = airport;
-        //projection = new SimpleMapProjection(origin);
+                // 21.1.26 no longer needed here after using projection via Dataprovider. TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED,
+                TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED});
         this.terrainBuilder=terrainBuilder;
     }
 
@@ -95,22 +85,8 @@ public class GraphTerrainSystem extends DefaultEcsSystem {
             //18.11.20: Das koennte evtl. in einen GroundnetVisualizer? Nee, besser zweiteilig 20.11.20 ob das wirklich besser wäre?
             // Naja, ein Groundnetgraphdecorator vielleicht, sowas koennte auch fuer Railing gehen
 
-            terrainBuilder.buildTerrain(evt.getPayloadByIndex(0),evt.getPayloadByIndex(1),projection);
+            terrainBuilder.buildTerrain(evt.getPayloadByIndex(0),evt.getPayloadByIndex(1),TrafficHelper.getProjectionByDataprovider(null/*??*/).projection);
 
-        }
-        if (evt.getType().equals(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED) && enabled) {
-            //GeoCoordinate initialPosition = (GeoCoordinate) evt.getPayloadByIndex(0);
-            GeoCoordinate initialPosition = evt.getPayload().get("initialPosition", s -> {
-                try {
-                    return GeoCoordinate.parse(s);
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-
-            //projection = (SimpleMapProjection) evt.getPayloadByIndex(1);
-            //7.10.21 Tile initialTile = (Tile) evt.getPayloadByIndex(2);
-            projection = new SimpleMapProjection(initialPosition);
         }
 
         if (evt.getType().equals(TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED) && enabled) {

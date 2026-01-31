@@ -331,6 +331,11 @@ Major changes:
   * NativeCanvas deprecated roughly because of LWJGL/AWT conflicts on MacOS 
   * Migration of platform-homebrew only started but not complete
   
+## 2026-01-22
+  * 'projection' removed from GraphTerrainSystem because SphereSystem already derives projection from XML and provides it (used by eg. FlatAirportScene)
+  * 'initialPosition' removed from TRAFFIC_EVENT_SPHERE_LOADED because it is neither needed/used for setting a projection nor triggering terrain/scenery load.
+  *  initial teleport position no longer EDDK but dynamic from initialPosition/Route
+
 # Technical Details
 
 ## Architecture

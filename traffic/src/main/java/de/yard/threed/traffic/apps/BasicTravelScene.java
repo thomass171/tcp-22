@@ -19,6 +19,7 @@ import de.yard.threed.traffic.GraphTerrainSystem;
 import de.yard.threed.traffic.GraphVisualizationSystem;
 import de.yard.threed.traffic.MoonSceneryBuilder;
 import de.yard.threed.traffic.RequestRegistry;
+import de.yard.threed.traffic.flight.FlightLocation;
 import de.yard.threed.trafficcore.EllipsoidCalculations;
 import de.yard.threed.traffic.FreeFlyingSystem;
 import de.yard.threed.traffic.ScenerySystem;
@@ -30,6 +31,8 @@ import de.yard.threed.core.GeoCoordinate;
 import de.yard.threed.graph.*;
 import de.yard.threed.core.platform.Log;
 import de.yard.threed.engine.platform.common.*;
+import de.yard.threed.trafficcore.GeoRoute;
+import de.yard.threed.trafficcore.model.SmartLocation;
 import de.yard.threed.trafficcore.model.Vehicle;
 import de.yard.threed.engine.util.NearView;
 import de.yard.threed.engine.util.RandomIntProvider;
@@ -106,6 +109,8 @@ public class BasicTravelScene extends Scene {
     // in non VR for menu and control menu
     protected Camera cameraForMenu = null;
     private String waitsForInitialVehicle = null;
+    protected SmartLocation initialLocation = null;
+    protected GeoRoute initialRoute = null;
 
     @Override
     public void init(SceneMode sceneMode) {
@@ -347,6 +352,21 @@ public class BasicTravelScene extends Scene {
             tilename = getDefaultTilename();
         }
         getLog().debug("using tilename " + tilename);
+
+        String argv_initialLocation = Platform.getInstance().getConfiguration().getString("initialLocation");
+        if (argv_initialLocation != null) {
+            initialLocation = SmartLocation.fromString(argv_initialLocation);
+        }
+
+        String argv_initialRoute = Platform.getInstance().getConfiguration().getString("initialRoute");
+        if (argv_initialRoute != null) {
+            try {
+                initialRoute = GeoRoute.parse(argv_initialRoute);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         customProcessArguments();
     }
 
@@ -398,8 +418,8 @@ public class BasicTravelScene extends Scene {
         //7.10.21:Load tile per SphereSystem. SphereSystem will then send initial events
         SystemManager.putRequest(new Request(SphereSystem.USER_REQUEST_SPHERE,
                 new Payload()
-                .add("tilename", tilename)
-                .add("vehiclelistname", getVehicleListName())));
+                        .add("tilename", tilename)
+                        .add("vehiclelistname", getVehicleListName())));
 
         // create player/Avatar (via login)
         if (sceneMode.isClient()) {
@@ -623,4 +643,22 @@ public class BasicTravelScene extends Scene {
         return controlmenu;
     }
 
+    /**
+     * Used by extending classes
+     */
+    public FlightLocation getInitialTeleportPosition(FlightLocation defaultPosition) {
+
+        FlightLocation fl = defaultPosition;
+        if (initialLocation != null && initialLocation.getGeoCoordinate() != null) {
+            // For now just looking north from 500m elevation
+            GeoCoordinate gc = GeoCoordinate.fromLatLon(initialLocation.getGeoCoordinate(), 500);
+            fl = new FlightLocation(gc, new Degree(0));
+        } else {
+            if (initialRoute != null) {
+                GeoCoordinate gc = GeoCoordinate.fromLatLon(initialRoute.takeoff, 500);
+                fl = new FlightLocation(gc, new Degree(0));
+            }
+        }
+        return fl;
+    }
 }

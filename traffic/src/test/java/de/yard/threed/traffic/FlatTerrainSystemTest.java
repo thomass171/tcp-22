@@ -64,7 +64,7 @@ public class FlatTerrainSystemTest {
 
     private void startSimpleTest(String tilename) {
 
-        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(BundleResource.buildFromFullQualifiedString("traffic:" + tilename), null));
+        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(BundleResource.buildFromFullQualifiedString("traffic:" + tilename)));
         //too many assertEquals("events ", 1, SystemManager.getEventCount());
         EcsTestHelper.processSeconds(2);
     }

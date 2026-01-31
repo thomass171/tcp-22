@@ -291,6 +291,8 @@ public class BasicTravelSceneTest {
             "simple;loc;;geo:50.768,7.1672000;320",
             // Route from EDDK 14L to EHAM 18L
             "EDDK-EHAM;mobi;wp:50.8800381,7.1296996->takeoff:50.8764919,7.1348404->wp:50.8566037,7.1636556->wp:50.8480166,7.1594773->wp:50.8459351,7.1456370->wp:50.8524115,7.1357771->wp:52.3457417,4.8181967->wp:52.3522189,4.8080071->wp:52.3525042,4.7933074->wp:52.3464347,4.7824657->touchdown:52.3195264,4.7800279->wp:52.2908234,4.7774309;;",
+            // no  'initial'
+            //"no-initial;mobi;;;",
     }, delimiter = ';')
     public void testMoon(String testCaseName, String initialVehicle, String initialRoute, String initialLocation, String initialHeading) throws Exception {
         HashMap<String, String> customProperties = new HashMap<String, String>();

@@ -44,8 +44,11 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
 
     Log logger = Platform.getInstance().getLog(SphereSystem.class);
 
+    // A request to load a sphere with a list of vehicles moving in that sphere.
     // contains optional full qualified tilename and optional vehiclelist
-    // 19.1.26: No more the list but the list name. null if there is no such list.
+    // 19.1.26: No more the list but the list name. null if there is no such list. The vehiclelist is only needed
+    // in TrafficHelper.launchVehicles() apparently. Overall a confusing way to transfer this value. Maybe
+    // forward it via TRAFFIC_EVENT_SPHERE_LOADED instead of using a data provider?
     public static RequestType USER_REQUEST_SPHERE = RequestType.register(4000, "USER_REQUEST_SPHERE");
 
     public static String TAG = "SphereSystem";
@@ -62,8 +65,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
     // sich damit dann komplett verschieben läßt. Könnte/sollte evtl. per DataProvider zur Verfügung gestellt werden.
     // Kommentar von TravelScene.world: Wofuer ist die world Zwsichenebene.
     private static SceneNode sphereNode;
-    //29.11.21 public Tile activeTile; Stattdessen andere Kruecke.
-    public boolean wasOsm;
+
     // Have a 'world' for easy adjusting/moving/scaling and to avoid rounding artifacts
     // Different to Scene.world, which is only a technical layer.
     // 11.5.24: Moved here from 3D scenes. Might also be useful for shrinking in AR/VR
@@ -115,7 +117,9 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
             // 7.5.19: By initialPosition terrain, groundnet, vehicles can be loaded and projection gesetzt werden.
             // Independent from avatar.
             // 20.6.20: This is also not the initial teleport position
-            GeoCoordinate initialPosition = null;
+            // 20.1.26 It's only the position that is published first before any viewpoint is loaded. But might trigger
+            // scenery load, so it might waste resources if we have initialLocation/Route set at some very different location.
+            // 21.2.26 not needed/used any more GeoCoordinate initialPosition = null;
 
             BundleResource initialTile = null;
             List<NativeNode> xmlVPs = null;
@@ -128,7 +132,9 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                 if (initialTile != null) {
                     // found regular tilename
 
-                    initialPosition = activateTile(initialTile);
+                    // initialPosition = activateTile(initialTile);
+                    // The default above EDDK (what we had from the very beginning)
+                    //21.1.26 initialPosition = new GeoCoordinate(new Degree(50.843675), new Degree(7.109709), 1150);
 
                     if (initialTile.getExtension().equals("xml")) {
                         // XML only sync for now
@@ -205,12 +211,14 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                     // basename is no bundle resource (tilename). Assume geo coordinate.
                     //18.3.24: Now we get initialPosition from basename.
                     //15.5.24: basename as initialPosition might be deprecated now as also 3D scenes use (tile) configs
-                    try {
+                    //20.1.26: Assume this featur no longer exists. We have 'initialLocation'
+                    throw new RuntimeException("feature no longer exists (initialTile) not found: "+basename);
+                    /*try {
                         initialPosition = GeoCoordinate.parse(basename);
                     } catch (ParseException e) {
                         throw new RuntimeException(e);
                     }
-                    logger.debug("Retrieved initialPosition from basename: " + initialPosition);
+                    logger.debug("Retrieved initialPosition from basename: " + initialPosition);*/
                     // 24.5.24: Try again to exit here
                 }
 
@@ -228,13 +236,13 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                 List<Vehicle> providerVehicleList = vehicleList;
                 SystemManager.putDataProvider("vehiclelistprovider", parameter -> providerVehicleList);
 
-                if (initialPosition == null) {
+                /*21.1.26 if (initialPosition == null) {
                     //wait for async service response. 18.3.24: Do we really have async here? If yes, request processing should be aborted and retried.
                     //23.5.24: we don't have it now. So exit with exception
                     throw new RuntimeException("no initial position yet. Waiting for information or no tile found");
-                }
-                // 7.10.21 das war frueher als erstes im update() sowohl 2D wie 3D
-                sendInitialEvents(initialPosition, initialTile, groundnetToLoad);
+                }*/
+                // 7.10.21 was once the first call in update() both 2D and 3D
+                sendInitialEvents(/*initialPosition,*/ initialTile, groundnetToLoad);
 
 
                 // Viewpoints koennte auch TeleporterSystem kennen, aber irgendwo muss ein neu dazugekommener Player sie ja herholen können.
@@ -296,7 +304,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
             }
         }
 
-        wasOsm = true;
+        //wasOsm = true;
         return center;
     }
 
@@ -306,12 +314,12 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
      *
      * @param initialPosition
      */
-    private void sendInitialEvents(GeoCoordinate initialPosition, /*Tile*/BundleResource initialTile, String groundnetToLoad) {
-        logger.debug("sendInitialEvents initialPosition=" + initialPosition + ", initialTile=" + initialTile);
+    private void sendInitialEvents(/*21.1.26 GeoCoordinate initialPosition, /*Tile*/BundleResource initialTile, String groundnetToLoad) {
+        logger.debug("sendInitialEvents initialTile=" + initialTile);
 
         // Send event to trigger eg. graph loading in other systems. Groundnet however is ICAO specific and comes from config via 'groundnetToLoad'.
         // 10.5.24: Isn't this too early. Should be at least at end of method.
-        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(initialTile, initialPosition));
+        SystemManager.sendEvent(TrafficEventRegistry.buildSPHERELOADED(initialTile));
 
         // 14.5.24: Now 3D EDDK might also use config files
         boolean loadEDDK = false;
@@ -374,7 +382,7 @@ public class SphereSystem extends DefaultEcsSystem implements DataProvider {
                     Airport airport = JsonUtil.toAirport(response.getContentAsString());
                     //12.10.21 elevation?
                     GeoCoordinate ctr = GeoCoordinate.fromLatLon(airport.getCenter(), 0);
-                    sendInitialEvents(ctr, tile, null);
+                    sendInitialEvents(/*21.2.26 ctr,*/ tile, null);
                 }
             } catch (CharsetException e) {
                 // TODO improved eror handling

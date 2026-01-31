@@ -65,10 +65,10 @@ public class TrafficEventRegistry {
      */
     public static EventType TRAFFIC_EVENT_SPHERE_LOADED = EventType.register(4007, "TRAFFIC_EVENT_SPHERE_LOADED");
 
-    public static Event buildSPHERELOADED(BundleResource tileName, GeoCoordinate initialPosition) {
+    public static Event buildSPHERELOADED(BundleResource tileName/*21.1.26, GeoCoordinate initialPosition*/) {
         return new Event(TRAFFIC_EVENT_SPHERE_LOADED, new Payload()
                 .add("tilename", tileName == null ? null : tileName.getFullQualifiedName())
-                .add("initialPosition", initialPosition == null ? null : initialPosition.toString())
+                //.add("initialPosition", initialPosition == null ? null : initialPosition.toString())
         );
     }
 }

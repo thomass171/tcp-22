@@ -41,18 +41,12 @@ import java.util.List;
  * 20.9.23: Idea of merge with Terrain/ScenerySystem discarded (MA49).
  * 30.01.24: The name "flat" is confusing. It traditionally was always flat, but in principle its just static content. And
  * probably its not needed at all as separate system but can be merged into SphereSystem.
- *
+ * 29.11.21: Projection removed because it hasn't been used any more.
  * <p>
  * Created by thomass on 23.02.18.
  */
 public class FlatTerrainSystem extends DefaultEcsSystem {
     Log logger = Platform.getInstance().getLog(FlatTerrainSystem.class);
-    //20.10.21SceneNode world, earth;
-    // 29.11.21: Projection only if there is an initialPosition that indicates a projection is needed.
-    public MapProjection projection;
-    //String basename;
-    //20.10.21Scene scene;
-    //AirportConfig airport = null;
     SceneNode terrain = null;
     public static String TAG = "FlatTerrainSystem";
 
@@ -61,11 +55,6 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
                 TrafficEventRegistry.GROUNDNET_EVENT_LOADED,
                 TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED,
                 TrafficEventRegistry.TRAFFIC_EVENT_GRAPHLOADED});
-        //20.10.21 this.scene = scene;
-        //20.10.21 this.world = world;
-        // this.projection = projection;
-        // this.airport = airport;
-        //projection = new SimpleMapProjection(origin);
     }
 
     /**
@@ -114,15 +103,7 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
 
         if (evt.getType().equals(TrafficEventRegistry.TRAFFIC_EVENT_SPHERE_LOADED)) {
             Payload payload = evt.getPayload();
-            GeoCoordinate initialPosition = payload.get("initialPosition", s -> {
-                try {
-                    return GeoCoordinate.parse(s);
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            // 28.10.21 index 1 is deprecated  nearestairport and thus always null.
-            //projection = (SimpleMapProjection) evt.getPayloadByIndex(1);
+            // 28.10.21 Once contained 'nearestairport' (long time ago)
             Tile initialTile = null;//18.3.24 always null in the past? (Tile) evt.getPayloadByIndex(/*16.10.21 2 mal 1 doch wider 2*/1);
             BundleResource tileResource = payload.get("tilename", s -> BundleResource.buildFromFullQualifiedString(s));
             // 27.11.23 nasty workaround until we have proper bundle payload
@@ -142,7 +123,7 @@ public class FlatTerrainSystem extends DefaultEcsSystem {
                 }
             } else {
                 // 30.11.21: Still needed for EDDK?
-                projection = new SimpleMapProjection(initialPosition);
+                //22.1.26 not needed? projection = new SimpleMapProjection(initialPosition);
 
                 if (initialTile == null) {
                     logger.debug("Ignoring null tile");
