@@ -7,7 +7,6 @@ See also
   * [Examples](https://thomass171.github.io/tcp-22/tcp-22.html) 
   * [Maze use cases](https://thomass171.github.io/maze-games/mazegames.html)
   * [Flightgear use cases](https://thomass171.github.io/tcp-flightgear/tcp-flightgear.html)
-  * [My Blog](https://thomass171.github.io/blog)
 
 # Building And Deploying
 
